@@ -64,7 +64,6 @@ function RowGroup({ rows }: { rows: readonly Row[] }) {
 const ICON_NAMES: readonly IconName[] = [
   'career',
   'assets',
-  'advance',
   'relationships',
   'activities',
   'chevron',

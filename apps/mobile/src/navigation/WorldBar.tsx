@@ -19,10 +19,13 @@ import { StatBars } from '../components/StatBars';
 import type { VisibleStats } from '@yearafter/character';
 import { WORLDS, WORLD_LABELS, type World } from './navigation';
 
-const WORLD_ICONS: Record<World, IconName> = {
+/**
+ * Tab icons. 'life' is absent on purpose — that slot renders the Advance control,
+ * which is a raised circle showing the next age rather than an icon and label.
+ */
+const WORLD_ICONS: Record<Exclude<World, 'life'>, IconName> = {
   career: 'career',
   assets: 'assets',
-  life: 'advance',
   relationships: 'relationships',
   activities: 'activities',
 };
@@ -67,7 +70,7 @@ export function WorldBar({
           ) : (
             <WorldTab
               key={key}
-              world={key}
+              world={key as Exclude<World, 'life'>}
               active={world === key}
               onPress={() => onSelectWorld(key)}
             />
@@ -83,7 +86,7 @@ function WorldTab({
   active,
   onPress,
 }: {
-  world: World;
+  world: Exclude<World, 'life'>;
   active: boolean;
   onPress: () => void;
 }) {

@@ -25,7 +25,6 @@ import { colors } from './theme';
 export type IconName =
   | 'career'
   | 'assets'
-  | 'advance'
   | 'relationships'
   | 'activities'
   | 'chevron'
@@ -60,10 +59,14 @@ export type IconName =
 type Drawing = (props: { strokeWidth: number }) => React.JSX.Element;
 
 /**
- * The five worlds carry the most weight — they are on screen constantly and are
- * the only icons a player learns by shape rather than by the label beside them.
- * Each is a distinct silhouette at a glance: rectangle, diamond, two circles,
+ * The four world tabs carry the most weight — they are on screen constantly and
+ * are the only icons a player learns by shape rather than by the label beside
+ * them. Each is a distinct silhouette at a glance: rectangle, gem, two figures,
  * four squares.
+ *
+ * There is deliberately no "advance" icon. The centre control IS the advance
+ * affordance — a raised circle showing the next age — so a glyph for it would be
+ * a second, competing way to express the same action.
  */
 const DRAWINGS: Record<IconName, Drawing> = {
   // Career — a case. Squared, horizontal, unlike anything else in the bar.
@@ -85,14 +88,6 @@ const DRAWINGS: Record<IconName, Drawing> = {
       <Path d="M5.4 3.6h13.2l3 5.1-9.6 11.7L3 8.7z" strokeWidth={strokeWidth} />
       <Path d="M3 8.7h18" strokeWidth={strokeWidth} />
       <Path d="M9.2 3.6 7.4 8.7l4.6 11.7 4.6-11.7-1.8-5.1" strokeWidth={strokeWidth} />
-    </>
-  ),
-
-  // Advance — forward through time.
-  advance: ({ strokeWidth }) => (
-    <>
-      <Circle cx={12} cy={12} r={8.6} strokeWidth={strokeWidth} />
-      <Path d="M10.2 8.4 15 12l-4.8 3.6z" strokeWidth={strokeWidth} />
     </>
   ),
 
