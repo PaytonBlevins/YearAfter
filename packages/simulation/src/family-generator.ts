@@ -160,6 +160,24 @@ export function generateFamily(stream: RandomStream, options: FamilyOptions): Ho
   const members: FamilyMember[] = [];
   let index = 0;
 
+  /**
+   * First names already used in this household.
+   *
+   * Two people under one roof sharing a name reads as a bug even though it is a
+   * legitimate draw — one generated life had "father Andrea" and "sibling
+   * Andrea". Unisex names in several of the catalog's traditions make the
+   * collision far likelier than it looks.
+   */
+  const usedNames = new Set<string>();
+  const uniqueFirstName = (sex: Sex): string => {
+    let name = pickFirstName(stream, culture, sex);
+    for (let attempt = 0; attempt < 6 && usedNames.has(name); attempt += 1) {
+      name = pickFirstName(stream, culture, sex);
+    }
+    usedNames.add(name);
+    return name;
+  };
+
   const makeMember = (
     role: FamilyRole,
     sex: Sex,
@@ -171,7 +189,7 @@ export function generateFamily(stream: RandomStream, options: FamilyOptions): Ho
     return {
       id: asNpcId(`${options.seed}:npc:${index}`),
       role,
-      firstName: pickFirstName(stream, culture, sex),
+      firstName: uniqueFirstName(sex),
       lastName,
       sex,
       birthYear,

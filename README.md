@@ -8,9 +8,9 @@ Before writing code, read [`specs/CORE_RULES.md`](specs/CORE_RULES.md) and
 [`specs/AI_CODING_INSTRUCTIONS.md`](specs/AI_CODING_INSTRUCTIONS.md).
 
 **Status:** v0.02 Living Character, in progress. Sprint Zero (0001–0009),
-v0.01 (0101–0114), Ticket 0201 (character generator), 0202 (starting family) and
-0203 (childhood event library) are complete. Next is Ticket 0204, school
-progression.
+v0.01 (0101–0114), Tickets 0201 (character generator), 0202 (starting family),
+0203 (childhood event library, revised in 0203b) and 0204 (school progression)
+are complete. Next is Ticket 0205, the stress foundation.
 
 ---
 
@@ -141,6 +141,7 @@ packages/character       Character state, the seven visible stats, Boolean talen
 packages/content         Versioned content catalogs — names, locations, events.
 packages/relationships   NPCs, tiers, the family model.
 packages/events          The event engine: eligibility, weights, cooldowns, chains.
+packages/education       Schooling: enrolment, grades, behaviour, extracurriculars.
 packages/simulation      Seeded RNG, GameState, year advancement, new-game, decisions.
 packages/persistence     SaveGameV1, migrations, memory + expo-sqlite repositories.
 tools/content-validator  Catalog and canonical-rule validation. Runs in CI.
@@ -173,6 +174,14 @@ These are the ones that bite. The full list is in `CORE_RULES.md`.
   `scripts/generate-events.py`, run it, commit the script and the JSON.
 - **Stat changes go through `nudgeStats`,** not raw addition — see the growth
   curve in `packages/character/src/stats.ts` and CORE_RULES 13.2.
+- **A menu never refuses because you are busy.** Extracurriculars are limited by
+  hours against capacity, in the background — never by the UI allowing one pick.
+  There is no workload bar; the consequences arrive in the feed (CORE_RULES 13.4).
+- **Money says where it came from.** A cash effect is `{ delta, source }`, and
+  the amount must appear in the line the player reads (CORE_RULES 13.6).
+- **A decision is a scene.** Named people, three or more different tactics,
+  outcomes that can land badly (CORE_RULES 13.4). The people are bound once, when
+  the decision is raised, so the prompt and the outcome mean the same person.
 
 ## Where things are wired
 
@@ -181,6 +190,8 @@ These are the ones that bite. The full list is in `CORE_RULES.md`.
   file's header, and `phases/events.ts` is the worked example.
 - Events: `packages/events` is the engine, `packages/content/data/events-*.json`
   is the library, and `scripts/generate-events.py` is how the library is edited.
+- School: `packages/education` is the system, `packages/content/data/activities.json`
+  is the club catalog, and `scripts/generate-activities.py` edits it.
 - Save shape: `packages/persistence/src/save-schema.ts`. Changing it means a
   version bump and a migration in `migrations.ts`, with tests.
 - Theme: `apps/mobile/src/theme/theme.ts`. Every colour and dimension in the app
@@ -207,7 +218,10 @@ These are the ones that bite. The full list is in `CORE_RULES.md`.
   none.
 - **Event library size: 250–500** across family, school, friendship, humour and
   talent contexts — an explicit override of the spec's 75–150 (spec 1656). The
-  catalog currently holds 327, and the count is asserted in two places.
+  catalog currently holds 346, and the count is asserted in two places.
+- **Extracurriculars are not exclusive.** Join as many as you like; the limit is
+  a hidden workload model, not the menu. Rejected in review: the pop-up that
+  allowed exactly one club, forever.
 
 ## Still open
 

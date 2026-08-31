@@ -70,8 +70,17 @@ REQUIREMENTS = {
     "onlyChild",
 }
 WEALTH = {"struggling", "modest", "comfortable", "affluent", "wealthy"}
+SCHOOL_STAGES = {"preschool", "elementary", "middle", "high", "graduated", "droppedOut"}
+# Screens a choice may open. The engine treats `opens` as opaque; this is the
+# list the app actually knows how to navigate to.
+OPENABLE = {"activities"}
 
 # Which family requirement each person-token needs before it may be used.
+# `kid`, `kid2` and `adult` are incidental people the engine invents, so they
+# need no eligibility guarantee — but a DECISION must declare them in
+# `person_tokens` so the same person is named in the prompt and the outcome.
+INCIDENTAL_TOKENS = {"kid", "kid2", "adult"}
+
 TOKEN_GUARDS = {
     "mother": {"mother", "bothParents"},
     "father": {"father", "bothParents"},
@@ -81,26 +90,47 @@ TOKEN_GUARDS = {
     "siblingRel": {"sibling", "siblings2", "olderSibling"},
     "olderSibling": {"olderSibling"},
 }
-FREE_TOKENS = {"me", "city", "kid", "kid2", "they", "them", "their"}
+FREE_TOKENS = {"me", "city", "kid", "kid2", "adult", "they", "them", "their"}
 
 
 def prune(mapping: dict) -> dict:
     return {key: value for key, value in mapping.items() if value not in (None, {}, [])}
 
 
+def CASH(delta: int, source: str) -> dict:
+    """
+    Money moving, and where it came from.
+
+    The source is not optional and never can be. A bare number was the original
+    shape and it produced exactly the bug the product owner reported: cash
+    arriving with no explanation anywhere in the feed. The checker additionally
+    requires the player-visible text to name the amount, so the audit trail
+    lives in the prose rather than in a field nobody reads.
+    """
+    if delta == 0:
+        raise ValueError("CASH with a delta of zero is not a thing that happened")
+    if not source or not source.strip():
+        raise ValueError(f"CASH({delta}) needs a source phrase")
+    return {"delta": delta, "source": source}
+
+
 def FX(
     stats: dict | None = None,
     relationship: dict | None = None,
-    cash: int | None = None,
+    cash: dict | None = None,
+    behaviour: int | None = None,
     set_flags: list[str] | None = None,
     clear_flags: list[str] | None = None,
 ) -> dict:
-    """An event's consequences."""
+    """An event's consequences. `cash` must come from CASH()."""
+    if cash is not None and not isinstance(cash, dict):
+        raise TypeError("cash must be CASH(delta, source), not a bare number")
     return prune(
         {
             "stats": stats,
             "relationship": relationship,
             "cash": cash,
+            "behaviour": behaviour,
             "setFlags": set_flags,
             "clearFlags": clear_flags,
         }
@@ -111,6 +141,9 @@ def COND(
     age_min: int | None = None,
     age_max: int | None = None,
     sex: str | None = None,
+    school_stage_any: list[str] | None = None,
+    activities_at_least: int | None = None,
+    activities_at_most: int | None = None,
     requires: list[str] | None = None,
     talents_any: list[str] | None = None,
     talents_none: list[str] | None = None,
@@ -127,6 +160,9 @@ def COND(
             "ageMin": age_min,
             "ageMax": age_max,
             "sex": sex,
+            "schoolStageAny": school_stage_any,
+            "activitiesAtLeast": activities_at_least,
+            "activitiesAtMost": activities_at_most,
             "requires": requires,
             "talentsAny": talents_any,
             "talentsNone": talents_none,
@@ -153,6 +189,7 @@ def C(
     id: str,
     label: str,
     text: str | None = None,
+    opens: str | None = None,
     effects: dict | None = None,
     outcomes: list[dict] | None = None,
     follow_up: dict | None = None,
@@ -162,6 +199,7 @@ def C(
         {
             "id": id,
             "label": label,
+            "opens": opens,
             "text": text,
             "effects": effects,
             "outcomes": outcomes,
@@ -188,6 +226,9 @@ def E(
     choices: list[dict] | None = None,
     modifiers: list[dict] | None = None,
     follow_up: dict | None = None,
+    person_tokens: list[str] | None = None,
+    binary_ok: bool = False,
+    physical: bool = False,
     **condition,
 ) -> None:
     EVENTS.append(
@@ -198,6 +239,12 @@ def E(
                 "type": type,
                 "rarity": rarity,
                 "eligibility": COND(**condition),
+                # Declared so the engine can bind these people ONCE when the
+                # decision is raised, and name the same person in the prompt and
+                # in the outcome.
+                "personTokens": person_tokens,
+                "binaryOk": binary_ok or None,
+                "physical": physical or None,
                 "weight": weight,
                 "modifiers": modifiers,
                 "cooldown": cooldown,
@@ -413,10 +460,10 @@ E("family.mc.chores-list", "family", [
    effects=FX(stats={"discipline": 2}))
 
 E("family.mc.allowance", "family", [
-    "Started getting an allowance, tied loosely to work actually performed.",
+    "Started getting an allowance — $5 a week, tied loosely to work actually performed. $60 by Christmas.",
 ], age_min=7, age_max=14, requires=["anyParent"], weight=10, cooldown=4,
    wealth_any=["modest", "comfortable", "affluent", "wealthy"],
-   effects=FX(cash=60, stats={"discipline": 1}))
+   effects=FX(cash=CASH(60, "a year of allowance"), stats={"discipline": 1}))
 
 E("family.mc.sibling-war", "family", [
     "You and {sibling} conducted a border dispute over the back seat that lasted the whole year.",
@@ -452,7 +499,7 @@ E("family.mc.money-tight", "family", [
    effects=FX(stats={"happiness": -2, "discipline": 2, "willpower": 1}))
 
 E("family.mc.second-job", "family", [
-    "{parent} picked up a second job. You saw a lot less of them, and understood why.",
+    "{parent} picked up a second job. Dinner moved to nine o'clock and you understood why.",
 ], age_min=5, age_max=17, requires=["singleParent"], weight=10, cooldown=4,
    wealth_any=["struggling", "modest"],
    effects=FX(stats={"happiness": -1, "discipline": 2}, relationship={"parents": 1}))
@@ -583,7 +630,7 @@ E("school.reading-struggle", "school", [
 E("school.favourite-teacher", "school", [
     "Had a teacher who noticed you. It made more difference than they will ever know.",
 ], age_min=6, age_max=17, weight=12, cooldown=4,
-   effects=FX(stats={"smarts": 3, "happiness": 2, "willpower": 1}))
+   effects=FX(stats={"smarts": 3, "happiness": 2, "willpower": 1}, behaviour=5))
 
 E("school.hated-teacher", "school", [
     "Had a teacher who had clearly decided about you in week one.",
@@ -632,18 +679,19 @@ E("school.forgot-homework", "school", [
 E("school.perfect-attendance", "school", [
     "Perfect attendance. The certificate is somewhere in a drawer to this day.",
 ], age_min=7, age_max=17, weight=9, cooldown=3, stat_at_least={"discipline": 62},
-   effects=FX(stats={"discipline": 2, "happiness": 1}))
+   effects=FX(stats={"discipline": 2, "happiness": 1}, behaviour=6))
 
 E("school.detention", "school", [
     "Detention, for something that had seemed extremely funny at the time.",
 ], age_min=8, age_max=17, weight=12, cooldown=2,
-   effects=FX(stats={"discipline": -1, "charisma": 1}),
+   effects=FX(stats={"discipline": -1, "charisma": 1}, behaviour=-8),
    modifiers=[MOD(1.9, talents_any=["crime"]), MOD(0.4, stat_at_least={"discipline": 70})])
 
 E("school.suspended", "school", [
     "Suspended for three days. The house was very quiet about it.",
 ], age_min=10, age_max=17, weight=7, rarity="uncommon", requires=["anyParent"],
-   effects=FX(stats={"discipline": -2, "happiness": -2}, relationship={"parents": -4}),
+   effects=FX(stats={"discipline": -2, "happiness": -2}, relationship={"parents": -4},
+              behaviour=-20),
    modifiers=[MOD(2.4, talents_any=["crime"])])
 
 E("school.bullied", "school", [
@@ -759,10 +807,11 @@ E("school.prom-skipped", "school", [
    effects=FX(stats={"happiness": 2}))
 
 E("school.part-time-job", "school", [
-    "Took a weekend job that paid badly and taught more than a year of school did.",
-], age_min=14, age_max=17, weight=11, cooldown=2,
+    "Took a weekend job that paid badly and taught more than a year of school did. It came to about $900.",
+], age_min=14, age_max=17, weight=11, cooldown=2, physical=True,
    wealth_any=["struggling", "modest", "comfortable"],
-   effects=FX(cash=900, stats={"discipline": 3, "charisma": 1}))
+   effects=FX(cash=CASH(900, "a year of weekend shifts"),
+              stats={"discipline": 3, "charisma": 1, "health": -1}))
 
 E("school.summer-camp", "school", [
     "Summer camp. Came back with a lanyard, a sunburn and three new opinions.",
@@ -913,9 +962,9 @@ E("friend.bike-summer", "friendship", [
    effects=FX(stats={"health": 2, "happiness": 3, "charisma": 1}))
 
 E("friend.arcade", "friendship", [
-    "Discovered an arcade with {kid} and lost a genuinely irresponsible amount of pocket money.",
+    "Discovered an arcade with {kid} and fed $25 of pocket money into one machine over a fortnight.",
 ], age_min=8, age_max=16, weight=10, cooldown=3,
-   effects=FX(stats={"happiness": 2}, cash=-25))
+   effects=FX(stats={"happiness": 2}, cash=CASH(-25, "a fortnight at the arcade")))
 
 E("friend.borrowed-never-returned", "friendship", [
     "Lent {kid} something you loved. It has not come back and it is not going to.",
@@ -925,7 +974,7 @@ E("friend.borrowed-never-returned", "friendship", [
 E("friend.first-fight", "friendship", [
     "An actual fistfight in a playground, over nothing, lasting eleven seconds.",
 ], age_min=8, age_max=15, weight=9, cooldown=4,
-   effects=FX(stats={"health": -1, "willpower": 2, "charisma": 1}),
+   effects=FX(stats={"health": -1, "willpower": 2, "charisma": 1}, behaviour=-11),
    modifiers=[MOD(1.8, talents_any=["athletics", "crime"])])
 
 E("friend.peer-pressure-resisted", "friendship", [
@@ -1097,9 +1146,9 @@ E("random.lost-in-shop", "random", [
    effects=FX(stats={"happiness": -2, "willpower": 1}))
 
 E("random.tooth-fairy", "random", [
-    "Lost a tooth and negotiated hard on the going rate.",
+    "Lost a tooth and negotiated the going rate up to $5, which was considered outrageous.",
 ], age_min=5, age_max=9, weight=12, cooldown=2,
-   effects=FX(cash=5, stats={"charisma": 1}))
+   effects=FX(cash=CASH(5, "a tooth, renegotiated"), stats={"charisma": 1}))
 
 E("random.swimming", "random", [
     "Learned to swim, badly, in a pool that smelled of chlorine and fear.",
@@ -1112,9 +1161,9 @@ E("random.storm", "random", [
    effects=FX(stats={"happiness": 2, "willpower": 1}))
 
 E("random.found-money", "random", [
-    "Found money on the pavement and told nobody, ever.",
+    "Found $20 on the pavement outside the laundromat and told nobody, ever.",
 ], age_min=5, age_max=17, weight=9, cooldown=4,
-   effects=FX(cash=20, stats={"happiness": 2}))
+   effects=FX(cash=CASH(20, "$20 found on the pavement"), stats={"happiness": 2}))
 
 E("random.snow-day", "random", [
     "A snow day. The greatest single institution in human history.",
@@ -1187,9 +1236,9 @@ E("random.celebrity-sighting", "random", [
    effects=FX(stats={"happiness": 3, "charisma": 1}))
 
 E("random.lottery-scratch", "random", [
-    "{parent} let you scratch the lottery ticket. It won eight dollars and was celebrated for days.",
+    "{parent} let you scratch the lottery ticket. It won $8 and was celebrated for days.",
 ], age_min=6, age_max=14, weight=8, requires=["anyParent"], rarity="uncommon",
-   effects=FX(cash=8, stats={"happiness": 2}))
+   effects=FX(cash=CASH(8, "a winning scratch card"), stats={"happiness": 2}))
 
 E("random.attic-find", "random", [
     "Found a box in the attic with somebody's whole life in it and read all of it.",
@@ -1285,9 +1334,10 @@ E("talent.act.local-stage", "talent", [
    effects=FX(stats={"charisma": 4, "happiness": 4}, set_flags=["act.staged"]))
 
 E("talent.act.commercial", "talent", [
-    "Did a commercial for a regional furniture shop. It paid, and it aired, relentlessly.",
+    "Did a commercial for a regional furniture shop. It paid $800, and it aired, relentlessly.",
 ], age_min=9, age_max=17, weight=7, rarity="rare", talents_any=["acting"],
-   effects=FX(cash=800, stats={"charisma": 3, "happiness": 3}))
+   effects=FX(cash=CASH(800, "a regional furniture commercial"),
+              stats={"charisma": 3, "happiness": 3}))
 
 E("talent.act.stage-fright", "talent", [
     "Froze completely on stage for nine seconds that have never fully ended.",
@@ -1361,9 +1411,10 @@ E("talent.wri.school-paper", "talent", [
    effects=FX(stats={"discipline": 3, "smarts": 2}, set_flags=["wri.published"]))
 
 E("talent.wri.competition", "talent", [
-    "Placed in a writing competition that had a genuinely large number of entrants.",
+    "Placed in a writing competition with a large number of entrants. The prize was $100.",
 ], age_min=10, age_max=17, weight=9, talents_any=["writing"], rarity="uncommon",
-   effects=FX(stats={"smarts": 3, "happiness": 4}, cash=100))
+   effects=FX(stats={"smarts": 3, "happiness": 4},
+              cash=CASH(100, "a writing competition prize")))
 
 E("talent.wri.journal", "talent", [
     "Kept a journal every single day for a year, which nobody has ever been allowed to read.",
@@ -1398,9 +1449,10 @@ E("talent.aca.encyclopedia", "talent", [
    effects=FX(stats={"smarts": 3, "charisma": -1}))
 
 E("talent.aca.tutor", "talent", [
-    "Started tutoring kids a year below for cash, and turned out to be good at it.",
+    "Started tutoring kids a year below at $15 an hour. About $350 over the year.",
 ], age_min=13, age_max=17, weight=10, talents_any=["academics"], cooldown=2,
-   effects=FX(cash=350, stats={"smarts": 2, "charisma": 2, "discipline": 2}))
+   effects=FX(cash=CASH(350, "a year of tutoring at $15 an hour"),
+              stats={"smarts": 2, "charisma": 2, "discipline": 2}))
 
 E("talent.aca.scholarship-track", "talent", [
     "A guidance counsellor started using the word 'scholarship' in the present tense.",
@@ -1441,9 +1493,10 @@ E("talent.inv.robotics", "talent", [
    effects=FX(stats={"smarts": 3, "discipline": 3, "charisma": 1}))
 
 E("talent.inv.fixed-neighbours", "talent", [
-    "Word got round the street that you could fix things, and it stopped being a favour.",
+    "Word got round that you could fix things. It stopped being a favour and started being $180.",
 ], age_min=10, age_max=17, weight=10, talents_any=["inventive"], cooldown=3,
-   effects=FX(cash=180, stats={"charisma": 2, "smarts": 2}))
+   effects=FX(cash=CASH(180, "fixing things for people on the street"),
+              stats={"charisma": 2, "smarts": 2}))
 
 E("talent.inv.patent-idea", "talent", [
     "Had an idea that was, on inspection, already a product. It was still a good idea.",
@@ -1475,9 +1528,10 @@ E("talent.cri.forged-note", "talent", [
    effects=FX(stats={"smarts": 2, "discipline": -1}))
 
 E("talent.cri.playground-economy", "talent", [
-    "Ran a small and profitable trade in banned goods at school.",
+    "Ran a trade in banned goods at school. It cleared about $140 before anyone noticed.",
 ], age_min=9, age_max=17, weight=12, talents_any=["crime"], cooldown=3,
-   effects=FX(cash=140, stats={"charisma": 3, "smarts": 2, "discipline": -1}))
+   effects=FX(cash=CASH(140, "selling banned goods at school"),
+              stats={"charisma": 3, "smarts": 2, "discipline": -1}, behaviour=-7))
 
 E("talent.cri.lookout", "talent", [
     "Was the lookout. Was good at it. Did not enjoy discovering that.",
@@ -1509,429 +1563,1225 @@ E("talent.none.grafted", "talent", [
    effects=FX(stats={"discipline": 3, "willpower": 3}))
 
 
+
 # =============================================================================
 # DECISIONS AND OPPORTUNITIES
 #
-# Spec 725-770 caps a year at roughly three of these, and the engine starts
-# offering them at FIRST_DECISION_AGE. Two rules held throughout:
-#   - no choice is strictly correct. Every option buys something and costs
-#     something, so the player is choosing a person rather than a number.
-#   - uncertain choices use weighted outcomes. Talents shift the odds; they
-#     never guarantee the result (spec 725-770).
+# Rewritten wholesale for Ticket 0203b, to the standard in
+# claude/event-writing-rules.md. The product owner rejected the first version as
+# "extremely boring", and the example he gave is the standard:
+#
+#   BEFORE  "You have been rehearsing a conversation with somebody for four
+#            months." [Say something] [Say nothing]
+#            -> "You said it. They were kind about it. It still took months."
+#
+#   AFTER   a named person, a place, something happening right now, three or four
+#           different TACTICS, and outcomes that can land badly.
+#
+# The rules, applied to every entry below:
+#   - Name the other person. `person_tokens` binds them once, so the prompt and
+#     the outcome mean the same person.
+#   - Set a scene. Never "you have been feeling X for N months".
+#   - Three or more options unless the situation genuinely has two answers
+#     (binary_ok=True), and options must be different approaches, not the same
+#     approach at two volumes.
+#   - Outcomes are concrete. The test: could you film it? "It still took months"
+#     is a verdict. "{kid} laughed so hard she snorted water" is an event.
+#   - Happiness always moves, and not every outcome may be positive.
+#   - Health wherever it is physical, exhausting, dangerous or restful.
+#   - Money only ever with CASH(), and the text names the amount.
 # =============================================================================
 
-D("d.school.cheat", "school", [
-    "The kid next to you has left their test paper at exactly the right angle.",
-], [
-    C("copy", "Copy it", outcomes=[
-        OUT(6, "You copied, got the grade, and spent a fortnight waiting to be called to an office.",
-            FX(stats={"smarts": -1, "happiness": -2, "discipline": -2})),
-        OUT(4, "You copied and were caught within the hour. The grade became the least of it.",
-            FX(stats={"happiness": -4, "discipline": -3}, relationship={"parents": -4})),
-    ]),
-    C("own-work", "Do your own work", text="You did your own work and got what you got.",
-      effects=FX(stats={"willpower": 3, "discipline": 2})),
-], age_min=9, age_max=17, weight=13,
-   modifiers=[MOD(1.7, talents_any=["crime"]), MOD(0.5, stat_at_least={"discipline": 70})])
+# ---- the two the product owner called out ----------------------------------
 
-D("d.school.club", "school", [
-    "Sign-up sheets went up for after-school clubs and you can only realistically do one.",
+# REPLACES d.friend.confession, the "rehearsing a conversation" decision.
+D("d.friend.crush", "friendship", [
+    "{kid} is at the water fountain by herself and the bell is not for six minutes. You have had a crush on her since September.",
+    "{kid} is sitting on the wall by the bike racks on her own. You have thought about talking to her since September.",
 ], [
-    C("sport", "Sports team", text="You went with the team. Three evenings a week, all year.",
-      effects=FX(stats={"health": 4, "charisma": 2, "discipline": 2})),
-    C("study", "Academic club", text="You took the quiet room with the good teacher in it.",
-      effects=FX(stats={"smarts": 4, "discipline": 2, "charisma": -1})),
-    C("arts", "Drama or music", text="You picked the one with a stage at the end of it.",
-      effects=FX(stats={"charisma": 4, "happiness": 2})),
-    C("none", "Skip it", text="You went home instead, and got very good at having spare time.",
-      effects=FX(stats={"happiness": 2, "discipline": -1})),
-], age_min=8, age_max=17, weight=14, cooldown=4)
+    C("compliment", "Compliment her jacket", outcomes=[
+        OUT(5, "{kid} was flattered — she said nobody ever notices that jacket, and asked where you sit at lunch.",
+            FX(stats={"happiness": 6, "charisma": 3})),
+        OUT(3, "{kid} said 'okay' in a completely flat voice. You heard about it from three different people by Friday.",
+            FX(stats={"happiness": -5, "charisma": -1})),
+        OUT(2, "{kid} was visibly creeped out and moved to the other fountain.",
+            FX(stats={"happiness": -6, "charisma": -3})),
+    ]),
+    C("ask-day", "Ask about her day", outcomes=[
+        OUT(6, "{kid} talked for the full six minutes about her sister's dog. You were late to class and did not care.",
+            FX(stats={"happiness": 5, "charisma": 2})),
+        OUT(4, "{kid} said 'fine.' That was the entire conversation.",
+            FX(stats={"happiness": -3})),
+    ]),
+    C("joke", "Make a silly joke", outcomes=[
+        OUT(4, "{kid} laughed so hard she snorted water out of her nose, and then could not look at you.",
+            FX(stats={"happiness": 7, "charisma": 4})),
+        OUT(6, "{kid} cringed. You replayed it in your head every night for a week.",
+            FX(stats={"happiness": -6, "willpower": 2})),
+    ]),
+    C("nothing", "Walk past", text="You walked past {kid} and the bell went. Nothing happened, which was the point.",
+      effects=FX(stats={"happiness": -2, "willpower": -1})),
+], age_min=11, age_max=17, weight=14, cooldown=3, person_tokens=["kid"],
+   modifiers=[MOD(1.5, stat_at_least={"looks": 65}), MOD(1.4, stat_at_least={"charisma": 68})])
 
-D("d.school.study-hard", "school", [
-    "Exams are eight weeks out and there is a real decision to be made about the next eight weeks.",
+# REPLACES d.school.club, which allowed exactly one pick, forever. Now it points
+# at the real menu — see Ticket 0204's Clubs & Teams screen.
+D("d.school.signup-table", "school", [
+    "A folding table went up in the gym at lunch with a clipboard on it. Your school has activities available to join.",
+    "Sign-up sheets went up outside the office. Somebody has already written a fake name at the top of every one.",
 ], [
-    C("grind", "Work for it", outcomes=[
-        OUT(7, "You worked, and it showed. Something clicked around week five.",
-            FX(stats={"smarts": 4, "discipline": 3, "happiness": -1})),
-        OUT(3, "You worked hard and the results were middling anyway, which was its own lesson.",
-            FX(stats={"discipline": 3, "willpower": 2, "happiness": -2})),
+    C("see", "See what they offer", opens="activities",
+      text="You went and had a proper look at what the school had on offer.",
+      effects=FX(stats={"happiness": 2})),
+    C("ask-around", "Ask {kid} what she does", outcomes=[
+        OUT(6, "{kid} talked you into the same thing she does, and it turned out to be a good year for it.",
+            FX(stats={"happiness": 4, "charisma": 3})),
+        OUT(4, "{kid} said all of it was for losers, which you believed at the time.",
+            FX(stats={"happiness": -2, "charisma": 1})),
     ]),
-    C("coast", "Coast", text="You coasted. It was a good couple of months and a mediocre set of results.",
-      effects=FX(stats={"happiness": 3, "smarts": -1, "discipline": -2})),
-], age_min=12, age_max=17, weight=13, cooldown=3)
+    C("pass", "Pass",
+      text="You walked past the sign-up table. The gym smelled like floor polish.",
+      effects=FX(stats={"happiness": -2})),
+], age_min=8, age_max=17, weight=16, cooldown=2, person_tokens=["kid"],
+   school_stage_any=["elementary", "middle", "high"])
 
-D("d.school.bully-response", "school", [
-    "The kid who has been making your year difficult is standing in front of you again.",
-], [
-    C("fight", "Hit back", outcomes=[
-        OUT(5, "You hit back. It stopped completely, and you were suspended for a week.",
-            FX(stats={"willpower": 4, "happiness": 2, "discipline": -2},
-               relationship={"parents": -3}, clear_flags=["school.bullied"])),
-        OUT(5, "You hit back, lost, and it got worse before it got better.",
-            FX(stats={"health": -3, "happiness": -3, "willpower": 3})),
-    ]),
-    C("tell", "Tell an adult", outcomes=[
-        OUT(6, "An adult handled it, quietly and well. It ended.",
-            FX(stats={"happiness": 3, "charisma": -1}, clear_flags=["school.bullied"])),
-        OUT(4, "The adult handled it badly and it became a much more public problem.",
-            FX(stats={"happiness": -3, "willpower": 2})),
-    ]),
-    C("endure", "Ride it out", text="You said nothing and waited it out. It took another year.",
-      effects=FX(stats={"willpower": 4, "happiness": -4})),
-], age_min=8, age_max=17, weight=16, flags_all=["school.bullied"])
 
-D("d.school.detention-blame", "school", [
-    "Something got broken and the teacher is asking, in a general way, who did it.",
+# ---- family -----------------------------------------------------------------
+
+D("d.family.broken-bowl", "family", [
+    "{sibling} knocked {mother}'s ceramic bowl off the counter and it broke into four pieces. {sibling} is staring at you. {mother} is in the next room.",
 ], [
-    C("own", "Own up", text="You owned it. The punishment was smaller than the silence would have been.",
-      effects=FX(stats={"willpower": 3, "discipline": 2, "happiness": -1})),
-    C("silent", "Say nothing", outcomes=[
-        OUT(6, "Nobody said anything and the whole class was kept back. It was never mentioned again.",
-            FX(stats={"charisma": 1, "happiness": -1})),
-        OUT(4, "Somebody named you within a day, and it landed much harder for the delay.",
-            FX(stats={"happiness": -3, "discipline": -1}, relationship={"parents": -2})),
+    C("own", "Say you did it", outcomes=[
+        OUT(6, "You took the blame. {mother} grounded you for a week, and {sibling} left a candy bar on your pillow.",
+            FX(stats={"happiness": -2, "willpower": 3}, relationship={"siblings": 9, "mother": -3})),
+        OUT(4, "You took the blame and {mother} did not believe you for a second. She grounded {sibling} anyway.",
+            FX(stats={"happiness": -3, "charisma": -1}, relationship={"siblings": 4})),
     ]),
-    C("blame", "Blame someone else",
-      text="You gave them a name. It worked, and it cost you a friend who worked out why.",
-      effects=FX(stats={"charisma": -2, "happiness": -2, "discipline": -1})),
-], age_min=8, age_max=16, weight=12)
+    C("tell", "Tell {mother} what happened",
+      text="You told {mother} the truth. {sibling} got grounded and did not speak to you for three days.",
+      effects=FX(stats={"happiness": -3, "discipline": 2}, relationship={"siblings": -9, "mother": 4})),
+    C("glue", "Glue it before she notices", outcomes=[
+        OUT(5, "You and {sibling} glued the bowl badly. {mother} found out a week later and was angrier about the glue than the bowl.",
+            FX(stats={"happiness": -5}, relationship={"mother": -6, "siblings": 3})),
+        OUT(5, "You and {sibling} glued the bowl and {mother} never noticed. It is still on the shelf.",
+            FX(stats={"happiness": 6, "smarts": 1}, relationship={"siblings": 8})),
+    ]),
+    C("cat", "Blame the cat",
+      text="{mother} pointed out that the cat has been at the vet since Tuesday.",
+      effects=FX(stats={"happiness": -5, "charisma": -2}, relationship={"mother": -5})),
+], age_min=6, age_max=16, weight=13, requires=["sibling", "mother"], person_tokens=[])
+
+D("d.family.birthday-money", "family", [
+    "It is your birthday and {sibling} handed you an envelope with $25 in it, saved out of {siblingRel}'s own allowance.",
+], [
+    C("spend", "Spend it all today", outcomes=[
+        OUT(6, "Blew the whole $25 on comics and candy at the corner store in one afternoon. Worth it.",
+            FX(cash=CASH(-25, "comics and candy at the corner store"),
+               stats={"happiness": 6, "health": -1, "discipline": -2})),
+        OUT(4, "Spent the $25 on a toy that broke the same afternoon.",
+            FX(cash=CASH(-25, "a toy that broke the same day"),
+               stats={"happiness": -5, "smarts": 1})),
+    ]),
+    C("save", "Put it away",
+      text="Put the $25 birthday money in the coffee can under your bed and left it there.",
+      effects=FX(stats={"happiness": 2, "discipline": 4, "willpower": 2})),
+    C("split", "Give half back to {sibling}",
+      text="Gave {sibling} back half the birthday money, $12. {siblingRel} tried to refuse and you made {them} take it.",
+      effects=FX(cash=CASH(-12, "half the birthday money, given back to {sibling}"),
+                 stats={"happiness": 5}, relationship={"siblings": 10})),
+], age_min=7, age_max=16, weight=12, cooldown=6, requires=["sibling"],
+   effects=FX(cash=CASH(25, "birthday money from {sibling}")))
+
+D("d.family.yard", "family", [
+    "{father} has been on double shifts and the yard has got away from him. He has not asked you to do anything about it.",
+], [
+    C("mow", "Mow it before he gets home", outcomes=[
+        OUT(5, "You mowed the whole yard in July heat and threw up behind the shed. {father} hugged you anyway.",
+            FX(stats={"health": -4, "happiness": 5, "willpower": 3}, relationship={"father": 9})),
+        OUT(5, "You mowed the yard before {father} got home. He sat on the back step and looked at it for a long time.",
+            FX(stats={"health": -1, "happiness": 5}, relationship={"father": 8})),
+    ]),
+    C("ask", "Ask him what he needs", outcomes=[
+        OUT(6, "You asked {father} what he needed. He said 'company', and you sat out there until it got dark.",
+            FX(stats={"happiness": 6}, relationship={"father": 9})),
+        OUT(4, "You asked {father} what he needed and he snapped at you. He apologised an hour later.",
+            FX(stats={"happiness": -3}, relationship={"father": 1})),
+    ]),
+    C("leave", "Leave it",
+      text="The yard stayed long all summer. Nobody said a word about it, which was somehow worse.",
+      effects=FX(stats={"happiness": -3}, relationship={"father": -3})),
+], age_min=9, age_max=17, weight=12, cooldown=5, requires=["father"], physical=True)
 
 D("d.family.chore-money", "family", [
-    "{parent} has offered actual money for a genuinely unpleasant weekend of work.",
+    "{parent} has offered $30 for a genuinely unpleasant weekend of clearing out the garage.",
 ], [
-    C("take", "Take the job", text="You did it, badly at first and then properly, and got paid.",
-      effects=FX(cash=120, stats={"discipline": 3}, relationship={"parents": 3})),
-    C("negotiate", "Negotiate first", outcomes=[
-        OUT(5, "You negotiated up, which was noticed and quietly respected.",
-            FX(cash=200, stats={"charisma": 3}, relationship={"parents": 2})),
-        OUT(5, "You negotiated, the offer was withdrawn, and the job was done by somebody else.",
-            FX(stats={"charisma": 1, "happiness": -1}, relationship={"parents": -2})),
-    ]),
-    C("refuse", "Refuse", text="You had better things to do, and did them.",
-      effects=FX(stats={"happiness": 2}, relationship={"parents": -3})),
-], age_min=9, age_max=17, requires=["anyParent"], weight=13, cooldown=4)
+    C("take", "Take the job",
+      text="You cleared the garage over two days, found a dead mouse, and got your $30.",
+      effects=FX(cash=CASH(30, "clearing out the garage"),
+                 stats={"discipline": 4, "health": -1, "happiness": 1}, relationship={"parents": 4})),
+    C("negotiate", "Try for more", outcomes=[
+        OUT(5, "You talked {parent} up to $50, which was noticed and quietly respected.",
+            FX(cash=CASH(50, "clearing the garage, after negotiating"),
+               stats={"charisma": 4, "happiness": 3}, relationship={"parents": 3})),
+        OUT(5, "You pushed, the offer was withdrawn, and {sibling} did it instead for the original $30.",
+            FX(stats={"charisma": 1, "happiness": -4}, relationship={"parents": -3}),
+            ),
+    ], requires=COND(requires=["sibling"])),
+    C("free", "Do it for nothing",
+      text="You did the garage without taking the money. {parent} brought it up for years afterwards.",
+      effects=FX(stats={"happiness": 3, "willpower": 3}, relationship={"parents": 8})),
+    C("refuse", "Refuse",
+      text="You had better things to do that weekend, and you did them.",
+      effects=FX(stats={"happiness": 3}, relationship={"parents": -4})),
+], age_min=9, age_max=17, requires=["anyParent"], weight=13, cooldown=4, physical=True)
 
 D("d.family.sibling-secret", "family", [
-    "{sibling} has done something that is going to come out eventually, and has asked you to sit on it.",
+    "{sibling} has done something that is going to come out eventually, and has just asked you to sit on it.",
 ], [
     C("keep", "Keep quiet", outcomes=[
-        OUT(6, "You kept it. It never came out, and {sibling} has not forgotten.",
-            FX(relationship={"siblings": 8}, stats={"willpower": 2})),
-        OUT(4, "You kept it, it came out anyway, and you were standing next to it when it did.",
-            FX(relationship={"siblings": 4, "parents": -4}, stats={"happiness": -2})),
+        OUT(6, "You kept it. It never came out, and {sibling} has not forgotten that you did.",
+            FX(stats={"happiness": 2, "willpower": 3}, relationship={"siblings": 10})),
+        OUT(4, "You kept it, it came out anyway, and you were standing next to {sibling} when it did.",
+            FX(stats={"happiness": -5}, relationship={"siblings": 4, "parents": -5})),
     ]),
-    C("tell", "Tell a parent", text="You told. It was probably the right call and it did not feel like it.",
-      effects=FX(relationship={"siblings": -8, "parents": 3}, stats={"discipline": 2})),
+    C("tell", "Tell {parent}",
+      text="You told {parent}. It was probably the right call and it did not feel like one for a month.",
+      effects=FX(stats={"happiness": -4, "discipline": 3}, relationship={"siblings": -10, "parents": 4})),
+    C("make-fix", "Make {sibling} fix it", outcomes=[
+        OUT(5, "You talked {sibling} into owning up before anyone found out. It went far better than it should have.",
+            FX(stats={"happiness": 4, "charisma": 5}, relationship={"siblings": 6})),
+        OUT(5, "{sibling} agreed to sort it out and then did not, and it landed on both of you.",
+            FX(stats={"happiness": -4}, relationship={"siblings": -4, "parents": -3})),
+    ]),
 ], age_min=8, age_max=17, requires=["sibling", "anyParent"], weight=13)
 
+D("d.family.report-card", "family", [
+    "The report is in your bag, it is not good, and {parent} has not asked about it yet.",
+], [
+    C("hand-over", "Hand it over", outcomes=[
+        OUT(6, "You handed it over. It was a bad hour and a much better month.",
+            FX(stats={"happiness": -2, "discipline": 4}, relationship={"parents": 4}, behaviour=4)),
+        OUT(4, "You handed it over and it went far worse than the report deserved. Nobody spoke at dinner for a week.",
+            FX(stats={"happiness": -6, "willpower": 3}, relationship={"parents": -6})),
+    ]),
+    C("hide", "Lose it", outcomes=[
+        OUT(5, "It was never found. You spent four months waiting for it to be.",
+            FX(stats={"happiness": -3, "discipline": -3})),
+        OUT(5, "It surfaced in March, which made it a much larger problem than it had ever been in October.",
+            FX(stats={"happiness": -6}, relationship={"parents": -9}, behaviour=-6)),
+    ]),
+    C("preempt", "Get in first with a plan",
+      text="You handed it over with a plan already written down. {parent} was too surprised to shout.",
+      effects=FX(stats={"happiness": 2, "discipline": 5, "charisma": 3}, relationship={"parents": 5})),
+], age_min=9, age_max=17, requires=["anyParent"], weight=13, cooldown=3,
+   modifiers=[MOD(1.8, stat_at_most={"discipline": 45})])
+
+D("d.family.parent-asks", "family", [
+    "{parent} sat down on the end of your bed and asked, without warning, whether you are all right.",
+], [
+    C("honest", "Tell them the truth", outcomes=[
+        OUT(7, "You told {parent} the truth. They listened better than you had expected them to.",
+            FX(stats={"happiness": 7, "health": 1}, relationship={"parents": 9})),
+        OUT(3, "You told {parent} the truth and they did not know what to do with it. They tried, which counted.",
+            FX(stats={"happiness": 2}, relationship={"parents": 3})),
+    ]),
+    C("deflect", "Say you're fine",
+      text="You said you were fine. {parent} knew, and let it go, and turned the light off.",
+      effects=FX(stats={"happiness": -3, "willpower": 1}, relationship={"parents": -2})),
+    C("turn-it", "Ask them the same thing", outcomes=[
+        OUT(6, "You asked {parent} the same question back. They sat there a long time before answering.",
+            FX(stats={"happiness": 4, "charisma": 3}, relationship={"parents": 7})),
+        OUT(4, "You asked {parent} the same question back and they laughed it off and left.",
+            FX(stats={"happiness": -2, "charisma": 1})),
+    ]),
+], age_min=11, age_max=17, requires=["anyParent"], weight=12, cooldown=4,
+   modifiers=[MOD(2.0, stat_at_most={"happiness": 40})])
+
+D("d.family.holiday-choice", "family", [
+    "The family holiday is being decided at the kitchen table and, unusually, you have been given a vote.",
+], [
+    C("push", "Push for what you want", outcomes=[
+        OUT(5, "You got your way and it was a great week. Everybody said so, more than once.",
+            FX(stats={"happiness": 6, "charisma": 3, "health": 1}, relationship={"family": 3})),
+        OUT(5, "You got your way and it rained for six days, which was mentioned at every meal.",
+            FX(stats={"happiness": -4, "charisma": 1}, relationship={"family": -4})),
+    ]),
+    C("defer", "Let {sibling} pick",
+      text="You let {sibling} pick, which bought you something you cashed in months later.",
+      effects=FX(stats={"happiness": 1, "willpower": 2}, relationship={"siblings": 8})),
+    C("stay", "Argue for staying home",
+      text="You argued for staying home. You got eleven days on your own street and no photographs at all.",
+      effects=FX(stats={"happiness": 3, "charisma": -1}, relationship={"family": -2})),
+], age_min=8, age_max=16, requires=["anyParent", "sibling"], weight=11, cooldown=5)
+
+D("d.family.parent-favour", "family", [
+    "{parent} needs a hand with something all Saturday, and you had plans with {kid}.",
+], [
+    C("help", "Cancel and help",
+      text="You cancelled on {kid} and helped. It took nine hours and was never mentioned again.",
+      effects=FX(stats={"happiness": -2, "discipline": 3, "health": -1}, relationship={"parents": 9})),
+    C("plans", "Keep your plans",
+      text="You went out with {kid}. It was a good day with a shadow on it.",
+      effects=FX(stats={"happiness": 3}, relationship={"parents": -5})),
+    C("both", "Try to do both", outcomes=[
+        OUT(4, "You did half of each and somehow got away with it.",
+            FX(stats={"happiness": 3, "charisma": 3, "health": -2})),
+        OUT(6, "You did half of each badly, and both {parent} and {kid} noticed.",
+            FX(stats={"happiness": -4, "health": -2}, relationship={"parents": -3})),
+    ]),
+], age_min=10, age_max=17, requires=["anyParent"], weight=12, cooldown=4, person_tokens=["kid"])
+
+D("d.family.grandparent", "family", [
+    "A grandparent is in hospital for a week, and visiting means giving up the one thing you had planned.",
+], [
+    C("visit", "Go and sit with them",
+      text="You went. It was awkward for ten minutes and then they told you a story nobody else in the family had heard.",
+      effects=FX(stats={"happiness": 3, "willpower": 2}, relationship={"family": 6})),
+    C("bring", "Take something in for them", outcomes=[
+        OUT(7, "You took in the newspaper and the boiled sweets they liked, every day that week.",
+            FX(stats={"happiness": 5, "health": -1, "willpower": 4}, relationship={"family": 10})),
+        OUT(3, "You took things in and they were asleep for most of it. You sat there anyway.",
+            FX(stats={"happiness": -2, "willpower": 4}, relationship={"family": 6})),
+    ]),
+    C("skip", "Skip it",
+      text="You did not go. Nobody said anything about it, which was worse than if they had.",
+      effects=FX(stats={"happiness": -5}, relationship={"family": -4})),
+], age_min=9, age_max=17, weight=10, rarity="uncommon")
+
+D("d.family.pet", "family", [
+    "There is a serious conversation happening about a dog, and {parent} has used the word 'responsibility' four times.",
+], [
+    C("promise", "Promise everything", outcomes=[
+        OUT(6, "You promised everything, got the dog, and did about half of it. The dog did not mind.",
+            FX(stats={"happiness": 7, "health": 2, "discipline": 1}, relationship={"parents": -2})),
+        OUT(4, "You promised everything and, to universal astonishment, did all of it for four years.",
+            FX(stats={"happiness": 7, "health": 3, "discipline": 5}, relationship={"parents": 6})),
+    ]),
+    C("honest", "Be honest about it",
+      text="You said you probably would not keep it up. The answer was no, and it was fair.",
+      effects=FX(stats={"happiness": -3, "willpower": 3}, relationship={"parents": 5})),
+    C("trial", "Offer a trial run", outcomes=[
+        OUT(6, "You proposed fostering first. It worked, and the foster dog never left.",
+            FX(stats={"happiness": 6, "smarts": 2, "health": 2}, relationship={"parents": 5})),
+        OUT(4, "You proposed fostering first, and after three weeks the dog went to somebody else.",
+            FX(stats={"happiness": -5, "willpower": 2})),
+    ]),
+], age_min=6, age_max=14, requires=["anyParent"], weight=12, physical=True)
+
+D("d.family.sibling-broke-it", "family", [
+    "{sibling} has taken something of yours and broken it, and is standing in your doorway holding both halves.",
+], [
+    C("shout", "Lose it", outcomes=[
+        OUT(6, "You lost it completely. {sibling} was punished and the house stayed sour for months.",
+            FX(stats={"happiness": -4, "willpower": -2}, relationship={"siblings": -9})),
+        OUT(4, "You lost it, and you were the one who ended up in trouble, for the noise.",
+            FX(stats={"happiness": -5}, relationship={"siblings": -5, "parents": -4}, behaviour=-3)),
+    ]),
+    C("let-go", "Let it go",
+      text="You said it was fine. {sibling} noticed that you had, which was the entire point.",
+      effects=FX(stats={"happiness": -1, "willpower": 4}, relationship={"siblings": 7})),
+    C("make-pay", "Make {sibling} replace it", outcomes=[
+        OUT(5, "{sibling} paid you back over four months out of {siblingRel}'s own allowance. $18, in coins.",
+            FX(cash=CASH(18, "{sibling} paying you back for what {siblingRel} broke"),
+               stats={"happiness": 2, "discipline": 2}, relationship={"siblings": -2})),
+        OUT(5, "{sibling} agreed to pay you back and never did, and you brought it up for years.",
+            FX(stats={"happiness": -3}, relationship={"siblings": -5})),
+    ]),
+], age_min=6, age_max=16, requires=["sibling"], weight=13, cooldown=4,
+   modifiers=[MOD(1.5, stat_at_most={"willpower": 40})])
+
 D("d.family.move-away", "family", [
-    "The family is moving away from {city}, and you have been asked what you think, which is new.",
+    "The family is leaving {city}, and you have been asked what you think about it, which has never happened before.",
 ], [
     C("support", "Say you're fine with it",
       text="You said you were fine with it. Some of that was even true.",
-      effects=FX(relationship={"parents": 5}, stats={"willpower": 2, "happiness": -2})),
+      effects=FX(stats={"happiness": -3, "willpower": 3}, relationship={"parents": 6})),
     C("fight", "Fight it", outcomes=[
-        OUT(3, "You made enough of a case that the move was delayed a year.",
-            FX(stats={"charisma": 4, "happiness": 3}, relationship={"parents": -2})),
-        OUT(7, "You lost the argument, and the move happened on schedule anyway.",
-            FX(stats={"happiness": -4, "willpower": 2}, relationship={"parents": -4})),
+        OUT(3, "You made enough of a case that the move was put back a year.",
+            FX(stats={"happiness": 5, "charisma": 5}, relationship={"parents": -2})),
+        OUT(7, "You lost the argument and the move happened on schedule, and you had said all of that for nothing.",
+            FX(stats={"happiness": -6, "willpower": 2}, relationship={"parents": -5})),
+    ]),
+    C("terms", "Ask for something in return", outcomes=[
+        OUT(6, "You agreed to the move in exchange for one condition, and {parent} kept to it.",
+            FX(stats={"happiness": 2, "charisma": 4, "smarts": 2}, relationship={"parents": 3})),
+        OUT(4, "You agreed to the move in exchange for a promise that was quietly forgotten by August.",
+            FX(stats={"happiness": -5, "charisma": 2}, relationship={"parents": -4})),
     ]),
 ], age_min=8, age_max=16, requires=["anyParent"], weight=9, rarity="uncommon")
 
-D("d.family.grandparent-visit", "family", [
-    "A grandparent has been in hospital, and visiting means giving up something you had planned.",
+
+# ---- school -----------------------------------------------------------------
+
+D("d.school.cheat", "school", [
+    "{kid} has slid his maths test an inch to the left so you can see it. {adult} is at the window.",
 ], [
-    C("go", "Go", text="You went. It was awkward for ten minutes and mattered for years.",
-      effects=FX(stats={"happiness": 1, "willpower": 2}, relationship={"family": 4})),
-    C("skip", "Skip it", text="You didn't go. Nobody said anything about it, which was worse.",
-      effects=FX(stats={"happiness": -3}, relationship={"family": -3})),
-], age_min=9, age_max=17, weight=10, rarity="uncommon")
+    C("copy", "Copy it", outcomes=[
+        OUT(5, "You copied {kid}'s answers and got an 88. He got an 84.",
+            FX(stats={"happiness": 2, "discipline": -2})),
+        OUT(5, "You copied and {adult} saw it happen. You both got zeros and a phone call home.",
+            FX(stats={"happiness": -6, "discipline": -3}, relationship={"parents": -6}, behaviour=-16)),
+    ]),
+    C("own-work", "Look away",
+      text="You looked away and got a 61 that was entirely yours.",
+      effects=FX(stats={"happiness": -2, "willpower": 4, "discipline": 2})),
+    C("warn", "Hiss at him to move it",
+      text="You hissed at {kid} to move his paper. He did, and he never sat near you again.",
+      effects=FX(stats={"happiness": -3, "charisma": -2, "discipline": 2}, behaviour=2)),
+], age_min=9, age_max=17, weight=13, person_tokens=["kid", "adult"],
+   modifiers=[MOD(1.7, talents_any=["crime"]), MOD(0.5, stat_at_least={"discipline": 70})])
+
+D("d.school.study-hard", "school", [
+    "Exams are eight weeks out and {adult} has just handed back a practice paper with a number on it you did not expect.",
+], [
+    C("grind", "Work for it", outcomes=[
+        OUT(7, "You worked. Something clicked around week five and the real paper was easy.",
+            FX(stats={"smarts": 5, "discipline": 4, "happiness": 2, "health": -1})),
+        OUT(3, "You worked hard and the results were middling anyway, which was its own lesson.",
+            FX(stats={"discipline": 4, "willpower": 3, "happiness": -3, "health": -1})),
+    ]),
+    C("ask-help", "Ask {adult} for help", outcomes=[
+        OUT(6, "{adult} gave you an hour a week for two months and you have never forgotten it.",
+            FX(stats={"smarts": 5, "happiness": 4, "charisma": 2}, behaviour=6)),
+        OUT(4, "{adult} said she would help and then was off sick for a month.",
+            FX(stats={"happiness": -3, "willpower": 2})),
+    ]),
+    C("coast", "Coast",
+      text="You coasted. It was a very good couple of months and a mediocre set of results.",
+      effects=FX(stats={"happiness": 4, "health": 1, "smarts": -1, "discipline": -3})),
+], age_min=12, age_max=17, weight=13, cooldown=3, person_tokens=["adult"])
+
+D("d.school.bully-response", "school", [
+    "{kid} has been making your year difficult since October, and is standing in front of you in an empty corridor.",
+], [
+    C("fight", "Hit him", outcomes=[
+        OUT(5, "You hit {kid}. It stopped completely, and you were suspended for a week.",
+            FX(stats={"willpower": 5, "happiness": 3, "health": -1}, relationship={"parents": -4},
+               behaviour=-18, clear_flags=["school.bullied"])),
+        OUT(5, "You hit {kid}, lost, and it got considerably worse before it got better.",
+            FX(stats={"health": -4, "happiness": -5, "willpower": 3}, behaviour=-12)),
+    ]),
+    C("tell", "Tell {adult}", outcomes=[
+        OUT(6, "{adult} handled it quietly and well, and it ended within a fortnight.",
+            FX(stats={"happiness": 5}, behaviour=4, clear_flags=["school.bullied"])),
+        OUT(4, "{adult} handled it badly, and it became a much more public problem than it had been.",
+            FX(stats={"happiness": -5, "willpower": 2})),
+    ]),
+    C("endure", "Ride it out",
+      text="You said nothing and waited {kid} out. It took another year.",
+      effects=FX(stats={"willpower": 5, "happiness": -6, "health": -1})),
+    C("disarm", "Get him laughing", outcomes=[
+        OUT(3, "You made {kid} laugh, and by Christmas you were something close to friends.",
+            FX(stats={"charisma": 6, "happiness": 6}, clear_flags=["school.bullied"])),
+        OUT(7, "You tried to make {kid} laugh and gave him three new things to use.",
+            FX(stats={"happiness": -5, "charisma": 1})),
+    ]),
+], age_min=8, age_max=17, weight=16, flags_all=["school.bullied"],
+   person_tokens=["kid", "adult"], physical=True)
+
+D("d.school.blame", "school", [
+    "A window in the science block is broken and {adult} is asking the whole class, in a general sort of way, who did it.",
+], [
+    C("own", "Own up",
+      text="You owned it. The punishment was smaller than the silence would have been.",
+      effects=FX(stats={"willpower": 4, "discipline": 3, "happiness": -2}, behaviour=5)),
+    C("silent", "Say nothing", outcomes=[
+        OUT(6, "Nobody said anything and the whole class was kept back. It was never mentioned again.",
+            FX(stats={"happiness": -2, "charisma": 2})),
+        OUT(4, "{kid} named you within a day, and it landed much harder for the delay.",
+            FX(stats={"happiness": -5}, relationship={"parents": -3}, behaviour=-12)),
+    ]),
+    C("blame", "Blame {kid}",
+      text="You gave {adult} {kid}'s name. It worked, and it cost you a friend who worked out why.",
+      effects=FX(stats={"charisma": -3, "happiness": -4, "discipline": -2}, behaviour=-4)),
+], age_min=8, age_max=16, weight=12, person_tokens=["kid", "adult"])
+
+D("d.school.speech", "school", [
+    "{adult} has put your name down to speak in front of the whole school. It is optional in theory only.",
+], [
+    C("do", "Get up and do it", outcomes=[
+        OUT(6, "You did it, and two teachers who had never spoken to you mentioned it afterwards.",
+            FX(stats={"charisma": 6, "happiness": 5, "willpower": 3}, behaviour=5)),
+        OUT(4, "You did it, it went badly, and you survived it — which was the actual lesson.",
+            FX(stats={"charisma": 2, "willpower": 5, "happiness": -4})),
+    ]),
+    C("refuse", "Get out of it",
+      text="You found a way out of it and felt the relief for about an hour.",
+      effects=FX(stats={"happiness": -2, "charisma": -3})),
+    C("rewrite", "Throw out the script", outcomes=[
+        OUT(4, "You threw out the script {adult} gave you and wrote your own. The hall went quiet in the good way.",
+            FX(stats={"charisma": 7, "happiness": 6, "smarts": 2})),
+        OUT(6, "You threw out the script and it did not land, and {adult} was not pleased about either half.",
+            FX(stats={"charisma": 1, "happiness": -4}, behaviour=-4)),
+    ]),
+], age_min=10, age_max=17, weight=12, cooldown=4, person_tokens=["adult"],
+   modifiers=[MOD(1.6, talents_any=["acting"]), MOD(1.4, stat_at_least={"charisma": 65})])
+
+D("d.school.reading-group", "school", [
+    "{adult} has offered you a move up to the harder reading group, where you would be the youngest by a year.",
+], [
+    C("move", "Move up", outcomes=[
+        OUT(6, "You moved up and kept pace, quietly, all year.",
+            FX(stats={"smarts": 5, "discipline": 3, "happiness": 2})),
+        OUT(4, "You moved up and struggled, in public, for two terms.",
+            FX(stats={"smarts": 2, "happiness": -5, "willpower": 4})),
+    ]),
+    C("stay", "Stay where you are",
+      text="You stayed put with your friends and coasted comfortably for a year.",
+      effects=FX(stats={"happiness": 3, "charisma": 2, "smarts": -1})),
+    C("trial", "Ask to try it for a term",
+      text="You asked {adult} for a term's trial. She had not been asked that before and said yes.",
+      effects=FX(stats={"smarts": 3, "charisma": 3, "discipline": 2, "happiness": 2})),
+], age_min=6, age_max=11, weight=12, person_tokens=["adult"],
+   modifiers=[MOD(1.8, talents_any=["academics"])])
+
+D("d.school.team-tryout", "school", [
+    "Trials for the school team are on Thursday and {kid} has been going on about them for a fortnight.",
+], [
+    C("try", "Try out", outcomes=[
+        OUT(5, "You made the squad. Not the first eleven, but the squad, and {kid} did not.",
+            FX(stats={"health": 4, "charisma": 3, "happiness": 5})),
+        OUT(5, "You were cut on the first day, in front of everyone, and {kid} made the team.",
+            FX(stats={"happiness": -6, "willpower": 4, "health": 1})),
+    ]),
+    C("train-first", "Train for a month first", outcomes=[
+        OUT(6, "You trained for a month before the trial and walked it.",
+            FX(stats={"health": 5, "discipline": 5, "happiness": 5})),
+        OUT(4, "You trained for a month, pulled something in week three, and missed the trial entirely.",
+            FX(stats={"health": -4, "happiness": -5, "discipline": 3})),
+    ]),
+    C("skip", "Don't bother",
+      text="You did not go. It was the sensible call and it sat badly for about a year.",
+      effects=FX(stats={"happiness": -3, "willpower": -1})),
+], age_min=8, age_max=16, weight=13, cooldown=4, person_tokens=["kid"], physical=True,
+   modifiers=[MOD(2.4, talents_any=["athletics"]), MOD(0.6, stat_at_most={"health": 45})])
+
+D("d.school.instrument", "school", [
+    "{adult} is handing out instruments, and whatever you pick you are stuck with for years.",
+], [
+    C("loud", "The loudest one on the table",
+      text="You picked the loudest thing on the table and never once regretted it.",
+      effects=FX(stats={"happiness": 5, "charisma": 3, "discipline": 1})),
+    C("serious", "The hard one",
+      text="You picked the hard one and practised like it mattered, and after two years it did.",
+      effects=FX(stats={"discipline": 5, "smarts": 2, "happiness": 2})),
+    C("none", "Don't take one",
+      text="You did not take one, and spent three years of assemblies watching other people play.",
+      effects=FX(stats={"happiness": -2, "charisma": -1})),
+], age_min=7, age_max=13, weight=12, person_tokens=["adult"],
+   modifiers=[MOD(2.0, talents_any=["music"])])
+
+D("d.school.detention-clash", "school", [
+    "{adult} has given you detention on Thursday, and Thursday is the one evening you had wanted all year.",
+], [
+    C("serve", "Serve it",
+      text="You sat out the detention and heard about the evening secondhand for a month.",
+      effects=FX(stats={"happiness": -4, "discipline": 3}, behaviour=7)),
+    C("skip", "Skip it and go", outcomes=[
+        OUT(5, "You skipped detention, went anyway, and nobody ever followed it up.",
+            FX(stats={"happiness": 6}, behaviour=-7)),
+        OUT(5, "You skipped detention and it became a much bigger thing than the detention had been.",
+            FX(stats={"happiness": -5}, behaviour=-16, relationship={"parents": -4})),
+    ]),
+    C("ask", "Ask {adult} to move it", outcomes=[
+        OUT(4, "{adult} moved it to Monday, which nobody expected including you.",
+            FX(stats={"charisma": 5, "happiness": 5}, behaviour=3)),
+        OUT(6, "{adult} said that was rather the point of a detention.",
+            FX(stats={"charisma": 1, "happiness": -3})),
+    ]),
+], age_min=11, age_max=17, weight=12, cooldown=4, person_tokens=["adult"],
+   school_stage_any=["middle", "high"])
+
+
+# ---- friendship -------------------------------------------------------------
 
 D("d.friend.dare", "friendship", [
-    "{kid} has proposed something that is obviously a bad idea and everybody is watching.",
+    "{kid} has proposed jumping the gap between the bike shed roof and the wall, and about nine people are watching.",
 ], [
     C("do-it", "Do it", outcomes=[
-        OUT(5, "It worked. You were a legend for about six weeks.",
-            FX(stats={"charisma": 4, "happiness": 3, "willpower": 1})),
-        OUT(4, "It did not work. There was blood, and an adult, and a story that outlived the injury.",
-            FX(stats={"health": -3, "charisma": 2, "happiness": -1})),
-        OUT(2, "It went badly enough that somebody's parents were called.",
-            FX(stats={"health": -2, "happiness": -3}, relationship={"parents": -3})),
+        OUT(5, "You made it. You were a legend for roughly six weeks.",
+            FX(stats={"charisma": 6, "happiness": 6, "willpower": 2, "health": -1})),
+        OUT(4, "You did not make it. There was blood, and an adult, and a story that outlived the injury.",
+            FX(stats={"health": -5, "charisma": 3, "happiness": -2})),
+        OUT(2, "You did not make it, and somebody's parents were called, and yours came to get you.",
+            FX(stats={"health": -6, "happiness": -5}, relationship={"parents": -5}, behaviour=-8)),
     ]),
-    C("refuse", "Refuse", text="You said no. It cost something socially and nothing else.",
-      effects=FX(stats={"willpower": 3, "charisma": -2})),
-], age_min=7, age_max=17, weight=14, cooldown=4,
+    C("refuse", "Refuse",
+      text="You said no. It cost you something socially and nothing else.",
+      effects=FX(stats={"willpower": 5, "charisma": -3, "happiness": -2})),
+    C("counter", "Dare {kid} instead", outcomes=[
+        OUT(5, "You told {kid} to go first. He did, badly, and nobody mentioned your turn again.",
+            FX(stats={"charisma": 5, "happiness": 4, "willpower": 2})),
+        OUT(5, "You told {kid} to go first. He did it perfectly, and then everybody looked at you.",
+            FX(stats={"charisma": -2, "happiness": -4, "willpower": 1})),
+    ]),
+], age_min=7, age_max=17, weight=14, cooldown=4, person_tokens=["kid"], physical=True,
    modifiers=[MOD(1.6, talents_any=["athletics", "crime"]), MOD(0.5, stat_at_least={"discipline": 72})])
 
 D("d.friend.new-kid", "friendship", [
-    "There is a new kid eating lunch alone, and a table you already have a seat at.",
+    "There is a new kid, {kid}, eating lunch alone by the recycling bins, and you already have a seat at a table.",
 ], [
-    C("invite", "Bring them over", outcomes=[
-        OUT(7, "You brought them over. It turned into one of the good ones.",
-            FX(stats={"charisma": 3, "happiness": 4})),
-        OUT(3, "You brought them over and it did not take. You were still glad you did.",
-            FX(stats={"charisma": 2, "happiness": 1})),
+    C("invite", "Bring {kid} over", outcomes=[
+        OUT(7, "You brought {kid} over. It turned into one of the good ones — years of it.",
+            FX(stats={"charisma": 4, "happiness": 6})),
+        OUT(3, "You brought {kid} over and it did not take. You were still glad you had.",
+            FX(stats={"charisma": 3, "happiness": 2})),
     ]),
-    C("leave", "Leave it", text="You left it. Somebody else did it a week later.",
-      effects=FX(stats={"happiness": -1})),
-], age_min=7, age_max=17, weight=13, cooldown=5)
+    C("sit-there", "Sit with {kid} instead",
+      text="You took your tray over to {kid} instead. Your own table noticed, and said so.",
+      effects=FX(stats={"charisma": 2, "happiness": 4, "willpower": 3})),
+    C("leave", "Leave it",
+      text="You left it. Somebody else did it a week later and you remember that too.",
+      effects=FX(stats={"happiness": -3})),
+], age_min=7, age_max=17, weight=13, cooldown=5, person_tokens=["kid"])
 
 D("d.friend.exclusion", "friendship", [
-    "The group has decided to freeze somebody out, and is waiting to see what you do.",
+    "The group has decided to freeze {kid2} out, and {kid} is watching to see what you do about it.",
 ], [
-    C("join", "Go along with it", text="You went along with it. It was easy, and you remember it.",
-      effects=FX(stats={"charisma": 2, "happiness": -3, "willpower": -1})),
+    C("join", "Go along with it",
+      text="You went along with it. It was easy, and it is one of the ones that stayed with you.",
+      effects=FX(stats={"charisma": 2, "happiness": -5, "willpower": -2})),
     C("refuse", "Refuse", outcomes=[
-        OUT(5, "You refused, and it broke the whole thing up within a week.",
-            FX(stats={"willpower": 4, "charisma": 2, "happiness": 2})),
-        OUT(5, "You refused, and were frozen out alongside them.",
-            FX(stats={"willpower": 4, "charisma": -3, "happiness": -3})),
+        OUT(5, "You refused, and the whole thing broke up within a week.",
+            FX(stats={"willpower": 5, "charisma": 3, "happiness": 4})),
+        OUT(5, "You refused, and were frozen out alongside {kid2}.",
+            FX(stats={"willpower": 5, "charisma": -4, "happiness": -5})),
     ]),
-], age_min=9, age_max=17, weight=12)
+    C("quiet", "Say nothing, sit with {kid2} anyway", outcomes=[
+        OUT(6, "You did not argue about it, you just sat with {kid2} every lunchtime until it stopped mattering.",
+            FX(stats={"willpower": 4, "happiness": 3, "charisma": 1})),
+        OUT(4, "You sat with {kid2} and lost {kid} over it without a word ever being said.",
+            FX(stats={"willpower": 3, "happiness": -3, "charisma": -2})),
+    ]),
+], age_min=9, age_max=17, weight=13, person_tokens=["kid", "kid2"])
 
-D("d.friend.confession", "friendship", [
-    "You have been rehearsing a conversation with somebody for four months.",
+D("d.friend.stand-up", "friendship", [
+    "{kid} is being humiliated in front of thirty people in the cafeteria and nobody has moved.",
 ], [
-    C("ask", "Say something", outcomes=[
-        OUT(4, "You said it. They said it back. The year improved considerably.",
-            FX(stats={"happiness": 6, "charisma": 3})),
-        OUT(6, "You said it. They were kind about it. It still took months.",
-            FX(stats={"happiness": -3, "willpower": 3, "charisma": 1})),
+    C("step-in", "Step in", outcomes=[
+        OUT(6, "You stepped in. It stopped, and it cost you nothing you could measure.",
+            FX(stats={"willpower": 5, "charisma": 4, "happiness": 5})),
+        OUT(4, "You stepped in and it turned on you for the rest of term.",
+            FX(stats={"willpower": 6, "happiness": -5, "charisma": -2, "health": -1})),
     ]),
-    C("wait", "Say nothing", text="You said nothing, all year, and thought about it constantly.",
-      effects=FX(stats={"happiness": -2, "willpower": -1})),
-], age_min=12, age_max=17, weight=13, cooldown=4,
-   modifiers=[MOD(1.5, stat_at_least={"looks": 65}), MOD(1.4, stat_at_least={"charisma": 68})])
+    C("laugh", "Laugh along",
+      text="You laughed with everyone else. {kid} saw you do it.",
+      effects=FX(stats={"charisma": 1, "happiness": -5, "willpower": -3})),
+    C("after", "Find {kid} afterwards",
+      text="You did not step in, but you found {kid} afterwards by the lockers and stayed a while.",
+      effects=FX(stats={"happiness": 2, "charisma": 2, "willpower": 1})),
+    C("leave", "Walk out",
+      text="You left the room. Not brave, not complicit, and not forgotten either.",
+      effects=FX(stats={"happiness": -2, "willpower": 1})),
+], age_min=9, age_max=17, weight=13, person_tokens=["kid"])
+
+D("d.friend.betrayal", "friendship", [
+    "{kid} told everyone what you said about {kid2}'s house. {kid2} is not speaking to you and {kid} is acting like nothing happened.",
+], [
+    C("apologise", "Apologise to {kid2}", outcomes=[
+        OUT(5, "You apologised to {kid2} at her locker. She said 'okay', and it took until March to be normal.",
+            FX(stats={"happiness": -2, "charisma": 2, "willpower": 3})),
+        OUT(5, "You apologised and {kid2} cried and hugged you, and {kid} was furious you had made him look bad.",
+            FX(stats={"happiness": 5, "charisma": 3})),
+    ]),
+    C("confront", "Have it out with {kid}", outcomes=[
+        OUT(5, "You told {kid} exactly what you thought of him in front of six people. He did not deny any of it.",
+            FX(stats={"happiness": -3, "willpower": 4, "charisma": 1})),
+        OUT(5, "You confronted {kid} and he cried, which you had not expected at all.",
+            FX(stats={"happiness": -2, "charisma": 2})),
+    ]),
+    C("blow-over", "Let it blow over",
+      text="It blew over by Easter. {kid2} never quite trusted you again and never said so.",
+      effects=FX(stats={"happiness": -5, "charisma": -1})),
+], age_min=9, age_max=17, weight=12, person_tokens=["kid", "kid2"])
+
+D("d.friend.homework", "friendship", [
+    "{kid} wants the homework ten minutes before it is due, and is asking as a friend.",
+], [
+    C("give", "Hand it over",
+      text="You handed it over. {kid} copied it word for word, including a mistake, and {adult} noticed.",
+      effects=FX(stats={"charisma": 2, "discipline": -2, "happiness": -1}, behaviour=-5)),
+    C("explain", "Explain it instead",
+      text="You walked {kid} through it in eight minutes and were late to your own lesson.",
+      effects=FX(stats={"smarts": 3, "charisma": 4, "happiness": 3})),
+    C("refuse", "Say no",
+      text="You said no. {kid} found somebody else within a minute and it was awkward for a fortnight.",
+      effects=FX(stats={"discipline": 3, "charisma": -3, "happiness": -2})),
+], age_min=9, age_max=17, weight=13, cooldown=3, person_tokens=["kid", "adult"])
 
 D("d.friend.party", "friendship", [
-    "There is a party this weekend that {parent} has specifically said no to.",
+    "{kid} is having people round on Saturday and {parent} has already said no to it, twice.",
 ], [
     C("sneak", "Go anyway", outcomes=[
-        OUT(5, "You went, got back in through a window, and were never found out.",
-            FX(stats={"happiness": 4, "charisma": 3, "discipline": -1})),
-        OUT(5, "You went, and {parent} was sitting in the kitchen when you got back.",
-            FX(stats={"happiness": -2, "charisma": 2}, relationship={"parents": -6})),
+        OUT(5, "You went, got back in through the window at one, and were never found out.",
+            FX(stats={"happiness": 6, "charisma": 4, "health": -1, "discipline": -1})),
+        OUT(5, "You went, and {parent} was sitting in the kitchen with the light on when you got back.",
+            FX(stats={"happiness": -4, "charisma": 2}, relationship={"parents": -8})),
     ]),
-    C("stay", "Stay home", text="You stayed home and heard about it for a month.",
-      effects=FX(stats={"charisma": -2, "discipline": 2}, relationship={"parents": 3})),
-    C("ask-again", "Try to talk them round", outcomes=[
+    C("stay", "Stay home",
+      text="You stayed home and heard about {kid}'s party for a month.",
+      effects=FX(stats={"charisma": -3, "discipline": 3, "happiness": -3}, relationship={"parents": 4})),
+    C("negotiate", "Talk {parent} round", outcomes=[
         OUT(4, "You made a real case and got a curfew instead of a no.",
-            FX(stats={"charisma": 4, "happiness": 3}, relationship={"parents": 2})),
+            FX(stats={"charisma": 5, "happiness": 5}, relationship={"parents": 3})),
         OUT(6, "The answer stayed no, and got firmer for the asking.",
-            FX(stats={"charisma": 1, "happiness": -2})),
+            FX(stats={"charisma": 1, "happiness": -3})),
     ]),
-], age_min=13, age_max=17, requires=["anyParent"], weight=14, cooldown=3)
+    C("host", "Ask to host instead", outcomes=[
+        OUT(5, "{parent} said yes to hosting, and eleven people came, and nothing was broken.",
+            FX(stats={"happiness": 6, "charisma": 5}, relationship={"parents": 2})),
+        OUT(5, "{parent} said yes to hosting, and something was broken, and it was expensive.",
+            FX(stats={"happiness": -2, "charisma": 3}, relationship={"parents": -6})),
+    ]),
+], age_min=13, age_max=17, requires=["anyParent"], weight=14, cooldown=3, person_tokens=["kid"])
 
-D("d.friend.blame-friend", "friendship", [
-    "{kid} broke something expensive and the two of you are the only ones who know.",
+D("d.friend.birthday-clash", "friendship", [
+    "{kid} and {kid2} are having birthdays on the same afternoon and both have asked you directly.",
 ], [
-    C("cover", "Cover for them", text="You took it. They knew, and it changed the friendship.",
-      effects=FX(stats={"willpower": 3, "happiness": -2}, relationship={"parents": -3})),
-    C("truth", "Tell the truth", text="You told the truth. It was the correct thing and it ended the friendship.",
-      effects=FX(stats={"discipline": 2, "happiness": -3, "charisma": -1})),
-], age_min=9, age_max=17, weight=11)
+    C("close", "Go to {kid}'s",
+      text="You went to {kid}'s. {kid2} noticed, and mentioned it in February.",
+      effects=FX(stats={"happiness": 3, "charisma": -1})),
+    C("new", "Turn up at {kid2}'s",
+      text="You went to {kid2}'s, which surprised everybody including you, and it was the better party.",
+      effects=FX(stats={"charisma": 3, "happiness": 4})),
+    C("both", "An hour at each", outcomes=[
+        OUT(5, "You did an hour at each and both of them were pleased you had bothered.",
+            FX(stats={"charisma": 5, "happiness": 4, "health": -1})),
+        OUT(5, "You did an hour at each and managed to annoy both of them.",
+            FX(stats={"charisma": -2, "happiness": -4})),
+    ]),
+    C("neither", "Stay home",
+      text="You went to neither and stayed home, which solved nothing at all.",
+      effects=FX(stats={"happiness": -4, "charisma": -3})),
+], age_min=7, age_max=15, weight=12, cooldown=5, person_tokens=["kid", "kid2"])
+
+D("d.friend.cover", "friendship", [
+    "{kid} broke something expensive at your house and the two of you are the only people who know.",
+], [
+    C("cover", "Take it yourself",
+      text="You took it. {kid} knew you had, and the friendship changed shape after that.",
+      effects=FX(stats={"willpower": 4, "happiness": -3}, relationship={"parents": -5})),
+    C("truth", "Tell the truth",
+      text="You told the truth. It was the correct thing to do and it ended the friendship.",
+      effects=FX(stats={"discipline": 3, "happiness": -5, "charisma": -2})),
+    C("together", "Make {kid} come with you", outcomes=[
+        OUT(6, "You made {kid} come and own it with you. {parent} was more impressed than angry.",
+            FX(stats={"charisma": 5, "willpower": 4, "happiness": 2}, relationship={"parents": 2})),
+        OUT(4, "You made {kid} come with you and he denied everything on the doorstep.",
+            FX(stats={"happiness": -5, "charisma": -2}, relationship={"parents": -4})),
+    ]),
+], age_min=9, age_max=17, requires=["anyParent"], weight=11, person_tokens=["kid"])
+
+D("d.friend.gift", "friendship", [
+    "{kid}'s birthday is Saturday and you have $12 to your name.",
+], [
+    C("buy", "Buy him something", outcomes=[
+        OUT(5, "You spent the $12 on a present {kid} already had one of.",
+            FX(cash=CASH(-12, "a birthday present for {kid}"), stats={"happiness": -3})),
+        OUT(5, "You spent the $12 on a present {kid} carried around for the whole afternoon.",
+            FX(cash=CASH(-12, "a birthday present for {kid}"), stats={"happiness": 5, "charisma": 2})),
+    ]),
+    C("make", "Make him something", outcomes=[
+        OUT(6, "You made {kid} a comic about the two of you. It went on his wall and stayed there.",
+            FX(stats={"happiness": 6, "charisma": 3, "smarts": 1})),
+        OUT(4, "You made {kid} a present and his cousin asked out loud why you had not just bought one.",
+            FX(stats={"happiness": -5, "willpower": 2})),
+    ]),
+    C("nothing", "Turn up empty-handed",
+      text="You went to {kid}'s with nothing. Nobody said a word about it and you thought about it all night.",
+      effects=FX(stats={"happiness": -5})),
+], age_min=8, age_max=16, weight=11, cooldown=5, person_tokens=["kid"])
+
+D("d.friend.late-night", "friendship", [
+    "{kid}'s parents are out and he wants to stay up for the whole horror marathon.",
+], [
+    C("all-night", "Stay up all night", outcomes=[
+        OUT(6, "You stayed up until six at {kid}'s and slept through Saturday entirely.",
+            FX(stats={"health": -4, "happiness": 6, "charisma": 2})),
+        OUT(4, "You stayed up all night at {kid}'s and had nightmares for a month.",
+            FX(stats={"health": -4, "happiness": -5})),
+    ]),
+    C("two", "Turn in around two",
+      text="You fell asleep at two on {kid}'s floor. Good night, no wreckage.",
+      effects=FX(stats={"health": -1, "happiness": 5})),
+    C("home", "Go home",
+      text="You went home at eleven. {kid} brought it up for years.",
+      effects=FX(stats={"health": 3, "happiness": -2, "charisma": -2})),
+], age_min=10, age_max=17, weight=12, cooldown=3, person_tokens=["kid"], physical=True)
+
+O("o.friend.mentor", "friendship", [
+    "{kid}, who is three years above you and has no reason to, has started taking you seriously.",
+], [
+    C("stick", "Stick with {kid}", outcomes=[
+        OUT(7, "{kid} taught you more in a year than school managed in three.",
+            FX(stats={"smarts": 4, "charisma": 4, "discipline": 4, "happiness": 5})),
+        OUT(3, "{kid} was not the influence anybody had hoped for, and the year got away from you.",
+            FX(stats={"charisma": 4, "discipline": -4, "happiness": 2}, behaviour=-8)),
+    ]),
+    C("distance", "Keep your distance",
+      text="You kept your distance, politely, and it faded out by spring.",
+      effects=FX(stats={"willpower": 2, "happiness": -1})),
+    C("ask", "Ask {kid} outright why",
+      text="You asked {kid} why he bothered with you. He said you reminded him of himself, which was a lot to carry.",
+      effects=FX(stats={"charisma": 3, "smarts": 2, "happiness": 3})),
+], age_min=10, age_max=17, weight=10, person_tokens=["kid"])
+
+
+# ---- random -----------------------------------------------------------------
+
+D("d.random.wallet", "random", [
+    "There is a wallet on the pavement outside Trujillo's Market with $60 in it and a driver's licence.",
+], [
+    C("hand-in", "Hand it in at the counter", outcomes=[
+        OUT(6, "You handed it in at Trujillo's. The owner came back for it and gave you $20.",
+            FX(cash=CASH(20, "a reward for handing in a found wallet"),
+               stats={"happiness": 6, "willpower": 3})),
+        OUT(4, "You left the wallet at the Trujillo's counter and never heard another word about it.",
+            FX(stats={"happiness": 3, "willpower": 3})),
+    ]),
+    C("keep", "Take the cash", outcomes=[
+        OUT(7, "You took the $60 and left the wallet on the pavement. Nobody ever came looking.",
+            FX(cash=CASH(60, "cash taken from a wallet you found"),
+               stats={"happiness": -3, "discipline": -3})),
+        OUT(3, "You took the $60, and two weeks later the owner's son recognised you from the photo on the licence.",
+            FX(cash=CASH(60, "cash taken from a wallet you found"),
+               stats={"happiness": -6, "charisma": -4})),
+    ]),
+    C("find-owner", "Go to the address on the licence", outcomes=[
+        OUT(6, "You walked the wallet to the address on the licence. They gave you $20 and a slice of cake.",
+            FX(cash=CASH(20, "a reward for returning a wallet in person"),
+               stats={"happiness": 7, "charisma": 3, "willpower": 2})),
+        OUT(4, "You walked to the address on the licence and nobody answered, three times.",
+            FX(stats={"happiness": -2, "willpower": 3, "health": -1})),
+    ]),
+    C("leave", "Leave it where it is",
+      text="You left the wallet on the pavement. Somebody else got to it within the hour.",
+      effects=FX(stats={"happiness": -3})),
+], age_min=8, age_max=17, weight=12, modifiers=[MOD(1.8, talents_any=["crime"])])
 
 D("d.random.stray-dog", "random", [
-    "There is a dog outside with no collar, and it has decided to follow you home.",
+    "There is a dog outside the corner shop with no collar, and it has decided to follow you home.",
 ], [
     C("keep", "Take it home", outcomes=[
-        OUT(6, "{parent} said no for two days and then bought a bowl.",
-            FX(stats={"happiness": 5}, relationship={"parents": 2})),
-        OUT(4, "It had an owner, who was extremely relieved and gave you twenty dollars.",
-            FX(cash=20, stats={"happiness": 1})),
+        OUT(6, "{parent} said no for two days and then came home with a bowl.",
+            FX(stats={"happiness": 7, "health": 2}, relationship={"parents": 3})),
+        OUT(4, "It had an owner, who was extremely relieved, and pressed $20 on you.",
+            FX(cash=CASH(20, "a reward from the dog's owner"), stats={"happiness": 3})),
     ], requires=COND(requires=["anyParent"])),
     C("owner", "Look for the owner",
-      text="You knocked on doors until you found the right one. They were in tears about it.",
-      effects=FX(stats={"charisma": 2, "willpower": 2, "happiness": 2})),
-    C("leave", "Leave it", text="You left it. You thought about it for a long time afterwards.",
-      effects=FX(stats={"happiness": -2, "willpower": 1})),
-], age_min=6, age_max=15, weight=11)
-
-D("d.random.found-wallet", "random", [
-    "There is a wallet on the pavement with more cash in it than you have ever held.",
-], [
-    C("keep", "Keep it", outcomes=[
-        OUT(7, "You kept it. Nobody ever came looking, and you did not enjoy the money much.",
-            FX(cash=90, stats={"happiness": -1, "discipline": -2})),
-        OUT(3, "You kept it, and somebody worked out it was you.",
-            FX(cash=90, stats={"charisma": -3, "happiness": -3})),
-    ]),
-    C("return", "Hand it in", outcomes=[
-        OUT(6, "You handed it in. The owner turned up with a reward and a handshake.",
-            FX(cash=25, stats={"happiness": 3, "willpower": 2})),
-        OUT(4, "You handed it in and heard nothing more about it, ever.",
-            FX(stats={"willpower": 3, "happiness": 1})),
-    ]),
-], age_min=8, age_max=17, weight=12,
-   modifiers=[MOD(1.8, talents_any=["crime"])])
+      text="You knocked on doors for two hours until you found the right one. They were in tears about it.",
+      effects=FX(stats={"charisma": 3, "willpower": 3, "happiness": 4, "health": -1})),
+    C("shelter", "Walk it to the shelter",
+      text="You walked the dog two miles to the shelter and did not stay to watch them take it in.",
+      effects=FX(stats={"happiness": -2, "willpower": 3, "health": -1})),
+    C("leave", "Leave it",
+      text="You left it outside the shop. You thought about it for a long time afterwards.",
+      effects=FX(stats={"happiness": -4, "willpower": 1})),
+], age_min=6, age_max=15, weight=11, physical=True)
 
 D("d.random.first-cigarette", "random", [
-    "Somebody has produced a packet behind the sports hall and is offering it round.",
+    "{kid} has produced a packet behind the sports hall and is offering it round.",
 ], [
-    C("try", "Try it", text="You tried it, coughed for a minute, and pretended otherwise.",
-      effects=FX(stats={"health": -2, "charisma": 2, "discipline": -1})),
-    C("decline", "Pass", text="You passed. It was noted, and briefly held against you.",
-      effects=FX(stats={"willpower": 3, "health": 1, "charisma": -1})),
-], age_min=12, age_max=17, weight=12,
+    C("try", "Try it",
+      text="You tried it, coughed for a full minute, and pretended otherwise for the rest of the afternoon.",
+      effects=FX(stats={"health": -3, "charisma": 3, "discipline": -2, "happiness": 1})),
+    C("decline", "Pass",
+      text="You passed. {kid} noted it, and it was briefly held against you.",
+      effects=FX(stats={"willpower": 4, "health": 2, "charisma": -2, "happiness": -1})),
+    C("take-and-not", "Take one and not smoke it",
+      text="You took one, held it the whole time, and put it in your pocket unlit. Nobody checked.",
+      effects=FX(stats={"willpower": 3, "charisma": 2, "happiness": 1})),
+], age_min=12, age_max=17, weight=12, person_tokens=["kid"], physical=True,
    modifiers=[MOD(1.6, talents_any=["crime"]), MOD(0.5, stat_at_least={"discipline": 70})])
 
-D("d.random.savings", "random", [
-    "You have saved up, slowly, and there is now a real decision about what it is for.",
+D("d.random.first-drink", "random", [
+    "There is a bottle going round at {kid}'s and somebody has put a cup in your hand without asking.",
 ], [
-    C("spend", "Spend it now", text="You spent it immediately and had an excellent fortnight.",
-      effects=FX(cash=-150, stats={"happiness": 5, "discipline": -2})),
-    C("save", "Keep saving", text="You left it alone. It was hard and the pile got bigger.",
-      effects=FX(stats={"discipline": 4, "willpower": 2, "happiness": -1})),
+    C("drink", "Drink it", outcomes=[
+        OUT(6, "You drank it, disliked it, and pretended otherwise for the rest of the night.",
+            FX(stats={"health": -2, "charisma": 3, "happiness": 2})),
+        OUT(4, "You drank rather more than that, and the night ended badly and publicly on {kid}'s lawn.",
+            FX(stats={"health": -4, "happiness": -5, "charisma": -3})),
+    ]),
+    C("pour", "Put it down somewhere",
+      text="You put the cup down behind a plant pot and nobody noticed either way.",
+      effects=FX(stats={"willpower": 4, "health": 1})),
+    C("drive-home", "Get everyone home", outcomes=[
+        OUT(7, "You stayed sober and got three people home. Two of them still bring it up.",
+            FX(stats={"willpower": 5, "charisma": 4, "happiness": 3, "health": -1})),
+        OUT(3, "You stayed sober and spent the night holding somebody's hair back.",
+            FX(stats={"willpower": 4, "happiness": -3, "health": -1})),
+    ]),
+], age_min=14, age_max=17, weight=13, person_tokens=["kid"], physical=True,
+   modifiers=[MOD(1.5, talents_any=["crime"]), MOD(0.6, stat_at_least={"discipline": 72})])
+
+D("d.random.bridge", "random", [
+    "{kid} and {kid2} are jumping off the train bridge into the river. {kid} says it is twelve feet. It is closer to twenty.",
+], [
+    C("jump", "Jump", outcomes=[
+        OUT(5, "You jumped off the bridge and came up whooping. {kid2} would not do it.",
+            FX(stats={"health": -2, "happiness": 8, "charisma": 4, "willpower": 3})),
+        OUT(5, "You jumped and hit the water flat. Your whole back was purple for a week.",
+            FX(stats={"health": -7, "happiness": 2, "charisma": 2})),
+    ]),
+    C("swim", "Swim from the bank",
+      text="You swam from the bank while {kid} and {kid2} jumped. Good afternoon, nothing broken.",
+      effects=FX(stats={"health": 3, "happiness": 5})),
+    C("say-no", "Say it is too high", outcomes=[
+        OUT(5, "You said it was too high. {kid} quietly agreed with you an hour later.",
+            FX(stats={"willpower": 4, "happiness": 3})),
+        OUT(5, "You said it was too high and {kid2} gave you a name that stuck until spring.",
+            FX(stats={"willpower": 3, "happiness": -6, "charisma": -3})),
+    ]),
+], age_min=9, age_max=17, weight=11, person_tokens=["kid", "kid2"], physical=True)
+
+D("d.random.sore-throat", "random", [
+    "You woke up with a sore throat on the morning of the aquarium trip.",
+], [
+    C("go", "Go anyway", outcomes=[
+        OUT(5, "You went to the aquarium with a fever and slept on the bus both ways.",
+            FX(stats={"health": -5, "happiness": -3})),
+        OUT(5, "You went, felt fine by ten, and got to put your hand in the ray tank.",
+            FX(stats={"health": -1, "happiness": 6})),
+    ]),
+    C("stay", "Stay home",
+      text="You stayed home from the aquarium trip and slept eleven hours.",
+      effects=FX(stats={"health": 5, "happiness": -3})),
+    C("ask", "Let {parent} decide", outcomes=[
+        OUT(5, "{parent} took one look and sent you back to bed, and was right.",
+            FX(stats={"health": 5, "happiness": -1}, relationship={"parents": 3})),
+        OUT(5, "{parent} said you would live, and you did, and you saw the rays.",
+            FX(stats={"health": -2, "happiness": 4}, relationship={"parents": 1})),
+    ], requires=COND(requires=["anyParent"])),
+], age_min=7, age_max=15, weight=11, physical=True)
+
+D("d.random.savings", "random", [
+    "The coffee can under your bed has $150 in it, and there is something in a shop window in {city}.",
+], [
+    C("buy", "Buy the thing",
+      text="You spent the whole $150 in one afternoon and had an excellent fortnight.",
+      effects=FX(cash=CASH(-150, "the thing in the shop window"),
+                 stats={"happiness": 7, "discipline": -3})),
+    C("wait", "Leave it alone",
+      text="You left the $150 where it was. It was hard, and the pile got bigger.",
+      effects=FX(stats={"discipline": 5, "willpower": 4, "happiness": -2})),
+    C("cheaper", "Find a cheaper version",
+      text="You found a worse one for $75 and put the rest back. It did the job for two years.",
+      effects=FX(cash=CASH(-75, "a cheaper version of the thing"),
+                 stats={"happiness": 3, "smarts": 2, "discipline": 2})),
 ], age_min=10, age_max=17, weight=11, cooldown=4)
 
-D("d.random.summer", "random", [
-    "Summer is eleven weeks long and completely undecided.",
+D("d.random.charity", "random", [
+    "There is a collection at school for a family who lost their house, and you have $40 saved for something else.",
 ], [
-    C("work", "Get a job", text="You worked. It was dull, it paid, and it made the autumn easier.",
-      effects=FX(cash=1100, stats={"discipline": 3, "happiness": -1})),
-    C("train", "Train or practise", text="You spent the summer getting better at one thing.",
-      effects=FX(stats={"discipline": 3, "health": 2, "willpower": 2})),
+    C("donate", "Put the whole $40 in",
+      text="You put the whole $40 in the envelope. Nobody knew how much it was, which was the point.",
+      effects=FX(cash=CASH(-40, "the school collection"),
+                 stats={"happiness": 5, "willpower": 3}, behaviour=5)),
+    C("help", "Help run the collection instead",
+      text="You kept your $40 and spent two weeks of lunchtimes counting other people's.",
+      effects=FX(stats={"happiness": -1, "discipline": 4, "charisma": 3}, behaviour=6)),
+    C("keep", "Keep it",
+      text="You kept the $40 and bought the thing. It was excellent, briefly, and then it was not.",
+      effects=FX(cash=CASH(-40, "the thing you had been saving for"),
+                 stats={"happiness": -2, "discipline": -1})),
+], age_min=8, age_max=16, weight=11, cooldown=5)
+
+D("d.random.haircut", "random", [
+    "You have been in the chair two minutes and {adult} has asked the same question twice.",
+], [
+    C("bold", "Something drastic", outcomes=[
+        OUT(5, "It was a triumph. Three people asked where you had it done.",
+            FX(stats={"looks": 6, "charisma": 4, "happiness": 6})),
+        OUT(5, "It was a catastrophe, and hair grows about a centimetre a month.",
+            FX(stats={"looks": -6, "happiness": -5, "willpower": 3})),
+    ]),
+    C("same", "The usual",
+      text="You had the usual. It was fine. It is always fine.",
+      effects=FX(stats={"happiness": 1})),
+    C("ask-her", "Ask {adult} what she'd do", outcomes=[
+        OUT(7, "{adult} did what she thought suited you and she was completely right.",
+            FX(stats={"looks": 5, "happiness": 5, "charisma": 2})),
+        OUT(3, "{adult} did what she thought suited you and she was not right at all.",
+            FX(stats={"looks": -3, "happiness": -3})),
+    ]),
+], age_min=9, age_max=17, weight=12, cooldown=3, person_tokens=["adult"])
+
+D("d.random.online-argument", "random", [
+    "Somebody has posted something about you and there is a reply box open on your phone at midnight.",
+], [
+    C("fire-back", "Fire back", outcomes=[
+        OUT(5, "You destroyed them, publicly, and it followed you around for a year.",
+            FX(stats={"charisma": 2, "happiness": -4, "health": -1})),
+        OUT(5, "You fired back badly and it was screenshotted before you could delete it.",
+            FX(stats={"charisma": -4, "happiness": -6, "willpower": 2})),
+    ]),
+    C("ignore", "Close the app",
+      text="You put the phone face down. It died within two days, the way they do.",
+      effects=FX(stats={"willpower": 5, "happiness": 2, "health": 1})),
+    C("dm", "Message them privately", outcomes=[
+        OUT(6, "You messaged them directly. It turned out to be a misunderstanding and they took the post down.",
+            FX(stats={"charisma": 4, "happiness": 4, "smarts": 2})),
+        OUT(4, "You messaged them directly and the message itself got screenshotted.",
+            FX(stats={"happiness": -5, "charisma": -2})),
+    ]),
+], age_min=12, age_max=17, weight=12, flags_all=["has.phone"], cooldown=3)
+
+D("d.random.late-night", "random", [
+    "It is one in the morning and you are nowhere near finished with what you are doing.",
+], [
+    C("push-on", "Keep going",
+      text="You kept going until four and paid for it every day that week.",
+      effects=FX(stats={"health": -3, "discipline": 3, "happiness": 3})),
+    C("sleep", "Go to bed",
+      text="You went to bed. It was still there in the morning and it was easier.",
+      effects=FX(stats={"health": 3, "discipline": 2, "happiness": 1})),
+    C("alarm", "Sleep and get up early", outcomes=[
+        OUT(5, "You set an alarm for five and it worked, which surprised you more than anyone.",
+            FX(stats={"discipline": 5, "happiness": 3, "health": -1})),
+        OUT(5, "You set an alarm for five and slept straight through it.",
+            FX(stats={"health": 2, "happiness": -4, "discipline": -2})),
+    ]),
+], age_min=11, age_max=17, weight=12, cooldown=3, physical=True)
+
+D("d.random.summer", "random", [
+    "Summer is eleven weeks long and, as of this afternoon, completely undecided.",
+], [
+    C("work", "Take a summer job",
+      text="You worked at the garden centre all summer. It was dull, it paid $1,100, and it made the autumn easier.",
+      effects=FX(cash=CASH(1100, "a summer at the garden centre"),
+                 stats={"discipline": 4, "health": -1, "happiness": -1})),
+    C("train", "Train for one thing",
+      text="You spent the whole summer getting better at one thing and came back visibly different.",
+      effects=FX(stats={"discipline": 4, "health": 3, "willpower": 3, "happiness": 2})),
     C("nothing", "Do absolutely nothing",
       text="You did nothing for eleven weeks and it remains one of the great summers.",
-      effects=FX(stats={"happiness": 5, "discipline": -2})),
-], age_min=13, age_max=17, weight=13, cooldown=2)
+      effects=FX(stats={"happiness": 7, "health": 2, "discipline": -3})),
+    C("kid", "Spend it with {kid}",
+      text="You spent all eleven weeks with {kid} and cannot now remember a single specific day of it.",
+      effects=FX(stats={"happiness": 6, "charisma": 4})),
+], age_min=13, age_max=17, weight=13, cooldown=2, person_tokens=["kid"], physical=True)
 
 D("d.random.appearance", "random", [
-    "You have decided that something about how you look is going to change this year.",
+    "You have decided that something about how you look is going to be different by September.",
 ], [
     C("effort", "Put real effort in", outcomes=[
-        OUT(6, "It worked. People noticed, and did not always say so.",
-            FX(stats={"looks": 5, "charisma": 2, "discipline": 2})),
+        OUT(6, "It worked. People noticed and mostly did not say so.",
+            FX(stats={"looks": 6, "charisma": 3, "discipline": 3, "happiness": 4})),
         OUT(4, "It half worked, which is roughly what happens at that age.",
-            FX(stats={"looks": 2, "discipline": 2})),
+            FX(stats={"looks": 2, "discipline": 3, "happiness": 1})),
     ]),
-    C("gym", "Get fit instead", text="You started running, hated it for six weeks, then didn't.",
-      effects=FX(stats={"health": 5, "discipline": 3, "looks": 2})),
-    C("drop", "Decide not to care", text="You decided not to care. It took more willpower than the alternative.",
-      effects=FX(stats={"willpower": 4, "happiness": 2})),
-], age_min=12, age_max=17, weight=12, cooldown=3)
+    C("fit", "Get fit instead",
+      text="You started running, hated it for six weeks, and then did not.",
+      effects=FX(stats={"health": 6, "discipline": 4, "looks": 3, "happiness": 3})),
+    C("drop", "Decide not to care", outcomes=[
+        OUT(6, "You decided not to care. It took more willpower than the alternative would have.",
+            FX(stats={"willpower": 5, "happiness": 4})),
+        OUT(4, "You said you had stopped caring, out loud, several times, to people who had not asked.",
+            FX(stats={"willpower": 2, "happiness": -4, "charisma": -2})),
+    ]),
+], age_min=12, age_max=17, weight=12, cooldown=3, physical=True)
+
+D("d.random.found-note", "random", [
+    "There is a twenty on the kitchen counter and nobody in the house has mentioned it for three days.",
+], [
+    C("take", "Take it", outcomes=[
+        OUT(7, "You took the $20. Nothing was ever said, which was somehow not a relief.",
+            FX(cash=CASH(20, "$20 taken off the kitchen counter"),
+               stats={"happiness": -2, "discipline": -2})),
+        OUT(3, "You took the $20, and {parent} had known exactly how much was there.",
+            FX(cash=CASH(20, "$20 taken off the kitchen counter"),
+               stats={"happiness": -5}, relationship={"parents": -7})),
+    ]),
+    C("ask", "Ask about it",
+      text="You asked. The $20 was yours anyway — {parent} had left it out for you — and you kept it cleanly.",
+      effects=FX(cash=CASH(20, "$20 {parent} had left out for you"),
+                 stats={"happiness": 4, "willpower": 3}, relationship={"parents": 3})),
+    C("leave", "Leave it there",
+      text="You left the $20 where it was. It was gone by Friday and you never found out where.",
+      effects=FX(stats={"willpower": 3, "happiness": -1})),
+], age_min=8, age_max=16, requires=["anyParent"], weight=11,
+   modifiers=[MOD(1.8, talents_any=["crime"]), MOD(1.6, wealth_any=["struggling"])])
+
+O("o.random.neighbour", "random", [
+    "{adult} next door, who you barely know, has offered to teach you something she is very good at.",
+], [
+    C("accept", "Take her up on it",
+      text="You said yes to {adult}. It became a Saturday habit that lasted four years.",
+      effects=FX(stats={"smarts": 4, "discipline": 4, "happiness": 5})),
+    C("decline", "Politely decline",
+      text="You said no thanks to {adult}, and the offer was never made again.",
+      effects=FX(stats={"happiness": -2})),
+    C("once", "Try it once",
+      text="You went once to be polite and stayed four hours.",
+      effects=FX(stats={"smarts": 2, "charisma": 3, "happiness": 3})),
+], age_min=8, age_max=16, weight=10, person_tokens=["adult"])
+
+O("o.random.competition", "random", [
+    "There is a competition with a $600 prize and the entry form has been on the kitchen table for a week.",
+], [
+    C("enter", "Enter it", outcomes=[
+        OUT(2, "You won the $600. Nobody was more surprised than the people who knew you.",
+            FX(cash=CASH(600, "a competition prize"),
+               stats={"happiness": 8, "charisma": 4})),
+        OUT(8, "You did not win, and the entry took more nerve than the result required.",
+            FX(stats={"willpower": 4, "happiness": -2})),
+    ]),
+    C("with-kid", "Team up with {kid}", outcomes=[
+        OUT(2, "You and {kid} won and split the prize down the middle. $300 each.",
+            FX(cash=CASH(300, "half a competition prize, split with {kid}"),
+               stats={"happiness": 8, "charisma": 5})),
+        OUT(8, "You and {kid} did not win, and had a much better week than the winners.",
+            FX(stats={"happiness": 3, "charisma": 3})),
+    ]),
+    C("bin", "Leave it",
+      text="The form stayed on the table until somebody threw it out with the junk mail.",
+      effects=FX(stats={"happiness": -2})),
+], age_min=8, age_max=17, weight=11, rarity="uncommon", cooldown=6, person_tokens=["kid"])
+
+O("o.school.exchange", "school", [
+    "Somebody has dropped out of the exchange trip and {adult} is offering you the place.",
+], [
+    C("go", "Take it", outcomes=[
+        OUT(7, "Three weeks somewhere else rearranged your sense of how big things are.",
+            FX(stats={"smarts": 5, "charisma": 5, "happiness": 6, "health": -1})),
+        OUT(3, "You were homesick for the entire three weeks and learned something anyway.",
+            FX(stats={"willpower": 5, "charisma": 2, "happiness": -3})),
+    ]),
+    C("ask-parents", "Ask {parent} first", outcomes=[
+        OUT(6, "{parent} found the money from somewhere and did not say where.",
+            FX(stats={"smarts": 4, "charisma": 4, "happiness": 5}, relationship={"parents": 6})),
+        OUT(4, "{parent} could not make it work, and was more upset about it than you were.",
+            FX(stats={"happiness": -4}, relationship={"parents": 2})),
+    ], requires=COND(requires=["anyParent"])),
+    C("decline", "Turn it down",
+      text="You turned {adult} down. The reasons were good and it nagged for years.",
+      effects=FX(stats={"happiness": -3})),
+], age_min=13, age_max=17, weight=10, rarity="uncommon", person_tokens=["adult"],
+   wealth_any=["modest", "comfortable", "affluent", "wealthy"])
+
+
+# ---- talent -----------------------------------------------------------------
 
 D("d.talent.commit", "talent", [
-    "The thing you are good at now wants more time than you have, and something has to give.",
+    "The thing you are good at now wants four evenings a week, and {adult} has asked you straight out whether you are serious about it.",
 ], [
     C("commit", "Go all in", outcomes=[
-        OUT(6, "You went all in. School slipped and the thing got serious.",
-            FX(stats={"discipline": 4, "smarts": -2, "happiness": 3}, set_flags=["talent.committed"])),
-        OUT(4, "You went all in and burned out by spring. It came back later.",
-            FX(stats={"willpower": 3, "happiness": -3})),
+        OUT(6, "You went all in. School slipped a grade and the thing got serious.",
+            FX(stats={"discipline": 5, "smarts": -2, "happiness": 5, "health": -1},
+               set_flags=["talent.committed"])),
+        OUT(4, "You went all in and burned out by spring. It came back two years later.",
+            FX(stats={"willpower": 4, "happiness": -5, "health": -3})),
     ]),
-    C("balance", "Keep it balanced", text="You kept it balanced, which meant being second-best at both.",
-      effects=FX(stats={"discipline": 2, "smarts": 1, "happiness": 1})),
-    C("drop", "Let it go", text="You let it go. It was a relief for about a year.",
-      effects=FX(stats={"happiness": 2, "discipline": -1, "willpower": -1})),
-], age_min=12, age_max=17, weight=14,
+    C("balance", "Keep it balanced",
+      text="You kept it balanced, which meant being second-best at both and fine about it.",
+      effects=FX(stats={"discipline": 3, "smarts": 2, "happiness": 2})),
+    C("drop", "Let it go",
+      text="You told {adult} you were done. It was a relief for about a year.",
+      effects=FX(stats={"happiness": 3, "discipline": -2, "willpower": -2})),
+], age_min=12, age_max=17, weight=14, person_tokens=["adult"], physical=True,
    talents_any=["athletics", "acting", "music", "writing", "academics", "inventive"])
 
 D("d.talent.rival", "talent", [
-    "Somebody your age is visibly better at your thing than you are.",
+    "{kid} is visibly better at your thing than you are, and has just been picked for something you were not.",
 ], [
-    C("train", "Out-work them", outcomes=[
-        OUT(5, "You out-worked them. It took two years and it took.",
-            FX(stats={"discipline": 5, "willpower": 4, "happiness": 2})),
-        OUT(5, "You out-worked them and they stayed better. That was worth knowing early.",
-            FX(stats={"discipline": 4, "willpower": 3, "happiness": -3})),
+    C("train", "Out-work {kid}", outcomes=[
+        OUT(5, "You out-worked {kid}. It took two years and it took.",
+            FX(stats={"discipline": 6, "willpower": 5, "happiness": 4, "health": -1})),
+        OUT(5, "You out-worked {kid} and {kid} stayed better anyway. That was worth finding out early.",
+            FX(stats={"discipline": 5, "willpower": 4, "happiness": -5, "health": -1})),
     ]),
-    C("learn", "Learn from them", text="You asked them how. They told you, and you both got better.",
-      effects=FX(stats={"smarts": 2, "charisma": 3, "discipline": 2})),
-    C("quit", "Find something else", text="You moved on to something with less competition in it.",
-      effects=FX(stats={"happiness": 1, "willpower": -2})),
-], age_min=10, age_max=17, weight=12,
+    C("learn", "Ask {kid} how",
+      text="You asked {kid} how it was done. {kid} told you, and you both got better for it.",
+      effects=FX(stats={"smarts": 3, "charisma": 4, "discipline": 3, "happiness": 3})),
+    C("quit", "Find something else",
+      text="You moved on to something with less competition in it and were quietly happier.",
+      effects=FX(stats={"happiness": 3, "willpower": -2})),
+], age_min=10, age_max=17, weight=12, person_tokens=["kid"], physical=True,
    talents_any=["athletics", "acting", "music", "writing", "academics", "inventive", "crime"])
 
+D("d.talent.show-off", "talent", [
+    "There is a chance to do your thing in front of a room of people who have never seen you do it.",
+], [
+    C("perform", "Go for the hard version", outcomes=[
+        OUT(6, "It landed. Several people looked at you differently afterwards, including {kid}.",
+            FX(stats={"charisma": 5, "happiness": 6})),
+        OUT(4, "It did not land, and the silence afterwards lasted a geological age.",
+            FX(stats={"charisma": -2, "willpower": 4, "happiness": -5})),
+    ]),
+    C("small", "Play it safe",
+      text="You did the version you could not get wrong. It was fine and nobody remembered it.",
+      effects=FX(stats={"charisma": 1, "happiness": -1})),
+    C("decline", "Keep it to yourself",
+      text="You kept it to yourself, which is also a choice a person can make.",
+      effects=FX(stats={"willpower": 2, "happiness": -2})),
+], age_min=8, age_max=17, weight=12, cooldown=4, person_tokens=["kid"],
+   talents_any=["athletics", "acting", "music", "writing", "inventive"])
+
 O("o.talent.audition", "talent", [
-    "A letter arrived about an audition for something that does not usually come to {city}.",
+    "A letter came about an audition that does not usually come to {city}, and it is on a Tuesday.",
 ], [
     C("go", "Go", outcomes=[
         OUT(3, "You got it. It changed what you thought was possible.",
-            FX(stats={"charisma": 5, "happiness": 6, "discipline": 2}, set_flags=["talent.breakthrough"])),
+            FX(stats={"charisma": 6, "happiness": 8, "discipline": 3},
+               set_flags=["talent.breakthrough"])),
         OUT(7, "You did not get it, and the room itself was an education.",
-            FX(stats={"charisma": 2, "willpower": 3, "happiness": -2})),
+            FX(stats={"charisma": 3, "willpower": 4, "happiness": -3})),
     ]),
-    C("skip", "Don't go", text="You did not go. It is one of the ones you still think about.",
-      effects=FX(stats={"happiness": -3, "willpower": -1})),
+    C("prepare", "Spend a month preparing first", outcomes=[
+        OUT(5, "You prepared for a month and walked in knowing exactly what you were doing.",
+            FX(stats={"charisma": 5, "discipline": 5, "happiness": 6, "health": -1},
+               set_flags=["talent.breakthrough"])),
+        OUT(5, "You prepared for a month and over-rehearsed it into something stiff.",
+            FX(stats={"discipline": 4, "happiness": -4, "health": -1})),
+    ]),
+    C("skip", "Don't go",
+      text="You did not go. It is one of the ones you still think about.",
+      effects=FX(stats={"happiness": -4, "willpower": -2})),
 ], age_min=11, age_max=17, weight=11, rarity="rare", talents_any=["acting", "music"])
 
 O("o.talent.trial", "talent", [
-    "A club two hours away has invited you to trial, and somebody would have to drive you.",
+    "A club two hours away has invited you to trial, and somebody would have to drive you there and back.",
 ], [
-    C("go", "Go to the trial", outcomes=[
-        OUT(4, "You were offered a place. Everything about the next three years got harder and better.",
-            FX(stats={"health": 3, "discipline": 5, "happiness": 5}, set_flags=["talent.breakthrough"])),
-        OUT(6, "You did not make it. You were closer than the result suggested.",
-            FX(stats={"health": 2, "willpower": 4, "happiness": -3})),
+    C("go", "Go", outcomes=[
+        OUT(4, "You were offered a place. The next three years got harder and better.",
+            FX(stats={"health": 4, "discipline": 5, "happiness": 7},
+               set_flags=["talent.breakthrough"])),
+        OUT(6, "You did not make it, and you were closer than the result suggested.",
+            FX(stats={"health": 2, "willpower": 5, "happiness": -4})),
     ]),
-    C("skip", "Let it go", text="It was too far and there was nobody free to drive. That was the whole reason.",
-      effects=FX(stats={"happiness": -4, "willpower": 1})),
+    C("ask-parent", "Ask {parent} to take you", outcomes=[
+        OUT(6, "{parent} took the day off work to drive you. You have never quite squared that.",
+            FX(stats={"health": 3, "discipline": 4, "happiness": 6}, relationship={"parents": 7})),
+        OUT(4, "{parent} could not get the day off, and neither of you brought it up again.",
+            FX(stats={"happiness": -5}, relationship={"parents": -2})),
+    ]),
+    C("skip", "Let it go",
+      text="It was too far and there was nobody free to drive. That was the whole reason.",
+      effects=FX(stats={"happiness": -5, "willpower": 1})),
 ], age_min=11, age_max=17, requires=["anyParent"], weight=11, rarity="rare",
-   talents_any=["athletics"])
+   talents_any=["athletics"], physical=True)
 
-O("o.aca.scholarship", "talent", [
+O("o.talent.scholarship", "talent", [
     "A school you had not considered has written to you directly about a place and a bursary.",
 ], [
     C("apply", "Apply", outcomes=[
         OUT(4, "You got in. The commute was brutal and the teaching was extraordinary.",
-            FX(stats={"smarts": 6, "discipline": 4, "happiness": -1}, set_flags=["talent.breakthrough"])),
-        OUT(6, "You did not get in, and the application itself taught you how to write about yourself.",
-            FX(stats={"smarts": 2, "willpower": 3})),
+            FX(stats={"smarts": 7, "discipline": 5, "happiness": -1, "health": -2},
+               set_flags=["talent.breakthrough"])),
+        OUT(6, "You did not get in, and writing the application taught you how to write about yourself.",
+            FX(stats={"smarts": 3, "willpower": 4, "happiness": -2})),
     ]),
-    C("stay", "Stay where you are", text="You stayed. Your friends were there, and that was a real reason.",
-      effects=FX(stats={"happiness": 3, "charisma": 2})),
+    C("visit", "Go and look at it first", outcomes=[
+        OUT(5, "You visited, hated the feel of the place, and did not apply. Good instinct.",
+            FX(stats={"smarts": 2, "willpower": 3, "happiness": 2})),
+        OUT(5, "You visited, loved it, applied late, and missed the deadline by four days.",
+            FX(stats={"happiness": -6, "discipline": 2})),
+    ]),
+    C("stay", "Stay where you are",
+      text="You stayed. Your friends were there, and that was a real reason.",
+      effects=FX(stats={"happiness": 4, "charisma": 3})),
 ], age_min=10, age_max=16, weight=11, rarity="rare", talents_any=["academics"])
-
-O("o.random.stranger-kindness", "random", [
-    "A neighbour you barely know has offered to teach you something they are very good at.",
-], [
-    C("accept", "Take them up on it", text="You said yes. It became a Saturday habit for four years.",
-      effects=FX(stats={"smarts": 3, "discipline": 3, "happiness": 3})),
-    C("decline", "Politely decline", text="You said no thanks, and the offer was never repeated.",
-      effects=FX(stats={"happiness": -1})),
-], age_min=8, age_max=16, weight=10, rarity="uncommon")
-
-O("o.random.competition-entry", "random", [
-    "There is a competition with a real prize, and the entry form is sitting on the kitchen table.",
-], [
-    C("enter", "Enter it", outcomes=[
-        OUT(2, "You won. Nobody was more surprised than the people who knew you.",
-            FX(cash=600, stats={"happiness": 6, "charisma": 3})),
-        OUT(8, "You did not win, and the entry itself took more nerve than the result required.",
-            FX(stats={"willpower": 3, "happiness": -1})),
-    ]),
-    C("bin", "Leave it", text="The form stayed on the table until somebody threw it out.",
-      effects=FX(stats={"happiness": -1})),
-], age_min=8, age_max=17, weight=11, rarity="uncommon", cooldown=6)
-
-D("d.family.parent-asks", "family", [
-    "{parent} has asked, directly and without warning, whether you are all right.",
-], [
-    C("honest", "Tell them the truth", outcomes=[
-        OUT(7, "You told them. They listened better than you expected.",
-            FX(stats={"happiness": 4}, relationship={"parents": 6})),
-        OUT(3, "You told them, and they did not know what to do with it. They tried.",
-            FX(stats={"happiness": 1}, relationship={"parents": 2})),
-    ]),
-    C("deflect", "Say you're fine", text="You said you were fine. They knew, and let it go.",
-      effects=FX(stats={"willpower": 1, "happiness": -2}, relationship={"parents": -1})),
-], age_min=11, age_max=17, requires=["anyParent"], weight=12, cooldown=4,
-   modifiers=[MOD(2.0, stat_at_most={"happiness": 40})])
-
-D("d.school.speech", "school", [
-    "You have been asked to speak in front of the whole school. It is optional in theory only.",
-], [
-    C("do", "Do it", outcomes=[
-        OUT(6, "You did it, and it went well enough that two teachers mentioned it afterwards.",
-            FX(stats={"charisma": 5, "happiness": 3, "willpower": 2})),
-        OUT(4, "You did it, and it went badly, and you survived it, which was the actual lesson.",
-            FX(stats={"charisma": 2, "willpower": 4, "happiness": -3})),
-    ]),
-    C("refuse", "Get out of it", text="You found a way out of it and felt the relief for about an hour.",
-      effects=FX(stats={"happiness": -1, "charisma": -2})),
-], age_min=10, age_max=17, weight=12, cooldown=4,
-   modifiers=[MOD(1.6, talents_any=["acting"]), MOD(1.4, stat_at_least={"charisma": 65})])
 
 
 # =============================================================================
@@ -2075,272 +2925,79 @@ E("early.zoo", "family", [
 ], age_min=2, age_max=7, weight=11, effects=FX(stats={"happiness": 2, "smarts": 1}))
 
 
+
 # =============================================================================
-# MORE DECISIONS
+# SCHOOL PROGRESSION (Ticket 0204)
 #
-# Decision density matters more than passive density: a year with a real choice
-# in it is the year a player remembers. These fill the gaps by age band, so a
-# character is being asked things from FIRST_DECISION_AGE onwards.
+# The education phase already writes the milestones — starting kindergarten,
+# moving up to high school, graduating, the year you took on too much. These are
+# the texture around those, and the ones that move school STANDING, which is
+# what routes a character into an alternative school (spec 73). Before events
+# could touch behaviour, every character in 300 test lives finished on 96-100
+# and that branch of the spec was unreachable.
 # =============================================================================
 
-D("d.school.reading-group", "school", [
-    "You have been offered a move up to the harder reading group, where you would be the youngest.",
-], [
-    C("move", "Move up", outcomes=[
-        OUT(6, "You moved up and kept pace, quietly, all year.",
-            FX(stats={"smarts": 4, "discipline": 2})),
-        OUT(4, "You moved up and struggled, in public, for two terms.",
-            FX(stats={"smarts": 2, "happiness": -3, "willpower": 3})),
-    ]),
-    C("stay", "Stay where you are", text="You stayed put, with your friends, and coasted comfortably.",
-      effects=FX(stats={"happiness": 2, "charisma": 1})),
-], age_min=6, age_max=11, weight=12,
-   modifiers=[MOD(1.8, talents_any=["academics"])])
+E("school.front-of-class", "school", [
+    "Got moved to the front of the class, which was framed as a compliment and was not one.",
+], age_min=7, age_max=15, weight=10, cooldown=3,
+   school_stage_any=["elementary", "middle"],
+   effects=FX(stats={"happiness": -2, "smarts": 1}, behaviour=-5))
 
-D("d.school.instrument", "school", [
-    "The school is handing out instruments. Whatever you pick, you are stuck with for years.",
-], [
-    C("loud", "Something loud", text="You picked the loudest option available and never regretted it.",
-      effects=FX(stats={"happiness": 3, "charisma": 2, "discipline": 1})),
-    C("serious", "Something serious", text="You picked the difficult one and practised like it mattered.",
-      effects=FX(stats={"discipline": 4, "smarts": 2})),
-    C("none", "Don't take one", text="You did not take one. Somebody in the house was relieved.",
-      effects=FX(stats={"happiness": 1})),
-], age_min=7, age_max=13, weight=12,
-   modifiers=[MOD(2.0, talents_any=["music"])])
+E("school.teacher-vouched", "school", [
+    "A teacher went out of their way to say something good about you to somebody who mattered.",
+], age_min=8, age_max=17, weight=10, cooldown=4,
+   school_stage_any=["elementary", "middle", "high"],
+   effects=FX(stats={"happiness": 3, "charisma": 1}, behaviour=8))
 
-D("d.school.team-tryout", "school", [
-    "Trials for the school team are on Thursday, and half your year is going.",
-], [
-    C("try", "Try out", outcomes=[
-        OUT(5, "You made the squad. Not the first eleven, but the squad.",
-            FX(stats={"health": 3, "charisma": 2, "happiness": 3})),
-        OUT(5, "You were cut on the first day, in front of everyone.",
-            FX(stats={"happiness": -4, "willpower": 3, "health": 1})),
-    ]),
-    C("skip", "Don't bother", text="You did not go. It was the sensible call and it sat badly.",
-      effects=FX(stats={"happiness": -1, "willpower": -1})),
-], age_min=8, age_max=16, weight=13, cooldown=4,
-   modifiers=[MOD(2.4, talents_any=["athletics"]), MOD(0.6, stat_at_most={"health": 45})])
+E("school.principal-office", "school", [
+    "Spent enough time outside the principal's office this year to know the receptionist's name.",
+], age_min=9, age_max=17, weight=9, cooldown=2,
+   school_stage_any=["middle", "high"],
+   effects=FX(stats={"charisma": 1, "happiness": -2}, behaviour=-12),
+   modifiers=[MOD(2.0, talents_any=["crime"])])
 
-D("d.family.pet-responsibility", "family", [
-    "There is a serious family conversation about a pet, and the word 'responsibility' has been used four times.",
-], [
-    C("promise", "Promise everything", outcomes=[
-        OUT(6, "You promised everything, got the pet, and did about half of it.",
-            FX(stats={"happiness": 5, "discipline": 1}, relationship={"parents": -1})),
-        OUT(4, "You promised everything and, to universal surprise, did all of it.",
-            FX(stats={"happiness": 5, "discipline": 4}, relationship={"parents": 4})),
-    ]),
-    C("honest", "Be honest about it",
-      text="You said you probably wouldn't keep it up. The answer was no, and it was fair.",
-      effects=FX(stats={"willpower": 2, "happiness": -2}, relationship={"parents": 3})),
-], age_min=6, age_max=14, requires=["anyParent"], weight=12)
+E("school.fresh-start", "school", [
+    "A new year, a new set of teachers, and nobody in the building holding last year against you.",
+], age_min=11, age_max=17, weight=8, cooldown=4,
+   school_stage_any=["middle", "high"],
+   effects=FX(stats={"happiness": 3}, behaviour=10))
 
-D("d.family.holiday-choice", "family", [
-    "The family holiday is being decided at the table and, unusually, you get a vote.",
-], [
-    C("push", "Push for what you want", outcomes=[
-        OUT(5, "You got your way and it was a great week.",
-            FX(stats={"happiness": 4, "charisma": 2})),
-        OUT(5, "You got your way and it rained for six days, which was noted repeatedly.",
-            FX(stats={"happiness": -2, "charisma": 1}, relationship={"family": -2})),
-    ]),
-    C("defer", "Let someone else pick", text="You let {sibling} pick, which bought you something later.",
-      effects=FX(relationship={"siblings": 5}, stats={"charisma": 1})),
-], age_min=8, age_max=16, requires=["anyParent", "sibling"], weight=11, cooldown=5)
+E("school.alt.settling", "school", [
+    "Smaller classes at the new school, and a teacher who had clearly seen worse than you.",
+    "The new school had fifteen kids in a room and an adult who actually looked at you when you talked.",
+], age_min=11, age_max=17, weight=12, cooldown=2,
+   effects=FX(stats={"happiness": 2, "willpower": 2}, behaviour=9))
 
-D("d.family.parent-favour", "family", [
-    "{parent} needs a hand with something all Saturday, and you had plans.",
-], [
-    C("help", "Cancel and help", text="You cancelled and helped. It took nine hours and was never mentioned again.",
-      effects=FX(relationship={"parents": 6}, stats={"discipline": 2, "happiness": -1})),
-    C("plans", "Keep your plans", text="You went out. It was a good day with a shadow on it.",
-      effects=FX(relationship={"parents": -4}, stats={"happiness": 2})),
-], age_min=10, age_max=17, requires=["anyParent"], weight=12, cooldown=4)
+E("school.locker-search", "school", [
+    "There was a locker search. Yours was fine, which was not true of everybody's.",
+], age_min=12, age_max=17, weight=9, cooldown=3,
+   school_stage_any=["middle", "high"],
+   effects=FX(stats={"happiness": -1}))
 
-D("d.family.sibling-fight", "family", [
-    "{sibling} has taken something of yours and broken it, and is standing right there.",
-], [
-    C("shout", "Lose it", outcomes=[
-        OUT(6, "You lost it completely. They were punished and it stayed sour for months.",
-            FX(relationship={"siblings": -7}, stats={"happiness": -2, "willpower": -1})),
-        OUT(4, "You lost it, and were the one who ended up in trouble for the noise.",
-            FX(relationship={"siblings": -4, "parents": -3}, stats={"happiness": -3})),
-    ]),
-    C("let-go", "Let it go", text="You let it go. They noticed, which was the point.",
-      effects=FX(relationship={"siblings": 5}, stats={"willpower": 3})),
-], age_min=6, age_max=16, requires=["sibling"], weight=13, cooldown=4,
-   modifiers=[MOD(1.5, stat_at_most={"willpower": 40})])
+E("school.fundraiser", "school", [
+    "Sold wrapping paper door to door for the school fundraiser and came second in the year.",
+], age_min=8, age_max=14, weight=9, cooldown=4,
+   school_stage_any=["elementary", "middle"],
+   effects=FX(stats={"charisma": 3, "discipline": 2}))
 
-D("d.friend.share-answer", "friendship", [
-    "{kid} wants the homework, ten minutes before it is due, and is asking as a friend.",
-], [
-    C("give", "Hand it over", text="You handed it over. They copied it word for word, including a mistake.",
-      effects=FX(stats={"charisma": 2, "discipline": -1})),
-    C("explain", "Explain it instead", text="You walked them through it and were late to your own lesson.",
-      effects=FX(stats={"smarts": 2, "charisma": 3, "happiness": 1})),
-    C("refuse", "Say no", text="You said no. They found somebody else within a minute.",
-      effects=FX(stats={"discipline": 2, "charisma": -2})),
-], age_min=9, age_max=17, weight=13, cooldown=3)
+E("school.busy-year", "school", [
+    "Between everything you had signed up for, the year went past in one long blur.",
+], age_min=10, age_max=17, weight=11, cooldown=2,
+   activities_at_least=3,
+   effects=FX(stats={"charisma": 2, "discipline": 2, "health": -1}))
 
-D("d.friend.birthday-clash", "friendship", [
-    "Two birthdays, same afternoon, and both of them have asked directly.",
-], [
-    C("close", "Go to the closer friend's", text="You picked the obvious one. The other noticed.",
-      effects=FX(stats={"happiness": 2, "charisma": -1})),
-    C("new", "Go to the newer friend's", text="You went to the other one, which surprised everybody including you.",
-      effects=FX(stats={"charisma": 3, "happiness": 1})),
-    C("neither", "Go to neither", text="You went to neither and stayed home, which solved nothing.",
-      effects=FX(stats={"happiness": -3, "charisma": -2})),
-], age_min=7, age_max=15, weight=12, cooldown=5)
+E("school.empty-afternoons", "school", [
+    "You were not in anything this year. The afternoons were long and entirely your own.",
+], age_min=10, age_max=17, weight=10, cooldown=3,
+   activities_at_most=0,
+   school_stage_any=["middle", "high"],
+   effects=FX(stats={"happiness": 1, "health": 1, "charisma": -2}))
 
-D("d.friend.stand-up", "friendship", [
-    "Somebody is being humiliated in front of thirty people and nobody has moved.",
-], [
-    C("step-in", "Step in", outcomes=[
-        OUT(6, "You stepped in. It stopped, and it cost you nothing you can measure.",
-            FX(stats={"willpower": 4, "charisma": 3, "happiness": 3})),
-        OUT(4, "You stepped in, and it turned on you for the rest of term.",
-            FX(stats={"willpower": 5, "happiness": -4, "charisma": -1})),
-    ]),
-    C("laugh", "Laugh along", text="You laughed with everyone else. It is one of the ones that stayed.",
-      effects=FX(stats={"charisma": 1, "happiness": -3, "willpower": -2})),
-    C("leave", "Walk away", text="You left the room. Not brave, not complicit, and not forgotten either.",
-      effects=FX(stats={"happiness": -1, "willpower": 1})),
-], age_min=9, age_max=17, weight=13)
-
-D("d.random.money-found", "random", [
-    "There is a twenty on the kitchen counter and nobody in the house has mentioned it for three days.",
-], [
-    C("take", "Take it", outcomes=[
-        OUT(7, "You took it. Nothing was ever said, which was somehow not a relief.",
-            FX(cash=20, stats={"happiness": -1, "discipline": -1})),
-        OUT(3, "You took it, and {parent} had known exactly how much was there.",
-            FX(cash=20, relationship={"parents": -5}, stats={"happiness": -3})),
-    ]),
-    C("ask", "Ask about it", text="You asked. It was yours anyway, and you got to keep it cleanly.",
-      effects=FX(cash=20, stats={"willpower": 2}, relationship={"parents": 2})),
-], age_min=8, age_max=16, requires=["anyParent"], weight=11,
-   modifiers=[MOD(1.8, talents_any=["crime"]), MOD(1.6, wealth_any=["struggling"])])
-
-D("d.random.late-night", "random", [
-    "It is one in the morning and you are not remotely finished with what you are doing.",
-], [
-    C("push-on", "Keep going", text="You kept going until four and paid for it all week.",
-      effects=FX(stats={"health": -2, "discipline": 2, "happiness": 2})),
-    C("sleep", "Go to bed", text="You went to bed. It was still there in the morning.",
-      effects=FX(stats={"health": 2, "discipline": 2})),
-], age_min=11, age_max=17, weight=12, cooldown=3)
-
-D("d.random.first-drink", "random", [
-    "There is alcohol at a party and somebody has handed you a cup without asking.",
-], [
-    C("drink", "Drink it", outcomes=[
-        OUT(6, "You drank it, disliked it, and pretended otherwise for the rest of the night.",
-            FX(stats={"health": -1, "charisma": 2, "happiness": 1})),
-        OUT(4, "You drank rather more than that, and the night ended badly and publicly.",
-            FX(stats={"health": -3, "happiness": -3, "charisma": -2})),
-    ]),
-    C("pour", "Quietly put it down", text="You put it down somewhere and nobody noticed either way.",
-      effects=FX(stats={"willpower": 3, "health": 1})),
-], age_min=14, age_max=17, weight=13,
-   modifiers=[MOD(1.5, talents_any=["crime"]), MOD(0.6, stat_at_least={"discipline": 72})])
-
-D("d.random.online-argument", "random", [
-    "Somebody has said something about you online and there is a reply box open.",
-], [
-    C("fire-back", "Fire back", outcomes=[
-        OUT(5, "You destroyed them, publicly, and it followed you for a year.",
-            FX(stats={"charisma": 2, "happiness": -3})),
-        OUT(5, "You fired back badly and it was screenshotted before you could delete it.",
-            FX(stats={"charisma": -3, "happiness": -4, "willpower": 1})),
-    ]),
-    C("ignore", "Close the app", text="You closed the app. It died within two days, as they do.",
-      effects=FX(stats={"willpower": 4, "happiness": 1})),
-], age_min=12, age_max=17, weight=12, flags_all=["has.phone"], cooldown=3)
-
-D("d.random.charity", "random", [
-    "There is a collection at school and you have exactly enough money for the thing you have been saving for.",
-], [
-    C("give", "Give it", text="You gave it. Nobody knew how much it was, which was the whole point.",
-      effects=FX(cash=-40, stats={"happiness": 3, "willpower": 2})),
-    C("keep", "Keep it", text="You kept it and bought the thing. It was excellent, briefly.",
-      effects=FX(cash=-40, stats={"happiness": 3, "discipline": -1})),
-], age_min=8, age_max=16, weight=11, cooldown=5)
-
-D("d.talent.show-off", "talent", [
-    "There is a chance to do your thing in front of people who have never seen it.",
-], [
-    C("perform", "Do it properly", outcomes=[
-        OUT(6, "It landed. Several people looked at you differently afterwards.",
-            FX(stats={"charisma": 4, "happiness": 4})),
-        OUT(4, "It did not land, and the silence afterwards lasted a geological age.",
-            FX(stats={"charisma": -1, "willpower": 3, "happiness": -3})),
-    ]),
-    C("decline", "Keep it to yourself", text="You kept it to yourself, which is also a choice you can make.",
-      effects=FX(stats={"willpower": 1, "happiness": -1})),
-], age_min=8, age_max=17, weight=12, cooldown=4,
-   talents_any=["athletics", "acting", "music", "writing", "inventive"])
-
-O("o.friend.older-mentor", "friendship", [
-    "Somebody several years above has decided, for no clear reason, to take you seriously.",
-], [
-    C("accept", "Stick with them", outcomes=[
-        OUT(7, "They taught you more in a year than school managed in three.",
-            FX(stats={"smarts": 3, "charisma": 3, "discipline": 3, "happiness": 3})),
-        OUT(3, "They were not the influence anybody had hoped for.",
-            FX(stats={"charisma": 3, "discipline": -3, "happiness": 1})),
-    ]),
-    C("keep-distance", "Keep your distance", text="You kept your distance, politely, and it faded out.",
-      effects=FX(stats={"willpower": 2})),
-], age_min=10, age_max=17, weight=10)
-
-O("o.school.exchange", "school", [
-    "There is a place left on an exchange trip, and it is being offered to you because somebody dropped out.",
-], [
-    C("go", "Take the place", outcomes=[
-        OUT(7, "Three weeks somewhere else rearranged your sense of how big things are.",
-            FX(stats={"smarts": 4, "charisma": 4, "happiness": 4})),
-        OUT(3, "You were homesick for the entire trip and learned something anyway.",
-            FX(stats={"willpower": 4, "charisma": 2, "happiness": -2})),
-    ]),
-    C("decline", "Turn it down", text="You turned it down. The reasons were good and it still nags.",
-      effects=FX(stats={"happiness": -2})),
-], age_min=13, age_max=17, weight=10, rarity="uncommon",
-   wealth_any=["modest", "comfortable", "affluent", "wealthy"])
-
-D("d.family.report-card", "family", [
-    "The report is in your bag, it is not good, and nobody has asked about it yet.",
-], [
-    C("hand-over", "Hand it over", outcomes=[
-        OUT(6, "You handed it over. It was a bad hour and a much better month.",
-            FX(relationship={"parents": 3}, stats={"discipline": 3, "happiness": -2})),
-        OUT(4, "You handed it over and it went far worse than the report deserved.",
-            FX(relationship={"parents": -4}, stats={"happiness": -4, "willpower": 2})),
-    ]),
-    C("hide", "Lose it", outcomes=[
-        OUT(5, "It was never found. You spent four months waiting for it to be.",
-            FX(stats={"happiness": -2, "discipline": -2})),
-        OUT(5, "It was found in March, which made it a much larger problem than it had been.",
-            FX(relationship={"parents": -7}, stats={"happiness": -4})),
-    ]),
-], age_min=9, age_max=17, requires=["anyParent"], weight=13, cooldown=3,
-   modifiers=[MOD(1.8, stat_at_most={"discipline": 45})])
-
-D("d.random.haircut-decision", "random", [
-    "You have been sitting in the chair for two minutes and the question has been asked twice.",
-], [
-    C("bold", "Something drastic", outcomes=[
-        OUT(5, "It was a triumph. Three people asked where you had it done.",
-            FX(stats={"looks": 4, "charisma": 3, "happiness": 3})),
-        OUT(5, "It was a catastrophe, and it grows about a centimetre a month.",
-            FX(stats={"looks": -4, "happiness": -3, "willpower": 2})),
-    ]),
-    C("same", "The usual", text="You had the usual. It was fine. It is always fine.",
-      effects=FX(stats={"happiness": 1})),
-], age_min=9, age_max=17, weight=12, cooldown=3)
-
+E("school.team-photo", "school", [
+    "The team photo went up in the hallway with your name printed under it, spelled wrong.",
+], age_min=10, age_max=17, weight=10, cooldown=3,
+   activities_at_least=1,
+   effects=FX(stats={"happiness": 3, "charisma": 1}))
 
 # =============================================================================
 # ADULTHOOD — PLACEHOLDER
@@ -2404,6 +3061,24 @@ CHILDHOOD_AGES = range(0, 18)
 ADULT_SAMPLE_AGES = (18, 25, 40, 60, 80, 100)
 MIN_UNCONDITIONAL_PER_AGE = 4
 
+# Eligibility keys that make an event conditional on something a given character
+# might not have. Coverage is measured over events with NONE of these, because
+# those are the ones guaranteed to be available to anybody at that age.
+GATE_KEYS = (
+    "requires",
+    "talentsAny",
+    "wealthAny",
+    "statAtLeast",
+    "statAtMost",
+    "flagsAll",
+    "relationshipAtLeast",
+    "relationshipAtMost",
+    "sex",
+    "schoolStageAny",
+    "activitiesAtLeast",
+    "activitiesAtMost",
+)
+
 
 def guaranteed_requirements(event: dict, choice: dict | None = None) -> set[str]:
     """Family requirements the player is certain to have when this text renders."""
@@ -2419,7 +3094,36 @@ def guaranteed_requirements(event: dict, choice: dict | None = None) -> set[str]
     return requirements
 
 
+PLAYER_PRONOUNS = {"they", "them", "their"}
+
+# Words that carry no tactical meaning at the start of a choice label.
+LABEL_NOISE = {"the", "a", "an", "to", "for", "it", "them", "your", "my", "s"}
+
+
+def label_stem(label: str) -> str:
+    """
+    The opening phrase of a choice label, for the intensity check.
+
+    Tokens, punctuation and leading filler are stripped, then the first two
+    meaningful words are kept. Two options that agree on that much are almost
+    always the same tactic at two volumes.
+    """
+    plain = TOKEN_RE.sub(" ", label).lower()
+    words = [re.sub(r"[^a-z]", "", word) for word in plain.split()]
+    words = [word for word in words if word and word not in LABEL_NOISE]
+    return " ".join(words[:2])
+
+
 def check_text(problems: list[str], event: dict, text: str, where: str, choice=None) -> None:
+    """
+    Validate one line of player-visible copy.
+
+    Note the pronoun rule below. `{they}/{them}/{their}` are the PLAYER's
+    pronouns. Writing "You asked {kid} how {they} did it" reads fine and renders
+    the wrong person's gender — the same class of mistake as drawing the
+    player's own first name for a friend, which only turned up in review.
+    Incidental people have no gender, so they are referred to by name.
+    """
     if not text.strip():
         problems.append(f"{event['id']}: empty text in {where}")
         return
@@ -2427,6 +3131,21 @@ def check_text(problems: list[str], event: dict, text: str, where: str, choice=N
         problems.append(f"{event['id']}: {where} does not end in punctuation: {text!r}")
     if len(text) > 220:
         problems.append(f"{event['id']}: {where} is {len(text)} chars — spec 725-770 says concise")
+    # {adult} renders with its own title ("Mrs. Okafor"), so copy must not add
+    # one — "Mr. {adult}" printed "Mr. Mr. Conti" at the player.
+    if re.search(r"(Mr\.|Mrs\.|Miss|Ms\.)\s*\{adult\}", text):
+        problems.append(
+            f"{event['id']}: {where} puts a title in front of {{adult}}, which already has one"
+        )
+
+    tokens = set(TOKEN_RE.findall(text))
+    if tokens & INCIDENTAL_TOKENS and tokens & PLAYER_PRONOUNS:
+        problems.append(
+            f"{event['id']}: {where} names an incidental person AND uses a player "
+            f"pronoun — {{they}}/{{them}}/{{their}} are the player's, so this "
+            f"renders the wrong person's gender. Use the name."
+        )
+
     have = guaranteed_requirements(event, choice)
     for token in TOKEN_RE.findall(text):
         if token in FREE_TOKENS:
@@ -2445,6 +3164,9 @@ def check_condition(problems: list[str], event_id: str, condition: dict, where: 
     for key in condition.get("requires", []):
         if key not in REQUIREMENTS:
             problems.append(f"{event_id}: unknown family requirement {key!r} in {where}")
+    for key in condition.get("schoolStageAny", []):
+        if key not in SCHOOL_STAGES:
+            problems.append(f"{event_id}: unknown school stage {key!r} in {where}")
     for key in condition.get("wealthAny", []):
         if key not in WEALTH:
             problems.append(f"{event_id}: unknown wealth band {key!r} in {where}")
@@ -2462,15 +3184,36 @@ def check_condition(problems: list[str], event_id: str, condition: dict, where: 
         problems.append(f"{event_id}: unknown sex {condition.get('sex')!r} in {where}")
 
 
-def check_effects(problems: list[str], event_id: str, effects: dict | None, where: str) -> None:
+def check_effects(
+    problems: list[str],
+    event_id: str,
+    effects: dict | None,
+    where: str,
+    visible_text: str = "",
+) -> None:
     if not effects:
         return
+    cash = effects.get("cash")
+    if cash is not None:
+        # V4. CASH() already refuses a missing source; this is the half that
+        # matters to the player — the amount has to appear in the line they
+        # actually read, or the money still arrives unexplained.
+        amount = abs(cash["delta"])
+        written = {f"${amount}", f"${amount:,}"}
+        if visible_text and not any(form in visible_text for form in written):
+            problems.append(
+                f"{event_id}: {where} moves ${amount} but the text does not say so: "
+                f"{visible_text!r}"
+            )
     for key in effects.get("stats", {}):
         if key not in STATS:
             problems.append(f"{event_id}: unknown stat {key!r} in {where} effects")
     for key in effects.get("relationship", {}):
         if key not in {"mother", "father", "parents", "siblings", "family"}:
             problems.append(f"{event_id}: unknown relationship target {key!r} in {where}")
+    behaviour = effects.get("behaviour")
+    if behaviour is not None and not (-40 <= behaviour <= 40):
+        problems.append(f"{event_id}: behaviour change {behaviour} in {where} is out of range")
 
 
 def check() -> None:
@@ -2491,7 +3234,7 @@ def check() -> None:
         if event["weight"] <= 0:
             problems.append(f"{eid}: weight must be positive")
         check_condition(problems, eid, event["eligibility"], "eligibility")
-        check_effects(problems, eid, event.get("effects"), "event")
+        check_effects(problems, eid, event.get("effects"), "event", " ".join(event["text"]))
 
         for modifier in event.get("modifiers", []):
             check_condition(problems, eid, modifier["when"], "modifier")
@@ -2517,6 +3260,56 @@ def check() -> None:
                 f"collapse to a single button"
             )
 
+        # --- V1: three options, unless this genuinely has two answers --------
+        # "Do it / don't" is not a decision. Some situations really do have two
+        # answers (own up or stay silent), and those say so with binary_ok.
+        if is_decision and len(choices) < 3 and not event.get("binaryOk"):
+            problems.append(
+                f"{eid}: only {len(choices)} options. Three or more, or set "
+                f"binary_ok=True if this genuinely has two answers"
+            )
+
+        # --- V2: options are approaches, not intensities ---------------------
+        # Two labels sharing an opening PHRASE are usually the same tactic at two
+        # volumes ("Give it" / "Give some of it"), which is a choice of slider
+        # position rather than a choice of person.
+        #
+        # Compares the first two significant words, not the first word: a single
+        # shared verb has too many honest collisions ("Go and sit with them" and
+        # "Go to the address on the licence" are different tactics that both
+        # start with "go"). Articles, possessives and tokens are stripped first.
+        heads = [label_stem(choice["label"]) for choice in choices]
+        repeated = {head for head in heads if head and heads.count(head) > 1}
+        if is_decision and repeated:
+            problems.append(
+                f"{eid}: options {sorted(repeated)} open the same way — these read as "
+                f"one approach at two volumes rather than as different tactics"
+            )
+
+        # --- V3: happiness moves, and it can go badly ------------------------
+        if is_decision:
+            results = []
+            for choice in choices:
+                if choice.get("text"):
+                    results.append(choice.get("effects") or {})
+                for outcome in choice.get("outcomes", []):
+                    merged = dict(choice.get("effects") or {})
+                    merged.update(outcome.get("effects") or {})
+                    results.append(merged)
+            happiness = [(r.get("stats") or {}).get("happiness", 0) for r in results]
+            if not any(happiness):
+                problems.append(f"{eid}: no result moves happiness — spec 0203b requires it")
+            if happiness and min(happiness) >= 0:
+                problems.append(
+                    f"{eid}: every result is happiness-neutral or better. A decision that "
+                    f"cannot land badly is not a decision"
+                )
+            if event.get("physical"):
+                if not any((r.get("stats") or {}).get("health", 0) for r in results):
+                    problems.append(
+                        f"{eid}: marked physical but no result moves health"
+                    )
+
         seen_choices = set()
         for choice in choices:
             if choice["id"] in seen_choices:
@@ -2526,20 +3319,56 @@ def check() -> None:
                 problems.append(f"{eid}/{choice['id']}: choice needs `text` or `outcomes`")
             if choice.get("text") and choice.get("outcomes"):
                 problems.append(f"{eid}/{choice['id']}: choice has both `text` and `outcomes`")
-            if len(choice["label"]) > 26:
+            if choice.get("opens") and choice["opens"] not in OPENABLE:
+                problems.append(
+                    f"{eid}/{choice['id']}: opens {choice['opens']!r}, which no screen handles"
+                )
+            # Labels wrap on the card rather than truncating, so two lines is
+            # survivable and an essay is not.
+            if len(choice["label"]) > 38:
                 problems.append(
                     f"{eid}/{choice['id']}: label {choice['label']!r} is too long for a phone"
                 )
             if choice.get("text"):
                 check_text(problems, event, choice["text"], f"choice {choice['id']}", choice)
-            check_effects(problems, eid, choice.get("effects"), f"choice {choice['id']}")
+            check_effects(
+                problems,
+                eid,
+                choice.get("effects"),
+                f"choice {choice['id']}",
+                choice.get("text") or "",
+            )
             if choice.get("requires"):
                 check_condition(problems, eid, choice["requires"], f"choice {choice['id']}")
             for index, outcome in enumerate(choice.get("outcomes", [])):
                 if outcome["weight"] <= 0:
                     problems.append(f"{eid}/{choice['id']}: outcome {index} has no weight")
                 check_text(problems, event, outcome["text"], f"choice {choice['id']} outcome {index}", choice)
-                check_effects(problems, eid, outcome.get("effects"), f"choice {choice['id']} outcome")
+                check_effects(
+                    problems,
+                    eid,
+                    outcome.get("effects"),
+                    f"choice {choice['id']} outcome",
+                    outcome["text"],
+                )
+
+        declared = set(event.get("personTokens", []))
+        used: set[str] = set()
+        for text in event["text"]:
+            used |= set(TOKEN_RE.findall(text)) & INCIDENTAL_TOKENS
+        for choice in choices:
+            used |= set(TOKEN_RE.findall(choice["label"])) & INCIDENTAL_TOKENS
+            if choice.get("text"):
+                used |= set(TOKEN_RE.findall(choice["text"])) & INCIDENTAL_TOKENS
+            for outcome in choice.get("outcomes", []):
+                used |= set(TOKEN_RE.findall(outcome["text"])) & INCIDENTAL_TOKENS
+        if is_decision and used - declared:
+            problems.append(
+                f"{eid}: uses {sorted(used - declared)} but does not declare them in "
+                f"person_tokens, so the prompt and the outcome would name different people"
+            )
+        if is_decision and declared - used:
+            problems.append(f"{eid}: declares {sorted(declared - used)} but never uses them")
 
         for follow in follow_ups(event):
             target = by_id.get(follow["eventId"])
@@ -2567,17 +3396,7 @@ def check() -> None:
             and event["eligibility"].get("ageMin", 0) <= age <= event["eligibility"].get("ageMax", 130)
             and not any(
                 key in event["eligibility"]
-                for key in (
-                    "requires",
-                    "talentsAny",
-                    "wealthAny",
-                    "statAtLeast",
-                    "statAtMost",
-                    "flagsAll",
-                    "relationshipAtLeast",
-                    "relationshipAtMost",
-                    "sex",
-                )
+                for key in GATE_KEYS
             )
         ]
         if len(available) < MIN_UNCONDITIONAL_PER_AGE:
@@ -2639,22 +3458,20 @@ def report() -> None:
         plain = [
             event
             for event in window
-            if not any(
-                key in event["eligibility"]
-                for key in ("requires", "talentsAny", "wealthAny", "statAtLeast",
-                            "statAtMost", "flagsAll", "relationshipAtLeast",
-                            "relationshipAtMost", "sex")
-            )
+            if not any(key in event["eligibility"] for key in GATE_KEYS)
         ]
         print(f"    age {age:>2}: {len(window):>3} / {len(plain):>3}")
 
 
 def main() -> None:
+    # Order matters: check, WRITE, then report. Reporting first means piping this
+    # through `head` closes the pipe, the next print kills the process, and the
+    # file is silently never written — which cost real time twice.
     check()
-    report()
     payload = {"version": CATALOG_VERSION, "entries": EVENTS}
     OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {OUT_PATH.relative_to(ROOT)}")
+    report()
 
 
 if __name__ == "__main__":

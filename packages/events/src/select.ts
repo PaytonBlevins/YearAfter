@@ -32,7 +32,7 @@ import {
   schedule,
   type EventHistory,
 } from './history';
-import { renderEventText } from './text';
+import { bindPersonNames, renderEventText, type NameBindings } from './text';
 
 /**
  * The random surface the engine needs. `RandomStream` from @yearafter/simulation
@@ -92,6 +92,8 @@ export interface EventOutcome {
 export interface PendingChoice {
   readonly id: string;
   readonly label: string;
+  /** Screen to open after this choice resolves. Opaque to the engine. */
+  readonly opens?: string;
 }
 
 /** A decision waiting on the player. Held in game state until answered. */
@@ -102,6 +104,14 @@ export interface PendingDecision {
   readonly year: number;
   readonly prompt: string;
   readonly choices: readonly PendingChoice[];
+  /**
+   * The people this decision is about, bound when it was raised.
+   *
+   * Stored on the decision rather than re-drawn, so the outcome names the same
+   * person the prompt did — even when the answer arrives days later on another
+   * device, after the RNG stream has moved on.
+   */
+  readonly names: NameBindings;
 }
 
 export interface EventPhaseResult {
@@ -177,13 +187,22 @@ function toPendingDecision(
   // A decision with one surviving choice is not a decision; skip it rather than
   // showing the player a dialog with a single button.
   if (offered.length < 2) return undefined;
+
+  // Bind the people ONCE, here, before anything is rendered.
+  const names = bindPersonNames(definition.personTokens ?? [], context, random);
+
   return {
     eventId: definition.id,
     category: definition.category,
     age: context.age,
     year: context.year,
-    prompt: renderEventText(random.pick(definition.text), context, random),
-    choices: offered.map((choice) => ({ id: choice.id, label: choice.label })),
+    prompt: renderEventText(random.pick(definition.text), context, random, names),
+    choices: offered.map((choice) => ({
+      id: choice.id,
+      label: renderEventText(choice.label, context, random, names),
+      ...(choice.opens ? { opens: choice.opens } : {}),
+    })),
+    names,
   };
 }
 
@@ -324,6 +343,8 @@ export function runEventPhase(
 export interface ResolvedChoice {
   readonly outcome: EventOutcome;
   readonly history: EventHistory;
+  /** Screen the answered choice asked to open, if any. */
+  readonly opens?: string;
 }
 
 /**
@@ -340,8 +361,10 @@ export function resolveChoice(
   context: EventContext,
   random: EventRandom,
   history: EventHistory,
+  /** Overridable for tests; production always resolves against the catalog. */
+  lookup: (id: string) => EventDefinition | undefined = findEvent,
 ): ResolvedChoice | undefined {
-  const definition = findEvent(decision.eventId);
+  const definition = lookup(decision.eventId);
   const choice: EventChoice | undefined = definition?.choices?.find(
     (candidate) => candidate.id === choiceId,
   );
@@ -365,10 +388,12 @@ export function resolveChoice(
       eventId: definition.id,
       category: definition.category,
       type: definition.type,
-      text: renderEventText(text ?? choice.label, context, random),
+      // The decision's own bindings, not a fresh draw: this is the whole point.
+      text: renderEventText(text ?? choice.label, context, random, decision.names),
       effects,
     },
     history: applyFollowUp(history, followUp, definition.id, decision.age, random),
+    ...(choice.opens ? { opens: choice.opens } : {}),
   };
 }
 
@@ -382,7 +407,9 @@ function mergeEffects(
   return {
     stats: sumRecords(base.stats, extra.stats),
     relationship: sumRecords(base.relationship, extra.relationship),
-    cash: (base.cash ?? 0) + (extra.cash ?? 0) || undefined,
+    // A choice's cash and its outcome's cash do not add — the outcome's wins,
+    // because two sources cannot describe one movement.
+    cash: extra.cash ?? base.cash,
     setFlags: [...(base.setFlags ?? []), ...(extra.setFlags ?? [])],
     clearFlags: [...(base.clearFlags ?? []), ...(extra.clearFlags ?? [])],
   };

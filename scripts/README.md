@@ -19,3 +19,14 @@ python3 scripts/generate-events.py
 The same invariants are re-checked at build time by `tools/content-validator`
 and by the package tests, because the JSON is what ships and it can be edited by
 hand.
+
+`generate-events.py` also enforces the decision-writing rules from
+`claude/event-writing-rules.md`: three options unless the situation is a genuine
+binary, options that are different tactics rather than one tactic at two
+volumes, happiness always moving and able to move down, money that names its
+source and its amount, and every person a decision mentions declared so the
+prompt and the outcome name the same one.
+
+Each script writes its output BEFORE printing its report. Piping one through
+`head` closes the pipe and kills the process on the next print; with the report
+first, the file silently never got written.

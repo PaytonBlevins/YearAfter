@@ -26,6 +26,15 @@ import {
 } from '@yearafter/character';
 import { describeCity } from '@yearafter/content';
 import {
+  STUDY_EFFORT_LABELS,
+  gradePointAverage,
+  isInSchool,
+  joinedActivities,
+  letterGrade,
+  schoolLabel,
+  type StudyEffort,
+} from '@yearafter/education';
+import {
   Card,
   ComingSoon,
   ListRow,
@@ -135,28 +144,96 @@ function Screen({ children }: { children: React.ReactNode }) {
 /* -------------------------------------------------------------------------- */
 
 export function CareerScreen() {
-  const { state } = useGame();
+  const { state, setEffort } = useGame();
+  const { push } = useNavigation();
   if (!state) return null;
-  const { player } = state;
+  const { player, education } = state;
 
-  const inSchool = player.age >= 5 && player.age <= 17;
+  const atSchool = isInSchool(education);
+  const joined = joinedActivities(education);
 
   return (
     <Screen>
       <SectionHeading>Current</SectionHeading>
       <Card>
         <ListRow
-          icon={inSchool ? 'school' : 'career'}
+          icon={atSchool ? 'school' : 'career'}
           title={player.occupation}
-          subtitle={inSchool ? 'Enrolled' : 'No employer'}
+          subtitle={schoolLabel(education)}
           affordance="none"
         />
+        {atSchool ? (
+          <>
+            <RowDivider />
+            {/*
+              A letter and a GPA, never the underlying number. Spec 786-795:
+              explain outcomes through context, not formulas.
+            */}
+            <ListRow
+              title="Grades"
+              value={letterGrade(education.performance)}
+              meta={`${gradePointAverage(education.performance).toFixed(1)} GPA`}
+              affordance="none"
+            />
+            <RowDivider />
+            <ListRow
+              title="Standing"
+              subtitle={standingLabel(education.behaviour)}
+              affordance="none"
+              meter={education.behaviour}
+              meterColor={education.behaviour < 40 ? colors.negative : colors.statHealth}
+            />
+          </>
+        ) : null}
       </Card>
 
-      <SectionHeading>Actions</SectionHeading>
+      {atSchool ? (
+        <>
+          <SectionHeading>School</SectionHeading>
+          <Card>
+            {/*
+              Spec 1821: "major + Study Harder is generally enough". This is the
+              whole school interaction, and it is a setting rather than a yearly
+              question — a popup every year asking how hard you are trying is
+              exactly the management spec 75 forbids.
+            */}
+            <ListRow
+              icon="school"
+              title="Effort"
+              // Current setting in the VALUE slot, where a state belongs; what
+              // pressing does goes in the subtitle. The other way round read as
+              // though the character was already studying hard.
+              value={STUDY_EFFORT_LABELS[education.effort]}
+              subtitle={`Tap for ${STUDY_EFFORT_LABELS[cycleEffort(education.effort)].toLowerCase()}`}
+              affordance="action"
+              onPress={() => setEffort(cycleEffort(education.effort))}
+            />
+            <RowDivider />
+            {/*
+              "Clubs & Teams", not "Activities" — there is already an Activities
+              world in the tab bar, and two things with the same name one tap
+              apart is the kind of collision a player only notices by ending up
+              on the wrong screen.
+            */}
+            <ListRow
+              icon="social"
+              title="Clubs & Teams"
+              subtitle={
+                joined.length === 0
+                  ? 'Not in anything'
+                  : joined.map((activity) => activity.name).join(', ')
+              }
+              value={joined.length > 0 ? String(joined.length) : undefined}
+              affordance="navigate"
+              onPress={() => push({ screen: 'schoolActivities', title: 'Clubs & Teams' })}
+            />
+          </Card>
+        </>
+      ) : null}
+
+      <SectionHeading>Work</SectionHeading>
       <RowGroup
         rows={[
-          { icon: 'school', title: 'Study Harder', affordance: 'action', ticket: '0204' },
           { icon: 'career', title: 'Find a Job', ticket: '0210' },
           { icon: 'career', title: 'Work Harder', affordance: 'action', ticket: '0210' },
         ]}
@@ -166,9 +243,28 @@ export function CareerScreen() {
       <Card>
         <ListRow title="Nothing on the table right now" affordance="none" disabled />
       </Card>
-      <ComingSoon ticket="0204 / 0210" what="Education and employment" />
+      <ComingSoon ticket="0210" what="Employment" />
     </Screen>
   );
+}
+
+/** Study effort cycles rather than opening a sheet — three settings, one tap. */
+function cycleEffort(current: StudyEffort): StudyEffort {
+  return current === 'coasting' ? 'normal' : current === 'normal' ? 'hard' : 'coasting';
+}
+
+/**
+ * School standing in words.
+ *
+ * The player never sees the behaviour number, only where it has got them — and
+ * the bottom band is the one that ends in an alternative school (spec 73).
+ */
+function standingLabel(behaviour: number): string {
+  if (behaviour >= 80) return 'The staff like you';
+  if (behaviour >= 60) return 'No trouble worth mentioning';
+  if (behaviour >= 40) return 'They have your number';
+  if (behaviour >= 25) return 'On a short leash';
+  return 'One more incident and that is it';
 }
 
 /* -------------------------------------------------------------------------- */

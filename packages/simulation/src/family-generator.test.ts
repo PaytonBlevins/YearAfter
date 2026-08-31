@@ -310,3 +310,29 @@ describe('integration with a new game', () => {
     }
   });
 });
+
+describe('names inside one household', () => {
+  it('never gives two family members the same first name', () => {
+    // "father Andrea, sibling Andrea" turned up in a generated life. It is a
+    // legitimate draw and it reads as a bug, which is the only test that matters.
+    for (let i = 0; i < 400; i += 1) {
+      const members = familyFor(`UNIQUE-${i}`).members;
+      const names = members.map((member) => member.firstName);
+      expect(new Set(names).size, names.join(', ')).toBe(names.length);
+    }
+  });
+
+  it('still draws from the right naming tradition after de-duplicating', () => {
+    for (const cultureId of ['it', 'ng', 'jp']) {
+      const culture = findNameCulture(cultureId);
+      expect(culture).toBeDefined();
+      if (!culture) continue;
+      for (let i = 0; i < 40; i += 1) {
+        for (const member of familyFor(`UNIQ-${cultureId}-${i}`, cultureId).members) {
+          const pool = member.sex === 'male' ? culture.male : culture.female;
+          expect(pool, `${member.firstName} (${cultureId})`).toContain(member.firstName);
+        }
+      }
+    }
+  });
+});

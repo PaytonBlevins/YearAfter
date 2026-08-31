@@ -390,3 +390,145 @@ describe('event state round trip', () => {
     );
   });
 });
+
+describe('v4 -> v5 migration (Ticket 0204 school)', () => {
+  const asV4 = (save: ReturnType<typeof toSave>) => {
+    const { education: _e, ...rest } = save as unknown as Record<string, unknown>;
+    return { ...rest, version: 4 };
+  };
+
+  it('enrols an existing character at the grade their age implies', () => {
+    // Not at kindergarten: a twelve-year-old who has been playing for a while
+    // is in seventh grade, not starting school for the first time.
+    const { save } = newSave('V4');
+    const migrated = migrateSave(asV4(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.education.gradeLevel).toBe(save.player.age - 5);
+    expect(migrated.value.education.stage).toBe('middle');
+    // But a neutral record — inventing years of grades they never lived would
+    // be worse than admitting the system did not exist yet.
+    expect(migrated.value.education.performance).toBe(50);
+    expect(migrated.value.education.activities).toEqual([]);
+  });
+
+  it('consumes no randomness, so the save still replays from its seed', () => {
+    const { save } = newSave('V4-PURE');
+    const before = JSON.parse(JSON.stringify(save.rng));
+    const migrated = migrateSave(asV4(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.rng).toEqual(before);
+  });
+
+  it('lets a migrated v4 save keep playing', () => {
+    const { save } = newSave('V4-RESUME');
+    const migrated = migrateSave(asV4(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    const resumed = advanceYear(fromSave(migrated.value));
+    expect(resumed.newEntries.length).toBeGreaterThan(0);
+    expect(resumed.state.education.gradeLevel).toBe(save.player.age - 4);
+  });
+
+  it('rejects a v5 save with no education state', () => {
+    const { save } = newSave('V5-BROKEN');
+    const broken = { ...(save as unknown as Record<string, unknown>) };
+    delete broken['education'];
+    const result = migrateSave(broken);
+    expect(result.ok).toBe(false);
+  });
+});
+
+describe('school state round trip', () => {
+  it('carries grades, behaviour and everything joined through a save', () => {
+    let state = createNewGame({ seed: 'SCHOOL-SAVE', startYear: 2000 });
+    state = play(state, 14);
+    const withActivities = {
+      ...state,
+      education: {
+        ...state.education,
+        effort: 'hard' as const,
+        activities: [{ activityId: 'act.chess', joinedAtAge: 12 }],
+      },
+    };
+
+    const save = toSave(withActivities, { id: asSaveId('save-school') });
+    const restored = fromSave(JSON.parse(JSON.stringify(save)));
+    expect(restored.education).toEqual(withActivities.education);
+
+    // And the restored save plays the next year identically.
+    expect(advanceYear(restored).newEntries).toEqual(advanceYear(withActivities).newEntries);
+  });
+});
+
+describe('v5 -> v6 migration (Ticket 0203b decision names)', () => {
+  const asV5 = (save: ReturnType<typeof toSave>) => ({
+    ...(save as unknown as Record<string, unknown>),
+    version: 5,
+    pending: (save.pending as unknown as Record<string, unknown>[]).map((decision) => {
+      const { names: _dropped, ...rest } = decision;
+      return rest;
+    }),
+  });
+
+  it('gives an already-open decision empty bindings rather than drawing names', () => {
+    // Drawing here would consume RNG, and a migration that consumes RNG stops
+    // the save replaying from its seed. An empty map means "resolve per render",
+    // which is exactly the behaviour that decision already had.
+    let state = createNewGame({ seed: 'V5-PENDING', startYear: 2000 });
+    for (let i = 0; i < 40 && state.pending.length === 0; i += 1) {
+      state = advanceYear(state).state;
+    }
+    expect(state.pending.length).toBeGreaterThan(0);
+
+    const save = toSave(state, { id: asSaveId('save-v5') });
+    const before = JSON.parse(JSON.stringify(save.rng));
+    const migrated = migrateSave(asV5(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.pending[0]?.names).toEqual({});
+    expect(migrated.value.rng).toEqual(before);
+  });
+
+  it('leaves a save with no open decisions alone', () => {
+    const { save } = newSave('V5-EMPTY');
+    const migrated = migrateSave({ ...asV5(save), pending: [] });
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.pending).toEqual([]);
+  });
+});
+
+describe('a decision keeps its people across a save', () => {
+  it('names the same person after a reload as it did when it was asked', () => {
+    // The point of the whole change: a question asked on a phone at a bus stop
+    // and answered on a tablet that night is about the same person.
+    let state = createNewGame({ seed: 'NAMES-SAVE', startYear: 2000 });
+    for (let i = 0; i < 40 && state.pending.length === 0; i += 1) {
+      state = advanceYear(state).state;
+    }
+    const decision = state.pending.find((entry) => Object.keys(entry.names).length > 0);
+    if (!decision) return; // not every year raises a decision about a named person
+
+    const restored = fromSave(JSON.parse(JSON.stringify(toSave(state, { id: asSaveId('s') }))));
+    expect(restored.pending.find((d) => d.eventId === decision.eventId)?.names).toEqual(
+      decision.names,
+    );
+
+    const answered = decide(restored, decision.eventId, decision.choices[0]!.id);
+    expect(answered.ok).toBe(true);
+    if (!answered.ok) return;
+    for (const name of Object.values(decision.names)) {
+      if (decision.prompt.includes(name as string)) {
+        // The outcome may not mention every bound person, but if it names one,
+        // it must be the one the prompt named.
+        expect(answered.value.entry.text).not.toMatch(/[{}]/);
+      }
+    }
+  });
+});

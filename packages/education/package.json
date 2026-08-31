@@ -1,5 +1,5 @@
 {
-  "name": "@yearafter/simulation",
+  "name": "@yearafter/education",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -16,8 +16,6 @@
     "@yearafter/character": "workspace:*",
     "@yearafter/content": "workspace:*",
     "@yearafter/core": "workspace:*",
-    "@yearafter/education": "workspace:*",
-    "@yearafter/events": "workspace:*",
     "@yearafter/relationships": "workspace:*"
   },
   "devDependencies": {

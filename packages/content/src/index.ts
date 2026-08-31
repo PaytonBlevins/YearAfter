@@ -83,3 +83,9 @@ export const findNameCulture = (id: string): NameCulture | undefined => CULTURES
 /* -------------------------------------------------------------------------- */
 
 export * from './events';
+
+/* -------------------------------------------------------------------------- */
+/* Extracurricular activities (Ticket 0204)                                    */
+/* -------------------------------------------------------------------------- */
+
+export * from './activities';

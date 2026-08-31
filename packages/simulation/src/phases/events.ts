@@ -29,6 +29,8 @@ export interface EventPhaseOutput {
   readonly player: Character;
   readonly family: Household;
   readonly history: EventHistory;
+  /** School standing after events. Folded back into education state (0204). */
+  readonly behaviour: number;
   /** Feed lines for this year, in order. */
   readonly lines: readonly {
     readonly kind: TimelineKind;
@@ -54,6 +56,7 @@ export function buildEventContext(
     age,
     year,
     firstName: state.player.firstName,
+    lastName: state.player.lastName,
     sex: state.player.sex,
     stats: state.player.stats,
     talents: state.player.talents,
@@ -62,6 +65,8 @@ export function buildEventContext(
     nameCultureId: state.nameCultureId,
     homeCity: describeCity(state.player.currentLocation.cityId),
     flags: new Set(history.flags),
+    schoolStage: state.education.stage,
+    activityCount: state.education.activities.length,
   };
 }
 
@@ -85,15 +90,17 @@ export function applyOutcome(
   family: Household,
   history: EventHistory,
   outcome: EventOutcome,
-): { player: Character; family: Household; history: EventHistory } {
+  behaviour: number,
+): { player: Character; family: Household; history: EventHistory; behaviour: number } {
   const applied = applyEffects(
-    { stats: player.stats, family, cash: player.cash, history },
+    { stats: player.stats, family, cash: player.cash, behaviour, history },
     outcome.effects,
   );
   return {
     player: { ...player, stats: applied.stats, cash: applied.cash },
     family: applied.family,
     history: applied.history,
+    behaviour: applied.behaviour,
   };
 }
 
@@ -106,15 +113,17 @@ export function runEvents(state: GameState, age: number, year: number): EventPha
   let player = state.player;
   let family = state.family;
   let history = result.history;
+  let behaviour: number = state.education.behaviour;
   const lines: { kind: TimelineKind; text: string; eventId: string }[] = [];
 
   for (const outcome of result.outcomes) {
-    const applied = applyOutcome(player, family, history, outcome);
+    const applied = applyOutcome(player, family, history, outcome, behaviour);
     player = applied.player;
     family = applied.family;
     history = applied.history;
+    behaviour = applied.behaviour;
     lines.push({ kind: timelineKindFor(outcome), text: outcome.text, eventId: outcome.eventId });
   }
 
-  return { player, family, history, lines, decisions: result.decisions };
+  return { player, family, history, behaviour, lines, decisions: result.decisions };
 }

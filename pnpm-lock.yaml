@@ -38,6 +38,9 @@ importers:
       '@yearafter/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@yearafter/education':
+        specifier: workspace:*
+        version: link:../../packages/education
       '@yearafter/events':
         specifier: workspace:*
         version: link:../../packages/events
@@ -123,6 +126,28 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
 
+  packages/education:
+    dependencies:
+      '@yearafter/character':
+        specifier: workspace:*
+        version: link:../character
+      '@yearafter/content':
+        specifier: workspace:*
+        version: link:../content
+      '@yearafter/core':
+        specifier: workspace:*
+        version: link:../core
+      '@yearafter/relationships':
+        specifier: workspace:*
+        version: link:../relationships
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
+
   packages/events:
     dependencies:
       '@yearafter/character':
@@ -153,6 +178,9 @@ importers:
       '@yearafter/core':
         specifier: workspace:*
         version: link:../core
+      '@yearafter/education':
+        specifier: workspace:*
+        version: link:../education
       '@yearafter/events':
         specifier: workspace:*
         version: link:../events
@@ -200,6 +228,9 @@ importers:
       '@yearafter/core':
         specifier: workspace:*
         version: link:../core
+      '@yearafter/education':
+        specifier: workspace:*
+        version: link:../education
       '@yearafter/events':
         specifier: workspace:*
         version: link:../events

@@ -10,6 +10,7 @@
  */
 
 import { err, ok, type Result } from '@yearafter/core';
+import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
 import { CURRENT_SAVE_VERSION, type CurrentSaveGame } from './save-schema';
 
 export type MigrationError =
@@ -92,6 +93,66 @@ const migrations: Readonly<Record<number, Migration>> = {
     nameCultureId: save['nameCultureId'] ?? 'us-en',
     events: save['events'] ?? { lastFired: {}, scheduled: [], flags: [] },
     pending: save['pending'] ?? [],
+  }),
+
+  /**
+   * v4 -> v5: Ticket 0204 added schooling.
+   *
+   * An existing character is enrolled at the grade their AGE implies rather
+   * than starting at kindergarten — a fourteen-year-old who has been playing
+   * for a while is a freshman, not a five-year-old — but they get a neutral
+   * academic record, because inventing twelve years of grades they never lived
+   * would be worse than admitting the system did not exist yet.
+   *
+   * Pure, like every migration here: no RNG, no clock. Grade comes from the
+   * character's own age, which is already in the save.
+   */
+  4: (save) => {
+    const player = save['player'] as Record<string, unknown> | undefined;
+    const age = typeof player?.['age'] === 'number' ? (player['age'] as number) : 0;
+    const grade = age - SCHOOL_START_AGE;
+    const stage =
+      grade < 0
+        ? 'preschool'
+        : grade <= 5
+          ? 'elementary'
+          : grade <= 8
+            ? 'middle'
+            : grade <= GRADES_TO_GRADUATE
+              ? 'high'
+              : 'graduated';
+    return {
+      ...save,
+      version: 5,
+      education: save['education'] ?? {
+        stage,
+        gradeLevel: Math.max(-1, Math.min(GRADES_TO_GRADUATE, grade)),
+        schoolType: 'public',
+        performance: 50,
+        effort: 'normal',
+        behaviour: 70,
+        activities: [],
+      },
+    };
+  },
+
+  /**
+   * v5 -> v6: Ticket 0203b bound a decision's people once, at the moment it is
+   * raised, so the prompt and the outcome name the same person.
+   *
+   * A decision written by v5 has no bindings. It gets an EMPTY map, which the
+   * renderer treats as "resolve per render" — exactly the old behaviour. It must
+   * NOT draw names here: migrations are pure by contract (no RNG, no clock) or
+   * the save stops replaying from its seed. One already-open question keeping
+   * the old behaviour is a far smaller price than that.
+   */
+  5: (save) => ({
+    ...save,
+    version: 6,
+    pending: (Array.isArray(save['pending']) ? save['pending'] : []).map((decision) => {
+      const entry = decision as Record<string, unknown>;
+      return entry['names'] ? entry : { ...entry, names: {} };
+    }),
   }),
 };
 
@@ -182,6 +243,10 @@ export function validateCurrentSave(
     require('family.members', (candidate['family'] as Record<string, unknown> | undefined)?.[
       'members'
     ], Array.isArray((candidate['family'] as Record<string, unknown> | undefined)?.['members'])),
+    require('education.stage', (candidate['education'] as Record<string, unknown> | undefined)?.[
+      'stage'
+    ], typeof (candidate['education'] as Record<string, unknown> | undefined)?.['stage'] ===
+      'string'),
   ].filter((problem): problem is string => problem !== null);
 
   if (problems.length > 0) {

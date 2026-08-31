@@ -18,6 +18,7 @@ packages/
   content/                Versioned catalogs: names, locations, the event library.
   relationships/          NPCs, simulation tiers, the family model.
   events/                 The event engine. Generic — it never names an event.
+  education/              Schooling: enrolment, grades, behaviour, activities.
   simulation/             Seeded RNG, GameState, year advancement, new-game, decisions.
   persistence/            Versioned saves, migrations, repositories (memory + expo-sqlite).
 tools/
@@ -35,10 +36,11 @@ benefit.
 ## Dependency direction
 
 ```
-core  <-  character  <-  relationships  <-  content  <-  events  <-  simulation
-                                                                        |
-                                                        persistence  <--+
-                                                        apps/mobile  <--+
+core  <-  character  <-  relationships  <-  content  <-+-  events     <-  simulation
+                                                       +-  education        |
+                                                                            |
+                                                            persistence  <--+
+                                                            apps/mobile  <--+
 ```
 
 Strictly acyclic. `core` imports nothing.

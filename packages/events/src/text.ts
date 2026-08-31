@@ -1,11 +1,19 @@
 /**
- * Ticket 0203 — event text.
+ * Ticket 0203b — event text.
  *
  * Event copy is written with tokens rather than names, so one line covers every
  * family shape: "{mother} kept the drawing on the fridge for a year." A token
  * that cannot be resolved is a content bug, not a runtime one — the catalog test
  * proves every token in every line is resolvable — so resolution falls back to a
  * neutral phrase rather than rendering a literal brace at the player.
+ *
+ * NAMES ARE BOUND ONCE PER DECISION. An earlier version drew an incidental name
+ * every time a line rendered, which meant the prompt could say "{kid} is at the
+ * water fountain" and the outcome could name somebody else entirely. A decision
+ * declares the tokens it depends on (`personTokens`), the engine resolves them
+ * when the decision is raised, and the same bindings render the prompt, every
+ * option label and every outcome. Passive events keep the old behaviour, which
+ * is safe because a passive event is a single line.
  *
  * Tone rule from spec 725–770: concise and conversational. Light events can be
  * funny; serious ones are respectful. Second person, past tense, one or two
@@ -29,6 +37,7 @@ export const TEXT_TOKENS = [
   'city',
   'kid',
   'kid2',
+  'adult',
   'they',
   'them',
   'their',
@@ -36,25 +45,60 @@ export const TEXT_TOKENS = [
 
 export type TextToken = (typeof TEXT_TOKENS)[number];
 
+/** Tokens that draw a person who is not in the character's family. */
+export const PERSON_TOKENS = ['kid', 'kid2', 'adult'] as const;
+export type PersonToken = (typeof PERSON_TOKENS)[number];
+
+/** Names bound for one decision: token -> the person it means, all year. */
+export type NameBindings = Readonly<Partial<Record<PersonToken, string>>>;
+
 const TOKEN_PATTERN = /\{([a-zA-Z0-9]+)\}/g;
 
 export interface TokenSource {
-  /** Draws incidental names — the kid down the street, the rival at school. */
+  /** Draws incidental names — the kid down the street, the teacher next door. */
   pick<T>(values: readonly T[]): T;
 }
 
 const FALLBACK_NAMES = ['Sam', 'Alex', 'Jamie', 'Robin', 'Casey'];
 
+/**
+ * Surnames, for an adult the character would not call by a first name.
+ *
+ * A teacher is "Mrs. Okafor", not "Grace" — and using a child's given-name pool
+ * for a forty-year-old produces the wrong register entirely.
+ */
+function adultName(context: EventContext, source: TokenSource, taken: Set<string>): string {
+  const culture = findNameCulture(context.nameCultureId);
+  if (!culture) return 'Mr. Alvarez';
+  let surname = source.pick(culture.surnames);
+  for (let attempt = 0; attempt < 6 && taken.has(surname); attempt += 1) {
+    surname = source.pick(culture.surnames);
+  }
+  taken.add(surname);
+  // Alternating by a property of the name keeps this deterministic without
+  // spending another draw on a coin flip.
+  const title = surname.length % 2 === 0 ? 'Mrs.' : 'Mr.';
+  return `${title} ${surname}`;
+}
+
+/**
+ * Names the character's own family already uses, which incidental people must
+ * not reuse. "Fell out with Sebastián" when the player IS Sebastián reads as a
+ * bug even though it is a legitimate draw.
+ */
+function namesInUse(context: EventContext): Set<string> {
+  return new Set<string>([
+    context.firstName,
+    context.lastName,
+    ...context.family.members.map((member) => member.firstName),
+    ...context.family.members.map((member) => member.lastName),
+  ]);
+}
+
 function incidentalNames(context: EventContext, source: TokenSource, count: number): string[] {
   const culture = findNameCulture(context.nameCultureId);
   const pool = culture ? [...culture.male, ...culture.female] : FALLBACK_NAMES;
-  // "Fell out with Sebastián" when the player IS Sebastián reads as a bug even
-  // though it is a legitimate draw, and so does a friend who shares a parent's
-  // name. Both are excluded, and so is the other incidental name in the line.
-  const taken = new Set<string>([
-    context.firstName,
-    ...context.family.members.map((member) => member.firstName),
-  ]);
+  const taken = namesInUse(context);
   const chosen: string[] = [];
   for (let i = 0; i < count; i += 1) {
     let name = source.pick(pool);
@@ -69,6 +113,44 @@ function incidentalNames(context: EventContext, source: TokenSource, count: numb
   return chosen;
 }
 
+/**
+ * Bind the people a decision talks about, once.
+ *
+ * Called when a decision is RAISED. The result is stored on the pending decision
+ * and used to render everything about it from then on, including the outcome the
+ * player sees after answering — possibly days later, on a different device.
+ */
+export function bindPersonNames(
+  tokens: readonly string[],
+  context: EventContext,
+  source: TokenSource,
+): NameBindings {
+  const bindings: Partial<Record<PersonToken, string>> = {};
+  const taken = namesInUse(context);
+
+  const wantsKid = tokens.includes('kid');
+  const wantsKid2 = tokens.includes('kid2');
+  if (wantsKid || wantsKid2) {
+    const culture = findNameCulture(context.nameCultureId);
+    const pool = culture ? [...culture.male, ...culture.female] : FALLBACK_NAMES;
+    for (const token of ['kid', 'kid2'] as const) {
+      if (!tokens.includes(token)) continue;
+      let name = source.pick(pool);
+      for (let attempt = 0; attempt < 6 && taken.has(name); attempt += 1) {
+        name = source.pick(pool);
+      }
+      taken.add(name);
+      bindings[token] = name;
+    }
+  }
+
+  if (tokens.includes('adult')) {
+    bindings.adult = adultName(context, source, taken);
+  }
+
+  return bindings;
+}
+
 function oldest(members: readonly FamilyMember[]): FamilyMember | undefined {
   return [...members].sort((a, b) => a.birthYear - b.birthYear)[0];
 }
@@ -76,17 +158,24 @@ function oldest(members: readonly FamilyMember[]): FamilyMember | undefined {
 /**
  * Resolve every token in a line.
  *
- * `source` is the RNG stream, and it is consumed only when a line actually
- * contains an incidental-name token — so adding a `{kid}` to one event's text
- * does not shift the draws every other event sees.
+ * `bindings` wins where present — that is how a decision keeps one name across
+ * its prompt and its outcomes. Without bindings, incidental names are drawn
+ * here, and `source` is consumed only when the line actually needs one, so
+ * adding a `{kid}` to one event's copy does not shift the draws every other
+ * event sees.
  */
 export function renderEventText(
   template: string,
   context: EventContext,
   source: TokenSource,
+  bindings: NameBindings = {},
 ): string {
-  const needsNames = /\{kid2?\}/.test(template);
-  const [kid, kid2] = needsNames ? incidentalNames(context, source, 2) : ['a kid', 'another kid'];
+  const needsIncidental = /\{kid2?\}/.test(template) && (!bindings.kid || !bindings.kid2);
+  const [drawnKid, drawnKid2] = needsIncidental
+    ? incidentalNames(context, source, 2)
+    : [undefined, undefined];
+  const needsAdult = /\{adult\}/.test(template) && !bindings.adult;
+  const drawnAdult = needsAdult ? adultName(context, source, namesInUse(context)) : undefined;
 
   const mum = mother(context.family);
   const dad = father(context.family);
@@ -104,8 +193,9 @@ export function renderEventText(
     siblingRel: sibling ? (sibling.sex === 'male' ? 'brother' : 'sister') : undefined,
     olderSibling: older?.firstName,
     city: context.homeCity,
-    kid,
-    kid2,
+    kid: bindings.kid ?? drawnKid,
+    kid2: bindings.kid2 ?? drawnKid2,
+    adult: bindings.adult ?? drawnAdult,
     they: context.sex === 'male' ? 'he' : 'she',
     them: context.sex === 'male' ? 'him' : 'her',
     their: context.sex === 'male' ? 'his' : 'her',
@@ -132,6 +222,9 @@ const FALLBACKS: Record<string, string> = {
   siblingRel: 'sibling',
   olderSibling: 'your older sibling',
   city: 'town',
+  kid: 'a kid you knew',
+  kid2: 'another kid',
+  adult: 'a teacher',
 };
 
 /** Every token name used in a line. For validation. */

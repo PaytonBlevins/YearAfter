@@ -59,6 +59,22 @@ export function matchesCondition(condition: EventCondition, context: EventContex
   if (condition.ageMax !== undefined && context.age > condition.ageMax) return false;
   if (condition.sex !== undefined && context.sex !== condition.sex) return false;
 
+  if (condition.schoolStageAny && !condition.schoolStageAny.includes(context.schoolStage)) {
+    return false;
+  }
+  if (
+    condition.activitiesAtLeast !== undefined &&
+    context.activityCount < condition.activitiesAtLeast
+  ) {
+    return false;
+  }
+  if (
+    condition.activitiesAtMost !== undefined &&
+    context.activityCount > condition.activitiesAtMost
+  ) {
+    return false;
+  }
+
   const playerBirthYear = context.year - context.age;
   for (const requirement of condition.requires ?? []) {
     if (!satisfiesFamily(requirement, context.family, playerBirthYear)) return false;

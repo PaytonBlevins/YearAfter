@@ -20,7 +20,43 @@ import {
 } from './events';
 
 const TOKEN = /\{([a-zA-Z0-9]+)\}/g;
-const FREE_TOKENS = new Set(['me', 'city', 'kid', 'kid2', 'they', 'them', 'their']);
+const FREE_TOKENS = new Set(['me', 'city', 'kid', 'kid2', 'adult', 'they', 'them', 'their']);
+/** People the engine invents. A decision must declare these to bind them once. */
+const INCIDENTAL = new Set(['kid', 'kid2', 'adult']);
+/** {they}/{them}/{their} are the PLAYER's pronouns, never an incidental person's. */
+const PLAYER_PRONOUNS = new Set(['they', 'them', 'their']);
+const LABEL_NOISE = new Set(['the', 'a', 'an', 'to', 'for', 'it', 'them', 'your', 'my', 's']);
+
+/** Opening phrase of a choice label, for the intensity check (V2). */
+function labelStem(label: string): string {
+  return label
+    .replace(/\{[a-zA-Z0-9]+\}/g, ' ')
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.replace(/[^a-z]/g, ''))
+    .filter((word) => word && !LABEL_NOISE.has(word))
+    .slice(0, 2)
+    .join(' ');
+}
+
+function isDecision(event: EventDefinition): boolean {
+  return event.type === 'decision' || event.type === 'opportunity';
+}
+
+/** Every result a decision can produce, with the choice's own effects folded in. */
+function resultsOf(event: EventDefinition) {
+  const results: { text: string; effects?: EventDefinition['effects'] }[] = [];
+  for (const choice of event.choices ?? []) {
+    if (choice.text) results.push({ text: choice.text, effects: choice.effects });
+    for (const outcome of choice.outcomes ?? []) {
+      results.push({
+        text: outcome.text,
+        effects: { ...choice.effects, ...outcome.effects },
+      });
+    }
+  }
+  return results;
+}
 const TOKEN_GUARDS: Record<string, string[]> = {
   mother: ['mother', 'bothParents'],
   father: ['father', 'bothParents'],
@@ -146,7 +182,9 @@ describe('the childhood catalog', () => {
         expect(Boolean(choice.text) !== Boolean(choice.outcomes), `${event.id}/${choice.id}`).toBe(
           true,
         );
-        expect(choice.label.length, `${event.id}/${choice.id}`).toBeLessThanOrEqual(26);
+        // Labels wrap on the decision card rather than truncating, so two
+        // lines is survivable and an essay is not.
+        expect(choice.label.length, `${event.id}/${choice.id}`).toBeLessThanOrEqual(38);
         for (const outcome of choice.outcomes ?? []) {
           expect(outcome.weight, `${event.id}/${choice.id}`).toBeGreaterThan(0);
         }
@@ -219,6 +257,123 @@ describe('the childhood catalog', () => {
         );
       });
       expect(universal.length, `age ${age}`).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('gives every decision three real options, or says why not (V1)', () => {
+    // "Do it / don't" is not a decision. Some situations genuinely have two
+    // answers, and those declare `binaryOk` rather than being padded with a
+    // third option nobody would ever take.
+    for (const event of CHILDHOOD_EVENTS) {
+      if (!isDecision(event)) continue;
+      const count = (event.choices ?? []).length;
+      if (count < 3) {
+        expect(event.binaryOk, `${event.id} has ${count} options`).toBe(true);
+      }
+    }
+  });
+
+  it('offers different tactics, not one tactic at two volumes (V2)', () => {
+    for (const event of CHILDHOOD_EVENTS) {
+      if (!isDecision(event)) continue;
+      const stems = (event.choices ?? []).map((choice) => labelStem(choice.label));
+      const seen = new Set<string>();
+      for (const stem of stems) {
+        if (!stem) continue;
+        expect(seen.has(stem), `${event.id}: two options open with "${stem}"`).toBe(false);
+        seen.add(stem);
+      }
+    }
+  });
+
+  it('moves happiness, and can always land badly (V3)', () => {
+    // A decision every branch of which is neutral-or-better is not a decision,
+    // it is a reward with extra steps.
+    for (const event of CHILDHOOD_EVENTS) {
+      if (!isDecision(event)) continue;
+      const happiness = resultsOf(event).map((result) => result.effects?.stats?.happiness ?? 0);
+      expect(
+        happiness.some((value) => value !== 0),
+        `${event.id} never moves happiness`,
+      ).toBe(true);
+      expect(Math.min(...happiness), `${event.id} cannot land badly`).toBeLessThan(0);
+      if (event.physical) {
+        const health = resultsOf(event).map((result) => result.effects?.stats?.health ?? 0);
+        expect(
+          health.some((value) => value !== 0),
+          `${event.id} is physical but health never moves`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it('names the amount in the line the player reads, whenever money moves (V4)', () => {
+    const check = (
+      cash: { delta: number; source: string } | undefined,
+      text: string,
+      where: string,
+    ) => {
+      if (!cash) return;
+      expect(cash.source.trim().length, `${where} moves money with no source`).toBeGreaterThan(0);
+      const amount = Math.abs(cash.delta);
+      const written = [`$${amount}`, `$${amount.toLocaleString('en-US')}`];
+      expect(
+        written.some((form) => text.includes(form)),
+        `${where} moves $${amount} but the text does not say so: ${text}`,
+      ).toBe(true);
+    };
+
+    for (const event of CHILDHOOD_EVENTS) {
+      check(event.effects?.cash, event.text.join(' '), event.id);
+      for (const choice of event.choices ?? []) {
+        if (choice.text) check(choice.effects?.cash, choice.text, `${event.id}/${choice.id}`);
+        for (const outcome of choice.outcomes ?? []) {
+          check(
+            { ...choice.effects, ...outcome.effects }.cash,
+            outcome.text,
+            `${event.id}/${choice.id} outcome`,
+          );
+        }
+      }
+    }
+  });
+
+  it('declares every person a decision names, so one name carries through (V5)', () => {
+    for (const event of CHILDHOOD_EVENTS) {
+      if (!isDecision(event)) continue;
+      const declared = new Set(event.personTokens ?? []);
+      const used = new Set<string>();
+      const collect = (text: string) => {
+        for (const match of text.matchAll(TOKEN)) {
+          const token = match[1] as string;
+          if (INCIDENTAL.has(token)) used.add(token);
+        }
+      };
+      event.text.forEach(collect);
+      for (const choice of event.choices ?? []) {
+        collect(choice.label);
+        if (choice.text) collect(choice.text);
+        for (const outcome of choice.outcomes ?? []) collect(outcome.text);
+      }
+      for (const token of used) {
+        expect(declared.has(token), `${event.id} uses {${token}} without declaring it`).toBe(true);
+      }
+      for (const token of declared) {
+        expect(used.has(token), `${event.id} declares {${token}} but never uses it`).toBe(true);
+      }
+    }
+  });
+
+  it('never uses a player pronoun for somebody else', () => {
+    // "You asked {kid} how {they} did it" renders the PLAYER's gender for the
+    // other person. Incidental people have no gender; they get named.
+    for (const event of CHILDHOOD_EVENTS) {
+      for (const { text } of textsOf(event)) {
+        const tokens = new Set([...text.matchAll(TOKEN)].map((match) => match[1] as string));
+        const namesSomeone = [...tokens].some((token) => INCIDENTAL.has(token));
+        const usesPronoun = [...tokens].some((token) => PLAYER_PRONOUNS.has(token));
+        expect(namesSomeone && usesPronoun, `${event.id}: ${text}`).toBe(false);
+      }
     }
   });
 

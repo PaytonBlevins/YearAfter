@@ -44,6 +44,13 @@ export interface ListRowProps {
   readonly subtitle?: string;
   /** Right-aligned value, e.g. a salary or a count. */
   readonly value?: string;
+  /**
+   * A third, quieter line for the price of pressing the row — hours a week, a
+   * yearly cost. Separate from `subtitle` because the subtitle describes what
+   * the thing IS and this describes what it COSTS, and a player scanning a list
+   * is asking those two questions at different moments.
+   */
+  readonly meta?: string;
   readonly onPress?: () => void;
   /** Defaults to 'navigate' when pressable, 'none' otherwise. */
   readonly affordance?: RowAffordance;
@@ -63,6 +70,7 @@ export function ListRow({
   title,
   subtitle,
   value,
+  meta,
   onPress,
   affordance,
   disabled = false,
@@ -105,6 +113,11 @@ export function ListRow({
         {subtitle ? (
           <Text numberOfLines={1} style={styles.rowSubtitle}>
             {subtitle}
+          </Text>
+        ) : null}
+        {meta ? (
+          <Text numberOfLines={1} style={styles.rowMeta}>
+            {meta}
           </Text>
         ) : null}
         {meter !== undefined ? (
@@ -343,6 +356,14 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeights.label,
     color: colors.inkMuted,
     marginTop: 1,
+  },
+  rowMeta: {
+    fontFamily: typography.family,
+    fontSize: typography.sizes.caption,
+    lineHeight: typography.lineHeights.caption,
+    color: colors.inkFaint,
+    fontVariant: ['tabular-nums'],
+    marginTop: 2,
   },
   rowValue: {
     fontFamily: typography.family,

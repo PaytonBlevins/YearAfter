@@ -9,6 +9,7 @@
  */
 
 import type { Character } from '@yearafter/character';
+import { NOT_YET_ENROLLED, type EducationState } from '@yearafter/education';
 import { EMPTY_HISTORY, type EventHistory, type PendingDecision } from '@yearafter/events';
 import { EMPTY_HOUSEHOLD, type Household } from '@yearafter/relationships';
 import { Rng } from './rng/rng';
@@ -42,6 +43,13 @@ export interface GameState {
   /** What the event engine remembers: cooldowns, chains and story flags (0203). */
   readonly events: EventHistory;
   /**
+   * Schooling (Ticket 0204): enrolment, grades, behaviour and what they joined.
+   *
+   * Beside the player rather than on them, for the same reason the family is —
+   * on dynasty continuation the player is replaced and this starts again.
+   */
+  readonly education: EducationState;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -62,6 +70,7 @@ export interface CreateGameStateOptions {
   readonly family?: Household;
   readonly nameCultureId?: string;
   readonly events?: EventHistory;
+  readonly education?: EducationState;
   readonly pending?: readonly PendingDecision[];
 }
 
@@ -76,6 +85,7 @@ export const createGameState = (
   family: options.family ?? EMPTY_HOUSEHOLD,
   nameCultureId: options.nameCultureId ?? 'us-en',
   events: options.events ?? EMPTY_HISTORY,
+  education: options.education ?? NOT_YET_ENROLLED,
   pending: options.pending ?? [],
   rng,
 });

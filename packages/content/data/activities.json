@@ -1,0 +1,450 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "act.cross-country",
+      "name": "Cross-Country",
+      "kind": "sport",
+      "blurb": "Six miles before most people are awake.",
+      "hoursPerWeek": 6,
+      "requires": {
+        "stages": ["middle", "high"]
+      },
+      "effects": {
+        "health": 5,
+        "discipline": 3,
+        "willpower": 2
+      },
+      "joinText": "Joined the cross-country team. First practice was at six in the morning.",
+      "leaveText": "Stopped running cross-country. Slept in for the first time since September."
+    },
+    {
+      "id": "act.basketball",
+      "name": "Basketball",
+      "kind": "sport",
+      "blurb": "Practice every night, games on Fridays.",
+      "hoursPerWeek": 8,
+      "requires": {
+        "stages": ["middle", "high"],
+        "needsParent": true
+      },
+      "effects": {
+        "health": 4,
+        "charisma": 3,
+        "discipline": 2
+      },
+      "joinText": "Made the basketball team. Practice every night, games on Fridays.",
+      "leaveText": "Turned in your basketball jersey."
+    },
+    {
+      "id": "act.football",
+      "name": "Football",
+      "kind": "sport",
+      "blurb": "Two-a-days in August. Everyone knows you by October.",
+      "hoursPerWeek": 10,
+      "requires": {
+        "stages": ["high"],
+        "needsParent": true
+      },
+      "effects": {
+        "health": 3,
+        "charisma": 5,
+        "willpower": 3
+      },
+      "joinText": "Made the football team. Two-a-days started in August.",
+      "leaveText": "Quit football. The coach did not take it well."
+    },
+    {
+      "id": "act.swimming",
+      "name": "Swim Team",
+      "kind": "sport",
+      "blurb": "Chlorine in everything you own.",
+      "hoursPerWeek": 7,
+      "annualCost": 180,
+      "costSource": "swim team fees and a season of goggles",
+      "requires": {
+        "stages": ["elementary", "middle", "high"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
+      },
+      "effects": {
+        "health": 6,
+        "discipline": 3
+      },
+      "joinText": "Joined the swim team. Everything you own smells like chlorine now.",
+      "leaveText": "Left the swim team."
+    },
+    {
+      "id": "act.soccer",
+      "name": "Soccer",
+      "kind": "sport",
+      "blurb": "Saturday mornings, every Saturday, all year.",
+      "hoursPerWeek": 6,
+      "annualCost": 95,
+      "costSource": "league registration and a pair of cleats",
+      "requires": {
+        "stages": ["elementary", "middle", "high"],
+        "needsParent": true
+      },
+      "effects": {
+        "health": 5,
+        "charisma": 2
+      },
+      "joinText": "Signed up for soccer. Games are Saturday mornings, every Saturday.",
+      "leaveText": "Stopped playing soccer."
+    },
+    {
+      "id": "act.wrestling",
+      "name": "Wrestling",
+      "kind": "sport",
+      "blurb": "Cutting weight is a normal Tuesday.",
+      "hoursPerWeek": 9,
+      "requires": {
+        "stages": ["high"]
+      },
+      "effects": {
+        "health": 2,
+        "willpower": 6,
+        "discipline": 4
+      },
+      "joinText": "Joined the wrestling team. Cutting weight turned out to be most of it.",
+      "leaveText": "Quit wrestling and ate an entire pizza."
+    },
+    {
+      "id": "act.track",
+      "name": "Track & Field",
+      "kind": "sport",
+      "blurb": "Spring season. Bus rides and a stopwatch.",
+      "hoursPerWeek": 6,
+      "requires": {
+        "stages": ["middle", "high"]
+      },
+      "effects": {
+        "health": 4,
+        "discipline": 2,
+        "willpower": 2
+      },
+      "joinText": "Went out for track. Spring meets, long bus rides, one stopwatch.",
+      "leaveText": "Left the track team."
+    },
+    {
+      "id": "act.band",
+      "name": "Marching Band",
+      "kind": "arts",
+      "blurb": "Field practice in full uniform in September heat.",
+      "hoursPerWeek": 9,
+      "annualCost": 216,
+      "costSource": "a rented clarinet at $18 a month",
+      "requires": {
+        "stages": ["middle", "high"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"],
+        "needsParent": true
+      },
+      "effects": {
+        "discipline": 4,
+        "charisma": 2,
+        "smarts": 2
+      },
+      "joinText": "Joined marching band. Mom rented an instrument at $18 a month.",
+      "leaveText": "Turned in the rented instrument and quit band."
+    },
+    {
+      "id": "act.school-play",
+      "name": "School Play",
+      "kind": "arts",
+      "blurb": "Six quiet weeks, then three of everything at once.",
+      "hoursPerWeek": 8,
+      "requires": {
+        "stages": ["elementary", "middle", "high"],
+        "needsParent": true
+      },
+      "effects": {
+        "charisma": 5,
+        "happiness": 3
+      },
+      "joinText": "Got cast in the school play. Rehearsals run late through opening night.",
+      "leaveText": "Dropped out of the school play."
+    },
+    {
+      "id": "act.choir",
+      "name": "Choir",
+      "kind": "arts",
+      "blurb": "Two concerts a year and a lot of standing on risers.",
+      "hoursPerWeek": 4,
+      "requires": {
+        "stages": ["elementary", "middle", "high"]
+      },
+      "effects": {
+        "charisma": 3,
+        "happiness": 2
+      },
+      "joinText": "Joined choir. Two concerts a year and a great deal of standing on risers.",
+      "leaveText": "Left choir."
+    },
+    {
+      "id": "act.art-club",
+      "name": "Art Club",
+      "kind": "arts",
+      "blurb": "Turpentine, and nobody hurrying you along.",
+      "hoursPerWeek": 3,
+      "requires": {
+        "stages": ["middle", "high"]
+      },
+      "effects": {
+        "happiness": 4,
+        "smarts": 1
+      },
+      "joinText": "Joined art club. Thursdays in a room that smells like turpentine.",
+      "leaveText": "Stopped going to art club."
+    },
+    {
+      "id": "act.jazz-band",
+      "name": "Jazz Band",
+      "kind": "arts",
+      "blurb": "Before school, for people who already play.",
+      "hoursPerWeek": 6,
+      "requires": {
+        "stages": ["high"],
+        "talentsAny": ["music"]
+      },
+      "effects": {
+        "discipline": 3,
+        "charisma": 3,
+        "happiness": 3
+      },
+      "joinText": "Got into jazz band. Rehearsals before school, twice a week.",
+      "leaveText": "Left jazz band."
+    },
+    {
+      "id": "act.chess",
+      "name": "Chess Club",
+      "kind": "academic",
+      "blurb": "Two hours a week and a slow, permanent improvement.",
+      "hoursPerWeek": 2,
+      "requires": {
+        "stages": ["elementary", "middle", "high"]
+      },
+      "effects": {
+        "smarts": 4,
+        "discipline": 1
+      },
+      "joinText": "Joined chess club. Two hours a week in the library.",
+      "leaveText": "Stopped going to chess club."
+    },
+    {
+      "id": "act.science-olympiad",
+      "name": "Science Olympiad",
+      "kind": "academic",
+      "blurb": "Regionals in March. Somebody's dad drives.",
+      "hoursPerWeek": 5,
+      "annualCost": 25,
+      "costSource": "Science Olympiad registration, covered by the booster club",
+      "requires": {
+        "stages": ["middle", "high"],
+        "statAtLeast": {
+          "smarts": 55
+        }
+      },
+      "effects": {
+        "smarts": 5,
+        "discipline": 2
+      },
+      "joinText": "Joined Science Olympiad. Registration was $25 and the booster club paid it.",
+      "leaveText": "Left Science Olympiad."
+    },
+    {
+      "id": "act.debate",
+      "name": "Debate Team",
+      "kind": "academic",
+      "blurb": "Weekend tournaments in other schools' cafeterias.",
+      "hoursPerWeek": 6,
+      "requires": {
+        "stages": ["high"],
+        "statAtLeast": {
+          "charisma": 50
+        },
+        "needsParent": true
+      },
+      "effects": {
+        "charisma": 5,
+        "smarts": 3,
+        "willpower": 2
+      },
+      "joinText": "Joined the debate team. Tournaments are weekends, in other schools' cafeterias.",
+      "leaveText": "Quit debate."
+    },
+    {
+      "id": "act.robotics",
+      "name": "Robotics",
+      "kind": "academic",
+      "blurb": "Solder, and a competition in April.",
+      "hoursPerWeek": 7,
+      "annualCost": 140,
+      "costSource": "robotics team parts and entry fees",
+      "requires": {
+        "stages": ["middle", "high"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
+      },
+      "effects": {
+        "smarts": 5,
+        "discipline": 3
+      },
+      "joinText": "Joined the robotics team. Every weekend in a room that smells like solder.",
+      "leaveText": "Left the robotics team."
+    },
+    {
+      "id": "act.math-team",
+      "name": "Math Team",
+      "kind": "academic",
+      "blurb": "Before school. Nobody knows it exists.",
+      "hoursPerWeek": 3,
+      "requires": {
+        "stages": ["middle", "high"],
+        "statAtLeast": {
+          "smarts": 60
+        }
+      },
+      "effects": {
+        "smarts": 4
+      },
+      "joinText": "Joined the math team. Meets before school; nobody else knows it exists.",
+      "leaveText": "Left the math team."
+    },
+    {
+      "id": "act.yearbook",
+      "name": "Yearbook",
+      "kind": "service",
+      "blurb": "Deadlines in February that nobody warned you about.",
+      "hoursPerWeek": 4,
+      "requires": {
+        "stages": ["middle", "high"]
+      },
+      "effects": {
+        "discipline": 3,
+        "charisma": 2
+      },
+      "joinText": "Joined yearbook staff. The February deadline is the whole year.",
+      "leaveText": "Left the yearbook staff."
+    },
+    {
+      "id": "act.student-council",
+      "name": "Student Council",
+      "kind": "social",
+      "blurb": "You have to be elected. You can lose.",
+      "hoursPerWeek": 4,
+      "requires": {
+        "stages": ["middle", "high"],
+        "statAtLeast": {
+          "charisma": 58
+        }
+      },
+      "effects": {
+        "charisma": 5,
+        "discipline": 2
+      },
+      "joinText": "Won a seat on student council.",
+      "leaveText": "Left student council."
+    },
+    {
+      "id": "act.newspaper",
+      "name": "School Paper",
+      "kind": "service",
+      "blurb": "A deadline every two weeks, forever.",
+      "hoursPerWeek": 5,
+      "requires": {
+        "stages": ["high"]
+      },
+      "effects": {
+        "smarts": 3,
+        "discipline": 4,
+        "charisma": 1
+      },
+      "joinText": "Joined the school paper. A deadline every two weeks, forever.",
+      "leaveText": "Left the school paper."
+    },
+    {
+      "id": "act.volunteering",
+      "name": "Volunteering",
+      "kind": "service",
+      "blurb": "Saturday mornings at the food bank.",
+      "hoursPerWeek": 4,
+      "requires": {
+        "stages": ["middle", "high"]
+      },
+      "effects": {
+        "happiness": 4,
+        "charisma": 2,
+        "discipline": 2
+      },
+      "joinText": "Started volunteering Saturday mornings at the food bank.",
+      "leaveText": "Stopped volunteering."
+    },
+    {
+      "id": "act.scouts",
+      "name": "Scouts",
+      "kind": "social",
+      "blurb": "Camping trips and a shirt covered in patches.",
+      "hoursPerWeek": 5,
+      "annualCost": 70,
+      "costSource": "scout dues and a uniform shirt",
+      "requires": {
+        "stages": ["elementary", "middle"],
+        "needsParent": true
+      },
+      "effects": {
+        "health": 3,
+        "discipline": 3,
+        "happiness": 2
+      },
+      "joinText": "Joined scouts. Dues were $70 and the shirt came covered in space for patches.",
+      "leaveText": "Left scouts."
+    },
+    {
+      "id": "act.drama-club",
+      "name": "Drama Club",
+      "kind": "arts",
+      "blurb": "Improv games in a carpeted room, twice a week.",
+      "hoursPerWeek": 4,
+      "requires": {
+        "stages": ["middle", "high"]
+      },
+      "effects": {
+        "charisma": 4,
+        "happiness": 3
+      },
+      "joinText": "Joined drama club. Improv games in a carpeted room, twice a week.",
+      "leaveText": "Left drama club."
+    },
+    {
+      "id": "act.reading-club",
+      "name": "Reading Club",
+      "kind": "academic",
+      "blurb": "Tuesdays in the library, one box of paperbacks.",
+      "hoursPerWeek": 2,
+      "requires": {
+        "stages": ["elementary", "middle"]
+      },
+      "effects": {
+        "smarts": 4,
+        "happiness": 2
+      },
+      "joinText": "Joined the reading club. Tuesdays in the library, one box of donated paperbacks.",
+      "leaveText": "Stopped going to the reading club."
+    },
+    {
+      "id": "act.gsa",
+      "name": "Community Club",
+      "kind": "social",
+      "blurb": "A room at lunch, no explaining required.",
+      "hoursPerWeek": 2,
+      "requires": {
+        "stages": ["middle", "high"]
+      },
+      "effects": {
+        "happiness": 4,
+        "charisma": 2
+      },
+      "joinText": "Started going to the club that meets at lunch. Easiest room in the building.",
+      "leaveText": "Stopped going to the lunchtime club."
+    }
+  ]
+}

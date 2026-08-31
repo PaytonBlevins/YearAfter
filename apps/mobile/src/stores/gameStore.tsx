@@ -29,6 +29,7 @@ import {
   type GameState,
 } from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
+import { join, leave, type StudyEffort } from '@yearafter/education';
 import type { TimelineEntry } from '@yearafter/character';
 import {
   DEFAULT_SETTINGS,
@@ -53,7 +54,12 @@ interface GameContextValue {
    */
   readonly decision: PendingDecision | null;
   readonly advance: () => void;
-  readonly answer: (eventId: string, choiceId: string) => void;
+  /** Returns a screen the chosen option asked to open, if any (Ticket 0204). */
+  readonly answer: (eventId: string, choiceId: string) => string | undefined;
+  /** Ticket 0204. The one school lever the player has (spec 1821). */
+  readonly setEffort: (effort: StudyEffort) => void;
+  readonly joinActivity: (activityId: string) => void;
+  readonly leaveActivity: (activityId: string) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   readonly updateSettings: (patch: Partial<SaveSettings>) => void;
 }
@@ -160,7 +166,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   }, [persist, saveId, settings]);
 
   const answer = useCallback(
-    (eventId: string, choiceId: string) => {
+    (eventId: string, choiceId: string): string | undefined => {
+      // The chosen option may ask to open a screen ("See what they offer" →
+      // the activities list). The simulation reports it; navigating is the
+      // app's job, so it is returned rather than acted on here.
+      let opens: string | undefined;
       setState((current) => {
         if (!current) return current;
         const result = resolveDecision(current, eventId, choiceId);
@@ -169,12 +179,65 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           setSaveError(`That choice is no longer available (${result.error}).`);
           return current;
         }
+        opens = result.value.opens;
         setLastEntries((entries) => [...entries, result.value.entry]);
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
       });
+      return opens;
     },
     [persist, saveId, settings],
+  );
+
+  /**
+   * Ticket 0204 school actions.
+   *
+   * These change state between years rather than during one: effort applies to
+   * the next school year, and joining takes effect the same way. Nothing here
+   * advances time — CORE_RULES 13.3, advancing is one control.
+   */
+  const mutateEducation = useCallback(
+    (change: (state: GameState) => GameState) => {
+      setState((current) => {
+        if (!current) return current;
+        const next = change(current);
+        if (next === current) return current;
+        if (saveId) persist(next, saveId, settings);
+        return next;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const setEffort = useCallback(
+    (effort: StudyEffort) => {
+      mutateEducation((current) =>
+        current.education.effort === effort
+          ? current
+          : { ...current, education: { ...current.education, effort } },
+      );
+    },
+    [mutateEducation],
+  );
+
+  const joinActivity = useCallback(
+    (activityId: string) => {
+      mutateEducation((current) => ({
+        ...current,
+        education: join(current.education, activityId, current.player.age),
+      }));
+    },
+    [mutateEducation],
+  );
+
+  const leaveActivity = useCallback(
+    (activityId: string) => {
+      mutateEducation((current) => ({
+        ...current,
+        education: leave(current.education, activityId),
+      }));
+    },
+    [mutateEducation],
   );
 
   const updateSettings = useCallback(
@@ -199,6 +262,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       decision: state?.pending[0] ?? null,
       advance,
       answer,
+      setEffort,
+      joinActivity,
+      leaveActivity,
       startNewLife,
       updateSettings,
     }),
@@ -211,6 +277,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       lastEntries,
       advance,
       answer,
+      setEffort,
+      joinActivity,
+      leaveActivity,
       startNewLife,
       updateSettings,
     ],

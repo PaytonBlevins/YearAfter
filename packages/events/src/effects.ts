@@ -21,6 +21,12 @@ export interface EffectTargets {
   readonly stats: VisibleStats;
   readonly family: Household;
   readonly cash: Money;
+  /**
+   * School standing (Ticket 0204). Carried as a bare number rather than as the
+   * education state, so this package still does not depend on
+   * @yearafter/education — the phase module owns putting it back.
+   */
+  readonly behaviour: number;
   readonly history: EventHistory;
 }
 
@@ -57,12 +63,19 @@ export function applyEffects(targets: EffectTargets, effects?: EventEffects): Ef
   // ledger (Ticket 0301); until then the floor is zero rather than a negative
   // balance nothing in the game yet knows how to resolve.
   const cash =
-    effects.cash === undefined ? targets.cash : max(ZERO, add(targets.cash, dollars(effects.cash)));
+    effects.cash === undefined
+      ? targets.cash
+      : max(ZERO, add(targets.cash, dollars(effects.cash.delta)));
+
+  const behaviour =
+    effects.behaviour === undefined
+      ? targets.behaviour
+      : clampStat(targets.behaviour + effects.behaviour);
 
   const history =
     effects.setFlags || effects.clearFlags
       ? withFlags(targets.history, effects.setFlags, effects.clearFlags)
       : targets.history;
 
-  return { stats, family, cash, history };
+  return { stats, family, cash, behaviour, history };
 }

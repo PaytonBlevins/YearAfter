@@ -13,6 +13,7 @@ import { DecisionCard } from '../components/DecisionCard';
 import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
 import { FamilyScreen } from '../screens/FamilyScreen';
+import { SchoolActivitiesScreen } from '../screens/SchoolActivitiesScreen';
 import {
   ActivitiesScreen,
   AssetsScreen,
@@ -39,12 +40,27 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   doctor: DoctorScreen,
   relocate: RelocateScreen,
   family: FamilyScreen,
+  schoolActivities: SchoolActivitiesScreen,
   debug: DebugScreen,
 };
 
 export function Shell() {
   const { ready, state, advance, decision, answer } = useGame();
   const { world, current, selectWorld, push, pop, closeToLife } = useNavigation();
+
+  /**
+   * Answering may ask to open a screen — "See what they offer" leading to the
+   * real activities list rather than the game picking a club for you (Ticket
+   * 0204). The simulation reports the destination; mapping it to a route is the
+   * app's job, which is why the engine never learns what a screen is.
+   */
+  const answerAndNavigate = (eventId: string, choiceId: string) => {
+    const opens = answer(eventId, choiceId);
+    if (opens === 'activities') {
+      selectWorld('career');
+      push({ screen: 'schoolActivities', title: 'Clubs & Teams' });
+    }
+  };
 
   if (!ready || !state) {
     return (
@@ -158,7 +174,7 @@ export function Shell() {
         <DecisionCard
           decision={decision}
           remaining={state.pending.length}
-          onChoose={(choiceId) => answer(decision.eventId, choiceId)}
+          onChoose={(choiceId) => answerAndNavigate(decision.eventId, choiceId)}
         />
       ) : null}
     </View>

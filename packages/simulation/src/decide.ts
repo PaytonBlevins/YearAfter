@@ -27,6 +27,12 @@ export type DecisionError =
 export interface DecisionResult {
   readonly state: GameState;
   readonly entry: TimelineEntry;
+  /**
+   * A screen the chosen option asked to open — "See what they offer" leading to
+   * the real activities list. The simulation does not navigate; it reports, and
+   * the app decides what to do with it.
+   */
+  readonly opens?: string;
 }
 
 /**
@@ -52,7 +58,13 @@ export function decide(
     return err(decision.choices.some((c) => c.id === choiceId) ? 'unresolvable' : 'no-such-choice');
   }
 
-  const applied = applyOutcome(state.player, state.family, resolved.history, resolved.outcome);
+  const applied = applyOutcome(
+    state.player,
+    state.family,
+    resolved.history,
+    resolved.outcome,
+    state.education.behaviour,
+  );
 
   // Sequence after everything already recorded for that age, so the answer reads
   // directly beneath the year it belongs to.
@@ -73,11 +85,13 @@ export function decide(
   };
 
   return ok({
+    ...(resolved.opens ? { opens: resolved.opens } : {}),
     state: {
       ...state,
       player,
       family: applied.family,
       events: applied.history,
+      education: { ...state.education, behaviour: applied.behaviour },
       pending: state.pending.filter((candidate) => candidate.eventId !== eventId),
     },
     entry,

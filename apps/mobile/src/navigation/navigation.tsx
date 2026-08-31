@@ -33,6 +33,8 @@ export type ScreenKey =
   | 'shopping'
   | 'family'
   | 'friends'
+  /** Ticket 0204. School extracurriculars — join as many as you can carry. */
+  | 'schoolActivities'
   | 'debug';
 
 export interface Route {

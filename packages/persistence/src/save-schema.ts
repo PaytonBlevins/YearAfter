@@ -10,12 +10,13 @@
  */
 
 import type { Character } from '@yearafter/character';
+import type { EducationState } from '@yearafter/education';
 import type { EventHistory, PendingDecision } from '@yearafter/events';
 import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 4;
+export const CURRENT_SAVE_VERSION = 6;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -35,10 +36,12 @@ export type { WorldState };
  * v2 added `player.personality` (Ticket 0201).
  * v3 added `family` (Ticket 0202).
  * v4 added `nameCultureId`, `events` and `pending` (Ticket 0203).
+ * v5 added `education` (Ticket 0204).
+ * v6 added `names` to a pending decision (Ticket 0203b).
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV4 {
-  readonly version: 4;
+export interface SaveGameV6 {
+  readonly version: 6;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -55,6 +58,8 @@ export interface SaveGameV4 {
    * asked on a phone at a bus stop has to still be there on a tablet that night.
    */
   readonly pending: readonly PendingDecision[];
+  /** Ticket 0204: enrolment, grades, behaviour and extracurriculars. */
+  readonly education: EducationState;
   readonly settings: SaveSettings;
   /** Unix ms. Metadata only — never used in simulation logic. */
   readonly createdAt: number;
@@ -62,8 +67,8 @@ export interface SaveGameV4 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV4;
-export type CurrentSaveGame = SaveGameV4;
+export type AnySaveGame = SaveGameV6;
+export type CurrentSaveGame = SaveGameV6;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

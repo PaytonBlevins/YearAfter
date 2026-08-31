@@ -11,21 +11,17 @@
  * SCOPE — the systems that hang off this loop arrive on their own tickets, and
  * each one plugs in as a phase module under `phases/`:
  *   0203  childhood event library         -> DONE, phases/events.ts
- *   0204  school progression              -> education phase
+ *   0204  school progression              -> DONE, phases/education.ts
  *   0205  stress from hidden capacity     -> stress phase
  *   0211  aging, health, mortality        -> health phase
  *   0301  financial ledger, monthly pass  -> finance phase
  * Do not grow this file with inline system logic — add a phase module.
  */
 
-import {
-  createTimelineEntry,
-  defaultOccupationFor,
-  type Character,
-  type TimelineEntry,
-} from '@yearafter/character';
-import { asEventId } from '@yearafter/core';
+import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import { asEventId, clampStat } from '@yearafter/core';
 import type { GameState } from './game-state';
+import { runEducation } from './phases/education';
 import { runEvents } from './phases/events';
 
 export interface AdvanceResult {
@@ -56,18 +52,38 @@ export function advanceYear(state: GameState): AdvanceResult {
   const nextAge = state.player.age + 1;
   const nextYear = state.world.year + 1;
 
-  const events = runEvents(state, nextAge, nextYear);
-
-  const entries: TimelineEntry[] = events.lines.map((line, index) =>
-    createTimelineEntry({
-      age: nextAge,
-      year: nextYear,
-      kind: line.kind,
-      text: line.text,
-      eventId: asEventId(line.eventId),
-      sequence: index,
-    }),
+  // Education first: an event that fires this year should be able to read the
+  // grade the character is now in, and a report-card event that arrives before
+  // the report card is nonsense.
+  const education = runEducation(state, nextAge);
+  const events = runEvents(
+    { ...state, player: education.player, education: education.education },
+    nextAge,
+    nextYear,
   );
+
+  const entries: TimelineEntry[] = [
+    ...education.lines.map((line, index) =>
+      createTimelineEntry({
+        age: nextAge,
+        year: nextYear,
+        kind: line.kind,
+        text: line.text,
+        id: `t:${nextYear}:school:${index}`,
+        sequence: index,
+      }),
+    ),
+    ...events.lines.map((line, index) =>
+      createTimelineEntry({
+        age: nextAge,
+        year: nextYear,
+        kind: line.kind,
+        text: line.text,
+        eventId: asEventId(line.eventId),
+        sequence: education.lines.length + index,
+      }),
+    ),
+  ];
 
   // ---- validate ----------------------------------------------------------
   if (nextAge !== state.player.age + 1) {
@@ -85,8 +101,9 @@ export function advanceYear(state: GameState): AdvanceResult {
   const player: Character = {
     ...events.player,
     age: nextAge,
-    // Placeholder until education (0204) and employment (0210) own this field.
-    occupation: defaultOccupationFor(nextAge),
+    // Set by the education phase; employment (Ticket 0210) takes it over for
+    // characters who have left school.
+    occupation: education.player.occupation,
     timeline: [...state.player.timeline, ...entries],
   };
 
@@ -97,6 +114,9 @@ export function advanceYear(state: GameState): AdvanceResult {
       player,
       family: events.family,
       events: events.history,
+      // Events can move school standing (detention, suspension, being caught);
+      // the education phase set the rest of it.
+      education: { ...education.education, behaviour: clampStat(events.behaviour) },
       pending: events.decisions,
     },
     newEntries: entries,

@@ -164,6 +164,49 @@ control is disabled. Advancing past an unanswered question would either discard
 it or answer it on the player's behalf. Pending decisions are part of the save:
 a question asked on a phone at a bus stop is still there on a tablet that night.
 
+### 13.4 A decision is a scene, not a prompt
+
+Every decision names the people in it, puts them somewhere, and asks about
+something happening now — never "you have been feeling X for N months". Three or
+more options unless the situation genuinely has two answers, and the options are
+different TACTICS rather than one tactic at two volumes. Outcomes are concrete
+and can land badly: a decision every branch of which is neutral-or-better is a
+reward with extra steps. Happiness always moves; Health moves wherever the thing
+is physical, exhausting, dangerous or restful.
+
+The people are bound ONCE, when the decision is raised, and stored on it. A
+prompt naming a girl at the water fountain and an outcome naming somebody else
+were two independent draws before this, which is what shipped in 0203 and what
+review rejected.
+
+`{they}`, `{them}` and `{their}` are the PLAYER's pronouns. Incidental people
+have no gender and are referred to by name.
+
+### 13.5 A menu never refuses because you are busy
+
+Anything a character can sign up for — clubs, teams, later jobs and courses —
+lists everything, lets them take as much as they want, and shows what each thing
+costs in hours and money before they commit. What stops overcommitment is a
+hidden workload model: committed hours run against a capacity that varies by
+character, and past it the year costs grades, health and happiness on its own.
+
+There is no workload bar, capacity meter or time budget anywhere in the UI (spec
+661, 1824). The player learns the limit by living a year that went badly and
+reading why, in a sentence, in the feed.
+
+Rows that genuinely cannot be joined are shown with the reason rather than
+hidden. "Nobody free to drive you home" is a fact about that character's life.
+
+### 13.6 Any change to money names its source
+
+A cash effect is `{ delta, source }`, never a bare number, and the amount must
+appear in the line the player actually reads. A silent balance change is
+unrepresentable rather than merely discouraged.
+
+This is enforced structurally, not by writing discipline: the generator, the
+content validator and the catalog tests each fail a build on unsourced money, on
+an amount the prose never mentions, and on the other four rules above.
+
 ## 14. Branding
 
 Fictional analogues must be recognisable but original, with identifiable model

@@ -16,6 +16,7 @@
   "dependencies": {
     "@yearafter/character": "workspace:*",
     "@yearafter/core": "workspace:*",
+    "@yearafter/education": "workspace:*",
     "@yearafter/events": "workspace:*",
     "@yearafter/relationships": "workspace:*",
     "@yearafter/simulation": "workspace:*"

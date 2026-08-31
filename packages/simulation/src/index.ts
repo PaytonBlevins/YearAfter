@@ -4,4 +4,5 @@ export * from './advance';
 export * from './decide';
 export * from './new-game';
 export * from './family-generator';
+export * from './phases/education';
 export * from './phases/events';

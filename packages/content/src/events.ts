@@ -83,6 +83,11 @@ export interface EventCondition {
   readonly ageMin?: number;
   readonly ageMax?: number;
   readonly sex?: 'male' | 'female';
+  /** School stage: 'preschool' | 'elementary' | 'middle' | 'high' | 'graduated' | 'droppedOut'. */
+  readonly schoolStageAny?: readonly string[];
+  /** Extracurriculars currently joined (Ticket 0204). */
+  readonly activitiesAtLeast?: number;
+  readonly activitiesAtMost?: number;
   readonly requires?: readonly FamilyRequirement[];
   /** Any one of these talents. */
   readonly talentsAny?: readonly TalentKey[];
@@ -107,12 +112,32 @@ export interface EventModifier {
 }
 
 /**
+ * Money moving, and where it came from.
+ *
+ * A bare number was the original shape, and it produced exactly the bug the
+ * product owner reported: cash arriving with no explanation anywhere in the
+ * feed. Requiring a source makes a silent balance change unrepresentable rather
+ * than merely discouraged, and the validator additionally checks that the
+ * player-visible text names the amount — so the audit trail is in the prose,
+ * where the player actually reads it.
+ *
+ * The source reads inside a sentence: "birthday money from {sibling}".
+ */
+export interface CashEffect {
+  /** Whole dollars. Negative is money leaving. */
+  readonly delta: number;
+  /** Never empty. Supports the same tokens as event text. */
+  readonly source: string;
+}
+
+/**
  * What an event does.
  *
  * Deliberately small. An event may nudge stats, move warmth with family, move
- * pocket money and set story flags — nothing else. Careers, education and the
- * financial ledger own their own state and arrive on their own tickets; an event
- * reaches them through a flag, not by writing into them from here.
+ * pocket money, move school standing and set story flags — nothing else.
+ * Careers, education and the financial ledger own their own state and arrive on
+ * their own tickets; an event reaches them through a flag, not by writing into
+ * them from here.
  */
 export interface EventEffects {
   readonly stats?: Partial<Record<VisibleStatKey, number>>;
@@ -120,8 +145,16 @@ export interface EventEffects {
   readonly relationship?: Partial<
     Record<'mother' | 'father' | 'parents' | 'siblings' | 'family', number>
   >;
-  /** Whole dollars. Pocket money only until the ledger exists (Ticket 0301). */
-  readonly cash?: number;
+  /** Pocket money, always with a source. Until the ledger exists (Ticket 0301). */
+  readonly cash?: CashEffect;
+  /**
+   * Standing with the school, 0–100 (Ticket 0204). Detention, suspension and
+   * being caught cheating push it down; being noticed for the right reasons
+   * pushes it up. Sustained low behaviour is what routes a character into an
+   * alternative school (spec 73) — without events able to move it, that whole
+   * branch of the spec is unreachable, which is exactly what testing found.
+   */
+  readonly behaviour?: number;
   readonly setFlags?: readonly string[];
   readonly clearFlags?: readonly string[];
 }
@@ -139,6 +172,15 @@ export interface EventChoice {
   readonly id: string;
   /** Button text. Short — it has to fit a phone. */
   readonly label: string;
+  /**
+   * A screen this choice opens after it resolves, e.g. `"activities"`.
+   *
+   * This is how "See what they offer" leads to a real menu instead of the game
+   * picking for you. The engine treats it as an opaque string and never acts on
+   * it — the app maps it to a screen — so adding a destination stays content
+   * work rather than engine work.
+   */
+  readonly opens?: string;
   /** Certain result. Mutually exclusive with `outcomes`. */
   readonly text?: string;
   readonly effects?: EventEffects;
@@ -164,6 +206,19 @@ export interface EventDefinition {
   readonly type: EventType;
   readonly rarity: EventRarity;
   readonly eligibility: EventCondition;
+  /**
+   * People this event's text talks about: `kid`, `kid2`, `adult`.
+   *
+   * Declared rather than inferred so the engine can bind them ONCE when a
+   * decision is raised and use the same names in the prompt, the options and
+   * the outcome. Without this, a prompt naming a girl at the water fountain and
+   * an outcome naming somebody else are two independent draws — which is
+   * exactly what shipped in 0203.
+   *
+   * Optional on passive events, which are a single line and cannot disagree
+   * with themselves.
+   */
+  readonly personTokens?: readonly string[];
   /** Relative weight before rarity and modifiers. */
   readonly weight: number;
   readonly modifiers?: readonly EventModifier[];
@@ -172,6 +227,16 @@ export interface EventDefinition {
    * right default: most events are things that happen to you, not habits.
    */
   readonly cooldown?: number;
+  /**
+   * A decision with only two options, deliberately.
+   *
+   * The rule is three or more — "do it / don't" is not a decision. Some
+   * situations genuinely have two answers (own up or stay silent), and those
+   * say so here rather than being padded with a third option nobody would take.
+   */
+  readonly binaryOk?: boolean;
+  /** Marks an event whose outcomes must touch Health, not only Happiness. */
+  readonly physical?: boolean;
   /** Text variants (spec 725–770). One is drawn; all must fit the same conditions. */
   readonly text: readonly string[];
   readonly effects?: EventEffects;

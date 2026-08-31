@@ -61,6 +61,7 @@ const context = (overrides: Partial<EventContext> = {}): EventContext => ({
   age: 10,
   year: 2010,
   firstName: 'Sofia',
+  lastName: 'Reyes',
   sex: 'female',
   stats: createStats(),
   talents: createTalents(),
@@ -69,6 +70,8 @@ const context = (overrides: Partial<EventContext> = {}): EventContext => ({
   nameCultureId: 'us-en',
   homeCity: 'Toledo, OH',
   flags: new Set<string>(),
+  schoolStage: 'elementary',
+  activityCount: 0,
   ...overrides,
 });
 
@@ -270,6 +273,7 @@ describe('effects', () => {
     stats: createStats(),
     family: FULL_FAMILY,
     cash: dollars(100),
+    behaviour: 70,
     history: EMPTY_HISTORY,
   });
 
@@ -294,8 +298,23 @@ describe('effects', () => {
   });
 
   it('never lets an event push a child into debt', () => {
-    const after = applyEffects(targets(), { cash: -900 });
+    const after = applyEffects(targets(), { cash: { delta: -900, source: 'a bad trade' } });
     expect(after.cash).toBe(0);
+  });
+
+  it('carries a source with every movement of money', () => {
+    // A bare number was the original shape and it produced cash arriving with no
+    // explanation anywhere in the feed.
+    const after = applyEffects(targets(), { cash: { delta: 25, source: 'a found wallet' } });
+    expect(after.cash).toBe(dollars(125));
+  });
+
+  it('moves school standing, clamped', () => {
+    // Without this, alternative-school placement (spec 73) is unreachable —
+    // nothing else in the game pushes behaviour down.
+    expect(applyEffects(targets(), { behaviour: -12 }).behaviour).toBe(58);
+    expect(applyEffects(targets(), { behaviour: 999 }).behaviour).toBe(100);
+    expect(applyEffects(targets(), {}).behaviour).toBe(70);
   });
 
   it('sets and clears flags', () => {
@@ -533,5 +552,114 @@ describe('history', () => {
   it('keeps flags sorted and unique so a save diff is readable', () => {
     const history = withFlags(withFlags(EMPTY_HISTORY, ['b', 'a']), ['a', 'c']);
     expect(history.flags).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('one name, carried through a whole decision (Ticket 0203b)', () => {
+  const catalog = [
+    definition({
+      id: 'test.named',
+      type: 'decision',
+      personTokens: ['kid', 'adult'],
+      text: ['{kid} is by the fountain and {adult} is watching from the window.'],
+      choices: [
+        {
+          id: 'a',
+          label: 'Talk to {kid}',
+          text: '{kid} laughed. {adult} pretended not to notice.',
+        },
+        { id: 'b', label: 'Ask {adult}', text: '{adult} told you to talk to {kid} yourself.' },
+        { id: 'c', label: 'Walk off', text: 'You walked off past {kid}.' },
+      ],
+    }),
+  ];
+
+  const raise = (seed: string) => {
+    const result = runEventPhase(context({ age: 14 }), stream(seed), EMPTY_HISTORY, catalog);
+    return result.decisions[0];
+  };
+
+  it('binds the people once and stores them on the decision', () => {
+    const decision = raise('BIND');
+    expect(decision).toBeDefined();
+    if (!decision) return;
+    expect(decision.names.kid).toBeTruthy();
+    expect(decision.names.adult).toBeTruthy();
+    expect(decision.prompt).toContain(decision.names.kid as string);
+    expect(decision.prompt).toContain(decision.names.adult as string);
+  });
+
+  it('names the same person in the option labels', () => {
+    const decision = raise('LABELS');
+    if (!decision) return;
+    expect(decision.choices[0]?.label).toBe(`Talk to ${decision.names.kid}`);
+    expect(decision.choices[1]?.label).toBe(`Ask ${decision.names.adult}`);
+  });
+
+  it('names the same person in the outcome, which is the whole point', () => {
+    // This is the bug the product owner hit: a prompt about one person and an
+    // outcome about somebody else, because each render drew independently.
+    const decision = raise('OUTCOME');
+    if (!decision) return;
+    // A DIFFERENT stream, standing in for answering days later on another device.
+    const resolved = resolveChoice(
+      decision,
+      'a',
+      context({ age: 14 }),
+      stream('MUCH-LATER'),
+      EMPTY_HISTORY,
+      (id) => catalog.find((event) => event.id === id),
+    );
+    expect(resolved?.outcome.text).toContain(decision.names.kid as string);
+    expect(resolved?.outcome.text).toContain(decision.names.adult as string);
+  });
+
+  it('gives an adult a surname and a title, not a child’s given name', () => {
+    const decision = raise('ADULT');
+    if (!decision) return;
+    expect(decision.names.adult).toMatch(/^(Mr\.|Mrs\.) /);
+  });
+
+  it('never gives an incidental person a name the family already uses', () => {
+    for (let i = 0; i < 60; i += 1) {
+      const decision = raise(`CLASH-${i}`);
+      if (!decision) continue;
+      const family = ['Sofia', 'Reyes', 'Ana', 'Luis', 'Mateo'];
+      expect(family).not.toContain(decision.names.kid);
+      expect(decision.names.adult).not.toContain('Reyes');
+    }
+  });
+
+  it('still resolves a passive event’s names per render', () => {
+    // Passive events are a single line and cannot disagree with themselves, so
+    // they keep the cheaper path and need no declaration.
+    const passive = [definition({ id: 'test.passive', text: ['{kid} moved away.'] })];
+    const result = runEventPhase(context(), stream('PASSIVE'), EMPTY_HISTORY, passive);
+    expect(result.outcomes[0]?.text).toMatch(/^\w+ moved away\.$/);
+    expect(result.outcomes[0]?.text).not.toContain('{');
+  });
+
+  it('resolves the real catalog’s decisions without leaving a brace behind', () => {
+    for (let i = 0; i < 120; i += 1) {
+      const result = runEventPhase(
+        context({ age: 8 + (i % 10) }),
+        stream(`REAL-${i}`),
+        EMPTY_HISTORY,
+      );
+      for (const decision of result.decisions) {
+        expect(decision.prompt, decision.eventId).not.toMatch(/[{}]/);
+        for (const choice of decision.choices) {
+          expect(choice.label, decision.eventId).not.toMatch(/[{}]/);
+          const resolved = resolveChoice(
+            decision,
+            choice.id,
+            context(),
+            stream('R'),
+            EMPTY_HISTORY,
+          );
+          expect(resolved?.outcome.text, `${decision.eventId}/${choice.id}`).not.toMatch(/[{}]/);
+        }
+      }
+    }
   });
 });

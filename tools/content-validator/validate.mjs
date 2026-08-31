@@ -272,6 +272,139 @@ if (existsSync(eventsPath)) {
       }
     }
 
+    // ---- the decision-writing rules (Ticket 0203b) ------------------------
+    // claude/event-writing-rules.md, approved after review. These are the half
+    // that cannot be left to writing discipline across 340 events.
+    const INCIDENTAL = new Set(['kid', 'kid2', 'adult']);
+    const PRONOUNS = new Set(['they', 'them', 'their']);
+    const NOISE = new Set(['the', 'a', 'an', 'to', 'for', 'it', 'them', 'your', 'my', 's']);
+    const TOKENS = /\{([a-zA-Z0-9]+)\}/g;
+    const stem = (label) =>
+      label
+        .replace(/\{[a-zA-Z0-9]+\}/g, ' ')
+        .toLowerCase()
+        .split(/\s+/)
+        .map((word) => word.replace(/[^a-z]/g, ''))
+        .filter((word) => word && !NOISE.has(word))
+        .slice(0, 2)
+        .join(' ');
+
+    for (const event of events) {
+      const decision = event.type === 'decision' || event.type === 'opportunity';
+      const choices = event.choices ?? [];
+
+      // V1 — three options, or an explicit note that two is the honest number.
+      if (decision && choices.length < 3 && !event.binaryOk) {
+        fail(rel, `${event.id}: ${choices.length} options. Three or more, or set binaryOk.`);
+      }
+
+      // V2 — different tactics, not one tactic at two volumes.
+      if (decision) {
+        const seen = new Set();
+        for (const choice of choices) {
+          const key = stem(choice.label);
+          if (key && seen.has(key)) {
+            fail(rel, `${event.id}: two options open with "${key}" — same tactic, two volumes.`);
+          }
+          seen.add(key);
+        }
+      }
+
+      // Every result a decision can produce, choice effects folded in.
+      const results = [];
+      for (const choice of choices) {
+        if (choice.text) results.push({ text: choice.text, effects: choice.effects ?? {} });
+        for (const outcome of choice.outcomes ?? []) {
+          results.push({
+            text: outcome.text,
+            effects: { ...(choice.effects ?? {}), ...(outcome.effects ?? {}) },
+          });
+        }
+      }
+
+      // V3 — happiness moves, and it can go badly.
+      if (decision && results.length > 0) {
+        const happiness = results.map((r) => r.effects.stats?.happiness ?? 0);
+        if (!happiness.some((value) => value !== 0)) {
+          fail(rel, `${event.id}: no result moves happiness.`);
+        }
+        if (Math.min(...happiness) >= 0) {
+          fail(rel, `${event.id}: every result is neutral or better — it cannot land badly.`);
+        }
+        if (event.physical && !results.some((r) => r.effects.stats?.health)) {
+          fail(rel, `${event.id}: marked physical but no result moves health.`);
+        }
+      }
+
+      // V4 — money names its source, and the amount appears in the prose.
+      const checkCash = (cash, text, where) => {
+        if (!cash) return;
+        if (typeof cash !== 'object' || typeof cash.delta !== 'number') {
+          fail(rel, `${where}: cash must be { delta, source }.`);
+          return;
+        }
+        if (!cash.source || !String(cash.source).trim()) {
+          fail(rel, `${where}: moves $${cash.delta} with no source.`);
+        }
+        const amount = Math.abs(cash.delta);
+        const written = [`$${amount}`, `$${amount.toLocaleString('en-US')}`];
+        if (!written.some((form) => (text ?? '').includes(form))) {
+          fail(rel, `${where}: moves $${amount} but the visible text never says so.`);
+        }
+      };
+      checkCash(event.effects?.cash, (event.text ?? []).join(' '), event.id);
+      for (const choice of choices) {
+        if (choice.text) checkCash(choice.effects?.cash, choice.text, `${event.id}/${choice.id}`);
+        for (const outcome of choice.outcomes ?? []) {
+          checkCash(
+            { ...(choice.effects ?? {}), ...(outcome.effects ?? {}) }.cash,
+            outcome.text,
+            `${event.id}/${choice.id} outcome`,
+          );
+        }
+      }
+
+      // V5 — a decision declares every person it names, so one name carries
+      // through the prompt, the options and the outcome.
+      const lines = [
+        ...(event.text ?? []),
+        ...choices.flatMap((choice) => [
+          choice.label,
+          ...(choice.text ? [choice.text] : []),
+          ...(choice.outcomes ?? []).map((outcome) => outcome.text),
+        ]),
+      ];
+      const used = new Set();
+      for (const line of lines) {
+        const tokens = new Set([...String(line).matchAll(TOKENS)].map((match) => match[1]));
+        for (const token of tokens) if (INCIDENTAL.has(token)) used.add(token);
+        const namesSomeone = [...tokens].some((token) => INCIDENTAL.has(token));
+        const usesPronoun = [...tokens].some((token) => PRONOUNS.has(token));
+        if (namesSomeone && usesPronoun) {
+          fail(
+            rel,
+            `${event.id}: "${line}" names somebody and uses a player pronoun — ` +
+              `{they}/{them}/{their} are the PLAYER's, so this renders the wrong gender.`,
+          );
+        }
+      }
+      const declared = new Set(event.personTokens ?? []);
+      if (decision) {
+        for (const token of used) {
+          if (!declared.has(token)) {
+            fail(
+              rel,
+              `${event.id}: uses {${token}} but does not declare it in personTokens, so the ` +
+                `prompt and the outcome would name different people.`,
+            );
+          }
+        }
+        for (const token of declared) {
+          if (!used.has(token)) fail(rel, `${event.id}: declares {${token}} but never uses it.`);
+        }
+      }
+    }
+
     // A year with no eligible event throws in advanceYear. This is the check
     // that stops a catalog edit turning that into a crash in a player's hands.
     for (const age of [0, 1, 2, 3, 4, 5, 8, 12, 17, 18, 40, 80, 110]) {
@@ -305,6 +438,62 @@ if (existsSync(eventsPath)) {
     }
   } catch (cause) {
     fail(rel, `Could not validate the event catalog: ${cause.message}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 6. Activity catalog (Ticket 0204)
+// ---------------------------------------------------------------------------
+
+const activitiesPath = join(ROOT, 'packages/content/data/activities.json');
+
+if (existsSync(activitiesPath)) {
+  const rel = 'packages/content/data/activities.json';
+  try {
+    const activities = JSON.parse(readFileSync(activitiesPath, 'utf8')).entries ?? [];
+    const stages = ['elementary', 'middle', 'high'];
+
+    for (const activity of activities) {
+      // Money never moves without a sentence saying where it went. This is the
+      // structural half of that rule — a cost with no source cannot ship.
+      if (activity.annualCost && !activity.costSource) {
+        fail(rel, `${activity.id}: costs money but names no source.`);
+      }
+      if (activity.costSource && !activity.annualCost) {
+        fail(rel, `${activity.id}: names a cost source but costs nothing.`);
+      }
+      if (!(activity.hoursPerWeek > 0)) {
+        fail(
+          rel,
+          `${activity.id}: hoursPerWeek must be greater than zero — it is the only thing that limits how many a character can hold.`,
+        );
+      }
+      if (!activity.effects || Object.keys(activity.effects).length === 0) {
+        fail(rel, `${activity.id}: does nothing.`);
+      }
+      if ((activity.blurb ?? '').length > 52) {
+        fail(
+          rel,
+          `${activity.id}: blurb truncates on a phone (${activity.blurb.length} chars, max 52).`,
+        );
+      }
+    }
+
+    for (const stage of stages) {
+      const available = activities.filter((a) => (a.requires?.stages ?? []).includes(stage));
+      if (available.length < 6) {
+        fail(rel, `stage "${stage}" offers only ${available.length} activities (need 6).`);
+      }
+      const free = available.filter((a) => !a.annualCost && !a.requires?.wealthAny);
+      if (free.length < 4) {
+        fail(
+          rel,
+          `stage "${stage}" has only ${free.length} activities that cost nothing (need 4) — a struggling household would find the menu mostly closed.`,
+        );
+      }
+    }
+  } catch (cause) {
+    fail(rel, `Could not validate the activity catalog: ${cause.message}`);
   }
 }
 
