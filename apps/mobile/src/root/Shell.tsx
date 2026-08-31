@@ -69,8 +69,12 @@ export function Shell() {
 
         At a world root:  ✕ close        · title
         Inside a leaf:    ‹ parent       · title · ✕ close
+
+        The condition covers leaves on the LIFE stack too — the developer screen
+        is pushed from the Life header, and gating on `world !== 'life'` alone
+        left it with no header and therefore no way back.
       */}
-      {world !== 'life' ? (
+      {world !== 'life' || current ? (
         <View style={styles.subHeader}>
           {current ? (
             <Pressable

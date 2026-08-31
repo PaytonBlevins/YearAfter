@@ -65,7 +65,7 @@ describe('determinism', () => {
 
 describe('identity', () => {
   it('gives every character a name drawn from its birthplace culture', () => {
-    for (let i = 0; i < 300; i += 1) {
+    for (let i = 0; i < 1500; i += 1) {
       const { character, birthCity, nameCulture } = generate(`NAME-${i}`);
       const culture = findNameCulture(nameCulture);
       expect(culture, nameCulture).toBeDefined();
@@ -124,14 +124,15 @@ describe('birthplace', () => {
   it('spreads births across many cities and countries', () => {
     const cities = new Set<string>();
     const countries = new Set<string>();
-    for (let i = 0; i < 1200; i += 1) {
+    for (let i = 0; i < 12_000; i += 1) {
       const { birthCity } = generate(`SPREAD-${i}`);
       cities.add(birthCity.id);
       countries.add(birthCity.countryCode);
     }
-    // Every catalogued city should be reachable, and more than one country.
+    // Every catalogued city must be reachable — an unreachable birthplace is
+    // content nobody will ever see.
     expect(cities.size).toBe(CITIES.length);
-    expect(countries.size).toBeGreaterThan(4);
+    expect(countries.size).toBeGreaterThanOrEqual(15);
   });
 
   it('weights births toward the US while the economic content is US-benchmarked', () => {
@@ -140,9 +141,10 @@ describe('birthplace', () => {
     for (let i = 0; i < trials; i += 1) {
       if (generate(`US-${i}`).birthCity.countryCode === 'US') us += 1;
     }
-    // Wide bounds: this is a content weighting, not a fixed rule.
-    expect(us / trials).toBeGreaterThan(0.45);
-    expect(us / trials).toBeLessThan(0.7);
+    // Wide bounds: this is a content weighting (US_BIAS in the generator script),
+    // not a fixed rule. The US should be the plurality without being most lives.
+    expect(us / trials).toBeGreaterThan(0.38);
+    expect(us / trials).toBeLessThan(0.55);
   });
 });
 

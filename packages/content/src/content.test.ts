@@ -5,7 +5,7 @@ describe('location catalog', () => {
   it('has stable unique ids', () => {
     const ids = CITIES.map((city) => city.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(CITIES.length).toBeGreaterThan(20);
+    expect(CITIES.length).toBeGreaterThan(100);
   });
 
   it('gives every city a positive birth weight', () => {
@@ -48,6 +48,10 @@ describe('location catalog', () => {
 });
 
 describe('name catalog', () => {
+  it('carries at least a dozen naming traditions', () => {
+    expect(NAME_CULTURES.length).toBeGreaterThanOrEqual(12);
+  });
+
   it('has stable unique culture ids', () => {
     const ids = NAME_CULTURES.map((culture) => culture.id);
     expect(new Set(ids).size).toBe(ids.length);
@@ -55,9 +59,9 @@ describe('name catalog', () => {
 
   it('gives every culture enough names to avoid obvious repetition', () => {
     for (const culture of NAME_CULTURES) {
-      expect(culture.male.length, `${culture.id} male`).toBeGreaterThanOrEqual(10);
-      expect(culture.female.length, `${culture.id} female`).toBeGreaterThanOrEqual(10);
-      expect(culture.surnames.length, `${culture.id} surnames`).toBeGreaterThanOrEqual(10);
+      expect(culture.male.length, `${culture.id} male`).toBeGreaterThanOrEqual(28);
+      expect(culture.female.length, `${culture.id} female`).toBeGreaterThanOrEqual(28);
+      expect(culture.surnames.length, `${culture.id} surnames`).toBeGreaterThanOrEqual(32);
     }
   });
 

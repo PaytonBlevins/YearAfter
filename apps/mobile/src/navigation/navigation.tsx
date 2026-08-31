@@ -114,9 +114,10 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
 
   const closeToLife = useCallback(() => {
     setWorld((activeWorld) => {
-      if (activeWorld !== 'life') {
-        setStacks((current) => ({ ...current, [activeWorld]: [] }));
-      }
+      // Clear unconditionally, including when already on Life. The developer
+      // screen is pushed onto Life's own stack, and an `activeWorld !== 'life'`
+      // guard here left it with no way out.
+      setStacks((current) => ({ ...current, [activeWorld]: [], life: [] }));
       return 'life';
     });
   }, []);
