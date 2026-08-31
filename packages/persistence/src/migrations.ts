@@ -1,0 +1,118 @@
+/**
+ * Ticket 0005 — save migrations.
+ *
+ * Spec 1108–1140 requires explicit versions, tested migrations, and old saves
+ * that keep loading. Each migration takes the previous shape to the next one and
+ * must be pure — no RNG, no clock, no I/O — so a migration replays identically.
+ *
+ * There is only one version today. The machinery exists now because retrofitting
+ * migrations onto shipped saves is the expensive version of this problem.
+ */
+
+import { err, ok, type Result } from '@yearafter/core';
+import { CURRENT_SAVE_VERSION, type CurrentSaveGame } from './save-schema';
+
+export type MigrationError =
+  | { readonly kind: 'notAnObject' }
+  | { readonly kind: 'missingVersion' }
+  | { readonly kind: 'unknownVersion'; readonly version: number }
+  | { readonly kind: 'fromTheFuture'; readonly version: number; readonly supported: number }
+  | { readonly kind: 'corrupt'; readonly detail: string };
+
+type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
+
+/**
+ * Keyed by the version being migrated FROM.
+ * migrations[1] would take a v1 save to v2.
+ */
+const migrations: Readonly<Record<number, Migration>> = {};
+
+export function describeMigrationError(error: MigrationError): string {
+  switch (error.kind) {
+    case 'notAnObject':
+      return 'Save data is not an object.';
+    case 'missingVersion':
+      return 'Save data has no version field.';
+    case 'unknownVersion':
+      return `No migration path from save version ${error.version}.`;
+    case 'fromTheFuture':
+      return `Save version ${error.version} is newer than this build supports (${error.supported}). Update the app.`;
+    case 'corrupt':
+      return `Save data is corrupt: ${error.detail}`;
+  }
+}
+
+/**
+ * Bring any supported save shape up to the current version.
+ * Returns a typed Result — a save that cannot be read is an expected outcome
+ * on a downgraded app, not an exception (spec 1224–1246).
+ */
+export function migrateSave(raw: unknown): Result<CurrentSaveGame, MigrationError> {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    return err({ kind: 'notAnObject' });
+  }
+
+  let working = { ...(raw as Record<string, unknown>) };
+  const declared = working['version'];
+
+  if (typeof declared !== 'number' || !Number.isInteger(declared)) {
+    return err({ kind: 'missingVersion' });
+  }
+  if (declared > CURRENT_SAVE_VERSION) {
+    return err({ kind: 'fromTheFuture', version: declared, supported: CURRENT_SAVE_VERSION });
+  }
+
+  let version = declared;
+  while (version < CURRENT_SAVE_VERSION) {
+    const migration = migrations[version];
+    if (!migration) {
+      return err({ kind: 'unknownVersion', version });
+    }
+    working = migration(working);
+    const nextVersion = working['version'];
+    if (typeof nextVersion !== 'number' || nextVersion <= version) {
+      return err({
+        kind: 'corrupt',
+        detail: `migration from v${version} did not advance the version field`,
+      });
+    }
+    version = nextVersion;
+  }
+
+  const validation = validateCurrentSave(working);
+  if (!validation.ok) return validation;
+  return ok(validation.value);
+}
+
+/**
+ * Structural validation of a current-version save. Deliberately checks shape,
+ * not game balance — a save with odd numbers is still a save.
+ */
+export function validateCurrentSave(
+  candidate: Record<string, unknown>,
+): Result<CurrentSaveGame, MigrationError> {
+  const require = (path: string, value: unknown, predicate: boolean): string | null =>
+    predicate ? null : `expected ${path}${value === undefined ? ' to be present' : ''}`;
+
+  const player = candidate['player'] as Record<string, unknown> | undefined;
+  const world = candidate['world'] as Record<string, unknown> | undefined;
+  const rng = candidate['rng'] as Record<string, unknown> | undefined;
+
+  const problems = [
+    require('id', candidate['id'], typeof candidate['id'] === 'string'),
+    require('player', player, typeof player === 'object' && player !== null),
+    require('player.age', player?.['age'], typeof player?.['age'] === 'number'),
+    require('player.stats', player?.['stats'], typeof player?.['stats'] === 'object'),
+    require('player.talents', player?.['talents'], typeof player?.['talents'] === 'object'),
+    require('player.timeline', player?.['timeline'], Array.isArray(player?.['timeline'])),
+    require('world.year', world?.['year'], typeof world?.['year'] === 'number'),
+    require('rng.seed', rng?.['seed'], typeof rng?.['seed'] === 'string'),
+    require('rng.streams', rng?.['streams'], typeof rng?.['streams'] === 'object'),
+    require('settings', candidate['settings'], typeof candidate['settings'] === 'object'),
+  ].filter((problem): problem is string => problem !== null);
+
+  if (problems.length > 0) {
+    return err({ kind: 'corrupt', detail: problems.join('; ') });
+  }
+  return ok(candidate as unknown as CurrentSaveGame);
+}

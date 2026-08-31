@@ -1,0 +1,41 @@
+/**
+ * GameState <-> SaveGameV1.
+ *
+ * The only difference between the two is the RNG: the live state holds an `Rng`
+ * registry, the save holds its serialised snapshot. Everything else is already
+ * plain data, which is why the simulation uses immutable records throughout.
+ */
+
+import { Rng, createGameState, type GameState } from '@yearafter/simulation';
+import type { SaveId } from '@yearafter/core';
+import {
+  CURRENT_SAVE_VERSION,
+  DEFAULT_SETTINGS,
+  type CurrentSaveGame,
+  type SaveSettings,
+} from './save-schema';
+
+export interface ToSaveOptions {
+  readonly id: SaveId;
+  readonly settings?: SaveSettings;
+  readonly createdAt?: number;
+  readonly updatedAt?: number;
+}
+
+export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGame {
+  const now = Date.now();
+  return {
+    version: CURRENT_SAVE_VERSION,
+    id: options.id,
+    rng: state.rng.snapshot(),
+    world: state.world,
+    player: state.player,
+    settings: options.settings ?? DEFAULT_SETTINGS,
+    createdAt: options.createdAt ?? now,
+    updatedAt: options.updatedAt ?? now,
+  };
+}
+
+export function fromSave(save: CurrentSaveGame): GameState {
+  return createGameState(save.world, save.player, Rng.restore(save.rng));
+}

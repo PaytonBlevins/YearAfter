@@ -1,0 +1,6 @@
+node_modules
+dist
+.turbo
+.expo
+pnpm-lock.yaml
+specs/MASTER_SPEC.md
