@@ -133,10 +133,19 @@ export function useNavigation(): NavigationContextValue {
   return context;
 }
 
+/**
+ * Tab labels.
+ *
+ * These name the five worlds of spec 828–838 in the player's language rather
+ * than the spec's. "Activities" is the spec's own word for that world and is
+ * what the screen is called everywhere else, so the tab says the same thing.
+ * "People" stands in for Relationships only because "Relationships" does not
+ * fit a fifth of a phone's width without truncating.
+ */
 export const WORLD_LABELS: Record<World, string> = {
   career: 'Career',
   assets: 'Assets',
   life: 'Life',
   relationships: 'People',
-  activities: 'Do',
+  activities: 'Activities',
 };

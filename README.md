@@ -96,15 +96,20 @@ These are the ones that bite. The full list is in `CORE_RULES.md`.
 - Game state binding: `apps/mobile/src/stores/gameStore.tsx`. The only place the
   UI touches the simulation.
 
-## Open decisions for the v0.01 review gate
+## Settled at the v0.01 review gate
 
-1. **Stat bar layout (Ticket 0106).** Three prototypes ship — `compact`, `grid`,
-   `inline`. Switch between them in the developer screen (gear icon, top right).
-   Once chosen, delete the other two.
-2. **Feed density.** The compact layout gives roughly four timeline entries per
-   screen; grid and inline give six to eight. This is the main feel tradeoff.
-3. **Icons.** Text glyphs stand in for real artwork so the shell does not borrow
-   a recognisable third-party icon set. Drawn icons are a v0.20 identity task.
-4. **App identity.** Name, logo, colour and typography are placeholders pending
-   the identity pass. The accent green and paper background are a starting point,
-   not a decision.
+- **Stat bar layout (Ticket 0106): grid.** Two columns, four rows, with numeric
+  values. The compact and inline prototypes are deleted, not left behind.
+- **Icons: an original drawn set** in `src/theme/icons.tsx` — 33 line icons on
+  one 24x24 geometry at a single stroke weight. The full set renders in the
+  developer screen's icon sheet. Adding one: keep it inside the 20x20 optical
+  area, inherit the stroke weight, and prefer three or four strokes to an
+  accurate silhouette.
+
+## Still open
+
+- **App identity.** Name, logo, colour and typography are placeholders pending
+  the identity pass. The accent green and paper background are a starting point,
+  not a decision.
+- **Tab label for Relationships** reads "People" only because "Relationships"
+  truncates at a fifth of a phone's width.

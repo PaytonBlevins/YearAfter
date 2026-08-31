@@ -23,7 +23,7 @@ import { Card, ComingSoon, ListRow, RowDivider, SectionHeading } from '../compon
 import { useGame } from '../stores/gameStore';
 import { useNavigation, type Route } from '../navigation/navigation';
 import { colors, spacing, typography } from '../theme/theme';
-import type { IconName } from '../theme/icons';
+import { Glyph, type IconName } from '../theme/icons';
 
 /* -------------------------------------------------------------------------- */
 /* Shared scaffolding                                                          */
@@ -59,6 +59,43 @@ function RowGroup({ rows }: { rows: readonly Row[] }) {
     </Card>
   );
 }
+
+/** Every icon in the set, for the developer icon sheet. */
+const ICON_NAMES: readonly IconName[] = [
+  'career',
+  'assets',
+  'advance',
+  'relationships',
+  'activities',
+  'chevron',
+  'back',
+  'money',
+  'home',
+  'vehicle',
+  'business',
+  'collection',
+  'shopping',
+  'invest',
+  'family',
+  'friends',
+  'love',
+  'mind',
+  'doctor',
+  'crime',
+  'gambling',
+  'social',
+  'pets',
+  'nightlife',
+  'vacation',
+  'relocate',
+  'surgery',
+  'salon',
+  'adoption',
+  'lawsuit',
+  'estate',
+  'school',
+  'debug',
+];
 
 function Screen({ children }: { children: React.ReactNode }) {
   return (
@@ -333,7 +370,7 @@ export function RelocateScreen() {
 /* -------------------------------------------------------------------------- */
 
 export function DebugScreen() {
-  const { state, saveId, settings, updateSettings, startNewLife, saveError } = useGame();
+  const { state, saveId, startNewLife, saveError } = useGame();
   if (!state) return null;
 
   const talents = activeTalents(state.player.talents);
@@ -376,20 +413,18 @@ export function DebugScreen() {
         />
       </Card>
 
-      <SectionHeading note="Ticket 0106">Stat bar layout</SectionHeading>
+      <SectionHeading note={`${ICON_NAMES.length} icons`}>Icon sheet</SectionHeading>
       <Card>
-        {(['compact', 'grid', 'inline'] as const).map((option, index) => (
-          <Fragment key={option}>
-            {index > 0 ? <RowDivider inset={false} /> : null}
-            <ListRow
-              title={option[0]?.toUpperCase() + option.slice(1)}
-              value={settings.statBarLayout === option ? 'Selected' : undefined}
-              accent={settings.statBarLayout === option}
-              navigates={false}
-              onPress={() => updateSettings({ statBarLayout: option })}
-            />
-          </Fragment>
-        ))}
+        <View style={styles.iconSheet}>
+          {ICON_NAMES.map((name) => (
+            <View key={name} style={styles.iconTile}>
+              <Glyph name={name} size={24} color={colors.ink} />
+              <Text numberOfLines={1} style={styles.iconTileLabel}>
+                {name}
+              </Text>
+            </View>
+          ))}
+        </View>
       </Card>
 
       <SectionHeading>Reset</SectionHeading>
@@ -417,6 +452,19 @@ export function DebugScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   screenContent: { paddingBottom: spacing.xxl },
+  iconSheet: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: spacing.md,
+    rowGap: spacing.md,
+  },
+  iconTile: { width: '20%', alignItems: 'center', gap: 4 },
+  iconTileLabel: {
+    fontFamily: typography.family,
+    fontSize: 8,
+    color: colors.inkFaint,
+    textAlign: 'center',
+  },
   note: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
   noteText: {
     fontFamily: typography.family,

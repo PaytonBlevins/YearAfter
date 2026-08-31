@@ -18,15 +18,12 @@ export const CURRENT_SAVE_VERSION = 1;
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
   readonly reduceMotion: boolean;
-  /** Which of the three stat-bar prototypes to render (Ticket 0106). */
-  readonly statBarLayout: 'compact' | 'grid' | 'inline';
   /** Development-only helpers. Never true in a production build. */
   readonly debugMode: boolean;
 }
 
 export const DEFAULT_SETTINGS: SaveSettings = {
   reduceMotion: false,
-  statBarLayout: 'compact',
   debugMode: false,
 };
 

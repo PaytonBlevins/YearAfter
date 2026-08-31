@@ -35,7 +35,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
 };
 
 export function Shell() {
-  const { ready, state, settings, advance } = useGame();
+  const { ready, state, advance } = useGame();
   const { world, current, selectWorld, push, pop } = useNavigation();
 
   if (!ready || !state) {
@@ -92,7 +92,6 @@ export function Shell() {
       <WorldBar
         world={world}
         stats={state.player.stats}
-        statBarLayout={settings.statBarLayout}
         age={state.player.age}
         onSelectWorld={selectWorld}
         onAdvance={advance}

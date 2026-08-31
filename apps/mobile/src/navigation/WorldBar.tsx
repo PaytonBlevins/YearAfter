@@ -15,7 +15,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, layout, radii, shadows, spacing, typography } from '../theme/theme';
 import { Glyph, type IconName } from '../theme/icons';
-import { StatBars, type StatBarLayout } from '../components/StatBars';
+import { StatBars } from '../components/StatBars';
 import type { VisibleStats } from '@yearafter/character';
 import { WORLDS, WORLD_LABELS, type World } from './navigation';
 
@@ -30,7 +30,6 @@ const WORLD_ICONS: Record<World, IconName> = {
 export interface WorldBarProps {
   readonly world: World;
   readonly stats: VisibleStats;
-  readonly statBarLayout: StatBarLayout;
   readonly age: number;
   readonly onSelectWorld: (world: World) => void;
   readonly onAdvance: () => void;
@@ -40,7 +39,6 @@ export interface WorldBarProps {
 export function WorldBar({
   world,
   stats,
-  statBarLayout,
   age,
   onSelectWorld,
   onAdvance,
@@ -51,7 +49,7 @@ export function WorldBar({
   return (
     <View style={styles.container}>
       <View style={styles.stats}>
-        <StatBars stats={stats} layout={statBarLayout} />
+        <StatBars stats={stats} />
       </View>
 
       <View style={[styles.bar, { paddingBottom: insets.bottom || spacing.sm }]}>
@@ -97,8 +95,15 @@ function WorldTab({
       onPress={onPress}
       style={styles.tab}
     >
-      <Glyph name={WORLD_ICONS[world]} size={19} color={active ? colors.accent : colors.inkFaint} />
-      <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{WORLD_LABELS[world]}</Text>
+      <Glyph
+        name={WORLD_ICONS[world]}
+        size={21}
+        active={active}
+        color={active ? colors.accent : colors.inkMuted}
+      />
+      <Text numberOfLines={1} style={[styles.tabLabel, active && styles.tabLabelActive]}>
+        {WORLD_LABELS[world]}
+      </Text>
     </Pressable>
   );
 }

@@ -31,8 +31,6 @@ import {
   type SaveSettings,
 } from '@yearafter/persistence';
 
-export type StatBarLayout = SaveSettings['statBarLayout'];
-
 interface GameContextValue {
   readonly ready: boolean;
   readonly state: GameState | null;
