@@ -14,13 +14,60 @@ are complete. Next milestone is v0.02 Living Character, starting at Ticket 0201.
 
 ## Getting started
 
-Requires Node 20+ and pnpm 10+.
+> **Paste these one line at a time.** Interactive zsh does not treat `#` as a
+> comment, so a line with a trailing explanation will try to run the explanation
+> as a command. Every code block below is paste-safe as written.
+
+### 1. Install pnpm
+
+This is a pnpm workspace. `npm install` will not work — the packages depend on
+each other through the `workspace:*` protocol, and `.npmrc` sets a pnpm-specific
+linker that Metro needs.
+
+Check Node first; it must be 20 or newer.
+
+```bash
+node -v
+```
+
+Then install pnpm:
+
+```bash
+npm install -g pnpm@10
+```
+
+If that fails with a permissions error, this installer needs no admin rights:
+
+```bash
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+It edits your shell profile, so **open a new terminal tab** afterwards. Confirm:
+
+```bash
+pnpm -v
+```
+
+To avoid a global install entirely, prefix every command below with `npx`:
+`npx pnpm@10 install`, `npx pnpm@10 mobile`.
+
+### 2. Install dependencies
+
+```bash
+cd ~/Documents/yearafter
+```
 
 ```bash
 pnpm install
-pnpm verify          # typecheck + tests + content validation
-pnpm mobile          # start Expo; press i for iOS, a for Android
 ```
+
+### 3. Check everything passes
+
+```bash
+pnpm verify
+```
+
+That runs typecheck, tests and content validation — the same three things CI runs.
 
 ## Running it in the iOS simulator
 
@@ -30,15 +77,16 @@ One-time setup:
 2. Open Xcode once and accept the licence.
 3. In Xcode: **Settings → Platforms**, install the **iOS** platform if it is not
    already there. That is what provides the simulator.
-4. `xcode-select --install` in a terminal, if command line tools are missing.
-5. `corepack enable` to get pnpm 10, if you do not have it.
+4. If command line tools are missing, run `xcode-select --install`.
 
 Then, every time:
 
 ```bash
 cd ~/Documents/yearafter
-pnpm install        # first run only, or after dependencies change
-pnpm mobile         # starts the Expo dev server
+```
+
+```bash
+pnpm mobile
 ```
 
 With the dev server running, **press `i`** in that terminal. It boots the
@@ -50,11 +98,13 @@ yet. Edits to any file — app or package — hot-reload.
 
 If it misbehaves:
 
-| Symptom                        | Fix                                                       |
-| ------------------------------ | --------------------------------------------------------- |
-| "No simulator available"       | Xcode → Settings → Platforms → install iOS                |
-| Stale screen after an edit     | press `r`, or restart with `npx expo start --clear`       |
-| Metro cannot resolve a package | `pnpm install` from the repo root, not from `apps/mobile` |
+| Symptom                         | Fix                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| `zsh: command not found: pnpm`  | Install it — see step 1 above                                              |
+| `zsh: command not found: press` | You pasted a line with a trailing `#` comment. Paste one command at a time |
+| "No simulator available"        | Xcode → Settings → Platforms → install iOS                                 |
+| Stale screen after an edit      | Press `r`, or restart with `npx expo start --clear`                        |
+| Metro cannot resolve a package  | Run `pnpm install` from the repo root, not from `apps/mobile`              |
 
 Later, when a library that is not in Expo Go is added, switch to a development
 build — `cd apps/mobile && npx expo run:ios`. That compiles a native project and
