@@ -25,6 +25,19 @@ import { Glyph, type IconName } from '../theme/icons';
 /* ListRow                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * What pressing a row does. The marker on the right tells the player *before*
+ * they tap, which is the whole point:
+ *
+ *   navigate  chevron  — opens a sub-screen you can come back from
+ *   action    ellipsis — does something, or opens a sheet, in place
+ *   none      nothing  — the row is informational
+ *
+ * Pick the one that matches what actually happens. A row that opens a
+ * confirmation sheet is an `action`; a row that pushes a list is `navigate`.
+ */
+export type RowAffordance = 'navigate' | 'action' | 'none';
+
 export interface ListRowProps {
   readonly icon?: IconName;
   readonly title: string;
@@ -32,8 +45,8 @@ export interface ListRowProps {
   /** Right-aligned value, e.g. a salary or a count. */
   readonly value?: string;
   readonly onPress?: () => void;
-  /** Show the navigation chevron. Defaults to true when onPress is provided. */
-  readonly navigates?: boolean;
+  /** Defaults to 'navigate' when pressable, 'none' otherwise. */
+  readonly affordance?: RowAffordance;
   readonly disabled?: boolean;
   readonly compact?: boolean;
   readonly accent?: boolean;
@@ -45,18 +58,23 @@ export function ListRow({
   subtitle,
   value,
   onPress,
-  navigates,
+  affordance,
   disabled = false,
   compact = false,
   accent = false,
 }: ListRowProps) {
-  const showChevron = navigates ?? Boolean(onPress);
+  const resolved: RowAffordance = affordance ?? (onPress ? 'navigate' : 'none');
   const minHeight = compact ? layout.rowHeightCompact : layout.rowHeight;
+
+  // Screen readers get the same distinction the marker gives sighted players.
+  const affordanceHint =
+    resolved === 'navigate' ? 'Opens' : resolved === 'action' ? 'Takes action' : undefined;
 
   return (
     <Pressable
       accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityLabel={subtitle ? `${title}. ${subtitle}` : title}
+      accessibilityHint={onPress ? affordanceHint : undefined}
       accessibilityState={{ disabled }}
       onPress={disabled ? undefined : onPress}
       style={({ pressed }) => [
@@ -89,8 +107,11 @@ export function ListRow({
         </Text>
       ) : null}
 
-      {showChevron ? (
-        <Glyph name="chevron" size={20} color={colors.inkFaint} style={styles.rowChevron} />
+      {resolved === 'navigate' ? (
+        <Glyph name="chevron" size={20} color={colors.inkFaint} style={styles.rowMarker} />
+      ) : null}
+      {resolved === 'action' ? (
+        <Glyph name="ellipsis" size={20} color={colors.inkFaint} style={styles.rowMarker} />
       ) : null}
     </Pressable>
   );
@@ -308,7 +329,7 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
     marginLeft: spacing.sm,
   },
-  rowChevron: { marginLeft: spacing.xs },
+  rowMarker: { marginLeft: spacing.xs },
 
   sectionHeading: {
     flexDirection: 'row',

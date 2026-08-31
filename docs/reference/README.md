@@ -101,7 +101,7 @@ visual identity.
 
 ---
 
-## One convention worth considering
+## One convention we adopted
 
 Their rows carry two different affordances, and the distinction is consistent:
 
@@ -110,9 +110,9 @@ Their rows carry two different affordances, and the distinction is consistent:
 - **`…` ellipsis** — the row performs an action or opens a sheet in place
   (Donate Blood, Pickpocket, Meditate, Lottery).
 
-Our `ListRow` currently shows a chevron for anything pressable, so a player
-cannot tell a menu from an action until they tap it. Adopting the split would be
-a small change to one component and would make every list more readable.
+Ours previously showed a chevron for anything pressable, so a player could not
+tell a menu from an action until they tapped it.
 
-**Not implemented.** This is an observation for the product owner, not an
-approved change. Raise it as a ticket if wanted.
+**Adopted.** `ListRow` now takes an `affordance` of `navigate` / `action` /
+`none`, and it is canonical in CORE_RULES §8. This is an interaction convention,
+not trade dress — the marker shapes and the rest of the row are our own.

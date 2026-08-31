@@ -131,3 +131,26 @@ describe('advanceYear', () => {
     expect(perYear).toBeLessThan(250);
   });
 });
+
+describe('talent distribution', () => {
+  // Guards the product-owner decision at 9% per talent. If this fails, someone
+  // changed TALENT_PROBABILITY — confirm that was intended before retuning it.
+  it('leaves about half of all characters with no talent', () => {
+    const trials = 20_000;
+    let none = 0;
+    let one = 0;
+    let several = 0;
+    for (let i = 0; i < trials; i += 1) {
+      const count = rollTalents(new Rng(`DIST-${i}`)).length;
+      if (count === 0) none += 1;
+      else if (count === 1) one += 1;
+      else several += 1;
+    }
+    expect(none / trials).toBeGreaterThan(0.48);
+    expect(none / trials).toBeLessThan(0.56);
+    expect(one / trials).toBeGreaterThan(0.32);
+    expect(one / trials).toBeLessThan(0.4);
+    expect(several / trials).toBeGreaterThan(0.08);
+    expect(several / trials).toBeLessThan(0.16);
+  });
+});

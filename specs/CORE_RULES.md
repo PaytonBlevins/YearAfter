@@ -93,6 +93,10 @@ Five worlds: **Career, Assets, Advance/Life (centre), Relationships, Activities.
 - Search fields must not be required in normal play. Curate inventories instead
   (a dealership shows 8–15 cars from a catalog of hundreds).
 - Roughly 6–9 rows per phone screen is the density target.
+- **A row's right-hand marker states what pressing it does, before it is
+  pressed.** Chevron = opens a sub-screen. Ellipsis = acts, or opens a sheet, in
+  place. Nothing = informational. Every `ListRow` declares an `affordance`; a
+  chevron on a row that fires an action is a bug.
 
 ## 9. Universal negotiation pattern
 

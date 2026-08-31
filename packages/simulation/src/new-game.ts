@@ -43,11 +43,14 @@ const DEFAULT_BIRTH_LOCATION: BirthLocation = {
 
 /**
  * Talent probability. Spec 0201: a character can have zero, one, or several.
- * At 12% per talent across seven talents this yields roughly 41% of characters
- * with no talent at all and a long thin tail of multi-talented lives — deliberately
- * a starting point for the balance lab, not a final tuned value.
+ *
+ * Set by the product owner. At 9% per talent across seven talents, roughly 52%
+ * of characters are born with no talent at all, ~36% with exactly one, and ~12%
+ * with two or more — a thin tail of multi-talented lives, which is what makes
+ * one worth something. Tunable in the balance lab; changing it shifts the whole
+ * game's opportunity curve, so treat it as a balance decision, not a constant.
  */
-export const TALENT_PROBABILITY = 0.12;
+export const TALENT_PROBABILITY = 0.09;
 
 export interface NewGameOptions {
   readonly seed: string;

@@ -29,6 +29,7 @@ export type IconName =
   | 'activities'
   | 'chevron'
   | 'back'
+  | 'ellipsis'
   | 'money'
   | 'home'
   | 'vehicle'
@@ -56,7 +57,7 @@ export type IconName =
   | 'school'
   | 'debug';
 
-type Drawing = (props: { strokeWidth: number }) => React.JSX.Element;
+type Drawing = (props: { strokeWidth: number; color: string }) => React.JSX.Element;
 
 /**
  * The four world tabs carry the most weight — they are on screen constantly and
@@ -113,6 +114,16 @@ const DRAWINGS: Record<IconName, Drawing> = {
 
   chevron: ({ strokeWidth }) => <Path d="M9.5 4.8 16.7 12l-7.2 7.2" strokeWidth={strokeWidth} />,
   back: ({ strokeWidth }) => <Path d="M14.5 4.8 7.3 12l7.2 7.2" strokeWidth={strokeWidth} />,
+
+  // The one filled icon in the set. Three dots drawn as outlines read as tiny
+  // rings at 20px, which is not what a "more actions" marker should look like.
+  ellipsis: ({ color }) => (
+    <>
+      <Circle cx={5.4} cy={12} r={1.7} fill={color} stroke="none" />
+      <Circle cx={12} cy={12} r={1.7} fill={color} stroke="none" />
+      <Circle cx={18.6} cy={12} r={1.7} fill={color} stroke="none" />
+    </>
+  ),
 
   money: ({ strokeWidth }) => (
     <>
@@ -360,5 +371,5 @@ export function Glyph({ name, size = 20, color = colors.ink, active = false, sty
     strokeLinejoin: 'round',
     style,
   };
-  return <Svg {...svgProps}>{draw({ strokeWidth: active ? 2.1 : 1.75 })}</Svg>;
+  return <Svg {...svgProps}>{draw({ strokeWidth: active ? 2.1 : 1.75, color })}</Svg>;
 }

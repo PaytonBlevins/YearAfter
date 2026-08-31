@@ -22,18 +22,48 @@ pnpm verify          # typecheck + tests + content validation
 pnpm mobile          # start Expo; press i for iOS, a for Android
 ```
 
-`pnpm mobile` runs Expo Go. For a development build with native modules:
+## Running it in the iOS simulator
+
+One-time setup:
+
+1. Install **Xcode** from the App Store (it is large — budget the download).
+2. Open Xcode once and accept the licence.
+3. In Xcode: **Settings → Platforms**, install the **iOS** platform if it is not
+   already there. That is what provides the simulator.
+4. `xcode-select --install` in a terminal, if command line tools are missing.
+5. `corepack enable` to get pnpm 10, if you do not have it.
+
+Then, every time:
 
 ```bash
-cd apps/mobile
-npx expo run:ios
+cd ~/Documents/yearafter
+pnpm install        # first run only, or after dependencies change
+pnpm mobile         # starts the Expo dev server
 ```
 
-To look at the shell quickly in a browser without a simulator:
+With the dev server running, **press `i`** in that terminal. It boots the
+simulator, installs Expo Go into it if needed, and loads the app. Press `a` for
+Android, `r` to reload, `j` to open the debugger, `Ctrl-C` to stop.
+
+Every library this app uses is bundled in Expo Go, so no native build is needed
+yet. Edits to any file — app or package — hot-reload.
+
+If it misbehaves:
+
+| Symptom                        | Fix                                                       |
+| ------------------------------ | --------------------------------------------------------- |
+| "No simulator available"       | Xcode → Settings → Platforms → install iOS                |
+| Stale screen after an edit     | press `r`, or restart with `npx expo start --clear`       |
+| Metro cannot resolve a package | `pnpm install` from the repo root, not from `apps/mobile` |
+
+Later, when a library that is not in Expo Go is added, switch to a development
+build — `cd apps/mobile && npx expo run:ios`. That compiles a native project and
+takes several minutes the first time. It is not needed today.
+
+To glance at the shell in a browser instead, without a simulator:
 
 ```bash
-cd apps/mobile
-npx expo start --web
+cd apps/mobile && npx expo start --web
 ```
 
 Web is a review convenience only — saves are in-memory there
@@ -96,20 +126,26 @@ These are the ones that bite. The full list is in `CORE_RULES.md`.
 - Game state binding: `apps/mobile/src/stores/gameStore.tsx`. The only place the
   UI touches the simulation.
 
-## Settled at the v0.01 review gate
+## Settled by the product owner
 
-- **Stat bar layout (Ticket 0106): grid.** Two columns, four rows, with numeric
-  values. The compact and inline prototypes are deleted, not left behind.
-- **Icons: an original drawn set** in `src/theme/icons.tsx` — 33 line icons on
-  one 24x24 geometry at a single stroke weight. The full set renders in the
-  developer screen's icon sheet. Adding one: keep it inside the 20x20 optical
-  area, inherit the stroke weight, and prefer three or four strokes to an
-  accurate silhouette.
+- **Name: YearAfter.** Set in `apps/mobile/app.json`.
+- **Palette: the current one is accepted for now** — warm paper ground, near-black
+  ink, a single green accent carrying the Advance control and active navigation.
+  All of it lives in `src/theme/theme.ts`; nothing hard-codes a colour.
+- **Stat bar layout: grid.** Two columns, four rows, with numeric values. The
+  compact and inline prototypes are deleted, not left behind.
+- **Icons: an original drawn set** in `src/theme/icons.tsx` — line icons on one
+  24x24 geometry at a single stroke weight. The full set renders in the developer
+  screen's icon sheet. Adding one: keep it inside the 20x20 optical area, inherit
+  the stroke weight, and prefer three or four strokes to an accurate silhouette.
+- **Row affordances.** Chevron opens a screen, ellipsis acts in place, nothing
+  means informational. Canonical in CORE_RULES §8.
+- **No advance icon.** The centre control is the affordance.
+- **Talent probability: 9% per talent.** Roughly half of characters are born with
+  none.
 
 ## Still open
 
-- **App identity.** Name, logo, colour and typography are placeholders pending
-  the identity pass. The accent green and paper background are a starting point,
-  not a decision.
+- **Logo and typography** pending the identity pass.
 - **Tab label for Relationships** reads "People" only because "Relationships"
   truncates at a fifth of a phone's width.
