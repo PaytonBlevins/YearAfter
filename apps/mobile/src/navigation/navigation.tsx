@@ -58,6 +58,11 @@ interface NavigationContextValue {
   readonly push: (route: Route) => void;
   readonly pop: () => void;
   readonly popToRoot: () => void;
+  /**
+   * Leave the current world and return to Life without advancing a year.
+   * The world's stack is reset, because closing means "done here".
+   */
+  readonly closeToLife: () => void;
 }
 
 const NavigationContext = createContext<NavigationContextValue | null>(null);
@@ -107,6 +112,15 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const closeToLife = useCallback(() => {
+    setWorld((activeWorld) => {
+      if (activeWorld !== 'life') {
+        setStacks((current) => ({ ...current, [activeWorld]: [] }));
+      }
+      return 'life';
+    });
+  }, []);
+
   const stack = stacks[world];
 
   const value = useMemo<NavigationContextValue>(
@@ -118,8 +132,9 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
       push,
       pop,
       popToRoot,
+      closeToLife,
     }),
-    [world, stack, selectWorld, push, pop, popToRoot],
+    [world, stack, selectWorld, push, pop, popToRoot, closeToLife],
   );
 
   return <NavigationContext.Provider value={value}>{children}</NavigationContext.Provider>;
@@ -134,13 +149,24 @@ export function useNavigation(): NavigationContextValue {
 }
 
 /**
+ * Screen-header titles. These can be longer than the tab labels because the
+ * header has the full screen width — which is why Relationships gets its real
+ * name here even though the tab has to say "People".
+ */
+export const WORLD_TITLES: Record<World, string> = {
+  career: 'Career',
+  assets: 'Assets',
+  life: 'Life',
+  relationships: 'Relationships',
+  activities: 'Activities',
+};
+
+/**
  * Tab labels.
  *
- * These name the five worlds of spec 828–838 in the player's language rather
- * than the spec's. "Activities" is the spec's own word for that world and is
- * what the screen is called everywhere else, so the tab says the same thing.
- * "People" stands in for Relationships only because "Relationships" does not
- * fit a fifth of a phone's width without truncating.
+ * These name the five worlds of spec 828–838 in the player's language. They are
+ * constrained to a fifth of the screen, which is the only reason Relationships
+ * appears as "People" here while the header above says the full word.
  */
 export const WORLD_LABELS: Record<World, string> = {
   career: 'Career',

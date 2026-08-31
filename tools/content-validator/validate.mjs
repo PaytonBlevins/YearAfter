@@ -118,7 +118,9 @@ if (existsSync(talentsFile)) {
 // 3. Content catalogs
 // ---------------------------------------------------------------------------
 
-const contentDir = join(ROOT, 'packages/content');
+// Only `data/` directories hold catalogs. Walking a whole package would treat
+// package.json and tsconfig.json as malformed content.
+const contentDir = join(ROOT, 'packages/content/data');
 let catalogCount = 0;
 const seenIds = new Map();
 
@@ -151,6 +153,43 @@ walk(contentDir, (file) => {
     else seenIds.set(entry.id, rel);
   }
 });
+
+// ---------------------------------------------------------------------------
+// 4. Cross-references between catalogs
+// ---------------------------------------------------------------------------
+// Spec 1213-1223 asks for cross-references to be validated automatically. A city
+// pointing at a name culture that does not exist would throw during character
+// generation, which is far too late to find out.
+
+const locationsPath = join(ROOT, 'packages/content/data/locations.json');
+const namesPath = join(ROOT, 'packages/content/data/names.json');
+
+if (existsSync(locationsPath) && existsSync(namesPath)) {
+  try {
+    const cities = JSON.parse(readFileSync(locationsPath, 'utf8')).entries ?? [];
+    const cultures = new Set(
+      (JSON.parse(readFileSync(namesPath, 'utf8')).entries ?? []).map((entry) => entry.id),
+    );
+    for (const city of cities) {
+      for (const ref of city.nameCultures ?? []) {
+        if (!cultures.has(ref.culture)) {
+          fail(
+            'packages/content/data/locations.json',
+            `City "${city.id}" references unknown name culture "${ref.culture}".`,
+          );
+        }
+      }
+      if (!(city.weight > 0)) {
+        fail(
+          'packages/content/data/locations.json',
+          `City "${city.id}" needs a birth weight greater than zero.`,
+        );
+      }
+    }
+  } catch (cause) {
+    fail('packages/content/data', `Could not cross-check catalogs: ${cause.message}`);
+  }
+}
 
 // ---------------------------------------------------------------------------
 

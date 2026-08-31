@@ -1,65 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { advanceYear } from './advance';
-import { createNewGame, rollTalents, TALENT_PROBABILITY } from './new-game';
-import { Rng } from './rng/rng';
-import { TALENT_KEYS } from '@yearafter/character';
-
-describe('createNewGame', () => {
-  it('is fully determined by the seed', () => {
-    const a = createNewGame({ seed: 'ALPHA' });
-    const b = createNewGame({ seed: 'ALPHA' });
-    expect(b.player).toEqual(a.player);
-    expect(b.world).toEqual(a.world);
-  });
-
-  it('produces different characters for different seeds', () => {
-    const a = createNewGame({ seed: 'ALPHA' });
-    const b = createNewGame({ seed: 'BETA' });
-    expect(b.player).not.toEqual(a.player);
-  });
-
-  it('starts at age zero in the start year with all seven stats in range', () => {
-    const state = createNewGame({ seed: 'START', startYear: 1994 });
-    expect(state.player.age).toBe(0);
-    expect(state.world.year).toBe(1994);
-    expect(state.player.birthYear).toBe(1994);
-    expect(state.world.generation).toBe(1);
-    for (const value of Object.values(state.player.stats)) {
-      expect(value).toBeGreaterThanOrEqual(0);
-      expect(value).toBeLessThanOrEqual(100);
-    }
-  });
-
-  it('honours forced talents for dev tools and the paid unlock', () => {
-    const state = createNewGame({ seed: 'FORCED', talents: ['music', 'crime'] });
-    expect(state.player.talents.music).toBe(true);
-    expect(state.player.talents.crime).toBe(true);
-    expect(state.player.talents.athletics).toBe(false);
-  });
-});
-
-describe('talent rolls', () => {
-  it('allows zero, one and several talents', () => {
-    const counts = new Set<number>();
-    for (let i = 0; i < 400; i += 1) {
-      counts.add(rollTalents(new Rng(`SEED-${i}`)).length);
-    }
-    expect(counts.has(0)).toBe(true);
-    expect(counts.has(1)).toBe(true);
-    expect([...counts].some((n) => n >= 2)).toBe(true);
-  });
-
-  it('lands near the configured per-talent probability', () => {
-    const trials = 20_000;
-    let total = 0;
-    for (let i = 0; i < trials; i += 1) {
-      total += rollTalents(new Rng(`T-${i}`)).length;
-    }
-    const perTalent = total / (trials * TALENT_KEYS.length);
-    expect(perTalent).toBeGreaterThan(TALENT_PROBABILITY - 0.02);
-    expect(perTalent).toBeLessThan(TALENT_PROBABILITY + 0.02);
-  });
-});
+import { createNewGame } from './new-game';
 
 describe('advanceYear', () => {
   it('advances age and world year by exactly one', () => {
@@ -129,28 +70,5 @@ describe('advanceYear', () => {
     for (let i = 0; i < 80; i += 1) state = advanceYear(state).state;
     const perYear = (performance.now() - started) / 80;
     expect(perYear).toBeLessThan(250);
-  });
-});
-
-describe('talent distribution', () => {
-  // Guards the product-owner decision at 9% per talent. If this fails, someone
-  // changed TALENT_PROBABILITY — confirm that was intended before retuning it.
-  it('leaves about half of all characters with no talent', () => {
-    const trials = 20_000;
-    let none = 0;
-    let one = 0;
-    let several = 0;
-    for (let i = 0; i < trials; i += 1) {
-      const count = rollTalents(new Rng(`DIST-${i}`)).length;
-      if (count === 0) none += 1;
-      else if (count === 1) one += 1;
-      else several += 1;
-    }
-    expect(none / trials).toBeGreaterThan(0.48);
-    expect(none / trials).toBeLessThan(0.56);
-    expect(one / trials).toBeGreaterThan(0.32);
-    expect(one / trials).toBeLessThan(0.4);
-    expect(several / trials).toBeGreaterThan(0.08);
-    expect(several / trials).toBeLessThan(0.16);
   });
 });

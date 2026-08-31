@@ -21,7 +21,12 @@ import {
   RelationshipsScreen,
   RelocateScreen,
 } from '../screens/shells';
-import { useNavigation, WORLD_LABELS, type ScreenKey } from '../navigation/navigation';
+import {
+  useNavigation,
+  WORLD_LABELS,
+  WORLD_TITLES,
+  type ScreenKey,
+} from '../navigation/navigation';
 import { WorldBar } from '../navigation/WorldBar';
 import { useGame } from '../stores/gameStore';
 import { colors, layout, spacing, typography } from '../theme/theme';
@@ -36,7 +41,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
 
 export function Shell() {
   const { ready, state, advance } = useGame();
-  const { world, current, selectWorld, push, pop } = useNavigation();
+  const { world, current, selectWorld, push, pop, closeToLife } = useNavigation();
 
   if (!ready || !state) {
     return (
@@ -56,20 +61,59 @@ export function Shell() {
         onPressDebug={() => push({ screen: 'debug', title: 'Developer' })}
       />
 
-      {current ? (
+      {/*
+        Screen header. Life has none — it is the home screen, there is nothing to
+        leave. Every other world gets one, and it always offers a way back to
+        Life that does NOT advance the year: leaving a screen must never cost the
+        player a year of their life.
+
+        At a world root:  ✕ close        · title
+        Inside a leaf:    ‹ parent       · title · ✕ close
+      */}
+      {world !== 'life' ? (
         <View style={styles.subHeader}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Back"
-            onPress={pop}
-            hitSlop={12}
-            style={styles.back}
-          >
-            <Glyph name="back" size={22} color={colors.accent} />
-            <Text style={styles.backLabel}>{WORLD_LABELS[world]}</Text>
-          </Pressable>
-          <Text style={styles.subHeaderTitle}>{current.title}</Text>
-          <View style={styles.backSpacer} />
+          {current ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Back to ${WORLD_TITLES[world]}`}
+              onPress={pop}
+              hitSlop={12}
+              style={styles.headerSlot}
+            >
+              <Glyph name="back" size={22} color={colors.accent} />
+              <Text numberOfLines={1} style={styles.headerSlotLabel}>
+                {WORLD_LABELS[world]}
+              </Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close, back to Life"
+              onPress={closeToLife}
+              hitSlop={12}
+              style={styles.headerSlot}
+            >
+              <Glyph name="close" size={20} color={colors.accent} />
+            </Pressable>
+          )}
+
+          <Text numberOfLines={1} style={styles.subHeaderTitle}>
+            {current ? current.title : WORLD_TITLES[world]}
+          </Text>
+
+          {current ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close, back to Life"
+              onPress={closeToLife}
+              hitSlop={12}
+              style={[styles.headerSlot, styles.headerSlotEnd]}
+            >
+              <Glyph name="close" size={20} color={colors.inkFaint} />
+            </Pressable>
+          ) : (
+            <View style={styles.headerSlot} />
+          )}
         </View>
       ) : null}
 
@@ -114,9 +158,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: layout.hairlineWidth,
     borderBottomColor: colors.hairline,
   },
-  back: { flexDirection: 'row', alignItems: 'center', width: 96, gap: 2 },
-  backSpacer: { width: 96 },
-  backLabel: {
+  // Fixed-width slots on both sides keep the title optically centred whether
+  // the leading control is a close cross or a back arrow with a word beside it.
+  headerSlot: { flexDirection: 'row', alignItems: 'center', width: 104, gap: 2 },
+  headerSlotEnd: { justifyContent: 'flex-end' },
+  headerSlotLabel: {
     fontFamily: typography.family,
     fontSize: typography.sizes.body,
     color: colors.accent,

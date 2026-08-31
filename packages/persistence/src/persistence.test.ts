@@ -179,3 +179,60 @@ describe('summaries', () => {
     expect(summary.generation).toBe(1);
   });
 });
+
+describe('v1 -> v2 migration (Ticket 0201 personality)', () => {
+  const asV1 = (save: ReturnType<typeof toSave>) => {
+    const { personality: _dropped, ...playerWithoutPersonality } = save.player as unknown as Record<
+      string,
+      unknown
+    >;
+    return { ...save, version: 1, player: playerWithoutPersonality };
+  };
+
+  it('loads a v1 save and fills neutral personality', () => {
+    const { save } = newSave('V1');
+    const migrated = migrateSave(asV1(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    expect(migrated.value.version).toBe(2);
+    expect(migrated.value.player.personality.ambition).toBe(50);
+    expect(migrated.value.player.personality.loyalty).toBe(50);
+  });
+
+  it('keeps everything else about the v1 character intact', () => {
+    const { save } = newSave('V1-INTACT');
+    const migrated = migrateSave(asV1(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    expect(migrated.value.player.firstName).toBe(save.player.firstName);
+    expect(migrated.value.player.age).toBe(save.player.age);
+    expect(migrated.value.player.talents).toEqual(save.player.talents);
+    expect(migrated.value.player.timeline).toHaveLength(save.player.timeline.length);
+    expect(migrated.value.rng).toEqual(save.rng);
+  });
+
+  it('resumes a migrated v1 save without drifting the simulation', () => {
+    // The migration must not consume RNG, or the save stops replaying its seed.
+    const { state, save } = newSave('V1-RESUME');
+    const migrated = migrateSave(asV1(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    expect(advanceYear(fromSave(migrated.value)).newEntries).toEqual(advanceYear(state).newEntries);
+  });
+
+  it('does not overwrite personality if a v1 save somehow already had it', () => {
+    const { save } = newSave('V1-KEEP');
+    const withPersonality = {
+      ...asV1(save),
+      player: { ...asV1(save).player, personality: { ambition: 77 } },
+    };
+    const migrated = migrateSave(withPersonality);
+    expect(migrated.ok).toBe(true);
+    if (migrated.ok) {
+      expect(migrated.value.player.personality.ambition).toBe(77);
+    }
+  });
+});

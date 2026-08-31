@@ -15,6 +15,7 @@
 
 import type { BirthLocation, CharacterId, CurrentLocation, Money } from '@yearafter/core';
 import { ZERO } from '@yearafter/core';
+import { createPersonality, type Personality } from './personality';
 import { createStats, createStressState, type StressState, type VisibleStats } from './stats';
 import { createTalents, type Talents } from './talents';
 import type { LifeRecord, TimelineEntry } from './timeline';
@@ -42,6 +43,8 @@ export interface Character {
   readonly stats: VisibleStats;
   /** Boolean at birth, persistent for life (spec 1070). */
   readonly talents: Talents;
+  /** Hidden. Never shown to the player — see personality.ts. */
+  readonly personality: Personality;
   readonly stress: StressState;
 
   /** Liquid cash, exact integer cents. The ledger is the source of truth for movement. */
@@ -106,6 +109,7 @@ export interface CreateCharacterInput {
   readonly currentLocation?: CurrentLocation;
   readonly stats?: Partial<VisibleStats>;
   readonly talents?: Talents;
+  readonly personality?: Personality;
   readonly cash?: Money;
   readonly occupation?: string;
   readonly age?: number;
@@ -129,6 +133,7 @@ export function createCharacter(input: CreateCharacterInput): Character {
     currentLocation: input.currentLocation ?? input.birthLocation,
     stats: createStats(input.stats),
     talents: input.talents ?? createTalents(),
+    personality: input.personality ?? createPersonality(),
     stress: createStressState(),
     cash: input.cash ?? ZERO,
     occupation: input.occupation ?? 'Newborn',

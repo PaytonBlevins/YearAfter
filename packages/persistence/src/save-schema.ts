@@ -13,7 +13,7 @@ import type { Character } from '@yearafter/character';
 import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 1;
+export const CURRENT_SAVE_VERSION = 2;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -29,8 +29,12 @@ export const DEFAULT_SETTINGS: SaveSettings = {
 
 export type { WorldState };
 
-export interface SaveGameV1 {
-  readonly version: 1;
+/**
+ * Version 2 added `player.personality` — the hidden traits from Ticket 0201.
+ * V1 saves migrate by filling neutral values; see migrations.ts.
+ */
+export interface SaveGameV2 {
+  readonly version: 2;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -43,8 +47,8 @@ export interface SaveGameV1 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV1;
-export type CurrentSaveGame = SaveGameV1;
+export type AnySaveGame = SaveGameV2;
+export type CurrentSaveGame = SaveGameV2;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

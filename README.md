@@ -7,8 +7,9 @@ The product source of truth is [`specs/MASTER_SPEC.md`](specs/MASTER_SPEC.md).
 Before writing code, read [`specs/CORE_RULES.md`](specs/CORE_RULES.md) and
 [`specs/AI_CODING_INSTRUCTIONS.md`](specs/AI_CODING_INSTRUCTIONS.md).
 
-**Status:** v0.01 Playable Shell. Sprint Zero (0001–0009) and tickets 0101–0114
-are complete. Next milestone is v0.02 Living Character, starting at Ticket 0201.
+**Status:** v0.02 Living Character, in progress. Sprint Zero (0001–0009),
+v0.01 (0101–0114) and Ticket 0201 (character generator) are complete.
+Next is Ticket 0202, starting family.
 
 ---
 

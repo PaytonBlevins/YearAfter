@@ -23,9 +23,37 @@ type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
 
 /**
  * Keyed by the version being migrated FROM.
- * migrations[1] would take a v1 save to v2.
+ * migrations[1] takes a v1 save to v2.
  */
-const migrations: Readonly<Record<number, Migration>> = {};
+const migrations: Readonly<Record<number, Migration>> = {
+  /**
+   * v1 -> v2: Ticket 0201 added hidden personality traits to the character.
+   *
+   * Note the birthplace is deliberately NOT touched. Saves made before the
+   * location catalog existed hold `us-ca-riverside`, which is why that city is
+   * in the catalog — rescuing an existing character's birthplace by adding a
+   * real city beats silently rewriting where they were born.
+   *
+   * Existing characters get neutral values rather than fresh rolls. Rolling
+   * would be worse in two ways: it would consume RNG outside a stream (making
+   * the save no longer replay from its seed), and it would silently change the
+   * disposition of a character the player already knows.
+   */
+  1: (save) => {
+    const player = { ...(save['player'] as Record<string, unknown>) };
+    if (typeof player['personality'] !== 'object' || player['personality'] === null) {
+      player['personality'] = {
+        ambition: 50,
+        riskTolerance: 50,
+        temper: 50,
+        generosity: 50,
+        loyalty: 50,
+        extraversion: 50,
+      };
+    }
+    return { ...save, version: 2, player };
+  },
+};
 
 export function describeMigrationError(error: MigrationError): string {
   switch (error.kind) {
@@ -104,6 +132,8 @@ export function validateCurrentSave(
     require('player.age', player?.['age'], typeof player?.['age'] === 'number'),
     require('player.stats', player?.['stats'], typeof player?.['stats'] === 'object'),
     require('player.talents', player?.['talents'], typeof player?.['talents'] === 'object'),
+    require('player.personality', player?.['personality'], typeof player?.['personality'] ===
+      'object' && player?.['personality'] !== null),
     require('player.timeline', player?.['timeline'], Array.isArray(player?.['timeline'])),
     require('world.year', world?.['year'], typeof world?.['year'] === 'number'),
     require('rng.seed', rng?.['seed'], typeof rng?.['seed'] === 'string'),

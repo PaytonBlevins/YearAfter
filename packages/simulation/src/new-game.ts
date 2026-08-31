@@ -1,109 +1,221 @@
 /**
- * New game creation — v0.01 shell scope.
+ * Ticket 0201 — Character generator.
  *
- * Ticket 0201 replaces the fixed starting character with the real generator
- * (randomised names, sex, birthplace, visible and hidden attributes, and Boolean
- * talent rolls at configured probabilities). What this file establishes now is
- * the *shape* of that call: everything comes from the seed, nothing from the
- * clock or `Math.random`, so a given seed always produces the same life.
+ * Spec 0201: name, sex, birthplace history, visible and hidden attributes, and
+ * Boolean talents including Crime, with zero / one / several talents possible
+ * according to configured probabilities.
+ *
+ * Everything here is drawn from the seed through named RNG streams. A seed
+ * fully determines a life (CORE_RULES 5), which is what the golden-life tests
+ * depend on and what makes a bug reproducible from a save.
+ *
+ * Not in scope: parents, siblings and family finances are Ticket 0202. The
+ * generator produces a character alone; family attaches to it afterwards.
  */
 
 import {
   createCharacter,
+  createPersonality,
   createTalents,
+  PERSONALITY_KEYS,
+  TALENT_KEYS,
   type Character,
+  type PersonalityKey,
   type Sex,
   type TalentKey,
-  TALENT_KEYS,
+  type VisibleStatKey,
 } from '@yearafter/character';
+import { CITIES, findNameCulture, type CityEntry } from '@yearafter/content';
 import { asCharacterId, dollars, type BirthLocation } from '@yearafter/core';
 import { createGameState, createWorldState, type GameState } from './game-state';
-import { Rng, RngDomains } from './rng/rng';
+import { Rng, RngDomains, type RandomStream } from './rng/rng';
 
-/** v0.01 placeholder name pool. Ticket 0201 moves this into @yearafter/content. */
-const FIRST_NAMES_MALE = ['Marcus', 'Elliot', 'Dante', 'Owen', 'Silas', 'Rowan', 'Andre', 'Felix'];
-const FIRST_NAMES_FEMALE = ['Nadia', 'June', 'Priya', 'Alma', 'Rosa', 'Imani', 'Cleo', 'Wren'];
-const LAST_NAMES = [
-  'Vaughn',
-  'Okafor',
-  'Reyes',
-  'Lindqvist',
-  'Bellamy',
-  'Nakamura',
-  'Doyle',
-  'Ferrer',
-];
-
-/** v0.01 placeholder birthplace. Ticket 0201 draws from the location catalog. */
-const DEFAULT_BIRTH_LOCATION: BirthLocation = {
-  countryCode: 'US',
-  regionCode: 'CA',
-  cityId: 'us-ca-riverside',
-};
+/* -------------------------------------------------------------------------- */
+/* Tunable configuration                                                       */
+/* -------------------------------------------------------------------------- */
 
 /**
- * Talent probability. Spec 0201: a character can have zero, one, or several.
+ * Talent probability per talent. Set by the product owner.
  *
- * Set by the product owner. At 9% per talent across seven talents, roughly 52%
- * of characters are born with no talent at all, ~36% with exactly one, and ~12%
- * with two or more — a thin tail of multi-talented lives, which is what makes
- * one worth something. Tunable in the balance lab; changing it shifts the whole
- * game's opportunity curve, so treat it as a balance decision, not a constant.
+ * Across seven talents this yields roughly 52% of characters with no talent,
+ * 36% with exactly one, and 12% with two or more. The thin tail is the point:
+ * a talent is only worth something if most people do not have one.
  */
 export const TALENT_PROBABILITY = 0.09;
+
+/**
+ * Birth attribute band for the seven visible stats.
+ *
+ * Deliberately not 0–100. A newborn rolling a 3 in Health is not an interesting
+ * life, it is a dead one, and a 99 leaves nothing to earn. The band leaves room
+ * to grow in both directions — every system that moves a stat is adding to or
+ * subtracting from a middling start.
+ */
+export const BIRTH_ATTRIBUTE_MIN = 25;
+export const BIRTH_ATTRIBUTE_MAX = 88;
+
+/**
+ * Personality band. Wider than birth attributes because these never move much
+ * after birth — they are dispositions, not skills — so the spread at generation
+ * is most of the variation the trait will ever have.
+ */
+export const PERSONALITY_MIN = 12;
+export const PERSONALITY_MAX = 92;
+
+/** Probability a character is born male. Even, and stated rather than assumed. */
+export const MALE_PROBABILITY = 0.5;
+
+/* -------------------------------------------------------------------------- */
 
 export interface NewGameOptions {
   readonly seed: string;
   /** In-world year the character is born. */
   readonly startYear?: number;
-  /** Override the generated name, for dev tools and tests. */
+  /** Overrides for dev tools and the paid Character Editor unlock. */
   readonly firstName?: string;
   readonly lastName?: string;
   readonly sex?: Sex;
-  /** Force a talent set, for dev tools and the paid talent-selection unlock. */
   readonly talents?: readonly TalentKey[];
+  /** Force a birthplace by city id, for tests and dev tools. */
+  readonly birthCityId?: string;
 }
 
+/** The generated character plus the details that are not stored on it. */
+export interface GeneratedCharacter {
+  readonly character: Character;
+  readonly birthCity: CityEntry;
+  /** Which naming tradition the name came from. Useful for dev tools and tests. */
+  readonly nameCulture: string;
+}
+
+/**
+ * Pick a birthplace, weighted.
+ *
+ * Region and country come along with the city, which is why this is one draw:
+ * picking country then region then city would make a country with two listed
+ * cities as likely as one with sixteen.
+ */
+export function rollBirthCity(stream: RandomStream, forcedId?: string): CityEntry {
+  if (forcedId) {
+    const forced = CITIES.find((city) => city.id === forcedId);
+    if (!forced) {
+      throw new Error(`Unknown birth city id: ${forcedId}`);
+    }
+    return forced;
+  }
+  return stream.weightedChoice(CITIES.map((city) => ({ value: city, weight: city.weight })));
+}
+
+/**
+ * Pick a naming tradition for a birthplace, then a name from it.
+ *
+ * A character born in Los Angeles can carry any of several naming traditions,
+ * which is both truer and more interesting than one name pool per country.
+ */
+export function rollName(
+  stream: RandomStream,
+  city: CityEntry,
+  sex: Sex,
+): { firstName: string; lastName: string; culture: string } {
+  const cultureId = stream.weightedChoice(
+    city.nameCultures.map((entry) => ({ value: entry.culture, weight: entry.weight })),
+  );
+  const culture = findNameCulture(cultureId);
+  if (!culture) {
+    // A dangling culture reference is a content bug, and the content validator
+    // fails the build on it. Throwing here means it cannot reach a player.
+    throw new Error(`City ${city.id} references unknown name culture: ${cultureId}`);
+  }
+  return {
+    firstName: stream.pick(sex === 'male' ? culture.male : culture.female),
+    lastName: stream.pick(culture.surnames),
+    culture: cultureId,
+  };
+}
+
+/** Boolean talent rolls. Zero, one or several are all possible (spec 0201). */
 export function rollTalents(rng: Rng): TalentKey[] {
   const stream = rng.stream(RngDomains.Talents);
   return TALENT_KEYS.filter(() => stream.chance(TALENT_PROBABILITY));
 }
 
-export function createNewGame(options: NewGameOptions): GameState {
-  const rng = new Rng(options.seed);
+/**
+ * Roll the seven visible birth attributes.
+ *
+ * `aroundCentre` clusters results toward the middle of the band rather than
+ * spreading them flat, so most characters are ordinary and the exceptional ones
+ * are actually exceptional. Each stat is independent — there is deliberately no
+ * correlation between, say, Smarts and Looks, and no talent bonus, because
+ * talents are Boolean and act through opportunity rather than by inflating
+ * numbers (spec 1070).
+ */
+export function rollBirthStats(stream: RandomStream): Record<VisibleStatKey, number> {
+  const roll = () => Math.round(stream.aroundCentre(BIRTH_ATTRIBUTE_MIN, BIRTH_ATTRIBUTE_MAX));
+  return {
+    happiness: roll(),
+    health: roll(),
+    smarts: roll(),
+    looks: roll(),
+    charisma: roll(),
+    willpower: roll(),
+    discipline: roll(),
+  };
+}
+
+/** Roll the hidden personality traits. Flat within the band — dispositions vary. */
+export function rollPersonality(stream: RandomStream): Record<PersonalityKey, number> {
+  const result = {} as Record<PersonalityKey, number>;
+  for (const key of PERSONALITY_KEYS) {
+    result[key] = stream.range(PERSONALITY_MIN, PERSONALITY_MAX);
+  }
+  return result;
+}
+
+/**
+ * Generate a character. Deterministic in the seed.
+ *
+ * Stream discipline matters here: birthplace, naming, attributes and talents
+ * each draw from their own stream, so adding a roll to one does not shift the
+ * others. Without that, tuning the personality spread would silently change
+ * every character's birthplace.
+ */
+export function generateCharacter(rng: Rng, options: NewGameOptions): GeneratedCharacter {
   const generation = rng.stream(RngDomains.CharacterGeneration);
-
-  const sex: Sex = options.sex ?? (generation.chance(0.5) ? 'male' : 'female');
-  const firstName =
-    options.firstName ?? generation.pick(sex === 'male' ? FIRST_NAMES_MALE : FIRST_NAMES_FEMALE);
-  const lastName = options.lastName ?? generation.pick(LAST_NAMES);
-
   const startYear = options.startYear ?? 2000;
 
-  // Birth attributes vary; the full weighting model is Ticket 0201.
-  const stat = () => Math.round(generation.aroundCentre(25, 90));
+  const birthCity = rollBirthCity(generation, options.birthCityId);
+  const sex: Sex = options.sex ?? (generation.chance(MALE_PROBABILITY) ? 'male' : 'female');
 
-  const player: Character = createCharacter({
+  const rolled = rollName(generation, birthCity, sex);
+  const firstName = options.firstName ?? rolled.firstName;
+  const lastName = options.lastName ?? rolled.lastName;
+
+  const birthLocation: BirthLocation = {
+    countryCode: birthCity.countryCode,
+    regionCode: birthCity.regionCode,
+    cityId: birthCity.id,
+  };
+
+  const character = createCharacter({
     id: asCharacterId(`${options.seed}:player:1`),
     firstName,
     lastName,
     sex,
     birthYear: startYear,
-    birthLocation: DEFAULT_BIRTH_LOCATION,
-    stats: {
-      happiness: stat(),
-      health: stat(),
-      smarts: stat(),
-      looks: stat(),
-      charisma: stat(),
-      willpower: stat(),
-      discipline: stat(),
-    },
+    birthLocation,
+    stats: rollBirthStats(generation),
+    personality: createPersonality(rollPersonality(generation)),
     talents: createTalents(options.talents ?? rollTalents(rng)),
     cash: dollars(0),
     occupation: 'Newborn',
     age: 0,
   });
 
-  return createGameState(createWorldState(startYear, 1), player, rng);
+  return { character, birthCity, nameCulture: rolled.culture };
+}
+
+export function createNewGame(options: NewGameOptions): GameState {
+  const rng = new Rng(options.seed);
+  const { character } = generateCharacter(rng, options);
+  return createGameState(createWorldState(options.startYear ?? 2000, 1), character, rng);
 }

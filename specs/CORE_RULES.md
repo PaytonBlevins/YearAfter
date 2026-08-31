@@ -93,6 +93,10 @@ Five worlds: **Career, Assets, Advance/Life (centre), Relationships, Activities.
 - Search fields must not be required in normal play. Curate inventories instead
   (a dealership shows 8–15 cars from a catalog of hundreds).
 - Roughly 6–9 rows per phone screen is the density target.
+- **Leaving a screen never costs the player a year.** Every world screen offers
+  a close (✕) that returns to Life without advancing. Advancing time is one
+  control — the centre button — and nothing else may trigger it, directly or as
+  a side effect of navigation.
 - **A row's right-hand marker states what pressing it does, before it is
   pressed.** Chevron = opens a sub-screen. Ellipsis = acts, or opens a sheet, in
   place. Nothing = informational. Every `ListRow` declares an `affordance`; a

@@ -1,5 +1,5 @@
 {
-  "name": "@yearafter/simulation",
+  "name": "@yearafter/content",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -11,11 +11,6 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
-  },
-  "dependencies": {
-    "@yearafter/character": "workspace:*",
-    "@yearafter/content": "workspace:*",
-    "@yearafter/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3",

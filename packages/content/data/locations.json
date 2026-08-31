@@ -1,0 +1,600 @@
+{
+  "$comment": "Ticket 0201 — birthplace catalog. One entry per city, each carrying its region and country so a birth draw is a single weighted pick. `weight` is a birth-likelihood weight, loosely population-shaped, NOT a population figure. `nameCultures` is the mix a character born there draws a name from — which is why a US birth can produce any of several naming traditions. US weight is deliberately dominant for now because salary, property and price content is US-benchmarked until later milestones; that is a content gap, not a design statement.",
+  "entries": [
+    {
+      "id": "us-ny-nyc",
+      "city": "New York City",
+      "regionCode": "NY",
+      "region": "New York",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 90,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 66
+        },
+        {
+          "culture": "mx-es",
+          "weight": 16
+        },
+        {
+          "culture": "ng",
+          "weight": 10
+        },
+        {
+          "culture": "br-pt",
+          "weight": 8
+        }
+      ]
+    },
+    {
+      "id": "us-ca-los-angeles",
+      "city": "Los Angeles",
+      "regionCode": "CA",
+      "region": "California",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 70,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 58
+        },
+        {
+          "culture": "mx-es",
+          "weight": 36
+        },
+        {
+          "culture": "ng",
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": "us-il-chicago",
+      "city": "Chicago",
+      "regionCode": "IL",
+      "region": "Illinois",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 45,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 68
+        },
+        {
+          "culture": "mx-es",
+          "weight": 20
+        },
+        {
+          "culture": "ng",
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": "us-tx-houston",
+      "city": "Houston",
+      "regionCode": "TX",
+      "region": "Texas",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 42,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 58
+        },
+        {
+          "culture": "mx-es",
+          "weight": 32
+        },
+        {
+          "culture": "ng",
+          "weight": 10
+        }
+      ]
+    },
+    {
+      "id": "us-tx-dallas",
+      "city": "Dallas",
+      "regionCode": "TX",
+      "region": "Texas",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 30,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 62
+        },
+        {
+          "culture": "mx-es",
+          "weight": 30
+        },
+        {
+          "culture": "ng",
+          "weight": 8
+        }
+      ]
+    },
+    {
+      "id": "us-az-phoenix",
+      "city": "Phoenix",
+      "regionCode": "AZ",
+      "region": "Arizona",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 32,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 64
+        },
+        {
+          "culture": "mx-es",
+          "weight": 32
+        },
+        {
+          "culture": "ng",
+          "weight": 4
+        }
+      ]
+    },
+    {
+      "id": "us-ca-san-diego",
+      "city": "San Diego",
+      "regionCode": "CA",
+      "region": "California",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 25,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 62
+        },
+        {
+          "culture": "mx-es",
+          "weight": 32
+        },
+        {
+          "culture": "ng",
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": "us-pa-philadelphia",
+      "city": "Philadelphia",
+      "regionCode": "PA",
+      "region": "Pennsylvania",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 30,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 70
+        },
+        {
+          "culture": "ng",
+          "weight": 18
+        },
+        {
+          "culture": "mx-es",
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": "us-fl-miami",
+      "city": "Miami",
+      "regionCode": "FL",
+      "region": "Florida",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 25,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 46
+        },
+        {
+          "culture": "mx-es",
+          "weight": 34
+        },
+        {
+          "culture": "br-pt",
+          "weight": 12
+        },
+        {
+          "culture": "ng",
+          "weight": 8
+        }
+      ]
+    },
+    {
+      "id": "us-ga-atlanta",
+      "city": "Atlanta",
+      "regionCode": "GA",
+      "region": "Georgia",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 25,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 62
+        },
+        {
+          "culture": "ng",
+          "weight": 28
+        },
+        {
+          "culture": "mx-es",
+          "weight": 10
+        }
+      ]
+    },
+    {
+      "id": "us-wa-seattle",
+      "city": "Seattle",
+      "regionCode": "WA",
+      "region": "Washington",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 25,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 76
+        },
+        {
+          "culture": "jp",
+          "weight": 12
+        },
+        {
+          "culture": "mx-es",
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": "us-ma-boston",
+      "city": "Boston",
+      "regionCode": "MA",
+      "region": "Massachusetts",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 25,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 76
+        },
+        {
+          "culture": "gb-en",
+          "weight": 12
+        },
+        {
+          "culture": "br-pt",
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": "us-co-denver",
+      "city": "Denver",
+      "regionCode": "CO",
+      "region": "Colorado",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 22,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 74
+        },
+        {
+          "culture": "mx-es",
+          "weight": 22
+        },
+        {
+          "culture": "ng",
+          "weight": 4
+        }
+      ]
+    },
+    {
+      "id": "us-oh-columbus",
+      "city": "Columbus",
+      "regionCode": "OH",
+      "region": "Ohio",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 20,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 80
+        },
+        {
+          "culture": "ng",
+          "weight": 12
+        },
+        {
+          "culture": "mx-es",
+          "weight": 8
+        }
+      ]
+    },
+    {
+      "id": "us-mi-detroit",
+      "city": "Detroit",
+      "regionCode": "MI",
+      "region": "Michigan",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 20,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 72
+        },
+        {
+          "culture": "ng",
+          "weight": 22
+        },
+        {
+          "culture": "mx-es",
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": "us-tn-nashville",
+      "city": "Nashville",
+      "regionCode": "TN",
+      "region": "Tennessee",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 18,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 82
+        },
+        {
+          "culture": "ng",
+          "weight": 12
+        },
+        {
+          "culture": "mx-es",
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": "us-ca-riverside",
+      "city": "Riverside",
+      "regionCode": "CA",
+      "region": "California",
+      "countryCode": "US",
+      "country": "United States",
+      "weight": 14,
+      "nameCultures": [
+        {
+          "culture": "us-en",
+          "weight": 58
+        },
+        {
+          "culture": "mx-es",
+          "weight": 36
+        },
+        {
+          "culture": "ng",
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": "gb-eng-london",
+      "city": "London",
+      "regionCode": "ENG",
+      "region": "England",
+      "countryCode": "GB",
+      "country": "United Kingdom",
+      "weight": 60,
+      "nameCultures": [
+        {
+          "culture": "gb-en",
+          "weight": 78
+        },
+        {
+          "culture": "ng",
+          "weight": 16
+        },
+        {
+          "culture": "br-pt",
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": "gb-sct-glasgow",
+      "city": "Glasgow",
+      "regionCode": "SCT",
+      "region": "Scotland",
+      "countryCode": "GB",
+      "country": "United Kingdom",
+      "weight": 15,
+      "nameCultures": [
+        {
+          "culture": "gb-en",
+          "weight": 92
+        },
+        {
+          "culture": "ng",
+          "weight": 8
+        }
+      ]
+    },
+    {
+      "id": "mx-cmx-mexico-city",
+      "city": "Mexico City",
+      "regionCode": "CMX",
+      "region": "Ciudad de México",
+      "countryCode": "MX",
+      "country": "Mexico",
+      "weight": 55,
+      "nameCultures": [
+        {
+          "culture": "mx-es",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "id": "mx-jal-guadalajara",
+      "city": "Guadalajara",
+      "regionCode": "JAL",
+      "region": "Jalisco",
+      "countryCode": "MX",
+      "country": "Mexico",
+      "weight": 20,
+      "nameCultures": [
+        {
+          "culture": "mx-es",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "id": "jp-13-tokyo",
+      "city": "Tokyo",
+      "regionCode": "13",
+      "region": "Tokyo",
+      "countryCode": "JP",
+      "country": "Japan",
+      "weight": 55,
+      "nameCultures": [
+        {
+          "culture": "jp",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "id": "jp-27-osaka",
+      "city": "Osaka",
+      "regionCode": "27",
+      "region": "Osaka",
+      "countryCode": "JP",
+      "country": "Japan",
+      "weight": 25,
+      "nameCultures": [
+        {
+          "culture": "jp",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "id": "ng-la-lagos",
+      "city": "Lagos",
+      "regionCode": "LA",
+      "region": "Lagos",
+      "countryCode": "NG",
+      "country": "Nigeria",
+      "weight": 50,
+      "nameCultures": [
+        {
+          "culture": "ng",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "id": "ng-fc-abuja",
+      "city": "Abuja",
+      "regionCode": "FC",
+      "region": "Federal Capital Territory",
+      "countryCode": "NG",
+      "country": "Nigeria",
+      "weight": 15,
+      "nameCultures": [
+        {
+          "culture": "ng",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "id": "de-be-berlin",
+      "city": "Berlin",
+      "regionCode": "BE",
+      "region": "Berlin",
+      "countryCode": "DE",
+      "country": "Germany",
+      "weight": 30,
+      "nameCultures": [
+        {
+          "culture": "de",
+          "weight": 94
+        },
+        {
+          "culture": "ng",
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": "de-by-munich",
+      "city": "Munich",
+      "regionCode": "BY",
+      "region": "Bavaria",
+      "countryCode": "DE",
+      "country": "Germany",
+      "weight": 15,
+      "nameCultures": [
+        {
+          "culture": "de",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "id": "br-sp-sao-paulo",
+      "city": "São Paulo",
+      "regionCode": "SP",
+      "region": "São Paulo",
+      "countryCode": "BR",
+      "country": "Brazil",
+      "weight": 45,
+      "nameCultures": [
+        {
+          "culture": "br-pt",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "id": "br-rj-rio-de-janeiro",
+      "city": "Rio de Janeiro",
+      "regionCode": "RJ",
+      "region": "Rio de Janeiro",
+      "countryCode": "BR",
+      "country": "Brazil",
+      "weight": 25,
+      "nameCultures": [
+        {
+          "culture": "br-pt",
+          "weight": 100
+        }
+      ]
+    }
+  ]
+}

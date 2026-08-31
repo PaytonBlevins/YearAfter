@@ -18,7 +18,13 @@
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { formatMoney } from '@yearafter/core';
-import { activeTalents, TALENT_LABELS } from '@yearafter/character';
+import {
+  activeTalents,
+  PERSONALITY_KEYS,
+  PERSONALITY_LABELS,
+  TALENT_LABELS,
+} from '@yearafter/character';
+import { describeCity } from '@yearafter/content';
 import {
   Card,
   ComingSoon,
@@ -83,6 +89,7 @@ const ICON_NAMES: readonly IconName[] = [
   'chevron',
   'back',
   'ellipsis',
+  'close',
   'money',
   'home',
   'vehicle',
@@ -360,8 +367,8 @@ export function RelocateScreen() {
       <Card>
         <ListRow
           icon="relocate"
-          title={currentLocation.cityId}
-          subtitle={`${currentLocation.regionCode}, ${currentLocation.countryCode}`}
+          title={describeCity(currentLocation.cityId)}
+          subtitle={currentLocation.countryCode === 'US' ? 'United States' : undefined}
           affordance="none"
         />
       </Card>
@@ -415,8 +422,14 @@ export function DebugScreen() {
         <ListRow title="Cash" value={formatMoney(state.player.cash)} affordance="none" />
         <RowDivider inset={false} />
         <ListRow
+          title="Born"
+          value={describeCity(state.player.birthLocation.cityId)}
+          affordance="none"
+        />
+        <RowDivider inset={false} />
+        <ListRow
           title="Location"
-          value={`${state.player.currentLocation.regionCode}, ${state.player.currentLocation.countryCode}`}
+          value={describeCity(state.player.currentLocation.cityId)}
           affordance="none"
         />
         <RowDivider inset={false} />
@@ -425,6 +438,20 @@ export function DebugScreen() {
           value={talents.length > 0 ? talents.map((key) => TALENT_LABELS[key]).join(', ') : 'None'}
           affordance="none"
         />
+      </Card>
+
+      <SectionHeading note="never shown to the player">Hidden personality</SectionHeading>
+      <Card>
+        {PERSONALITY_KEYS.map((key, index) => (
+          <Fragment key={key}>
+            {index > 0 ? <RowDivider inset={false} /> : null}
+            <ListRow
+              title={PERSONALITY_LABELS[key]}
+              value={String(state.player.personality[key])}
+              affordance="none"
+            />
+          </Fragment>
+        ))}
       </Card>
 
       <SectionHeading note={`${ICON_NAMES.length} icons`}>Icon sheet</SectionHeading>

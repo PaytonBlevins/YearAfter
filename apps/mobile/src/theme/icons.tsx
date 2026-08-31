@@ -30,6 +30,7 @@ export type IconName =
   | 'chevron'
   | 'back'
   | 'ellipsis'
+  | 'close'
   | 'money'
   | 'home'
   | 'vehicle'
@@ -114,6 +115,9 @@ const DRAWINGS: Record<IconName, Drawing> = {
 
   chevron: ({ strokeWidth }) => <Path d="M9.5 4.8 16.7 12l-7.2 7.2" strokeWidth={strokeWidth} />,
   back: ({ strokeWidth }) => <Path d="M14.5 4.8 7.3 12l7.2 7.2" strokeWidth={strokeWidth} />,
+  close: ({ strokeWidth }) => (
+    <Path d="M5.6 5.6 18.4 18.4M18.4 5.6 5.6 18.4" strokeWidth={strokeWidth} />
+  ),
 
   // The one filled icon in the set. Three dots drawn as outlines read as tiny
   // rings at 20px, which is not what a "more actions" marker should look like.
@@ -143,15 +147,19 @@ const DRAWINGS: Record<IconName, Drawing> = {
     </>
   ),
 
+  // Vehicle — a side profile with a distinct cabin. The earlier shape was
+  // symmetrical enough to read as a generic lozenge at small sizes.
   vehicle: ({ strokeWidth }) => (
     <>
       <Path
-        d="M3 15.4v-2.1l2.1-4.6A2.2 2.2 0 0 1 7.1 7.4h9.8a2.2 2.2 0 0 1 2 1.3l2.1 4.6v2.1a1.4 1.4 0 0 1-1.4 1.4H4.4A1.4 1.4 0 0 1 3 15.4z"
+        d="M2.8 16.2v-3.4a1.6 1.6 0 0 1 1-1.5l2.4-1 2.2-3.1a2.4 2.4 0 0 1 2-1h4.2a2.4 2.4 0 0 1 1.9.9l2.6 3.4 1.3.5a1.7 1.7 0 0 1 1.1 1.6v3.6h-2.6"
         strokeWidth={strokeWidth}
       />
-      <Path d="M3.9 13.3h16.2" strokeWidth={strokeWidth} />
-      <Circle cx={7.4} cy={16.8} r={1.8} strokeWidth={strokeWidth} />
-      <Circle cx={16.6} cy={16.8} r={1.8} strokeWidth={strokeWidth} />
+      <Path d="M8.2 16.2h7.2" strokeWidth={strokeWidth} />
+      <Path d="M6.2 10.3h12.3" strokeWidth={strokeWidth} />
+      <Path d="M11.6 6.2v4.1" strokeWidth={strokeWidth} />
+      <Circle cx={6.6} cy={16.4} r={2} strokeWidth={strokeWidth} />
+      <Circle cx={17.2} cy={16.4} r={2} strokeWidth={strokeWidth} />
     </>
   ),
 
@@ -171,13 +179,14 @@ const DRAWINGS: Record<IconName, Drawing> = {
     </>
   ),
 
+  // Shopping — a cart. The previous bag read as "a purchase"; a cart reads as
+  // the act of going shopping, which is what the row does.
   shopping: ({ strokeWidth }) => (
     <>
-      <Path
-        d="M5.4 7.8h13.2l-1.1 12.1a1.5 1.5 0 0 1-1.5 1.3H8a1.5 1.5 0 0 1-1.5-1.3z"
-        strokeWidth={strokeWidth}
-      />
-      <Path d="M8.8 10V6.6a3.2 3.2 0 0 1 6.4 0V10" strokeWidth={strokeWidth} />
+      <Path d="M2.6 3.8h2.6l2.4 10.6h9.8" strokeWidth={strokeWidth} />
+      <Path d="M6.2 6.8h15L19 12.4H7.4" strokeWidth={strokeWidth} />
+      <Circle cx={9} cy={19} r={1.7} strokeWidth={strokeWidth} />
+      <Circle cx={17.2} cy={19} r={1.7} strokeWidth={strokeWidth} />
     </>
   ),
 
@@ -255,27 +264,42 @@ const DRAWINGS: Record<IconName, Drawing> = {
     </>
   ),
 
+  // Pets — a dog's head with drop ears. A paw print is a generic animal mark and
+  // its pads closed up into a blob at 20px; a head reads as a companion.
   pets: ({ strokeWidth }) => (
     <>
-      <Circle cx={7.2} cy={9.2} r={1.9} strokeWidth={strokeWidth} />
-      <Circle cx={16.8} cy={9.2} r={1.9} strokeWidth={strokeWidth} />
-      <Circle cx={10.4} cy={5.4} r={1.7} strokeWidth={strokeWidth} />
-      <Circle cx={13.6} cy={5.4} r={1.7} strokeWidth={strokeWidth} />
-      <Path
-        d="M12 12.6c3 0 5 2.2 5 4.6s-2.2 3-5 3-5-.6-5-3 2-4.6 5-4.6z"
-        strokeWidth={strokeWidth}
-      />
+      <Path d="M6.4 7.2 4.2 4.8v5.8" strokeWidth={strokeWidth} />
+      <Path d="M17.6 7.2l2.2-2.4v5.8" strokeWidth={strokeWidth} />
+      <Path d="M4.2 10.6a7.8 7.8 0 0 0 15.6 0" strokeWidth={strokeWidth} />
+      <Path d="M6.4 7.2a7.6 7.6 0 0 1 11.2 0" strokeWidth={strokeWidth} />
+      <Path d="M9.8 11.6h.01M14.2 11.6h.01" strokeWidth={strokeWidth} />
+      <Path d="M12 15.4a2 2 0 0 1-2-1.8h4a2 2 0 0 1-2 1.8z" strokeWidth={strokeWidth} />
     </>
   ),
 
+  // Nightlife — a cocktail glass. The earlier crescent moon read as night, or
+  // worse as sleep; going out is the actual subject.
   nightlife: ({ strokeWidth }) => (
-    <Path d="M20.4 14.6A9 9 0 0 1 9.4 3.6a9 9 0 1 0 11 11z" strokeWidth={strokeWidth} />
+    <>
+      <Path d="M3.8 4.8h16.4L12 13.4z" strokeWidth={strokeWidth} />
+      <Path d="M12 13.4v6.2" strokeWidth={strokeWidth} />
+      <Path d="M8.2 20.2h7.6" strokeWidth={strokeWidth} />
+      <Path d="M16.4 8 20 4.4" strokeWidth={strokeWidth} />
+    </>
   ),
 
+  // Vacation — a palm tree over water. The earlier umbrella read as rain, which
+  // is the opposite of the intended feeling.
   vacation: ({ strokeWidth }) => (
     <>
-      <Path d="M2.8 12.2a9.2 9.2 0 0 1 18.4 0z" strokeWidth={strokeWidth} />
-      <Path d="M12 12.2v6.4a2.4 2.4 0 0 0 4.8 0" strokeWidth={strokeWidth} />
+      <Path d="M11.6 7.4c-.9 4.2-1.2 8.6-1 13" strokeWidth={strokeWidth} />
+      <Path d="M11.4 6.8c-2.6-1.5-5.6-.9-7.2 1.4 2.5-.8 4.6-.6 6.4.6" strokeWidth={strokeWidth} />
+      <Path d="M12.6 6.8c2.6-1.5 5.6-.9 7.2 1.4-2.5-.8-4.6-.6-6.4.6" strokeWidth={strokeWidth} />
+      <Path d="M11.8 6.2c.6-2.4 2.8-3.6 5.2-3-1.6.8-2.6 2-3.2 3.6" strokeWidth={strokeWidth} />
+      <Path
+        d="M2.8 20.6c1.8-1.4 3.6-1.4 5.4 0s3.6 1.4 5.4 0 3.6-1.4 5.4 0"
+        strokeWidth={strokeWidth}
+      />
     </>
   ),
 
@@ -288,8 +312,16 @@ const DRAWINGS: Record<IconName, Drawing> = {
     </>
   ),
 
+  // Plastic surgery — a syringe. A four-point sparkle reads as "magic" in any
+  // modern interface, and a face profile collapsed into an unreadable blob at
+  // 20px. Distinct from `doctor` (a plus), which is general medicine.
   surgery: ({ strokeWidth }) => (
-    <Path d="M12 2.8 14 9l6.2 2-6.2 2-2 6.2-2-6.2L3.8 11 10 9z" strokeWidth={strokeWidth} />
+    <>
+      <Path d="M7.44 13.44 14.44 6.44 17.56 9.56 10.56 16.56z" strokeWidth={strokeWidth} />
+      <Path d="M9 15 4.6 19.4" strokeWidth={strokeWidth} />
+      <Path d="M16 8 19 5" strokeWidth={strokeWidth} />
+      <Path d="M17.6 3.6 20.4 6.4" strokeWidth={strokeWidth} />
+    </>
   ),
 
   salon: ({ strokeWidth }) => (

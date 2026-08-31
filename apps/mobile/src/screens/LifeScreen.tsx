@@ -19,6 +19,7 @@
 import { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { groupByAge, type TimelineEntry } from '@yearafter/character';
+import { describeCity } from '@yearafter/content';
 import { useGame } from '../stores/gameStore';
 import { colors, layout, radii, spacing, typography } from '../theme/theme';
 
@@ -50,7 +51,7 @@ export function LifeScreen() {
     >
       <View style={styles.birth}>
         <Text style={styles.birthText}>
-          Born in {birthYear} · {state.player.currentLocation.regionCode}
+          Born {birthYear} · {describeCity(state.player.birthLocation.cityId)}
         </Text>
       </View>
 
