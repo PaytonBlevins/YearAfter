@@ -225,7 +225,7 @@ export function RelationshipsScreen() {
             icon: 'family',
             title: 'Family',
             subtitle: 'Parents, siblings, partner, children',
-            ticket: '0202',
+            route: { screen: 'family', title: 'Family' },
           },
           { icon: 'friends', title: 'Friends', ticket: '0206' },
         ]}
@@ -236,7 +236,7 @@ export function RelationshipsScreen() {
           employees in business, tenants in property.
         </Text>
       </View>
-      <ComingSoon ticket="0202 / 0206" what="Family and friends" />
+      <ComingSoon ticket="0206" what="Friends" />
     </Screen>
   );
 }

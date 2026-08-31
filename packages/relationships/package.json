@@ -1,5 +1,5 @@
 {
-  "name": "@yearafter/simulation",
+  "name": "@yearafter/relationships",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -14,9 +14,7 @@
   },
   "dependencies": {
     "@yearafter/character": "workspace:*",
-    "@yearafter/content": "workspace:*",
-    "@yearafter/core": "workspace:*",
-    "@yearafter/relationships": "workspace:*"
+    "@yearafter/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3",

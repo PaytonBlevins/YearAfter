@@ -11,6 +11,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { CharacterHeader } from '../components/CharacterHeader';
 import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
+import { FamilyScreen } from '../screens/FamilyScreen';
 import {
   ActivitiesScreen,
   AssetsScreen,
@@ -36,6 +37,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   mindBody: MindBodyScreen,
   doctor: DoctorScreen,
   relocate: RelocateScreen,
+  family: FamilyScreen,
   debug: DebugScreen,
 };
 

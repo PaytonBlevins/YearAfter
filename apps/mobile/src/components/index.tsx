@@ -50,6 +50,12 @@ export interface ListRowProps {
   readonly disabled?: boolean;
   readonly compact?: boolean;
   readonly accent?: boolean;
+  /**
+   * Optional 0–100 bar under the subtitle. For state that belongs ON the row
+   * rather than behind it — a relationship, job performance, a car's condition.
+   */
+  readonly meter?: number;
+  readonly meterColor?: string;
 }
 
 export function ListRow({
@@ -62,6 +68,8 @@ export function ListRow({
   disabled = false,
   compact = false,
   accent = false,
+  meter,
+  meterColor = colors.accent,
 }: ListRowProps) {
   const resolved: RowAffordance = affordance ?? (onPress ? 'navigate' : 'none');
   const minHeight = compact ? layout.rowHeightCompact : layout.rowHeight;
@@ -98,6 +106,21 @@ export function ListRow({
           <Text numberOfLines={1} style={styles.rowSubtitle}>
             {subtitle}
           </Text>
+        ) : null}
+        {meter !== undefined ? (
+          <View
+            accessible
+            accessibilityRole="progressbar"
+            accessibilityValue={{ min: 0, max: 100, now: Math.round(meter) }}
+            style={styles.rowMeterTrack}
+          >
+            <View
+              style={[
+                styles.rowMeterFill,
+                { width: `${Math.max(0, Math.min(100, meter))}%`, backgroundColor: meterColor },
+              ]}
+            />
+          </View>
         ) : null}
       </View>
 
@@ -330,6 +353,15 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
   rowMarker: { marginLeft: spacing.xs },
+  rowMeterTrack: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.surfaceSunken,
+    overflow: 'hidden',
+    marginTop: 5,
+    marginRight: spacing.lg,
+  },
+  rowMeterFill: { height: '100%', borderRadius: 2 },
 
   sectionHeading: {
     flexDirection: 'row',

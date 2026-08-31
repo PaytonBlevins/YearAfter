@@ -8,8 +8,8 @@ Before writing code, read [`specs/CORE_RULES.md`](specs/CORE_RULES.md) and
 [`specs/AI_CODING_INSTRUCTIONS.md`](specs/AI_CODING_INSTRUCTIONS.md).
 
 **Status:** v0.02 Living Character, in progress. Sprint Zero (0001–0009),
-v0.01 (0101–0114) and Ticket 0201 (character generator) are complete.
-Next is Ticket 0202, starting family.
+v0.01 (0101–0114), Ticket 0201 (character generator) and Ticket 0202 (starting
+family) are complete. Next is Ticket 0203, the childhood event library.
 
 ---
 
@@ -137,6 +137,8 @@ Web is a review convenience only — saves are in-memory there
 apps/mobile              Expo app. The only place React Native lives.
 packages/core            IDs, Money, Percentage, Location, Result.
 packages/character       Character state, the seven visible stats, Boolean talents, timeline.
+packages/content         Versioned content catalogs — names, locations.
+packages/relationships   NPCs, tiers, the family model.
 packages/simulation      Seeded RNG, GameState, year advancement, new-game.
 packages/persistence     SaveGameV1, migrations, memory + expo-sqlite repositories.
 tools/content-validator  Catalog and canonical-rule validation. Runs in CI.

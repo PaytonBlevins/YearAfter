@@ -53,6 +53,21 @@ const migrations: Readonly<Record<number, Migration>> = {
     }
     return { ...save, version: 2, player };
   },
+
+  /**
+   * v2 -> v3: Ticket 0202 added the starting family.
+   *
+   * An existing character keeps an EMPTY household rather than getting one
+   * generated. Generating here would invent parents and siblings the player has
+   * already lived years without, and would have to consume RNG to do it, which
+   * breaks the save's ability to replay from its seed. An empty family is
+   * honest: this character was created before families existed.
+   */
+  2: (save) => ({
+    ...save,
+    version: 3,
+    family: save['family'] ?? { members: [], finances: { band: 'modest', annualIncome: 0 } },
+  }),
 };
 
 export function describeMigrationError(error: MigrationError): string {
@@ -139,6 +154,9 @@ export function validateCurrentSave(
     require('rng.seed', rng?.['seed'], typeof rng?.['seed'] === 'string'),
     require('rng.streams', rng?.['streams'], typeof rng?.['streams'] === 'object'),
     require('settings', candidate['settings'], typeof candidate['settings'] === 'object'),
+    require('family.members', (candidate['family'] as Record<string, unknown> | undefined)?.[
+      'members'
+    ], Array.isArray((candidate['family'] as Record<string, unknown> | undefined)?.['members'])),
   ].filter((problem): problem is string => problem !== null);
 
   if (problems.length > 0) {

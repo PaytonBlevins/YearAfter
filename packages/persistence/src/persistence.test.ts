@@ -195,7 +195,8 @@ describe('v1 -> v2 migration (Ticket 0201 personality)', () => {
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
 
-    expect(migrated.value.version).toBe(2);
+    // Migrations chain: a v1 save comes out at the current version, not v2.
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
     expect(migrated.value.player.personality.ambition).toBe(50);
     expect(migrated.value.player.personality.loyalty).toBe(50);
   });
@@ -234,5 +235,57 @@ describe('v1 -> v2 migration (Ticket 0201 personality)', () => {
     if (migrated.ok) {
       expect(migrated.value.player.personality.ambition).toBe(77);
     }
+  });
+});
+
+describe('v2 -> v3 migration (Ticket 0202 family)', () => {
+  const asV2 = (save: ReturnType<typeof toSave>) => {
+    const { family: _dropped, ...rest } = save as unknown as Record<string, unknown>;
+    return { ...rest, version: 2 };
+  };
+
+  it('loads a v2 save and gives it an empty family', () => {
+    const { save } = newSave('V2');
+    const migrated = migrateSave(asV2(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    expect(migrated.value.version).toBe(3);
+    // Empty, not generated. Inventing parents a character has already lived
+    // years without would be worse than admitting they predate families.
+    expect(migrated.value.family.members).toEqual([]);
+  });
+
+  it('resumes a migrated v2 save without drifting the simulation', () => {
+    const { state, save } = newSave('V2-RESUME');
+    const migrated = migrateSave(asV2(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(advanceYear(fromSave(migrated.value)).newEntries).toEqual(advanceYear(state).newEntries);
+  });
+
+  it('migrates a v1 save all the way to v3 in one pass', () => {
+    const { save } = newSave('V1-TO-V3');
+    const asV1 = (() => {
+      const { family: _f, ...rest } = save as unknown as Record<string, unknown>;
+      const { personality: _p, ...player } = save.player as unknown as Record<string, unknown>;
+      return { ...rest, version: 1, player };
+    })();
+
+    const migrated = migrateSave(asV1);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(3);
+    expect(migrated.value.player.personality.ambition).toBe(50);
+    expect(migrated.value.family.members).toEqual([]);
+  });
+});
+
+describe('family round trip', () => {
+  it('survives save and load intact', () => {
+    const { state, save } = newSave('FAMILY-RT');
+    expect(save.family.members.length).toBeGreaterThan(0);
+    const restored = fromSave(JSON.parse(JSON.stringify(save)));
+    expect(restored.family).toEqual(state.family);
   });
 });

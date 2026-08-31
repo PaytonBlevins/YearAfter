@@ -126,6 +126,9 @@ export function advanceYear(state: GameState): AdvanceResult {
     state: {
       world: { ...state.world, year: nextYear },
       player,
+      // Family is carried through untouched. NPCs ageing, moving, falling ill
+      // and dying is spec 674-683 and attaches here as its own phase later.
+      family: state.family,
       rng: state.rng,
     },
     newEntries: entries,

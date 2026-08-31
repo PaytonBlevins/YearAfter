@@ -78,7 +78,14 @@ export function formatMoney(amount: Money, options: FormatMoneyOptions = {}): st
       if (absoluteDollars >= threshold) {
         const scaled = absoluteDollars / threshold;
         const digits = scaled >= 100 ? 0 : scaled >= 10 ? 1 : 2;
-        const text = scaled.toFixed(digits).replace(/\.?0+$/, '');
+        // Trim only zeros that follow a decimal point. A bare `/\.?0+$/` also
+        // eats significant trailing zeros in a whole number, which rendered
+        // $110K as $11K and $100K as $1K — a formatting bug that looks exactly
+        // like a balance bug.
+        const text = scaled
+          .toFixed(digits)
+          .replace(/(\.\d*?)0+$/, '$1')
+          .replace(/\.$/, '');
         return `${sign}${symbol}${text}${suffix}`;
       }
     }

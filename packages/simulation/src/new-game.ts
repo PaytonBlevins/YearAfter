@@ -26,6 +26,8 @@ import {
   type VisibleStatKey,
 } from '@yearafter/character';
 import { CITIES, findNameCulture, type CityEntry } from '@yearafter/content';
+import type { Household } from '@yearafter/relationships';
+import { generateFamily, pickFirstName, pickSurname } from './family-generator';
 import { asCharacterId, dollars, type BirthLocation } from '@yearafter/core';
 import { createGameState, createWorldState, type GameState } from './game-state';
 import { Rng, RngDomains, type RandomStream } from './rng/rng';
@@ -127,8 +129,8 @@ export function rollName(
     throw new Error(`City ${city.id} references unknown name culture: ${cultureId}`);
   }
   return {
-    firstName: stream.pick(sex === 'male' ? culture.male : culture.female),
-    lastName: stream.pick(culture.surnames),
+    firstName: pickFirstName(stream, culture, sex),
+    lastName: pickSurname(stream, culture),
     culture: cultureId,
   };
 }
@@ -216,6 +218,22 @@ export function generateCharacter(rng: Rng, options: NewGameOptions): GeneratedC
 
 export function createNewGame(options: NewGameOptions): GameState {
   const rng = new Rng(options.seed);
-  const { character } = generateCharacter(rng, options);
-  return createGameState(createWorldState(options.startYear ?? 2000, 1), character, rng);
+  const { character, nameCulture } = generateCharacter(rng, options);
+  const family = generateFamilyFor(rng, character, nameCulture, options.seed);
+  return createGameState(createWorldState(options.startYear ?? 2000, 1), character, rng, family);
+}
+
+/** Ticket 0202. Uses its own RNG stream so family tuning cannot shift the player. */
+export function generateFamilyFor(
+  rng: Rng,
+  character: { lastName: string; birthYear: number },
+  nameCultureId: string,
+  seed: string,
+): Household {
+  return generateFamily(rng.stream(RngDomains.Family), {
+    playerLastName: character.lastName,
+    playerBirthYear: character.birthYear,
+    nameCultureId,
+    seed,
+  });
 }

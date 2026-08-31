@@ -30,6 +30,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     rng: state.rng.snapshot(),
     world: state.world,
     player: state.player,
+    family: state.family,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -37,5 +38,5 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
 }
 
 export function fromSave(save: CurrentSaveGame): GameState {
-  return createGameState(save.world, save.player, Rng.restore(save.rng));
+  return createGameState(save.world, save.player, Rng.restore(save.rng), save.family);
 }

@@ -2,3 +2,4 @@ export * from './rng/rng';
 export * from './game-state';
 export * from './advance';
 export * from './new-game';
+export * from './family-generator';

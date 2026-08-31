@@ -41,6 +41,9 @@ importers:
       '@yearafter/persistence':
         specifier: workspace:*
         version: link:../../packages/persistence
+      '@yearafter/relationships':
+        specifier: workspace:*
+        version: link:../../packages/relationships
       '@yearafter/simulation':
         specifier: workspace:*
         version: link:../../packages/simulation
@@ -118,12 +121,31 @@ importers:
       '@yearafter/core':
         specifier: workspace:*
         version: link:../core
+      '@yearafter/relationships':
+        specifier: workspace:*
+        version: link:../relationships
       '@yearafter/simulation':
         specifier: workspace:*
         version: link:../simulation
       expo-sqlite:
         specifier: '*'
         version: 57.0.2(expo@57.0.18)(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8)
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
+
+  packages/relationships:
+    dependencies:
+      '@yearafter/character':
+        specifier: workspace:*
+        version: link:../character
+      '@yearafter/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       typescript:
         specifier: ~6.0.3
@@ -143,6 +165,9 @@ importers:
       '@yearafter/core':
         specifier: workspace:*
         version: link:../core
+      '@yearafter/relationships':
+        specifier: workspace:*
+        version: link:../relationships
     devDependencies:
       typescript:
         specifier: ~6.0.3

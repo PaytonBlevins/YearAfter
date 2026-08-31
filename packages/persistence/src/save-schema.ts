@@ -11,9 +11,10 @@
 
 import type { Character } from '@yearafter/character';
 import type { RngSnapshot, WorldState } from '@yearafter/simulation';
+import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 2;
+export const CURRENT_SAVE_VERSION = 3;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -30,16 +31,19 @@ export const DEFAULT_SETTINGS: SaveSettings = {
 export type { WorldState };
 
 /**
- * Version 2 added `player.personality` — the hidden traits from Ticket 0201.
- * V1 saves migrate by filling neutral values; see migrations.ts.
+ * v2 added `player.personality` (Ticket 0201).
+ * v3 added `family` (Ticket 0202).
+ * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV2 {
-  readonly version: 2;
+export interface SaveGameV3 {
+  readonly version: 3;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
   readonly world: WorldState;
   readonly player: Character;
+  /** Ticket 0202. Beside the player, not on them — see GameState. */
+  readonly family: Household;
   readonly settings: SaveSettings;
   /** Unix ms. Metadata only — never used in simulation logic. */
   readonly createdAt: number;
@@ -47,8 +51,8 @@ export interface SaveGameV2 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV2;
-export type CurrentSaveGame = SaveGameV2;
+export type AnySaveGame = SaveGameV3;
+export type CurrentSaveGame = SaveGameV3;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {
