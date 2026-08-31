@@ -31,6 +31,9 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     world: state.world,
     player: state.player,
     family: state.family,
+    nameCultureId: state.nameCultureId,
+    events: state.events,
+    pending: state.pending,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -38,5 +41,10 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
 }
 
 export function fromSave(save: CurrentSaveGame): GameState {
-  return createGameState(save.world, save.player, Rng.restore(save.rng), save.family);
+  return createGameState(save.world, save.player, Rng.restore(save.rng), {
+    family: save.family,
+    nameCultureId: save.nameCultureId,
+    events: save.events,
+    pending: save.pending,
+  });
 }

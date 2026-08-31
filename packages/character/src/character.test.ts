@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { asCharacterId, dollars } from '@yearafter/core';
 import { createCharacter, defaultOccupationFor, fullName, lifeStageFor } from './character';
-import { adjustStats, createStats, VISIBLE_STAT_KEYS } from './stats';
+import { adjustStats, createStats, curvedDelta, nudgeStats, VISIBLE_STAT_KEYS } from './stats';
 import { activeTalents, createTalents, TALENT_KEYS } from './talents';
 import { createTimelineEntry, groupByAge } from './timeline';
 
@@ -110,5 +110,54 @@ describe('occupation placeholder', () => {
     expect(defaultOccupationFor(15)).toBe('Student');
     expect(defaultOccupationFor(30)).toBe('Unemployed');
     expect(defaultOccupationFor(70)).toBe('Retired');
+  });
+});
+
+describe('the growth curve (Ticket 0203)', () => {
+  it('applies a gain at full strength in the low half', () => {
+    expect(curvedDelta(20, 4)).toBe(4);
+    expect(curvedDelta(50, 4)).toBe(4);
+  });
+
+  it('tapers a gain towards the ceiling', () => {
+    expect(curvedDelta(75, 4)).toBe(2);
+    expect(curvedDelta(90, 4)).toBe(1);
+    expect(curvedDelta(100, 4)).toBe(0);
+  });
+
+  it('tapers a loss towards the floor', () => {
+    expect(curvedDelta(80, -4)).toBe(-4);
+    expect(curvedDelta(25, -4)).toBe(-2);
+    expect(curvedDelta(0, -4)).toBe(0);
+  });
+
+  it('lets a small nudge at the ceiling genuinely do nothing', () => {
+    // Rounding away from zero here is what put stat inflation back the first time.
+    expect(curvedDelta(96, 1)).toBe(0);
+  });
+
+  it('never moves a stat outside 0-100', () => {
+    const high = nudgeStats(createStats({ happiness: 99 }), { happiness: 50 });
+    expect(high.happiness).toBeLessThanOrEqual(100);
+    const low = nudgeStats(createStats({ happiness: 1 }), { happiness: -50 });
+    expect(low.happiness).toBeGreaterThanOrEqual(0);
+  });
+
+  it('leaves stats it was not given alone', () => {
+    const before = createStats({ smarts: 60 });
+    expect(nudgeStats(before, { happiness: 5 }).smarts).toBe(60);
+  });
+
+  it('resists the inflation that raw addition produces over a childhood', () => {
+    // Forty small gains is roughly what a childhood delivers (Ticket 0203).
+    let raw = createStats({ happiness: 50 });
+    let curved = createStats({ happiness: 50 });
+    for (let i = 0; i < 40; i += 1) {
+      raw = adjustStats(raw, { happiness: 2 });
+      curved = nudgeStats(curved, { happiness: 2 });
+    }
+    expect(raw.happiness).toBe(100);
+    expect(curved.happiness).toBeLessThan(90);
+    expect(curved.happiness).toBeGreaterThan(60);
   });
 });

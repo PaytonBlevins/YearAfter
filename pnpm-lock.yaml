@@ -38,6 +38,9 @@ importers:
       '@yearafter/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@yearafter/events':
+        specifier: workspace:*
+        version: link:../../packages/events
       '@yearafter/persistence':
         specifier: workspace:*
         version: link:../../packages/persistence
@@ -96,6 +99,13 @@ importers:
         version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
 
   packages/content:
+    dependencies:
+      '@yearafter/character':
+        specifier: workspace:*
+        version: link:../character
+      '@yearafter/relationships':
+        specifier: workspace:*
+        version: link:../relationships
     devDependencies:
       typescript:
         specifier: ~6.0.3
@@ -113,6 +123,28 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
 
+  packages/events:
+    dependencies:
+      '@yearafter/character':
+        specifier: workspace:*
+        version: link:../character
+      '@yearafter/content':
+        specifier: workspace:*
+        version: link:../content
+      '@yearafter/core':
+        specifier: workspace:*
+        version: link:../core
+      '@yearafter/relationships':
+        specifier: workspace:*
+        version: link:../relationships
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
+
   packages/persistence:
     dependencies:
       '@yearafter/character':
@@ -121,6 +153,9 @@ importers:
       '@yearafter/core':
         specifier: workspace:*
         version: link:../core
+      '@yearafter/events':
+        specifier: workspace:*
+        version: link:../events
       '@yearafter/relationships':
         specifier: workspace:*
         version: link:../relationships
@@ -165,6 +200,9 @@ importers:
       '@yearafter/core':
         specifier: workspace:*
         version: link:../core
+      '@yearafter/events':
+        specifier: workspace:*
+        version: link:../events
       '@yearafter/relationships':
         specifier: workspace:*
         version: link:../relationships

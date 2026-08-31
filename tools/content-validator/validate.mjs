@@ -192,6 +192,123 @@ if (existsSync(locationsPath) && existsSync(namesPath)) {
 }
 
 // ---------------------------------------------------------------------------
+// 5. Event catalog (Ticket 0203)
+// ---------------------------------------------------------------------------
+// The Python generator checks all of this before it writes the file, and the
+// content package tests it too. It is here as well because this is the gate CI
+// runs on a hand-edited JSON, and an unreachable event is invisible until a
+// player fails to see it.
+
+const eventsPath = join(ROOT, 'packages/content/data/events-childhood.json');
+
+if (existsSync(eventsPath)) {
+  const rel = 'packages/content/data/events-childhood.json';
+  try {
+    const events = JSON.parse(readFileSync(eventsPath, 'utf8')).entries ?? [];
+    const byId = new Map(events.map((event) => [event.id, event]));
+    const categories = new Set(['family', 'school', 'friendship', 'random', 'talent']);
+    const types = new Set(['passive', 'decision', 'opportunity', 'followUp']);
+    const rarities = new Set([
+      'common',
+      'uncommon',
+      'rare',
+      'veryRare',
+      'exceptional',
+      'legendary',
+    ]);
+    const scheduled = new Set();
+
+    const followUpsOf = (event) => [
+      ...(event.followUp ? [event.followUp] : []),
+      ...(event.choices ?? []).flatMap((choice) => [
+        ...(choice.followUp ? [choice.followUp] : []),
+        ...(choice.outcomes ?? []).flatMap((o) => (o.followUp ? [o.followUp] : [])),
+      ]),
+    ];
+
+    for (const event of events) {
+      if (!categories.has(event.category))
+        fail(rel, `${event.id}: unknown category "${event.category}".`);
+      if (!types.has(event.type)) fail(rel, `${event.id}: unknown type "${event.type}".`);
+      if (!rarities.has(event.rarity)) fail(rel, `${event.id}: unknown rarity "${event.rarity}".`);
+      if (!(event.weight > 0)) fail(rel, `${event.id}: weight must be greater than zero.`);
+      if (!Array.isArray(event.text) || event.text.length === 0) {
+        fail(rel, `${event.id}: needs at least one text variant.`);
+      }
+
+      const { ageMin, ageMax } = event.eligibility ?? {};
+      if (ageMin !== undefined && ageMax !== undefined && ageMin > ageMax) {
+        fail(rel, `${event.id}: age window ${ageMin}..${ageMax} can never be satisfied.`);
+      }
+
+      const isDecision = event.type === 'decision' || event.type === 'opportunity';
+      const choices = event.choices ?? [];
+      if (isDecision && choices.filter((choice) => !choice.requires).length < 2) {
+        fail(rel, `${event.id}: a ${event.type} needs two always-available choices.`);
+      }
+      if (!isDecision && choices.length > 0) {
+        fail(rel, `${event.id}: type "${event.type}" must not carry choices.`);
+      }
+      for (const choice of choices) {
+        if (Boolean(choice.text) === Boolean(choice.outcomes)) {
+          fail(rel, `${event.id}/${choice.id}: needs exactly one of "text" or "outcomes".`);
+        }
+      }
+
+      for (const follow of followUpsOf(event)) {
+        scheduled.add(follow.eventId);
+        const target = byId.get(follow.eventId);
+        if (!target)
+          fail(rel, `${event.id}: follow-up points at unknown event "${follow.eventId}".`);
+        else if (target.type !== 'followUp') {
+          fail(rel, `${event.id}: follow-up target "${follow.eventId}" is not type "followUp".`);
+        }
+      }
+    }
+
+    for (const event of events) {
+      if (event.type === 'followUp' && !scheduled.has(event.id)) {
+        fail(rel, `${event.id}: type "followUp" but nothing schedules it — dead content.`);
+      }
+    }
+
+    // A year with no eligible event throws in advanceYear. This is the check
+    // that stops a catalog edit turning that into a crash in a player's hands.
+    for (const age of [0, 1, 2, 3, 4, 5, 8, 12, 17, 18, 40, 80, 110]) {
+      const universal = events.filter((event) => {
+        const e = event.eligibility ?? {};
+        if (event.type !== 'passive') return false;
+        if ((e.ageMin ?? 0) > age || (e.ageMax ?? 130) < age) return false;
+        return ![
+          'requires',
+          'talentsAny',
+          'wealthAny',
+          'statAtLeast',
+          'statAtMost',
+          'flagsAll',
+          'relationshipAtLeast',
+          'relationshipAtMost',
+          'sex',
+        ].some((key) => key in e);
+      });
+      if (universal.length < 4) {
+        fail(
+          rel,
+          `age ${age}: only ${universal.length} passive events are available to every character. ` +
+            `A life could render an empty year, which throws in advanceYear.`,
+        );
+      }
+    }
+
+    if (events.length < 250) {
+      fail(rel, `only ${events.length} events; the approved target for ticket 0203 is 250-500.`);
+    }
+  } catch (cause) {
+    fail(rel, `Could not validate the event catalog: ${cause.message}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 for (const note of notes) console.log(`note  ${note}`);
 

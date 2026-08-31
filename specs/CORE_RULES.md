@@ -132,6 +132,38 @@ Cars, jobs, gifts, jewelry, businesses, colleges, locations, brands and event
 text are versioned content catalogs with stable IDs. **Logic never depends on
 display names.** Content expands without code changes.
 
+### 13.1 Events are data, and the engine never names one
+
+There is no `switch` on an event id anywhere in `@yearafter/events`, and there
+must never be one. Everything an event knows about itself — when it may fire,
+how likely it is, what it says, what it costs, what it schedules next — is a
+field in `packages/content/data/events-*.json`. That is the line between a
+library that can grow to thousands of entries and one that cannot.
+
+Two rules follow, and both are enforced by the content validator and by tests:
+
+- **A person named in event text must be guaranteed by that event's own
+  eligibility.** `{mother}` needs `requires: ["mother"]`. Falling back to "your
+  mom" is a safety net for a content bug, not a licence to skip the requirement.
+- **Every character, at every age, in every household shape, must have events
+  available.** `advanceYear` throws on a year with nothing in it, because a
+  blank year in the feed reads to the player as a broken button.
+
+### 13.2 Stats move along a curve, not by addition
+
+Event and system stat deltas are applied through `nudgeStats`, never by raw
+addition: a gain is at full strength at or below 50 and tapers to nothing at
+100, and a loss mirrors it. Applying childhood's forty-odd events at face value
+put every character at eighteen with happiness pinned at 100 and +20 on four
+other bars. A stat everyone maxes is a stat that says nothing.
+
+### 13.3 A pending decision stops time
+
+`advanceYear` is a no-op while `state.pending` is non-empty, and the Advance
+control is disabled. Advancing past an unanswered question would either discard
+it or answer it on the player's behalf. Pending decisions are part of the save:
+a question asked on a phone at a bus stop is still there on a tablet that night.
+
 ## 14. Branding
 
 Fictional analogues must be recognisable but original, with identifiable model

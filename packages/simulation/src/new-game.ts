@@ -220,7 +220,10 @@ export function createNewGame(options: NewGameOptions): GameState {
   const rng = new Rng(options.seed);
   const { character, nameCulture } = generateCharacter(rng, options);
   const family = generateFamilyFor(rng, character, nameCulture, options.seed);
-  return createGameState(createWorldState(options.startYear ?? 2000, 1), character, rng, family);
+  return createGameState(createWorldState(options.startYear ?? 2000, 1), character, rng, {
+    family,
+    nameCultureId: nameCulture,
+  });
 }
 
 /** Ticket 0202. Uses its own RNG stream so family tuning cannot shift the player. */

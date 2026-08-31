@@ -9,6 +9,7 @@
 
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { CharacterHeader } from '../components/CharacterHeader';
+import { DecisionCard } from '../components/DecisionCard';
 import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
 import { FamilyScreen } from '../screens/FamilyScreen';
@@ -42,7 +43,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
 };
 
 export function Shell() {
-  const { ready, state, advance } = useGame();
+  const { ready, state, advance, decision, answer } = useGame();
   const { world, current, selectWorld, push, pop, closeToLife } = useNavigation();
 
   if (!ready || !state) {
@@ -145,8 +146,21 @@ export function Shell() {
         age={state.player.age}
         onSelectWorld={selectWorld}
         onAdvance={advance}
-        canAdvance={state.player.alive}
+        canAdvance={state.player.alive && state.pending.length === 0}
       />
+
+      {/*
+        Rendered here rather than inside LifeScreen so the question follows the
+        player: time is stopped whatever world they wandered into, and a control
+        that does nothing with no explanation is the worst version of that.
+      */}
+      {decision ? (
+        <DecisionCard
+          decision={decision}
+          remaining={state.pending.length}
+          onChoose={(choiceId) => answer(decision.eventId, choiceId)}
+        />
+      ) : null}
     </View>
   );
 }

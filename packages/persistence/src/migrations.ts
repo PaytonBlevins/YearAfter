@@ -68,6 +68,31 @@ const migrations: Readonly<Record<number, Migration>> = {
     version: 3,
     family: save['family'] ?? { members: [], finances: { band: 'modest', annualIncome: 0 } },
   }),
+
+  /**
+   * v3 -> v4: Ticket 0203 added the event engine's memory.
+   *
+   * An existing character starts with an EMPTY history, which means every event
+   * in the catalog is off cooldown for them. That is the deliberate choice: the
+   * alternative is inventing a history of events that never happened so the
+   * engine can pretend to have suppressed them. A character who has already
+   * lived twenty years simply becomes eligible for everything at their current
+   * age, and their remaining years read normally.
+   *
+   * `nameCultureId` defaults to the catalog's largest tradition rather than
+   * being derived from the birth city: a city lists several traditions and the
+   * one actually drawn was never recorded before v4. Guessing per-city would be
+   * no more correct and would make the migration depend on content, which then
+   * changes what an old save loads as every time the catalog is edited.
+   * Like every migration here, this consumes no RNG and reads no clock.
+   */
+  3: (save) => ({
+    ...save,
+    version: 4,
+    nameCultureId: save['nameCultureId'] ?? 'us-en',
+    events: save['events'] ?? { lastFired: {}, scheduled: [], flags: [] },
+    pending: save['pending'] ?? [],
+  }),
 };
 
 export function describeMigrationError(error: MigrationError): string {

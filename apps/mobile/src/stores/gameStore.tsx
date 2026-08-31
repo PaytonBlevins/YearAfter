@@ -21,7 +21,14 @@ import {
   type ReactNode,
 } from 'react';
 import { asSaveId, type SaveId } from '@yearafter/core';
-import { advanceYear, createNewGame, generateSeed, type GameState } from '@yearafter/simulation';
+import {
+  advanceYear,
+  createNewGame,
+  decide as resolveDecision,
+  generateSeed,
+  type GameState,
+} from '@yearafter/simulation';
+import type { PendingDecision } from '@yearafter/events';
 import type { TimelineEntry } from '@yearafter/character';
 import {
   DEFAULT_SETTINGS,
@@ -39,7 +46,14 @@ interface GameContextValue {
   readonly saveError: string | null;
   /** Entries produced by the most recent Advance, for feed emphasis. */
   readonly lastEntries: readonly TimelineEntry[];
+  /**
+   * The question the game is waiting on, if any (Ticket 0203). One at a time:
+   * a year can raise up to three, and stacking three cards on a phone is how a
+   * life sim starts to feel like a form.
+   */
+  readonly decision: PendingDecision | null;
   readonly advance: () => void;
+  readonly answer: (eventId: string, choiceId: string) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   readonly updateSettings: (patch: Partial<SaveSettings>) => void;
 }
@@ -135,12 +149,33 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   const advance = useCallback(() => {
     setState((current) => {
       if (!current) return current;
+      // advanceYear is a no-op while a decision is pending; returning `current`
+      // unchanged keeps React from re-rendering for nothing.
+      if (current.pending.length > 0) return current;
       const { state: next, newEntries } = advanceYear(current);
       setLastEntries(newEntries);
       if (saveId) persist(next, saveId, settings);
       return next;
     });
   }, [persist, saveId, settings]);
+
+  const answer = useCallback(
+    (eventId: string, choiceId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = resolveDecision(current, eventId, choiceId);
+        if (!result.ok) {
+          // Expected, not exceptional: the same save answered on two devices.
+          setSaveError(`That choice is no longer available (${result.error}).`);
+          return current;
+        }
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
 
   const updateSettings = useCallback(
     (patch: Partial<SaveSettings>) => {
@@ -161,11 +196,24 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       saveId,
       saveError,
       lastEntries,
+      decision: state?.pending[0] ?? null,
       advance,
+      answer,
       startNewLife,
       updateSettings,
     }),
-    [ready, state, settings, saveId, saveError, lastEntries, advance, startNewLife, updateSettings],
+    [
+      ready,
+      state,
+      settings,
+      saveId,
+      saveError,
+      lastEntries,
+      advance,
+      answer,
+      startNewLife,
+      updateSettings,
+    ],
   );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

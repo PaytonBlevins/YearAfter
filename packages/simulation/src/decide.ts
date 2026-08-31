@@ -1,0 +1,85 @@
+/**
+ * Ticket 0203 — answering a decision.
+ *
+ * A decision is raised during `advanceYear` and answered afterwards, possibly
+ * days later on a different device. That is why the pending list lives in game
+ * state rather than in the UI: the question has to survive a save.
+ *
+ * The resolved line is appended to the year the decision was RAISED in, not the
+ * year it was answered in, so a feed never shows a choice landing before the
+ * event that prompted it.
+ */
+
+import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import { asEventId } from '@yearafter/core';
+import { resolveChoice, type PendingDecision } from '@yearafter/events';
+import { err, ok, type Result } from '@yearafter/core';
+import type { GameState } from './game-state';
+import { applyOutcome, buildEventContext, timelineKindFor } from './phases/events';
+import { RngDomains } from './rng/rng';
+
+export type DecisionError =
+  | 'no-such-decision'
+  | 'no-such-choice'
+  /** The choice exists in the catalog but produced nothing — a content bug. */
+  | 'unresolvable';
+
+export interface DecisionResult {
+  readonly state: GameState;
+  readonly entry: TimelineEntry;
+}
+
+/**
+ * Answer a pending decision.
+ *
+ * Returns a `Result` rather than throwing: a stale decision id is an expected
+ * failure (two devices, one save), not an engineering bug (CORE_RULES).
+ */
+export function decide(
+  state: GameState,
+  eventId: string,
+  choiceId: string,
+): Result<DecisionResult, DecisionError> {
+  const decision: PendingDecision | undefined = state.pending.find(
+    (candidate) => candidate.eventId === eventId,
+  );
+  if (!decision) return err('no-such-decision');
+
+  const stream = state.rng.stream(RngDomains.Events);
+  const context = buildEventContext(state, decision.age, decision.year, state.events);
+  const resolved = resolveChoice(decision, choiceId, context, stream, state.events);
+  if (!resolved) {
+    return err(decision.choices.some((c) => c.id === choiceId) ? 'unresolvable' : 'no-such-choice');
+  }
+
+  const applied = applyOutcome(state.player, state.family, resolved.history, resolved.outcome);
+
+  // Sequence after everything already recorded for that age, so the answer reads
+  // directly beneath the year it belongs to.
+  const sequence = state.player.timeline.filter((entry) => entry.age === decision.age).length;
+
+  const entry = createTimelineEntry({
+    age: decision.age,
+    year: decision.year,
+    kind: timelineKindFor(resolved.outcome),
+    text: resolved.outcome.text,
+    eventId: asEventId(resolved.outcome.eventId),
+    sequence,
+  });
+
+  const player: Character = {
+    ...applied.player,
+    timeline: [...state.player.timeline, entry],
+  };
+
+  return ok({
+    state: {
+      ...state,
+      player,
+      family: applied.family,
+      events: applied.history,
+      pending: state.pending.filter((candidate) => candidate.eventId !== eventId),
+    },
+    entry,
+  });
+}

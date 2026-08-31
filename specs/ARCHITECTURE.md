@@ -15,31 +15,42 @@ apps/
 packages/
   core/                   IDs, Money, Percentage, Location, Result. Depends on nothing.
   character/              Character state, visible stats, Boolean talents, timeline.
-  simulation/             Seeded RNG, GameState, year advancement, new-game.
-  persistence/            SaveGameV1, migrations, repositories (memory + expo-sqlite).
+  content/                Versioned catalogs: names, locations, the event library.
+  relationships/          NPCs, simulation tiers, the family model.
+  events/                 The event engine. Generic — it never names an event.
+  simulation/             Seeded RNG, GameState, year advancement, new-game, decisions.
+  persistence/            Versioned saves, migrations, repositories (memory + expo-sqlite).
 tools/
   content-validator/      Catalog and cross-reference validation. Runs in CI.
 specs/                    Source of truth. MASTER_SPEC, CORE_RULES, this file.
 tests/                    Cross-package acceptance tests.
 ```
 
-Packages named in spec 1191–1203 that have no ticket yet — `world`, `events`,
-`finance`, `relationships`, `education`, `careers`, `assets`, `business`,
-`creators`, `entertainment`, `sports`, `military`, `politics`, `crime`, `health`,
-`content`, `shared` — are created when their milestone starts. Empty workspaces
-slow every install and typecheck for no benefit.
+Packages named in spec 1191–1203 that have no ticket yet — `world`, `finance`,
+`education`, `careers`, `assets`, `business`, `creators`, `entertainment`,
+`sports`, `military`, `politics`, `crime`, `health`, `shared` — are created when
+their milestone starts. Empty workspaces slow every install and typecheck for no
+benefit.
 
 ## Dependency direction
 
 ```
-core  <-  character  <-  simulation  <-  persistence
-                                   \
-                                    <-  apps/mobile
+core  <-  character  <-  relationships  <-  content  <-  events  <-  simulation
+                                                                        |
+                                                        persistence  <--+
+                                                        apps/mobile  <--+
 ```
 
-Strictly acyclic. `core` imports nothing. Cross-system effects use defined
-service interfaces and domain events rather than direct imports between sibling
-domain packages.
+Strictly acyclic. `core` imports nothing.
+
+The one edge worth explaining is `events` never importing `simulation`, even
+though it needs random numbers and reads game state. Instead it declares the
+narrow shapes it needs — `EventRandom` for randomness, `EventContext` for state —
+and `simulation` supplies both. That keeps the arrow pointing one way, and it is
+why the engine's own tests use a small local generator rather than `RandomStream`.
+
+Cross-system effects use defined service interfaces and domain events rather than
+direct imports between sibling domain packages.
 
 Distinguish **commands** (a requested action: "apply for this mortgage") from
 **events** (something that actually happened: "mortgage denied"). Commands can

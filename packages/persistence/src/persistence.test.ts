@@ -1,14 +1,34 @@
 import { describe, expect, it } from 'vitest';
 import { asSaveId } from '@yearafter/core';
-import { advanceYear, createNewGame } from '@yearafter/simulation';
+import { advanceYear, createNewGame, decide, type GameState } from '@yearafter/simulation';
 import { MemorySaveRepository } from './adapters/memory';
 import { migrateSave } from './migrations';
 import { fromSave, toSave } from './serialize';
 import { CURRENT_SAVE_VERSION, summarise } from './save-schema';
 
+/**
+ * Play forward, answering every decision with its first option.
+ *
+ * Time does not advance past an unanswered decision (Ticket 0203), so a test
+ * that wants a character aged twelve has to be able to answer.
+ */
+const play = (state: GameState, years: number): GameState => {
+  let current = state;
+  for (let i = 0; i < years; i += 1) {
+    current = advanceYear(current).state;
+    while (current.pending.length > 0) {
+      const decision = current.pending[0];
+      if (!decision) break;
+      const answered = decide(current, decision.eventId, decision.choices[0]!.id);
+      if (!answered.ok) throw new Error(`could not answer ${decision.eventId}`);
+      current = answered.value.state;
+    }
+  }
+  return current;
+};
+
 const newSave = (seed = 'SAVE-TEST') => {
-  let state = createNewGame({ seed, startYear: 2000 });
-  for (let i = 0; i < 12; i += 1) state = advanceYear(state).state;
+  const state = play(createNewGame({ seed, startYear: 2000 }), 12);
   return { state, save: toSave(state, { id: asSaveId(`save-${seed}`) }) };
 };
 
@@ -250,18 +270,27 @@ describe('v2 -> v3 migration (Ticket 0202 family)', () => {
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
 
-    expect(migrated.value.version).toBe(3);
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
     // Empty, not generated. Inventing parents a character has already lived
     // years without would be worse than admitting they predate families.
     expect(migrated.value.family.members).toEqual([]);
   });
 
-  it('resumes a migrated v2 save without drifting the simulation', () => {
-    const { state, save } = newSave('V2-RESUME');
+  it('resumes a migrated v2 save, with the year it produces reflecting what it lost', () => {
+    // A pre-family save cannot continue identically, and should not pretend to:
+    // it has no household for family events to be about. What it must do is
+    // load, advance, and produce a readable year — which is the actual promise.
+    const { save } = newSave('V2-RESUME');
     const migrated = migrateSave(asV2(save));
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
-    expect(advanceYear(fromSave(migrated.value)).newEntries).toEqual(advanceYear(state).newEntries);
+
+    const resumed = advanceYear(fromSave(migrated.value));
+    expect(resumed.newEntries.length).toBeGreaterThan(0);
+    for (const entry of resumed.newEntries) {
+      expect(entry.text).not.toMatch(/[{}]/);
+      expect(entry.age).toBe(save.player.age + 1);
+    }
   });
 
   it('migrates a v1 save all the way to v3 in one pass', () => {
@@ -275,7 +304,7 @@ describe('v2 -> v3 migration (Ticket 0202 family)', () => {
     const migrated = migrateSave(asV1);
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
-    expect(migrated.value.version).toBe(3);
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
     expect(migrated.value.player.personality.ambition).toBe(50);
     expect(migrated.value.family.members).toEqual([]);
   });
@@ -287,5 +316,77 @@ describe('family round trip', () => {
     expect(save.family.members.length).toBeGreaterThan(0);
     const restored = fromSave(JSON.parse(JSON.stringify(save)));
     expect(restored.family).toEqual(state.family);
+  });
+});
+
+describe('v3 -> v4 migration (Ticket 0203 events)', () => {
+  const asV3 = (save: ReturnType<typeof toSave>) => {
+    const {
+      events: _e,
+      pending: _p,
+      nameCultureId: _n,
+      ...rest
+    } = save as unknown as Record<string, unknown>;
+    return { ...rest, version: 3 };
+  };
+
+  it('gives a v3 save an empty event history rather than inventing one', () => {
+    const { save } = newSave('V3');
+    const migrated = migrateSave(asV3(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.events).toEqual({ lastFired: {}, scheduled: [], flags: [] });
+    expect(migrated.value.pending).toEqual([]);
+    expect(migrated.value.nameCultureId).toBe('us-en');
+  });
+
+  it('lets a migrated v3 save keep playing', () => {
+    const { save } = newSave('V3-RESUME');
+    const migrated = migrateSave(asV3(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    const resumed = advanceYear(fromSave(migrated.value));
+    expect(resumed.newEntries.length).toBeGreaterThan(0);
+    for (const entry of resumed.newEntries) {
+      expect(entry.text).not.toMatch(/[{}]/);
+    }
+  });
+
+  it('consumes no randomness, so the save still replays from its seed', () => {
+    const { save } = newSave('V3-PURE');
+    const before = JSON.parse(JSON.stringify(save.rng));
+    const migrated = migrateSave(asV3(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.rng).toEqual(before);
+  });
+});
+
+describe('event state round trip', () => {
+  it('carries cooldowns, chains, flags and unanswered questions through a save', () => {
+    // A decision asked on a phone at a bus stop has to still be there that night.
+    let state = createNewGame({ seed: 'PENDING-SAVE', startYear: 2000 });
+    for (let i = 0; i < 40 && state.pending.length === 0; i += 1) {
+      state = advanceYear(state).state;
+    }
+    expect(state.pending.length).toBeGreaterThan(0);
+
+    const save = toSave(state, { id: asSaveId('save-pending') });
+    const restored = fromSave(JSON.parse(JSON.stringify(save)));
+
+    expect(restored.pending).toEqual(state.pending);
+    expect(restored.events).toEqual(state.events);
+    expect(restored.nameCultureId).toBe(state.nameCultureId);
+
+    // And the restored save answers the question the same way the live one does.
+    const decision = restored.pending[0]!;
+    const fromDisk = decide(restored, decision.eventId, decision.choices[0]!.id);
+    const live = decide(state, decision.eventId, decision.choices[0]!.id);
+    expect(fromDisk.ok && live.ok && fromDisk.value.entry.text).toBe(
+      live.ok ? live.value.entry.text : 'live failed',
+    );
   });
 });

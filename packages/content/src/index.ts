@@ -77,3 +77,9 @@ export const NAME_CULTURES: readonly NameCulture[] = namesData.entries as readon
 const CULTURES_BY_ID = new Map(NAME_CULTURES.map((culture) => [culture.id, culture]));
 
 export const findNameCulture = (id: string): NameCulture | undefined => CULTURES_BY_ID.get(id);
+
+/* -------------------------------------------------------------------------- */
+/* Events (Ticket 0203)                                                        */
+/* -------------------------------------------------------------------------- */
+
+export * from './events';

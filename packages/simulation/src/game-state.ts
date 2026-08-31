@@ -9,6 +9,7 @@
  */
 
 import type { Character } from '@yearafter/character';
+import { EMPTY_HISTORY, type EventHistory, type PendingDecision } from '@yearafter/events';
 import { EMPTY_HOUSEHOLD, type Household } from '@yearafter/relationships';
 import { Rng } from './rng/rng';
 
@@ -29,6 +30,25 @@ export interface GameState {
    * family is rebuilt, so it is not part of a character's own record.
    */
   readonly family: Household;
+  /**
+   * The naming tradition this life was generated from (Ticket 0201).
+   *
+   * Stored rather than re-derived: a city lists several traditions with weights,
+   * so recovering the one that was actually drawn is not possible from the city
+   * alone, and guessing would give a character's incidental acquaintances names
+   * from a culture their own family does not use.
+   */
+  readonly nameCultureId: string;
+  /** What the event engine remembers: cooldowns, chains and story flags (0203). */
+  readonly events: EventHistory;
+  /**
+   * Decisions waiting on the player.
+   *
+   * Held in state rather than in the UI because a decision must survive a save,
+   * a reload and a cold app start. Time does not advance while this is non-empty
+   * (CORE_RULES: advancing is one control, and a pending question is not it).
+   */
+  readonly pending: readonly PendingDecision[];
   /** Live RNG registry. Serialised into the save on every write. */
   readonly rng: Rng;
 }
@@ -38,14 +58,24 @@ export const createWorldState = (year: number, generation = 1): WorldState => ({
   generation,
 });
 
+export interface CreateGameStateOptions {
+  readonly family?: Household;
+  readonly nameCultureId?: string;
+  readonly events?: EventHistory;
+  readonly pending?: readonly PendingDecision[];
+}
+
 export const createGameState = (
   world: WorldState,
   player: Character,
   rng: Rng,
-  family: Household = EMPTY_HOUSEHOLD,
+  options: CreateGameStateOptions = {},
 ): GameState => ({
   world,
   player,
-  family,
+  family: options.family ?? EMPTY_HOUSEHOLD,
+  nameCultureId: options.nameCultureId ?? 'us-en',
+  events: options.events ?? EMPTY_HISTORY,
+  pending: options.pending ?? [],
   rng,
 });

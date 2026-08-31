@@ -1,13 +1,12 @@
 {
-  "name": "@yearafter/persistence",
+  "name": "@yearafter/events",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./sqlite": "./src/adapters/sqlite.ts"
+    ".": "./src/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -15,21 +14,12 @@
   },
   "dependencies": {
     "@yearafter/character": "workspace:*",
+    "@yearafter/content": "workspace:*",
     "@yearafter/core": "workspace:*",
-    "@yearafter/events": "workspace:*",
-    "@yearafter/relationships": "workspace:*",
-    "@yearafter/simulation": "workspace:*"
+    "@yearafter/relationships": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3",
     "vitest": "^2.1.8"
-  },
-  "peerDependencies": {
-    "expo-sqlite": "*"
-  },
-  "peerDependenciesMeta": {
-    "expo-sqlite": {
-      "optional": true
-    }
   }
 }

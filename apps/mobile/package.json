@@ -15,6 +15,7 @@
     "@yearafter/character": "workspace:*",
     "@yearafter/content": "workspace:*",
     "@yearafter/core": "workspace:*",
+    "@yearafter/events": "workspace:*",
     "@yearafter/persistence": "workspace:*",
     "@yearafter/relationships": "workspace:*",
     "@yearafter/simulation": "workspace:*",

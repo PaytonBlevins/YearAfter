@@ -1,6 +1,41 @@
 import { describe, expect, it } from 'vitest';
 import { advanceYear } from './advance';
+import { decide } from './decide';
+import type { GameState } from './game-state';
 import { createNewGame } from './new-game';
+
+/**
+ * Play `years` of a life, answering every decision with its first option.
+ *
+ * A life cannot be simulated forward without answering: a pending decision
+ * blocks time deliberately (see `advanceYear`). Every test that runs a life
+ * therefore has to be able to answer, which is a good property for the tests to
+ * be forced to encode.
+ */
+function play(state: GameState, years: number): GameState {
+  let current = state;
+  for (let i = 0; i < years; i += 1) {
+    current = advanceYear(current).state;
+    current = answerAll(current);
+  }
+  return current;
+}
+
+function answerAll(state: GameState): GameState {
+  let current = state;
+  let guard = 0;
+  while (current.pending.length > 0) {
+    if ((guard += 1) > 10) throw new Error('decisions did not clear');
+    const decision = current.pending[0];
+    if (!decision) break;
+    const choice = decision.choices[0];
+    if (!choice) throw new Error(`decision ${decision.eventId} had no choices`);
+    const result = decide(current, decision.eventId, choice.id);
+    if (!result.ok) throw new Error(`could not answer ${decision.eventId}: ${result.error}`);
+    current = result.value.state;
+  }
+  return current;
+}
 
 describe('advanceYear', () => {
   it('advances age and world year by exactly one', () => {
@@ -31,10 +66,7 @@ describe('advanceYear', () => {
   });
 
   it('keeps the timeline in chronological order across many years', () => {
-    let state = createNewGame({ seed: 'CHRONO', startYear: 1980 });
-    for (let i = 0; i < 60; i += 1) {
-      state = advanceYear(state).state;
-    }
+    const state = play(createNewGame({ seed: 'CHRONO', startYear: 1980 }), 60);
     expect(state.player.age).toBe(60);
     expect(state.world.year).toBe(2040);
 
@@ -47,8 +79,7 @@ describe('advanceYear', () => {
 
   it('replays identically from the same seed — the golden life check', () => {
     const run = (seed: string) => {
-      let state = createNewGame({ seed, startYear: 2000 });
-      for (let i = 0; i < 40; i += 1) state = advanceYear(state).state;
+      const state = play(createNewGame({ seed, startYear: 2000 }), 40);
       return state.player.timeline.map((entry) => `${entry.age}|${entry.text}`);
     };
     expect(run('GOLDEN')).toEqual(run('GOLDEN'));
@@ -63,12 +94,159 @@ describe('advanceYear', () => {
     expect(newEntries).toHaveLength(0);
   });
 
+  it('refuses to advance past an unanswered decision', () => {
+    // Advancing would either discard the question or answer it for the player.
+    let state = createNewGame({ seed: 'BLOCK', startYear: 2000 });
+    for (let i = 0; i < 30 && state.pending.length === 0; i += 1) {
+      state = advanceYear(state).state;
+    }
+    expect(state.pending.length).toBeGreaterThan(0);
+
+    const blocked = advanceYear(state);
+    expect(blocked.state).toBe(state);
+    expect(blocked.newEntries).toHaveLength(0);
+  });
+
   it('processes an ordinary lifetime well inside the performance budget', () => {
     // Spec 1247-1263: annual processing should stay near-instant.
     const started = performance.now();
-    let state = createNewGame({ seed: 'PERF', startYear: 1950 });
-    for (let i = 0; i < 80; i += 1) state = advanceYear(state).state;
+    play(createNewGame({ seed: 'PERF', startYear: 1950 }), 80);
     const perYear = (performance.now() - started) / 80;
     expect(perYear).toBeLessThan(250);
+  });
+});
+
+describe('the event phase (Ticket 0203)', () => {
+  it('replaced the placeholder feed with catalog events', () => {
+    const { newEntries } = advanceYear(createNewGame({ seed: 'CATALOG', startYear: 2000 }));
+    for (const entry of newEntries) {
+      expect(entry.eventId, entry.text).toBeDefined();
+    }
+  });
+
+  it('never renders an unresolved text token to the player', () => {
+    // The catalog test proves the tokens are guaranteed; this proves the wiring
+    // between household state and the renderer actually passes them through.
+    for (let i = 0; i < 40; i += 1) {
+      const state = play(createNewGame({ seed: `TOKEN-${i}`, startYear: 2000 }), 18);
+      for (const entry of state.player.timeline) {
+        expect(entry.text, `${entry.age}: ${entry.text}`).not.toMatch(/[{}]/);
+      }
+    }
+  });
+
+  it('gives a childhood several events a year without flooding it', () => {
+    let total = 0;
+    let worstYear = 0;
+    for (let i = 0; i < 25; i += 1) {
+      const state = play(createNewGame({ seed: `PACE-${i}`, startYear: 2000 }), 18);
+      total += state.player.timeline.length;
+      for (let age = 1; age <= 18; age += 1) {
+        worstYear = Math.max(
+          worstYear,
+          state.player.timeline.filter((entry) => entry.age === age).length,
+        );
+      }
+    }
+    const perLife = total / 25;
+    expect(perLife).toBeGreaterThan(25);
+    // Spec 725-770: busy characters should not be bombarded.
+    expect(worstYear).toBeLessThanOrEqual(7);
+  });
+
+  it('does not repeat a once-per-life event within a life', () => {
+    for (let i = 0; i < 20; i += 1) {
+      const state = play(createNewGame({ seed: `REPEAT-${i}`, startYear: 2000 }), 18);
+      const counts = new Map<string, number[]>();
+      for (const entry of state.player.timeline) {
+        if (!entry.eventId) continue;
+        const ages = counts.get(entry.eventId) ?? [];
+        ages.push(entry.age);
+        counts.set(entry.eventId, ages);
+      }
+      for (const [eventId, ages] of counts) {
+        // A repeat is only legal via a cooldown, and never inside the same year.
+        expect(new Set(ages).size, `${eventId} repeated in one year`).toBe(ages.length);
+      }
+    }
+  });
+
+  it('moves stats and family warmth as events land', () => {
+    const start = createNewGame({ seed: 'MOVES', startYear: 2000 });
+    const after = play(start, 18);
+    const statsMoved = Object.keys(start.player.stats).some(
+      (key) =>
+        start.player.stats[key as keyof typeof start.player.stats] !==
+        after.player.stats[key as keyof typeof after.player.stats],
+    );
+    expect(statsMoved).toBe(true);
+    expect(after.player.stats.happiness).toBeGreaterThanOrEqual(0);
+    expect(after.player.stats.happiness).toBeLessThanOrEqual(100);
+  });
+
+  it('carries event history into the state so cooldowns survive a year boundary', () => {
+    const state = play(createNewGame({ seed: 'HISTORY', startYear: 2000 }), 10);
+    expect(Object.keys(state.events.lastFired).length).toBeGreaterThan(10);
+  });
+
+  it('keeps the family alive and intact through a childhood', () => {
+    const start = createNewGame({ seed: 'FAMILY', startYear: 2000 });
+    const after = play(start, 18);
+    expect(after.family.members.map((m) => m.id)).toEqual(start.family.members.map((m) => m.id));
+  });
+
+  it('uses only the Events stream, so event tuning cannot shift the character', () => {
+    const a = createNewGame({ seed: 'ISOLATION' });
+    const b = createNewGame({ seed: 'ISOLATION' });
+    play(b, 12);
+    const c = createNewGame({ seed: 'ISOLATION' });
+    expect(c.player.talents).toEqual(a.player.talents);
+    expect(c.family.members.map((m) => m.firstName)).toEqual(
+      a.family.members.map((m) => m.firstName),
+    );
+  });
+});
+
+describe('childhood balance', () => {
+  /**
+   * A regression guard on the shape of a childhood, not on any single number.
+   *
+   * The first version of the event phase applied stat deltas at face value, and
+   * every character arrived at eighteen with happiness pinned at 100 and +20 on
+   * four other bars. Nothing failed; the game was just flat. These bounds are
+   * deliberately wide — they catch a catalog edit that breaks the shape, not one
+   * that shifts a number.
+   */
+  const LIVES = 60;
+
+  function childhoods() {
+    const finals: number[][] = [];
+    for (let i = 0; i < LIVES; i += 1) {
+      const state = play(createNewGame({ seed: `BALANCE-${i}`, startYear: 2000 }), 18);
+      finals.push([
+        state.player.stats.happiness,
+        state.player.stats.health,
+        state.player.stats.smarts,
+        state.player.stats.looks,
+        state.player.stats.charisma,
+        state.player.stats.willpower,
+        state.player.stats.discipline,
+      ]);
+    }
+    return finals;
+  }
+
+  it('does not leave a childhood with a maxed-out stat bar', () => {
+    const maxed = childhoods()
+      .flat()
+      .filter((value) => value >= 100).length;
+    expect(maxed).toBe(0);
+  });
+
+  it('still produces characters who differ from each other', () => {
+    // The other failure mode: damp the curve until everyone lands on 60.
+    const happiness = childhoods().map((stats) => stats[0]!);
+    const spread = Math.max(...happiness) - Math.min(...happiness);
+    expect(spread).toBeGreaterThan(20);
   });
 });

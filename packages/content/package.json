@@ -15,5 +15,9 @@
   "devDependencies": {
     "typescript": "~6.0.3",
     "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@yearafter/character": "workspace:*",
+    "@yearafter/relationships": "workspace:*"
   }
 }

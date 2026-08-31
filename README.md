@@ -8,8 +8,9 @@ Before writing code, read [`specs/CORE_RULES.md`](specs/CORE_RULES.md) and
 [`specs/AI_CODING_INSTRUCTIONS.md`](specs/AI_CODING_INSTRUCTIONS.md).
 
 **Status:** v0.02 Living Character, in progress. Sprint Zero (0001–0009),
-v0.01 (0101–0114), Ticket 0201 (character generator) and Ticket 0202 (starting
-family) are complete. Next is Ticket 0203, the childhood event library.
+v0.01 (0101–0114), Ticket 0201 (character generator), 0202 (starting family) and
+0203 (childhood event library) are complete. Next is Ticket 0204, school
+progression.
 
 ---
 
@@ -137,17 +138,18 @@ Web is a review convenience only — saves are in-memory there
 apps/mobile              Expo app. The only place React Native lives.
 packages/core            IDs, Money, Percentage, Location, Result.
 packages/character       Character state, the seven visible stats, Boolean talents, timeline.
-packages/content         Versioned content catalogs — names, locations.
+packages/content         Versioned content catalogs — names, locations, events.
 packages/relationships   NPCs, tiers, the family model.
-packages/simulation      Seeded RNG, GameState, year advancement, new-game.
+packages/events          The event engine: eligibility, weights, cooldowns, chains.
+packages/simulation      Seeded RNG, GameState, year advancement, new-game, decisions.
 packages/persistence     SaveGameV1, migrations, memory + expo-sqlite repositories.
 tools/content-validator  Catalog and canonical-rule validation. Runs in CI.
 specs/                   MASTER_SPEC, CORE_RULES, ARCHITECTURE, AI_CODING_INSTRUCTIONS.
 ```
 
-Packages listed in spec 1191–1203 that have no ticket yet (`world`, `events`,
-`finance`, `careers`, `assets`, and the rest) are created when their milestone
-starts — see [`specs/ARCHITECTURE.md`](specs/ARCHITECTURE.md).
+Packages listed in spec 1191–1203 that have no ticket yet (`world`, `finance`,
+`careers`, `assets`, and the rest) are created when their milestone starts — see
+[`specs/ARCHITECTURE.md`](specs/ARCHITECTURE.md).
 
 ## Rules worth knowing before your first change
 
@@ -167,11 +169,18 @@ These are the ones that bite. The full list is in `CORE_RULES.md`.
 - **Derive, do not store.** Net worth, monthly outflow and equity are computed
   from source state.
 - **Never weaken a test to make code pass.**
+- **Events are data.** No `switch` on an event id, ever. Add events to
+  `scripts/generate-events.py`, run it, commit the script and the JSON.
+- **Stat changes go through `nudgeStats`,** not raw addition — see the growth
+  curve in `packages/character/src/stats.ts` and CORE_RULES 13.2.
 
 ## Where things are wired
 
 - Year advancement: `packages/simulation/src/advance.ts`. New systems attach as
-  phase modules — the list of upcoming phases is in that file's header.
+  phase modules under `src/phases/` — the list of upcoming phases is in that
+  file's header, and `phases/events.ts` is the worked example.
+- Events: `packages/events` is the engine, `packages/content/data/events-*.json`
+  is the library, and `scripts/generate-events.py` is how the library is edited.
 - Save shape: `packages/persistence/src/save-schema.ts`. Changing it means a
   version bump and a migration in `migrations.ts`, with tests.
 - Theme: `apps/mobile/src/theme/theme.ts`. Every colour and dimension in the app
@@ -196,6 +205,9 @@ These are the ones that bite. The full list is in `CORE_RULES.md`.
 - **No advance icon.** The centre control is the affordance.
 - **Talent probability: 9% per talent.** Roughly half of characters are born with
   none.
+- **Event library size: 250–500** across family, school, friendship, humour and
+  talent contexts — an explicit override of the spec's 75–150 (spec 1656). The
+  catalog currently holds 327, and the count is asserted in two places.
 
 ## Still open
 

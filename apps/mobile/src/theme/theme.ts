@@ -56,6 +56,11 @@ export const colors = {
   background: palette.paper,
   /** Text on the accent colour. */
   onAccent: '#FFFFFF',
+  /**
+   * Dim behind a decision card (Ticket 0203). Deliberately light: the year that
+   * raised the question stays readable behind it.
+   */
+  scrim: 'rgba(26, 24, 21, 0.32)',
 } as const;
 
 /**

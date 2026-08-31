@@ -10,11 +10,12 @@
  */
 
 import type { Character } from '@yearafter/character';
+import type { EventHistory, PendingDecision } from '@yearafter/events';
 import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 3;
+export const CURRENT_SAVE_VERSION = 4;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -33,10 +34,11 @@ export type { WorldState };
 /**
  * v2 added `player.personality` (Ticket 0201).
  * v3 added `family` (Ticket 0202).
+ * v4 added `nameCultureId`, `events` and `pending` (Ticket 0203).
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV3 {
-  readonly version: 3;
+export interface SaveGameV4 {
+  readonly version: 4;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -44,6 +46,15 @@ export interface SaveGameV3 {
   readonly player: Character;
   /** Ticket 0202. Beside the player, not on them — see GameState. */
   readonly family: Household;
+  /** Ticket 0201's naming tradition, kept so event text stays culturally local. */
+  readonly nameCultureId: string;
+  /** Ticket 0203: cooldowns, scheduled chains and story flags. */
+  readonly events: EventHistory;
+  /**
+   * Decisions raised but not yet answered. Persisted deliberately — a question
+   * asked on a phone at a bus stop has to still be there on a tablet that night.
+   */
+  readonly pending: readonly PendingDecision[];
   readonly settings: SaveSettings;
   /** Unix ms. Metadata only — never used in simulation logic. */
   readonly createdAt: number;
@@ -51,8 +62,8 @@ export interface SaveGameV3 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV3;
-export type CurrentSaveGame = SaveGameV3;
+export type AnySaveGame = SaveGameV4;
+export type CurrentSaveGame = SaveGameV4;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {
