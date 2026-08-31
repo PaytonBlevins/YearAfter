@@ -62,11 +62,23 @@ def A(
     talents_any: list[str] | None = None,
     stat_at_least: dict | None = None,
     needs_parent: bool = False,
+    tryout: str | None = None,
+    tryout_stat: str | None = None,
+    tryout_text: str | None = None,
+    cut_text: str | None = None,
     effects: dict | None = None,
     join_text: str | None = None,
     leave_text: str | None = None,
 ) -> None:
-    """One joinable activity. `hours` is the only thing that limits how many."""
+    """
+    One joinable activity. `hours` is the only thing that limits how MANY.
+
+    `tryout` is a different thing entirely: some places you cannot simply decide
+    to be in. Review, on the first version: "I was able to join the basketball
+    team just by clicking on it. I should have to tryout for things like that."
+    A tryout is an attempt that can fail, scored against `tryout_stat` and the
+    relevant talent, and it can be attempted again the next school year.
+    """
     ACTIVITIES.append(
         prune(
             {
@@ -90,6 +102,10 @@ def A(
                         "needsParent": needs_parent or None,
                     }
                 ),
+                # Places you have to earn, not just decide on.
+                "tryout": prune({"label": tryout, "stat": tryout_stat}) or None,
+                "tryoutText": tryout_text,
+                "cutText": cut_text,
                 "effects": effects or {},
                 "joinText": join_text,
                 "leaveText": leave_text,
@@ -105,6 +121,9 @@ def A(
 A("act.cross-country", "Cross-Country", "sport", 6,
   blurb="Six miles before most people are awake.",
   stages=["middle", "high"],
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the cross-country team. First practice was at six in the morning.",
+  cut_text="Did not make the cross-country squad by about ninety seconds.",
   effects={"health": 5, "discipline": 3, "willpower": 2},
   join_text="Joined the cross-country team. First practice was at six in the morning.",
   leave_text="Stopped running cross-country. Slept in for the first time since September.")
@@ -112,6 +131,9 @@ A("act.cross-country", "Cross-Country", "sport", 6,
 A("act.basketball", "Basketball", "sport", 8,
   blurb="Practice every night, games on Fridays.",
   stages=["middle", "high"], needs_parent=True,
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the basketball team. Practice every night, games on Fridays.",
+  cut_text="Cut from basketball on the second day. The list was on the gym door.",
   effects={"health": 4, "charisma": 3, "discipline": 2},
   join_text="Made the basketball team. Practice every night, games on Fridays.",
   leave_text="Turned in your basketball jersey.")
@@ -119,6 +141,9 @@ A("act.basketball", "Basketball", "sport", 8,
 A("act.football", "Football", "sport", 10,
   blurb="Two-a-days in August. Everyone knows you by October.",
   stages=["high"], needs_parent=True,
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the football team. Two-a-days started in August.",
+  cut_text="Cut from football. The coach said to come back a stone heavier.",
   effects={"health": 3, "charisma": 5, "willpower": 3},
   join_text="Made the football team. Two-a-days started in August.",
   leave_text="Quit football. The coach did not take it well.")
@@ -128,6 +153,9 @@ A("act.swimming", "Swim Team", "sport", 7,
   stages=["elementary", "middle", "high"],
   annual_cost=180, cost_source="swim team fees and a season of goggles",
   wealth_any=["modest", "comfortable", "affluent", "wealthy"],
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the swim team. Everything you own smells like chlorine now.",
+  cut_text="Missed the swim team's qualifying time by four seconds.",
   effects={"health": 6, "discipline": 3},
   join_text="Joined the swim team. Everything you own smells like chlorine now.",
   leave_text="Left the swim team.")
@@ -136,6 +164,9 @@ A("act.soccer", "Soccer", "sport", 6,
   blurb="Saturday mornings, every Saturday, all year.",
   stages=["elementary", "middle", "high"], needs_parent=True,
   annual_cost=95, cost_source="league registration and a pair of cleats",
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the soccer team. Games are Saturday mornings, every Saturday.",
+  cut_text="Did not make the soccer team. Somebody's dad read the list out.",
   effects={"health": 5, "charisma": 2},
   join_text="Signed up for soccer. Games are Saturday mornings, every Saturday.",
   leave_text="Stopped playing soccer.")
@@ -143,6 +174,9 @@ A("act.soccer", "Soccer", "sport", 6,
 A("act.wrestling", "Wrestling", "sport", 9,
   blurb="Cutting weight is a normal Tuesday.",
   stages=["high"],
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the wrestling team. Cutting weight turned out to be most of it.",
+  cut_text="Did not make weight for wrestling, and that was that.",
   effects={"health": 2, "willpower": 6, "discipline": 4},
   join_text="Joined the wrestling team. Cutting weight turned out to be most of it.",
   leave_text="Quit wrestling and ate an entire pizza.")
@@ -150,6 +184,9 @@ A("act.wrestling", "Wrestling", "sport", 9,
 A("act.track", "Track & Field", "sport", 6,
   blurb="Spring season. Bus rides and a stopwatch.",
   stages=["middle", "high"],
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the track team. Spring meets, long bus rides, one stopwatch.",
+  cut_text="Did not make the track team. The times were posted in the corridor.",
   effects={"health": 4, "discipline": 2, "willpower": 2},
   join_text="Went out for track. Spring meets, long bus rides, one stopwatch.",
   leave_text="Left the track team.")
@@ -170,6 +207,9 @@ A("act.band", "Marching Band", "arts", 9,
 A("act.school-play", "School Play", "arts", 8,
   blurb="Six quiet weeks, then three of everything at once.",
   stages=["elementary", "middle", "high"], needs_parent=True,
+  tryout="Audition", tryout_stat="charisma",
+  tryout_text="Got cast in the school play. Rehearsals run late through opening night.",
+  cut_text="Auditioned for the school play and got a thank-you and a closed door.",
   effects={"charisma": 5, "happiness": 3},
   join_text="Got cast in the school play. Rehearsals run late through opening night.",
   leave_text="Dropped out of the school play.")
@@ -191,6 +231,9 @@ A("act.art-club", "Art Club", "arts", 3,
 A("act.jazz-band", "Jazz Band", "arts", 6,
   blurb="Before school, for people who already play.",
   stages=["high"], talents_any=["music"],
+  tryout="Audition", tryout_stat="discipline",
+  tryout_text="Got into jazz band. Rehearsals before school, twice a week.",
+  cut_text="Auditioned for jazz band and was asked to try again next year.",
   effects={"discipline": 3, "charisma": 3, "happiness": 3},
   join_text="Got into jazz band. Rehearsals before school, twice a week.",
   leave_text="Left jazz band.")
@@ -218,6 +261,9 @@ A("act.debate", "Debate Team", "academic", 6,
   blurb="Weekend tournaments in other schools' cafeterias.",
   stages=["high"], stat_at_least={"charisma": 50},
   needs_parent=True,
+  tryout="Try out", tryout_stat="charisma",
+  tryout_text="Made the debate team. Tournaments are weekends, in other schools' cafeterias.",
+  cut_text="Did not make the debate team. You were told your rebuttals were thin.",
   effects={"charisma": 5, "smarts": 3, "willpower": 2},
   join_text="Joined the debate team. Tournaments are weekends, in other schools' cafeterias.",
   leave_text="Quit debate.")
@@ -252,6 +298,9 @@ A("act.yearbook", "Yearbook", "service", 4,
 A("act.student-council", "Student Council", "social", 4,
   blurb="You have to be elected. You can lose.",
   stages=["middle", "high"], stat_at_least={"charisma": 58},
+  tryout="Run for it", tryout_stat="charisma",
+  tryout_text="Won a seat on student council by eleven votes.",
+  cut_text="Ran for student council and lost. The posters stayed up for a week.",
   effects={"charisma": 5, "discipline": 2},
   join_text="Won a seat on student council.",
   leave_text="Left student council.")
@@ -318,6 +367,17 @@ def check() -> None:
             problems.append(f"{aid}: unknown kind {a['kind']!r}")
         if not (0 < a["hoursPerWeek"] <= 12):
             problems.append(f"{aid}: hoursPerWeek {a['hoursPerWeek']} is outside 0-12")
+        tryout = a.get("tryout")
+        if tryout:
+            if tryout.get("stat") not in STATS:
+                problems.append(f"{aid}: tryout scores against unknown stat {tryout.get('stat')!r}")
+            if not a.get("tryoutText") or not a.get("cutText"):
+                problems.append(f"{aid}: a tryout needs both a made-it and a cut line")
+        for field in ("tryoutText", "cutText"):
+            text = a.get(field)
+            if text and text.strip()[-1] not in ".!?":
+                problems.append(f"{aid}: {field} is unpunctuated")
+
         # Rule 4, structurally: money never moves without a named source.
         if a.get("annualCost") and not a.get("costSource"):
             problems.append(f"{aid}: costs money but does not say where it goes")
@@ -374,6 +434,8 @@ def check() -> None:
 def report() -> None:
     print(f"{len(ACTIVITIES)} activities")
     print("  by kind:  " + ", ".join(f"{k} {v}" for k, v in sorted(Counter(a["kind"] for a in ACTIVITIES).items())))
+    earned = [a["id"] for a in ACTIVITIES if a.get("tryout")]
+    print(f"  {len(earned)} need a tryout, {len(ACTIVITIES) - len(earned)} are open sign-ups")
     for stage in ("elementary", "middle", "high"):
         available = [a for a in ACTIVITIES if stage in a["requires"]["stages"]]
         hours = sum(a["hoursPerWeek"] for a in available)

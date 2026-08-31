@@ -154,6 +154,25 @@ const migrations: Readonly<Record<number, Migration>> = {
       return entry['names'] ? entry : { ...entry, names: {} };
     }),
   }),
+
+  /**
+   * v6 -> v7: Ticket 0204b made competitive activities something you try out
+   * for rather than something you click on.
+   *
+   * An existing character starts with no tryout history, which means their next
+   * attempt at anything is a first attempt. That is the honest reading: they
+   * have never tried out for anything, because trying out did not exist.
+   *
+   * Anything they were already IN stays joined. Retroactively cutting a
+   * character from a team they have been on for three years would be a worse
+   * lie than letting them keep a place they got before there was a queue.
+   */
+  6: (save) => {
+    const education = { ...((save['education'] as Record<string, unknown>) ?? {}) };
+    education['tryouts'] = education['tryouts'] ?? {};
+    education['tryoutYear'] = education['tryoutYear'] ?? {};
+    return { ...save, version: 7, education };
+  },
 };
 
 export function describeMigrationError(error: MigrationError): string {

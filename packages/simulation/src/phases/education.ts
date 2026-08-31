@@ -13,12 +13,7 @@
  */
 
 import { nudgeStats, type Character } from '@yearafter/character';
-import {
-  enrolmentLabel,
-  isInSchool,
-  runSchoolYear,
-  type EducationState,
-} from '@yearafter/education';
+import { runSchoolYear, statusLabel, type EducationState } from '@yearafter/education';
 import type { TimelineKind } from '@yearafter/character';
 import type { GameState } from '../game-state';
 
@@ -63,23 +58,13 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
 }
 
 /**
- * What the character header shows under the name.
+ * The stored copy of the status label, for the save-list summary.
  *
- * This finally retires `defaultOccupationFor`, the v0.01 placeholder that
- * rendered every nine-year-old as "Child" and every teenager as "Student".
- * A character out of school falls back to a life-stage label until employment
- * (Ticket 0210) owns this field properly.
+ * The UI does NOT read this — it calls `statusLabel` at render time, because a
+ * stored label goes stale the moment a save is migrated or resumed and two
+ * screens then disagree about the same child. Kept written here so the save
+ * list can show "8th Grader" without loading and migrating the whole document.
  */
 export function occupationFor(education: EducationState, age: number): string {
-  if (isInSchool(education) || education.stage === 'preschool') {
-    return enrolmentLabel(education, age);
-  }
-  if (age >= 65) return 'Retired';
-  // For a few years after leaving, what you did last is still who you are.
-  // Calling an eighteen-year-old "Unemployed" the summer they graduate is
-  // technically true and reads like an accusation.
-  if (education.finishedAtAge !== undefined && age - education.finishedAtAge <= 3) {
-    return education.stage === 'graduated' ? 'High School Graduate' : 'Left School';
-  }
-  return 'Unemployed';
+  return statusLabel(education, age);
 }

@@ -120,6 +120,21 @@ Exceptions mean an engineering bug.
 Never duplicate canonical state. Net worth, monthly outflow, equity, liabilities
 and available credit are **derived** from source state, never stored alongside it.
 
+This extends to labels the UI shows. A character's status line — "8th Grader",
+"High School Graduate" — is derived at render time from education state and age
+by `statusLabel`, not read from the stored `player.occupation`. A stored label is
+only rewritten when a year advances, so a resumed or migrated save shows a stale
+one, and two screens reading it disagree about the same character. That is
+exactly what review reported: "when my character was 11, it simply said I was in
+public school, now that I am 13, it says that I am in 8th grade." The stored copy
+survives only for the save-list summary, which needs a value without loading a
+whole save, and is written from the same function.
+
+A field with a value is not the same as a fact. `schoolType` is `'public'` from
+birth because the field is not optional; rendering it unconditionally announced a
+newborn's enrolment at a public school. Ask whether the fact applies before
+showing the field.
+
 ## 12. Saves
 
 Explicit schema version, tested migrations, old dynasties stay loadable. Never
@@ -179,8 +194,20 @@ prompt naming a girl at the water fountain and an outcome naming somebody else
 were two independent draws before this, which is what shipped in 0203 and what
 review rejected.
 
-`{they}`, `{them}` and `{their}` are the PLAYER's pronouns. Incidental people
-have no gender and are referred to by name.
+`{they}`, `{them}` and `{their}` are the PLAYER's pronouns and are never used
+for anybody else. An incidental person has their OWN pronoun tokens —
+`{kidThey}`, `{kidThem}`, `{kidTheir}` and the `kid2`/`adult` forms — which are
+resolved from the name that was actually bound.
+
+Copy must never write a bare "he", "him", "his", "she" or "her" in an event that
+names a person the engine drew. Their names come from the culture's male AND
+female lists, so a written-in pronoun is wrong half the time: 0203b shipped "You
+told Lucía exactly what you thought of him." A capitalised token — `{KidThey}` —
+is the same token at the start of a sentence, so correct pronouns never cost a
+correct capital letter.
+
+The person tokens a decision declares cover its pronouns too: a line using only
+`{kidThem}` counts as a use of `kid`.
 
 ### 13.5 A menu never refuses because you are busy
 
@@ -203,9 +230,21 @@ A cash effect is `{ delta, source }`, never a bare number, and the amount must
 appear in the line the player actually reads. A silent balance change is
 unrepresentable rather than merely discouraged.
 
+### 13.7 A place worth having is earned, not clicked
+
+A competitive activity carries a `tryout` and cannot be joined directly. It is
+attempted, it can be failed, and it may be attempted again the following school
+year — once per year, so the button is not a slot machine. The draw comes from
+`RngDomains.Education`, so a life still replays from its seed. Being cut writes a
+timeline line exactly as making it does: a screen that silently does nothing on
+failure teaches the player that the button is broken.
+
+Review, on the first version: "I was able to join the basketball team just by
+clicking on it. I should have to tryout for things like that."
+
 This is enforced structurally, not by writing discipline: the generator, the
 content validator and the catalog tests each fail a build on unsourced money, on
-an amount the prose never mentions, and on the other four rules above.
+an amount the prose never mentions, and on the other rules above.
 
 ## 14. Branding
 

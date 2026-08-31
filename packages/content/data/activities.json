@@ -10,6 +10,12 @@
       "requires": {
         "stages": ["middle", "high"]
       },
+      "tryout": {
+        "label": "Try out",
+        "stat": "health"
+      },
+      "tryoutText": "Made the cross-country team. First practice was at six in the morning.",
+      "cutText": "Did not make the cross-country squad by about ninety seconds.",
       "effects": {
         "health": 5,
         "discipline": 3,
@@ -28,6 +34,12 @@
         "stages": ["middle", "high"],
         "needsParent": true
       },
+      "tryout": {
+        "label": "Try out",
+        "stat": "health"
+      },
+      "tryoutText": "Made the basketball team. Practice every night, games on Fridays.",
+      "cutText": "Cut from basketball on the second day. The list was on the gym door.",
       "effects": {
         "health": 4,
         "charisma": 3,
@@ -46,6 +58,12 @@
         "stages": ["high"],
         "needsParent": true
       },
+      "tryout": {
+        "label": "Try out",
+        "stat": "health"
+      },
+      "tryoutText": "Made the football team. Two-a-days started in August.",
+      "cutText": "Cut from football. The coach said to come back a stone heavier.",
       "effects": {
         "health": 3,
         "charisma": 5,
@@ -66,6 +84,12 @@
         "stages": ["elementary", "middle", "high"],
         "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
       },
+      "tryout": {
+        "label": "Try out",
+        "stat": "health"
+      },
+      "tryoutText": "Made the swim team. Everything you own smells like chlorine now.",
+      "cutText": "Missed the swim team's qualifying time by four seconds.",
       "effects": {
         "health": 6,
         "discipline": 3
@@ -85,6 +109,12 @@
         "stages": ["elementary", "middle", "high"],
         "needsParent": true
       },
+      "tryout": {
+        "label": "Try out",
+        "stat": "health"
+      },
+      "tryoutText": "Made the soccer team. Games are Saturday mornings, every Saturday.",
+      "cutText": "Did not make the soccer team. Somebody's dad read the list out.",
       "effects": {
         "health": 5,
         "charisma": 2
@@ -101,6 +131,12 @@
       "requires": {
         "stages": ["high"]
       },
+      "tryout": {
+        "label": "Try out",
+        "stat": "health"
+      },
+      "tryoutText": "Made the wrestling team. Cutting weight turned out to be most of it.",
+      "cutText": "Did not make weight for wrestling, and that was that.",
       "effects": {
         "health": 2,
         "willpower": 6,
@@ -118,6 +154,12 @@
       "requires": {
         "stages": ["middle", "high"]
       },
+      "tryout": {
+        "label": "Try out",
+        "stat": "health"
+      },
+      "tryoutText": "Made the track team. Spring meets, long bus rides, one stopwatch.",
+      "cutText": "Did not make the track team. The times were posted in the corridor.",
       "effects": {
         "health": 4,
         "discipline": 2,
@@ -157,6 +199,12 @@
         "stages": ["elementary", "middle", "high"],
         "needsParent": true
       },
+      "tryout": {
+        "label": "Audition",
+        "stat": "charisma"
+      },
+      "tryoutText": "Got cast in the school play. Rehearsals run late through opening night.",
+      "cutText": "Auditioned for the school play and got a thank-you and a closed door.",
       "effects": {
         "charisma": 5,
         "happiness": 3
@@ -206,6 +254,12 @@
         "stages": ["high"],
         "talentsAny": ["music"]
       },
+      "tryout": {
+        "label": "Audition",
+        "stat": "discipline"
+      },
+      "tryoutText": "Got into jazz band. Rehearsals before school, twice a week.",
+      "cutText": "Auditioned for jazz band and was asked to try again next year.",
       "effects": {
         "discipline": 3,
         "charisma": 3,
@@ -264,6 +318,12 @@
         },
         "needsParent": true
       },
+      "tryout": {
+        "label": "Try out",
+        "stat": "charisma"
+      },
+      "tryoutText": "Made the debate team. Tournaments are weekends, in other schools' cafeterias.",
+      "cutText": "Did not make the debate team. You were told your rebuttals were thin.",
       "effects": {
         "charisma": 5,
         "smarts": 3,
@@ -337,6 +397,12 @@
           "charisma": 58
         }
       },
+      "tryout": {
+        "label": "Run for it",
+        "stat": "charisma"
+      },
+      "tryoutText": "Won a seat on student council by eleven votes.",
+      "cutText": "Ran for student council and lost. The posters stayed up for a week.",
       "effects": {
         "charisma": 5,
         "discipline": 2

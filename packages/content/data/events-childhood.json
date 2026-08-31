@@ -2287,24 +2287,6 @@
       }
     },
     {
-      "id": "school.graduation",
-      "category": "school",
-      "type": "passive",
-      "rarity": "common",
-      "eligibility": {
-        "ageMin": 17,
-        "ageMax": 17
-      },
-      "weight": 20,
-      "text": ["Finished school. Somebody's parent cried, and it was not necessarily yours."],
-      "effects": {
-        "stats": {
-          "happiness": 4,
-          "discipline": 1
-        }
-      }
-    },
-    {
       "id": "friend.first",
       "category": "friendship",
       "type": "passive",
@@ -2491,7 +2473,7 @@
       "weight": 11,
       "cooldown": 3,
       "text": [
-        "A new kid, {kid}, showed up mid-term and you were the one who talked to them first."
+        "A new kid, {kid}, showed up mid-term and you were the one who talked to {kidThem} first."
       ],
       "effects": {
         "stats": {
@@ -2596,7 +2578,7 @@
         "ageMax": 17
       },
       "weight": 9,
-      "text": ["{kid} told everyone the one thing you had asked them not to."],
+      "text": ["{kid} told everyone the one thing you had asked {kidThem} not to."],
       "effects": {
         "stats": {
           "happiness": -5,
@@ -2615,7 +2597,7 @@
         "ageMax": 17
       },
       "weight": 8,
-      "text": ["{kid} stood up for you in front of everybody, at real cost to themselves."],
+      "text": ["{kid} stood up for you in front of everybody, at real cost to {kidThem}self."],
       "effects": {
         "stats": {
           "happiness": 5,
@@ -5142,17 +5124,17 @@
       ],
       "cooldown": 3,
       "text": [
-        "{kid} is at the water fountain by herself and the bell is not for six minutes. You have had a crush on her since September.",
-        "{kid} is sitting on the wall by the bike racks on her own. You have thought about talking to her since September."
+        "{kid} is at the water fountain on {kidTheir} own and the bell is not for six minutes. You have had a crush on {kidThem} since September.",
+        "{kid} is sitting on the wall by the bike racks alone. You have thought about talking to {kidThem} since September."
       ],
       "choices": [
         {
           "id": "compliment",
-          "label": "Compliment her jacket",
+          "label": "Compliment {kidTheir} jacket",
           "outcomes": [
             {
               "weight": 5,
-              "text": "{kid} was flattered — she said nobody ever notices that jacket, and asked where you sit at lunch.",
+              "text": "{kid} was flattered — {kidThey} said nobody ever notices that jacket, and asked where you sit at lunch.",
               "effects": {
                 "stats": {
                   "happiness": 6,
@@ -5184,11 +5166,11 @@
         },
         {
           "id": "ask-day",
-          "label": "Ask about her day",
+          "label": "Ask about {kidTheir} day",
           "outcomes": [
             {
               "weight": 6,
-              "text": "{kid} talked for the full six minutes about her sister's dog. You were late to class and did not care.",
+              "text": "{kid} talked for the full six minutes about {kidTheir} sister's dog. You were late to class and did not care.",
               "effects": {
                 "stats": {
                   "happiness": 5,
@@ -5213,7 +5195,7 @@
           "outcomes": [
             {
               "weight": 4,
-              "text": "{kid} laughed so hard she snorted water out of her nose, and then could not look at you.",
+              "text": "{kid} laughed so hard {kidThey} snorted water out of {kidTheir} nose, and then could not look at you.",
               "effects": {
                 "stats": {
                   "happiness": 7,
@@ -5277,11 +5259,11 @@
         },
         {
           "id": "ask-around",
-          "label": "Ask {kid} what she does",
+          "label": "Ask {kid} what {kidThey} does",
           "outcomes": [
             {
               "weight": 6,
-              "text": "{kid} talked you into the same thing she does, and it turned out to be a good year for it.",
+              "text": "{kid} talked you into the same thing {kidThey} does, and it turned out to be a good year for it.",
               "effects": {
                 "stats": {
                   "happiness": 4,
@@ -6574,7 +6556,7 @@
         }
       ],
       "text": [
-        "{kid} has slid his maths test an inch to the left so you can see it. {adult} is at the window."
+        "{kid} has slid {kidTheir} maths test an inch to the left so you can see it. {adult} is at the window."
       ],
       "choices": [
         {
@@ -6583,7 +6565,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You copied {kid}'s answers and got an 88. He got an 84.",
+              "text": "You copied {kid}'s answers and got an 88. {KidThey} got an 84.",
               "effects": {
                 "stats": {
                   "happiness": 2,
@@ -6621,8 +6603,8 @@
         },
         {
           "id": "warn",
-          "label": "Hiss at him to move it",
-          "text": "You hissed at {kid} to move his paper. He did, and he never sat near you again.",
+          "label": "Hiss at {kidThem} to move it",
+          "text": "You hissed at {kid} to move {kidTheir} paper. {KidThey} did, and {kidThey} never sat near you again.",
           "effects": {
             "stats": {
               "happiness": -3,
@@ -6698,7 +6680,7 @@
             },
             {
               "weight": 4,
-              "text": "{adult} said she would help and then was off sick for a month.",
+              "text": "{adult} said {adultThey} would help and then was off sick for a month.",
               "effects": {
                 "stats": {
                   "happiness": -3,
@@ -6742,7 +6724,7 @@
       "choices": [
         {
           "id": "fight",
-          "label": "Hit him",
+          "label": "Hit {kidThem}",
           "outcomes": [
             {
               "weight": 5,
@@ -6815,7 +6797,7 @@
         },
         {
           "id": "disarm",
-          "label": "Get him laughing",
+          "label": "Get {kidThem} laughing",
           "outcomes": [
             {
               "weight": 3,
@@ -6830,7 +6812,7 @@
             },
             {
               "weight": 7,
-              "text": "You tried to make {kid} laugh and gave him three new things to use.",
+              "text": "You tried to make {kid} laugh and gave {kidThem} three new things to use.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -7082,7 +7064,7 @@
         {
           "id": "trial",
           "label": "Ask to try it for a term",
-          "text": "You asked {adult} for a term's trial. She had not been asked that before and said yes.",
+          "text": "You asked {adult} for a term's trial. {AdultThey} had not been asked that before and said yes.",
           "effects": {
             "stats": {
               "smarts": 3,
@@ -7437,7 +7419,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You told {kid} to go first. He did, badly, and nobody mentioned your turn again.",
+              "text": "You told {kid} to go first. {KidThey} did, badly, and nobody mentioned your turn again.",
               "effects": {
                 "stats": {
                   "charisma": 5,
@@ -7448,7 +7430,7 @@
             },
             {
               "weight": 5,
-              "text": "You told {kid} to go first. He did it perfectly, and then everybody looked at you.",
+              "text": "You told {kid} to go first. {KidThey} did it perfectly, and then everybody looked at you.",
               "effects": {
                 "stats": {
                   "charisma": -2,
@@ -7714,7 +7696,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You apologised to {kid2} at her locker. She said 'okay', and it took until March to be normal.",
+              "text": "You apologised to {kid2} at {kid2Their} locker. {Kid2They} said 'okay', and it took until March to be normal.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -7725,7 +7707,7 @@
             },
             {
               "weight": 5,
-              "text": "You apologised and {kid2} cried and hugged you, and {kid} was furious you had made him look bad.",
+              "text": "You apologised and {kid2} cried and hugged you, and {kid} was furious you had made {kidThem} look bad.",
               "effects": {
                 "stats": {
                   "happiness": 5,
@@ -7741,7 +7723,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You told {kid} exactly what you thought of him in front of six people. He did not deny any of it.",
+              "text": "You told {kid} exactly what you thought of {kidThem} in front of six people. {KidThey} did not deny any of it.",
               "effects": {
                 "stats": {
                   "happiness": -3,
@@ -7752,7 +7734,7 @@
             },
             {
               "weight": 5,
-              "text": "You confronted {kid} and he cried, which you had not expected at all.",
+              "text": "You confronted {kid} and {kidThey} cried, which you had not expected at all.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -8094,7 +8076,7 @@
             },
             {
               "weight": 4,
-              "text": "You made {kid} come with you and he denied everything on the doorstep.",
+              "text": "You made {kid} come with you and {kidThey} denied everything on the doorstep.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -8125,7 +8107,7 @@
       "choices": [
         {
           "id": "buy",
-          "label": "Buy him something",
+          "label": "Buy {kidThem} something",
           "outcomes": [
             {
               "weight": 5,
@@ -8158,11 +8140,11 @@
         },
         {
           "id": "make",
-          "label": "Make him something",
+          "label": "Make {kidThem} something",
           "outcomes": [
             {
               "weight": 6,
-              "text": "You made {kid} a comic about the two of you. It went on his wall and stayed there.",
+              "text": "You made {kid} a comic about the two of you. It went on {kidTheir} wall and stayed there.",
               "effects": {
                 "stats": {
                   "happiness": 6,
@@ -8173,7 +8155,7 @@
             },
             {
               "weight": 4,
-              "text": "You made {kid} a present and his cousin asked out loud why you had not just bought one.",
+              "text": "You made {kid} a present and {kidTheir} cousin asked out loud why you had not just bought one.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -8208,7 +8190,9 @@
       "physical": true,
       "weight": 12,
       "cooldown": 3,
-      "text": ["{kid}'s parents are out and he wants to stay up for the whole horror marathon."],
+      "text": [
+        "{kid}'s parents are out and {kidThey} wants to stay up for the whole horror marathon."
+      ],
       "choices": [
         {
           "id": "all-night",
@@ -8321,7 +8305,7 @@
         {
           "id": "ask",
           "label": "Ask {kid} outright why",
-          "text": "You asked {kid} why he bothered with you. He said you reminded him of himself, which was a lot to carry.",
+          "text": "You asked {kid} why {kidThey} bothered with you. {KidThey} said you reminded {kidThem} of {kidThem}self, which was a lot to carry.",
           "effects": {
             "stats": {
               "charisma": 3,
@@ -9071,11 +9055,11 @@
         },
         {
           "id": "ask-her",
-          "label": "Ask {adult} what she'd do",
+          "label": "Ask {adult} what {adultThey}'d do",
           "outcomes": [
             {
               "weight": 7,
-              "text": "{adult} did what she thought suited you and she was completely right.",
+              "text": "{adult} did what {adultThey} thought suited you and {adultThey} was completely right.",
               "effects": {
                 "stats": {
                   "looks": 5,
@@ -9086,7 +9070,7 @@
             },
             {
               "weight": 3,
-              "text": "{adult} did what she thought suited you and she was not right at all.",
+              "text": "{adult} did what {adultThey} thought suited you and {adultThey} was not right at all.",
               "effects": {
                 "stats": {
                   "looks": -3,
@@ -9517,12 +9501,12 @@
       "personTokens": ["adult"],
       "weight": 10,
       "text": [
-        "{adult} next door, who you barely know, has offered to teach you something she is very good at."
+        "{adult} next door, who you barely know, has offered to teach you something {adultThey} is very good at."
       ],
       "choices": [
         {
           "id": "accept",
-          "label": "Take her up on it",
+          "label": "Take {adultThem} up on it",
           "text": "You said yes to {adult}. It became a Saturday habit that lasted four years.",
           "effects": {
             "stats": {

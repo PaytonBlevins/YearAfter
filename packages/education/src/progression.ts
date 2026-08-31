@@ -10,6 +10,7 @@
 
 import type { Personality, Talents, VisibleStats } from '@yearafter/character';
 import { ACTIVITIES, type SchoolStageId } from '@yearafter/content';
+import { clampStat } from '@yearafter/core';
 import type { WealthBand } from '@yearafter/relationships';
 import {
   annualActivityEffects,
@@ -24,6 +25,7 @@ import {
   SCHOOL_MODIFIERS,
   advanceBehaviour,
   advancePerformance,
+  targetPerformance,
 } from './performance';
 import {
   GRADES_TO_GRADUATE,
@@ -92,6 +94,15 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
 
   // ---- enrolment and grade ------------------------------------------------
   let next = state;
+  /**
+   * True on the year school starts.
+   *
+   * Performance normally DRIFTS towards its target, which is right for every
+   * year but the first — before school there is nothing to drift from, and the
+   * placeholder 50 rendered a six-year-old's first report card as an F with a
+   * 0.7 GPA. A first report card reports the child, not the placeholder.
+   */
+  let justEnrolled = false;
 
   if (state.stage === 'graduated' || state.stage === 'droppedOut') {
     return { state, statDeltas: EMPTY, hiddenLoad: 0, costs: [], lines: [] };
@@ -102,6 +113,7 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
       return { state, statDeltas: EMPTY, hiddenLoad: 0, costs: [], lines: [] };
     }
     next = { ...next, gradeLevel: 0, stage: 'elementary' };
+    justEnrolled = true;
     push('milestone', 'Started kindergarten.');
   } else {
     const grade = state.gradeLevel + 1;
@@ -139,13 +151,17 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
   const penalties = overloadPenalties(workload.overload);
 
   // ---- academic performance ----------------------------------------------
-  const performance = advancePerformance(next.performance, {
+  const performanceInputs = {
+    age: input.age,
     stats: input.stats,
     talents: input.talents,
     effort: next.effort,
     overloadPenalty: penalties.performance,
     schoolModifier: SCHOOL_MODIFIERS[next.schoolType],
-  });
+  };
+  const performance = justEnrolled
+    ? clampStat(Math.round(targetPerformance(performanceInputs)))
+    : advancePerformance(next.performance, performanceInputs);
   const behaviour = advanceBehaviour(
     next.behaviour,
     input.personality.temper,

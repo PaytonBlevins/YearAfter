@@ -26,6 +26,7 @@ import {
   createNewGame,
   decide as resolveDecision,
   generateSeed,
+  tryOut as attemptTryout,
   type GameState,
 } from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
@@ -60,6 +61,8 @@ interface GameContextValue {
   readonly setEffort: (effort: StudyEffort) => void;
   readonly joinActivity: (activityId: string) => void;
   readonly leaveActivity: (activityId: string) => void;
+  /** Attempt a competitive place. Can fail. One attempt per school year. */
+  readonly tryOutFor: (activityId: string) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   readonly updateSettings: (patch: Partial<SaveSettings>) => void;
 }
@@ -240,6 +243,30 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [mutateEducation],
   );
 
+  /**
+   * Try out for something.
+   *
+   * Unlike joining, this consumes randomness and can fail, so it writes a
+   * timeline entry either way — being cut is a thing that happened, and a button
+   * that silently does nothing on failure reads as broken.
+   */
+  const tryOutFor = useCallback(
+    (activityId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = attemptTryout(current, activityId);
+        if (!result.ok) {
+          setSaveError(`Cannot try out right now (${result.error}).`);
+          return current;
+        }
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const updateSettings = useCallback(
     (patch: Partial<SaveSettings>) => {
       setSettings((current) => {
@@ -265,6 +292,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       setEffort,
       joinActivity,
       leaveActivity,
+      tryOutFor,
       startNewLife,
       updateSettings,
     }),
@@ -280,6 +308,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       setEffort,
       joinActivity,
       leaveActivity,
+      tryOutFor,
       startNewLife,
       updateSettings,
     ],

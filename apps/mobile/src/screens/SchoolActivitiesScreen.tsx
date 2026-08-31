@@ -39,7 +39,7 @@ import { colors, layout, spacing, typography } from '../theme/theme';
 const KIND_ORDER: readonly ActivityKind[] = ['sport', 'arts', 'academic', 'service', 'social'];
 
 export function SchoolActivitiesScreen() {
-  const { state, joinActivity, leaveActivity } = useGame();
+  const { state, joinActivity, leaveActivity, tryOutFor } = useGame();
   if (!state) return null;
 
   const { education, player, family } = state;
@@ -106,7 +106,14 @@ export function SchoolActivitiesScreen() {
               {rows.map((offer, index) => (
                 <Fragment key={offer.activity.id}>
                   {index > 0 ? <RowDivider /> : null}
-                  <ActivityRow offer={offer} onPress={() => joinActivity(offer.activity.id)} />
+                  <ActivityRow
+                    offer={offer}
+                    onPress={() =>
+                      offer.needsTryout
+                        ? tryOutFor(offer.activity.id)
+                        : joinActivity(offer.activity.id)
+                    }
+                  />
                 </Fragment>
               ))}
             </Card>
@@ -136,16 +143,33 @@ export function SchoolActivitiesScreen() {
 }
 
 function ActivityRow({ offer, onPress }: { offer: ActivityOffer; onPress?: () => void }) {
-  const { activity, joined, unavailable } = offer;
+  const { activity, joined, unavailable, needsTryout, attemptedThisYear } = offer;
+  // Some places you have to earn. The row says which before it is pressed, so
+  // "Try out" and "Join" are visibly different promises.
+  const blocked = Boolean(unavailable) || attemptedThisYear;
+  const action = joined
+    ? 'Quit'
+    : attemptedThisYear
+      ? undefined
+      : needsTryout
+        ? activity.tryout?.label
+        : 'Join';
+
   return (
     <ListRow
       title={activity.name}
-      subtitle={unavailable ? UNAVAILABLE_LABELS[unavailable] : activity.blurb}
-      value={joined ? 'Quit' : unavailable ? undefined : 'Join'}
+      subtitle={
+        unavailable
+          ? UNAVAILABLE_LABELS[unavailable]
+          : attemptedThisYear
+            ? 'You already tried this year. Next year.'
+            : activity.blurb
+      }
+      value={action}
       // Ellipsis, not a chevron: these act in place. CORE_RULES §8.
-      affordance={unavailable ? 'none' : 'action'}
-      disabled={Boolean(unavailable)}
-      onPress={unavailable ? undefined : onPress}
+      affordance={blocked ? 'none' : 'action'}
+      disabled={blocked}
+      onPress={blocked ? undefined : onPress}
       meta={describeCommitment(activity)}
     />
   );

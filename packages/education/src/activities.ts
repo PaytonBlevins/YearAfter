@@ -14,8 +14,14 @@
  * told no.
  */
 
-import type { Personality, Talents, VisibleStats } from '@yearafter/character';
-import { ACTIVITIES, findActivity, type Activity, type SchoolStageId } from '@yearafter/content';
+import type { Personality, TalentKey, Talents, VisibleStats } from '@yearafter/character';
+import {
+  ACTIVITIES,
+  findActivity,
+  type Activity,
+  type ActivityKind,
+  type SchoolStageId,
+} from '@yearafter/content';
 import { livingParents, type Household, type WealthBand } from '@yearafter/relationships';
 import { hasJoined, isInSchool, type EducationState, EFFORT_HOURS } from './school';
 
@@ -75,6 +81,13 @@ export interface ActivityOffer {
   readonly joined: boolean;
   /** Undefined when it can be joined. */
   readonly unavailable?: Unavailable;
+  /**
+   * This must be earned rather than chosen, and has not been attempted yet this
+   * school year. The row offers "Try out" or "Audition" instead of "Join".
+   */
+  readonly needsTryout: boolean;
+  /** Already attempted this year; the next attempt is next year. */
+  readonly attemptedThisYear: boolean;
 }
 
 /**
@@ -90,11 +103,17 @@ export function activityOffers(
 ): readonly ActivityOffer[] {
   if (!isInSchool(state)) return [];
   return ACTIVITIES.filter((activity) => activity.requires.stages.includes(context.stage))
-    .map((activity) => ({
-      activity,
-      joined: hasJoined(state, activity.id),
-      unavailable: unavailableReason(activity, context),
-    }))
+    .map((activity) => {
+      const joined = hasJoined(state, activity.id);
+      const attemptedThisYear = hasAttemptedThisYear(state, activity.id, context.age);
+      return {
+        activity,
+        joined,
+        unavailable: unavailableReason(activity, context),
+        needsTryout: Boolean(activity.tryout) && !joined,
+        attemptedThisYear: attemptedThisYear && !joined,
+      };
+    })
     .sort((a, b) => {
       if (a.joined !== b.joined) return a.joined ? -1 : 1;
       if (Boolean(a.unavailable) !== Boolean(b.unavailable)) return a.unavailable ? 1 : -1;
@@ -159,5 +178,121 @@ export function annualActivityEffects(state: EducationState): Partial<VisibleSta
   }
   return total as Partial<VisibleStats>;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Tryouts                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Some places you cannot simply decide to be in.
+ *
+ * Review, on the first version of this screen: "I was able to join the
+ * basketball team just by clicking on it. I should have to tryout for things
+ * like that." So a competitive activity is ATTEMPTED. The attempt is scored
+ * against the relevant visible stat and the relevant talent, it can fail, and it
+ * can be tried again next school year — which is what actually happens.
+ *
+ * This is separate from workload. Workload limits how MANY things a character
+ * can carry; a tryout decides whether they are good enough for this one. Neither
+ * ever refuses on the grounds that the character is busy.
+ */
+
+/** Chance of making it at an exactly average stat, with no talent. */
+export const TRYOUT_BASE_CHANCE = 0.4;
+
+/** How much the scored stat moves the odds, across its whole range. */
+export const TRYOUT_STAT_WEIGHT = 0.55;
+
+/** What the matching talent is worth. Large, but never a guarantee (spec 725–770). */
+export const TRYOUT_TALENT_BONUS = 0.25;
+
+/** Talent that counts for each kind of activity. */
+const KIND_TALENT: Readonly<Record<ActivityKind, TalentKey | undefined>> = {
+  sport: 'athletics',
+  arts: 'acting',
+  academic: 'academics',
+  service: undefined,
+  social: undefined,
+};
+
+/**
+ * The odds of making it, before the draw.
+ *
+ * Exposed rather than buried so the balance tooling can sweep it, and so the
+ * test that a talent helps but does not guarantee has something to assert on.
+ */
+export function tryoutChance(
+  activity: Activity,
+  stats: VisibleStats,
+  talents: Talents,
+  attemptsBefore: number,
+): number {
+  if (!activity.tryout) return 1;
+  const stat = stats[activity.tryout.stat];
+  const talent = KIND_TALENT[activity.kind];
+  // Music has its own kind-less home in arts; check it too.
+  const hasTalent = Boolean(
+    (talent && talents[talent]) || (activity.kind === 'arts' && talents.music),
+  );
+  const chance =
+    TRYOUT_BASE_CHANCE +
+    ((stat - 50) / 50) * TRYOUT_STAT_WEIGHT +
+    (hasTalent ? TRYOUT_TALENT_BONUS : 0) +
+    // Somebody who keeps turning up gets known. Caps out quickly.
+    Math.min(0.15, attemptsBefore * 0.075);
+  return Math.max(0.05, Math.min(0.95, chance));
+}
+
+export interface TryoutResult {
+  readonly made: boolean;
+  readonly state: EducationState;
+  /** The line for the feed. Always present — an attempt is worth recording. */
+  readonly text: string;
+}
+
+/**
+ * Attempt a tryout.
+ *
+ * `roll` is a number in [0, 1) from the caller's seeded stream, so this stays
+ * pure and a life still replays from its seed.
+ */
+export function attemptTryout(
+  state: EducationState,
+  activity: Activity,
+  stats: VisibleStats,
+  talents: Talents,
+  age: number,
+  roll: number,
+): TryoutResult {
+  const attemptsBefore = state.tryouts[activity.id] ?? 0;
+  const made = roll < tryoutChance(activity, stats, talents, attemptsBefore);
+  const tryouts = { ...state.tryouts, [activity.id]: attemptsBefore + 1 };
+  const tryoutYear = { ...state.tryoutYear, [activity.id]: age };
+
+  if (!made) {
+    return {
+      made: false,
+      state: { ...state, tryouts, tryoutYear },
+      text: activity.cutText ?? `Did not make ${activity.name.toLowerCase()}.`,
+    };
+  }
+  return {
+    made: true,
+    state: { ...join(state, activity.id, age), tryouts, tryoutYear },
+    text: activity.tryoutText ?? activity.joinText,
+  };
+}
+
+/**
+ * Has this character already attempted this one since the school year turned?
+ *
+ * One attempt per year. Without this, a player taps until they make the team,
+ * which is not a tryout, it is a slot machine.
+ */
+export const hasAttemptedThisYear = (
+  state: EducationState,
+  activityId: string,
+  age: number,
+): boolean => state.tryoutYear[activityId] === age;
 
 export type { Activity, Personality };

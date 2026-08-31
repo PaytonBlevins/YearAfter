@@ -40,6 +40,21 @@ export interface ActivityRequirements {
   readonly needsParent?: boolean;
 }
 
+/**
+ * A place you have to earn rather than decide on.
+ *
+ * Review, on the first version: "I was able to join the basketball team just by
+ * clicking on it. I should have to tryout for things like that." An activity
+ * with a `tryout` cannot be joined directly — it is attempted, it can be
+ * failed, and it can be attempted again the following school year.
+ */
+export interface ActivityTryout {
+  /** The button, and the word for what you are doing: "Try out", "Audition". */
+  readonly label: string;
+  /** The visible stat it is scored against, alongside the relevant talent. */
+  readonly stat: VisibleStatKey;
+}
+
 export interface Activity {
   readonly id: string;
   readonly name: string;
@@ -56,6 +71,12 @@ export interface Activity {
    */
   readonly costSource?: string;
   readonly requires: ActivityRequirements;
+  /** Present when this must be earned. Absent means an open sign-up. */
+  readonly tryout?: ActivityTryout;
+  /** Timeline line when a tryout succeeds. */
+  readonly tryoutText?: string;
+  /** Timeline line when it does not. */
+  readonly cutText?: string;
   readonly effects: Partial<Record<VisibleStatKey, number>>;
   /** Timeline line written when the character joins. */
   readonly joinText: string;

@@ -327,8 +327,9 @@ describe('effects', () => {
 
 describe('text', () => {
   it('resolves family tokens from the household', () => {
+    // Parents by relationship, siblings by name — which is how a child talks.
     const text = renderEventText('{mother} and {father} met {sibling}.', context(), stream('T'));
-    expect(text).toBe('Ana and Luis met Mateo.');
+    expect(text).toBe('Mom and Dad met Mateo.');
   });
 
   it('names the character and the city', () => {
@@ -357,8 +358,10 @@ describe('text', () => {
   });
 
   it('falls back to neutral prose rather than printing a brace', () => {
-    const text = renderEventText('{mother} called.', context({ family: household() }), stream('T'));
-    expect(text).toBe('your mom called.');
+    const orphan = context({ family: household() });
+    expect(renderEventText('{mother} called.', orphan, stream('T'))).toBe('Mom called.');
+    expect(renderEventText('{motherName} called.', orphan, stream('T'))).toBe('your mom called.');
+    expect(renderEventText('{sibling} called.', orphan, stream('T'))).toBe('your sibling called.');
   });
 
   it('lists the tokens in a line', () => {
@@ -658,6 +661,120 @@ describe('one name, carried through a whole decision (Ticket 0203b)', () => {
             EMPTY_HISTORY,
           );
           expect(resolved?.outcome.text, `${decision.eventId}/${choice.id}`).not.toMatch(/[{}]/);
+        }
+      }
+    }
+  });
+});
+
+describe('what a child calls their parents', () => {
+  it('says Mom and Dad rather than using first names', () => {
+    // Review: "90% of kids do not [use first names]. It's mom, mother, dad."
+    const line = renderEventText('{mother} and {father} were out.', context(), stream('P'));
+    expect(line).toBe('Mom and Dad were out.');
+    expect(renderEventText('{parents} argued.', context(), stream('P'))).toBe(
+      'Mom and Dad argued.',
+    );
+  });
+
+  it('uses whichever parent exists in a single-parent household', () => {
+    const dadOnly = household([member('father', 'Luis', 'male', 1972)]);
+    expect(renderEventText('{parent} was late.', context({ family: dadOnly }), stream('P'))).toBe(
+      'Dad was late.',
+    );
+    expect(renderEventText('{parents} were late.', context({ family: dadOnly }), stream('P'))).toBe(
+      'Dad were late.',
+    );
+  });
+
+  it('reads correctly at the start of a sentence and in the middle', () => {
+    expect(renderEventText('{mother} asked.', context(), stream('P'))).toBe('Mom asked.');
+    expect(renderEventText('You asked {mother}.', context(), stream('P'))).toBe('You asked Mom.');
+    expect(renderEventText("{mother}'s car.", context(), stream('P'))).toBe("Mom's car.");
+  });
+
+  it('still offers a first name for the rare line that needs one', () => {
+    expect(renderEventText('{motherName} Reyes, aged 35.', context(), stream('P'))).toBe(
+      'Ana Reyes, aged 35.',
+    );
+  });
+
+  it('leaves siblings on first-name terms, because that is what happens', () => {
+    expect(renderEventText('{sibling} took it.', context(), stream('P'))).toBe('Mateo took it.');
+  });
+
+  it('gives an incidental person their own pronouns, not the player’s', () => {
+    // Review found "You told Lucía exactly what you thought of him." Names are
+    // drawn from both lists, so a bare "him" in the copy was wrong half the
+    // time. The pronoun is resolved from the name that was actually bound.
+    const she = renderEventText(
+      'You told {kid} what you thought of {kidThem}. {KidThey} kept {kidTheir} face still.',
+      context(),
+      stream('X'),
+      { kid: 'Harper' },
+    );
+    expect(she).toBe('You told Harper what you thought of her. She kept her face still.');
+
+    const he = renderEventText(
+      'You told {kid} what you thought of {kidThem}. {KidThey} kept {kidTheir} face still.',
+      context(),
+      stream('X'),
+      { kid: 'Owen' },
+    );
+    expect(he).toBe('You told Owen what you thought of him. He kept his face still.');
+  });
+
+  it('reads an adult’s pronoun off the title it renders with', () => {
+    expect(
+      renderEventText('{adult} said {adultThey} would help.', context(), stream('X'), {
+        adult: 'Mrs. Okafor',
+      }),
+    ).toBe('Mrs. Okafor said she would help.');
+    expect(
+      renderEventText('{adult} said {adultThey} would help.', context(), stream('X'), {
+        adult: 'Mr. Conti',
+      }),
+    ).toBe('Mr. Conti said he would help.');
+  });
+
+  it('keeps the player’s pronouns separate from everybody else’s', () => {
+    // The player here is Sofia, female. The kid is Mateo, male. One line, two
+    // people, two sets of pronouns.
+    const line = renderEventText('{they} asked {kid} why {kidThey} left.', context(), stream('X'), {
+      kid: 'Owen',
+    });
+    expect(line).toBe('she asked Owen why he left.');
+  });
+
+  it('never assumes a sex for a drawn name anywhere in the shipped catalog', () => {
+    // The catalog test forbids a bare "he"/"she" beside a person token; this
+    // proves the rendered result of the whole catalog is consistent too.
+    for (let i = 0; i < 60; i += 1) {
+      const result = runEventPhase(
+        context({ age: 4 + (i % 14) }),
+        stream(`PR-${i}`),
+        EMPTY_HISTORY,
+      );
+      for (const outcome of result.outcomes) {
+        expect(outcome.text, outcome.eventId).not.toMatch(/\{[A-Za-z0-9]+\}/);
+      }
+    }
+  });
+
+  it('never prints a parent’s first name anywhere in the shipped catalog', () => {
+    // The Family screen still shows real names; event copy does not.
+    for (let i = 0; i < 60; i += 1) {
+      const result = runEventPhase(
+        context({ age: 4 + (i % 14) }),
+        stream(`PN-${i}`),
+        EMPTY_HISTORY,
+      );
+      const family = FULL_FAMILY.members
+        .filter((m) => m.role !== 'sibling')
+        .map((m) => m.firstName);
+      for (const outcome of result.outcomes) {
+        for (const name of family) {
+          expect(outcome.text, outcome.eventId).not.toContain(name);
         }
       }
     }

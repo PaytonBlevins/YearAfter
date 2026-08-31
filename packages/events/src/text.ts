@@ -24,13 +24,26 @@ import { findNameCulture } from '@yearafter/content';
 import { father, mother, siblings, type FamilyMember } from '@yearafter/relationships';
 import type { EventContext } from './context';
 
-/** Anything that can appear between braces in catalog text. */
+/**
+ * Anything that can appear between braces in catalog text.
+ *
+ * `mother`, `father`, `parent` and `parents` render as what a CHILD actually
+ * calls them — "Mom", "Dad", "Mom and Dad" — not as first names. Review put it
+ * plainly: 90% of kids do not call their parents by name, and event text that
+ * did read as though the character were somebody's colleague.
+ *
+ * `motherName` and `fatherName` still give the first name, for the rare line
+ * where a child genuinely would use it — overhearing adults, reading a form,
+ * a hospital corridor. The Family screen is unaffected and shows real names.
+ */
 export const TEXT_TOKENS = [
   'me',
   'mother',
   'father',
   'parent',
   'parents',
+  'motherName',
+  'fatherName',
   'sibling',
   'siblingRel',
   'olderSibling',
@@ -41,6 +54,16 @@ export const TEXT_TOKENS = [
   'they',
   'them',
   'their',
+  // An incidental person's own pronouns. See PERSON_PRONOUN_TOKENS.
+  'kidThey',
+  'kidThem',
+  'kidTheir',
+  'kid2They',
+  'kid2Them',
+  'kid2Their',
+  'adultThey',
+  'adultThem',
+  'adultTheir',
 ] as const;
 
 export type TextToken = (typeof TEXT_TOKENS)[number];
@@ -48,6 +71,32 @@ export type TextToken = (typeof TEXT_TOKENS)[number];
 /** Tokens that draw a person who is not in the character's family. */
 export const PERSON_TOKENS = ['kid', 'kid2', 'adult'] as const;
 export type PersonToken = (typeof PERSON_TOKENS)[number];
+
+/**
+ * Pronouns belonging to an incidental person, not to the player.
+ *
+ * Review caught the reason these exist: an outcome read "You told Lucía exactly
+ * what you thought of him." The line had been written with a bare "him" because
+ * the incidental pool was assumed to be genderless — but names are drawn from
+ * the culture's male AND female lists, so half the time the copy misgendered
+ * the person it had just named.
+ *
+ * A bound name already determines a sex: a kid's name is in one of the two
+ * lists, and an adult renders with a title. So the pronoun is derived from the
+ * binding rather than stored, which means no save shape changes and a decision
+ * answered next week still says "she" about the same person.
+ */
+export const PERSON_PRONOUN_TOKENS = [
+  'kidThey',
+  'kidThem',
+  'kidTheir',
+  'kid2They',
+  'kid2Them',
+  'kid2Their',
+  'adultThey',
+  'adultThem',
+  'adultTheir',
+] as const;
 
 /** Names bound for one decision: token -> the person it means, all year. */
 export type NameBindings = Readonly<Partial<Record<PersonToken, string>>>;
@@ -151,6 +200,41 @@ export function bindPersonNames(
   return bindings;
 }
 
+/**
+ * The sex of an already-bound person, read back off their name.
+ *
+ * An adult carries a title, so that answers it outright. A child's name came
+ * from one of the culture's two lists, so the lists answer it. Anything else —
+ * a fallback name, a culture that has since dropped a name — is treated as
+ * male, which is a coin flip rather than a claim.
+ */
+function sexOfBoundName(name: string, nameCultureId: string): 'male' | 'female' {
+  if (name.startsWith('Mrs.') || name.startsWith('Ms.') || name.startsWith('Miss')) return 'female';
+  if (name.startsWith('Mr.')) return 'male';
+  const culture = findNameCulture(nameCultureId);
+  if (culture?.female.includes(name)) return 'female';
+  return 'male';
+}
+
+interface Pronouns {
+  readonly they: string;
+  readonly them: string;
+  readonly their: string;
+}
+
+const PRONOUNS: Readonly<Record<'male' | 'female', Pronouns>> = {
+  male: { they: 'he', them: 'him', their: 'his' },
+  female: { they: 'she', them: 'her', their: 'her' },
+};
+
+/** Neutral, for a line whose person was never bound. Never reached in shipped copy. */
+const NEUTRAL: Pronouns = { they: 'they', them: 'them', their: 'their' };
+
+function pronounsFor(name: string | undefined, nameCultureId: string): Pronouns {
+  if (!name) return NEUTRAL;
+  return PRONOUNS[sexOfBoundName(name, nameCultureId)];
+}
+
 function oldest(members: readonly FamilyMember[]): FamilyMember | undefined {
   return [...members].sort((a, b) => a.birthYear - b.birthYear)[0];
 }
@@ -170,11 +254,12 @@ export function renderEventText(
   source: TokenSource,
   bindings: NameBindings = {},
 ): string {
-  const needsIncidental = /\{kid2?\}/.test(template) && (!bindings.kid || !bindings.kid2);
+  const needsIncidental =
+    /\{[Kk]id2?(They|Them|Their)?\}/.test(template) && (!bindings.kid || !bindings.kid2);
   const [drawnKid, drawnKid2] = needsIncidental
     ? incidentalNames(context, source, 2)
     : [undefined, undefined];
-  const needsAdult = /\{adult\}/.test(template) && !bindings.adult;
+  const needsAdult = /\{[Aa]dult(They|Them|Their)?\}/.test(template) && !bindings.adult;
   const drawnAdult = needsAdult ? adultName(context, source, namesInUse(context)) : undefined;
 
   const mum = mother(context.family);
@@ -183,28 +268,62 @@ export function renderEventText(
   const sibling = sibs[0];
   const older = oldest(sibs);
 
+  // What a child calls them, not what the census calls them. "Mom" works both
+  // at the start of a sentence and mid-sentence, because it is being used as a
+  // name — "Mom read to you" and "You asked Mom" are both right.
+  const mumWord = mum ? 'Mom' : undefined;
+  const dadWord = dad ? 'Dad' : undefined;
+
+  const kidName = bindings.kid ?? drawnKid;
+  const kid2Name = bindings.kid2 ?? drawnKid2;
+  const adultBound = bindings.adult ?? drawnAdult;
+  const kidP = pronounsFor(kidName, context.nameCultureId);
+  const kid2P = pronounsFor(kid2Name, context.nameCultureId);
+  const adultP = pronounsFor(adultBound, context.nameCultureId);
+
   const values: Record<string, string | undefined> = {
     me: context.firstName,
-    mother: mum?.firstName,
-    father: dad?.firstName,
-    parent: mum?.firstName ?? dad?.firstName,
-    parents: mum && dad ? `${mum.firstName} and ${dad.firstName}` : (mum ?? dad)?.firstName,
+    mother: mumWord,
+    father: dadWord,
+    parent: mumWord ?? dadWord,
+    parents: mum && dad ? 'Mom and Dad' : (mumWord ?? dadWord),
+    // First names, for the rare line where a child genuinely would use one.
+    motherName: mum?.firstName,
+    fatherName: dad?.firstName,
     sibling: sibling?.firstName,
     siblingRel: sibling ? (sibling.sex === 'male' ? 'brother' : 'sister') : undefined,
     olderSibling: older?.firstName,
     city: context.homeCity,
-    kid: bindings.kid ?? drawnKid,
-    kid2: bindings.kid2 ?? drawnKid2,
-    adult: bindings.adult ?? drawnAdult,
+    kid: kidName,
+    kid2: kid2Name,
+    adult: adultBound,
     they: context.sex === 'male' ? 'he' : 'she',
     them: context.sex === 'male' ? 'him' : 'her',
     their: context.sex === 'male' ? 'his' : 'her',
+    kidThey: kidP.they,
+    kidThem: kidP.them,
+    kidTheir: kidP.their,
+    kid2They: kid2P.they,
+    kid2Them: kid2P.them,
+    kid2Their: kid2P.their,
+    adultThey: adultP.they,
+    adultThem: adultP.them,
+    adultTheir: adultP.their,
   };
 
   return template.replace(TOKEN_PATTERN, (whole, name: string) => {
-    const value = values[name];
+    const value = values[name] ?? FALLBACKS[name];
     if (value) return value;
-    return FALLBACKS[name] ?? whole;
+    // A capitalised token is the same token at the start of a sentence:
+    // "{KidThey} did not deny any of it." Resolving it here means copy does not
+    // have to choose between correct pronouns and correct sentence case.
+    const first = name.charAt(0);
+    if (first >= 'A' && first <= 'Z') {
+      const lower = first.toLowerCase() + name.slice(1);
+      const resolved = values[lower] ?? FALLBACKS[lower];
+      if (resolved) return resolved.charAt(0).toUpperCase() + resolved.slice(1);
+    }
+    return whole;
   });
 }
 
@@ -214,10 +333,12 @@ export function renderEventText(
  * mistake reads as slightly generic prose instead of `{mother}`.
  */
 const FALLBACKS: Record<string, string> = {
-  mother: 'your mom',
-  father: 'your dad',
+  mother: 'Mom',
+  father: 'Dad',
   parent: 'your parent',
   parents: 'your parents',
+  motherName: 'your mom',
+  fatherName: 'your dad',
   sibling: 'your sibling',
   siblingRel: 'sibling',
   olderSibling: 'your older sibling',
@@ -225,6 +346,15 @@ const FALLBACKS: Record<string, string> = {
   kid: 'a kid you knew',
   kid2: 'another kid',
   adult: 'a teacher',
+  kidThey: 'they',
+  kidThem: 'them',
+  kidTheir: 'their',
+  kid2They: 'they',
+  kid2Them: 'them',
+  kid2Their: 'their',
+  adultThey: 'they',
+  adultThem: 'them',
+  adultTheir: 'their',
 };
 
 /** Every token name used in a line. For validation. */

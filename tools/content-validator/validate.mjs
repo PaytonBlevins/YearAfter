@@ -277,6 +277,23 @@ if (existsSync(eventsPath)) {
     // that cannot be left to writing discipline across 340 events.
     const INCIDENTAL = new Set(['kid', 'kid2', 'adult']);
     const PRONOUNS = new Set(['they', 'them', 'their']);
+    /**
+     * An incidental person's own pronoun tokens, and who each belongs to.
+     *
+     * Review found "You told Lucía exactly what you thought of him." Incidental
+     * names are drawn from the culture's male AND female lists, so a bare
+     * "he"/"she" in a line that names one of these people is wrong half the
+     * time. Their pronouns have to be tokens.
+     */
+    const PERSON_OF = new Map([...INCIDENTAL].map((token) => [token, token]));
+    for (const person of INCIDENTAL) {
+      for (const grammaticalCase of ['They', 'Them', 'Their']) {
+        PERSON_OF.set(`${person}${grammaticalCase}`, person);
+      }
+    }
+    const BARE_PRONOUN = /\b(he|him|his|she|her|hers)\b/i;
+    /** A capitalised token is the same token at the start of a sentence. */
+    const norm = (token) => token.charAt(0).toLowerCase() + token.slice(1);
     const NOISE = new Set(['the', 'a', 'an', 'to', 'for', 'it', 'them', 'your', 'my', 's']);
     const TOKENS = /\{([a-zA-Z0-9]+)\}/g;
     const stem = (label) =>
@@ -376,15 +393,23 @@ if (existsSync(eventsPath)) {
       ];
       const used = new Set();
       for (const line of lines) {
-        const tokens = new Set([...String(line).matchAll(TOKENS)].map((match) => match[1]));
-        for (const token of tokens) if (INCIDENTAL.has(token)) used.add(token);
-        const namesSomeone = [...tokens].some((token) => INCIDENTAL.has(token));
+        const tokens = new Set([...String(line).matchAll(TOKENS)].map((match) => norm(match[1])));
+        for (const token of tokens) if (PERSON_OF.has(token)) used.add(PERSON_OF.get(token));
+        const namesSomeone = [...tokens].some((token) => PERSON_OF.has(token));
         const usesPronoun = [...tokens].some((token) => PRONOUNS.has(token));
         if (namesSomeone && usesPronoun) {
           fail(
             rel,
             `${event.id}: "${line}" names somebody and uses a player pronoun — ` +
               `{they}/{them}/{their} are the PLAYER's, so this renders the wrong gender.`,
+          );
+        }
+        if (namesSomeone && BARE_PRONOUN.test(String(line).replace(TOKENS, ' '))) {
+          fail(
+            rel,
+            `${event.id}: "${line}" names an incidental person and then writes a bare ` +
+              `'he'/'she'. The name is drawn from both lists, so use ` +
+              `{kidThey}/{kidThem}/{kidTheir} (or the kid2/adult forms).`,
           );
         }
       }

@@ -87,8 +87,47 @@ export function enrolmentLabel(state: EducationState, age = 0): string {
   return `${ordinal(grade)} Grader`;
 }
 
-/** The school's own name, for the Career screen. */
-export function schoolLabel(state: EducationState): string {
+/**
+ * What the character IS right now, in one phrase — the line under their name.
+ *
+ * Review, on the first version: "It should track grades consistently. When my
+ * character was 11, it simply said I was in public school, now that I am 13, it
+ * says that I am in 8th grade." Both screens were reading `player.occupation`, a
+ * STORED string that is only rewritten when a year advances. A save migrated
+ * from before schooling existed therefore carried its old placeholder around
+ * until the next birthday, and the two screens disagreed about the same child.
+ *
+ * So the label is derived here, from education state and age, and the UI calls
+ * this at render time (CORE_RULES 11: derive, do not store). The stored field
+ * remains for the save-list summary, which needs a value without loading a
+ * whole save, and it is written from this same function.
+ */
+export function statusLabel(state: EducationState, age: number): string {
+  if (isInSchool(state) || state.stage === 'preschool') {
+    return enrolmentLabel(state, age);
+  }
+  if (age >= 65) return 'Retired';
+  // For a few years after leaving, what you did last is still who you are.
+  // Calling an eighteen-year-old "Unemployed" the summer they graduate is
+  // technically true and reads like an accusation.
+  if (state.finishedAtAge !== undefined && age - state.finishedAtAge <= 3) {
+    return state.stage === 'graduated' ? 'High School Graduate' : 'Left School';
+  }
+  return 'Unemployed';
+}
+
+/**
+ * The kind of school, for the second line of the Career card.
+ *
+ * Undefined before school starts. It used to return "Public School" for a
+ * NEWBORN — `schoolType` has a value from birth because the field is not
+ * optional, and reading it unconditionally announced an enrolment that does not
+ * exist. That is the other half of the review's report: the card said "Public
+ * School" while the grade line said nothing, and the same character read as two
+ * different facts at two different ages.
+ */
+export function schoolLabel(state: EducationState): string | undefined {
+  if (state.stage === 'preschool') return undefined;
   if (state.stage === 'graduated') return 'Finished school';
   if (state.stage === 'droppedOut') return 'Left school';
   return SCHOOL_TYPE_LABELS[state.schoolType];
@@ -180,6 +219,21 @@ export interface EducationState {
    */
   readonly behaviour: StatValue;
   readonly activities: readonly EnrolledActivity[];
+  /**
+   * How many times this character has tried out for each thing, ever.
+   *
+   * Somebody who keeps turning up gets known, so repeated attempts help a
+   * little. Kept per activity rather than as a total, because being cut from
+   * football twice says nothing about your chances at debate.
+   */
+  readonly tryouts: Readonly<Record<string, number>>;
+  /**
+   * The age at which each was last attempted.
+   *
+   * One attempt per school year. Without it a player taps until they make the
+   * team, which is not a tryout, it is a slot machine.
+   */
+  readonly tryoutYear: Readonly<Record<string, number>>;
   /** Set once a character graduates or leaves, so later systems can ask. */
   readonly finishedAtAge?: number;
 }
@@ -192,6 +246,8 @@ export const NOT_YET_ENROLLED: EducationState = {
   effort: 'normal',
   behaviour: 70,
   activities: [],
+  tryouts: {},
+  tryoutYear: {},
 };
 
 export const isInSchool = (state: EducationState): boolean =>

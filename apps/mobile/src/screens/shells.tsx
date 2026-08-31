@@ -32,6 +32,7 @@ import {
   joinedActivities,
   letterGrade,
   schoolLabel,
+  statusLabel,
   type StudyEffort,
 } from '@yearafter/education';
 import {
@@ -150,19 +151,29 @@ export function CareerScreen() {
   const { player, education } = state;
 
   const atSchool = isInSchool(education);
+  // A school record does not vanish the day you leave. Once there is one, it
+  // keeps being shown — as "Final grades" rather than "Grades".
+  const hasGrades = atSchool || education.stage === 'graduated' || education.stage === 'droppedOut';
   const joined = joinedActivities(education);
 
   return (
     <Screen>
       <SectionHeading>Current</SectionHeading>
       <Card>
+        {/*
+          Derived from education state at render time, exactly like the header —
+          the two must never disagree, and reading the stored `occupation` here
+          is what made them. Grade on the title line, school on the second, at
+          every age: review asked for school facts that read the same way each
+          year rather than a grade one year and a school type the next.
+        */}
         <ListRow
           icon={atSchool ? 'school' : 'career'}
-          title={player.occupation}
+          title={statusLabel(education, player.age)}
           subtitle={schoolLabel(education)}
           affordance="none"
         />
-        {atSchool ? (
+        {hasGrades ? (
           <>
             <RowDivider />
             {/*
@@ -170,11 +181,15 @@ export function CareerScreen() {
               explain outcomes through context, not formulas.
             */}
             <ListRow
-              title="Grades"
+              title={atSchool ? 'Grades' : 'Final grades'}
               value={letterGrade(education.performance)}
               meta={`${gradePointAverage(education.performance).toFixed(1)} GPA`}
               affordance="none"
             />
+          </>
+        ) : null}
+        {atSchool ? (
+          <>
             <RowDivider />
             <ListRow
               title="Standing"

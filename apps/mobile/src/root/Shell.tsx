@@ -76,6 +76,7 @@ export function Shell() {
     <View style={styles.root}>
       <CharacterHeader
         character={state.player}
+        education={state.education}
         year={state.world.year}
         onPressDebug={() => push({ screen: 'debug', title: 'Developer' })}
       />

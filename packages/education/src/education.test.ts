@@ -28,9 +28,11 @@ import {
   EFFORT_HOURS,
   NOT_YET_ENROLLED,
   enrolmentLabel,
+  statusLabel,
   gradePointAverage,
   isInSchool,
   letterGrade,
+  schoolLabel,
   stageForGrade,
   type EducationState,
 } from './school';
@@ -128,6 +130,56 @@ describe('enrolment and progression', () => {
     expect(enrolmentLabel(states[17]!, 18)).toBe('High School Graduate');
   });
 
+  it('gives the same kind of answer at every school age', () => {
+    // Review: "It should track grades consistently. When my character was 11, it
+    // simply said I was in public school, now that I am 13, it says that I am in
+    // 8th grade." The label must be a school year for the whole of school — one
+    // age reading as a school TYPE was the bug.
+    const states = career(NOT_YET_ENROLLED, 18);
+    const schoolYear = /^(Kindergartner|\d+(st|nd|rd|th) Grader|Freshman|Sophomore|Junior|Senior)$/;
+    for (let age = 5; age <= 17; age += 1) {
+      const label = statusLabel(states[age - 1]!, age);
+      expect(label, `age ${age}`).toMatch(schoolYear);
+    }
+    expect(statusLabel(states[17]!, 18)).toBe('High School Graduate');
+  });
+
+  it('grades the first report card on the child, not on the placeholder', () => {
+    // A six-year-old's Career card read "F · 0.7 GPA". Performance starts at a
+    // neutral 50 and drifts, so year one showed the starting value rather than
+    // the child. A bright kid gets a bright first report card.
+    const bright = career(NOT_YET_ENROLLED, 5, {
+      stats: createStats({ smarts: 80, discipline: 70 }),
+    });
+    expect(letterGrade(bright[4]!.performance)).not.toBe('F');
+    // And it still reflects the character rather than being a free pass.
+    const struggling = career(NOT_YET_ENROLLED, 5, {
+      stats: createStats({ smarts: 30, discipline: 30 }),
+    });
+    expect(struggling[4]!.performance).toBeLessThan(bright[4]!.performance);
+  });
+
+  it('does not announce a school a character has not started', () => {
+    // A newborn's Career card read "Newborn / Public School" — `schoolType` has
+    // a value from birth, and reading it unconditionally invented an enrolment.
+    expect(schoolLabel(NOT_YET_ENROLLED)).toBeUndefined();
+    const states = career(NOT_YET_ENROLLED, 18);
+    expect(schoolLabel(states[4]!)).toBe('Public School');
+    expect(schoolLabel(states[17]!)).toBe('Finished school');
+  });
+
+  it('derives the same label the stored one is written from', () => {
+    // The header and the Career screen both call statusLabel; the save summary
+    // stores what it returns. Three places, one function, no drift.
+    const states = career(NOT_YET_ENROLLED, 18);
+    expect(statusLabel(states[12]!, 13)).toBe('8th Grader');
+    expect(statusLabel(NOT_YET_ENROLLED, 0)).toBe('Newborn');
+    const dropout: EducationState = { ...NOT_YET_ENROLLED, stage: 'droppedOut', finishedAtAge: 16 };
+    expect(statusLabel(dropout, 17)).toBe('Left School');
+    expect(statusLabel(dropout, 30)).toBe('Unemployed');
+    expect(statusLabel(dropout, 70)).toBe('Retired');
+  });
+
   it('announces each milestone exactly once', () => {
     let state = NOT_YET_ENROLLED;
     const milestones: string[] = [];
@@ -150,6 +202,32 @@ describe('grades', () => {
     expect(gradePointAverage(100)).toBe(4);
     expect(gradePointAverage(45)).toBe(0);
     expect(gradePointAverage(30)).toBe(0);
+  });
+
+  it('grades a child against children their own age', () => {
+    // Stats grow through childhood, but the formula's constant was fitted at the
+    // top of that curve — so an ordinary six-year-old was graded an F with a 0.7
+    // GPA. A screenshot caught it; no test could, because every test compared a
+    // character against the same formula that produced them.
+    const shared = {
+      talents: createTalents(),
+      effort: 'normal' as const,
+      overloadPenalty: 0,
+      schoolModifier: 0,
+    };
+    // Roughly the mean child at each age, measured across 150 simulated lives.
+    const sixYearOld = targetPerformance({
+      ...shared,
+      age: 6,
+      stats: createStats({ smarts: 63, discipline: 59 }),
+    });
+    const senior = targetPerformance({
+      ...shared,
+      age: 17,
+      stats: createStats({ smarts: 76, discipline: 66 }),
+    });
+    expect(letterGrade(sixYearOld)).toBe(letterGrade(senior));
+    expect(Math.abs(sixYearOld - senior)).toBeLessThan(8);
   });
 
   it('rewards effort by more than a rounding error', () => {

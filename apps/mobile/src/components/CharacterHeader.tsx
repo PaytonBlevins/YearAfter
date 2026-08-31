@@ -13,17 +13,28 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Character } from '@yearafter/character';
 import { formatMoney } from '@yearafter/core';
+import { statusLabel, type EducationState } from '@yearafter/education';
 import { colors, layout, radii, spacing, typography } from '../theme/theme';
 import { Glyph } from '../theme/icons';
 
 export interface CharacterHeaderProps {
   readonly character: Character;
+  readonly education: EducationState;
   readonly year: number;
   readonly onPressDebug?: () => void;
 }
 
-export function CharacterHeader({ character, year, onPressDebug }: CharacterHeaderProps) {
+export function CharacterHeader({
+  character,
+  education,
+  year,
+  onPressDebug,
+}: CharacterHeaderProps) {
   const initials = `${character.firstName.charAt(0)}${character.lastName.charAt(0)}`;
+  // Derived, not read from `character.occupation`: a stored label is only
+  // rewritten on Advance, so a resumed or migrated save showed one thing here
+  // and something else on the Career screen for the same child.
+  const status = statusLabel(education, character.age);
 
   return (
     <View style={styles.header}>
@@ -36,7 +47,7 @@ export function CharacterHeader({ character, year, onPressDebug }: CharacterHead
           {character.firstName} {character.lastName}
         </Text>
         <Text numberOfLines={1} style={styles.status}>
-          {character.age} · {character.occupation}
+          {character.age} · {status}
         </Text>
       </View>
 

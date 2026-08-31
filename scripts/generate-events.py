@@ -23,7 +23,12 @@ ticket is 250-500. See the assertion in `check()`.
 
 Text tokens available, all resolved in packages/events/src/text.ts:
   {me} {mother} {father} {parent} {parents} {sibling} {siblingRel}
-  {olderSibling} {city} {kid} {kid2} {they} {them} {their}
+  {olderSibling} {city} {kid} {kid2} {adult} {they} {them} {their}
+  {motherName} {fatherName}
+
+{mother} and {father} render as "Mom" and "Dad" — what a child actually calls
+them. Review: "90% of kids do not [use first names]. It's mom, mother, dad."
+Use {motherName}/{fatherName} only where a child genuinely would say the name.
 
 A token naming a person MUST be guaranteed by the event's own eligibility —
 `{mother}` needs requires=["mother"], `{sibling}` needs requires=["sibling"].
@@ -81,16 +86,46 @@ OPENABLE = {"activities"}
 # `person_tokens` so the same person is named in the prompt and the outcome.
 INCIDENTAL_TOKENS = {"kid", "kid2", "adult"}
 
+# An incidental person's own pronouns, and who each one belongs to.
+#
+# Review found "You told Lucía exactly what you thought of him." The copy had
+# been written with a bare "him" on the assumption that incidental people are
+# genderless — but their names come from the culture's male AND female lists, so
+# half the time the line misgendered the person it had just named. A pronoun for
+# one of these people now has to be a token, so it can be resolved from the
+# name that was actually drawn.
+PERSON_OF = {token: token for token in INCIDENTAL_TOKENS}
+for _person in ("kid", "kid2", "adult"):
+    for _case in ("They", "Them", "Their"):
+        PERSON_OF[f"{_person}{_case}"] = _person
+
+# Bare gendered pronouns. Fine in a line about Mom; wrong in a line about a
+# person whose name the engine drew, which is what this rule covers.
+BARE_PRONOUN_RE = re.compile(r"\b(he|him|his|she|her|hers)\b", re.IGNORECASE)
+
+
+def norm_token(token: str) -> str:
+    """
+    A token capitalised is the same token at the start of a sentence.
+
+    "{KidThey} did not deny any of it." The renderer capitalises the resolved
+    value; every checker here compares the lowered form, so copy never has to
+    choose between a correct pronoun and a correct capital letter.
+    """
+    return token[:1].lower() + token[1:]
+
 TOKEN_GUARDS = {
     "mother": {"mother", "bothParents"},
     "father": {"father", "bothParents"},
+    "motherName": {"mother", "bothParents"},
+    "fatherName": {"father", "bothParents"},
     "parent": {"mother", "father", "anyParent", "bothParents", "singleParent"},
     "parents": {"bothParents"},
     "sibling": {"sibling", "siblings2", "olderSibling"},
     "siblingRel": {"sibling", "siblings2", "olderSibling"},
     "olderSibling": {"olderSibling"},
 }
-FREE_TOKENS = {"me", "city", "kid", "kid2", "adult", "they", "them", "their"}
+FREE_TOKENS = {"me", "city", "they", "them", "their"} | set(PERSON_OF)
 
 
 def prune(mapping: dict) -> dict:
@@ -824,10 +859,11 @@ E("school.summer-nothing", "school", [
 ], age_min=7, age_max=14, weight=12, cooldown=3,
    effects=FX(stats={"happiness": 3, "charisma": 1}))
 
-E("school.graduation", "school", [
-    "Finished school. Somebody's parent cried, and it was not necessarily yours.",
-], age_min=17, age_max=17, weight=20,
-   effects=FX(stats={"happiness": 4, "discipline": 1}))
+# NOT an event: graduation belongs to the education phase, which writes
+# "Graduated from high school with a B average." at eighteen and knows the
+# grade. This catalog once carried its own "Finished school." line at
+# SEVENTEEN, so a senior read about finishing a year before they did, and then
+# finished again the following year. One system owns a milestone.
 
 
 # =============================================================================
@@ -882,7 +918,7 @@ E("friend.moved-away", "friendship", [
    effects=FX(stats={"happiness": -4, "willpower": 2}))
 
 E("friend.new-kid", "friendship", [
-    "A new kid, {kid}, showed up mid-term and you were the one who talked to them first.",
+    "A new kid, {kid}, showed up mid-term and you were the one who talked to {kidThem} first.",
 ], age_min=7, age_max=16, weight=11, cooldown=3,
    effects=FX(stats={"charisma": 3, "happiness": 2}))
 
@@ -907,12 +943,12 @@ E("friend.group", "friendship", [
    effects=FX(stats={"charisma": 3, "happiness": 3}))
 
 E("friend.betrayed", "friendship", [
-    "{kid} told everyone the one thing you had asked them not to.",
+    "{kid} told everyone the one thing you had asked {kidThem} not to.",
 ], age_min=9, age_max=17, weight=9, rarity="uncommon",
    effects=FX(stats={"happiness": -5, "charisma": 1, "willpower": 2}))
 
 E("friend.defended", "friendship", [
-    "{kid} stood up for you in front of everybody, at real cost to themselves.",
+    "{kid} stood up for you in front of everybody, at real cost to {kidThem}self.",
 ], age_min=8, age_max=17, weight=8, rarity="uncommon",
    effects=FX(stats={"happiness": 5, "charisma": 1}))
 
@@ -1596,25 +1632,25 @@ E("talent.none.grafted", "talent", [
 
 # REPLACES d.friend.confession, the "rehearsing a conversation" decision.
 D("d.friend.crush", "friendship", [
-    "{kid} is at the water fountain by herself and the bell is not for six minutes. You have had a crush on her since September.",
-    "{kid} is sitting on the wall by the bike racks on her own. You have thought about talking to her since September.",
+    "{kid} is at the water fountain on {kidTheir} own and the bell is not for six minutes. You have had a crush on {kidThem} since September.",
+    "{kid} is sitting on the wall by the bike racks alone. You have thought about talking to {kidThem} since September.",
 ], [
-    C("compliment", "Compliment her jacket", outcomes=[
-        OUT(5, "{kid} was flattered — she said nobody ever notices that jacket, and asked where you sit at lunch.",
+    C("compliment", "Compliment {kidTheir} jacket", outcomes=[
+        OUT(5, "{kid} was flattered — {kidThey} said nobody ever notices that jacket, and asked where you sit at lunch.",
             FX(stats={"happiness": 6, "charisma": 3})),
         OUT(3, "{kid} said 'okay' in a completely flat voice. You heard about it from three different people by Friday.",
             FX(stats={"happiness": -5, "charisma": -1})),
         OUT(2, "{kid} was visibly creeped out and moved to the other fountain.",
             FX(stats={"happiness": -6, "charisma": -3})),
     ]),
-    C("ask-day", "Ask about her day", outcomes=[
-        OUT(6, "{kid} talked for the full six minutes about her sister's dog. You were late to class and did not care.",
+    C("ask-day", "Ask about {kidTheir} day", outcomes=[
+        OUT(6, "{kid} talked for the full six minutes about {kidTheir} sister's dog. You were late to class and did not care.",
             FX(stats={"happiness": 5, "charisma": 2})),
         OUT(4, "{kid} said 'fine.' That was the entire conversation.",
             FX(stats={"happiness": -3})),
     ]),
     C("joke", "Make a silly joke", outcomes=[
-        OUT(4, "{kid} laughed so hard she snorted water out of her nose, and then could not look at you.",
+        OUT(4, "{kid} laughed so hard {kidThey} snorted water out of {kidTheir} nose, and then could not look at you.",
             FX(stats={"happiness": 7, "charisma": 4})),
         OUT(6, "{kid} cringed. You replayed it in your head every night for a week.",
             FX(stats={"happiness": -6, "willpower": 2})),
@@ -1633,8 +1669,8 @@ D("d.school.signup-table", "school", [
     C("see", "See what they offer", opens="activities",
       text="You went and had a proper look at what the school had on offer.",
       effects=FX(stats={"happiness": 2})),
-    C("ask-around", "Ask {kid} what she does", outcomes=[
-        OUT(6, "{kid} talked you into the same thing she does, and it turned out to be a good year for it.",
+    C("ask-around", "Ask {kid} what {kidThey} does", outcomes=[
+        OUT(6, "{kid} talked you into the same thing {kidThey} does, and it turned out to be a good year for it.",
             FX(stats={"happiness": 4, "charisma": 3})),
         OUT(4, "{kid} said all of it was for losers, which you believed at the time.",
             FX(stats={"happiness": -2, "charisma": 1})),
@@ -1914,10 +1950,10 @@ D("d.family.move-away", "family", [
 # ---- school -----------------------------------------------------------------
 
 D("d.school.cheat", "school", [
-    "{kid} has slid his maths test an inch to the left so you can see it. {adult} is at the window.",
+    "{kid} has slid {kidTheir} maths test an inch to the left so you can see it. {adult} is at the window.",
 ], [
     C("copy", "Copy it", outcomes=[
-        OUT(5, "You copied {kid}'s answers and got an 88. He got an 84.",
+        OUT(5, "You copied {kid}'s answers and got an 88. {KidThey} got an 84.",
             FX(stats={"happiness": 2, "discipline": -2})),
         OUT(5, "You copied and {adult} saw it happen. You both got zeros and a phone call home.",
             FX(stats={"happiness": -6, "discipline": -3}, relationship={"parents": -6}, behaviour=-16)),
@@ -1925,8 +1961,8 @@ D("d.school.cheat", "school", [
     C("own-work", "Look away",
       text="You looked away and got a 61 that was entirely yours.",
       effects=FX(stats={"happiness": -2, "willpower": 4, "discipline": 2})),
-    C("warn", "Hiss at him to move it",
-      text="You hissed at {kid} to move his paper. He did, and he never sat near you again.",
+    C("warn", "Hiss at {kidThem} to move it",
+      text="You hissed at {kid} to move {kidTheir} paper. {KidThey} did, and {kidThey} never sat near you again.",
       effects=FX(stats={"happiness": -3, "charisma": -2, "discipline": 2}, behaviour=2)),
 ], age_min=9, age_max=17, weight=13, person_tokens=["kid", "adult"],
    modifiers=[MOD(1.7, talents_any=["crime"]), MOD(0.5, stat_at_least={"discipline": 70})])
@@ -1943,7 +1979,7 @@ D("d.school.study-hard", "school", [
     C("ask-help", "Ask {adult} for help", outcomes=[
         OUT(6, "{adult} gave you an hour a week for two months and you have never forgotten it.",
             FX(stats={"smarts": 5, "happiness": 4, "charisma": 2}, behaviour=6)),
-        OUT(4, "{adult} said she would help and then was off sick for a month.",
+        OUT(4, "{adult} said {adultThey} would help and then was off sick for a month.",
             FX(stats={"happiness": -3, "willpower": 2})),
     ]),
     C("coast", "Coast",
@@ -1954,7 +1990,7 @@ D("d.school.study-hard", "school", [
 D("d.school.bully-response", "school", [
     "{kid} has been making your year difficult since October, and is standing in front of you in an empty corridor.",
 ], [
-    C("fight", "Hit him", outcomes=[
+    C("fight", "Hit {kidThem}", outcomes=[
         OUT(5, "You hit {kid}. It stopped completely, and you were suspended for a week.",
             FX(stats={"willpower": 5, "happiness": 3, "health": -1}, relationship={"parents": -4},
                behaviour=-18, clear_flags=["school.bullied"])),
@@ -1970,10 +2006,10 @@ D("d.school.bully-response", "school", [
     C("endure", "Ride it out",
       text="You said nothing and waited {kid} out. It took another year.",
       effects=FX(stats={"willpower": 5, "happiness": -6, "health": -1})),
-    C("disarm", "Get him laughing", outcomes=[
+    C("disarm", "Get {kidThem} laughing", outcomes=[
         OUT(3, "You made {kid} laugh, and by Christmas you were something close to friends.",
             FX(stats={"charisma": 6, "happiness": 6}, clear_flags=["school.bullied"])),
-        OUT(7, "You tried to make {kid} laugh and gave him three new things to use.",
+        OUT(7, "You tried to make {kid} laugh and gave {kidThem} three new things to use.",
             FX(stats={"happiness": -5, "charisma": 1})),
     ]),
 ], age_min=8, age_max=17, weight=16, flags_all=["school.bullied"],
@@ -2030,7 +2066,7 @@ D("d.school.reading-group", "school", [
       text="You stayed put with your friends and coasted comfortably for a year.",
       effects=FX(stats={"happiness": 3, "charisma": 2, "smarts": -1})),
     C("trial", "Ask to try it for a term",
-      text="You asked {adult} for a term's trial. She had not been asked that before and said yes.",
+      text="You asked {adult} for a term's trial. {AdultThey} had not been asked that before and said yes.",
       effects=FX(stats={"smarts": 3, "charisma": 3, "discipline": 2, "happiness": 2})),
 ], age_min=6, age_max=11, weight=12, person_tokens=["adult"],
    modifiers=[MOD(1.8, talents_any=["academics"])])
@@ -2110,9 +2146,9 @@ D("d.friend.dare", "friendship", [
       text="You said no. It cost you something socially and nothing else.",
       effects=FX(stats={"willpower": 5, "charisma": -3, "happiness": -2})),
     C("counter", "Dare {kid} instead", outcomes=[
-        OUT(5, "You told {kid} to go first. He did, badly, and nobody mentioned your turn again.",
+        OUT(5, "You told {kid} to go first. {KidThey} did, badly, and nobody mentioned your turn again.",
             FX(stats={"charisma": 5, "happiness": 4, "willpower": 2})),
-        OUT(5, "You told {kid} to go first. He did it perfectly, and then everybody looked at you.",
+        OUT(5, "You told {kid} to go first. {KidThey} did it perfectly, and then everybody looked at you.",
             FX(stats={"charisma": -2, "happiness": -4, "willpower": 1})),
     ]),
 ], age_min=7, age_max=17, weight=14, cooldown=4, person_tokens=["kid"], physical=True,
@@ -2179,15 +2215,15 @@ D("d.friend.betrayal", "friendship", [
     "{kid} told everyone what you said about {kid2}'s house. {kid2} is not speaking to you and {kid} is acting like nothing happened.",
 ], [
     C("apologise", "Apologise to {kid2}", outcomes=[
-        OUT(5, "You apologised to {kid2} at her locker. She said 'okay', and it took until March to be normal.",
+        OUT(5, "You apologised to {kid2} at {kid2Their} locker. {Kid2They} said 'okay', and it took until March to be normal.",
             FX(stats={"happiness": -2, "charisma": 2, "willpower": 3})),
-        OUT(5, "You apologised and {kid2} cried and hugged you, and {kid} was furious you had made him look bad.",
+        OUT(5, "You apologised and {kid2} cried and hugged you, and {kid} was furious you had made {kidThem} look bad.",
             FX(stats={"happiness": 5, "charisma": 3})),
     ]),
     C("confront", "Have it out with {kid}", outcomes=[
-        OUT(5, "You told {kid} exactly what you thought of him in front of six people. He did not deny any of it.",
+        OUT(5, "You told {kid} exactly what you thought of {kidThem} in front of six people. {KidThey} did not deny any of it.",
             FX(stats={"happiness": -3, "willpower": 4, "charisma": 1})),
-        OUT(5, "You confronted {kid} and he cried, which you had not expected at all.",
+        OUT(5, "You confronted {kid} and {kidThey} cried, which you had not expected at all.",
             FX(stats={"happiness": -2, "charisma": 2})),
     ]),
     C("blow-over", "Let it blow over",
@@ -2267,7 +2303,7 @@ D("d.friend.cover", "friendship", [
     C("together", "Make {kid} come with you", outcomes=[
         OUT(6, "You made {kid} come and own it with you. {parent} was more impressed than angry.",
             FX(stats={"charisma": 5, "willpower": 4, "happiness": 2}, relationship={"parents": 2})),
-        OUT(4, "You made {kid} come with you and he denied everything on the doorstep.",
+        OUT(4, "You made {kid} come with you and {kidThey} denied everything on the doorstep.",
             FX(stats={"happiness": -5, "charisma": -2}, relationship={"parents": -4})),
     ]),
 ], age_min=9, age_max=17, requires=["anyParent"], weight=11, person_tokens=["kid"])
@@ -2275,16 +2311,16 @@ D("d.friend.cover", "friendship", [
 D("d.friend.gift", "friendship", [
     "{kid}'s birthday is Saturday and you have $12 to your name.",
 ], [
-    C("buy", "Buy him something", outcomes=[
+    C("buy", "Buy {kidThem} something", outcomes=[
         OUT(5, "You spent the $12 on a present {kid} already had one of.",
             FX(cash=CASH(-12, "a birthday present for {kid}"), stats={"happiness": -3})),
         OUT(5, "You spent the $12 on a present {kid} carried around for the whole afternoon.",
             FX(cash=CASH(-12, "a birthday present for {kid}"), stats={"happiness": 5, "charisma": 2})),
     ]),
-    C("make", "Make him something", outcomes=[
-        OUT(6, "You made {kid} a comic about the two of you. It went on his wall and stayed there.",
+    C("make", "Make {kidThem} something", outcomes=[
+        OUT(6, "You made {kid} a comic about the two of you. It went on {kidTheir} wall and stayed there.",
             FX(stats={"happiness": 6, "charisma": 3, "smarts": 1})),
-        OUT(4, "You made {kid} a present and his cousin asked out loud why you had not just bought one.",
+        OUT(4, "You made {kid} a present and {kidTheir} cousin asked out loud why you had not just bought one.",
             FX(stats={"happiness": -5, "willpower": 2})),
     ]),
     C("nothing", "Turn up empty-handed",
@@ -2293,7 +2329,7 @@ D("d.friend.gift", "friendship", [
 ], age_min=8, age_max=16, weight=11, cooldown=5, person_tokens=["kid"])
 
 D("d.friend.late-night", "friendship", [
-    "{kid}'s parents are out and he wants to stay up for the whole horror marathon.",
+    "{kid}'s parents are out and {kidThey} wants to stay up for the whole horror marathon.",
 ], [
     C("all-night", "Stay up all night", outcomes=[
         OUT(6, "You stayed up until six at {kid}'s and slept through Saturday entirely.",
@@ -2322,7 +2358,7 @@ O("o.friend.mentor", "friendship", [
       text="You kept your distance, politely, and it faded out by spring.",
       effects=FX(stats={"willpower": 2, "happiness": -1})),
     C("ask", "Ask {kid} outright why",
-      text="You asked {kid} why he bothered with you. He said you reminded him of himself, which was a lot to carry.",
+      text="You asked {kid} why {kidThey} bothered with you. {KidThey} said you reminded {kidThem} of {kidThem}self, which was a lot to carry.",
       effects=FX(stats={"charisma": 3, "smarts": 2, "happiness": 3})),
 ], age_min=10, age_max=17, weight=10, person_tokens=["kid"])
 
@@ -2499,10 +2535,10 @@ D("d.random.haircut", "random", [
     C("same", "The usual",
       text="You had the usual. It was fine. It is always fine.",
       effects=FX(stats={"happiness": 1})),
-    C("ask-her", "Ask {adult} what she'd do", outcomes=[
-        OUT(7, "{adult} did what she thought suited you and she was completely right.",
+    C("ask-her", "Ask {adult} what {adultThey}'d do", outcomes=[
+        OUT(7, "{adult} did what {adultThey} thought suited you and {adultThey} was completely right.",
             FX(stats={"looks": 5, "happiness": 5, "charisma": 2})),
-        OUT(3, "{adult} did what she thought suited you and she was not right at all.",
+        OUT(3, "{adult} did what {adultThey} thought suited you and {adultThey} was not right at all.",
             FX(stats={"looks": -3, "happiness": -3})),
     ]),
 ], age_min=9, age_max=17, weight=12, cooldown=3, person_tokens=["adult"])
@@ -2604,9 +2640,9 @@ D("d.random.found-note", "random", [
    modifiers=[MOD(1.8, talents_any=["crime"]), MOD(1.6, wealth_any=["struggling"])])
 
 O("o.random.neighbour", "random", [
-    "{adult} next door, who you barely know, has offered to teach you something she is very good at.",
+    "{adult} next door, who you barely know, has offered to teach you something {adultThey} is very good at.",
 ], [
-    C("accept", "Take her up on it",
+    C("accept", "Take {adultThem} up on it",
       text="You said yes to {adult}. It became a Saturday habit that lasted four years.",
       effects=FX(stats={"smarts": 4, "discipline": 4, "happiness": 5})),
     C("decline", "Politely decline",
@@ -3138,16 +3174,23 @@ def check_text(problems: list[str], event: dict, text: str, where: str, choice=N
             f"{event['id']}: {where} puts a title in front of {{adult}}, which already has one"
         )
 
-    tokens = set(TOKEN_RE.findall(text))
-    if tokens & INCIDENTAL_TOKENS and tokens & PLAYER_PRONOUNS:
+    tokens = {norm_token(token) for token in TOKEN_RE.findall(text)}
+    if tokens & set(PERSON_OF) and tokens & PLAYER_PRONOUNS:
         problems.append(
             f"{event['id']}: {where} names an incidental person AND uses a player "
             f"pronoun — {{they}}/{{them}}/{{their}} are the player's, so this "
-            f"renders the wrong person's gender. Use the name."
+            f"renders the wrong person's gender. Use {{kidThey}} and friends."
+        )
+    if tokens & set(PERSON_OF) and BARE_PRONOUN_RE.search(TOKEN_RE.sub(" ", text)):
+        problems.append(
+            f"{event['id']}: {where} names an incidental person and then writes a bare "
+            f"'he'/'she'/'him'/'her'. The name is drawn from both lists, so the copy "
+            f"cannot know the sex — use {{kidThey}}/{{kidThem}}/{{kidTheir}} "
+            f"(or the kid2/adult forms), which are resolved from the name."
         )
 
     have = guaranteed_requirements(event, choice)
-    for token in TOKEN_RE.findall(text):
+    for token in tokens:
         if token in FREE_TOKENS:
             continue
         guard = TOKEN_GUARDS.get(token)
@@ -3354,14 +3397,43 @@ def check() -> None:
 
         declared = set(event.get("personTokens", []))
         used: set[str] = set()
+
+        def people_in(text: str) -> set[str]:
+            # A pronoun token counts as a use of the person it belongs to, so a
+            # decision that says "{kid} ... {kidThem}" declares `kid` once.
+            return {
+                PERSON_OF[norm_token(token)]
+                for token in TOKEN_RE.findall(text)
+                if norm_token(token) in PERSON_OF
+            }
+
         for text in event["text"]:
-            used |= set(TOKEN_RE.findall(text)) & INCIDENTAL_TOKENS
+            used |= people_in(text)
         for choice in choices:
-            used |= set(TOKEN_RE.findall(choice["label"])) & INCIDENTAL_TOKENS
+            used |= people_in(choice["label"])
             if choice.get("text"):
-                used |= set(TOKEN_RE.findall(choice["text"])) & INCIDENTAL_TOKENS
+                used |= people_in(choice["text"])
             for outcome in choice.get("outcomes", []):
-                used |= set(TOKEN_RE.findall(outcome["text"])) & INCIDENTAL_TOKENS
+                used |= people_in(outcome["text"])
+        # Within one event, every line is about the SAME bound people — a choice
+        # label reads as a continuation of the prompt. So "Compliment her
+        # jacket" is wrong for exactly the reason the outcome copy was: the
+        # person it is about might be a boy. Once an event names anybody the
+        # engine drew, nothing in it may write a bare gendered pronoun.
+        if used:
+            for line in [*event["text"], *[choice["label"] for choice in choices]] + [
+                text
+                for choice in choices
+                for text in ([choice["text"]] if choice.get("text") else [])
+                + [outcome["text"] for outcome in choice.get("outcomes", [])]
+            ]:
+                if BARE_PRONOUN_RE.search(TOKEN_RE.sub(" ", line)):
+                    problems.append(
+                        f"{eid}: {line!r} is part of an event about a person the engine "
+                        f"named, so a bare 'he'/'she' is wrong half the time. Use "
+                        f"{{kidThey}}/{{kidThem}}/{{kidTheir}} (or the kid2/adult forms)."
+                    )
+
         if is_decision and used - declared:
             problems.append(
                 f"{eid}: uses {sorted(used - declared)} but does not declare them in "

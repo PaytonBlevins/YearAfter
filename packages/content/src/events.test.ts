@@ -20,11 +20,26 @@ import {
 } from './events';
 
 const TOKEN = /\{([a-zA-Z0-9]+)\}/g;
-const FREE_TOKENS = new Set(['me', 'city', 'kid', 'kid2', 'adult', 'they', 'them', 'their']);
 /** People the engine invents. A decision must declare these to bind them once. */
 const INCIDENTAL = new Set(['kid', 'kid2', 'adult']);
+/**
+ * An incidental person's own pronoun tokens, mapped to the person they belong
+ * to. Review found "You told Lucía exactly what you thought of him" — the names
+ * come from both lists, so their pronouns have to be resolved, not written.
+ */
+const PERSON_OF = new Map<string, string>([...INCIDENTAL].map((token) => [token, token]));
+for (const person of INCIDENTAL) {
+  for (const grammaticalCase of ['They', 'Them', 'Their']) {
+    PERSON_OF.set(`${person}${grammaticalCase}`, person);
+  }
+}
+const FREE_TOKENS = new Set(['me', 'city', 'they', 'them', 'their', ...PERSON_OF.keys()]);
 /** {they}/{them}/{their} are the PLAYER's pronouns, never an incidental person's. */
 const PLAYER_PRONOUNS = new Set(['they', 'them', 'their']);
+/** Bare gendered pronouns, which a line naming an incidental person must not use. */
+const BARE_PRONOUN = /\b(he|him|his|she|her|hers)\b/i;
+/** A capitalised token is the same token at the start of a sentence. */
+const norm = (token: string): string => token.charAt(0).toLowerCase() + token.slice(1);
 const LABEL_NOISE = new Set(['the', 'a', 'an', 'to', 'for', 'it', 'them', 'your', 'my', 's']);
 
 /** Opening phrase of a choice label, for the intensity check (V2). */
@@ -152,7 +167,7 @@ describe('the childhood catalog', () => {
       for (const { text, extra } of textsOf(event)) {
         const have = guaranteed(event, extra);
         for (const match of text.matchAll(TOKEN)) {
-          const token = match[1] as string;
+          const token = norm(match[1] as string);
           if (FREE_TOKENS.has(token)) continue;
           const guard = TOKEN_GUARDS[token];
           expect(guard, `${event.id}: unknown token {${token}}`).toBeDefined();
@@ -345,8 +360,9 @@ describe('the childhood catalog', () => {
       const used = new Set<string>();
       const collect = (text: string) => {
         for (const match of text.matchAll(TOKEN)) {
-          const token = match[1] as string;
-          if (INCIDENTAL.has(token)) used.add(token);
+          const token = norm(match[1] as string);
+          const person = PERSON_OF.get(token);
+          if (person) used.add(person);
         }
       };
       event.text.forEach(collect);
@@ -369,10 +385,23 @@ describe('the childhood catalog', () => {
     // other person. Incidental people have no gender; they get named.
     for (const event of CHILDHOOD_EVENTS) {
       for (const { text } of textsOf(event)) {
-        const tokens = new Set([...text.matchAll(TOKEN)].map((match) => match[1] as string));
-        const namesSomeone = [...tokens].some((token) => INCIDENTAL.has(token));
+        const tokens = new Set([...text.matchAll(TOKEN)].map((match) => norm(match[1] as string)));
+        const namesSomeone = [...tokens].some((token) => PERSON_OF.has(token));
         const usesPronoun = [...tokens].some((token) => PLAYER_PRONOUNS.has(token));
         expect(namesSomeone && usesPronoun, `${event.id}: ${text}`).toBe(false);
+      }
+    }
+  });
+
+  it('never assumes the sex of a person whose name it drew', () => {
+    // "You told Lucía exactly what you thought of him." The pool is male AND
+    // female, so a bare pronoun is wrong half the time. {kidThey} and friends
+    // are resolved from the name that was actually bound.
+    for (const event of CHILDHOOD_EVENTS) {
+      for (const { text } of textsOf(event)) {
+        const tokens = new Set([...text.matchAll(TOKEN)].map((match) => norm(match[1] as string)));
+        if (![...tokens].some((token) => PERSON_OF.has(token))) continue;
+        expect(BARE_PRONOUN.test(text.replace(TOKEN, ' ')), `${event.id}: ${text}`).toBe(false);
       }
     }
   });

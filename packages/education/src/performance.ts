@@ -31,6 +31,33 @@ export interface PerformanceInputs {
   readonly overloadPenalty: number;
   /** Alternative-school placements grade differently; see schoolModifier. */
   readonly schoolModifier: number;
+  /**
+   * The character's age, because a child is graded against other children of
+   * their own age and not against a seventeen-year-old. Optional so the balance
+   * tooling can ask about aptitude in the abstract; school always passes it.
+   */
+  readonly age?: number;
+}
+
+/**
+ * How much slack the aptitude formula gives a child for being young.
+ *
+ * Stats grow through childhood — mean Smarts runs 61 at five and 76 at
+ * seventeen — but the formula's constant was fitted at the top of that curve.
+ * Applied to a first-grader it graded an ordinary six-year-old an F with a 0.7
+ * GPA, which a screenshot caught and no test could: every test compared a
+ * character to the same formula that produced them.
+ *
+ * So the scale slides with the curve. An average child is an average student at
+ * every age, and a bright six-year-old reads as bright rather than as a
+ * seventeen-year-old who has failed.
+ */
+export const AGE_ALLOWANCE_PER_YEAR = 1.7;
+export const GRADED_AT_AGE = 17;
+
+export function ageAllowance(age: number | undefined): number {
+  if (age === undefined) return 0;
+  return Math.max(0, GRADED_AT_AGE - age) * AGE_ALLOWANCE_PER_YEAR;
 }
 
 /**
@@ -54,6 +81,7 @@ export function targetPerformance(inputs: PerformanceInputs): number {
   const talentBonus = talents.academics ? ACADEMICS_TALENT_BONUS : 0;
   return (
     aptitude +
+    ageAllowance(inputs.age) +
     talentBonus +
     EFFORT_PERFORMANCE[effort] +
     inputs.schoolModifier +
