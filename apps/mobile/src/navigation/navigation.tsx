@@ -33,6 +33,8 @@ export type ScreenKey =
   | 'shopping'
   | 'family'
   | 'friends'
+  /** Ticket 0206. One person: what they remember, and what you can do. */
+  | 'person'
   /** Ticket 0204. School extracurriculars — join as many as you can carry. */
   | 'schoolActivities'
   | 'debug';
@@ -40,6 +42,14 @@ export type ScreenKey =
 export interface Route {
   readonly screen: ScreenKey;
   readonly title: string;
+  /**
+   * Who this screen is about, for routes that are about one person (0206).
+   *
+   * Carried on the route rather than in a store: the back stack already
+   * remembers where the player was, and a second place holding "the person
+   * being looked at" is a second thing that can disagree with it.
+   */
+  readonly personId?: string;
 }
 
 type Stacks = Record<World, Route[]>;

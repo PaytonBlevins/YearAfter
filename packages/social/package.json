@@ -1,5 +1,5 @@
 {
-  "name": "@yearafter/simulation",
+  "name": "@yearafter/social",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -14,13 +14,8 @@
   },
   "dependencies": {
     "@yearafter/character": "workspace:*",
-    "@yearafter/content": "workspace:*",
     "@yearafter/core": "workspace:*",
-    "@yearafter/education": "workspace:*",
-    "@yearafter/events": "workspace:*",
-    "@yearafter/relationships": "workspace:*",
-    "@yearafter/social": "workspace:*",
-    "@yearafter/stress": "workspace:*"
+    "@yearafter/relationships": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3",

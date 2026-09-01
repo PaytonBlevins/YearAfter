@@ -63,6 +63,15 @@ export interface ListRowProps {
    */
   readonly meter?: number;
   readonly meterColor?: string;
+  /**
+   * Let the title and subtitle run to as many lines as they need.
+   *
+   * Rows are labels by default and clip to one line, which is right for a list
+   * you scan. It is wrong for a row whose content IS a sentence — a memory on
+   * somebody's page read "Laurence already had plans, and was not sorry …",
+   * which is the half of the sentence that carries none of the meaning.
+   */
+  readonly wrap?: boolean;
 }
 
 export function ListRow({
@@ -78,6 +87,7 @@ export function ListRow({
   accent = false,
   meter,
   meterColor = colors.accent,
+  wrap = false,
 }: ListRowProps) {
   const resolved: RowAffordance = affordance ?? (onPress ? 'navigate' : 'none');
   const minHeight = compact ? layout.rowHeightCompact : layout.rowHeight;
@@ -107,11 +117,14 @@ export function ListRow({
       ) : null}
 
       <View style={styles.rowBody}>
-        <Text numberOfLines={1} style={[styles.rowTitle, accent && styles.rowTitleAccent]}>
+        <Text
+          numberOfLines={wrap ? undefined : 1}
+          style={[styles.rowTitle, accent && styles.rowTitleAccent]}
+        >
           {title}
         </Text>
         {subtitle ? (
-          <Text numberOfLines={1} style={styles.rowSubtitle}>
+          <Text numberOfLines={wrap ? undefined : 1} style={styles.rowSubtitle}>
             {subtitle}
           </Text>
         ) : null}

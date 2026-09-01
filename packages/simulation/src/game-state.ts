@@ -12,6 +12,7 @@ import type { Character } from '@yearafter/character';
 import { NOT_YET_ENROLLED, type EducationState } from '@yearafter/education';
 import { EMPTY_HISTORY, type EventHistory, type PendingDecision } from '@yearafter/events';
 import { EMPTY_HOUSEHOLD, type Household } from '@yearafter/relationships';
+import { EMPTY_CIRCLE, type SocialCircle } from '@yearafter/social';
 import { Rng } from './rng/rng';
 
 /** World state that outlives any single character (spec 818–827 continuation). */
@@ -50,6 +51,14 @@ export interface GameState {
    */
   readonly education: EducationState;
   /**
+   * The people who are not family (Ticket 0206): classmates, friends, teachers.
+   *
+   * Held beside `family` rather than inside it, because the two have genuinely
+   * different rules — you cannot drift out of being somebody's brother, and the
+   * Relationships screen shows them as two lists (spec 839–848).
+   */
+  readonly circle: SocialCircle;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -71,6 +80,7 @@ export interface CreateGameStateOptions {
   readonly nameCultureId?: string;
   readonly events?: EventHistory;
   readonly education?: EducationState;
+  readonly circle?: SocialCircle;
   readonly pending?: readonly PendingDecision[];
 }
 
@@ -86,6 +96,7 @@ export const createGameState = (
   nameCultureId: options.nameCultureId ?? 'us-en',
   events: options.events ?? EMPTY_HISTORY,
   education: options.education ?? NOT_YET_ENROLLED,
+  circle: options.circle ?? EMPTY_CIRCLE,
   pending: options.pending ?? [],
   rng,
 });

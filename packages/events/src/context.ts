@@ -14,6 +14,7 @@
 
 import type { Personality, Sex, Talents, VisibleStats } from '@yearafter/character';
 import type { Household } from '@yearafter/relationships';
+import type { EventPerson } from './text';
 
 export interface EventContext {
   readonly age: number;
@@ -42,4 +43,17 @@ export interface EventContext {
    */
   readonly schoolStage: string;
   readonly activityCount: number;
+  /**
+   * The people this character actually knows (Ticket 0206) — classmates and
+   * the teacher who has them this year.
+   *
+   * `{kid}` and `{adult}` bind to these when there are any, so an event names
+   * somebody the player will see again rather than inventing a stranger. Empty
+   * for a four-year-old and for anybody out of school, which is why the
+   * invented-name path still exists.
+   *
+   * A narrow shape rather than @yearafter/social's own type, in the same spirit
+   * as the rest of this interface: the engine learns what it needs and no more.
+   */
+  readonly people: readonly EventPerson[];
 }

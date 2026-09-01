@@ -72,6 +72,7 @@ const context = (overrides: Partial<EventContext> = {}): EventContext => ({
   flags: new Set<string>(),
   schoolStage: 'elementary',
   activityCount: 0,
+  people: [],
   ...overrides,
 });
 
@@ -589,15 +590,15 @@ describe('one name, carried through a whole decision (Ticket 0203b)', () => {
     if (!decision) return;
     expect(decision.names.kid).toBeTruthy();
     expect(decision.names.adult).toBeTruthy();
-    expect(decision.prompt).toContain(decision.names.kid as string);
-    expect(decision.prompt).toContain(decision.names.adult as string);
+    expect(decision.prompt).toContain(decision.names.kid?.name as string);
+    expect(decision.prompt).toContain(decision.names.adult?.name as string);
   });
 
   it('names the same person in the option labels', () => {
     const decision = raise('LABELS');
     if (!decision) return;
-    expect(decision.choices[0]?.label).toBe(`Talk to ${decision.names.kid}`);
-    expect(decision.choices[1]?.label).toBe(`Ask ${decision.names.adult}`);
+    expect(decision.choices[0]?.label).toBe(`Talk to ${decision.names.kid?.name}`);
+    expect(decision.choices[1]?.label).toBe(`Ask ${decision.names.adult?.name}`);
   });
 
   it('names the same person in the outcome, which is the whole point', () => {
@@ -614,14 +615,14 @@ describe('one name, carried through a whole decision (Ticket 0203b)', () => {
       EMPTY_HISTORY,
       (id) => catalog.find((event) => event.id === id),
     );
-    expect(resolved?.outcome.text).toContain(decision.names.kid as string);
-    expect(resolved?.outcome.text).toContain(decision.names.adult as string);
+    expect(resolved?.outcome.text).toContain(decision.names.kid?.name as string);
+    expect(resolved?.outcome.text).toContain(decision.names.adult?.name as string);
   });
 
   it('gives an adult a surname and a title, not a child’s given name', () => {
     const decision = raise('ADULT');
     if (!decision) return;
-    expect(decision.names.adult).toMatch(/^(Mr\.|Mrs\.) /);
+    expect(decision.names.adult?.name).toMatch(/^(Mr\.|Mrs\.) /);
   });
 
   it('never gives an incidental person a name the family already uses', () => {
@@ -712,7 +713,7 @@ describe('what a child calls their parents', () => {
       'You told {kid} what you thought of {kidThem}. {KidThey} kept {kidTheir} face still.',
       context(),
       stream('X'),
-      { kid: 'Harper' },
+      { kid: { name: 'Harper', sex: 'female' } },
     );
     expect(she).toBe('You told Harper what you thought of her. She kept her face still.');
 
@@ -720,7 +721,7 @@ describe('what a child calls their parents', () => {
       'You told {kid} what you thought of {kidThem}. {KidThey} kept {kidTheir} face still.',
       context(),
       stream('X'),
-      { kid: 'Owen' },
+      { kid: { name: 'Owen', sex: 'male' } },
     );
     expect(he).toBe('You told Owen what you thought of him. He kept his face still.');
   });
@@ -728,12 +729,12 @@ describe('what a child calls their parents', () => {
   it('reads an adult’s pronoun off the title it renders with', () => {
     expect(
       renderEventText('{adult} said {adultThey} would help.', context(), stream('X'), {
-        adult: 'Mrs. Okafor',
+        adult: { name: 'Mrs. Okafor', sex: 'female' },
       }),
     ).toBe('Mrs. Okafor said she would help.');
     expect(
       renderEventText('{adult} said {adultThey} would help.', context(), stream('X'), {
-        adult: 'Mr. Conti',
+        adult: { name: 'Mr. Conti', sex: 'male' },
       }),
     ).toBe('Mr. Conti said he would help.');
   });
@@ -742,7 +743,7 @@ describe('what a child calls their parents', () => {
     // The player here is Sofia, female. The kid is Mateo, male. One line, two
     // people, two sets of pronouns.
     const line = renderEventText('{they} asked {kid} why {kidThey} left.', context(), stream('X'), {
-      kid: 'Owen',
+      kid: { name: 'Owen', sex: 'male' },
     });
     expect(line).toBe('she asked Owen why he left.');
   });

@@ -166,6 +166,16 @@ export interface EventEffects {
    * forbids wearing a different name.
    */
   readonly stress?: number;
+  /**
+   * Warmth toward the person this event named (Ticket 0206), signed.
+   *
+   * Optional, and usually left out: warmth is derived from the happiness delta
+   * when it is absent, because the copy has already said how it went. Author it
+   * where the two genuinely differ — a year that made the character miserable
+   * and brought them closer to somebody, which is most of what friendship is
+   * at fourteen.
+   */
+  readonly bond?: number;
   readonly setFlags?: readonly string[];
   readonly clearFlags?: readonly string[];
 }

@@ -523,8 +523,8 @@ describe('a decision keeps its people across a save', () => {
     const answered = decide(restored, decision.eventId, decision.choices[0]!.id);
     expect(answered.ok).toBe(true);
     if (!answered.ok) return;
-    for (const name of Object.values(decision.names)) {
-      if (decision.prompt.includes(name as string)) {
+    for (const person of Object.values(decision.names)) {
+      if (person && decision.prompt.includes(person.name)) {
         // The outcome may not mention every bound person, but if it names one,
         // it must be the one the prompt named.
         expect(answered.value.entry.text).not.toMatch(/[{}]/);

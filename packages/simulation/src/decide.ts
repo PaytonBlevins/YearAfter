@@ -16,7 +16,7 @@ import { resolveChoice, type PendingDecision } from '@yearafter/events';
 import { applyImmediateStress } from '@yearafter/stress';
 import { err, ok, type Result } from '@yearafter/core';
 import type { GameState } from './game-state';
-import { applyOutcome, buildEventContext, timelineKindFor } from './phases/events';
+import { applyOutcome, buildEventContext, rememberOutcome, timelineKindFor } from './phases/events';
 import { RngDomains } from './rng/rng';
 
 export type DecisionError =
@@ -103,6 +103,8 @@ export function decide(
       ...state,
       player,
       family: applied.family,
+      // The person the decision was about remembers how it went (Ticket 0206).
+      circle: rememberOutcome(state.circle, resolved.outcome, decision.age),
       events: applied.history,
       education: { ...state.education, behaviour: applied.behaviour },
       pending: state.pending.filter((candidate) => candidate.eventId !== eventId),

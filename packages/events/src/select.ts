@@ -32,7 +32,7 @@ import {
   schedule,
   type EventHistory,
 } from './history';
-import { bindPersonNames, renderEventText, type NameBindings } from './text';
+import { bindPersonNames, renderEvent, renderEventText, type NameBindings } from './text';
 
 /**
  * The random surface the engine needs. `RandomStream` from @yearafter/simulation
@@ -71,6 +71,22 @@ export const DECISION_COUNT_WEIGHTS = [
 export const FIRST_DECISION_AGE = 5;
 
 /**
+ * The most this engine will put in front of a player in one year.
+ *
+ * Passives and decisions are drawn independently, which means their maximums
+ * can land together: four passive developments and three decisions is seven
+ * entries before schooling, stress or a tryout have added anything. Reading
+ * output found a year with eight, and spec 725–770 is explicit that "busy
+ * characters should not be bombarded with popups".
+ *
+ * So the decision draw is trimmed by what the year already holds. Passives are
+ * drawn first and keep their number; decisions give way, because a year of
+ * quiet developments with one real question in it reads better than a year of
+ * three questions with no world around them.
+ */
+export const MAX_EVENTS_PER_YEAR = 6;
+
+/**
  * How much a category is damped after it has already appeared this year.
  *
  * Without this, a character with a big family and no talents gets four family
@@ -87,6 +103,14 @@ export interface EventOutcome {
   readonly type: EventDefinition['type'];
   readonly text: string;
   readonly effects?: EventEffects;
+  /**
+   * Who this outcome was about (Ticket 0206).
+   *
+   * Present whenever the line named somebody. The phase module turns this into
+   * a memory on that person's page — which is the difference between "Fell out
+   * with Wren" being a sentence and being a thing that happened between you.
+   */
+  readonly names?: NameBindings;
 }
 
 export interface PendingChoice {
@@ -229,6 +253,21 @@ function applyFollowUp(
  * Pure with respect to everything except `random`, which advances — a year
  * consumes randomness, and the save records the resulting stream state.
  */
+/**
+ * Render one line and report who it named, in the shape an outcome wants.
+ *
+ * A passive event binds its people as it renders — it is a single line — so
+ * this is the only moment those bindings exist to be captured.
+ */
+function rendered(
+  template: string,
+  context: EventContext,
+  random: EventRandom,
+): { readonly text: string; readonly names: NameBindings } {
+  const result = renderEvent(template, context, random);
+  return { text: result.text, names: result.bindings };
+}
+
 export function runEventPhase(
   context: EventContext,
   random: EventRandom,
@@ -264,7 +303,7 @@ export function runEventPhase(
       eventId: definition.id,
       category: definition.category,
       type: definition.type,
-      text: renderEventText(random.pick(definition.text), context, random),
+      ...rendered(random.pick(definition.text), context, random),
       effects: definition.effects,
     });
     nextHistory = recordFired(nextHistory, definition.id, context.age);
@@ -295,7 +334,7 @@ export function runEventPhase(
       eventId: definition.id,
       category: definition.category,
       type: definition.type,
-      text: renderEventText(random.pick(definition.text), context, random),
+      ...rendered(random.pick(definition.text), context, random),
       effects: definition.effects,
     });
     nextHistory = recordFired(nextHistory, definition.id, context.age);
@@ -315,7 +354,12 @@ export function runEventPhase(
         (definition.type === 'decision' || definition.type === 'opportunity') &&
         isEligible(definition, context, nextHistory),
     );
-    const wanted = random.weightedChoice(DECISION_COUNT_WEIGHTS) - decisions.length;
+    // Drawn unconditionally so the stream advances the same way whatever the
+    // year already holds — trimming the draw rather than skipping it keeps a
+    // seeded life reproducible.
+    const drawnCount = random.weightedChoice(DECISION_COUNT_WEIGHTS);
+    const room = Math.max(0, MAX_EVENTS_PER_YEAR - outcomes.length - decisions.length);
+    const wanted = Math.min(drawnCount - decisions.length, room);
     if (wanted > 0) {
       for (const definition of drawEvents(
         decisionPool,
@@ -391,6 +435,7 @@ export function resolveChoice(
       // The decision's own bindings, not a fresh draw: this is the whole point.
       text: renderEventText(text ?? choice.label, context, random, decision.names),
       effects,
+      names: decision.names,
     },
     history: applyFollowUp(history, followUp, definition.id, decision.age, random),
     ...(choice.opens ? { opens: choice.opens } : {}),

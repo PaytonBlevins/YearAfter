@@ -20,6 +20,7 @@
     "@yearafter/persistence": "workspace:*",
     "@yearafter/relationships": "workspace:*",
     "@yearafter/simulation": "workspace:*",
+    "@yearafter/social": "workspace:*",
     "@yearafter/stress": "workspace:*",
     "expo": "~57.0.18",
     "expo-sqlite": "~57.0.2",

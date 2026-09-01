@@ -269,7 +269,26 @@ failure teaches the player that the button is broken.
 Review, on the first version: "I was able to join the basketball team just by
 clicking on it. I should have to tryout for things like that."
 
-### 13.10 Stress is backend, and it is escapable
+### 13.10 A childhood has a cast, not a name generator
+
+Events name people from the character's actual class, not from a list. Before
+0206 every person in an event was invented for that line and discarded — a
+childhood produced sixty different names and no relationships, which is the
+opposite of what a life feels like.
+
+Five classmates by name at a time, one teacher a year, and they persist across
+the years of a school stage. `{kid}` and `{adult}` bind to them, and what
+happens becomes a memory on that person's page (spec 771–785). The
+invented-name path stays, because it is the whole of early childhood and of any
+character out of school.
+
+Being in the same room is CONTACT. Anybody `inClass` neither drifts nor needs
+the player to press anything — the first version drifted classmates at seven
+points a year against a floor of twenty-two and turned the entire class over
+every September. Friendship outside that room has to be kept up, and that is
+what makes keeping it up mean something.
+
+### 13.11 Stress is backend, and it is escapable
 
 Spec 1660, 661, 1824 and 1986 together: stress comes from workload and
 relationships, there is no visible time budget or capacity allocator, and the

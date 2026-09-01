@@ -338,7 +338,12 @@ export function RelationshipsScreen() {
             subtitle: 'Parents, siblings, partner, children',
             route: { screen: 'family', title: 'Family' },
           },
-          { icon: 'friends', title: 'Friends', ticket: '0206' },
+          {
+            icon: 'friends',
+            title: 'Friends',
+            subtitle: 'Classmates, friends, teachers',
+            route: { screen: 'friends', title: 'Friends' },
+          },
         ]}
       />
       <View style={styles.note}>
@@ -347,7 +352,6 @@ export function RelationshipsScreen() {
           employees in business, tenants in property.
         </Text>
       </View>
-      <ComingSoon ticket="0206" what="Friends" />
     </Screen>
   );
 }

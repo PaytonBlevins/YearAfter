@@ -98,8 +98,41 @@ export const PERSON_PRONOUN_TOKENS = [
   'adultTheir',
 ] as const;
 
-/** Names bound for one decision: token -> the person it means, all year. */
-export type NameBindings = Readonly<Partial<Record<PersonToken, string>>>;
+/**
+ * A person a token has been bound to.
+ *
+ * `sex` is stored rather than looked up. The first version read it back off the
+ * name by searching the culture's two lists, which worked only because every
+ * incidental person was invented from those lists — and Ticket 0206 made most
+ * of them real classmates instead. A real person's sex is a fact about them,
+ * not something to infer from their first name.
+ *
+ * `npcId` is present when the token bound to somebody who actually exists. That
+ * is what lets an outcome become a memory on their page rather than a line
+ * about a stranger.
+ */
+export interface BoundPerson {
+  readonly name: string;
+  readonly sex: 'male' | 'female';
+  readonly npcId?: string;
+}
+
+/** People bound for one decision: token -> who it means, for the whole decision. */
+export type NameBindings = Readonly<Partial<Record<PersonToken, BoundPerson>>>;
+
+/**
+ * Somebody the player actually knows, offered to the binder.
+ *
+ * The engine never sees @yearafter/social's types — this is the narrow shape it
+ * needs, in the same spirit as the rest of `EventContext`.
+ */
+export interface EventPerson {
+  readonly id: string;
+  /** What the text should call them: a first name, or "Mrs. Okafor". */
+  readonly name: string;
+  readonly sex: 'male' | 'female';
+  readonly kind: 'peer' | 'teacher';
+}
 
 const TOKEN_PATTERN = /\{([a-zA-Z0-9]+)\}/g;
 
@@ -144,76 +177,78 @@ function namesInUse(context: EventContext): Set<string> {
   ]);
 }
 
-function incidentalNames(context: EventContext, source: TokenSource, count: number): string[] {
-  const culture = findNameCulture(context.nameCultureId);
-  const pool = culture ? [...culture.male, ...culture.female] : FALLBACK_NAMES;
-  const taken = namesInUse(context);
-  const chosen: string[] = [];
-  for (let i = 0; i < count; i += 1) {
-    let name = source.pick(pool);
-    // A handful of retries is cheaper and more readable than shuffling a
-    // ninety-name pool, and the collision is rare.
-    for (let attempt = 0; attempt < 6 && taken.has(name); attempt += 1) {
-      name = source.pick(pool);
-    }
-    taken.add(name);
-    chosen.push(name);
-  }
-  return chosen;
-}
-
 /**
  * Bind the people a decision talks about, once.
  *
  * Called when a decision is RAISED. The result is stored on the pending decision
  * and used to render everything about it from then on, including the outcome the
  * player sees after answering — possibly days later, on a different device.
+ *
+ * REAL PEOPLE FIRST (Ticket 0206). If the character is in a class, the kid at
+ * the water fountain is somebody already in it, and the teacher at the window is
+ * the one who has them this year. Only when there is nobody — a four-year-old,
+ * a character out of school — does this fall back to inventing a name, which is
+ * what every version before 0206 did for everybody.
+ *
+ * That fallback is not dead code: it is the whole of early childhood, and it is
+ * why the invented-name path is kept rather than deleted.
  */
 export function bindPersonNames(
   tokens: readonly string[],
   context: EventContext,
   source: TokenSource,
 ): NameBindings {
-  const bindings: Partial<Record<PersonToken, string>> = {};
+  const bindings: Partial<Record<PersonToken, BoundPerson>> = {};
   const taken = namesInUse(context);
+  const usedIds = new Set<string>();
 
-  const wantsKid = tokens.includes('kid');
-  const wantsKid2 = tokens.includes('kid2');
-  if (wantsKid || wantsKid2) {
-    const culture = findNameCulture(context.nameCultureId);
-    const pool = culture ? [...culture.male, ...culture.female] : FALLBACK_NAMES;
-    for (const token of ['kid', 'kid2'] as const) {
-      if (!tokens.includes(token)) continue;
-      let name = source.pick(pool);
-      for (let attempt = 0; attempt < 6 && taken.has(name); attempt += 1) {
-        name = source.pick(pool);
-      }
-      taken.add(name);
-      bindings[token] = name;
+  const peers = context.people.filter((person) => person.kind === 'peer');
+  const teachers = context.people.filter((person) => person.kind === 'teacher');
+
+  /** One of the player's own people, if there is one left to pick. */
+  const takeReal = (pool: readonly EventPerson[]): BoundPerson | undefined => {
+    const free = pool.filter((person) => !usedIds.has(person.id));
+    if (free.length === 0) return undefined;
+    const person = source.pick(free);
+    usedIds.add(person.id);
+    taken.add(person.name);
+    return { name: person.name, sex: person.sex, npcId: person.id };
+  };
+
+  const culture = findNameCulture(context.nameCultureId);
+  const pool = culture ? [...culture.male, ...culture.female] : FALLBACK_NAMES;
+
+  for (const token of ['kid', 'kid2'] as const) {
+    if (!tokens.includes(token)) continue;
+    const real = takeReal(peers);
+    if (real) {
+      bindings[token] = real;
+      continue;
     }
+    let name = source.pick(pool);
+    for (let attempt = 0; attempt < 6 && taken.has(name); attempt += 1) {
+      name = source.pick(pool);
+    }
+    taken.add(name);
+    // An invented child's sex comes from the list the name was drawn from,
+    // which is the only thing there is to go on for somebody who does not exist.
+    bindings[token] = {
+      name,
+      sex: culture && culture.female.includes(name) ? 'female' : 'male',
+    };
   }
 
   if (tokens.includes('adult')) {
-    bindings.adult = adultName(context, source, taken);
+    const real = takeReal(teachers);
+    if (real) {
+      bindings.adult = real;
+    } else {
+      const name = adultName(context, source, taken);
+      bindings.adult = { name, sex: name.startsWith('Mrs.') ? 'female' : 'male' };
+    }
   }
 
   return bindings;
-}
-
-/**
- * The sex of an already-bound person, read back off their name.
- *
- * An adult carries a title, so that answers it outright. A child's name came
- * from one of the culture's two lists, so the lists answer it. Anything else —
- * a fallback name, a culture that has since dropped a name — is treated as
- * male, which is a coin flip rather than a claim.
- */
-function sexOfBoundName(name: string, nameCultureId: string): 'male' | 'female' {
-  if (name.startsWith('Mrs.') || name.startsWith('Ms.') || name.startsWith('Miss')) return 'female';
-  if (name.startsWith('Mr.')) return 'male';
-  const culture = findNameCulture(nameCultureId);
-  if (culture?.female.includes(name)) return 'female';
-  return 'male';
 }
 
 interface Pronouns {
@@ -230,10 +265,8 @@ const PRONOUNS: Readonly<Record<'male' | 'female', Pronouns>> = {
 /** Neutral, for a line whose person was never bound. Never reached in shipped copy. */
 const NEUTRAL: Pronouns = { they: 'they', them: 'them', their: 'their' };
 
-function pronounsFor(name: string | undefined, nameCultureId: string): Pronouns {
-  if (!name) return NEUTRAL;
-  return PRONOUNS[sexOfBoundName(name, nameCultureId)];
-}
+const pronounsFor = (person: BoundPerson | undefined): Pronouns =>
+  person ? PRONOUNS[person.sex] : NEUTRAL;
 
 function oldest(members: readonly FamilyMember[]): FamilyMember | undefined {
   return [...members].sort((a, b) => a.birthYear - b.birthYear)[0];
@@ -254,13 +287,33 @@ export function renderEventText(
   source: TokenSource,
   bindings: NameBindings = {},
 ): string {
-  const needsIncidental =
-    /\{[Kk]id2?(They|Them|Their)?\}/.test(template) && (!bindings.kid || !bindings.kid2);
-  const [drawnKid, drawnKid2] = needsIncidental
-    ? incidentalNames(context, source, 2)
-    : [undefined, undefined];
-  const needsAdult = /\{[Aa]dult(They|Them|Their)?\}/.test(template) && !bindings.adult;
-  const drawnAdult = needsAdult ? adultName(context, source, namesInUse(context)) : undefined;
+  return renderEvent(template, context, source, bindings).text;
+}
+
+/**
+ * The same render, with the people it bound handed back.
+ *
+ * Ticket 0206 needs both: the line to write into the feed, and WHO it was
+ * about, so the outcome can become a memory on that person's page. A passive
+ * event binds as it renders — it is one line, resolved and written in the same
+ * breath — so this is the only place those bindings exist.
+ */
+export function renderEvent(
+  template: string,
+  context: EventContext,
+  source: TokenSource,
+  bindings: NameBindings = {},
+): { readonly text: string; readonly bindings: NameBindings } {
+  // A passive event has no stored bindings — it is one line, resolved and
+  // written in the same breath. It still binds through the same path, so a
+  // passive line names a real classmate exactly as a decision does. Tokens are
+  // bound only when the line actually contains them, so adding a `{kid}` to one
+  // event's copy does not shift the draws every other event sees.
+  const wanted: PersonToken[] = [];
+  if (/\{[Kk]id(They|Them|Their)?\}/.test(template) && !bindings.kid) wanted.push('kid');
+  if (/\{[Kk]id2(They|Them|Their)?\}/.test(template) && !bindings.kid2) wanted.push('kid2');
+  if (/\{[Aa]dult(They|Them|Their)?\}/.test(template) && !bindings.adult) wanted.push('adult');
+  const drawn = wanted.length > 0 ? bindPersonNames(wanted, context, source) : {};
 
   const mum = mother(context.family);
   const dad = father(context.family);
@@ -274,12 +327,12 @@ export function renderEventText(
   const mumWord = mum ? 'Mom' : undefined;
   const dadWord = dad ? 'Dad' : undefined;
 
-  const kidName = bindings.kid ?? drawnKid;
-  const kid2Name = bindings.kid2 ?? drawnKid2;
-  const adultBound = bindings.adult ?? drawnAdult;
-  const kidP = pronounsFor(kidName, context.nameCultureId);
-  const kid2P = pronounsFor(kid2Name, context.nameCultureId);
-  const adultP = pronounsFor(adultBound, context.nameCultureId);
+  const kid = bindings.kid ?? drawn.kid;
+  const kid2 = bindings.kid2 ?? drawn.kid2;
+  const adult = bindings.adult ?? drawn.adult;
+  const kidP = pronounsFor(kid);
+  const kid2P = pronounsFor(kid2);
+  const adultP = pronounsFor(adult);
 
   const values: Record<string, string | undefined> = {
     me: context.firstName,
@@ -294,9 +347,9 @@ export function renderEventText(
     siblingRel: sibling ? (sibling.sex === 'male' ? 'brother' : 'sister') : undefined,
     olderSibling: older?.firstName,
     city: context.homeCity,
-    kid: kidName,
-    kid2: kid2Name,
-    adult: adultBound,
+    kid: kid?.name,
+    kid2: kid2?.name,
+    adult: adult?.name,
     they: context.sex === 'male' ? 'he' : 'she',
     them: context.sex === 'male' ? 'him' : 'her',
     their: context.sex === 'male' ? 'his' : 'her',
@@ -311,7 +364,7 @@ export function renderEventText(
     adultTheir: adultP.their,
   };
 
-  return template.replace(TOKEN_PATTERN, (whole, name: string) => {
+  const text = template.replace(TOKEN_PATTERN, (whole, name: string) => {
     const value = values[name] ?? FALLBACKS[name];
     if (value) return value;
     // A capitalised token is the same token at the start of a sentence:
@@ -325,6 +378,8 @@ export function renderEventText(
     }
     return whole;
   });
+
+  return { text, bindings: { ...drawn, ...bindings } };
 }
 
 /**

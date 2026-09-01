@@ -26,6 +26,7 @@ import {
   createNewGame,
   decide as resolveDecision,
   generateSeed,
+  interact,
   study,
   tryOut as attemptTryout,
   type GameState,
@@ -68,6 +69,11 @@ interface GameContextValue {
   readonly leaveActivity: (activityId: string) => void;
   /** Attempt a competitive place. Can fail. One attempt per school year. */
   readonly tryOutFor: (activityId: string) => void;
+  /**
+   * Do something with somebody (Ticket 0206). Once per person per school year,
+   * and it can go badly — see @yearafter/social.
+   */
+  readonly interactWith: (personId: string, interactionId: string) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   readonly updateSettings: (patch: Partial<SaveSettings>) => void;
 }
@@ -279,6 +285,23 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const interactWith = useCallback(
+    (personId: string, interactionId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = interact(current, personId, interactionId);
+        if (!result.ok) {
+          setSaveError(`Cannot do that right now (${result.error}).`);
+          return current;
+        }
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const updateSettings = useCallback(
     (patch: Partial<SaveSettings>) => {
       setSettings((current) => {
@@ -305,6 +328,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       joinActivity,
       leaveActivity,
       tryOutFor,
+      interactWith,
       startNewLife,
       updateSettings,
     }),
@@ -321,6 +345,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       joinActivity,
       leaveActivity,
       tryOutFor,
+      interactWith,
       startNewLife,
       updateSettings,
     ],

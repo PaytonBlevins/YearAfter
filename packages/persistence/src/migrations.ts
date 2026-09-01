@@ -189,6 +189,34 @@ const migrations: Readonly<Record<number, Migration>> = {
    * player had made and could no longer remake.
    */
   7: (save) => ({ ...save, version: 8 }),
+
+  /**
+   * v8 -> v9: Ticket 0206 gave a childhood a cast — classmates, friends and
+   * teachers who persist instead of being invented per line.
+   *
+   * An existing character starts with an EMPTY circle and fills it at their
+   * next school year, which reads correctly: they arrive in a class they have
+   * been in for years and the game finally starts naming the people in it.
+   * Inventing a history of friendships they never had would be worse, and would
+   * have to consume RNG to do it, which breaks replay from the seed.
+   *
+   * Open decisions LOSE their bound people. v9 changed a binding from a bare
+   * name to a person — name, sex, and the id of somebody real — and the sex
+   * cannot be recovered from a string without reading the name catalog, which
+   * would make an old save load differently every time that catalog is edited.
+   * An empty map is the shape the renderer already treats as "resolve per
+   * render", so the one open question re-draws its people. Migration 5 made the
+   * same trade for the same reason.
+   */
+  8: (save) => ({
+    ...save,
+    version: 9,
+    circle: save['circle'] ?? { people: [], spokenToAtAge: {} },
+    pending: (Array.isArray(save['pending']) ? save['pending'] : []).map((decision) => ({
+      ...(decision as Record<string, unknown>),
+      names: {},
+    })),
+  }),
 };
 
 export function describeMigrationError(error: MigrationError): string {
@@ -282,6 +310,9 @@ export function validateCurrentSave(
       'stage'
     ], typeof (candidate['education'] as Record<string, unknown> | undefined)?.['stage'] ===
       'string'),
+    require('circle.people', (candidate['circle'] as Record<string, unknown> | undefined)?.[
+      'people'
+    ], Array.isArray((candidate['circle'] as Record<string, unknown> | undefined)?.['people'])),
   ].filter((problem): problem is string => problem !== null);
 
   if (problems.length > 0) {

@@ -35,6 +35,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     events: state.events,
     pending: state.pending,
     education: state.education,
+    circle: state.circle,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -47,6 +48,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     nameCultureId: save.nameCultureId,
     events: save.events,
     education: save.education,
+    circle: save.circle,
     pending: save.pending,
   });
 }

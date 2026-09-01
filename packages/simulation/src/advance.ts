@@ -13,6 +13,7 @@
  *   0203  childhood event library         -> DONE, phases/events.ts
  *   0204  school progression              -> DONE, phases/education.ts
  *   0205  stress from hidden capacity     -> DONE, phases/stress.ts
+ *   0206  friends, classmates, teachers   -> DONE, phases/social.ts
  *   0211  aging, health, mortality        -> health phase
  *   0301  financial ledger, monthly pass  -> finance phase
  * Do not grow this file with inline system logic — add a phase module.
@@ -24,7 +25,9 @@ import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
 import { runEducation } from './phases/education';
 import { runEvents } from './phases/events';
+import { runSocial } from './phases/social';
 import { runStress } from './phases/stress';
+import { RngDomains } from './rng/rng';
 
 export interface AdvanceResult {
   readonly state: GameState;
@@ -58,8 +61,29 @@ export function advanceYear(state: GameState): AdvanceResult {
   // grade the character is now in, and a report-card event that arrives before
   // the report card is nonsense.
   const education = runEducation(state, nextAge);
+
+  // Then the class. Before events, so an event that fires this year can name
+  // somebody who is actually in it — which is the whole of Ticket 0206.
+  const social = runSocial({
+    circle: state.circle,
+    stream: state.rng.stream(RngDomains.Relationships),
+    age: nextAge,
+    worldYear: nextYear,
+    nameCultureId: state.nameCultureId,
+    firstName: state.player.firstName,
+    charisma: education.player.stats.charisma,
+    family: state.family,
+    education: education.education,
+    previousStage: state.education.stage,
+  });
+
   const events = runEvents(
-    { ...state, player: education.player, education: education.education },
+    {
+      ...state,
+      player: education.player,
+      education: education.education,
+      circle: social.circle,
+    },
     nextAge,
     nextYear,
   );
@@ -88,6 +112,16 @@ export function advanceYear(state: GameState): AdvanceResult {
         sequence: index,
       }),
     ),
+    ...social.lines.map((line, index) =>
+      createTimelineEntry({
+        age: nextAge,
+        year: nextYear,
+        kind: line.kind,
+        text: line.text,
+        id: `t:${nextYear}:social:${index}`,
+        sequence: education.lines.length + index,
+      }),
+    ),
     ...events.lines.map((line, index) =>
       createTimelineEntry({
         age: nextAge,
@@ -95,7 +129,7 @@ export function advanceYear(state: GameState): AdvanceResult {
         kind: line.kind,
         text: line.text,
         eventId: asEventId(line.eventId),
-        sequence: education.lines.length + index,
+        sequence: education.lines.length + social.lines.length + index,
       }),
     ),
     // Last in the year, because it is the line about the year as a whole.
@@ -106,7 +140,7 @@ export function advanceYear(state: GameState): AdvanceResult {
         kind: line.kind,
         text: line.text,
         id: `t:${nextYear}:stress:${index}`,
-        sequence: education.lines.length + events.lines.length + index,
+        sequence: education.lines.length + social.lines.length + events.lines.length + index,
       }),
     ),
   ];
@@ -139,6 +173,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       world: { ...state.world, year: nextYear },
       player,
       family: events.family,
+      circle: events.circle,
       events: events.history,
       // Events can move school standing (detention, suspension, being caught);
       // the education phase set the rest of it.

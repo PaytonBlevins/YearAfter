@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { activityOffers, join, leave } from '@yearafter/education';
+import { isCurrent, isFriend } from '@yearafter/social';
 import { isStressRelevant } from '@yearafter/stress';
+import { interact } from './interact';
 import { advanceYear } from './advance';
 import { study } from './study';
 import { decide } from './decide';
@@ -298,7 +300,11 @@ describe('Study Harder', () => {
       if (!result.ok) continue;
       attempts += 1;
       if (result.value.worked) worked += 1;
-      expect(result.value.gained).toBeGreaterThan(0);
+      // Always something, unless they were already top of the class — a result
+      // of exactly nothing reads as a broken button.
+      if (state.education.performance < 100) {
+        expect(result.value.gained).toBeGreaterThan(0);
+      }
       expect(result.value.entry.text.length).toBeGreaterThan(0);
     }
     expect(attempts).toBeGreaterThan(50);
@@ -375,5 +381,116 @@ describe('stress', () => {
     }
     for (let year = 0; year < 3; year += 1) state = answerAll(advanceYear(state).state);
     expect(state.player.stress.level).toBeLessThan(peak);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0206 — classmates, friends, teachers                                 */
+/* -------------------------------------------------------------------------- */
+
+describe('the people in a childhood', () => {
+  const lived = (seed: string, toAge: number): GameState => {
+    let state = createNewGame({ seed });
+    for (let age = 1; age <= toAge; age += 1) state = answerAll(advanceYear(state).state);
+    return state;
+  };
+
+  it('gives a school-age character a class, and nobody before that', () => {
+    expect(lived('CAST-EARLY', 3).circle.people).toHaveLength(0);
+    const pupil = lived('CAST-EARLY', 8);
+    const classmates = pupil.circle.people.filter((p) => p.kind === 'peer' && isCurrent(p));
+    expect(classmates.length).toBeGreaterThan(0);
+    expect(pupil.circle.people.some((p) => p.kind === 'teacher')).toBe(true);
+  });
+
+  it('keeps the same class from one year to the next', () => {
+    // Reading output found the first version replacing the entire class every
+    // September. A cast that changes completely each year is not a cast.
+    let state = lived('CAST-KEEP', 7);
+    const before = state.circle.people.filter((p) => p.kind === 'peer' && isCurrent(p));
+    state = answerAll(advanceYear(state).state);
+    const after = new Set(
+      state.circle.people.filter((p) => p.kind === 'peer' && isCurrent(p)).map((p) => p.id),
+    );
+    const kept = before.filter((p) => after.has(p.id));
+    expect(kept.length).toBeGreaterThanOrEqual(before.length - 1);
+  });
+
+  it('produces a couple of friends over a childhood, not thirty and not none', () => {
+    // Both failure modes are real: the first version of proximity gave 99% of
+    // lives NO friends, and removing drift entirely gives everybody everyone.
+    let none = 0;
+    let total = 0;
+    const LIVES = 40;
+    for (let life = 0; life < LIVES; life += 1) {
+      const state = lived(`FRIENDS-${life}`, 17);
+      const friends = state.circle.people.filter(isFriend);
+      total += friends.length;
+      if (friends.length === 0) none += 1;
+      expect(friends.length).toBeLessThan(10);
+    }
+    expect(total / LIVES).toBeGreaterThan(1);
+    expect(none / LIVES).toBeLessThan(0.2);
+  });
+
+  it('names somebody the player actually knows, not a stranger', () => {
+    // The whole ticket: "I also should be able to interact with teachers and
+    // classmates." A name in the feed has to be a name on the People screen.
+    let named = 0;
+    for (let life = 0; life < 20; life += 1) {
+      const state = lived(`NAMED-${life}`, 17);
+      const known = state.circle.people.filter((p) => p.memories.length > 0);
+      named += known.length;
+      for (const person of known) {
+        for (const memory of person.memories) {
+          expect(memory.text).toContain(
+            person.kind === 'teacher' ? person.lastName : person.firstName,
+          );
+        }
+      }
+    }
+    expect(named).toBeGreaterThan(20);
+  });
+
+  it('lets you do one thing a year with somebody, and no more', () => {
+    const state = lived('TALK', 10);
+    const person = state.circle.people.find((p) => p.kind === 'peer' && isCurrent(p));
+    expect(person).toBeDefined();
+    if (!person) return;
+
+    const first = interact(state, person.id, 'hang-out');
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    expect(first.value.entry.text).toContain(person.firstName);
+
+    const again = interact(first.value.state, person.id, 'hang-out');
+    expect(again.ok).toBe(false);
+    if (again.ok) return;
+    expect(again.error).toBe('already-this-year');
+
+    const nextYear = answerAll(advanceYear(first.value.state).state);
+    expect(interact(nextYear, person.id, 'hang-out').ok).toBe(true);
+  });
+
+  it('leaves the memory on the person, not just in the feed', () => {
+    const state = lived('MEMORY', 11);
+    const person = state.circle.people.find((p) => p.kind === 'peer' && isCurrent(p));
+    if (!person) return;
+    const result = interact(state, person.id, 'hang-out');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const after = result.value.state.circle.people.find((p) => p.id === person.id);
+    expect(after?.memories.length).toBe(person.memories.length + 1);
+    expect(after?.memories.at(-1)?.text).toBe(result.value.entry.text);
+  });
+
+  it('refuses an interaction that is not on that person’s menu', () => {
+    const state = lived('MENU', 10);
+    const teacher = state.circle.people.find((p) => p.kind === 'teacher' && isCurrent(p));
+    if (!teacher) return;
+    const result = interact(state, teacher.id, 'hang-out');
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toBe('not-available');
   });
 });
