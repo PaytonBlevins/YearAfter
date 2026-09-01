@@ -173,6 +173,22 @@ const migrations: Readonly<Record<number, Migration>> = {
     education['tryoutYear'] = education['tryoutYear'] ?? {};
     return { ...save, version: 7, education };
   },
+
+  /**
+   * v7 -> v8: Ticket 0205 turned Study Harder from a setting into a button you
+   * press once a school year.
+   *
+   * `studiedAtAge` is deliberately left ABSENT rather than set to the
+   * character's current age. Absent means "has not studied this year", so an
+   * existing character can press the button immediately instead of being told
+   * to come back next year for something they never did.
+   *
+   * `effort` is untouched. A character the player had already set to Studying
+   * Hard stays that way — the setting is gone from the UI, not from the model,
+   * and silently resetting them to Keeping Up would change a decision the
+   * player had made and could no longer remake.
+   */
+  7: (save) => ({ ...save, version: 8 }),
 };
 
 export function describeMigrationError(error: MigrationError): string {

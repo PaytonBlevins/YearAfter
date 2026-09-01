@@ -230,7 +230,34 @@ A cash effect is `{ delta, source }`, never a bare number, and the amount must
 appear in the line the player actually reads. A silent balance change is
 unrepresentable rather than merely discouraged.
 
-### 13.7 A place worth having is earned, not clicked
+### 13.7 A system nobody can trigger is not a system
+
+Any model with a threshold gets its inputs MEASURED across simulated lives
+before it ships, and the measurement goes in a comment beside the constant.
+
+Three times now a model has passed every test while never once running:
+behaviour sat at 96–100 for every character, so alternative school (spec 73) was
+unreachable; `hiddenLoad` was zero in all 3,400 simulated years measured for
+0205, so 0204's overload penalties and the whole workload half of stress had
+never fired; and the aptitude formula was fitted at the top of a stat curve it
+was applied to from age five. Tests do not catch this, because a test compares a
+character to the same formula that produced them.
+
+The fix each time was the same: measure the input distribution, then set the
+threshold inside it. `packages/stress/src/stress.ts` reads workload as PRESSURE
+against capacity rather than as overflow past it, for exactly this reason.
+
+### 13.8 Two systems never bill the same account
+
+An overcommitted fourteen-year-old finished two years with Health at 29, because
+0204's overload penalty and 0205's stress consequences were both charging health
+for one busy schedule. Spec 1079 names what commitments influence — Stress,
+Happiness, Performance — and each of those has ONE owner. Health belongs to
+events and to the physical part of overload, and stress does not touch it.
+
+Before adding a consequence, find what already charges for the same cause.
+
+### 13.9 A place worth having is earned, not clicked
 
 A competitive activity carries a `tryout` and cannot be joined directly. It is
 attempted, it can be failed, and it may be attempted again the following school
@@ -242,9 +269,26 @@ failure teaches the player that the button is broken.
 Review, on the first version: "I was able to join the basketball team just by
 clicking on it. I should have to tryout for things like that."
 
+### 13.10 Stress is backend, and it is escapable
+
+Spec 1660, 661, 1824 and 1986 together: stress comes from workload and
+relationships, there is no visible time budget or capacity allocator, and the
+player may overcommit rather than being blocked. So there is no stress screen —
+the player reads what went wrong in the feed, in a sentence, and sees a stress
+bar beside the seven canonical stats only while it has something to say (spec
+1094, "Stress when relevant"). Stress is NOT in `VISIBLE_STAT_KEYS`, which stays
+canonical at seven.
+
+Stress must go DOWN as well as up, in the model and in the catalog. A catalog
+whose stress effects are all positive makes stress a ratchet, and a ratchet is a
+second health bar every character loses by eighteen — which is precisely the
+"separate visible mental-health system" spec 1030 forbids, wearing a new name.
+The validator fails a build where too few events relieve it.
+
 This is enforced structurally, not by writing discipline: the generator, the
 content validator and the catalog tests each fail a build on unsourced money, on
-an amount the prose never mentions, and on the other rules above.
+an amount the prose never mentions, on a stress catalog that only goes one way,
+and on the other rules above.
 
 ## 14. Branding
 

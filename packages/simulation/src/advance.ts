@@ -12,7 +12,7 @@
  * each one plugs in as a phase module under `phases/`:
  *   0203  childhood event library         -> DONE, phases/events.ts
  *   0204  school progression              -> DONE, phases/education.ts
- *   0205  stress from hidden capacity     -> stress phase
+ *   0205  stress from hidden capacity     -> DONE, phases/stress.ts
  *   0211  aging, health, mortality        -> health phase
  *   0301  financial ledger, monthly pass  -> finance phase
  * Do not grow this file with inline system logic — add a phase module.
@@ -21,8 +21,10 @@
 import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
 import { asEventId, clampStat } from '@yearafter/core';
 import type { GameState } from './game-state';
+import { isInSchool } from '@yearafter/education';
 import { runEducation } from './phases/education';
 import { runEvents } from './phases/events';
+import { runStress } from './phases/stress';
 
 export interface AdvanceResult {
   readonly state: GameState;
@@ -62,6 +64,19 @@ export function advanceYear(state: GameState): AdvanceResult {
     nextYear,
   );
 
+  // Stress last: it summarises the year rather than making things happen in it,
+  // so it needs the workload education computed, the household events finished
+  // moving, and the stress those events contributed.
+  const stress = runStress({
+    player: events.player,
+    family: events.family,
+    education: { ...education.education, behaviour: clampStat(events.behaviour) },
+    hours: education.hours,
+    capacity: education.capacity,
+    eventStress: events.stress,
+    atSchool: isInSchool(education.education),
+  });
+
   const entries: TimelineEntry[] = [
     ...education.lines.map((line, index) =>
       createTimelineEntry({
@@ -83,6 +98,17 @@ export function advanceYear(state: GameState): AdvanceResult {
         sequence: education.lines.length + index,
       }),
     ),
+    // Last in the year, because it is the line about the year as a whole.
+    ...stress.lines.map((line, index) =>
+      createTimelineEntry({
+        age: nextAge,
+        year: nextYear,
+        kind: line.kind,
+        text: line.text,
+        id: `t:${nextYear}:stress:${index}`,
+        sequence: education.lines.length + events.lines.length + index,
+      }),
+    ),
   ];
 
   // ---- validate ----------------------------------------------------------
@@ -99,7 +125,7 @@ export function advanceYear(state: GameState): AdvanceResult {
 
   // ---- commit ------------------------------------------------------------
   const player: Character = {
-    ...events.player,
+    ...stress.player,
     age: nextAge,
     // Set by the education phase; employment (Ticket 0210) takes it over for
     // characters who have left school.
@@ -116,7 +142,13 @@ export function advanceYear(state: GameState): AdvanceResult {
       events: events.history,
       // Events can move school standing (detention, suspension, being caught);
       // the education phase set the rest of it.
-      education: { ...education.education, behaviour: clampStat(events.behaviour) },
+      education: {
+        ...education.education,
+        behaviour: clampStat(events.behaviour),
+        // Stress takes its cut of school last, after everything else has had
+        // its say about the year.
+        performance: clampStat(stress.performance),
+      },
       pending: events.decisions,
     },
     newEntries: entries,

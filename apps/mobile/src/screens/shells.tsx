@@ -26,14 +26,13 @@ import {
 } from '@yearafter/character';
 import { describeCity } from '@yearafter/content';
 import {
-  STUDY_EFFORT_LABELS,
   gradePointAverage,
+  hasStudiedThisYear,
   isInSchool,
   joinedActivities,
   letterGrade,
   schoolLabel,
   statusLabel,
-  type StudyEffort,
 } from '@yearafter/education';
 import {
   Card,
@@ -145,7 +144,7 @@ function Screen({ children }: { children: React.ReactNode }) {
 /* -------------------------------------------------------------------------- */
 
 export function CareerScreen() {
-  const { state, setEffort } = useGame();
+  const { state, studyHarder } = useGame();
   const { push } = useNavigation();
   if (!state) return null;
   const { player, education } = state;
@@ -155,6 +154,7 @@ export function CareerScreen() {
   // keeps being shown — as "Final grades" rather than "Grades".
   const hasGrades = atSchool || education.stage === 'graduated' || education.stage === 'droppedOut';
   const joined = joinedActivities(education);
+  const studiedThisYear = hasStudiedThisYear(education, player.age);
 
   return (
     <Screen>
@@ -208,20 +208,25 @@ export function CareerScreen() {
           <Card>
             {/*
               Spec 1821: "major + Study Harder is generally enough". This is the
-              whole school interaction, and it is a setting rather than a yearly
-              question — a popup every year asking how hard you are trying is
-              exactly the management spec 75 forbids.
+              whole school interaction, and review asked for it to be exactly
+              one button: "I want there to just be a button that says study
+              harder and it potentially (most of the time) boosts their grades."
+
+              Once per school year, and it can fail to show on the report card.
+              The subtitle says which of those two states the row is in, because
+              a disabled button with no reason reads as broken.
             */}
             <ListRow
               icon="school"
-              title="Effort"
-              // Current setting in the VALUE slot, where a state belongs; what
-              // pressing does goes in the subtitle. The other way round read as
-              // though the character was already studying hard.
-              value={STUDY_EFFORT_LABELS[education.effort]}
-              subtitle={`Tap for ${STUDY_EFFORT_LABELS[cycleEffort(education.effort)].toLowerCase()}`}
-              affordance="action"
-              onPress={() => setEffort(cycleEffort(education.effort))}
+              title="Study Harder"
+              subtitle={
+                studiedThisYear
+                  ? 'You put the work in this year already.'
+                  : 'A term of real effort. It usually shows.'
+              }
+              affordance={studiedThisYear ? 'none' : 'action'}
+              disabled={studiedThisYear}
+              onPress={studiedThisYear ? undefined : studyHarder}
             />
             <RowDivider />
             {/*
@@ -261,11 +266,6 @@ export function CareerScreen() {
       <ComingSoon ticket="0210" what="Employment" />
     </Screen>
   );
-}
-
-/** Study effort cycles rather than opening a sheet — three settings, one tap. */
-function cycleEffort(current: StudyEffort): StudyEffort {
-  return current === 'coasting' ? 'normal' : current === 'normal' ? 'hard' : 'coasting';
 }
 
 /**

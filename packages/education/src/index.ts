@@ -13,3 +13,4 @@ export * from './performance';
 export * from './workload';
 export * from './activities';
 export * from './progression';
+export * from './study';

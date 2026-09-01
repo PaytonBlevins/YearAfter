@@ -53,6 +53,9 @@ importers:
       '@yearafter/simulation':
         specifier: workspace:*
         version: link:../../packages/simulation
+      '@yearafter/stress':
+        specifier: workspace:*
+        version: link:../../packages/stress
       expo:
         specifier: ~57.0.18
         version: 57.0.18(@babel/core@7.29.7)(@expo/dom-webview@57.0.1)(@expo/metro-runtime@57.0.14)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
@@ -234,6 +237,28 @@ importers:
       '@yearafter/events':
         specifier: workspace:*
         version: link:../events
+      '@yearafter/relationships':
+        specifier: workspace:*
+        version: link:../relationships
+      '@yearafter/stress':
+        specifier: workspace:*
+        version: link:../stress
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
+
+  packages/stress:
+    dependencies:
+      '@yearafter/character':
+        specifier: workspace:*
+        version: link:../character
+      '@yearafter/core':
+        specifier: workspace:*
+        version: link:../core
       '@yearafter/relationships':
         specifier: workspace:*
         version: link:../relationships

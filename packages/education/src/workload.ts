@@ -75,6 +75,12 @@ export const OVERLOAD_EVENT_THRESHOLD = 4;
  * it actually happens in for a teenager with too much on. It means an
  * overloaded character reads as a person having a hard year rather than as a
  * number going down.
+ *
+ * The health figure was halved for Ticket 0205. Stress now bills the same busy
+ * schedule for happiness and grades, and a screenshot of a fourteen-year-old
+ * with Health at 29 showed what two systems charging one account looks like.
+ * What is left here is the physical part — tiredness, not enough sleep, meals
+ * eaten standing up — which is 0204's to charge and nobody else's.
  */
 export function overloadPenalties(overload: number): {
   performance: number;
@@ -85,7 +91,7 @@ export function overloadPenalties(overload: number): {
   const severity = Math.min(3, overload / 6);
   return {
     performance: -Math.round(severity * 7),
-    health: -Math.round(severity * 4),
+    health: -Math.round(severity * 2),
     happiness: -Math.round(severity * 5),
   };
 }

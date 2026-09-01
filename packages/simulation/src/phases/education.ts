@@ -20,6 +20,9 @@ import type { GameState } from '../game-state';
 export interface EducationPhaseOutput {
   readonly player: Character;
   readonly education: EducationState;
+  /** Committed hours and capacity, for the stress phase (Ticket 0205). */
+  readonly hours: number;
+  readonly capacity: number;
   readonly lines: readonly { readonly kind: TimelineKind; readonly text: string }[];
 }
 
@@ -53,6 +56,8 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
   return {
     player,
     education: result.state,
+    hours: result.hours,
+    capacity: result.capacity,
     lines: result.lines.map((line) => ({ kind: line.kind as TimelineKind, text: line.text })),
   };
 }

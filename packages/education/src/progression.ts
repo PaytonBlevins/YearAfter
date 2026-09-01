@@ -73,6 +73,16 @@ export interface SchoolYearResult {
   readonly statDeltas: Partial<Record<keyof VisibleStats, number>>;
   /** Written into character.stress.hiddenLoad; Ticket 0205 makes it visible. */
   readonly hiddenLoad: number;
+  /**
+   * Committed hours a week, and what this character can carry.
+   *
+   * Handed to the stress phase (Ticket 0205), which reads PRESSURE rather than
+   * overflow. `hiddenLoad` only counts hours ABOVE capacity, and reading 3,400
+   * simulated years found that number was zero in every one of them — so a
+   * system that consumed only `hiddenLoad` would never once have run.
+   */
+  readonly hours: number;
+  readonly capacity: number;
   readonly costs: readonly SchoolCost[];
   /** Feed lines, in order. Milestones first, then consequences. */
   readonly lines: readonly { readonly kind: 'milestone' | 'passive'; readonly text: string }[];
@@ -105,12 +115,20 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
   let justEnrolled = false;
 
   if (state.stage === 'graduated' || state.stage === 'droppedOut') {
-    return { state, statDeltas: EMPTY, hiddenLoad: 0, costs: [], lines: [] };
+    return { state, statDeltas: EMPTY, hiddenLoad: 0, hours: 0, capacity: 0, costs: [], lines: [] };
   }
 
   if (state.stage === 'preschool') {
     if (input.age < SCHOOL_START_AGE) {
-      return { state, statDeltas: EMPTY, hiddenLoad: 0, costs: [], lines: [] };
+      return {
+        state,
+        statDeltas: EMPTY,
+        hiddenLoad: 0,
+        hours: 0,
+        capacity: 0,
+        costs: [],
+        lines: [],
+      };
     }
     next = { ...next, gradeLevel: 0, stage: 'elementary' };
     justEnrolled = true;
@@ -126,6 +144,8 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
         state: { ...state, stage: 'graduated', finishedAtAge: input.age, activities: [] },
         statDeltas: { happiness: 6, discipline: 2 },
         hiddenLoad: 0,
+        hours: 0,
+        capacity: 0,
         costs: [],
         lines,
       };
@@ -213,7 +233,15 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
     );
   }
 
-  return { state: next, statDeltas, hiddenLoad: workload.load, costs, lines };
+  return {
+    state: next,
+    statDeltas,
+    hiddenLoad: workload.load,
+    hours: workload.hours,
+    capacity: workload.capacity,
+    costs,
+    lines,
+  };
 }
 
 /**

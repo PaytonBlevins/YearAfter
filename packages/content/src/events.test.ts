@@ -406,6 +406,32 @@ describe('the childhood catalog', () => {
     }
   });
 
+  it('lets stress go down as well as up (V6)', () => {
+    // A catalog whose stress effects are all positive makes stress a ratchet —
+    // a second health bar every character loses by eighteen, which is the
+    // separate visible mental-health system spec 1030 forbids under a new name.
+    let up = 0;
+    let down = 0;
+    for (const event of CHILDHOOD_EVENTS) {
+      const collect = (effects?: { stress?: number }) => {
+        const stress = effects?.stress;
+        if (stress === undefined) return;
+        expect(stress, event.id).not.toBe(0);
+        expect(stress, event.id).toBeGreaterThanOrEqual(-25);
+        expect(stress, event.id).toBeLessThanOrEqual(40);
+        if (stress > 0) up += 1;
+        else down += 1;
+      };
+      collect(event.effects);
+      for (const choice of event.choices ?? []) {
+        collect(choice.effects);
+        for (const outcome of choice.outcomes ?? []) collect(outcome.effects);
+      }
+    }
+    expect(up).toBeGreaterThan(0);
+    expect(down).toBeGreaterThanOrEqual(Math.max(4, up / 4));
+  });
+
   it('keeps the writing concise and finished', () => {
     for (const event of CHILDHOOD_EVENTS) {
       for (const { text } of textsOf(event)) {

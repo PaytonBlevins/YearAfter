@@ -274,6 +274,7 @@ describe('effects', () => {
     family: FULL_FAMILY,
     cash: dollars(100),
     behaviour: 70,
+    stress: 0,
     history: EMPTY_HISTORY,
   });
 

@@ -33,6 +33,8 @@ const WORLD_ICONS: Record<Exclude<World, 'life'>, IconName> = {
 export interface WorldBarProps {
   readonly world: World;
   readonly stats: VisibleStats;
+  /** 0-100. Rendered only when relevant (Ticket 0205, spec 1094). */
+  readonly stress: number;
   readonly age: number;
   readonly onSelectWorld: (world: World) => void;
   readonly onAdvance: () => void;
@@ -42,6 +44,7 @@ export interface WorldBarProps {
 export function WorldBar({
   world,
   stats,
+  stress,
   age,
   onSelectWorld,
   onAdvance,
@@ -52,7 +55,7 @@ export function WorldBar({
   return (
     <View style={styles.container}>
       <View style={styles.stats}>
-        <StatBars stats={stats} />
+        <StatBars stats={stats} stress={stress} />
       </View>
 
       <View style={[styles.bar, { paddingBottom: insets.bottom || spacing.sm }]}>

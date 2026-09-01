@@ -13,6 +13,7 @@
 import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
 import { asEventId } from '@yearafter/core';
 import { resolveChoice, type PendingDecision } from '@yearafter/events';
+import { applyImmediateStress } from '@yearafter/stress';
 import { err, ok, type Result } from '@yearafter/core';
 import type { GameState } from './game-state';
 import { applyOutcome, buildEventContext, timelineKindFor } from './phases/events';
@@ -81,6 +82,18 @@ export function decide(
 
   const player: Character = {
     ...applied.player,
+    // A decision is answered AFTER the year has been simulated, so its stress
+    // cannot join that year's total — it lands now, scaled by the same
+    // resilience the yearly pass uses.
+    stress: {
+      ...state.player.stress,
+      level: applyImmediateStress(
+        state.player.stress.level,
+        applied.stress,
+        applied.player.stats,
+        state.player.personality,
+      ),
+    },
     timeline: [...state.player.timeline, entry],
   };
 

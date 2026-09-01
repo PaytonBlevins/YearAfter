@@ -152,14 +152,18 @@ function ordinal(value: number): string {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Spec 367 and 1821: the entire school interaction is meant to be
- * "School → Study Harder". This is that, with a third setting so the player can
- * deliberately let school slide — a real choice a teenager makes, and the only
- * way "Study Harder" means anything.
+ * How hard this character works at school.
  *
- * Effort persists until changed. It is not re-asked every year, because a
- * yearly popup asking how hard you are trying is exactly the management the
- * spec forbids.
+ * No longer something the player sets. Review: "I want there to just be a
+ * button that says study harder." Pressing that button moves a character from
+ * `normal` to `hard` and keeps them there — they have become somebody who
+ * studies — which raises the target their grades drift towards for the rest of
+ * school. `coasting` is reachable only through events (a bad year, a family
+ * upheaval), which is how it works for actual teenagers.
+ *
+ * The three-way cycle this replaces was a setting the player configured once
+ * and forgot, which is the management spec 75 forbids in a school system meant
+ * to be lightweight.
  */
 export type StudyEffort = 'coasting' | 'normal' | 'hard';
 
@@ -234,6 +238,13 @@ export interface EducationState {
    * team, which is not a tryout, it is a slot machine.
    */
   readonly tryoutYear: Readonly<Record<string, number>>;
+  /**
+   * The age at which Study Harder was last pressed.
+   *
+   * One press per school year. Without it the button is a slot machine: tap
+   * until the roll lands and every character finishes with an A.
+   */
+  readonly studiedAtAge?: number;
   /** Set once a character graduates or leaves, so later systems can ask. */
   readonly finishedAtAge?: number;
 }
@@ -252,6 +263,10 @@ export const NOT_YET_ENROLLED: EducationState = {
 
 export const isInSchool = (state: EducationState): boolean =>
   state.stage === 'elementary' || state.stage === 'middle' || state.stage === 'high';
+
+/** Whether Study Harder is still available this school year. */
+export const hasStudiedThisYear = (state: EducationState, age: number): boolean =>
+  state.studiedAtAge === age;
 
 export const hasJoined = (state: EducationState, activityId: string): boolean =>
   state.activities.some((entry) => entry.activityId === activityId);

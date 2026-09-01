@@ -155,6 +155,17 @@ export interface EventEffects {
    * branch of the spec is unreachable, which is exactly what testing found.
    */
   readonly behaviour?: number;
+  /**
+   * Stress, in points, added to this year's total (Ticket 0205).
+   *
+   * The content hook for spec 1986: commitments and events feed stress rather
+   * than a visible time budget. Positive for a year that kept happening at the
+   * character, NEGATIVE for the things that genuinely help — a long summer, a
+   * grandparent's house, a holiday. Without the negative direction stress is a
+   * ratchet, and a ratchet is the separate mental-health system spec 1030
+   * forbids wearing a different name.
+   */
+  readonly stress?: number;
   readonly setFlags?: readonly string[];
   readonly clearFlags?: readonly string[];
 }

@@ -26,11 +26,12 @@ import {
   createNewGame,
   decide as resolveDecision,
   generateSeed,
+  study,
   tryOut as attemptTryout,
   type GameState,
 } from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
-import { join, leave, type StudyEffort } from '@yearafter/education';
+import { join, leave } from '@yearafter/education';
 import type { TimelineEntry } from '@yearafter/character';
 import {
   DEFAULT_SETTINGS,
@@ -57,8 +58,12 @@ interface GameContextValue {
   readonly advance: () => void;
   /** Returns a screen the chosen option asked to open, if any (Ticket 0204). */
   readonly answer: (eventId: string, choiceId: string) => string | undefined;
-  /** Ticket 0204. The one school lever the player has (spec 1821). */
-  readonly setEffort: (effort: StudyEffort) => void;
+  /**
+   * The one school lever the player has (spec 1821), once per school year.
+   * Replaces the three-way effort setting: review asked for "just a button that
+   * says study harder".
+   */
+  readonly studyHarder: () => void;
   readonly joinActivity: (activityId: string) => void;
   readonly leaveActivity: (activityId: string) => void;
   /** Attempt a competitive place. Can fail. One attempt per school year. */
@@ -212,16 +217,23 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
-  const setEffort = useCallback(
-    (effort: StudyEffort) => {
-      mutateEducation((current) =>
-        current.education.effort === effort
-          ? current
-          : { ...current, education: { ...current.education, effort } },
-      );
-    },
-    [mutateEducation],
-  );
+  /**
+   * Study Harder. Can fail to show up on the report card, which is the point,
+   * so it writes a feed line either way and cannot be pressed twice in a year.
+   */
+  const studyHarder = useCallback(() => {
+    setState((current) => {
+      if (!current) return current;
+      const result = study(current);
+      if (!result.ok) {
+        setSaveError(`Cannot study right now (${result.error}).`);
+        return current;
+      }
+      setLastEntries((entries) => [...entries, result.value.entry]);
+      if (saveId) persist(result.value.state, saveId, settings);
+      return result.value.state;
+    });
+  }, [persist, saveId, settings]);
 
   const joinActivity = useCallback(
     (activityId: string) => {
@@ -289,7 +301,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       decision: state?.pending[0] ?? null,
       advance,
       answer,
-      setEffort,
+      studyHarder,
       joinActivity,
       leaveActivity,
       tryOutFor,
@@ -305,7 +317,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       lastEntries,
       advance,
       answer,
-      setEffort,
+      studyHarder,
       joinActivity,
       leaveActivity,
       tryOutFor,

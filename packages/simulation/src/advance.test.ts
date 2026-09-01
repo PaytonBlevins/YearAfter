@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { activityOffers, join, leave } from '@yearafter/education';
+import { isStressRelevant } from '@yearafter/stress';
 import { advanceYear } from './advance';
+import { study } from './study';
 import { decide } from './decide';
 import type { GameState } from './game-state';
 import { createNewGame } from './new-game';
@@ -248,5 +251,129 @@ describe('childhood balance', () => {
     const happiness = childhoods().map((stats) => stats[0]!);
     const spread = Math.max(...happiness) - Math.min(...happiness);
     expect(spread).toBeGreaterThan(20);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0205 — Study Harder, and stress                                      */
+/* -------------------------------------------------------------------------- */
+
+describe('Study Harder', () => {
+  const atSchool = (seed: string, toAge: number): GameState => {
+    let state = createNewGame({ seed });
+    for (let age = 1; age <= toAge; age += 1) {
+      state = answerAll(advanceYear(state).state);
+    }
+    return state;
+  };
+
+  it('is refused before school and allowed once inside it', () => {
+    const toddler = atSchool('SH-EARLY', 3);
+    expect(study(toddler).ok).toBe(false);
+    const pupil = atSchool('SH-EARLY', 10);
+    expect(study(pupil).ok).toBe(true);
+  });
+
+  it('can only be pressed once a school year', () => {
+    const state = atSchool('SH-ONCE', 12);
+    const first = study(state);
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    const second = study(first.value.state);
+    expect(second.ok).toBe(false);
+    if (second.ok) return;
+    expect(second.error).toBe('already-studied');
+    // Next year it is available again.
+    const nextYear = answerAll(advanceYear(first.value.state).state);
+    expect(study(nextYear).ok).toBe(true);
+  });
+
+  it('boosts grades most of the time, and says so either way', () => {
+    // Review: "it potentially (most of the time) boosts their grades."
+    let worked = 0;
+    let attempts = 0;
+    for (let life = 0; life < 60; life += 1) {
+      const state = atSchool(`SH-${life}`, 12);
+      const result = study(state);
+      if (!result.ok) continue;
+      attempts += 1;
+      if (result.value.worked) worked += 1;
+      expect(result.value.gained).toBeGreaterThan(0);
+      expect(result.value.entry.text.length).toBeGreaterThan(0);
+    }
+    expect(attempts).toBeGreaterThan(50);
+    expect(worked / attempts).toBeGreaterThan(0.55);
+    expect(worked / attempts).toBeLessThan(0.95);
+  });
+
+  it('makes the character somebody who studies, for good', () => {
+    const state = atSchool('SH-EFFORT', 11);
+    const result = study(state);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.state.education.effort).toBe('hard');
+  });
+});
+
+describe('stress', () => {
+  it('never quietly taxes an ordinary childhood', () => {
+    // The system has no screen. If it charged happiness for a childhood with
+    // nothing wrong in it, the player would watch a bar fall for no reason they
+    // could ever discover.
+    let taxed = 0;
+    for (let life = 0; life < 80; life += 1) {
+      let state = createNewGame({ seed: `SQ-${life}` });
+      for (let age = 1; age <= 10; age += 1) state = answerAll(advanceYear(state).state);
+      if (isStressRelevant(state.player.stress.level)) taxed += 1;
+    }
+    // A hard childhood is allowed. A majority of hard childhoods is a bug.
+    expect(taxed / 80).toBeLessThan(0.25);
+  });
+
+  it('is reachable by taking on too much, which is the whole design', () => {
+    // Spec 1986: "Players may overcommit rather than being blocked." A model
+    // nobody can trigger is not a model — 0204's overload never once fired
+    // across 3,400 simulated years, which is why stress reads pressure instead.
+    let state = createNewGame({ seed: 'BUSY' });
+    for (let age = 1; age <= 12; age += 1) state = answerAll(advanceYear(state).state);
+    for (const offer of activityOffers(state.education, {
+      age: state.player.age,
+      stage: 'middle',
+      stats: state.player.stats,
+      talents: state.player.talents,
+      wealth: state.family.finances.band,
+      household: state.family,
+    })) {
+      if (!offer.unavailable) {
+        state = { ...state, education: join(state.education, offer.activity.id, state.player.age) };
+      }
+    }
+    state = answerAll(advanceYear(state).state);
+    expect(isStressRelevant(state.player.stress.level)).toBe(true);
+  });
+
+  it('lets a character come out the other side', () => {
+    let state = createNewGame({ seed: 'RECOVER' });
+    for (let age = 1; age <= 12; age += 1) state = answerAll(advanceYear(state).state);
+    for (const offer of activityOffers(state.education, {
+      age: state.player.age,
+      stage: 'middle',
+      stats: state.player.stats,
+      talents: state.player.talents,
+      wealth: state.family.finances.band,
+      household: state.family,
+    })) {
+      if (!offer.unavailable) {
+        state = { ...state, education: join(state.education, offer.activity.id, state.player.age) };
+      }
+    }
+    state = answerAll(advanceYear(state).state);
+    const peak = state.player.stress.level;
+    expect(peak).toBeGreaterThan(0);
+    for (const entry of state.education.activities) {
+      state = { ...state, education: leave(state.education, entry.activityId) };
+    }
+    for (let year = 0; year < 3; year += 1) state = answerAll(advanceYear(state).state);
+    expect(state.player.stress.level).toBeLessThan(peak);
   });
 });

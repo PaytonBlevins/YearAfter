@@ -31,6 +31,8 @@ export interface EventPhaseOutput {
   readonly history: EventHistory;
   /** School standing after events. Folded back into education state (0204). */
   readonly behaviour: number;
+  /** Stress points this year's events contributed. Read by the stress phase. */
+  readonly stress: number;
   /** Feed lines for this year, in order. */
   readonly lines: readonly {
     readonly kind: TimelineKind;
@@ -91,9 +93,16 @@ export function applyOutcome(
   history: EventHistory,
   outcome: EventOutcome,
   behaviour: number,
-): { player: Character; family: Household; history: EventHistory; behaviour: number } {
+  stress = 0,
+): {
+  player: Character;
+  family: Household;
+  history: EventHistory;
+  behaviour: number;
+  stress: number;
+} {
   const applied = applyEffects(
-    { stats: player.stats, family, cash: player.cash, behaviour, history },
+    { stats: player.stats, family, cash: player.cash, behaviour, stress, history },
     outcome.effects,
   );
   return {
@@ -101,6 +110,7 @@ export function applyOutcome(
     family: applied.family,
     history: applied.history,
     behaviour: applied.behaviour,
+    stress: applied.stress,
   };
 }
 
@@ -114,16 +124,20 @@ export function runEvents(state: GameState, age: number, year: number): EventPha
   let family = state.family;
   let history = result.history;
   let behaviour: number = state.education.behaviour;
+  // Running total for the year, handed to the stress phase. Not a level — the
+  // level is computed once, at the end of the year, from everything.
+  let stress = 0;
   const lines: { kind: TimelineKind; text: string; eventId: string }[] = [];
 
   for (const outcome of result.outcomes) {
-    const applied = applyOutcome(player, family, history, outcome, behaviour);
+    const applied = applyOutcome(player, family, history, outcome, behaviour, stress);
     player = applied.player;
     family = applied.family;
     history = applied.history;
     behaviour = applied.behaviour;
+    stress = applied.stress;
     lines.push({ kind: timelineKindFor(outcome), text: outcome.text, eventId: outcome.eventId });
   }
 
-  return { player, family, history, behaviour, lines, decisions: result.decisions };
+  return { player, family, history, behaviour, stress, lines, decisions: result.decisions };
 }

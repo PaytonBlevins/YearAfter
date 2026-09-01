@@ -27,6 +27,15 @@ export interface EffectTargets {
    * @yearafter/education — the phase module owns putting it back.
    */
   readonly behaviour: number;
+  /**
+   * Stress accumulated from this year's events, in points (Ticket 0205).
+   *
+   * Carried as a bare running total rather than as the character's stress
+   * level: the level is computed once, at the end of the year, by the stress
+   * phase, from everything that happened. An event contributes to the year; it
+   * does not set how stressed somebody is.
+   */
+  readonly stress: number;
   readonly history: EventHistory;
 }
 
@@ -72,10 +81,12 @@ export function applyEffects(targets: EffectTargets, effects?: EventEffects): Ef
       ? targets.behaviour
       : clampStat(targets.behaviour + effects.behaviour);
 
+  const stress = targets.stress + (effects.stress ?? 0);
+
   const history =
     effects.setFlags || effects.clearFlags
       ? withFlags(targets.history, effects.setFlags, effects.clearFlags)
       : targets.history;
 
-  return { stats, family, cash, behaviour, history };
+  return { stats, family, cash, behaviour, stress, history };
 }

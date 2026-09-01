@@ -16,7 +16,7 @@ import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 7;
+export const CURRENT_SAVE_VERSION = 8;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -39,10 +39,11 @@ export type { WorldState };
  * v5 added `education` (Ticket 0204).
  * v6 added `names` to a pending decision (Ticket 0203b).
  * v7 added tryout memory to education (Ticket 0204b).
+ * v8 added Study Harder's once-a-year memory (Ticket 0205).
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV7 {
-  readonly version: 7;
+export interface SaveGameV8 {
+  readonly version: 8;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -68,8 +69,8 @@ export interface SaveGameV7 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV7;
-export type CurrentSaveGame = SaveGameV7;
+export type AnySaveGame = SaveGameV8;
+export type CurrentSaveGame = SaveGameV8;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

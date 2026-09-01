@@ -160,6 +160,7 @@ export function Shell() {
       <WorldBar
         world={world}
         stats={state.player.stats}
+        stress={state.player.stress.level}
         age={state.player.age}
         onSelectWorld={selectWorld}
         onAdvance={advance}

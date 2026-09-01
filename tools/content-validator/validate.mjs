@@ -306,6 +306,10 @@ if (existsSync(eventsPath)) {
         .slice(0, 2)
         .join(' ');
 
+    // Counted across the whole catalog for the both-directions check below.
+    let stressUp = 0;
+    let stressDown = 0;
+
     for (const event of events) {
       const decision = event.type === 'decision' || event.type === 'opportunity';
       const choices = event.choices ?? [];
@@ -381,6 +385,30 @@ if (existsSync(eventsPath)) {
         }
       }
 
+      // V6 — stress is in range and goes BOTH ways (Ticket 0205).
+      // A catalog whose stress effects are all positive turns the system into a
+      // ratchet every character loses by eighteen, which is the separate
+      // visible mental-health system spec 1030 forbids under another name.
+      const checkStress = (effects, where) => {
+        const stress = effects?.stress;
+        if (stress === undefined) return;
+        if (typeof stress !== 'number' || !Number.isInteger(stress)) {
+          fail(rel, `${where}: stress must be a whole number.`);
+          return;
+        }
+        if (stress === 0) fail(rel, `${where}: a stress effect of 0 should be omitted.`);
+        if (stress < -25 || stress > 40) fail(rel, `${where}: stress ${stress} is out of range.`);
+        if (stress > 0) stressUp += 1;
+        if (stress < 0) stressDown += 1;
+      };
+      checkStress(event.effects, event.id);
+      for (const choice of choices) {
+        checkStress(choice.effects, `${event.id}/${choice.id}`);
+        for (const outcome of choice.outcomes ?? []) {
+          checkStress(outcome.effects, `${event.id}/${choice.id} outcome`);
+        }
+      }
+
       // V5 — a decision declares every person it names, so one name carries
       // through the prompt, the options and the outcome.
       const lines = [
@@ -428,6 +456,17 @@ if (existsSync(eventsPath)) {
           if (!used.has(token)) fail(rel, `${event.id}: declares {${token}} but never uses it.`);
         }
       }
+    }
+
+    // Stress must be able to go DOWN as well as up. A catalog where every
+    // stress effect is positive makes the system a ratchet, and a ratchet is a
+    // second health bar every character loses by eighteen.
+    if (stressUp > 0 && stressDown < Math.max(4, stressUp / 4)) {
+      fail(
+        rel,
+        `${stressUp} events add stress and only ${stressDown} relieve it. Stress must ` +
+          `be escapable — write the restful years too (Ticket 0205).`,
+      );
     }
 
     // A year with no eligible event throws in advanceYear. This is the check

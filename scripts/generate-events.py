@@ -154,10 +154,19 @@ def FX(
     relationship: dict | None = None,
     cash: dict | None = None,
     behaviour: int | None = None,
+    stress: int | None = None,
     set_flags: list[str] | None = None,
     clear_flags: list[str] | None = None,
 ) -> dict:
-    """An event's consequences. `cash` must come from CASH()."""
+    """
+    An event's consequences. `cash` must come from CASH().
+
+    `stress` is Ticket 0205's content hook. Positive for a year that kept
+    happening at the character; NEGATIVE for the things that genuinely help — a
+    long summer, a grandparent's house, a week with the power out. Both
+    directions are required, or stress is a ratchet and every character ends
+    childhood pinned at the top of it.
+    """
     if cash is not None and not isinstance(cash, dict):
         raise TypeError("cash must be CASH(delta, source), not a bare number")
     return prune(
@@ -166,6 +175,7 @@ def FX(
             "relationship": relationship,
             "cash": cash,
             "behaviour": behaviour,
+            "stress": stress,
             "setFlags": set_flags,
             "clearFlags": clear_flags,
         }
@@ -3257,6 +3267,11 @@ def check_effects(
     behaviour = effects.get("behaviour")
     if behaviour is not None and not (-40 <= behaviour <= 40):
         problems.append(f"{event_id}: behaviour change {behaviour} in {where} is out of range")
+    stress = effects.get("stress")
+    if stress is not None and not (-25 <= stress <= 40):
+        problems.append(f"{event_id}: stress change {stress} in {where} is out of range")
+    if stress == 0:
+        problems.append(f"{event_id}: stress of 0 in {where} — omit it instead")
 
 
 def check() -> None:
@@ -3535,10 +3550,131 @@ def report() -> None:
         print(f"    age {age:>2}: {len(window):>3} / {len(plain):>3}")
 
 
+# =============================================================================
+# TICKET 0205 — which years cost, and which years help
+# =============================================================================
+#
+# Stress is a backend system with no screen (spec 661, 1824, 1986). The only
+# way a player learns what wore a character down is that the things which wore
+# them down were things they read about. So the catalog has to be opinionated
+# about which years were hard.
+#
+# Kept as ONE table rather than scattered through the event definitions, for two
+# reasons: it can be read as a whole and argued with, and the balance of
+# positive to negative is visible at a glance. Both directions are required —
+# stress that only ever goes up is a second health bar every character loses by
+# eighteen, which is the separate mental-health system spec 1030 forbids.
+#
+# Values are points added to the year's total, before the character's own
+# resilience. A grandparent dying is worth roughly three months of being
+# overcommitted; a long empty summer pays back most of a bad term.
+
+STRESS_BY_EVENT: dict[str, int] = {
+    # --- years that cost -----------------------------------------------------
+    "family.mc.divorce": 24,
+    "family.mc.parent-illness": 18,
+    "school.bullied": 20,
+    "family.ec.parents-argue": 12,
+    "family.ec.new-house": 6,
+    "family.ec.moved-again": 9,
+    "family.ec.pet-dies": 8,
+    "family.mc.grandparent-dies": 18,
+    "family.mc.money-tight": 14,
+    "family.ec.parent-late-shifts": 6,
+    "family.inf.lost-toy": 3,
+    "family.mc.second-job": 7,
+    "family.mc.grounded": 5,
+    "family.mc.curfew-broken": 4,
+    "family.mc.older-sibling-leaves": 6,
+    "school.detention": 4,
+    "school.suspended": 14,
+    "school.exam-panic": 9,
+    "school.front-of-class": 4,
+    "school.reading-struggle": 8,
+    "school.hated-teacher": 9,
+    "school.new-school": 11,
+    "school.picked-last": 7,
+    "school.maths-wall": 8,
+    "school.principal-office": 8,
+    "friend.moved-away": 9,
+    "friend.first-fight": 6,
+    "friend.group-collapse": 14,
+    "friend.fell-out": 7,
+    "friend.left-out": 8,
+    "friend.betrayed": 12,
+    "friend.rejected": 6,
+    "friend.borrowed-never-returned": 3,
+    "random.broken-arm": 9,
+    "random.stitches": 6,
+    "random.phone-confiscated": 4,
+    "random.late-bloom": 7,
+    "random.embarrassment": 4,
+    "random.first-funeral-suit": 8,
+    "talent.act.stage-fright": 9,
+    "talent.aca.burnout": 12,
+    "talent.cri.caught": 15,
+    # --- years that help -----------------------------------------------------
+    "family.ec.bedtime-story": -3,
+    "family.ec.bedtime-story-dad": -3,
+    "family.mc.grandparent-close": -7,
+    "family.mc.family-holiday": -9,
+    "family.mc.camping": -6,
+    "school.summer-camp": -6,
+    "school.summer-nothing": -8,
+    "friend.bike-summer": -7,
+    "friend.fort": -4,
+    "friend.loner": -4,
+    "random.filler.teen.2": -6,
+    "random.snow-day": -4,
+    "random.library-card": -3,
+    "random.stray-cat": -3,
+    "random.cardboard": -4,
+    "random.perfect-day": -10,
+    "random.lunch-trades": -3,
+    "random.attic-find": -4,
+    "talent.wri.journal": -4,
+    "talent.ath.championship": -6,
+    "talent.mus.first-gig": -5,
+    "friend.defended": -8,
+    "friend.crush-returned": -6,
+    "family.ec.big-birthday": -4,
+    "family.ec.small-birthday": -4,
+    "family.ec.pet-arrives": -5,
+    "family.ec.pet-arrives-solo": -5,
+    "family.mc.first-car-gift": -6,
+    "school.reading-list": -3,
+    "friend.first": -6,
+    "friend.arcade": -4,
+    "random.filler.infant.1": -4,
+    "early.zoo": -3,
+}
+
+
+def apply_stress() -> None:
+    """
+    Fold the table above into the events it names.
+
+    An unknown id is a hard error rather than a warning: an event renamed out
+    from under this table would silently drop its stress and nothing would fail,
+    which is precisely the class of bug that only shows up in a screenshot
+    eighteen simulated years later.
+    """
+    by_id = {event["id"]: event for event in EVENTS}
+    missing = sorted(set(STRESS_BY_EVENT) - set(by_id))
+    if missing:
+        raise SystemExit(f"STRESS_BY_EVENT names events that do not exist: {missing}")
+    for event_id, points in STRESS_BY_EVENT.items():
+        event = by_id[event_id]
+        effects = dict(event.get("effects") or {})
+        effects["stress"] = points
+        event["effects"] = effects
+
+
 def main() -> None:
     # Order matters: check, WRITE, then report. Reporting first means piping this
     # through `head` closes the pipe, the next print kills the process, and the
     # file is silently never written — which cost real time twice.
+    apply_stress()
     check()
     payload = {"version": CATALOG_VERSION, "entries": EVENTS}
     OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

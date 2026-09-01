@@ -1,0 +1,77 @@
+/**
+ * Ticket 0205 — pressing Study Harder.
+ *
+ * Review: "I want there to just be a button that says study harder and it
+ * potentially (most of the time) boosts their grades."
+ *
+ * The model lives in @yearafter/education, which knows nothing about GameState.
+ * This is the translation layer: it spends the draws, writes the feed line, and
+ * folds the result back in. Same shape as `tryout.ts`, deliberately — an action
+ * the player takes between years is now a recognisable pattern in this package.
+ */
+
+import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import { err, ok, type Result } from '@yearafter/core';
+import { hasStudiedThisYear, isInSchool, studyHarder } from '@yearafter/education';
+import type { GameState } from './game-state';
+import { RngDomains } from './rng/rng';
+
+export type StudyError =
+  | 'not-in-school'
+  /** One press per school year. Come back after Advance. */
+  | 'already-studied';
+
+export interface StudyOutcome {
+  readonly state: GameState;
+  /** Whether it showed up on the report card. */
+  readonly worked: boolean;
+  readonly gained: number;
+  readonly entry: TimelineEntry;
+}
+
+export function study(state: GameState): Result<StudyOutcome, StudyError> {
+  if (!isInSchool(state.education)) return err('not-in-school');
+  if (hasStudiedThisYear(state.education, state.player.age)) return err('already-studied');
+
+  // Three draws from the Education stream, in a fixed order, so a life replays.
+  const stream = state.rng.stream(RngDomains.Education);
+  const result = studyHarder(
+    state.education.performance,
+    stream.next(),
+    stream.next(),
+    stream.next(),
+  );
+
+  const sequence = state.player.timeline.filter((entry) => entry.age === state.player.age).length;
+  const entry = createTimelineEntry({
+    age: state.player.age,
+    year: state.world.year,
+    kind: 'passive',
+    text: result.text,
+    id: `t:${state.world.year}:study`,
+    sequence,
+  });
+
+  const player: Character = {
+    ...state.player,
+    timeline: [...state.player.timeline, entry],
+  };
+
+  return ok({
+    state: {
+      ...state,
+      player,
+      education: {
+        ...state.education,
+        performance: result.performance,
+        // Pressing it makes them somebody who studies, for good. The yearly
+        // bump above is this year; `effort` is every year after it.
+        effort: 'hard',
+        studiedAtAge: state.player.age,
+      },
+    },
+    worked: result.worked,
+    gained: result.gained,
+    entry,
+  });
+}

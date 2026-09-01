@@ -24,6 +24,7 @@ import {
   targetPerformance,
 } from './performance';
 import { runSchoolYear } from './progression';
+import { STUDY_GAIN_MAX, STUDY_GAIN_MIN, studyHarder } from './study';
 import {
   EFFORT_HOURS,
   NOT_YET_ENROLLED,
@@ -31,6 +32,7 @@ import {
   statusLabel,
   gradePointAverage,
   isInSchool,
+  hasStudiedThisYear,
   letterGrade,
   schoolLabel,
   stageForGrade,
@@ -191,6 +193,48 @@ describe('enrolment and progression', () => {
     const starts = milestones.filter((text) => text.startsWith('Started'));
     expect(new Set(starts).size).toBe(starts.length);
     expect(milestones.filter((text) => text.includes('Graduated'))).toHaveLength(1);
+  });
+});
+
+describe('Study Harder', () => {
+  // Review: "I want there to just be a button that says study harder and it
+  // potentially (most of the time) boosts their grades."
+
+  it('boosts grades most of the time, but not always', () => {
+    let worked = 0;
+    for (let i = 0; i < 1000; i += 1) {
+      if (studyHarder(60, i / 1000, 0.5, 0.5).worked) worked += 1;
+    }
+    // "Most of the time" with room for a term that did not land.
+    expect(worked / 1000).toBeGreaterThan(0.6);
+    expect(worked / 1000).toBeLessThan(0.9);
+  });
+
+  it('is worth roughly a letter grade when it lands', () => {
+    const small = studyHarder(60, 0, 0, 0);
+    const big = studyHarder(60, 0, 1, 0);
+    expect(small.gained).toBeGreaterThanOrEqual(STUDY_GAIN_MIN);
+    expect(big.gained).toBeLessThanOrEqual(STUDY_GAIN_MAX);
+    expect(letterGrade(big.performance)).not.toBe(letterGrade(60));
+  });
+
+  it('still says something happened when the term did not land', () => {
+    const missed = studyHarder(60, 0.99, 0.5, 0);
+    expect(missed.worked).toBe(false);
+    // Not zero: a result of exactly nothing reads as a broken button.
+    expect(missed.gained).toBeGreaterThan(0);
+    expect(missed.text.length).toBeGreaterThan(0);
+  });
+
+  it('cannot push a character past the top of the scale', () => {
+    const topped = studyHarder(100, 0, 1, 0);
+    expect(topped.performance).toBe(100);
+  });
+
+  it('is available once per school year', () => {
+    const state: EducationState = { ...NOT_YET_ENROLLED, studiedAtAge: 12 };
+    expect(hasStudiedThisYear(state, 12)).toBe(true);
+    expect(hasStudiedThisYear(state, 13)).toBe(false);
   });
 });
 
