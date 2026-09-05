@@ -303,7 +303,20 @@ Where a cap is genuinely right — three afternoons of practice, two terms of
 studying — the screen says how many are left BEFORE the player presses, and says
 why when they are gone.
 
-### 13.12 An event never spends money the character does not have
+### 13.12 A timeline entry's id is unique, forever
+
+The Life screen keys its rows on the entry id. Two entries sharing one makes
+React drop or duplicate rows, so a piece of somebody's life silently vanishes
+from the feed — and it logs a duplicate-key error at whoever is running the app.
+
+Anything REPEATABLE puts its repeat counter in the id. Both bugs of this kind so
+far were created by making something repeatable — Study Harder going to two
+terms a year, and the interaction cap being lifted — and both reached a player's
+terminal. `advance.test.ts` now plays a life pressing every repeatable action to
+its limit and asserts no id repeats, so the next thing to become repeatable
+fails the build instead.
+
+### 13.13 An event never spends money the character does not have
 
 Anything with a negative cash effect carries `cashAtLeast` covering the largest
 amount any branch can spend, derived by the generator and checked by the
@@ -313,7 +326,7 @@ and finishing on $0 — the balance floored and the prose lying about it. That i
 13.6 broken from the other direction: money that moves without the sentence
 being true about it.
 
-### 13.13 Stress is backend, and it is escapable
+### 13.14 Stress is backend, and it is escapable
 
 Spec 1660, 661, 1824 and 1986 together: stress comes from workload and
 relationships, there is no visible time budget or capacity allocator, and the

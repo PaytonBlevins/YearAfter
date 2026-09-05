@@ -7,7 +7,7 @@ import {
   join,
   leave,
 } from '@yearafter/education';
-import { isCurrent, isFriend } from '@yearafter/social';
+import { interactionsFor, isCurrent, isFriend } from '@yearafter/social';
 import { isStressRelevant } from '@yearafter/stress';
 import { takeGig } from './gigs';
 import { interact } from './interact';
@@ -704,5 +704,79 @@ describe('teams, practice and work', () => {
         expect(before).toBeGreaterThanOrEqual(0);
       }
     }
+  });
+});
+
+describe('the feed', () => {
+  /**
+   * Every timeline entry needs its own id.
+   *
+   * The Life screen keys its rows on this. Two entries sharing an id makes
+   * React log "Encountered two children with the same key" and, worse, lets it
+   * drop or duplicate rows — so a year of somebody's life can silently go
+   * missing from the feed.
+   *
+   * This is written as a property over a life that presses EVERY repeatable
+   * action, because the two bugs it caught were both created by making
+   * something repeatable: Study Harder going to two terms a year, and the
+   * interaction cap being lifted. The next thing to become repeatable will be
+   * caught here rather than in the player's terminal.
+   */
+  it('never gives two entries the same id, however much the player does', () => {
+    let state = createNewGame({ seed: 'KEYS' });
+    for (let age = 1; age <= 17; age += 1) {
+      state = answerAll(advanceYear(state).state);
+
+      // Study both terms.
+      for (let term = 0; term < 4; term += 1) {
+        const result = study(state);
+        if (!result.ok) break;
+        state = result.value.state;
+      }
+
+      // Join what we can, try out for what we cannot, and practise it all.
+      const offers = activityOffers(state.education, {
+        age: state.player.age,
+        stage: state.education.stage === 'high' ? 'high' : 'middle',
+        stats: state.player.stats,
+        talents: state.player.talents,
+        wealth: state.family.finances.band,
+        household: state.family,
+      });
+      for (const offer of offers.slice(0, 3)) {
+        if (offer.joined || offer.unavailable) continue;
+        if (offer.needsTryout) {
+          const attempt = tryOut(state, offer.activity.id);
+          if (attempt.ok) state = attempt.value.state;
+        } else {
+          state = joinActivity(state, offer.activity.id);
+        }
+      }
+      for (const entry of state.education.activities) {
+        for (let session = 0; session < 4; session += 1) {
+          const result = practise(state, entry.activityId);
+          if (!result.ok) break;
+          state = result.value.state;
+        }
+      }
+
+      // And do everything on the menu with everybody, repeatedly.
+      for (const person of state.circle.people.filter(isCurrent)) {
+        for (const interaction of interactionsFor(person)) {
+          for (let repeat = 0; repeat < 3; repeat += 1) {
+            const result = interact(state, person.id, interaction.id);
+            if (!result.ok) break;
+            state = result.value.state;
+          }
+        }
+      }
+    }
+
+    const ids = state.player.timeline.map((entry) => entry.id);
+    const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+    expect(duplicates, `duplicate timeline ids: ${[...new Set(duplicates)].join(', ')}`).toEqual(
+      [],
+    );
+    expect(ids.length).toBeGreaterThan(60);
   });
 });

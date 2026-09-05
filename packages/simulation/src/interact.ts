@@ -110,7 +110,10 @@ export function interact(
     year: state.world.year,
     kind: 'relationship',
     text: result.text,
-    id: `t:${state.world.year}:social:${person.id}:${interaction.id}`,
+    // How many times already, because light interactions repeat within a year
+    // (0206b removed the cap). Two afternoons at the same person's house would
+    // otherwise share an id, which React reports as a duplicate key.
+    id: `t:${state.world.year}:social:${person.id}:${interaction.id}:${spent.light + spent.heavy}`,
     sequence,
   });
 

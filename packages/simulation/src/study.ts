@@ -58,7 +58,10 @@ export function study(state: GameState): Result<StudyOutcome, StudyError> {
     year: state.world.year,
     kind: 'passive',
     text: result.text,
-    id: `t:${state.world.year}:study`,
+    // The TERM is part of the id, because this runs twice a year now. Without
+    // it the second term collided with the first and React logged "Encountered
+    // two children with the same key" at the player's terminal.
+    id: `t:${state.world.year}:study:${termsAlready}`,
     sequence,
   });
 
