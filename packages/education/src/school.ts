@@ -203,6 +203,19 @@ export interface EnrolledActivity {
   readonly activityId: string;
   /** Age at which they joined, for "three years on the team" style text later. */
   readonly joinedAtAge: number;
+  /**
+   * Where this character sits in that squad or cast, 0–100 (Ticket 0206b).
+   *
+   * Review: "Please monitor sports team performance and have buttons to
+   * practice and raise performance." Never shown as a number — see
+   * `standingLabelFor` and `seasonLine` in standing.ts.
+   */
+  readonly standing: StatValue;
+  /** Seasons played, so a first year reads differently from a fourth. */
+  readonly seasons: number;
+  /** Age at which practice was last put in, and how many sessions that year. */
+  readonly practisedAtAge: number;
+  readonly practiceCount: number;
 }
 
 export interface EducationState {
@@ -239,12 +252,24 @@ export interface EducationState {
    */
   readonly tryoutYear: Readonly<Record<string, number>>;
   /**
-   * The age at which Study Harder was last pressed.
+   * The age at which Study Harder was last pressed, and how many times.
    *
-   * One press per school year. Without it the button is a slot machine: tap
-   * until the roll lands and every character finishes with an A.
+   * Review: "please allow me to study harder at least twice." Two terms is
+   * exactly right — a school year has more than one of them — and the second is
+   * worth less than the first, so it is a second lever rather than a doubled
+   * one. Without any limit the button is a slot machine: tap until the roll
+   * lands and every character finishes with an A.
    */
   readonly studiedAtAge?: number;
+  readonly studiedCount?: number;
+  /**
+   * Odd jobs currently held (Ticket 0206b), by gig id.
+   *
+   * Kept beside schooling because a child's working life and their school life
+   * share one budget of hours — the paper round takes the mornings homework was
+   * going to have. Real employment is Ticket 0210 and will want its own home.
+   */
+  readonly gigs: readonly string[];
   /** Set once a character graduates or leaves, so later systems can ask. */
   readonly finishedAtAge?: number;
 }
@@ -259,14 +284,22 @@ export const NOT_YET_ENROLLED: EducationState = {
   activities: [],
   tryouts: {},
   tryoutYear: {},
+  gigs: [],
 };
 
 export const isInSchool = (state: EducationState): boolean =>
   state.stage === 'elementary' || state.stage === 'middle' || state.stage === 'high';
 
-/** Whether Study Harder is still available this school year. */
+/** Terms of real effort available in one school year. */
+export const STUDY_TERMS = 2;
+
+/** How many times Study Harder has been pressed this school year. */
+export const studiedThisYear = (state: EducationState, age: number): number =>
+  state.studiedAtAge === age ? (state.studiedCount ?? 1) : 0;
+
+/** Whether the year's terms of studying are used up. */
 export const hasStudiedThisYear = (state: EducationState, age: number): boolean =>
-  state.studiedAtAge === age;
+  studiedThisYear(state, age) >= STUDY_TERMS;
 
 export const hasJoined = (state: EducationState, activityId: string): boolean =>
   state.activities.some((entry) => entry.activityId === activityId);

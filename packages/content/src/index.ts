@@ -89,3 +89,6 @@ export * from './events';
 /* -------------------------------------------------------------------------- */
 
 export * from './activities';
+
+/** Ticket 0206b — odd jobs a child can actually do for money. */
+export * from './gigs';

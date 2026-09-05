@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { activityOffers, join, leave } from '@yearafter/education';
+import {
+  PRACTICE_SESSIONS,
+  activityOffers,
+  enrolmentIn,
+  gigOffers,
+  join,
+  leave,
+} from '@yearafter/education';
 import { isCurrent, isFriend } from '@yearafter/social';
 import { isStressRelevant } from '@yearafter/stress';
+import { takeGig } from './gigs';
 import { interact } from './interact';
+import { joinActivity } from './joining';
+import { practise } from './practice';
+import { tryOut } from './tryout';
 import { advanceYear } from './advance';
 import { study } from './study';
 import { decide } from './decide';
@@ -276,18 +287,32 @@ describe('Study Harder', () => {
     expect(study(pupil).ok).toBe(true);
   });
 
-  it('can only be pressed once a school year', () => {
+  it('can be pressed twice a school year, and not a third time', () => {
+    // Review: "please allow me to study harder at least twice."
     const state = atSchool('SH-ONCE', 12);
     const first = study(state);
     expect(first.ok).toBe(true);
     if (!first.ok) return;
+    expect(first.value.termsLeft).toBe(1);
+
     const second = study(first.value.state);
-    expect(second.ok).toBe(false);
-    if (second.ok) return;
-    expect(second.error).toBe('already-studied');
-    // Next year it is available again.
-    const nextYear = answerAll(advanceYear(first.value.state).state);
-    expect(study(nextYear).ok).toBe(true);
+    expect(second.ok).toBe(true);
+    if (!second.ok) return;
+    expect(second.value.termsLeft).toBe(0);
+    // The second term is worth less than the first, and still worth something.
+    expect(second.value.gained).toBeLessThanOrEqual(first.value.gained);
+
+    const third = study(second.value.state);
+    expect(third.ok).toBe(false);
+    if (third.ok) return;
+    expect(third.error).toBe('already-studied');
+
+    // Next year both terms are available again.
+    const nextYear = answerAll(advanceYear(second.value.state).state);
+    const fresh = study(nextYear);
+    expect(fresh.ok).toBe(true);
+    if (!fresh.ok) return;
+    expect(fresh.value.termsLeft).toBe(1);
   });
 
   it('boosts grades most of the time, and says so either way', () => {
@@ -452,7 +477,9 @@ describe('the people in a childhood', () => {
     expect(named).toBeGreaterThan(20);
   });
 
-  it('lets you do one thing a year with somebody, and no more', () => {
+  it('lets you hang around with somebody as often as you like', () => {
+    // Review: "I don't like how you can only perform one action with your
+    // classmate per year." Light things repeat; they are simply worth less.
     const state = lived('TALK', 10);
     const person = state.circle.people.find((p) => p.kind === 'peer' && isCurrent(p));
     expect(person).toBeDefined();
@@ -464,12 +491,54 @@ describe('the people in a childhood', () => {
     expect(first.value.entry.text).toContain(person.firstName);
 
     const again = interact(first.value.state, person.id, 'hang-out');
+    expect(again.ok).toBe(true);
+    if (!again.ok) return;
+    const third = interact(again.value.state, person.id, 'hang-out');
+    expect(third.ok).toBe(true);
+  });
+
+  it('keeps the heavy things to once a year', () => {
+    let state = lived('HEAVY', 12);
+    // Warm somebody up to where telling them something is on the menu.
+    const person = state.circle.people.find((p) => p.kind === 'peer' && isCurrent(p));
+    if (!person) return;
+    state = {
+      ...state,
+      circle: {
+        ...state.circle,
+        people: state.circle.people.map((p) =>
+          p.id === person.id ? { ...p, relationship: 70 as typeof p.relationship } : p,
+        ),
+      },
+    };
+
+    const first = interact(state, person.id, 'secret');
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    const again = interact(first.value.state, person.id, 'secret');
     expect(again.ok).toBe(false);
     if (again.ok) return;
     expect(again.error).toBe('already-this-year');
 
+    // Next year it is available again.
     const nextYear = answerAll(advanceYear(first.value.state).state);
-    expect(interact(nextYear, person.id, 'hang-out').ok).toBe(true);
+    const later = nextYear.circle.people.find((p) => p.id === person.id);
+    if (later && isCurrent(later) && later.relationship >= 45) {
+      expect(interact(nextYear, person.id, 'secret').ok).toBe(true);
+    }
+  });
+
+  it('lets mischief with a teacher cost school standing', () => {
+    // Review: "I should also be able to interact with my teacher (innocently
+    // and mischievously)."
+    const state = lived('MISCHIEF', 12);
+    const teacher = state.circle.people.find((p) => p.kind === 'teacher' && isCurrent(p));
+    if (!teacher) return;
+    const before = state.education.behaviour;
+    const result = interact(state, teacher.id, 'talk-back');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.state.education.behaviour).toBeLessThan(before);
   });
 
   it('leaves the memory on the person, not just in the feed', () => {
@@ -492,5 +561,148 @@ describe('the people in a childhood', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.error).toBe('not-available');
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0206b — practice, teams and odd jobs                                 */
+/* -------------------------------------------------------------------------- */
+
+describe('teams, practice and work', () => {
+  const lived = (seed: string, toAge: number): GameState => {
+    let state = createNewGame({ seed });
+    for (let age = 1; age <= toAge; age += 1) state = answerAll(advanceYear(state).state);
+    return state;
+  };
+
+  const anyOffer = (state: GameState) =>
+    activityOffers(state.education, {
+      age: state.player.age,
+      stage: 'middle',
+      stats: state.player.stats,
+      talents: state.player.talents,
+      wealth: state.family.finances.band,
+      household: state.family,
+    });
+
+  it('still makes you try out for a team, after everything', () => {
+    // Review, twice now: "please remember to have tryouts for teams."
+    const state = lived('TRYOUT-STILL', 12);
+    const needing = anyOffer(state).filter((offer) => offer.needsTryout && !offer.unavailable);
+    expect(needing.length).toBeGreaterThan(0);
+    // And it is genuinely a tryout: it can be failed.
+    let cut = 0;
+    for (let life = 0; life < 30; life += 1) {
+      const other = lived(`TRY-${life}`, 12);
+      const target = anyOffer(other).find((offer) => offer.needsTryout && !offer.unavailable);
+      if (!target) continue;
+      const result = tryOut(other, target.activity.id);
+      if (result.ok && !result.value.made) cut += 1;
+    }
+    expect(cut).toBeGreaterThan(0);
+  });
+
+  it('puts people next to you when you make a team', () => {
+    // Reading output caught this: teammates appeared only for things you could
+    // press Join on, so every competitive activity left you there on your own.
+    let state = lived('MATES', 12);
+    const target = anyOffer(state).find((offer) => offer.needsTryout && !offer.unavailable);
+    if (!target) return;
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const result = tryOut(state, target.activity.id);
+      if (!result.ok) {
+        state = answerAll(advanceYear(state).state);
+        continue;
+      }
+      state = result.value.state;
+      if (result.value.made) {
+        const mates = state.circle.people.filter((p) => p.viaActivityId === target.activity.id);
+        expect(mates.length).toBeGreaterThan(0);
+        return;
+      }
+      state = answerAll(advanceYear(state).state);
+    }
+  });
+
+  it('lets practice make somebody genuinely good, and caps the year', () => {
+    let state = lived('PRACTISE', 12);
+    const club = anyOffer(state).find((offer) => !offer.needsTryout && !offer.unavailable);
+    if (!club) return;
+    state = joinActivity(state, club.activity.id);
+    const before = enrolmentIn(state.education, club.activity.id)?.standing ?? 0;
+
+    for (let session = 0; session < PRACTICE_SESSIONS; session += 1) {
+      const result = practise(state, club.activity.id);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      state = result.value.state;
+    }
+    expect(enrolmentIn(state.education, club.activity.id)?.standing).toBeGreaterThan(before);
+
+    // A fourth is refused — three afternoons is a good week, not a montage.
+    const extra = practise(state, club.activity.id);
+    expect(extra.ok).toBe(false);
+    if (extra.ok) return;
+    expect(extra.error).toBe('no-sessions-left');
+
+    // Next year the sessions come back.
+    const next = answerAll(advanceYear(state).state);
+    expect(practise(next, club.activity.id).ok).toBe(true);
+  });
+
+  it('pays an odd job, in a line that says the amount', () => {
+    // Review: "I also want to be able to perform freelance jobs at appropriate
+    // ages." CORE_RULES 13.6 still applies: the amount is in the sentence.
+    let state = lived('WORK', 13);
+    const offer = gigOffers({
+      age: state.player.age,
+      household: state.family,
+      held: state.education.gigs,
+    }).find((entry) => !entry.unavailable);
+    expect(offer).toBeDefined();
+    if (!offer) return;
+
+    const taken = takeGig(state, offer.gig.id);
+    expect(taken.ok).toBe(true);
+    if (!taken.ok) return;
+    state = taken.value;
+
+    const before = state.player.cash;
+    const advanced = advanceYear(state);
+    expect(Number(advanced.state.player.cash)).toBeGreaterThan(Number(before));
+
+    const paid = advanced.newEntries.find((entry) => /\$\d/.test(entry.text));
+    expect(paid, 'a gig that pays must say what it paid').toBeDefined();
+  });
+
+  it('refuses work the character is too young for', () => {
+    const child = lived('YOUNG', 9);
+    const result = takeGig(child, 'gig.retail');
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toBe('too-young');
+  });
+
+  it('never tells a character they spent money they did not have', () => {
+    // The bug this guards: "the coffee can under your bed has $150 in it" shown
+    // to somebody holding $60, who then spent it and finished on $0.
+    for (let life = 0; life < 40; life += 1) {
+      let state = createNewGame({ seed: `SPEND-${life}` });
+      for (let age = 1; age <= 17; age += 1) {
+        const before = Number(state.player.cash);
+        const advanced = advanceYear(state);
+        state = advanced.state;
+        // Answer with the most expensive option available, to provoke it.
+        while (state.pending.length > 0) {
+          const decision = state.pending[0];
+          if (!decision) break;
+          const answered = decide(state, decision.eventId, decision.choices[0]!.id);
+          if (!answered.ok) break;
+          state = answered.value.state;
+        }
+        expect(Number(state.player.cash), `life ${life} age ${age}`).toBeGreaterThanOrEqual(0);
+        expect(before).toBeGreaterThanOrEqual(0);
+      }
+    }
   });
 });

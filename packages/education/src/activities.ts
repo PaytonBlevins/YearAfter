@@ -15,15 +15,26 @@
  */
 
 import type { Personality, TalentKey, Talents, VisibleStats } from '@yearafter/character';
+import type { StatValue } from '@yearafter/core';
 import {
   ACTIVITIES,
   findActivity,
+  findGig,
+  type Gig,
   type Activity,
   type ActivityKind,
   type SchoolStageId,
 } from '@yearafter/content';
 import { livingParents, type Household, type WealthBand } from '@yearafter/relationships';
-import { hasJoined, isInSchool, type EducationState, EFFORT_HOURS } from './school';
+import {
+  hasJoined,
+  isInSchool,
+  type EducationState,
+  type EnrolledActivity,
+  EFFORT_HOURS,
+} from './school';
+import { gigHours } from './gigs';
+import { STARTING_STANDING } from './standing';
 
 export interface ActivityContext {
   readonly age: number;
@@ -123,8 +134,30 @@ export function activityOffers(
 
 export function join(state: EducationState, activityId: string, age: number): EducationState {
   if (hasJoined(state, activityId) || !findActivity(activityId)) return state;
-  return { ...state, activities: [...state.activities, { activityId, joinedAtAge: age }] };
+  return {
+    ...state,
+    activities: [
+      ...state.activities,
+      {
+        activityId,
+        joinedAtAge: age,
+        // In the squad, and nowhere near the front of it. Practice and the
+        // seasons decide the rest (Ticket 0206b).
+        standing: STARTING_STANDING as StatValue,
+        seasons: 0,
+        practisedAtAge: -1,
+        practiceCount: 0,
+      },
+    ],
+  };
 }
+
+/** The enrolment record for one activity, if the character is in it. */
+export const enrolmentIn = (
+  state: EducationState,
+  activityId: string,
+): EnrolledActivity | undefined =>
+  state.activities.find((entry) => entry.activityId === activityId);
 
 export function leave(state: EducationState, activityId: string): EducationState {
   if (!hasJoined(state, activityId)) return state;
@@ -140,7 +173,10 @@ export function committedHours(state: EducationState): number {
     const activity = findActivity(entry.activityId);
     return total + (activity?.hoursPerWeek ?? 0);
   }, 0);
-  return EFFORT_HOURS[state.effort] + activityHours;
+  const working = gigHours(
+    state.gigs.map((id) => findGig(id)).filter((gig): gig is Gig => gig !== undefined),
+  );
+  return EFFORT_HOURS[state.effort] + activityHours + working;
 }
 
 /** Annual cost of everything joined, in whole dollars, for the finance pass. */

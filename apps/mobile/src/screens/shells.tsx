@@ -26,6 +26,7 @@ import {
 } from '@yearafter/character';
 import { describeCity } from '@yearafter/content';
 import {
+  STUDY_TERMS,
   gradePointAverage,
   hasStudiedThisYear,
   isInSchool,
@@ -33,6 +34,7 @@ import {
   letterGrade,
   schoolLabel,
   statusLabel,
+  studiedThisYear,
 } from '@yearafter/education';
 import {
   Card,
@@ -154,7 +156,8 @@ export function CareerScreen() {
   // keeps being shown — as "Final grades" rather than "Grades".
   const hasGrades = atSchool || education.stage === 'graduated' || education.stage === 'droppedOut';
   const joined = joinedActivities(education);
-  const studiedThisYear = hasStudiedThisYear(education, player.age);
+  const termsUsed = studiedThisYear(education, player.age);
+  const studiedOut = hasStudiedThisYear(education, player.age);
 
   return (
     <Screen>
@@ -212,21 +215,25 @@ export function CareerScreen() {
               one button: "I want there to just be a button that says study
               harder and it potentially (most of the time) boosts their grades."
 
-              Once per school year, and it can fail to show on the report card.
-              The subtitle says which of those two states the row is in, because
-              a disabled button with no reason reads as broken.
+              TWO terms a school year — review asked for "at least twice" — and
+              it can fail to show on the report card either time. The subtitle
+              says which state the row is in, because a disabled button with no
+              reason reads as broken.
             */}
             <ListRow
               icon="school"
               title="Study Harder"
               subtitle={
-                studiedThisYear
-                  ? 'You put the work in this year already.'
-                  : 'A term of real effort. It usually shows.'
+                studiedOut
+                  ? 'Both terms of work are behind you this year.'
+                  : termsUsed > 0
+                    ? 'A second term. Worth less than the first.'
+                    : 'A term of real effort. It usually shows.'
               }
-              affordance={studiedThisYear ? 'none' : 'action'}
-              disabled={studiedThisYear}
-              onPress={studiedThisYear ? undefined : studyHarder}
+              value={studiedOut ? undefined : `${STUDY_TERMS - termsUsed} left`}
+              affordance={studiedOut ? 'none' : 'action'}
+              disabled={studiedOut}
+              onPress={studiedOut ? undefined : studyHarder}
             />
             <RowDivider />
             {/*
@@ -254,8 +261,16 @@ export function CareerScreen() {
       <SectionHeading>Work</SectionHeading>
       <RowGroup
         rows={[
+          {
+            icon: 'money',
+            title: 'Odd Jobs',
+            subtitle:
+              education.gigs.length > 0
+                ? `${education.gigs.length} on the go`
+                : 'What you can do for money at your age',
+            route: { screen: 'gigs', title: 'Odd Jobs' },
+          },
           { icon: 'career', title: 'Find a Job', ticket: '0210' },
-          { icon: 'career', title: 'Work Harder', affordance: 'action', ticket: '0210' },
         ]}
       />
 

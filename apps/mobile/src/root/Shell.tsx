@@ -14,6 +14,8 @@ import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
 import { FamilyScreen } from '../screens/FamilyScreen';
 import { SchoolActivitiesScreen } from '../screens/SchoolActivitiesScreen';
+import { ActivityScreen } from '../screens/ActivityScreen';
+import { GigsScreen } from '../screens/GigsScreen';
 import { PeopleScreen } from '../screens/PeopleScreen';
 import { PersonScreen } from '../screens/PersonScreen';
 import {
@@ -45,6 +47,8 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   friends: PeopleScreen,
   person: PersonScreen,
   schoolActivities: SchoolActivitiesScreen,
+  activity: ActivityScreen,
+  gigs: GigsScreen,
   debug: DebugScreen,
 };
 

@@ -288,7 +288,32 @@ points a year against a floor of twenty-two and turned the entire class over
 every September. Friendship outside that room has to be kept up, and that is
 what makes keeping it up mean something.
 
-### 13.11 Stress is backend, and it is escapable
+### 13.11 A limit is a year that wears out, not a wall
+
+Review, on the first version of the interaction menu: "I don't like how you can
+only perform one action with your classmate per year." Right — a hard wall after
+one tap is a rule the player runs into rather than a life they are living.
+
+So light things repeat and are worth steadily less, and stop with a sentence
+rather than a dead button. Only the things nobody could honestly do twice in a
+year stay once a year: telling somebody your secret, having it out with them,
+going first to fix it, asking a teacher to put a word in.
+
+Where a cap is genuinely right — three afternoons of practice, two terms of
+studying — the screen says how many are left BEFORE the player presses, and says
+why when they are gone.
+
+### 13.12 An event never spends money the character does not have
+
+Anything with a negative cash effect carries `cashAtLeast` covering the largest
+amount any branch can spend, derived by the generator and checked by the
+validator and the catalog tests. Reading output found a fourteen-year-old
+holding $60 told "the coffee can under your bed has $150 in it", spending it,
+and finishing on $0 — the balance floored and the prose lying about it. That is
+13.6 broken from the other direction: money that moves without the sentence
+being true about it.
+
+### 13.13 Stress is backend, and it is escapable
 
 Spec 1660, 661, 1824 and 1986 together: stress comes from workload and
 relationships, there is no visible time budget or capacity allocator, and the

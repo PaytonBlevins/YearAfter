@@ -2843,7 +2843,8 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 8,
-        "ageMax": 16
+        "ageMax": 16,
+        "cashAtLeast": 25
       },
       "weight": 10,
       "cooldown": 3,
@@ -5490,7 +5491,8 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 16,
-        "requires": ["sibling"]
+        "requires": ["sibling"],
+        "cashAtLeast": 25
       },
       "weight": 12,
       "cooldown": 6,
@@ -8174,7 +8176,8 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 8,
-        "ageMax": 16
+        "ageMax": 16,
+        "cashAtLeast": 12
       },
       "personTokens": ["kid"],
       "weight": 11,
@@ -8961,7 +8964,8 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 10,
-        "ageMax": 17
+        "ageMax": 17,
+        "cashAtLeast": 150
       },
       "weight": 11,
       "cooldown": 4,
@@ -9021,7 +9025,8 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 8,
-        "ageMax": 16
+        "ageMax": 16,
+        "cashAtLeast": 40
       },
       "weight": 11,
       "cooldown": 5,

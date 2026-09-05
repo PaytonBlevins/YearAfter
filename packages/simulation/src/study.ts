@@ -12,7 +12,13 @@
 
 import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
 import { err, ok, type Result } from '@yearafter/core';
-import { hasStudiedThisYear, isInSchool, studyHarder } from '@yearafter/education';
+import {
+  STUDY_TERMS,
+  hasStudiedThisYear,
+  isInSchool,
+  studiedThisYear,
+  studyHarder,
+} from '@yearafter/education';
 import type { GameState } from './game-state';
 import { RngDomains } from './rng/rng';
 
@@ -26,6 +32,8 @@ export interface StudyOutcome {
   /** Whether it showed up on the report card. */
   readonly worked: boolean;
   readonly gained: number;
+  /** Terms of this school year still available afterwards. */
+  readonly termsLeft: number;
   readonly entry: TimelineEntry;
 }
 
@@ -35,11 +43,13 @@ export function study(state: GameState): Result<StudyOutcome, StudyError> {
 
   // Three draws from the Education stream, in a fixed order, so a life replays.
   const stream = state.rng.stream(RngDomains.Education);
+  const termsAlready = studiedThisYear(state.education, state.player.age);
   const result = studyHarder(
     state.education.performance,
     stream.next(),
     stream.next(),
     stream.next(),
+    termsAlready,
   );
 
   const sequence = state.player.timeline.filter((entry) => entry.age === state.player.age).length;
@@ -68,10 +78,12 @@ export function study(state: GameState): Result<StudyOutcome, StudyError> {
         // bump above is this year; `effort` is every year after it.
         effort: 'hard',
         studiedAtAge: state.player.age,
+        studiedCount: termsAlready + 1,
       },
     },
     worked: result.worked,
     gained: result.gained,
+    termsLeft: STUDY_TERMS - (termsAlready + 1),
     entry,
   });
 }

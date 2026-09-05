@@ -46,6 +46,7 @@ export function runSocial(input: SocialPhaseInput): SocialPhaseOutput {
     nameCultureId: input.nameCultureId,
     firstName: input.firstName,
     charisma: input.charisma,
+    joinedActivityIds: input.education.activities.map((entry) => entry.activityId),
     family: input.family,
     atSchool,
     // Starting school counts as changing it: the class exists from that year on.

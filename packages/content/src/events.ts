@@ -88,6 +88,16 @@ export interface EventCondition {
   /** Extracurriculars currently joined (Ticket 0204). */
   readonly activitiesAtLeast?: number;
   readonly activitiesAtMost?: number;
+  /**
+   * Whole dollars the character must actually have.
+   *
+   * Set automatically by the generator on anything that SPENDS: an event whose
+   * prompt says "the coffee can under your bed has $150 in it" cannot fire at a
+   * character holding $60, and the version that did floored the balance at zero
+   * and told them they had spent $150. That is the unexplained-money bug
+   * (CORE_RULES 13.6) arriving from the other direction.
+   */
+  readonly cashAtLeast?: number;
   readonly requires?: readonly FamilyRequirement[];
   /** Any one of these talents. */
   readonly talentsAny?: readonly TalentKey[];

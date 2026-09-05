@@ -37,6 +37,10 @@ export type ScreenKey =
   | 'person'
   /** Ticket 0204. School extracurriculars — join as many as you can carry. */
   | 'schoolActivities'
+  /** Ticket 0206b. One team or club: how it is going, and practice. */
+  | 'activity'
+  /** Ticket 0206b. Odd jobs a child can actually do for money. */
+  | 'gigs'
   | 'debug';
 
 export interface Route {
@@ -50,6 +54,8 @@ export interface Route {
    * being looked at" is a second thing that can disagree with it.
    */
   readonly personId?: string;
+  /** Which activity this screen is about (0206b). Same reasoning as personId. */
+  readonly activityId?: string;
 }
 
 type Stacks = Record<World, Route[]>;

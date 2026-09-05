@@ -133,8 +133,9 @@ export function PeopleScreen() {
 
       <View style={styles.note}>
         <Text style={styles.noteText}>
-          You can do one thing with each person a year. People you stop seeing drift, and the ones
-          who last are the ones you kept up.
+          Hang around with somebody as often as you like — it is worth less each time. The things
+          you cannot do twice in a year are the ones that matter. People you stop seeing drift, and
+          the ones who last are the ones you kept up.
         </Text>
       </View>
     </ScrollView>

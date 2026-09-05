@@ -43,6 +43,8 @@ export interface EventContext {
    */
   readonly schoolStage: string;
   readonly activityCount: number;
+  /** Whole dollars the character is actually holding, for `cashAtLeast`. */
+  readonly cash: number;
   /**
    * The people this character actually knows (Ticket 0206) — classmates and
    * the teacher who has them this year.

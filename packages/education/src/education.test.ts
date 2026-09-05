@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { createPersonality, createStats, createTalents } from '@yearafter/character';
-import { ACTIVITIES, findActivity } from '@yearafter/content';
+import { ACTIVITIES, GIGS, findActivity, findGig } from '@yearafter/content';
 import { asNpcId, dollars } from '@yearafter/core';
 import type { FamilyMember, Household } from '@yearafter/relationships';
 import {
@@ -23,7 +23,17 @@ import {
   behaviourBaseline,
   targetPerformance,
 } from './performance';
+import { gigLine, gigOffers, gigPay } from './gigs';
 import { runSchoolYear } from './progression';
+import {
+  PRACTICE_SESSIONS,
+  STARTING_STANDING,
+  driftStanding,
+  naturalStanding,
+  practiceGain,
+  standingBand,
+  standingLabelFor,
+} from './standing';
 import { STUDY_GAIN_MAX, STUDY_GAIN_MIN, studyHarder } from './study';
 import {
   EFFORT_HOURS,
@@ -32,10 +42,12 @@ import {
   statusLabel,
   gradePointAverage,
   isInSchool,
+  STUDY_TERMS,
   hasStudiedThisYear,
   letterGrade,
   schoolLabel,
   stageForGrade,
+  studiedThisYear,
   type EducationState,
 } from './school';
 import { assessWorkload, capacityFor, overloadPenalties } from './workload';
@@ -231,10 +243,26 @@ describe('Study Harder', () => {
     expect(topped.performance).toBe(100);
   });
 
-  it('is available once per school year', () => {
-    const state: EducationState = { ...NOT_YET_ENROLLED, studiedAtAge: 12 };
-    expect(hasStudiedThisYear(state, 12)).toBe(true);
-    expect(hasStudiedThisYear(state, 13)).toBe(false);
+  it('is available twice per school year', () => {
+    // Review: "please allow me to study harder at least twice."
+    const once: EducationState = { ...NOT_YET_ENROLLED, studiedAtAge: 12, studiedCount: 1 };
+    expect(studiedThisYear(once, 12)).toBe(1);
+    expect(hasStudiedThisYear(once, 12)).toBe(false);
+
+    const twice: EducationState = { ...once, studiedCount: STUDY_TERMS };
+    expect(hasStudiedThisYear(twice, 12)).toBe(true);
+    // And the counting is per year, not for ever.
+    expect(hasStudiedThisYear(twice, 13)).toBe(false);
+    expect(studiedThisYear(twice, 13)).toBe(0);
+  });
+
+  it('makes the second term worth less than the first, and still worth it', () => {
+    const first = studyHarder(50, 0, 0.5, 0, 0);
+    const second = studyHarder(50, 0, 0.5, 0, 1);
+    expect(second.gained).toBeLessThan(first.gained);
+    expect(second.gained).toBeGreaterThan(0);
+    // And it says it is the second one, rather than repeating the first line.
+    expect(second.text).not.toBe(first.text);
   });
 });
 
@@ -610,5 +638,126 @@ describe('purity', () => {
     expect(isInSchool(NOT_YET_ENROLLED)).toBe(false);
     expect(isInSchool({ ...NOT_YET_ENROLLED, stage: 'high' })).toBe(true);
     expect(isInSchool({ ...NOT_YET_ENROLLED, stage: 'graduated' })).toBe(false);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0206b — standing, practice and odd jobs                              */
+/* -------------------------------------------------------------------------- */
+
+describe('how you are doing in a team', () => {
+  const team = ACTIVITIES.find((activity) => activity.kind === 'sport')!;
+
+  it('says where you sit in words, never as a number', () => {
+    // Spec 786-795: outcomes explained through context, not formulas.
+    for (const standing of [10, 45, 70, 95]) {
+      const label = standingLabelFor(team, standing);
+      expect(label).not.toMatch(/\d/);
+      expect(label.length).toBeGreaterThan(8);
+    }
+  });
+
+  it('uses the right nouns for the kind of thing it is', () => {
+    const play = ACTIVITIES.find((activity) => activity.kind === 'arts')!;
+    expect(standingLabelFor(team, 95)).not.toBe(standingLabelFor(play, 95));
+  });
+
+  it('is worth less every session inside one year', () => {
+    const stats = createStats();
+    const first = practiceGain(stats, 50, 0);
+    const third = practiceGain(stats, 50, 2);
+    expect(third).toBeLessThan(first);
+    expect(third).toBeGreaterThan(0);
+  });
+
+  it('is harder to improve the better you already are', () => {
+    const stats = createStats();
+    expect(practiceGain(stats, 90, 0)).toBeLessThan(practiceGain(stats, 30, 0));
+  });
+
+  it('lets work be KEPT, not eaten by the season every year', () => {
+    // Review asked for a practice button that raises performance. With a
+    // symmetric pull, six years of practising three times a year took a
+    // character from 40 to 71 and never to genuinely good — the drift ate the
+    // work annually and the button did not really do anything.
+    const stats = createStats({ discipline: 60, willpower: 60 });
+    const talents = createTalents();
+    let standing = STARTING_STANDING;
+    for (let year = 0; year < 6; year += 1) {
+      for (let session = 0; session < PRACTICE_SESSIONS; session += 1) {
+        standing = Math.min(100, standing + practiceGain(stats, standing, session));
+      }
+      standing = driftStanding(standing, team, stats, talents);
+    }
+    expect(standingBand(standing)).toBe('star');
+  });
+
+  it('still pulls a character who does nothing towards their own level', () => {
+    const talents = createTalents();
+    const natural = naturalStanding(team, createStats(), talents);
+    let standing = 95;
+    for (let year = 0; year < 12; year += 1) {
+      standing = driftStanding(standing, team, createStats(), talents);
+    }
+    expect(standing).toBeLessThan(95);
+    expect(standing).toBeGreaterThanOrEqual(natural - 2);
+  });
+});
+
+describe('odd jobs', () => {
+  it('gates every job on being old enough for it', () => {
+    // Review: "I also want to be able to perform freelance jobs at appropriate
+    // ages." The age gate is the whole point of these.
+    const atEight = gigOffers({ age: 8, household: household(), held: [] });
+    const atSixteen = gigOffers({ age: 16, household: household(), held: [] });
+    const openAtEight = atEight.filter((offer) => !offer.unavailable).map((o) => o.gig.id);
+    const openAtSixteen = atSixteen.filter((offer) => !offer.unavailable).map((o) => o.gig.id);
+    expect(openAtEight.length).toBeGreaterThan(0);
+    expect(openAtSixteen.length).toBeGreaterThan(openAtEight.length);
+    // A weekend shift in a shop is not a thing an eight-year-old can take.
+    expect(openAtEight).not.toContain('gig.retail');
+    expect(openAtSixteen).toContain('gig.retail');
+  });
+
+  it('never leaves a school-age character with nothing they could do', () => {
+    for (let age = 8; age <= 17; age += 1) {
+      const open = gigOffers({ age, household: household(), held: [] }).filter(
+        (offer) => !offer.unavailable,
+      );
+      expect(open.length, `age ${age}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('refuses babysitting to a character with nobody at home', () => {
+    const alone = gigOffers({ age: 14, household: household([]), held: [] });
+    const sitting = alone.find((offer) => offer.gig.id === 'gig.babysitting');
+    expect(sitting?.unavailable).toBe('needs-parent');
+  });
+
+  it('holds two at once and not three', () => {
+    const busy = gigOffers({ age: 16, household: household(), held: ['gig.retail', 'gig.lawns'] });
+    const others = busy.filter((offer) => !offer.held);
+    expect(others.every((offer) => offer.unavailable === 'hands-full')).toBe(true);
+  });
+
+  it('pays more to somebody who is good at it', () => {
+    const gig = findGig('gig.tutoring')!;
+    const bright = gigPay(gig, createStats({ smarts: 90 }), createTalents());
+    const not = gigPay(gig, createStats({ smarts: 30 }), createTalents());
+    expect(bright).toBeGreaterThan(not);
+    // And a talent is worth real money, which is why talents exist.
+    const talented = gigPay(gig, createStats({ smarts: 90 }), createTalents(['academics']));
+    expect(talented).toBeGreaterThan(bright);
+  });
+
+  it('always says what it paid, in the line the player reads', () => {
+    // CORE_RULES 13.6: money names its source AND its amount.
+    for (const gig of GIGS) {
+      for (const variant of [0, 0.9]) {
+        const line = gigLine(gig, 240, variant);
+        expect(line, gig.id).toContain('$240');
+        expect(line, gig.id).not.toContain('${amount}');
+      }
+    }
   });
 });

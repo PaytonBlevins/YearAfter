@@ -17,7 +17,9 @@ import {
   chanceOf,
   displayName,
   driftPerson,
+  findInteraction,
   interactionsFor,
+  lightLeft,
   isCurrent,
   isFriend,
   remember,
@@ -171,6 +173,77 @@ describe('interactions', () => {
     expect(interactionsFor(peer({ relationship: 70 })).map((e) => e.id)).toContain('secret');
   });
 
+  it('lets light things repeat, and heavy things not', () => {
+    // Review: "I don't like how you can only perform one action with your
+    // classmate per year." The wall is gone; what is left is the handful of
+    // things nobody can honestly do twice in a year.
+    const light = INTERACTIONS.filter((entry) => entry.weight === 'light').map((e) => e.id);
+    const heavy = INTERACTIONS.filter((entry) => entry.weight === 'heavy').map((e) => e.id);
+    expect(light).toContain('hang-out');
+    expect(light).toContain('compliment');
+    expect(heavy).toContain('secret');
+    expect(heavy).toContain('fall-out');
+  });
+
+  it('makes a repeated afternoon worth less, and eventually nothing', () => {
+    const first = resolveInteraction(INTERACTIONS[0]!, peer(), 50, 'Wren', 0, 0, 0);
+    const third = resolveInteraction(INTERACTIONS[0]!, peer(), 50, 'Wren', 0, 0, 2);
+    expect(third.warmth).toBeLessThan(first.warmth);
+    expect(third.warmth).toBeGreaterThan(0);
+
+    // And it stops, in a sentence rather than by the button going dead.
+    const worn = resolveInteraction(INTERACTIONS[0]!, peer(), 50, 'Wren', 0, 0, 9);
+    expect(worn.worn).toBe(true);
+    expect(worn.warmth).toBe(0);
+    expect(worn.text).toContain('Wren');
+    expect(lightLeft(9)).toBe(0);
+  });
+
+  it('gives a teacher an innocent menu and a mischievous one', () => {
+    // Review: "I should also be able to interact with my teacher (innocently
+    // and mischievously)."
+    const menu = interactionsFor(teacher());
+    expect(menu.some((entry) => !entry.mischief)).toBe(true);
+    expect(menu.some((entry) => entry.mischief)).toBe(true);
+    expect(menu.map((e) => e.id)).toContain('talk-back');
+  });
+
+  it('makes mischief cost school standing, and nothing else does', () => {
+    // Routed through the same field events use, so winding a teacher up all
+    // year can genuinely land a character in an alternative school (spec 73).
+    for (const interaction of INTERACTIONS) {
+      if (interaction.mischief) {
+        expect(interaction.behaviour, interaction.id).toBeLessThan(0);
+      }
+      if (interaction.kind === 'peer') {
+        expect(interaction.behaviour, interaction.id).toBeUndefined();
+      }
+    }
+    const caught = resolveInteraction(
+      findInteraction('talk-back')!,
+      teacher(),
+      50,
+      'Mrs. X',
+      0.99,
+      0,
+    );
+    expect(caught.behaviour).toBeLessThan(0);
+  });
+
+  it('costs less standing when you get away with it', () => {
+    const away = resolveInteraction(findInteraction('skip-class')!, teacher(), 50, 'Mrs. X', 0, 0);
+    const caught = resolveInteraction(
+      findInteraction('skip-class')!,
+      teacher(),
+      50,
+      'Mrs. X',
+      0.99,
+      0,
+    );
+    expect(Math.abs(away.behaviour)).toBeLessThan(Math.abs(caught.behaviour));
+    expect(away.behaviour).toBeLessThan(0);
+  });
+
   it('can always go badly, at every level of friendship', () => {
     // CORE_RULES 13.4: a menu where every option is neutral-or-better is a
     // reward with extra steps.
@@ -206,7 +279,8 @@ describe('interactions', () => {
 
   it('costs something when it does not land', () => {
     for (const interaction of INTERACTIONS) {
-      const bad = resolveInteraction(interaction, peer(), 50, 'Wren', 0.999, 0);
+      const subject = interaction.kind === 'teacher' ? teacher() : peer();
+      const bad = resolveInteraction(interaction, subject, 50, 'Wren', 0.999, 0);
       expect(bad.worked, interaction.id).toBe(false);
       expect(bad.warmth, interaction.id).toBeLessThan(0);
     }

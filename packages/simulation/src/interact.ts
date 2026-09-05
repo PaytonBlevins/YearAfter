@@ -4,15 +4,19 @@
  * Review, after the 0204b build: "I also should be able to interact with
  * teachers and classmates." This is that verb.
  *
- * Same shape as `tryout.ts` and `study.ts` — a Result, one draw from a named
- * stream, a timeline line either way, and once per school year. The rhythm is
- * deliberate: every action the player takes between years in this game costs a
- * year, so none of them can be ground.
+ * Same shape as `tryout.ts` and `study.ts` — a Result, draws from a named
+ * stream, a timeline line either way.
+ *
+ * Light things repeat as often as the player likes and are worth less each
+ * time; heavy things are once a year. Review asked for the flat one-a-year cap
+ * to go: "I don't like how you can only perform one action with your classmate
+ * per year." What replaced it is a year that wears out rather than a wall.
  */
 
 import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
-import { err, ok, type Result } from '@yearafter/core';
+import { clampStat, err, ok, type Result } from '@yearafter/core';
 import {
+  contactWith,
   displayName,
   findInteraction,
   interactionsFor,
@@ -31,7 +35,14 @@ export type InteractError =
   | 'no-such-interaction'
   /** Not on the menu for this person right now. */
   | 'not-available'
-  /** One per person per school year. */
+  /**
+   * A HEAVY thing, already done with this person this year.
+   *
+   * Light things have no such limit — review asked for the one-a-year cap to
+   * go, and it did. What is left is the handful of things you cannot honestly
+   * do twice in a year: tell somebody your secret, have it out with them, go
+   * first to fix it, ask a teacher to put a word in.
+   */
   | 'already-this-year';
 
 export interface InteractOutcome {
@@ -54,7 +65,8 @@ export function interact(
   if (!interactionsFor(person).some((entry) => entry.id === interaction.id)) {
     return err('not-available');
   }
-  if (state.circle.spokenToAtAge[person.id] === state.player.age) {
+  const spent = contactWith(state.circle, person.id, state.player.age);
+  if (interaction.weight === 'heavy' && spent.heavy > 0) {
     return err('already-this-year');
   }
 
@@ -66,16 +78,23 @@ export function interact(
     displayName(person),
     stream.next(),
     stream.next(),
+    spent.light,
   );
 
   // The other person keeps this. That is the difference between a menu and a
   // relationship: next year their page still says what happened.
-  const updated: Acquaintance = remember(person, {
-    age: state.player.age,
-    text: result.text,
-    major: result.major,
-    warmth: result.warmth,
-  });
+  //
+  // A worn-out repeat is NOT remembered. "You have been round a lot lately" is
+  // a fact about the week, not a thing that happened between two people, and
+  // filing six of them would push everything that mattered off the page.
+  const updated: Acquaintance = result.worn
+    ? person
+    : remember(person, {
+        age: state.player.age,
+        text: result.text,
+        major: result.major,
+        warmth: result.warmth,
+      });
 
   // Falling out badly enough ends it. The person stays in the save — spec
   // 771-785 keeps reconciliation possible, and "Try to fix it" is on the menu
@@ -104,11 +123,28 @@ export function interact(
     state: {
       ...state,
       player,
+      // Mischief costs school standing, through the same field events use —
+      // which means winding a teacher up all year can genuinely land a
+      // character in an alternative school (spec 73).
+      education:
+        result.behaviour === 0
+          ? state.education
+          : {
+              ...state.education,
+              behaviour: clampStat(state.education.behaviour + result.behaviour),
+            },
       circle: {
         people: state.circle.people.map((candidate) =>
           candidate.id === person.id ? ended : candidate,
         ),
-        spokenToAtAge: { ...state.circle.spokenToAtAge, [person.id]: state.player.age },
+        contact: {
+          ...state.circle.contact,
+          [person.id]: {
+            age: state.player.age,
+            light: spent.light + (interaction.weight === 'light' ? 1 : 0),
+            heavy: spent.heavy + (interaction.weight === 'heavy' ? 1 : 0),
+          },
+        },
       },
     },
     worked: result.worked,

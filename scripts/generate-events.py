@@ -3410,6 +3410,29 @@ def check() -> None:
                     outcome["text"],
                 )
 
+        # Anything that spends has to be gated on having the money. Derived by
+        # apply_cash_gates; checked here so a hand-edit cannot remove it.
+        biggest_spend = 0
+        for source in [event.get("effects")] + [
+            *(choice.get("effects") for choice in choices),
+            *(
+                outcome.get("effects")
+                for choice in choices
+                for outcome in choice.get("outcomes", [])
+            ),
+        ]:
+            delta = ((source or {}).get("cash") or {}).get("delta", 0)
+            if delta < 0:
+                biggest_spend = max(biggest_spend, -delta)
+        if biggest_spend > 0:
+            gate = event["eligibility"].get("cashAtLeast", 0)
+            if gate < biggest_spend:
+                problems.append(
+                    f"{eid}: can spend ${biggest_spend} but is only gated on ${gate}. "
+                    f"An event that spends what the character does not have floors the "
+                    f"balance at zero and tells them they spent it."
+                )
+
         declared = set(event.get("personTokens", []))
         used: set[str] = set()
 
@@ -3650,6 +3673,40 @@ STRESS_BY_EVENT: dict[str, int] = {
 }
 
 
+def apply_cash_gates() -> None:
+    """
+    An event that SPENDS must require the money to be there.
+
+    Reading output found a fourteen-year-old holding $60 told "the coffee can
+    under your bed has $150 in it", spending it, and finishing on $0 — the
+    balance floored and the sentence lying about it. That is CORE_RULES 13.6
+    broken from the other direction: money that moves without the prose being
+    true about it.
+
+    Derived rather than hand-authored, because hand-authoring it means the next
+    event to spend money forgets. The gate is the LARGEST amount any branch can
+    spend: an event whose prompt presumes the money presumes it before the
+    player picks, so gating per choice would still show the prompt to somebody
+    who cannot afford the thing it describes.
+    """
+    for event in EVENTS:
+        spends = [0]
+        effects = event.get("effects") or {}
+        if effects.get("cash", {}).get("delta", 0) < 0:
+            spends.append(-effects["cash"]["delta"])
+        for choice in event.get("choices", []):
+            choice_effects = choice.get("effects") or {}
+            if choice_effects.get("cash", {}).get("delta", 0) < 0:
+                spends.append(-choice_effects["cash"]["delta"])
+            for outcome in choice.get("outcomes", []):
+                outcome_effects = outcome.get("effects") or {}
+                if outcome_effects.get("cash", {}).get("delta", 0) < 0:
+                    spends.append(-outcome_effects["cash"]["delta"])
+        most = max(spends)
+        if most > 0:
+            event["eligibility"] = {**event["eligibility"], "cashAtLeast": most}
+
+
 def apply_stress() -> None:
     """
     Fold the table above into the events it names.
@@ -3675,6 +3732,7 @@ def main() -> None:
     # through `head` closes the pipe, the next print kills the process, and the
     # file is silently never written — which cost real time twice.
     apply_stress()
+    apply_cash_gates()
     check()
     payload = {"version": CATALOG_VERSION, "entries": EVENTS}
     OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

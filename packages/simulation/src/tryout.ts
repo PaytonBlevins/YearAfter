@@ -17,6 +17,7 @@ import { findActivity } from '@yearafter/content';
 import { err, ok, type Result } from '@yearafter/core';
 import { attemptTryout, hasAttemptedThisYear, hasJoined, isInSchool } from '@yearafter/education';
 import type { GameState } from './game-state';
+import { teammatesFor } from './social-generator';
 import { RngDomains } from './rng/rng';
 
 export type TryoutError =
@@ -77,8 +78,32 @@ export function tryOut(state: GameState, activityId: string): Result<TryoutOutco
     timeline: [...state.player.timeline, entry],
   };
 
+  // Making a team puts you next to the people on it (Ticket 0206b). Reading
+  // output caught this: teammates appeared only for things you could join by
+  // pressing Join, so every competitive activity — the ones you actually earned
+  // — left you standing there on your own.
+  const teammates = result.made
+    ? teammatesFor(state.circle, state.rng.stream(RngDomains.Relationships), {
+        activityId: activity.id,
+        activityName: activity.name,
+        age: state.player.age,
+        worldYear: state.world.year,
+        nameCultureId: state.nameCultureId,
+        firstName: state.player.firstName,
+        family: state.family,
+      })
+    : [];
+
   return ok({
-    state: { ...state, player, education: result.state },
+    state: {
+      ...state,
+      player,
+      education: result.state,
+      circle:
+        teammates.length > 0
+          ? { ...state.circle, people: [...state.circle.people, ...teammates] }
+          : state.circle,
+    },
     made: result.made,
     entry,
   });

@@ -10,6 +10,10 @@
  * make each year and see the result of, which is what spec 1821 means by "major
  * + Study Harder is generally enough".
  *
+ * Available TWICE a school year — review asked for "at least twice", and a
+ * school year genuinely has more than one term in it. The second is worth less
+ * than the first, so it is a second lever rather than the first one doubled.
+ *
  * Two things happen when it is pressed:
  *
  *  1. This year's grades move, most of the time. Not always: a term of real
@@ -54,11 +58,26 @@ const WORKED_LINES = [
   'Worked at it all year. The grades moved, and somebody noticed.',
 ];
 
+/** The second term of the same year. Said differently, because it is. */
+const WORKED_AGAIN_LINES = [
+  'Went at it again after Christmas, and the second half of the year was better than the first.',
+  'Kept it up through the second term. The grades moved again, by less, which is how it works.',
+  'Did not let it slide after the first report card. It showed.',
+];
+
 const DID_NOT_LINES = [
   'Studied hard all term and the grades barely moved. Some years are like that.',
   'Put the work in. The report card came back looking much the same.',
   'Revised for weeks and it did not show up where it was supposed to.',
 ];
+
+/**
+ * What a second term of the same year is worth, against the first.
+ *
+ * Not half, and not the same. Doing it twice should clearly beat doing it once,
+ * or the second press is a chore the player performs because it is there.
+ */
+export const SECOND_TERM_SCALE = 0.65;
 
 /**
  * Resolve one press of Study Harder.
@@ -69,22 +88,25 @@ const DID_NOT_LINES = [
  * @param roll        0–1, decides whether the term landed.
  * @param magnitude   0–1, how much it was worth when it did.
  * @param variant     0–1, which way the line is phrased.
+ * @param termsAlready How many terms of this year have already been spent.
  */
 export function studyHarder(
   performance: number,
   roll: number,
   magnitude: number,
   variant: number,
+  termsAlready = 0,
 ): StudyResult {
   const worked = roll < STUDY_SUCCESS_CHANCE;
-  const raw = worked
-    ? STUDY_GAIN_MIN + magnitude * (STUDY_GAIN_MAX - STUDY_GAIN_MIN)
-    : STUDY_CONSOLATION;
+  const scale = termsAlready > 0 ? SECOND_TERM_SCALE : 1;
+  const raw =
+    (worked ? STUDY_GAIN_MIN + magnitude * (STUDY_GAIN_MAX - STUDY_GAIN_MIN) : STUDY_CONSOLATION) *
+    scale;
   // Deliberately NOT run through nudgeStats: performance is not a visible stat,
   // and a character already at the top of their class should still be able to
   // hold that position by working. Clamping is enough.
   const next = clampStat(Math.round(performance + raw));
-  const lines = worked ? WORKED_LINES : DID_NOT_LINES;
+  const lines = worked ? (termsAlready > 0 ? WORKED_AGAIN_LINES : WORKED_LINES) : DID_NOT_LINES;
   const index = Math.min(lines.length - 1, Math.floor(variant * lines.length));
   return {
     performance: next,

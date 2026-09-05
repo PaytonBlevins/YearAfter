@@ -28,18 +28,22 @@ import {
 import {
   UNAVAILABLE_LABELS,
   activityOffers,
+  enrolmentIn,
   isInSchool,
   joinedActivities,
+  standingLabelFor,
   type ActivityOffer,
 } from '@yearafter/education';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
+import { useNavigation } from '../navigation/navigation';
 import { colors, layout, spacing, typography } from '../theme/theme';
 
 const KIND_ORDER: readonly ActivityKind[] = ['sport', 'arts', 'academic', 'service', 'social'];
 
 export function SchoolActivitiesScreen() {
-  const { state, joinActivity, leaveActivity, tryOutFor } = useGame();
+  const { state, joinActivity, tryOutFor } = useGame();
+  const { push } = useNavigation();
   if (!state) return null;
 
   const { education, player, family } = state;
@@ -85,13 +89,32 @@ export function SchoolActivitiesScreen() {
             {joined.map((offer, index) => (
               <Fragment key={offer.activity.id}>
                 {index > 0 ? <RowDivider /> : null}
-                <ActivityRow offer={offer} onPress={() => leaveActivity(offer.activity.id)} />
+                {/*
+                  Opens rather than quitting in place (0206b). A row you are
+                  already in is a place with a season and teammates behind it,
+                  and making the whole row a Quit button meant the only thing
+                  you could do with something you had joined was leave it.
+                */}
+                <ActivityRow
+                  offer={offer}
+                  standing={standingLabelFor(
+                    offer.activity,
+                    enrolmentIn(education, offer.activity.id)?.standing ?? 50,
+                  )}
+                  onPress={() =>
+                    push({
+                      screen: 'activity',
+                      title: offer.activity.name,
+                      activityId: offer.activity.id,
+                    })
+                  }
+                />
               </Fragment>
             ))}
           </Card>
           <Text style={styles.note}>
-            Tap one to quit it. Nothing stops you joining more — but a week is only so long, and the
-            year will let you know.
+            Tap one to see how it is going, put the hours in, or leave. Nothing stops you joining
+            more — but a week is only so long, and the year will let you know.
           </Text>
         </>
       ) : null}
@@ -142,13 +165,22 @@ export function SchoolActivitiesScreen() {
   );
 }
 
-function ActivityRow({ offer, onPress }: { offer: ActivityOffer; onPress?: () => void }) {
+function ActivityRow({
+  offer,
+  standing,
+  onPress,
+}: {
+  offer: ActivityOffer;
+  /** How it is going, in words. Only for something already joined. */
+  standing?: string;
+  onPress?: () => void;
+}) {
   const { activity, joined, unavailable, needsTryout, attemptedThisYear } = offer;
   // Some places you have to earn. The row says which before it is pressed, so
   // "Try out" and "Join" are visibly different promises.
   const blocked = Boolean(unavailable) || attemptedThisYear;
   const action = joined
-    ? 'Quit'
+    ? undefined
     : attemptedThisYear
       ? undefined
       : needsTryout
@@ -159,15 +191,18 @@ function ActivityRow({ offer, onPress }: { offer: ActivityOffer; onPress?: () =>
     <ListRow
       title={activity.name}
       subtitle={
-        unavailable
-          ? UNAVAILABLE_LABELS[unavailable]
-          : attemptedThisYear
-            ? 'You already tried this year. Next year.'
-            : activity.blurb
+        joined && standing
+          ? standing
+          : unavailable
+            ? UNAVAILABLE_LABELS[unavailable]
+            : attemptedThisYear
+              ? 'You already tried this year. Next year.'
+              : activity.blurb
       }
       value={action}
-      // Ellipsis, not a chevron: these act in place. CORE_RULES §8.
-      affordance={blocked ? 'none' : 'action'}
+      // Ellipsis for the things that act in place (CORE_RULES §8); a chevron
+      // for something joined, because that one opens a screen.
+      affordance={joined ? 'navigate' : blocked ? 'none' : 'action'}
       disabled={blocked}
       onPress={blocked ? undefined : onPress}
       meta={describeCommitment(activity)}

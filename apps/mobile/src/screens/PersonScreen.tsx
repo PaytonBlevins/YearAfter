@@ -15,12 +15,16 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   bondOf,
   chanceOf,
+  contactWith,
   displayName,
   fullName,
   interactionsFor,
   isCurrent,
+  lightLeft,
   notableMemories,
   type Acquaintance,
+  type Interaction,
+  type YearContact,
 } from '@yearafter/social';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
@@ -43,8 +47,11 @@ export function PersonScreen() {
   }
 
   const around = isCurrent(person);
-  const spentThisYear = state.circle.spokenToAtAge[person.id] === state.player.age;
+  const spent = contactWith(state.circle, person.id, state.player.age);
   const memories = notableMemories(person);
+  const options = interactionsFor(person);
+  const innocent = options.filter((entry) => !entry.mischief);
+  const mischief = options.filter((entry) => entry.mischief);
 
   return (
     <ScrollView
@@ -66,40 +73,49 @@ export function PersonScreen() {
 
       {around ? (
         <>
-          <SectionHeading note={spentThisYear ? undefined : 'once a year'}>
+          <SectionHeading note={lightLeft(spent.light) === 0 ? 'seen enough of you' : undefined}>
             What you can do
           </SectionHeading>
           <Card>
-            {/*
-              When the year is spent, ONE row saying so. The first version
-              disabled all six and repeated "You have already seen them this
-              year" six times down the screen, which is the same sentence
-              charging the player six lines of reading to learn one thing.
-            */}
-            {spentThisYear ? (
-              <ListRow
-                title={`You have already seen ${displayName(person)} this year`}
-                subtitle="One thing per person per year. Advance, and come back."
-                affordance="none"
-                disabled
-              />
-            ) : (
-              interactionsFor(person).map((interaction, index) => (
-                <Fragment key={interaction.id}>
-                  {index > 0 ? <RowDivider /> : null}
-                  <ListRow
-                    title={interaction.label}
-                    subtitle={interaction.blurb}
-                    // The odds, in words. Spec 786-795: enough to make a
-                    // decision with, never the formula that produced it.
-                    value={oddsLabel(chanceOf(interaction, person, state.player.stats.charisma))}
-                    affordance="action"
-                    onPress={() => interactWith(person.id, interaction.id)}
-                  />
-                </Fragment>
-              ))
-            )}
+            {innocent.map((interaction, index) => (
+              <Fragment key={interaction.id}>
+                {index > 0 ? <RowDivider /> : null}
+                <InteractionRow
+                  interaction={interaction}
+                  person={person}
+                  spent={spent}
+                  charisma={state.player.stats.charisma}
+                  onPress={() => interactWith(person.id, interaction.id)}
+                />
+              </Fragment>
+            ))}
           </Card>
+
+          {/*
+            Mischief gets its own card rather than sitting under the polite
+            options. Review asked to be able to treat a teacher "innocently and
+            mischievously", and the two are different decisions — one costs you
+            nothing to consider and the other costs school standing.
+          */}
+          {mischief.length > 0 ? (
+            <>
+              <SectionHeading note="costs you standing">Or</SectionHeading>
+              <Card>
+                {mischief.map((interaction, index) => (
+                  <Fragment key={interaction.id}>
+                    {index > 0 ? <RowDivider /> : null}
+                    <InteractionRow
+                      interaction={interaction}
+                      person={person}
+                      spent={spent}
+                      charisma={state.player.stats.charisma}
+                      onPress={() => interactWith(person.id, interaction.id)}
+                    />
+                  </Fragment>
+                ))}
+              </Card>
+            </>
+          ) : null}
         </>
       ) : null}
 
@@ -137,6 +153,51 @@ export function PersonScreen() {
         </View>
       ) : null}
     </ScrollView>
+  );
+}
+
+/**
+ * One row on the menu.
+ *
+ * A heavy thing already used this year is disabled and says why. A light thing
+ * shows how well it is likely to go — and, once the year has been spent on this
+ * person, that the returns have gone. The player is never left pressing
+ * something that quietly does nothing.
+ */
+function InteractionRow({
+  interaction,
+  person,
+  spent,
+  charisma,
+  onPress,
+}: {
+  interaction: Interaction;
+  person: Acquaintance;
+  spent: YearContact;
+  charisma: number;
+  onPress: () => void;
+}) {
+  const heavyUsed = interaction.weight === 'heavy' && spent.heavy > 0;
+  const worn = interaction.weight === 'light' && lightLeft(spent.light) === 0;
+  const blocked = heavyUsed || worn;
+
+  const subtitle = heavyUsed
+    ? 'Not something you can do twice in a year.'
+    : worn
+      ? `${displayName(person)} has seen plenty of you this year.`
+      : interaction.blurb;
+
+  return (
+    <ListRow
+      title={interaction.label}
+      subtitle={subtitle}
+      // The odds, in words. Spec 786-795: enough to make a decision with, never
+      // the formula that produced it.
+      value={blocked ? undefined : oddsLabel(chanceOf(interaction, person, charisma))}
+      affordance={blocked ? 'none' : 'action'}
+      disabled={blocked}
+      onPress={blocked ? undefined : onPress}
+    />
   );
 }
 

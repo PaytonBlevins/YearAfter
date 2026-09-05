@@ -406,6 +406,30 @@ describe('the childhood catalog', () => {
     }
   });
 
+  it('never spends money the character might not have (V7)', () => {
+    // Reading output found a fourteen-year-old holding $60 told "the coffee can
+    // under your bed has $150 in it", spending it, and finishing on $0 — the
+    // balance floored and the prose lying about it.
+    for (const event of CHILDHOOD_EVENTS) {
+      let biggest = 0;
+      const consider = (effects?: { cash?: { delta: number } }) => {
+        const delta = effects?.cash?.delta ?? 0;
+        if (delta < 0) biggest = Math.max(biggest, -delta);
+      };
+      consider(event.effects);
+      for (const choice of event.choices ?? []) {
+        consider(choice.effects);
+        for (const outcome of choice.outcomes ?? []) consider(outcome.effects);
+      }
+      if (biggest > 0) {
+        expect(
+          event.eligibility.cashAtLeast ?? 0,
+          `${event.id} spends $${biggest}`,
+        ).toBeGreaterThanOrEqual(biggest);
+      }
+    }
+  });
+
   it('lets stress go down as well as up (V6)', () => {
     // A catalog whose stress effects are all positive makes stress a ratchet —
     // a second health bar every character loses by eighteen, which is the

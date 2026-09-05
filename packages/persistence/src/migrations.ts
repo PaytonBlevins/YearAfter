@@ -211,12 +211,60 @@ const migrations: Readonly<Record<number, Migration>> = {
   8: (save) => ({
     ...save,
     version: 9,
-    circle: save['circle'] ?? { people: [], spokenToAtAge: {} },
+    circle: save['circle'] ?? { people: [], contact: {} },
     pending: (Array.isArray(save['pending']) ? save['pending'] : []).map((decision) => ({
       ...(decision as Record<string, unknown>),
       names: {},
     })),
   }),
+
+  /**
+   * v9 -> v10: Ticket 0206b removed the one-interaction-per-person-per-year cap
+   * and gave every joined activity a record of how it is going.
+   *
+   * `contact` starts EMPTY, which hands an existing character their year back
+   * rather than taking it away — the shape it replaces stored only "spoken to
+   * at this age", and there is no way to know from that whether the one thing
+   * they did was a light thing or a heavy one. Giving somebody an extra
+   * afternoon with a friend is the kinder direction to be wrong in.
+   *
+   * Joined activities get a NEUTRAL record and a joined-year season count of
+   * zero: a character three years into the basketball team has a history the
+   * save never recorded, and inventing three seasons of results they never
+   * played is the same lie migration 4 refused about grades.
+   */
+  9: (save) => {
+    const circle = { ...((save['circle'] as Record<string, unknown>) ?? {}) };
+    circle['contact'] = {};
+    delete circle['spokenToAtAge'];
+
+    const education = { ...((save['education'] as Record<string, unknown>) ?? {}) };
+    const activities = Array.isArray(education['activities']) ? education['activities'] : [];
+    education['activities'] = activities.map((entry) => {
+      const activity = entry as Record<string, unknown>;
+      return {
+        ...activity,
+        standing: activity['standing'] ?? 50,
+        seasons: activity['seasons'] ?? 0,
+        practisedAtAge: activity['practisedAtAge'] ?? -1,
+        practiceCount: activity['practiceCount'] ?? 0,
+      };
+    });
+
+    // Study Harder became two terms a year. A character who already used their
+    // one press this year keeps that as one of the two, so they get a second —
+    // giving somebody another term of effort is the kinder direction to be
+    // wrong in, and the field was absent before this version anyway.
+    education['studiedCount'] =
+      education['studiedCount'] ?? (education['studiedAtAge'] === undefined ? 0 : 1);
+
+    // Odd jobs start EMPTY. A sixteen-year-old who has been playing for a while
+    // has not been working a paper round the game never simulated, and giving
+    // them a year of back pay would be inventing money.
+    education['gigs'] = education['gigs'] ?? [];
+
+    return { ...save, version: 10, circle, education };
+  },
 };
 
 export function describeMigrationError(error: MigrationError): string {

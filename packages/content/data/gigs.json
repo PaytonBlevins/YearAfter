@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "gig.lemonade",
+      "name": "Lemonade stand",
+      "blurb": "A table, a jug, and an inflated sense of business.",
+      "ageMin": 7,
+      "ageMax": 11,
+      "payLow": 12,
+      "payHigh": 45,
+      "hoursPerWeek": 1,
+      "source": "the lemonade stand",
+      "stat": "charisma",
+      "lines": [
+        "Ran a lemonade stand all summer and took ${amount}. Overheads were somebody else's problem.",
+        "The lemonade stand cleared ${amount}, most of it from one very generous neighbour."
+      ]
+    },
+    {
+      "id": "gig.dog-walking",
+      "name": "Walking a neighbour's dog",
+      "blurb": "Every day after school, in all weathers.",
+      "ageMin": 9,
+      "ageMax": 15,
+      "payLow": 60,
+      "payHigh": 220,
+      "hoursPerWeek": 2,
+      "source": "walking the Hallidays' dog",
+      "stat": "discipline",
+      "lines": [
+        "Walked the neighbour's dog every day after school and made ${amount} doing it.",
+        "The dog-walking money came to ${amount} over the year, and the dog liked you best."
+      ]
+    },
+    {
+      "id": "gig.car-wash",
+      "name": "Washing cars",
+      "blurb": "Bucket, sponge, and the whole street.",
+      "ageMin": 10,
+      "ageMax": 16,
+      "payLow": 70,
+      "payHigh": 260,
+      "hoursPerWeek": 2,
+      "source": "washing cars on the street",
+      "stat": "willpower",
+      "lines": [
+        "Washed cars up and down the street most weekends and made ${amount}.",
+        "Made ${amount} washing cars, and got very good at the wheels nobody else does."
+      ]
+    },
+    {
+      "id": "gig.paper-round",
+      "name": "Paper round",
+      "blurb": "Before school. Every morning. In the dark half the year.",
+      "ageMin": 12,
+      "ageMax": 16,
+      "payLow": 180,
+      "payHigh": 420,
+      "hoursPerWeek": 4,
+      "source": "the paper round",
+      "stat": "discipline",
+      "lines": [
+        "Did the paper round all year, in the dark half of it, and made ${amount}.",
+        "The paper round paid ${amount} and cost every single morning."
+      ]
+    },
+    {
+      "id": "gig.babysitting",
+      "name": "Babysitting",
+      "blurb": "Somebody else's children, after their bedtime.",
+      "ageMin": 12,
+      "ageMax": 18,
+      "payLow": 150,
+      "payHigh": 600,
+      "hoursPerWeek": 3,
+      "source": "babysitting",
+      "stat": "charisma",
+      "needsParent": true,
+      "lines": [
+        "Babysat most Fridays and made ${amount} watching other people's television.",
+        "Babysitting brought in ${amount}, and one family asked for you specifically."
+      ]
+    },
+    {
+      "id": "gig.lawns",
+      "name": "Mowing lawns",
+      "blurb": "Hot work, and the money is real.",
+      "ageMin": 12,
+      "ageMax": 18,
+      "payLow": 200,
+      "payHigh": 700,
+      "hoursPerWeek": 4,
+      "source": "mowing lawns",
+      "stat": "willpower",
+      "lines": [
+        "Mowed lawns all summer and came out ${amount} up.",
+        "Made ${amount} on lawns. Your hands looked like somebody else's by August."
+      ]
+    },
+    {
+      "id": "gig.tutoring",
+      "name": "Tutoring a younger kid",
+      "blurb": "An hour a week, explaining what you already know.",
+      "ageMin": 13,
+      "ageMax": 18,
+      "payLow": 180,
+      "payHigh": 650,
+      "hoursPerWeek": 2,
+      "source": "tutoring",
+      "stat": "smarts",
+      "talent": "academics",
+      "lines": [
+        "Tutored a younger kid all year and made ${amount}, which felt like stealing.",
+        "Tutoring paid ${amount}, and the kid actually got better, which was the surprise."
+      ]
+    },
+    {
+      "id": "gig.busking",
+      "name": "Busking",
+      "blurb": "A pitch, an hour, and whoever walks past.",
+      "ageMin": 13,
+      "ageMax": 18,
+      "payLow": 90,
+      "payHigh": 800,
+      "hoursPerWeek": 3,
+      "source": "busking",
+      "stat": "charisma",
+      "talent": "music",
+      "lines": [
+        "Played on the street most Saturdays and made ${amount} in a hat.",
+        "Busking brought in ${amount}, and somebody filmed you once, which was terrifying."
+      ]
+    },
+    {
+      "id": "gig.commissions",
+      "name": "Drawing things for people",
+      "blurb": "Ten dollars a head, thirty for a pet.",
+      "ageMin": 13,
+      "ageMax": 18,
+      "payLow": 120,
+      "payHigh": 700,
+      "hoursPerWeek": 3,
+      "source": "drawings people asked for",
+      "stat": "looks",
+      "talent": "writing",
+      "lines": [
+        "Drew things for people all year and made ${amount} at it.",
+        "Took ${amount} in drawing commissions, and got faster than you got better."
+      ]
+    },
+    {
+      "id": "gig.retail",
+      "name": "Weekend shifts in a shop",
+      "blurb": "A name badge, a till, and a manager called Dave.",
+      "ageMin": 16,
+      "ageMax": 22,
+      "payLow": 1200,
+      "payHigh": 3800,
+      "hoursPerWeek": 12,
+      "source": "weekend shifts",
+      "stat": "discipline",
+      "lines": [
+        "Worked weekends in a shop all year and made ${amount}. It was mostly fine.",
+        "The weekend job paid ${amount} and took every Saturday you had."
+      ]
+    },
+    {
+      "id": "gig.food",
+      "name": "Kitchen shifts",
+      "blurb": "Hot, loud, and the best people you will ever work with.",
+      "ageMin": 16,
+      "ageMax": 22,
+      "payLow": 1400,
+      "payHigh": 4200,
+      "hoursPerWeek": 14,
+      "source": "kitchen shifts",
+      "stat": "willpower",
+      "lines": [
+        "Worked in a kitchen most nights and made ${amount}. You have never been so tired.",
+        "The kitchen paid ${amount} and taught you to work faster than you thought you could."
+      ]
+    },
+    {
+      "id": "gig.lifeguard",
+      "name": "Lifeguarding",
+      "blurb": "Sun, chlorine, and forty minutes of genuine responsibility.",
+      "ageMin": 16,
+      "ageMax": 22,
+      "payLow": 1300,
+      "payHigh": 3600,
+      "hoursPerWeek": 12,
+      "source": "lifeguarding",
+      "stat": "health",
+      "lines": [
+        "Lifeguarded all summer and made ${amount} watching people not drown.",
+        "Lifeguarding paid ${amount} and cost you an entire summer of being anywhere else."
+      ]
+    },
+    {
+      "id": "gig.camp",
+      "name": "Camp counsellor",
+      "blurb": "Six weeks, twelve children, no signal.",
+      "ageMin": 16,
+      "ageMax": 22,
+      "payLow": 900,
+      "payHigh": 2600,
+      "hoursPerWeek": 20,
+      "source": "the camp job",
+      "stat": "charisma",
+      "lines": [
+        "Did six weeks as a camp counsellor and came back ${amount} up and completely changed.",
+        "Camp paid ${amount}, which worked out at about nothing an hour, and was worth it anyway."
+      ]
+    }
+  ]
+}

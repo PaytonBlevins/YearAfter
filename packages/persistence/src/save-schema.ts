@@ -17,7 +17,7 @@ import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 9;
+export const CURRENT_SAVE_VERSION = 10;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -42,10 +42,12 @@ export type { WorldState };
  * v7 added tryout memory to education (Ticket 0204b).
  * v8 added Study Harder's once-a-year memory (Ticket 0205).
  * v9 added `circle` — classmates, friends and teachers (Ticket 0206).
+ * v10 replaced the circle's once-a-year cap with per-year contact counting,
+ *     and gave every joined activity a performance record (Ticket 0206b).
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV9 {
-  readonly version: 9;
+export interface SaveGameV10 {
+  readonly version: 10;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -72,8 +74,8 @@ export interface SaveGameV9 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV9;
-export type CurrentSaveGame = SaveGameV9;
+export type AnySaveGame = SaveGameV10;
+export type CurrentSaveGame = SaveGameV10;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

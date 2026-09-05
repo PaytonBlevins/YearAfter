@@ -75,6 +75,13 @@ export function matchesCondition(condition: EventCondition, context: EventContex
     return false;
   }
 
+  // Money the character has to actually have. An event that spends what is not
+  // there floors the balance at zero and tells the player they spent it, which
+  // is CORE_RULES 13.6 broken from the other direction.
+  if (condition.cashAtLeast !== undefined && context.cash < condition.cashAtLeast) {
+    return false;
+  }
+
   const playerBirthYear = context.year - context.age;
   for (const requirement of condition.requires ?? []) {
     if (!satisfiesFamily(requirement, context.family, playerBirthYear)) return false;

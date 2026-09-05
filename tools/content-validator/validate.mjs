@@ -155,6 +155,42 @@ walk(contentDir, (file) => {
 });
 
 // ---------------------------------------------------------------------------
+// 3b. Gig catalog (Ticket 0206b)
+// ---------------------------------------------------------------------------
+// The generator checks all of this before it writes the file. This is the copy
+// that runs in CI, because the JSON ships and can be hand-edited.
+
+const gigsPath = join(ROOT, 'packages/content/data/gigs.json');
+if (existsSync(gigsPath)) {
+  const rel = 'packages/content/data/gigs.json';
+  try {
+    const gigs = JSON.parse(readFileSync(gigsPath, 'utf8')).entries ?? [];
+    for (const gig of gigs) {
+      if (!(gig.ageMin <= gig.ageMax)) fail(rel, `${gig.id}: inverted age range.`);
+      if (!(gig.payLow > 0 && gig.payLow <= gig.payHigh)) {
+        fail(rel, `${gig.id}: pay must be positive and not inverted.`);
+      }
+      // CORE_RULES 13.6 — money names its source AND its amount, and for a gig
+      // the amount lives in the line the player actually reads.
+      if (!gig.source) fail(rel, `${gig.id}: money with no source.`);
+      for (const line of gig.lines ?? []) {
+        if (!String(line).includes('\${amount}')) {
+          fail(rel, `${gig.id}: "${line}" never says what it paid.`);
+        }
+      }
+    }
+    // A screen that is empty at some age teaches the player not to open it.
+    for (const age of [8, 10, 12, 14, 16, 17]) {
+      if (!gigs.some((gig) => gig.ageMin <= age && age <= gig.ageMax)) {
+        fail(rel, `nothing a ${age}-year-old can do for money.`);
+      }
+    }
+  } catch (cause) {
+    fail(rel, `Could not read the gig catalog: ${cause.message}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // 4. Cross-references between catalogs
 // ---------------------------------------------------------------------------
 // Spec 1213-1223 asks for cross-references to be validated automatically. A city
@@ -381,6 +417,31 @@ if (existsSync(eventsPath)) {
             { ...(choice.effects ?? {}), ...(outcome.effects ?? {}) }.cash,
             outcome.text,
             `${event.id}/${choice.id} outcome`,
+          );
+        }
+      }
+
+      // V7 — anything that SPENDS is gated on having the money (Ticket 0206b).
+      // Reading output found a fourteen-year-old holding $60 told "the coffee
+      // can under your bed has $150 in it", spending it, and finishing on $0:
+      // the balance floored and the sentence lied about it.
+      let biggestSpend = 0;
+      for (const source of [
+        event.effects,
+        ...choices.map((choice) => choice.effects),
+        ...choices.flatMap((choice) => (choice.outcomes ?? []).map((o) => o.effects)),
+      ]) {
+        const delta = source?.cash?.delta ?? 0;
+        if (delta < 0) biggestSpend = Math.max(biggestSpend, -delta);
+      }
+      if (biggestSpend > 0) {
+        const gate = event.eligibility?.cashAtLeast ?? 0;
+        if (gate < biggestSpend) {
+          fail(
+            rel,
+            `${event.id}: can spend $${biggestSpend} but is only gated on $${gate}. ` +
+              `An event that spends what the character does not have floors the balance ` +
+              `at zero and tells them they spent it.`,
           );
         }
       }

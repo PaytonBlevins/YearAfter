@@ -49,6 +49,21 @@ export const STARTING_WARMTH: readonly [number, number] = [26, 46];
  */
 export const PROXIMITY_WARMTH = 4;
 
+/**
+ * Teammates who arrive with a team.
+ *
+ * Review: "…and interact with peers." Joining something should put you next to
+ * people, because that is what joining something does. Two per activity: enough
+ * that a team has faces in it, few enough that signing up for five clubs does
+ * not hand the player a list of thirty names.
+ *
+ * They arrive warmer than a classmate — you chose to be in the same room as
+ * these ones — and their `context` is 'activity', which until now was a field
+ * nothing ever set.
+ */
+export const TEAMMATES_PER_ACTIVITY = 2;
+export const TEAMMATE_WARMTH: readonly [number, number] = [34, 52];
+
 /** A teacher starts a shade warmer — they are paid to be on your side. */
 export const TEACHER_WARMTH: readonly [number, number] = [40, 60];
 
@@ -218,10 +233,56 @@ export function proximityWarmth(person: Acquaintance, charisma: number): number 
 /* The school year                                                             */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * People who joined the same thing you did.
+ *
+ * Called when the player joins an activity rather than once a year, so the
+ * faces appear the moment they sign up rather than the following September.
+ */
+export function teammatesFor(
+  circle: SocialCircle,
+  stream: RandomStream,
+  input: {
+    readonly activityId: string;
+    readonly activityName: string;
+    readonly age: number;
+    readonly worldYear: number;
+    readonly nameCultureId: string;
+    readonly firstName: string;
+    readonly family: Household;
+  },
+): readonly Acquaintance[] {
+  const names = nameContext(input.nameCultureId, circle, input.family, input.firstName);
+  const made: Acquaintance[] = [];
+  for (let index = 0; index < TEAMMATES_PER_ACTIVITY; index += 1) {
+    const person = newClassmate(
+      stream,
+      names,
+      input.age,
+      input.worldYear - input.age,
+      circle.people.length + index,
+    );
+    made.push({
+      ...person,
+      id: asNpcId(`npc:team:${input.activityId}:${input.worldYear}:${index}`),
+      context: 'activity',
+      viaActivityId: input.activityId,
+      relationship: clampStat(stream.range(TEAMMATE_WARMTH[0], TEAMMATE_WARMTH[1])) as StatValue,
+      // NOT in the class — they are in the club. Which means the friendship has
+      // to be kept up, exactly like one that survived a change of school.
+      inClass: false,
+      lastContactAge: input.age,
+    });
+  }
+  return made;
+}
+
 export interface SocialYearInput {
   readonly age: number;
   /** The player's charisma. Some people are easier to be around. */
   readonly charisma: number;
+  /** Activities the character is still in, so teammates count as contact. */
+  readonly joinedActivityIds: readonly string[];
   readonly worldYear: number;
   readonly nameCultureId: string;
   readonly firstName: string;
@@ -291,8 +352,14 @@ export function runSocialYear(
   // Contact, without the player having to do anything (see `driftPerson`), and
   // a little warmth with it: this is how a class of strangers turns into one or
   // two friends over six years.
+  const stillIn = new Set(input.joinedActivityIds);
   people = people.map((person) => {
-    if (!person.inClass || person.endedAtAge !== undefined) return person;
+    if (person.endedAtAge !== undefined) return person;
+    // Two rooms count: the class, and a team you are still on. A teammate you
+    // see at training every week is not somebody you are losing touch with.
+    const together =
+      person.inClass || (person.viaActivityId !== undefined && stillIn.has(person.viaActivityId));
+    if (!together) return person;
     const gain = person.kind === 'teacher' ? 0 : proximityWarmth(person, input.charisma);
     return {
       ...person,

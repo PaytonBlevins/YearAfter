@@ -9,6 +9,8 @@
  */
 
 export * from './school';
+export * from './standing';
+export * from './gigs';
 export * from './performance';
 export * from './workload';
 export * from './activities';

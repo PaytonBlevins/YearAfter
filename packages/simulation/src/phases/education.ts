@@ -13,6 +13,7 @@
  */
 
 import { nudgeStats, type Character } from '@yearafter/character';
+import { add, dollars } from '@yearafter/core';
 import { runSchoolYear, statusLabel, type EducationState } from '@yearafter/education';
 import type { TimelineKind } from '@yearafter/character';
 import type { GameState } from '../game-state';
@@ -45,8 +46,14 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     wealth: state.family.finances.band,
   });
 
+  // Money the character EARNED. Unlike an activity fee — which the household
+  // bears and this phase only reports — a paper round pays the child, and it is
+  // the first money in this game that is genuinely theirs.
+  const wages = result.earned.reduce((total, entry) => total + entry.dollars, 0);
+
   const player: Character = {
     ...state.player,
+    cash: wages > 0 ? add(state.player.cash, dollars(wages)) : state.player.cash,
     stats: nudgeStats(state.player.stats, result.statDeltas),
     // Ticket 0205 turns hidden load into visible stress. 0204 only reports it.
     stress: { ...state.player.stress, hiddenLoad: result.hiddenLoad },

@@ -95,6 +95,15 @@ export interface Acquaintance extends Npc {
    * is the moment childhood friendships are actually decided.
    */
   readonly inClass: boolean;
+  /**
+   * The activity this person came from, when they are a teammate.
+   *
+   * Being on the same team every week is contact exactly as being in the same
+   * class is — so while the player is still in that activity, this person does
+   * not drift. Quitting the team starts the clock, which is the honest version
+   * of what happens to the people you only knew through a thing you did.
+   */
+  readonly viaActivityId?: string;
   /** For a teacher: what they teach, so a row can say "Mrs. Okafor · English". */
   readonly subject?: string;
   /**
@@ -110,13 +119,58 @@ export interface Acquaintance extends Npc {
   readonly endedBecause?: 'drifted' | 'fell out' | 'moved away' | 'moved on';
 }
 
-export interface SocialCircle {
-  readonly people: readonly Acquaintance[];
-  /** Interactions already spent this school year, by person id. */
-  readonly spokenToAtAge: Readonly<Record<string, number>>;
+/**
+ * How much of this year has already been spent on one person.
+ *
+ * Review, on the first version: "I don't like how you can only perform one
+ * action with your classmate per year." Fair — a hard wall after one tap is a
+ * rule the player runs into rather than a life they are living.
+ *
+ * So the wall is gone and the counting stays. Light things — hanging around,
+ * a compliment, a joke — can be done as often as the player likes, and are
+ * worth steadily less as the year goes on, because the fourth compliment in a
+ * term is not worth what the first was. Heavy things stay once a year: you
+ * cannot tell somebody your secret twice, and having it out with a person
+ * every Tuesday is not a friendship, it is a loop.
+ */
+export interface YearContact {
+  /** The player's age this counting belongs to. A new age resets it. */
+  readonly age: number;
+  readonly light: number;
+  readonly heavy: number;
 }
 
-export const EMPTY_CIRCLE: SocialCircle = { people: [], spokenToAtAge: {} };
+export interface SocialCircle {
+  readonly people: readonly Acquaintance[];
+  /** Contact spent this school year, by person id. */
+  readonly contact: Readonly<Record<string, YearContact>>;
+}
+
+export const EMPTY_CIRCLE: SocialCircle = { people: [], contact: {} };
+
+/** What has been spent on this person this year, zeroed when the year turns. */
+export function contactWith(circle: SocialCircle, personId: string, age: number): YearContact {
+  const entry = circle.contact[personId];
+  return entry && entry.age === age ? entry : { age, light: 0, heavy: 0 };
+}
+
+/**
+ * How much a light interaction is still worth, after this many already.
+ *
+ * Reaches zero rather than tailing off forever, and the menu says so before
+ * the player presses: a button that silently stops working is the same bug as
+ * a button that does nothing, wearing a friendlier face.
+ */
+export const LIGHT_FALLOFF = 0.28;
+
+export function repeatScale(alreadyDone: number): number {
+  const scale = 1 - alreadyDone * LIGHT_FALLOFF;
+  return scale < 0 ? 0 : scale;
+}
+
+/** Light interactions left before this person has had enough of you this year. */
+export const lightLeft = (alreadyDone: number): number =>
+  Math.max(0, Math.ceil(1 / LIGHT_FALLOFF) - 1 - alreadyDone);
 
 /* -------------------------------------------------------------------------- */
 /* How close                                                                   */

@@ -451,7 +451,16 @@ describe('school state round trip', () => {
       education: {
         ...state.education,
         effort: 'hard' as const,
-        activities: [{ activityId: 'act.chess', joinedAtAge: 12 }],
+        activities: [
+          {
+            activityId: 'act.chess',
+            joinedAtAge: 12,
+            standing: 50 as const,
+            seasons: 2,
+            practisedAtAge: -1,
+            practiceCount: 0,
+          },
+        ],
       },
     };
 

@@ -72,6 +72,7 @@ const context = (overrides: Partial<EventContext> = {}): EventContext => ({
   flags: new Set<string>(),
   schoolStage: 'elementary',
   activityCount: 0,
+  cash: 500,
   people: [],
   ...overrides,
 });

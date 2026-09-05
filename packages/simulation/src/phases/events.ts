@@ -85,6 +85,9 @@ export function buildEventContext(
     flags: new Set(history.flags),
     schoolStage: state.education.stage,
     activityCount: state.education.activities.length,
+    // Whole dollars. The engine works in dollars because the catalog does; the
+    // branded Money type stays on this side of the seam.
+    cash: Math.floor(Number(state.player.cash) / 100),
     // Only people who are still around. Somebody who drifted out two years ago
     // must not turn up in the cafeteria as though nothing happened.
     people: state.circle.people.filter(isCurrent).map((person) => ({

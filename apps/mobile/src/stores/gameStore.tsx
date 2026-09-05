@@ -27,12 +27,17 @@ import {
   decide as resolveDecision,
   generateSeed,
   interact,
+  joinActivity as joinTheActivity,
+  leaveActivity as leaveTheActivity,
+  practise,
+  quitGig,
+  takeGig,
   study,
   tryOut as attemptTryout,
   type GameState,
 } from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
-import { join, leave } from '@yearafter/education';
+
 import type { TimelineEntry } from '@yearafter/character';
 import {
   DEFAULT_SETTINGS,
@@ -66,6 +71,11 @@ interface GameContextValue {
    */
   readonly studyHarder: () => void;
   readonly joinActivity: (activityId: string) => void;
+  /** Put the hours in at something. Three sessions an activity a year. */
+  readonly practiseAt: (activityId: string) => void;
+  /** Take or leave an odd job (Ticket 0206b). */
+  readonly takeAGig: (gigId: string) => void;
+  readonly quitAGig: (gigId: string) => void;
   readonly leaveActivity: (activityId: string) => void;
   /** Attempt a competitive place. Can fail. One attempt per school year. */
   readonly tryOutFor: (activityId: string) => void;
@@ -241,24 +251,41 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     });
   }, [persist, saveId, settings]);
 
+  // Joining draws in two teammates as well as changing education state, which
+  // is why it goes through the simulation rather than being done here.
   const joinActivity = useCallback(
     (activityId: string) => {
-      mutateEducation((current) => ({
-        ...current,
-        education: join(current.education, activityId, current.player.age),
-      }));
+      mutateEducation((current) => joinTheActivity(current, activityId));
     },
     [mutateEducation],
   );
 
   const leaveActivity = useCallback(
     (activityId: string) => {
-      mutateEducation((current) => ({
-        ...current,
-        education: leave(current.education, activityId),
-      }));
+      mutateEducation((current) => leaveTheActivity(current, activityId));
     },
     [mutateEducation],
+  );
+
+  /**
+   * Practise something. Three sessions an activity a year, and unlike Study
+   * Harder it cannot fail — the variable is how much it is worth.
+   */
+  const practiseAt = useCallback(
+    (activityId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = practise(current, activityId);
+        if (!result.ok) {
+          setSaveError(`Cannot practise right now (${result.error}).`);
+          return current;
+        }
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
   );
 
   /**
@@ -302,6 +329,27 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const takeAGig = useCallback(
+    (gigId: string) => {
+      mutateEducation((current) => {
+        const result = takeGig(current, gigId);
+        if (!result.ok) {
+          setSaveError(`Cannot take that on (${result.error}).`);
+          return current;
+        }
+        return result.value;
+      });
+    },
+    [mutateEducation],
+  );
+
+  const quitAGig = useCallback(
+    (gigId: string) => {
+      mutateEducation((current) => quitGig(current, gigId));
+    },
+    [mutateEducation],
+  );
+
   const updateSettings = useCallback(
     (patch: Partial<SaveSettings>) => {
       setSettings((current) => {
@@ -326,6 +374,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       answer,
       studyHarder,
       joinActivity,
+      practiseAt,
+      takeAGig,
+      quitAGig,
       leaveActivity,
       tryOutFor,
       interactWith,
@@ -343,6 +394,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       answer,
       studyHarder,
       joinActivity,
+      practiseAt,
+      takeAGig,
+      quitAGig,
       leaveActivity,
       tryOutFor,
       interactWith,

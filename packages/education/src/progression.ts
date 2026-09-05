@@ -9,7 +9,7 @@
  */
 
 import type { Personality, Talents, VisibleStats } from '@yearafter/character';
-import { ACTIVITIES, type SchoolStageId } from '@yearafter/content';
+import { ACTIVITIES, findActivity, findGig, type SchoolStageId } from '@yearafter/content';
 import { clampStat } from '@yearafter/core';
 import type { WealthBand } from '@yearafter/relationships';
 import {
@@ -36,7 +36,20 @@ import {
   stageForGrade,
   type EducationState,
 } from './school';
+import { gigLine, gigPay } from './gigs';
+import { driftStanding, seasonLine } from './standing';
 import { OVERLOAD_EVENT_THRESHOLD, assessWorkload, overloadPenalties } from './workload';
+
+/**
+ * Which of a line's two phrasings a season gets.
+ *
+ * Derived from the activity and the age rather than drawn, because this package
+ * is pure and takes no RandomStream — and because a season's phrasing is not
+ * worth a draw that would shift every other event in the year.
+ */
+function seasonRoll(entry: { readonly activityId: string }, age: number): number {
+  return ((entry.activityId.length + age) % 2) / 2;
+}
 
 export interface SchoolYearInput {
   readonly age: number;
@@ -73,6 +86,8 @@ export interface SchoolYearResult {
   readonly statDeltas: Partial<Record<keyof VisibleStats, number>>;
   /** Written into character.stress.hiddenLoad; Ticket 0205 makes it visible. */
   readonly hiddenLoad: number;
+  /** Money the character EARNED this year, each with the job that paid it. */
+  readonly earned: readonly GigEarning[];
   /**
    * Committed hours a week, and what this character can carry.
    *
@@ -89,6 +104,54 @@ export interface SchoolYearResult {
 }
 
 const EMPTY: SchoolYearResult['statDeltas'] = {};
+
+/** Money an odd job paid, and the job that paid it (CORE_RULES 13.6). */
+export interface GigEarning {
+  readonly dollars: number;
+  readonly source: string;
+}
+
+/**
+ * A year of every odd job the character is holding.
+ *
+ * Pulled out of the school year and run separately because working does not
+ * stop when school does: somebody who left at sixteen still has the kitchen
+ * shifts, and the school-is-over early return would have silently stopped
+ * paying them. Real employment is Ticket 0210; this keeps the gigs honest until
+ * then.
+ */
+export function runGigs(
+  state: EducationState,
+  age: number,
+  stats: VisibleStats,
+  talents: Talents,
+): { state: EducationState; earned: readonly GigEarning[]; lines: readonly string[] } {
+  const earned: GigEarning[] = [];
+  const lines: string[] = [];
+  let next = state;
+
+  for (const gigId of state.gigs) {
+    const gig = findGig(gigId);
+    if (!gig) continue;
+
+    // PAID FIRST, then aged out. The other order found a character who took a
+    // lemonade stand at eleven being told at twelve that they had got too old
+    // for it, having never been paid a cent for the year they worked it.
+    const amount = gigPay(gig, stats, talents);
+    earned.push({ dollars: amount, source: gig.source });
+    lines.push(gigLine(gig, amount, ((gigId.length + age) % 2) / 2));
+
+    // Too old for another year of it. Nobody runs a lemonade stand at sixteen.
+    if (age >= gig.ageMax) {
+      next = { ...next, gigs: next.gigs.filter((id) => id !== gigId) };
+      lines.push(
+        `That was the last year of ${gig.name.toLowerCase()}. You had got too old for it.`,
+      );
+    }
+  }
+
+  return { state: next, earned, lines };
+}
 
 /**
  * Run a school year for a character who has just turned `age`.
@@ -115,7 +178,20 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
   let justEnrolled = false;
 
   if (state.stage === 'graduated' || state.stage === 'droppedOut') {
-    return { state, statDeltas: EMPTY, hiddenLoad: 0, hours: 0, capacity: 0, costs: [], lines: [] };
+    // School is over; work is not. Somebody who left at sixteen still has the
+    // kitchen shifts, and returning early without running them would silently
+    // stop paying a character who is very much still turning up.
+    const work = runGigs(state, input.age, input.stats, input.talents);
+    return {
+      state: work.state,
+      statDeltas: EMPTY,
+      hiddenLoad: 0,
+      earned: work.earned,
+      hours: 0,
+      capacity: 0,
+      costs: [],
+      lines: work.lines.map((text) => ({ kind: 'passive' as const, text })),
+    };
   }
 
   if (state.stage === 'preschool') {
@@ -124,6 +200,7 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
         state,
         statDeltas: EMPTY,
         hiddenLoad: 0,
+        earned: [],
         hours: 0,
         capacity: 0,
         costs: [],
@@ -144,6 +221,7 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
         state: { ...state, stage: 'graduated', finishedAtAge: input.age, activities: [] },
         statDeltas: { happiness: 6, discipline: 2 },
         hiddenLoad: 0,
+        earned: [],
         hours: 0,
         capacity: 0,
         costs: [],
@@ -201,6 +279,35 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
     push('milestone', 'Transferred back to a mainstream school.');
   }
 
+  // ---- the season ---------------------------------------------------------
+  // Every joined activity plays a year: standing drifts towards the level this
+  // character naturally sits at, and the year gets a line about how it went
+  // (Ticket 0206b). A season nobody mentions is a season nobody had.
+  const played = next.activities.map((entry) => {
+    const activity = findActivity(entry.activityId);
+    if (!activity) return entry;
+    return {
+      ...entry,
+      standing: driftStanding(entry.standing, activity, input.stats, input.talents),
+      seasons: entry.seasons + 1,
+    };
+  });
+  next = { ...next, activities: played };
+
+  for (const entry of played) {
+    const activity = findActivity(entry.activityId);
+    if (!activity) continue;
+    // One line each, and only for things with a season worth reporting — a
+    // sentence about the chess club every year for six years is the kind of
+    // noise spec 725-770 caps a year against.
+    if (activity.kind === 'sport' || activity.kind === 'arts' || entry.seasons === 1) {
+      push(
+        'passive',
+        seasonLine(activity, entry.standing, entry.seasons, seasonRoll(entry, input.age)),
+      );
+    }
+  }
+
   // ---- what the year did --------------------------------------------------
   const activityEffects = annualActivityEffects(next);
   const statDeltas: Record<string, number> = { ...activityEffects };
@@ -215,6 +322,12 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
   if (workload.overload >= OVERLOAD_EVENT_THRESHOLD) {
     push('passive', overloadLine(next, workload.overload, input.age));
   }
+
+  // ---- what the odd jobs paid ---------------------------------------------
+  const work = runGigs(next, input.age, input.stats, input.talents);
+  next = work.state;
+  for (const line of work.lines) push('passive', line);
+  const earned = work.earned;
 
   // ---- money, always with a source ---------------------------------------
   const cost = committedCost(next);
@@ -237,6 +350,7 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
     state: next,
     statDeltas,
     hiddenLoad: workload.load,
+    earned,
     hours: workload.hours,
     capacity: workload.capacity,
     costs,
