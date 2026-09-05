@@ -12,7 +12,7 @@
  *    five people the player had not met yet.
  */
 
-import type { TimelineKind } from '@yearafter/character';
+import type { Personality, TimelineKind } from '@yearafter/character';
 import { isInSchool, type EducationState } from '@yearafter/education';
 import type { Household } from '@yearafter/relationships';
 import { type SocialCircle } from '@yearafter/social';
@@ -27,6 +27,7 @@ export interface SocialPhaseInput {
   readonly nameCultureId: string;
   readonly firstName: string;
   readonly charisma: number;
+  readonly personality: Personality;
   readonly family: Household;
   readonly education: EducationState;
   /** The stage they were in last year, to spot a change of school. */
@@ -46,6 +47,7 @@ export function runSocial(input: SocialPhaseInput): SocialPhaseOutput {
     nameCultureId: input.nameCultureId,
     firstName: input.firstName,
     charisma: input.charisma,
+    personality: input.personality,
     joinedActivityIds: input.education.activities.map((entry) => entry.activityId),
     family: input.family,
     atSchool,

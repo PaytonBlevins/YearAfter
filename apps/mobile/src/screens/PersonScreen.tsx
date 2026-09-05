@@ -20,10 +20,16 @@ import {
   fullName,
   interactionsFor,
   isCurrent,
+  isRomantic,
   lightLeft,
+  moveUnavailable,
+  movesFor,
   notableMemories,
+  romanceChance,
+  ROMANCE_STAGE_LABELS,
   type Acquaintance,
   type Interaction,
+  type RomanceMove,
   type YearContact,
 } from '@yearafter/social';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
@@ -33,7 +39,7 @@ import { howLong, warmthColor } from './PeopleScreen';
 import { colors, spacing, typography } from '../theme/theme';
 
 export function PersonScreen() {
-  const { state, interactWith } = useGame();
+  const { state, interactWith, romanceWith } = useGame();
   const { current } = useNavigation();
   if (!state || !current?.personId) return null;
 
@@ -52,6 +58,12 @@ export function PersonScreen() {
   const options = interactionsFor(person);
   const innocent = options.filter((entry) => !entry.mischief);
   const mischief = options.filter((entry) => entry.mischief);
+  // Ticket 0207. Empty below the crush age, for a teacher, and for anybody the
+  // player has already been out with — `movesFor` decides all of that, so this
+  // screen has no age logic of its own to get wrong.
+  const romantic = movesFor(person, state.player.age, Number(state.player.cash));
+  const ending = romantic.filter((move) => move.certain);
+  const starting = romantic.filter((move) => !move.certain);
 
   return (
     <ScrollView
@@ -70,6 +82,33 @@ export function PersonScreen() {
           meterColor={warmthColor(person.relationship)}
         />
       </Card>
+
+      {/*
+        Above the friendship menu when there is something between you, because
+        that is the thing the player came to this screen about. Below it — as
+        just another option — when there is not.
+      */}
+      {around && isRomantic(person) ? (
+        <>
+          <SectionHeading>
+            {ROMANCE_STAGE_LABELS[person.romance?.stage ?? 'seeing']}
+          </SectionHeading>
+          <Card>
+            {[...starting, ...ending].map((move, index) => (
+              <Fragment key={move.id}>
+                {index > 0 ? <RowDivider /> : null}
+                <RomanceRow
+                  move={move}
+                  person={person}
+                  spent={spent}
+                  state={state}
+                  onPress={() => romanceWith(person.id, move.id)}
+                />
+              </Fragment>
+            ))}
+          </Card>
+        </>
+      ) : null}
 
       {around ? (
         <>
@@ -97,6 +136,24 @@ export function PersonScreen() {
             mischievously", and the two are different decisions — one costs you
             nothing to consider and the other costs school standing.
           */}
+          {/* Not yet anything between you: one row, in with everything else. */}
+          {starting.length > 0 && !isRomantic(person) ? (
+            <Card>
+              {starting.map((move, index) => (
+                <Fragment key={move.id}>
+                  {index > 0 ? <RowDivider /> : null}
+                  <RomanceRow
+                    move={move}
+                    person={person}
+                    spent={spent}
+                    state={state}
+                    onPress={() => romanceWith(person.id, move.id)}
+                  />
+                </Fragment>
+              ))}
+            </Card>
+          ) : null}
+
           {mischief.length > 0 ? (
             <>
               <SectionHeading note="costs you standing">Or</SectionHeading>
@@ -194,6 +251,66 @@ function InteractionRow({
       // The odds, in words. Spec 786-795: enough to make a decision with, never
       // the formula that produced it.
       value={blocked ? undefined : oddsLabel(chanceOf(interaction, person, charisma))}
+      affordance={blocked ? 'none' : 'action'}
+      disabled={blocked}
+      onPress={blocked ? undefined : onPress}
+    />
+  );
+}
+
+/**
+ * One romantic option.
+ *
+ * Same rules as the friendship rows, and one more: the price is on the row when
+ * there is one. A player should never find out what an evening cost by watching
+ * the balance change afterwards.
+ */
+function RomanceRow({
+  move,
+  person,
+  spent,
+  state,
+  onPress,
+}: {
+  move: RomanceMove;
+  person: Acquaintance;
+  spent: YearContact;
+  state: NonNullable<ReturnType<typeof useGame>['state']>;
+  onPress: () => void;
+}) {
+  const cash = Number(state.player.cash);
+  const heavyUsed = move.weight === 'heavy' && spent.heavy > 0;
+  const worn = move.weight === 'light' && lightLeft(spent.light) === 0;
+  const why = moveUnavailable(move, person, state.player.age, cash);
+  const blocked = heavyUsed || worn || why !== undefined;
+
+  const subtitle = heavyUsed
+    ? 'Not something you can do twice in a year.'
+    : worn
+      ? `${displayName(person)} has heard plenty from you this year.`
+      : (why ?? move.blurb);
+
+  // Ending it is a decision, not a gamble, so it shows no odds — a "Long shot"
+  // beside "End it" would be nonsense.
+  const value = blocked
+    ? undefined
+    : move.certain
+      ? undefined
+      : oddsLabel(
+          romanceChance(
+            person,
+            state.player.personality,
+            state.player.stats.charisma,
+            state.player.stats.looks,
+            move.base,
+          ),
+        );
+
+  return (
+    <ListRow
+      title={move.label}
+      subtitle={subtitle}
+      value={value}
       affordance={blocked ? 'none' : 'action'}
       disabled={blocked}
       onPress={blocked ? undefined : onPress}

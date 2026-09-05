@@ -78,6 +78,9 @@ export function matchesCondition(condition: EventCondition, context: EventContex
   // Money the character has to actually have. An event that spends what is not
   // there floors the balance at zero and tells the player they spent it, which
   // is CORE_RULES 13.6 broken from the other direction.
+  if (condition.partnered !== undefined && context.partnered !== condition.partnered) {
+    return false;
+  }
   if (condition.cashAtLeast !== undefined && context.cash < condition.cashAtLeast) {
     return false;
   }

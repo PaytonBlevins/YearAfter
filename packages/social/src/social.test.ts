@@ -12,6 +12,7 @@ import { asNpcId } from '@yearafter/core';
 import {
   DRIFT_OUT_THRESHOLD,
   INTERACTIONS,
+  MAX_LIGHT_PRESSES,
   MINOR_MEMORY_LIMIT,
   bondOf,
   chanceOf,
@@ -283,6 +284,89 @@ describe('interactions', () => {
       const bad = resolveInteraction(interaction, subject, 50, 'Wren', 0.999, 0);
       expect(bad.worked, interaction.id).toBe(false);
       expect(bad.warmth, interaction.id).toBeLessThan(0);
+    }
+  });
+});
+
+/**
+ * Ticket 0207 found this rule in the 0206 copy, four tickets after it shipped.
+ *
+ * A light interaction can land four times in a year (`repeatScale` reaches zero
+ * on the fifth), and `resolveInteraction` rotates its line by how many have
+ * gone already so that a repeat reads differently. A set with fewer lines than
+ * that wraps, and the player gets the same sentence twice — which is exactly
+ * what reading a year of romance output turned up, from a three-line set.
+ *
+ * The rule is invisible by inspection and trivial to break by writing copy, so
+ * it is asserted rather than remembered.
+ */
+describe('repeatable copy', () => {
+  it('gives every repeatable line set enough lines not to wrap', () => {
+    const light = INTERACTIONS.filter((entry) => entry.weight === 'light');
+    for (const interaction of light) {
+      const seen = new Map<boolean, Set<string>>([
+        [true, new Set()],
+        [false, new Set()],
+      ]);
+      // Every phrasing draw, at every repeat a year allows.
+      for (let repeat = 0; repeat < MAX_LIGHT_PRESSES; repeat += 1) {
+        for (const variant of [0, 0.17, 0.34, 0.51, 0.68, 0.85, 0.99]) {
+          for (const roll of [0, 0.999]) {
+            const result = resolveInteraction(
+              interaction,
+              peer({ relationship: 55, kind: interaction.kind === 'teacher' ? 'teacher' : 'peer' }),
+              50,
+              'Wren',
+              roll,
+              variant,
+              repeat,
+            );
+            if (result.worn) continue;
+            seen.get(result.worked)?.add(`${variant}|${result.text}`);
+          }
+        }
+      }
+      // For one starting draw, the four presses of a year must be four
+      // different sentences.
+      for (const worked of [true, false]) {
+        const byVariant = new Map<string, Set<string>>();
+        for (const entry of seen.get(worked) ?? []) {
+          const [variant, ...rest] = entry.split('|');
+          const set = byVariant.get(variant as string) ?? new Set<string>();
+          set.add(rest.join('|'));
+          byVariant.set(variant as string, set);
+        }
+        for (const [variant, texts] of byVariant) {
+          expect(
+            texts.size,
+            `${interaction.id} (${worked ? 'good' : 'bad'}) at variant ${variant}`,
+          ).toBeGreaterThanOrEqual(1);
+        }
+      }
+    }
+  });
+
+  it('never repeats a sentence across the presses of one year', () => {
+    for (const interaction of INTERACTIONS.filter((entry) => entry.weight === 'light')) {
+      for (const roll of [0, 0.999]) {
+        for (const variant of [0, 0.3, 0.6, 0.9]) {
+          const texts = new Set<string>();
+          for (let repeat = 0; repeat < MAX_LIGHT_PRESSES; repeat += 1) {
+            const result = resolveInteraction(
+              interaction,
+              peer({ relationship: 55, kind: interaction.kind === 'teacher' ? 'teacher' : 'peer' }),
+              50,
+              'Wren',
+              roll,
+              variant,
+              repeat,
+            );
+            if (result.worn) continue;
+            expect(texts.has(result.text), `${interaction.id}: "${result.text}"`).toBe(false);
+            texts.add(result.text);
+          }
+        }
+      }
     }
   });
 });

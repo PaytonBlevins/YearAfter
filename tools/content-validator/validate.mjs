@@ -17,6 +17,13 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const problems = [];
+
+/** Blank out line and block comments, keeping offsets irrelevant — we only match. */
+const stripComments = (source) =>
+  source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
+/** Mirrors CRUSH_AGE in `@yearafter/social` and ROMANCE_AGE_FLOOR in the generator. */
+const ROMANCE_AGE_FLOOR = 13;
 const notes = [];
 
 const fail = (file, message) => problems.push({ file, message });
@@ -50,7 +57,13 @@ for (const root of SOURCE_ROOTS) {
     }
 
     // CORE_RULES 17 — no `any`.
-    const anyMatch = source.match(/:\s*any\b|<any>|as any\b/);
+    //
+    // Comments are stripped first. The check used to run over the raw source
+    // and a sentence containing "…skipped the menu: any of those…" tripped it,
+    // which is the check being wrong rather than the code: a rule that fires on
+    // prose teaches authors to reword their comments to appease the linter,
+    // which is worse than not having the rule.
+    const anyMatch = stripComments(source).match(/:\s*any\b|<any>|as any\b/);
     if (anyMatch && !isTest) {
       fail(rel, `\`any\` is not allowed (found "${anyMatch[0].trim()}").`);
     }
@@ -442,6 +455,26 @@ if (existsSync(eventsPath)) {
             `${event.id}: can spend $${biggestSpend} but is only gated on $${gate}. ` +
               `An event that spends what the character does not have floors the balance ` +
               `at zero and tells them they spent it.`,
+          );
+        }
+      }
+
+      // V8 — nothing romantic is eligible below the crush age (Ticket 0207).
+      //
+      // The age gate in the engine is enforced twice already; this is the third
+      // place it can be broken, and the only one that is a data file. A `love.`
+      // event with no `ageMin` would be eligible from birth, and no test that
+      // plays the engine would ever catch it because the engine is not what is
+      // wrong. It is checked by id prefix rather than by reading the copy on
+      // purpose: a prefix is a promise the author makes and this is the thing
+      // that holds them to it.
+      if (event.id.startsWith('love.')) {
+        const floor = event.eligibility?.ageMin;
+        if (floor === undefined || floor < ROMANCE_AGE_FLOOR) {
+          fail(
+            rel,
+            `${event.id}: a romance event must be gated at ageMin >= ${ROMANCE_AGE_FLOOR}, ` +
+              `got ${floor ?? 'nothing'}. This is a safety rule, not a balance knob.`,
           );
         }
       }

@@ -15,11 +15,20 @@
  * class cannot shift the player's own attributes or their school results.
  */
 
-import { createPersonality, type Sex } from '@yearafter/character';
+import { createPersonality, type Personality, type Sex } from '@yearafter/character';
 import { findNameCulture, type NameCulture } from '@yearafter/content';
 import { asNpcId, clampStat, type StatValue } from '@yearafter/core';
 import type { Household } from '@yearafter/relationships';
-import { driftPerson, isFriend, type Acquaintance, type SocialCircle } from '@yearafter/social';
+import {
+  driftPerson,
+  isFriend,
+  isRomantic,
+  compatibility,
+  leavingChance,
+  romanceYear,
+  type Acquaintance,
+  type SocialCircle,
+} from '@yearafter/social';
 import type { RandomStream } from './rng/rng';
 
 /* -------------------------------------------------------------------------- */
@@ -281,6 +290,8 @@ export interface SocialYearInput {
   readonly age: number;
   /** The player's charisma. Some people are easier to be around. */
   readonly charisma: number;
+  /** The player's own temperament, for whether a relationship is working. */
+  readonly personality: Personality;
   /** Activities the character is still in, so teammates count as contact. */
   readonly joinedActivityIds: readonly string[];
   readonly worldYear: number;
@@ -365,6 +376,43 @@ export function runSocialYear(
       ...person,
       lastContactAge: input.age,
       relationship: clampStat(person.relationship + gain) as StatValue,
+    };
+  });
+
+  // ---- a year of being with somebody --------------------------------------
+  //
+  // Runs BEFORE the drift step and marks contact, because being with somebody
+  // is contact: a partner who has left school would otherwise be handled by
+  // `driftPerson` as though the player had stopped speaking to them, and the
+  // relationship the player is actually in would quietly fade.
+  //
+  // What happens here is the compatibility they cannot see doing its work. A
+  // couple who suit each other warm; a couple who do not cool, and once things
+  // are bad enough the other person gets a say in whether it continues.
+  people = people.map((person) => {
+    if (!isRomantic(person) || person.endedAtAge !== undefined) return person;
+    const warmed = romanceYear(person, input.personality);
+    const stayed: Acquaintance = { ...person, relationship: warmed, lastContactAge: input.age };
+
+    // Compatibility as well as warmth: somebody badly matched to you can leave
+    // a relationship you have been working at. See `leavingChance`.
+    const suited = compatibility(input.personality, person.personality);
+    if (!stream.chance(leavingChance(warmed, suited, input.age))) return stayed;
+
+    const stage = person.romance?.stage ?? 'seeing';
+    lines.push(
+      stage === 'married'
+        ? `${person.firstName} left. It had been coming for a while and it still arrived all at once.`
+        : `${person.firstName} ended it. You had known and you had not known.`,
+    );
+    return {
+      ...stayed,
+      romance: {
+        stage,
+        since: person.romance?.since ?? input.age,
+        endedAtAge: input.age,
+        endedBecause: stage === 'married' ? ('divorced' as const) : ('they ended it' as const),
+      },
     };
   });
 

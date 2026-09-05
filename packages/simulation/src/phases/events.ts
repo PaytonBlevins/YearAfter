@@ -25,6 +25,7 @@ import type { Household } from '@yearafter/relationships';
 import {
   displayName,
   isCurrent,
+  partnerOf,
   remember,
   type Acquaintance,
   type SocialCircle,
@@ -88,6 +89,10 @@ export function buildEventContext(
     // Whole dollars. The engine works in dollars because the catalog does; the
     // branded Money type stays on this side of the seam.
     cash: Math.floor(Number(state.player.cash) / 100),
+    // Ticket 0207. Lets a romance event say it presupposes a relationship —
+    // without it, "dinner at their parents'" fired about a classmate the
+    // character had never spoken to.
+    partnered: partnerOf(state.circle.people) !== undefined,
     // Only people who are still around. Somebody who drifted out two years ago
     // must not turn up in the cafeteria as though nothing happened.
     people: state.circle.people.filter(isCurrent).map((person) => ({

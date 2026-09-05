@@ -361,6 +361,77 @@ from printing unlimited money — it does not stop legitimate achievement.
 Extraordinary outcomes should be **materially more attainable than in real life**
 through skilled play. Living expenses must not secretly consume most gains.
 
+### 13.15 A gate guards what it hands back, not only what it lets through
+
+Ticket 0207 built an age gate for romance and tested it by advancing a minor
+towards an adult stage, which it correctly refused. Writing the tests found the
+other half missing: every path that leaves a relationship WHERE IT WAS — a
+refusal, a bad evening, a repeated light move — handed the existing stage
+straight back without looking at the age. The gate would have stopped a
+fifteen-year-old getting married and would have carried a marriage a fifteen-
+year-old somehow already had, which is exactly the case a gate exists for.
+
+So a gate is a function over the value being returned, not a check on the
+transition. And it needs more than one enforcement point: the menu builder is
+what a screen calls, so testing only the menu proves the menu is safe and proves
+nothing about the engine underneath it. A gate with one enforcement point is a
+gate one careless caller walks around.
+
+### 13.16 Do not gate a system on a system that has not shipped
+
+0207 priced a wedding at $9,000 and an engagement ring at $1,800. Both numbers
+are reasonable. The median thirty-year-old in the build holds THIRTEEN DOLLARS,
+because careers do not exist yet — so across 150 simulated lives, 1% got engaged
+and 0% ever married. The feature was complete, tested, and unreachable.
+
+A fixed price is a dependency on the income system. Until that ships, a cost
+that is a SHARE of what the character has is both reachable and truer: a wedding
+is what you can afford, and broke means a registry office and two witnesses,
+which is a real wedding and a better story than a locked button. When income
+arrives the same rule produces expensive weddings with no retuning.
+
+This is 13.7 (measure the inputs before setting a threshold) applied to money,
+and it is the third time that rule has been broken by not measuring first.
+
+### 13.17 Repeatable copy needs more lines than repeats, and a stable index
+
+0206b removed the one-action-per-year cap, so a light action can land four times
+in a year. Reading a year of output found "Shared chips with Diya on a wall"
+four times, twice of them consecutively, and then again every year for
+seventeen years.
+
+Two rules, and BOTH are needed:
+
+- The line is chosen by the phrasing draw ROTATED by how many times the action
+  has already been used this year, so a repeat cannot land on the same sentence.
+- The phrasing draw must be STABLE within the year — derived from
+  (year, person, action), not drawn fresh each press. A re-drawn index landing
+  one lower cancels the rotation exactly as often as it helps, which is why the
+  first fix did not work and the output still repeated.
+
+It follows that every set a repeatable action can draw from needs at least as
+many lines as the action can be used in a year. That is invisible by inspection
+and trivial to break by writing copy, so it is asserted in a test rather than
+remembered. The same latent bug was found in the 0206 friendship copy, four
+tickets after it shipped.
+
+### 13.18 A relationship the player can only improve is not a relationship
+
+Warmth is the number the player can pump: four evenings out a year is +23, more
+than any drift can take back. With leaving driven by warmth alone, 98% of lives
+ended at thirty with the classmate the player asked out at thirteen, and nobody
+was ever left by anybody. A life sim in which spending money on somebody
+guarantees they stay forever is saying something false and fairly bleak.
+
+So the thing that ends a relationship reads what the player CANNOT buy —
+compatibility, which is hidden and found out by living it (spec 786–795) — and
+the model knows that people change between thirteen and their early twenties.
+Both were missing, and each one alone was not enough: with only the first, 73%
+of lives still contained exactly one relationship, ever.
+
+More generally: any system where the player has a monotonic lever needs a term
+that lever does not reach, or the optimal play is to hold the lever down.
+
 ## 16. Performance
 
 Annual processing under ~250 ms for an ordinary life. Background NPCs are

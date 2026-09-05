@@ -41,6 +41,8 @@ export type ScreenKey =
   | 'activity'
   /** Ticket 0206b. Odd jobs a child can actually do for money. */
   | 'gigs'
+  /** Ticket 0207. Who there is, who there was, and where you stand. */
+  | 'love'
   | 'debug';
 
 export interface Route {

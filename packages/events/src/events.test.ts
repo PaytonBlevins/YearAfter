@@ -67,6 +67,7 @@ const context = (overrides: Partial<EventContext> = {}): EventContext => ({
   talents: createTalents(),
   personality: createPersonality(),
   family: FULL_FAMILY,
+  partnered: false,
   nameCultureId: 'us-en',
   homeCity: 'Toledo, OH',
   flags: new Set<string>(),
@@ -781,5 +782,30 @@ describe('what a child calls their parents', () => {
         }
       }
     }
+  });
+});
+
+/**
+ * Ticket 0207. A romance event that presupposes a relationship must not fire at
+ * somebody who has never spoken to anybody.
+ *
+ * Found by reading the built app: "Had dinner at Marcus's. Their parents asked
+ * what you wanted to do with your life" was written about a classmate the
+ * character had never so much as flirted with. The event system knew the cast
+ * and nothing about whether any of them were the player's partner.
+ */
+describe('partnered (Ticket 0207)', () => {
+  it('is a real constraint in both directions', () => {
+    const needsOne = { partnered: true };
+    const needsNobody = { partnered: false };
+    expect(matchesCondition(needsOne, context({ partnered: true }))).toBe(true);
+    expect(matchesCondition(needsOne, context({ partnered: false }))).toBe(false);
+    expect(matchesCondition(needsNobody, context({ partnered: false }))).toBe(true);
+    expect(matchesCondition(needsNobody, context({ partnered: true }))).toBe(false);
+  });
+
+  it('is not a constraint when the event does not say', () => {
+    expect(matchesCondition({}, context({ partnered: true }))).toBe(true);
+    expect(matchesCondition({}, context({ partnered: false }))).toBe(true);
   });
 });

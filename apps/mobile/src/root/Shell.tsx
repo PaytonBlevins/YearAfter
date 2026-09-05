@@ -17,6 +17,7 @@ import { SchoolActivitiesScreen } from '../screens/SchoolActivitiesScreen';
 import { ActivityScreen } from '../screens/ActivityScreen';
 import { GigsScreen } from '../screens/GigsScreen';
 import { PeopleScreen } from '../screens/PeopleScreen';
+import { LoveScreen } from '../screens/LoveScreen';
 import { PersonScreen } from '../screens/PersonScreen';
 import {
   ActivitiesScreen,
@@ -49,6 +50,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   schoolActivities: SchoolActivitiesScreen,
   activity: ActivityScreen,
   gigs: GigsScreen,
+  love: LoveScreen,
   debug: DebugScreen,
 };
 

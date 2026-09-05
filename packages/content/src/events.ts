@@ -98,6 +98,18 @@ export interface EventCondition {
    * (CORE_RULES 13.6) arriving from the other direction.
    */
   readonly cashAtLeast?: number;
+  /**
+   * Ticket 0207. Whether the character must (true) or must not (false) be
+   * seeing somebody for this to fire.
+   *
+   * Reading the built app found "Had dinner at Marcus's. Their parents asked
+   * what you wanted to do with your life" written about a classmate the
+   * character had never so much as flirted with — a romance event that
+   * presupposes a relationship has no way to say so, so it fired at anybody.
+   * The event system knew about the CAST from 0206 and nothing about whether
+   * any of them were the player's partner.
+   */
+  readonly partnered?: boolean;
   readonly requires?: readonly FamilyRequirement[];
   /** Any one of these talents. */
   readonly talentsAny?: readonly TalentKey[];

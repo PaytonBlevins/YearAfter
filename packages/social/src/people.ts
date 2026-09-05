@@ -25,6 +25,10 @@
 
 import { clampStat, type StatValue } from '@yearafter/core';
 import type { Npc } from '@yearafter/relationships';
+// Type-only, and therefore erased: `romance.ts` needs `Acquaintance` and the
+// person record needs `Romance`, so the two files reference each other. No
+// runtime cycle exists because nothing is imported for its value.
+import type { Romance } from './romance';
 
 /* -------------------------------------------------------------------------- */
 /* Who they are                                                                */
@@ -117,6 +121,17 @@ export interface Acquaintance extends Npc {
   readonly endedAtAge?: number;
   /** How it ended, for the one line the feed writes about it. */
   readonly endedBecause?: 'drifted' | 'fell out' | 'moved away' | 'moved on';
+  /**
+   * Ticket 0207. Whether the player is, or was, going out with this person.
+   *
+   * Deliberately a field on the person rather than a separate partner record.
+   * Somebody you are seeing is a classmate or a teammate who you are also seeing
+   * — they keep the memories they already had, they drift if you stop turning
+   * up, and when it ends they are in the same list of people you used to know as
+   * everybody else. Two models would have meant two places that disagree about
+   * whether you still speak to them.
+   */
+  readonly romance?: Romance;
 }
 
 /**

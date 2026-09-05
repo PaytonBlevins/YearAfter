@@ -44,6 +44,14 @@ export type { WorldState };
  * v9 added `circle` — classmates, friends and teachers (Ticket 0206).
  * v10 replaced the circle's once-a-year cap with per-year contact counting,
  *     and gave every joined activity a performance record (Ticket 0206b).
+ *
+ * Ticket 0207 (Love) did NOT bump the version, and that is a decision rather
+ * than an oversight. It added one optional field, `romance`, to a person in the
+ * circle. Absent already means exactly what it has to mean for every existing
+ * save — this is not somebody you were ever going out with — so there is nothing
+ * for a migration to compute. A version bump whose migration is the identity
+ * function is a lie about what changed.
+ *
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV10 {

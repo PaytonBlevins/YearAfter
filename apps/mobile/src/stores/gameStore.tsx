@@ -30,6 +30,7 @@ import {
   joinActivity as joinTheActivity,
   leaveActivity as leaveTheActivity,
   practise,
+  romanticMove,
   quitGig,
   takeGig,
   study,
@@ -84,6 +85,8 @@ interface GameContextValue {
    * and it can go badly — see @yearafter/social.
    */
   readonly interactWith: (personId: string, interactionId: string) => void;
+  /** Ticket 0207. Flirt, ask them out, take them out, end it. */
+  readonly romanceWith: (personId: string, moveId: string) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   readonly updateSettings: (patch: Partial<SaveSettings>) => void;
 }
@@ -329,6 +332,23 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const romanceWith = useCallback(
+    (personId: string, moveId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = romanticMove(current, personId, moveId);
+        if (!result.ok) {
+          setSaveError(`Cannot do that right now (${result.error}).`);
+          return current;
+        }
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const takeAGig = useCallback(
     (gigId: string) => {
       mutateEducation((current) => {
@@ -380,6 +400,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       leaveActivity,
       tryOutFor,
       interactWith,
+      romanceWith,
       startNewLife,
       updateSettings,
     }),
@@ -400,6 +421,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       leaveActivity,
       tryOutFor,
       interactWith,
+      romanceWith,
       startNewLife,
       updateSettings,
     ],

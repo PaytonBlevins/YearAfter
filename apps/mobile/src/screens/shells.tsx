@@ -36,6 +36,7 @@ import {
   statusLabel,
   studiedThisYear,
 } from '@yearafter/education';
+import { stagesFor } from '@yearafter/social';
 import {
   Card,
   ComingSoon,
@@ -376,16 +377,27 @@ export function RelationshipsScreen() {
 /* -------------------------------------------------------------------------- */
 
 export function ActivitiesScreen() {
+  const { state } = useGame();
+  // Ticket 0207. Below the crush age the row is ABSENT, not disabled with an
+  // explanation — a greyed "Dating, relationships, marriage" in front of a
+  // nine-year-old is worse than nothing at all. `stagesFor` is the one function
+  // that decides this, here and in the engine.
+  const love = state !== null && stagesFor(state.player.age).length > 0;
+
   return (
     <Screen>
       <RowGroup
         rows={[
-          {
-            icon: 'love',
-            title: 'Love',
-            subtitle: 'Dating, relationships, marriage',
-            ticket: '0207',
-          },
+          ...(love
+            ? [
+                {
+                  icon: 'love' as const,
+                  title: 'Love',
+                  subtitle: 'Dating, relationships, marriage',
+                  route: { screen: 'love' as const, title: 'Love' },
+                },
+              ]
+            : []),
           {
             icon: 'mind',
             title: 'Mind & Body',

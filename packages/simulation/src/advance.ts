@@ -72,6 +72,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     nameCultureId: state.nameCultureId,
     firstName: state.player.firstName,
     charisma: education.player.stats.charisma,
+    personality: education.player.personality,
     family: state.family,
     education: education.education,
     previousStage: state.education.stage,

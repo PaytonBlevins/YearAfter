@@ -199,6 +199,7 @@ def COND(
     rel_at_most: dict | None = None,
     flags_all: list[str] | None = None,
     flags_none: list[str] | None = None,
+    partnered: bool | None = None,
 ) -> dict:
     return prune(
         {
@@ -218,6 +219,10 @@ def COND(
             "relationshipAtMost": rel_at_most,
             "flagsAll": flags_all,
             "flagsNone": flags_none,
+            # Ticket 0207. `prune` drops None but keeps False, which is what
+            # this field needs: "must NOT be seeing anybody" is a real
+            # constraint and is not the same as no constraint at all.
+            "partnered": partnered,
         }
     )
 
@@ -981,6 +986,123 @@ E("friend.first-date", "friendship", [
     "A first date at a cinema. Neither of you can name the film.",
 ], age_min=14, age_max=17, weight=10, cooldown=3,
    effects=FX(stats={"happiness": 4, "charisma": 2}))
+
+# -----------------------------------------------------------------------------
+# ROMANCE (Ticket 0207)
+#
+# The texture around the Love menu, the way the friendship events are the
+# texture around the friendship menu. What the player DOES is on the person's
+# page; these are the things that happen to them.
+#
+# Two rules on top of the usual ones, and neither is negotiable:
+#
+#   1. Nothing romantic fires below thirteen. `age_min` is the enforcement and
+#      the self-check below asserts it, because an event catalog is exactly the
+#      place a rule like this gets broken by somebody adding one entry.
+#   2. Under eighteen, the register is the one the existing line already sets —
+#      "A first date at a cinema. Neither of you can name the film." Corridors,
+#      buses, and not knowing what to say. Nothing else.
+# -----------------------------------------------------------------------------
+
+E("love.note", "friendship", [
+    "Somebody put a note in your bag. It was not signed and you have a theory.",
+    "A note went round the class about you and {kid}, and it was not unkind, which was worse.",
+], age_min=13, age_max=16, weight=11, cooldown=3,
+   effects=FX(stats={"happiness": 3, "charisma": 1}), partnered=False)
+
+E("love.corridor", "friendship", [
+    "You and {kid} have started taking the long way to the same lesson.",
+], age_min=13, age_max=17, weight=11, cooldown=2,
+   effects=FX(stats={"happiness": 3, "charisma": 1}), partnered=False)
+
+E("love.overheard", "friendship", [
+    "Somebody told {kid} you liked them. It was true, and you have not decided whether to be grateful.",
+], age_min=13, age_max=17, weight=10, cooldown=3,
+   effects=FX(stats={"happiness": 2, "willpower": 1}), partnered=False)
+
+E("love.first-kiss", "friendship", [
+    "First kiss. Neither of you had a plan and it showed.",
+    "Kissed {kid} at a party, badly, and thought about nothing else for a fortnight.",
+], age_min=14, age_max=17, weight=10, cooldown=6, rarity="uncommon",
+   effects=FX(stats={"happiness": 6, "charisma": 3}))
+
+E("love.dumped-by-text", "friendship", [
+    "It ended over a message that took four minutes to send and nine words to say.",
+], age_min=14, age_max=17, weight=10, cooldown=3,
+   effects=FX(stats={"happiness": -6, "willpower": 3}), partnered=True)
+
+E("love.friends-again", "friendship", [
+    "You and {kid} went back to being friends, and it very nearly worked.",
+], age_min=14, age_max=17, weight=10, cooldown=3,
+   effects=FX(stats={"happiness": -1, "charisma": 2}), partnered=True)
+
+E("love.parents-met", "friendship", [
+    "Had dinner at {kid}'s. Their parents asked what you wanted to do with your life.",
+], age_min=15, age_max=17, weight=10, cooldown=3,
+   effects=FX(stats={"charisma": 2, "happiness": 2}), partnered=True)
+
+E("love.long-distance", "friendship", [
+    "{kid} moved away. You both said you would keep it going.",
+], age_min=15, age_max=17, weight=9, rarity="uncommon", cooldown=5,
+   effects=FX(stats={"happiness": -4, "willpower": 2}), partnered=True)
+
+E("love.mixtape", "friendship", [
+    "Spent a whole evening making {kid} a playlist and then did not send it.",
+], age_min=13, age_max=17, weight=10, cooldown=3,
+   effects=FX(stats={"happiness": 1, "willpower": 1}), partnered=False)
+
+E("love.dance", "friendship", [
+    "The school dance. You stood near {kid} for two hours and said eleven words.",
+    "Danced with {kid} once, to the slow one, and left immediately afterwards.",
+], age_min=14, age_max=17, weight=11, cooldown=2,
+   effects=FX(stats={"happiness": 3, "charisma": 2}))
+
+E("love.someone-else", "friendship", [
+    "{kid} started going out with somebody else. You found out from a group chat.",
+], age_min=13, age_max=17, weight=10, cooldown=3,
+   effects=FX(stats={"happiness": -5, "willpower": 2}), partnered=False)
+
+E("love.summer", "friendship", [
+    "A whole summer with {kid} that neither of you called anything.",
+], age_min=15, age_max=17, weight=10, cooldown=4,
+   effects=FX(stats={"happiness": 5, "charisma": 2}), partnered=True)
+
+# ---- adult ------------------------------------------------------------------
+#
+# The adult library proper arrives with its own tickets. These are here because
+# the year loop does not stop at eighteen and a thirty-year-old's feed should
+# not be silent about the largest thing in most people's lives.
+
+E("love.set-up", "friendship", [
+    "A friend set you up with somebody. It was not a disaster, which is a low bar cleared.",
+], age_min=19, weight=10, cooldown=3,
+   effects=FX(stats={"charisma": 2, "happiness": 2}), partnered=False)
+
+E("love.app", "friendship", [
+    "Spent a month on the apps. Met three people and liked one of them.",
+    "Reinstalled the app, met somebody for a coffee, and neither of you texted after.",
+], age_min=19, weight=11, cooldown=2,
+   effects=FX(stats={"happiness": 1, "charisma": 1}), partnered=False)
+
+E("love.moved-in", "friendship", [
+    "Moved in together. It took two days and a van and one argument about a chair.",
+], age_min=20, weight=9, rarity="uncommon", cooldown=8,
+   effects=FX(stats={"happiness": 5}), partnered=True)
+
+E("love.wedding-guest", "friendship", [
+    "Went to a wedding on your own and had a much better time than expected.",
+], age_min=22, weight=10, cooldown=3,
+   effects=FX(stats={"happiness": 3, "charisma": 2}), partnered=False)
+
+E("love.the-one-that-got-away", "friendship", [
+    "Ran into somebody you used to know. You were both polite and it took a week to shake.",
+], age_min=24, weight=10, cooldown=5,
+   effects=FX(stats={"happiness": -2, "willpower": 2}))
+
+E("love.quiet-year", "friendship", [
+    "A year with nobody in it. You got quite good at your own company.",
+], age_min=21, weight=10, cooldown=3,
+   effects=FX(stats={"willpower": 3, "happiness": 1}), partnered=False)
 
 E("friend.rival", "friendship", [
     "{kid} became a rival about something extremely small, and it lasted years.",
@@ -3099,6 +3221,11 @@ E("adult.placeholder.8", "random", [
 
 TOKEN_RE = re.compile(r"\{([a-zA-Z0-9]+)\}")
 
+# Ticket 0207. Mirrors CRUSH_AGE in `@yearafter/social`. Kept as a plain number
+# here because the generator is Python and cannot import it — the content
+# validator checks the same floor, so the two cannot drift silently.
+ROMANCE_AGE_FLOOR = 13
+
 MIN_EVENTS = 250
 MAX_EVENTS = 500
 CHILDHOOD_AGES = range(0, 18)
@@ -3282,6 +3409,20 @@ def check() -> None:
     for event_id, count in Counter(ids).items():
         if count > 1:
             problems.append(f"duplicate event id {event_id!r} ({count} times)")
+
+    # Ticket 0207. Nothing romantic may fire below the crush age, and the
+    # catalog is exactly where that gets broken by somebody adding one entry —
+    # a bare `E(...)` with no `age_min` defaults to being eligible from birth.
+    # Asserted here rather than remembered, and mirrored in the content
+    # validator so it holds for hand-edited JSON too.
+    for event in EVENTS:
+        if not event["id"].startswith("love."):
+            continue
+        floor = event["eligibility"].get("ageMin")
+        if floor is None or floor < ROMANCE_AGE_FLOOR:
+            problems.append(
+                f"{event['id']}: a romance event needs ageMin >= {ROMANCE_AGE_FLOOR}, got {floor!r}"
+            )
 
     for event in EVENTS:
         eid = event["id"]

@@ -7,6 +7,7 @@ export * from './interact';
 export * from './gigs';
 export * from './joining';
 export * from './practice';
+export * from './romance';
 export * from './social-generator';
 export * from './study';
 export * from './tryout';

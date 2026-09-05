@@ -332,7 +332,7 @@ export function resolveInteraction(
   const scale = interaction.weight === 'light' ? repeatScale(alreadyDone) : 1;
   if (scale <= 0) {
     const lines = WORN_LINES[person.kind];
-    const index = Math.min(lines.length - 1, Math.floor(variant * lines.length));
+    const index = pickLine(lines, variant, alreadyDone);
     return {
       worked: false,
       warmth: 0,
@@ -345,7 +345,14 @@ export function resolveInteraction(
 
   const worked = roll < chanceOf(interaction, person, charisma);
   const lines = (worked ? GOOD_LINES : BAD_LINES)[interaction.id];
-  const index = Math.min(lines.length - 1, Math.floor(variant * lines.length));
+  // Rotated by how many times this has already been done this year, so two
+  // afternoons at the same person's house in one year cannot render the same
+  // sentence. Ticket 0207 found this: 0206b removed the one-a-year cap and
+  // nothing was stopping the light options repeating their copy verbatim, four
+  // times a year, for the length of a childhood. The caller supplies a variant
+  // that is stable within the year for this reason — a re-drawn one cancels the
+  // rotation exactly as often as it helps.
+  const index = pickLine(lines, variant, alreadyDone);
   const raw = worked ? interaction.onGood : interaction.onBad;
   // Getting away with something still costs standing, just less of it: the
   // teacher noticed, they simply could not prove it.
@@ -363,6 +370,20 @@ export function resolveInteraction(
 }
 
 /**
+ * Which line, rotated by how many times this has been done this year.
+ *
+ * Every set a LIGHT interaction can draw from therefore has to be at least
+ * `MAX_LIGHT_PRESSES` long, or the rotation wraps and the repeat comes back.
+ * `interactions.test` asserts exactly that, because it is the kind of rule that
+ * is invisible until somebody reads a year of output.
+ */
+const pickLine = (lines: readonly string[], variant: number, repeat: number): number =>
+  (Math.min(lines.length - 1, Math.floor(variant * lines.length)) + repeat) % lines.length;
+
+/** The most times a light interaction can land in one year. See `repeatScale`. */
+export const MAX_LIGHT_PRESSES = 4;
+
+/**
  * What happens when the player keeps pressing.
  *
  * There is no wall and no error. The person is simply done with it for now, in
@@ -373,10 +394,14 @@ const WORN_LINES: Readonly<Record<Acquaintance['kind'], readonly string[]>> = {
   peer: [
     'You have been round at {name}’s a lot lately. Enough that it was starting to show.',
     '{name} was polite about it, in the way that means give it a week.',
+    '{name} had other people to see this term, and said so without saying it.',
+    'There is only so much of a year, and you have had most of {name}’s.',
   ],
   teacher: [
     '{name} has seen a great deal of you this term, and said so.',
     '{name} told you, kindly, to try it yourself first.',
+    '{name} has thirty of you and reminded you of the number.',
+    'You have used up your credit with {name} for this term.',
   ],
 };
 
@@ -393,14 +418,22 @@ const GOOD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
     'Spent an afternoon at {name}’s doing nothing in particular, which turned out to be the point.',
     'You and {name} walked the long way home and were both late for dinner.',
     'Ended up at {name}’s until it got dark and nobody noticed the time.',
+    'Sat on the wall outside {name}’s for three hours. Nothing happened and it was a good day.',
+    'You and {name} invented a game with no rules and played it until you were told to stop.',
   ],
   compliment: [
     'You told {name} they were the best in the year at it. {name} pretended not to care and told two people.',
     'Said something nice to {name} and got a look that stayed with you for a week.',
+    'Told {name} you had noticed. It turned out nobody else had.',
+    'Said the thing everybody was thinking about {name}, out loud, first.',
+    'Meant it, and {name} could tell, which is the only reason it worked.',
   ],
   joke: [
     'Made {name} laugh so hard a teacher came over to find out what was happening.',
     'The joke landed. {name} still brings it up.',
+    '{name} did the laugh they do when it is real, which you do not hear often.',
+    'Got {name} at exactly the wrong moment and neither of you recovered for ten minutes.',
+    'It was not even that funny. {name} was gone anyway.',
   ],
   secret: [
     'Told {name} the thing you had not told anybody. {name} kept it, and still has.',
@@ -409,14 +442,23 @@ const GOOD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   'ask-for-help': [
     '{name} sat with you until it made sense, and did not make it a thing.',
     'Asked {name} for help and got it, immediately, without the price you were expecting.',
+    '{name} said “oh, that” and had it sorted before you finished explaining.',
+    'Turned up at {name}’s with the problem. {name} cleared the table.',
+    'Asked. {name} did not ask why, which was the part that mattered.',
   ],
   'ask-about-work': [
     'Stayed behind and asked. {name} explained it twice and was pleased to be asked.',
     '{name} kept you back ten minutes and it was the ten minutes the year turned on.',
+    '{name} drew it on the board again, slower, for one person.',
+    'Asked the question everybody had. {name} looked relieved that somebody did.',
+    '{name} lent you a book that was not on the list.',
   ],
   'help-out': [
     'Stayed to stack the chairs. {name} did not make a thing of it and did not forget it either.',
     'Carried the boxes down for {name}, who started leaving the good jobs for you.',
+    'Wiped the board without being asked. {name} noticed, and said nothing, and noticed.',
+    'Gave up a lunch hour to sort {name}’s cupboard out. It took the whole hour.',
+    'Stayed to lock up with {name}, twice, and got told to call them by their first name. You did not.',
   ],
   'ask-reference': [
     '{name} put a word in for you with somebody who mattered, and did not mention it.',
@@ -425,6 +467,9 @@ const GOOD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   'wind-up': [
     'Got {name} going for a solid four minutes. The class has never respected you more.',
     'Said it under your breath and {name} chose not to have heard it.',
+    'Answered every question with another question until {name} gave up on the lesson.',
+    'Moved everything on {name}’s desk two inches to the left. It took a fortnight to be noticed.',
+    'Did the impression. {name} walked in halfway through and pretended not to know whose it was.',
   ],
   'talk-back': [
     'Said it out loud to {name}, in front of thirty people, and the room went completely silent.',
@@ -441,14 +486,23 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   'hang-out': [
     '{name} already had plans, and was not sorry enough about it.',
     'Sat around at {name}’s not talking. You both went home early.',
+    '{name} spent the afternoon waiting for somebody else to arrive.',
+    'Turned up and {name} had forgotten. You could hear them deciding what to do about it.',
+    'It was fine. It was exactly fine, all afternoon, and you both felt it.',
   ],
   compliment: [
     'You told {name} they were good at it. {name} assumed you wanted something.',
     'It came out wrong. {name} repeated it back to you, in front of people, in a voice.',
+    'Said it and {name} said “okay”, and went back to what they were doing.',
+    'Complimented the wrong thing. {name} was quiet for a bit after that.',
+    'You said it too loudly and {name} spent the rest of the day living it down.',
   ],
   joke: [
     'Nobody laughed. {name} looked at you the way you had been afraid of.',
     '{name} laughed a beat too late, which was worse than not laughing.',
+    'Had to explain it to {name}, and then explain it again.',
+    'It was about {name}, and you worked that out roughly a second too late.',
+    '{name} said “right” and there was quite a lot of afternoon left.',
   ],
   secret: [
     'Told {name}. Four people knew by Friday and you never worked out how.',
@@ -457,9 +511,24 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   'ask-for-help': [
     '{name} said yes and then did not turn up, twice.',
     'Asked {name}, who told you to work it out yourself. It was fair and it still stung.',
+    '{name} helped, and mentioned it to three people by Thursday.',
+    'Got halfway through asking and {name} was already looking over your shoulder.',
+    '{name} sighed before they said yes, and the sigh was the answer.',
   ],
-  'ask-about-work': ['{name} was packing up and told you to read the chapter again.'],
-  'help-out': ['{name} said they had it, in a voice that meant go away.'],
+  'ask-about-work': [
+    '{name} was packing up and told you to read the chapter again.',
+    'Asked, and got the same explanation at the same speed, twice.',
+    '{name} answered somebody else’s question instead and never came back to yours.',
+    'Got told it had been covered. It had, and that was not the problem.',
+    '{name} suggested you ask somebody in your group. You had.',
+  ],
+  'help-out': [
+    '{name} said they had it, in a voice that meant go away.',
+    'Offered, and got given the job nobody wanted, which was the point.',
+    '{name} thanked you and gave the interesting half to somebody else.',
+    'Broke something of {name}’s while helping. {name} said it did not matter.',
+    'Stayed behind for twenty minutes doing nothing while {name} finished an email.',
+  ],
   'ask-reference': [
     'Asked {name}, who said they did not really know you well enough. Which was fair.',
     '{name} said yes and then wrote something so lukewarm it did more harm than nothing.',
@@ -467,6 +536,9 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   'wind-up': [
     'It landed badly. {name} did not shout, which was worse, and remembered it all year.',
     'Nobody laughed and {name} moved your seat.',
+    '{name} waited for you to finish, then carried on, and the class went quiet on its own.',
+    'It was funnier in your head. {name} kept the note.',
+    '{name} said your full name, and that was all that had to happen.',
   ],
   'talk-back': [
     'You said it and {name} sent you out, and it went further up than you expected.',

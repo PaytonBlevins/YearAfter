@@ -43,6 +43,8 @@ export interface EventContext {
    */
   readonly schoolStage: string;
   readonly activityCount: number;
+  /** Ticket 0207. Whether the character is currently seeing somebody. */
+  readonly partnered: boolean;
   /** Whole dollars the character is actually holding, for `cashAtLeast`. */
   readonly cash: number;
   /**

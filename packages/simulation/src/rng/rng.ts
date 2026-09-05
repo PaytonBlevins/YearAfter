@@ -28,7 +28,7 @@ export interface WeightedOption<T> {
 }
 
 /** Hash an arbitrary seed string into a uint32. */
-function hashSeed(seed: string): number {
+export function hashSeed(seed: string): number {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < seed.length; i += 1) {
     h ^= seed.charCodeAt(i);
@@ -36,6 +36,16 @@ function hashSeed(seed: string): number {
   }
   return h >>> 0;
 }
+
+/**
+ * A stable draw in [0, 1) from a string, without touching any stream.
+ *
+ * For choices that must be the SAME every time they are asked within one
+ * context rather than fresh on every call — see the phrasing seed in
+ * `romance.ts`. It consumes no RNG state, so calling it can never shift what
+ * any stream produces next.
+ */
+export const stableUnit = (key: string): number => hashSeed(key) / 4294967296;
 
 /** splitmix32 — expands one uint32 into a well-distributed state vector. */
 function splitmix32(seed: number): () => number {

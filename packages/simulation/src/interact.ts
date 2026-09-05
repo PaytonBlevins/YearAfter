@@ -26,7 +26,7 @@ import {
   type Acquaintance,
 } from '@yearafter/social';
 import type { GameState } from './game-state';
-import { RngDomains } from './rng/rng';
+import { RngDomains, stableUnit } from './rng/rng';
 
 export type InteractError =
   | 'no-such-person'
@@ -77,7 +77,13 @@ export function interact(
     state.player.stats.charisma,
     displayName(person),
     stream.next(),
-    stream.next(),
+    // Stable for this person, this interaction, this year — NOT a fresh draw.
+    // `resolveInteraction` rotates the line by how many times it has been used
+    // this year so a repeat cannot render the same sentence, and that only
+    // works if the base index holds still. Ticket 0207 found the same bug in
+    // its own copy: a re-drawn index landing one lower cancels the rotation
+    // exactly.
+    stableUnit(`${state.world.year}:${person.id}:${interaction.id}`),
     spent.light,
   );
 
