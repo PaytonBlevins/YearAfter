@@ -24,6 +24,7 @@ import {
   isFriend,
   isRomantic,
   compatibility,
+  endPerson,
   leavingChance,
   romanceYear,
   type Acquaintance,
@@ -57,6 +58,46 @@ export const STARTING_WARMTH: readonly [number, number] = [26, 46];
  * people you sat near for six years, which is the true ratio.
  */
 export const PROXIMITY_WARMTH = 4;
+
+/**
+ * How many people an adult holds by name at once.
+ *
+ * Ticket 0207b. Deliberately SMALLER than a class, and that is the honest
+ * model rather than a budget: school hands you thirty people a year whether you
+ * want them or not, and adult life does not. Four is enough that the circle is
+ * not empty and few enough that it reads as a life rather than a directory.
+ */
+export const ADULT_CIRCLE = 4;
+
+/**
+ * The chance an adult meets somebody new in a year with nothing else going on.
+ *
+ * Scaled by extraversion and charisma below, so a sociable character genuinely
+ * meets more people and a solitary one can go years without. Measured across
+ * simulated lives before it was set: at 0.55, the median adult circle sat at
+ * three or four and about one life in eight spent a stretch with nobody, which
+ * is the spread this wants.
+ */
+export const ADULT_MEETING_CHANCE = 0.55;
+
+/** Somebody you have just met, and have no history with. */
+export const ADULT_WARMTH: readonly [number, number] = [18, 38];
+
+/**
+ * The yearly chance an adult acquaintance you never got anywhere with moves on.
+ *
+ * Neighbours count as contact (see the drift step), which stops them
+ * evaporating — and with nothing else, stopped them ever leaving: measuring
+ * found the circle filling at nineteen and then locking, so at thirty-five the
+ * earliest person a character knew had been met at 18.9, every time. A frozen
+ * cast formed at nineteen instead of seventeen is still a frozen cast.
+ *
+ * So people move, and jobs and leases end. Only people you never got anywhere
+ * with: somebody who became a friend has something holding them, which is what
+ * being a friend means. At 0.22 a non-friend lasts about four years, which
+ * leaves room for the ones who last thirty.
+ */
+export const ADULT_MOVES_ON = 0.22;
 
 /**
  * Teammates who arrive with a team.
@@ -118,7 +159,12 @@ interface NameContext {
   readonly taken: Set<string>;
 }
 
-function nameContext(cultureId: string, circle: SocialCircle, family: Household, self: string) {
+export function nameContext(
+  cultureId: string,
+  circle: SocialCircle,
+  family: Household,
+  self: string,
+) {
   const taken = new Set<string>([
     self,
     ...family.members.map((member) => member.firstName),
@@ -149,6 +195,25 @@ function uniqueFirstName(stream: RandomStream, names: NameContext, sex: Sex): st
 function surnameFor(stream: RandomStream, names: NameContext): string {
   if (!names.culture) return 'Alvarez';
   return stream.pick(names.culture.surnames);
+}
+
+/**
+ * An ordinary person of the player's own age, with a name nobody in their life
+ * already has.
+ *
+ * Shared by the class, by teams, by the neighbours an adult meets and by the
+ * dating app, so that everybody in the game is drawn from one distribution. A
+ * separate generator for app matches would have been the obvious place for a
+ * pool of implausibly compatible people to appear by accident.
+ */
+export function newPersonLike(
+  stream: RandomStream,
+  names: NameContext,
+  age: number,
+  birthYear: number,
+  index: number,
+): Acquaintance {
+  return newClassmate(stream, names, age, birthYear, index);
 }
 
 function newClassmate(
@@ -286,6 +351,59 @@ export function teammatesFor(
   return made;
 }
 
+/**
+ * A year of adult life, socially.
+ *
+ * At most one new person a year, and often none. That is not a throttle to keep
+ * the list short — it is what the thing being modelled is like, and a system
+ * that handed an adult five new names every September would be modelling school
+ * with the word "work" written on it.
+ */
+function meetSomebodyNew(
+  people: Acquaintance[],
+  circle: SocialCircle,
+  stream: RandomStream,
+  input: SocialYearInput,
+  lines: string[],
+): Acquaintance[] {
+  const around = people.filter(
+    (person) => person.kind === 'peer' && person.endedAtAge === undefined,
+  );
+  if (around.length >= ADULT_CIRCLE) return people;
+
+  // Some people meet people. The stat that says so is the one that has said so
+  // since 0201, and a stat with no consumer is decoration.
+  const openness = (input.charisma - 50) / 50 + (input.personality.extraversion - 50) / 50;
+  const chance = ADULT_MEETING_CHANCE * (1 + openness * 0.45);
+  if (!stream.chance(Math.max(0.08, Math.min(0.92, chance)))) return people;
+
+  const names = nameContext(input.nameCultureId, { ...circle, people }, input.family, input.firstName);
+  // Somebody you are still doing something with brings people; otherwise it is
+  // wherever you live. Work will be a third of these when 0210 lands.
+  const viaActivity = input.joinedActivityIds.length > 0 && stream.chance(0.45);
+  const activityId = viaActivity ? stream.pick([...input.joinedActivityIds]) : undefined;
+
+  const person = newClassmate(stream, names, input.age, input.worldYear - input.age, people.length);
+  const met: Acquaintance = {
+    ...person,
+    id: asNpcId(`npc:met:${input.worldYear}:${people.length}`),
+    context: activityId !== undefined ? 'activity' : 'neighbourhood',
+    ...(activityId !== undefined ? { viaActivityId: activityId } : {}),
+    relationship: clampStat(stream.range(ADULT_WARMTH[0], ADULT_WARMTH[1])) as StatValue,
+    // Never `inClass` — there is no class. An adult friendship has to be kept
+    // up from the first day, which is the whole difference from a school one.
+    inClass: false,
+    lastContactAge: input.age,
+  };
+
+  lines.push(
+    activityId !== undefined
+      ? `Met ${met.firstName} through something you do. You have got as far as first names.`
+      : `Met ${met.firstName}, who lives close enough to keep running into.`,
+  );
+  return [...people, met];
+}
+
 export interface SocialYearInput {
   readonly age: number;
   /** The player's charisma. Some people are easier to be around. */
@@ -300,8 +418,27 @@ export interface SocialYearInput {
   readonly family: Household;
   /** Whether the character is at school this year. */
   readonly atSchool: boolean;
-  /** True on the year they change school — the year the class turns over. */
+  /**
+   * True on the year the class turns over: changing school, or leaving it.
+   *
+   * Ticket 0207b. Leaving used to be missing, and the omission was structural
+   * rather than cosmetic. `changedSchool` was computed as
+   * `atSchool && stage !== previousStage`, so the year a character graduated it
+   * was FALSE — nobody's `inClass` was ever cleared, and `driftPerson` exempts
+   * anybody `inClass`. Measuring found the same five high-school classmates
+   * still in the circle, still not drifting, at thirty-five: a mean of 4.9
+   * available people at every adult age, all of them seventeen years stale.
+   * Nobody in this game could meet a person after leaving school, and every
+   * marriage was to somebody the character sat next to at sixteen.
+   */
   readonly changedSchool: boolean;
+  /**
+   * Whether the character has finished with school for good.
+   *
+   * Distinct from `!atSchool`, which is also true of a four-year-old. This is
+   * what turns on the adult ways of meeting people.
+   */
+  readonly leftSchool: boolean;
 }
 
 export interface SocialYearResult {
@@ -333,13 +470,12 @@ export function runSocialYear(
       // A friendship survives a change of building — but it leaves the class,
       // and from here it has to hold up on its own. That is the moment a
       // childhood friendship is actually decided.
-      if (isFriend(person)) return { ...person, inClass: false };
-      return {
-        ...person,
-        inClass: false,
-        endedAtAge: input.age,
-        endedBecause: 'moved on' as const,
-      };
+      //
+      // So does somebody you are going out with, obviously. 0207b found that
+      // omission the hard way: leaving school was ending the person while
+      // leaving the romance live, and the player picked up a second partner.
+      if (isFriend(person) || isRomantic(person)) return { ...person, inClass: false };
+      return endPerson({ ...person, inClass: false }, input.age, 'moved on');
     });
   }
 
@@ -351,12 +487,7 @@ export function runSocialYear(
       person.relationship >= TEACHER_STAYS_THRESHOLD &&
       stream.chance(TEACHER_STAYS);
     if (keeps) return person;
-    return {
-      ...person,
-      inClass: false,
-      endedAtAge: input.age,
-      endedBecause: 'moved on' as const,
-    };
+    return endPerson({ ...person, inClass: false }, input.age, 'moved on');
   });
 
   // ---- another year in the same room --------------------------------------
@@ -366,10 +497,22 @@ export function runSocialYear(
   const stillIn = new Set(input.joinedActivityIds);
   people = people.map((person) => {
     if (person.endedAtAge !== undefined) return person;
-    // Two rooms count: the class, and a team you are still on. A teammate you
-    // see at training every week is not somebody you are losing touch with.
+    // THREE rooms count: the class, a team you are still on, and the street you
+    // live on. A teammate you see at training every week is not somebody you
+    // are losing touch with, and neither is the neighbour you keep running
+    // into.
+    //
+    // The third one is Ticket 0207b, and it was found by measuring rather than
+    // reasoned out. Adult acquaintances arrive around 28 warmth; drift at that
+    // level costs 5.6 a year and the drift-out floor is 22, so every single one
+    // evaporated within a year of being met. The measurement was stark: at
+    // thirty, the earliest person a character knew had been met at 29.7. An
+    // adult social world with total annual churn is the same failure as a class
+    // that turns over every September, in a different room.
     const together =
-      person.inClass || (person.viaActivityId !== undefined && stillIn.has(person.viaActivityId));
+      person.inClass ||
+      (person.viaActivityId !== undefined && stillIn.has(person.viaActivityId)) ||
+      (person.context === 'neighbourhood' && person.kind === 'peer');
     if (!together) return person;
     const gain = person.kind === 'teacher' ? 0 : proximityWarmth(person, input.charisma);
     return {
@@ -436,7 +579,36 @@ export function runSocialYear(
     return after;
   });
 
+  // ---- people move --------------------------------------------------------
+  //
+  // Only ever ONE line about this a year, and only about somebody the player
+  // had got somewhere with — the same rule the drift step follows, for the same
+  // reason: losing an acquaintance you never spoke to is not news.
+  if (input.leftSchool) {
+    let movedLine = false;
+    people = people.map((person) => {
+      if (person.endedAtAge !== undefined || person.kind !== 'peer') return person;
+      if (person.context !== 'neighbourhood') return person;
+      if (isFriend(person) || isRomantic(person)) return person;
+      if (!stream.chance(ADULT_MOVES_ON)) return person;
+      if (person.relationship >= NOTABLE_LOSS && !movedLine) {
+        movedLine = true;
+        lines.push(`${person.firstName} moved. You said you would keep in touch and did not.`);
+      }
+      return endPerson(person, input.age, 'moved away');
+    });
+  }
+
+  // ---- an adult year -----------------------------------------------------
+  //
+  // Not the same shape as a school year and deliberately so. Nobody puts you in
+  // a room with thirty peers after seventeen; you meet people through where you
+  // live and what you do, a few at a time, and whether it happens at all
+  // depends on what you are like. That asymmetry IS the model.
   if (!input.atSchool) {
+    if (input.leftSchool) {
+      people = meetSomebodyNew(people, circle, stream, input, lines);
+    }
     return { circle: { ...circle, people }, lines };
   }
 

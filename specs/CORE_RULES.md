@@ -432,6 +432,25 @@ of lives still contained exactly one relationship, ever.
 More generally: any system where the player has a monotonic lever needs a term
 that lever does not reach, or the optimal play is to hold the lever down.
 
+### 13.19 A person leaving must take their relationships with them
+
+0207 put romance on the person record precisely so there could not be two places
+that disagree about whether you still speak to somebody. 0207b broke it within
+an hour: making graduation end the class set `endedAtAge` on the PERSON while
+leaving their `romance` live, `partnerOf` skips people who are gone, and the
+invariant test found a character with two partners at once.
+
+So there is exactly one function that may end somebody — `endPerson` — and it
+closes everything hanging off them. A second place that sets an ending is a bug
+waiting for the next ticket to find. The reverse is not symmetric and must stay
+that way: a romance ends without the person leaving, because that is what an ex
+is.
+
+More generally, when one record is derived from a filter over another
+(`partnerOf` reads "people who are still here"), every writer of the underlying
+field has to maintain the invariant. Funnel them through one function rather
+than trusting each caller to remember.
+
 ## 16. Performance
 
 Annual processing under ~250 ms for an ordinary life. Background NPCs are

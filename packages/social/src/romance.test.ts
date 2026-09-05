@@ -26,6 +26,7 @@ import {
   compatibility,
   costOf,
   crushesOf,
+  endPerson,
   exesOf,
   isRomantic,
   movesFor,
@@ -356,5 +357,49 @@ describe('who is who', () => {
     expect(exesOf(people).map((person) => person.id)).toEqual([ex.id]);
     expect(isRomantic(ex)).toBe(false);
     expect(isRomantic(plain)).toBe(false);
+  });
+});
+
+/**
+ * Ticket 0207b. The one-way rule between the two records.
+ *
+ * A ROMANCE may end while the person stays — that is what an ex is. A PERSON
+ * may not end while their romance stays live, because `partnerOf` skips people
+ * who are gone: the two records would then disagree about whether the player is
+ * seeing anybody, and the player picks up a second partner. That is exactly
+ * what happened when 0207b made graduating end the class, and it is the failure
+ * mode putting romance on the person record was meant to make impossible.
+ */
+describe('a person and their romance cannot disagree', () => {
+  it('ends the romance when the person goes', () => {
+    for (const because of ['drifted', 'fell out', 'moved away', 'moved on'] as const) {
+      for (const stage of ALL_STAGES) {
+        const going = peer({ relationship: 80, romance: at(stage, 15) });
+        const gone = endPerson(going, 19, because);
+        expect(gone.endedAtAge).toBe(19);
+        expect(gone.romance?.endedAtAge, `${because} / ${stage}`).toBe(19);
+        expect(isRomantic(gone)).toBe(false);
+        expect(partnerOf([gone])).toBeUndefined();
+      }
+    }
+  });
+
+  it('leaves somebody with no romance alone apart from ending them', () => {
+    const plain = peer({ relationship: 40 });
+    const gone = endPerson(plain, 19, 'drifted');
+    expect(gone.endedAtAge).toBe(19);
+    expect(gone.romance).toBeUndefined();
+  });
+
+  it('does not overwrite an ending that already happened', () => {
+    const already = peer({
+      relationship: 30,
+      endedAtAge: 15,
+      endedBecause: 'moved on',
+      romance: { stage: 'seeing', since: 14, endedAtAge: 15, endedBecause: 'broke up' },
+    });
+    const again = endPerson(already, 20, 'drifted');
+    expect(again.endedAtAge).toBe(15);
+    expect(again.romance?.endedBecause).toBe('broke up');
   });
 });

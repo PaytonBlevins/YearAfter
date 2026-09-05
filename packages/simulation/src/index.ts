@@ -1,6 +1,7 @@
 export * from './rng/rng';
 export * from './game-state';
 export * from './advance';
+export * from './dating';
 export * from './decide';
 export * from './new-game';
 export * from './interact';

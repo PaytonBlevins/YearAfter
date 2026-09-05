@@ -19,6 +19,12 @@ import { type SocialCircle } from '@yearafter/social';
 import { runSocialYear } from '../social-generator';
 import type { RandomStream } from '../rng/rng';
 
+/**
+ * Below this, "not at school" means a small child rather than somebody who has
+ * finished with it. Preschool has no class and no adult social life either.
+ */
+const LEAVING_AGE = 17;
+
 export interface SocialPhaseInput {
   readonly circle: SocialCircle;
   readonly stream: RandomStream;
@@ -51,8 +57,12 @@ export function runSocial(input: SocialPhaseInput): SocialPhaseOutput {
     joinedActivityIds: input.education.activities.map((entry) => entry.activityId),
     family: input.family,
     atSchool,
-    // Starting school counts as changing it: the class exists from that year on.
-    changedSchool: atSchool && input.education.stage !== input.previousStage,
+    // Starting school counts as changing it: the class exists from that year
+    // on. So does LEAVING — the year a character graduates or drops out, the
+    // class stops being a room they are in, and 0207b found that the missing
+    // half of this condition froze the high-school cast in place for life.
+    changedSchool: input.education.stage !== input.previousStage,
+    leftSchool: !atSchool && input.age >= LEAVING_AGE,
   });
 
   return {

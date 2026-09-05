@@ -33,6 +33,7 @@ import {
   stagesFor,
   type Acquaintance,
 } from '@yearafter/social';
+import { datingAppAvailable, datingAppUsedThisYear } from '@yearafter/simulation';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
 import { useNavigation } from '../navigation/navigation';
@@ -40,7 +41,7 @@ import { warmthColor } from './PeopleScreen';
 import { colors, spacing, typography } from '../theme/theme';
 
 export function LoveScreen() {
-  const { state } = useGame();
+  const { state, tryDatingApp } = useGame();
   const { push } = useNavigation();
   if (!state) return null;
 
@@ -60,6 +61,7 @@ export function LoveScreen() {
   const crushes = crushesOf(people);
   const exes = exesOf(people).filter((person) => person.id !== partner?.id);
   const cash = Number(state.player.cash);
+  const usedApp = datingAppUsedThisYear(state);
 
   // Anybody you could plausibly start something with: somebody still around,
   // who you are not already with, and who the menu has something to say about.
@@ -103,6 +105,36 @@ export function LoveScreen() {
           />
         )}
       </Card>
+
+      {/*
+        Ticket 0207b. Spec 1664's other half. Hidden rather than disabled while
+        the character is with somebody: a greyed "Try an app" beside the person
+        you are married to is a suggestion, not an explanation.
+      */}
+      {datingAppAvailable(state) ? (
+        <>
+          <SectionHeading note={usedApp ? 'this year’s done' : 'once a year'}>
+            Looking
+          </SectionHeading>
+          <Card>
+            <ListRow
+              icon="social"
+              title="Spend a month on the apps"
+              subtitle={
+                usedApp
+                  ? 'You have given it a go this year.'
+                  // Short enough not to clip. The first screenshot ran to
+                  // "Some months it …", which is a subtitle that stops mid-
+                  // sentence and looks like a bug rather than a style.
+                  : 'Most months it comes to nothing.'
+              }
+              affordance={usedApp ? 'none' : 'action'}
+              disabled={usedApp}
+              onPress={usedApp ? undefined : tryDatingApp}
+            />
+          </Card>
+        </>
+      ) : null}
 
       {crushes.length > 0 ? (
         <>
@@ -206,11 +238,13 @@ function stageLine(person: Acquaintance, age: number): string {
 function whereFrom(person: Acquaintance): string {
   const bond = bondOf(person);
   const where =
-    person.viaActivityId !== undefined
-      ? 'from something you do'
-      : person.context === 'school'
-        ? 'in your year'
-        : 'from around';
+    person.context === 'app'
+      ? 'from an app'
+      : person.viaActivityId !== undefined
+        ? 'from something you do'
+        : person.context === 'school'
+          ? 'in your year'
+          : 'from around here';
   return `${bond.charAt(0).toUpperCase()}${bond.slice(1)} · ${where}`;
 }
 

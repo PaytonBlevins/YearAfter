@@ -42,12 +42,13 @@ import type { Romance } from './romance';
 export type AcquaintanceKind = 'peer' | 'teacher';
 
 /** Where the player knows this person from. Renders inside a sentence. */
-export type MeetingContext = 'school' | 'neighbourhood' | 'activity';
+export type MeetingContext = 'school' | 'neighbourhood' | 'activity' | 'app';
 
 export const CONTEXT_LABELS: Readonly<Record<MeetingContext, string>> = {
   school: 'from school',
   neighbourhood: 'from your street',
   activity: 'from a club',
+  app: 'from an app',
 };
 
 /**
@@ -304,6 +305,38 @@ export const driftRate = (relationship: number): number =>
 export const DRIFT_OUT_THRESHOLD = 22;
 
 /**
+ * End somebody's presence in the player's life, and their romance with it.
+ *
+ * The one function that may set `endedAtAge`, and it exists because Ticket
+ * 0207b broke the rule that made 0207 safe. Graduating now ends the class —
+ * and it was ending the PERSON while leaving their `romance` live, so
+ * `partnerOf` (which skips people who are gone) reported nobody while the
+ * player was still recorded as going out with them. The invariant test caught a
+ * character with two partners at once.
+ *
+ * A person record and a romance record that disagree about whether you are
+ * seeing somebody is precisely the failure the whole 0207 design was built to
+ * avoid — it is why romance is a field on a person rather than a parallel
+ * model. One place to end somebody means the two can never drift apart again.
+ */
+export function endPerson(
+  person: Acquaintance,
+  age: number,
+  because: NonNullable<Acquaintance['endedBecause']>,
+): Acquaintance {
+  if (person.endedAtAge !== undefined) return person;
+  const romance = person.romance;
+  return {
+    ...person,
+    endedAtAge: age,
+    endedBecause: because,
+    ...(romance && romance.endedAtAge === undefined
+      ? { romance: { ...romance, endedAtAge: age, endedBecause: 'drifted' as const } }
+      : {}),
+  };
+}
+
+/**
  * A year passing for somebody the player did not speak to.
  *
  * Two exemptions, both load-bearing:
@@ -327,7 +360,7 @@ export function driftPerson(person: Acquaintance, age: number): Acquaintance {
   }
   const settled = clampStat(Math.round(relationship)) as StatValue;
   if (settled <= DRIFT_OUT_THRESHOLD) {
-    return { ...person, relationship: settled, endedAtAge: age, endedBecause: 'drifted' };
+    return endPerson({ ...person, relationship: settled }, age, 'drifted');
   }
   return { ...person, relationship: settled };
 }
