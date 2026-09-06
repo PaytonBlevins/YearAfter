@@ -132,8 +132,8 @@ export function costOf(move: RomanceMove, cash: number): number {
 export const ROMANCE_MOVES: readonly RomanceMove[] = [
   {
     id: 'flirt',
-    label: 'Flirt',
-    blurb: 'Badly, probably. Everybody does it badly.',
+    label: 'Flirt with them',
+    blurb: 'Let them know you like them.',
     from: ['none', 'interested'],
     to: 'interested',
     weight: 'light',
@@ -144,7 +144,7 @@ export const ROMANCE_MOVES: readonly RomanceMove[] = [
   {
     id: 'ask-out',
     label: 'Ask them out',
-    blurb: 'Out loud, to their face, with no way to take it back.',
+    blurb: 'Ask them out. They might say no.',
     from: ['interested'],
     to: 'seeing',
     weight: 'heavy',
@@ -156,8 +156,8 @@ export const ROMANCE_MOVES: readonly RomanceMove[] = [
   },
   {
     id: 'date',
-    label: 'Take them out',
-    blurb: 'An evening that is meant to be about the two of you.',
+    label: 'Go on a date',
+    blurb: 'An evening out. Costs money.',
     from: ['seeing', 'together', 'engaged', 'married'],
     weight: 'light',
     base: 0.62,
@@ -167,8 +167,8 @@ export const ROMANCE_MOVES: readonly RomanceMove[] = [
   },
   {
     id: 'make-official',
-    label: 'Make it official',
-    blurb: 'Say the word to them, and then to everybody else.',
+    label: 'Become a couple',
+    blurb: 'Ask them to make it official.',
     from: ['seeing'],
     to: 'together',
     weight: 'heavy',
@@ -181,8 +181,8 @@ export const ROMANCE_MOVES: readonly RomanceMove[] = [
   },
   {
     id: 'propose',
-    label: 'Propose',
-    blurb: 'Ask them the whole question.',
+    label: 'Propose to them',
+    blurb: 'Ask them to marry you. Costs money.',
     from: ['together'],
     to: 'engaged',
     weight: 'heavy',
@@ -199,7 +199,7 @@ export const ROMANCE_MOVES: readonly RomanceMove[] = [
   {
     id: 'marry',
     label: 'Get married',
-    blurb: 'The day itself, and everybody you know in one room.',
+    blurb: 'Have the wedding. Costs money.',
     from: ['engaged'],
     to: 'married',
     weight: 'heavy',
@@ -214,8 +214,8 @@ export const ROMANCE_MOVES: readonly RomanceMove[] = [
   },
   {
     id: 'break-up',
-    label: 'End it',
-    blurb: 'You have thought about it enough.',
+    label: 'Break up with them',
+    blurb: 'End the relationship for good.',
     from: ['interested', 'seeing', 'together', 'engaged'],
     weight: 'heavy',
     certain: true,
@@ -226,8 +226,8 @@ export const ROMANCE_MOVES: readonly RomanceMove[] = [
   },
   {
     id: 'divorce',
-    label: 'File for divorce',
-    blurb: 'Solicitors, a date in a diary, and the house.',
+    label: 'Get a divorce',
+    blurb: 'End the marriage. Costs money.',
     from: ['married'],
     weight: 'heavy',
     certain: true,

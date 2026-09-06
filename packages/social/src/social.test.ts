@@ -13,6 +13,8 @@ import {
   DRIFT_OUT_THRESHOLD,
   INTERACTIONS,
   MAX_LIGHT_PRESSES,
+  ROMANCE_MOVES,
+  ROMANCE_STAGE_LABELS,
   MINOR_MEMORY_LIMIT,
   bondOf,
   chanceOf,
@@ -367,6 +369,110 @@ describe('repeatable copy', () => {
           }
         }
       }
+    }
+  });
+});
+
+/**
+ * Ticket 0207d — a menu label says what pressing it does.
+ *
+ * Review, after playing the 0207 build: "'Tell them something' and 'Have it out
+ * with them' does not make sense to everyone. Please make them say what they
+ * mean. Much more clear please."
+ *
+ * These labels are harder than an event's, not easier: an event choice sits
+ * under a prompt that supplies the situation, and these sit on a standing menu
+ * with nothing above them. The content validator enforces the same rule on the
+ * catalog (V9/V10); this is the half of the game that lives in code.
+ */
+describe('menu copy is plain (Ticket 0207d)', () => {
+  const VAGUE = [
+    'tell them something',
+    'have it out with them',
+    'wind them up',
+    'try to fix it',
+    'end it',
+    'flirt',
+    'propose',
+    'take them out',
+    'make it official',
+    'say something nice',
+    'stay behind and ask',
+    'offer to help',
+    'ask them to put in a word',
+    'talk back',
+    'make a joke',
+  ];
+  const BRITISH = /\b(apologise|realise|recognise|practise|maths|licence|pavement|corridor|fortnight|neighbour|favourite|colour|whilst|learnt|amongst|solicitor|wind them up)\b/i;
+
+  const everyLabel = [
+    ...INTERACTIONS.map((entry) => ({ what: entry.id, label: entry.label, blurb: entry.blurb })),
+    ...ROMANCE_MOVES.map((move) => ({ what: move.id, label: move.label, blurb: move.blurb })),
+  ];
+
+  it('never uses a label review rejected, or one like it', () => {
+    for (const { what, label } of everyLabel) {
+      expect(VAGUE, `${what}: "${label}"`).not.toContain(label.toLowerCase());
+    }
+  });
+
+  it('gives every label a verb and an object', () => {
+    for (const { what, label } of everyLabel) {
+      // One word is a gesture, not an instruction.
+      expect(label.trim().split(/\s+/).length, `${what}: "${label}"`).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('writes American English', () => {
+    for (const { what, label, blurb } of everyLabel) {
+      expect(BRITISH.test(label), `${what} label: "${label}"`).toBe(false);
+      expect(BRITISH.test(blurb), `${what} blurb: "${blurb}"`).toBe(false);
+    }
+    for (const stage of Object.values(ROMANCE_STAGE_LABELS)) {
+      expect(BRITISH.test(stage), stage).toBe(false);
+    }
+  });
+
+  it('gives every option a blurb that explains it rather than winking at it', () => {
+    for (const { what, blurb } of everyLabel) {
+      expect(blurb.length, `${what}`).toBeGreaterThan(15);
+      // A blurb that is only a fragment ("Go first, and hope.") tells a player
+      // nothing about what the button does.
+      expect(blurb.trim().endsWith('.'), `${what}: "${blurb}"`).toBe(true);
+    }
+  });
+});
+
+/**
+ * Ticket 0207d — a blurb that clips is a blurb that did not explain.
+ *
+ * The rewrite made the labels clear and made two blurbs longer than the row,
+ * so the screenshot read "Say what you really think. It could end the …" and
+ * "Let them know you like them, without saying it o…". A sentence cut off
+ * mid-word is exactly the unclear-copy failure this pass exists to remove, so
+ * the width is a rule rather than something to notice in a screenshot later.
+ *
+ * 40 characters is what one row fits at the smallest supported width.
+ */
+describe('menu copy fits the row it renders in', () => {
+  const BLURB_LIMIT = 44;
+  const LABEL_LIMIT = 30;
+
+  it('never writes a blurb that would be truncated', () => {
+    for (const entry of INTERACTIONS) {
+      expect(entry.blurb.length, `${entry.id}: "${entry.blurb}"`).toBeLessThanOrEqual(BLURB_LIMIT);
+    }
+    for (const move of ROMANCE_MOVES) {
+      expect(move.blurb.length, `${move.id}: "${move.blurb}"`).toBeLessThanOrEqual(BLURB_LIMIT);
+    }
+  });
+
+  it('keeps labels short enough to sit beside the odds', () => {
+    for (const entry of INTERACTIONS) {
+      expect(entry.label.length, `${entry.id}: "${entry.label}"`).toBeLessThanOrEqual(LABEL_LIMIT);
+    }
+    for (const move of ROMANCE_MOVES) {
+      expect(move.label.length, `${move.id}: "${move.label}"`).toBeLessThanOrEqual(LABEL_LIMIT);
     }
   });
 });

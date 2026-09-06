@@ -34,5 +34,3 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
-_to_delete/
-*.tgz

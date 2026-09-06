@@ -96,7 +96,7 @@ export const INTERACTIONS: readonly Interaction[] = [
   {
     id: 'hang-out',
     label: 'Hang out',
-    blurb: 'An afternoon with nothing planned.',
+    blurb: 'Spend an afternoon together.',
     kind: 'peer',
     weight: 'light',
     bestChance: 0.95,
@@ -106,8 +106,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'compliment',
-    label: 'Say something nice',
-    blurb: 'Cheap, and it works more often than it should.',
+    label: 'Give them a compliment',
+    blurb: 'Tell them something you like.',
     kind: 'both',
     weight: 'light',
     bestChance: 0.92,
@@ -117,8 +117,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'joke',
-    label: 'Make a joke',
-    blurb: 'It either kills or it does not.',
+    label: 'Make them laugh',
+    blurb: 'Try a joke and see if it lands.',
     kind: 'peer',
     weight: 'light',
     bestChance: 0.85,
@@ -128,8 +128,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'ask-for-help',
-    label: 'Ask for help',
-    blurb: 'With homework, or with something worse.',
+    label: 'Ask them for help',
+    blurb: 'With homework, or something bigger.',
     kind: 'both',
     weight: 'light',
     bestChance: 0.9,
@@ -139,8 +139,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'secret',
-    label: 'Tell them something',
-    blurb: 'Something you have not told anybody else.',
+    label: 'Tell them a secret',
+    blurb: 'Something you have told no one else.',
     kind: 'peer',
     weight: 'heavy',
     bestChance: 0.88,
@@ -152,8 +152,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'fall-out',
-    label: 'Have it out with them',
-    blurb: 'Say the thing. It will not be unsaid.',
+    label: 'Start an argument',
+    blurb: 'Say what you think. It could end it.',
     kind: 'peer',
     weight: 'heavy',
     bestChance: 0.35,
@@ -164,8 +164,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'make-up',
-    label: 'Try to fix it',
-    blurb: 'Go first, and hope.',
+    label: 'Apologize and make up',
+    blurb: 'Say sorry first, before they do.',
     kind: 'peer',
     weight: 'heavy',
     bestChance: 0.8,
@@ -182,8 +182,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   /* ---- teachers, innocently ---------------------------------------------- */
   {
     id: 'ask-about-work',
-    label: 'Stay behind and ask',
-    blurb: 'About the thing you did not follow in class.',
+    label: 'Ask for extra help',
+    blurb: 'Stay after class and ask for help.',
     kind: 'teacher',
     weight: 'light',
     bestChance: 0.92,
@@ -194,8 +194,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'help-out',
-    label: 'Offer to help',
-    blurb: 'Carry the boxes. Stack the chairs. It gets noticed.',
+    label: 'Help them after class',
+    blurb: 'Stack chairs, carry boxes. It gets noticed.',
     kind: 'teacher',
     weight: 'light',
     bestChance: 0.94,
@@ -206,8 +206,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'ask-reference',
-    label: 'Ask them to put in a word',
-    blurb: 'For the thing you want and have not earned yet.',
+    label: 'Ask for a recommendation',
+    blurb: 'Ask them to put in a good word.',
     kind: 'teacher',
     weight: 'heavy',
     bestChance: 0.85,
@@ -221,8 +221,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   /* ---- teachers, otherwise ------------------------------------------------ */
   {
     id: 'wind-up',
-    label: 'Wind them up',
-    blurb: 'Nothing you could be written up for. Almost nothing.',
+    label: 'Annoy them in class',
+    blurb: 'Nothing you would get detention for.',
     kind: 'teacher',
     weight: 'light',
     mischief: true,
@@ -234,8 +234,8 @@ export const INTERACTIONS: readonly Interaction[] = [
   },
   {
     id: 'talk-back',
-    label: 'Talk back',
-    blurb: 'In front of everybody, which is the point.',
+    label: 'Talk back to them',
+    blurb: 'Argue with them in front of class.',
     kind: 'teacher',
     weight: 'heavy',
     mischief: true,
@@ -249,7 +249,7 @@ export const INTERACTIONS: readonly Interaction[] = [
   {
     id: 'skip-class',
     label: 'Skip their class',
-    blurb: 'A whole afternoon of not being there.',
+    blurb: 'Miss a whole afternoon of it.',
     kind: 'teacher',
     weight: 'heavy',
     mischief: true,

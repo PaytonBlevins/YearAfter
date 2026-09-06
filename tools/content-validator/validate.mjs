@@ -24,6 +24,98 @@ const stripComments = (source) =>
 
 /** Mirrors CRUSH_AGE in `@yearafter/social` and ROMANCE_AGE_FLOOR in the generator. */
 const ROMANCE_AGE_FLOOR = 13;
+
+/**
+ * Labels review rejected by name, plus the ones the same pass found beside them.
+ *
+ * Blocked exactly rather than by pattern: "Leave it" is fine under a prompt
+ * about a wallet and useless on a standing menu, and a regex cannot tell those
+ * apart. A list somebody has to consciously edit is the honest enforcement.
+ */
+const VAGUE_LABELS = [
+  'tell them something',
+  'have it out with them',
+  'something drastic',
+  'the usual',
+  'the hard one',
+  'the loudest one on the table',
+  'do it',
+  'try it',
+  'take it',
+  'keep it',
+  'move up',
+  'serve it',
+  'coast',
+  'fight it',
+  'step in',
+  'walk out',
+  'lose it',
+  'go',
+  'pass',
+  'apply',
+  'enter it',
+  'refuse',
+];
+
+/**
+ * British spelling and idiom in player-facing copy (Ticket 0207d).
+ *
+ * The game is written in American English. This is not pedantry: "wind them
+ * up", "have it out with them", "a fortnight", "maths" and "pavement" all
+ * appeared in shipped copy and all of them cost a US player a beat of decoding,
+ * which is the exact failure review reported.
+ *
+ * Checked against the RENDERED catalog, never the generator source, because
+ * event IDs are stable forever and several of them legitimately contain
+ * `favourite` and `neighbour` — a blanket rewrite of the source renamed five of
+ * them and broke every save that referenced one.
+ */
+const BRITISH = [
+  // STEMS, not whole words. The first version listed 'apologise' and shipped a
+  // line reading "spent all of it apologising to furniture" — `\bapologise`
+  // does not match `apologising`, so the check passed and reading the built app
+  // caught it instead. A word list that only knows one inflection is a word
+  // list that mostly does not work.
+  ['apologis', 'apologiz'],
+  ['realis', 'realiz'],
+  ['recognis', 'recogniz'],
+  ['organis', 'organiz'],
+  ['practis', 'practic'],
+  ['favourit', 'favorit'],
+  ['neighbour', 'neighbor'],
+  ['behaviour', 'behavior'],
+  ['colour', 'color'],
+  ['maths', 'math'],
+  ['licence', 'license'],
+  ['pavement', 'sidewalk'],
+  ['corridor', 'hallway'],
+  ['fortnight', 'two weeks'],
+  ['whilst', 'while'],
+  ['learnt', 'learned'],
+  ['amongst', 'among'],
+  ['solicitor', 'lawyer'],
+  ['fringe', 'bangs'],
+  ['jumper', 'sweater'],
+  ['trainers', 'sneakers'],
+  ['biscuit', 'cookie'],
+  ['petrol', 'gas'],
+  ['crisps', 'chips'],
+  ['sweets', 'candy'],
+  ['chemist', 'pharmacy'],
+  ['timetable', 'schedule'],
+  ['headteacher', 'principal'],
+  ['telly', 'TV'],
+  ['bloke', 'guy'],
+  ['straight away', 'right away'],
+  ['at the weekend', 'on the weekend'],
+  ['in hospital', 'in the hospital'],
+  ['sports hall', 'gym'],
+  ['car park', 'parking lot'],
+  // NOT 'trial': "a trial run" for a dog is ordinary English, and the tryout
+  // sense is the only British one. A rule that fires on correct copy is a rule
+  // somebody deletes, which is worse than not having it.
+  ['wind them up', 'annoy them'],
+];
 const notes = [];
 
 const fail = (file, message) => problems.push({ file, message });
@@ -455,6 +547,59 @@ if (existsSync(eventsPath)) {
             `${event.id}: can spend $${biggestSpend} but is only gated on $${gate}. ` +
               `An event that spends what the character does not have floors the balance ` +
               `at zero and tells them they spent it.`,
+          );
+        }
+      }
+
+      // V10 — American English in player-facing copy (Ticket 0207d).
+      //
+      // Checked on the RENDERED catalog, not the generator source: several
+      // event ids legitimately contain `favourite` and `neighbour`, and a
+      // blanket rewrite of the source renamed five of them — which silently
+      // breaks every save that recorded one, because ids are stable forever.
+      const copy = [
+        ...(event.text ?? []),
+        ...choices.map((choice) => choice.label ?? ''),
+        ...choices.map((choice) => choice.text ?? ''),
+        ...choices.flatMap((choice) => (choice.outcomes ?? []).map((o) => o.text ?? '')),
+      ].join(' \u0000 ');
+      for (const [british, american] of BRITISH) {
+        if (new RegExp(`\\b${british}`, 'i').test(copy)) {
+          fail(rel, `${event.id}: "${british}" is British — use "${american}".`);
+        }
+      }
+
+      // V9 — a choice label says what pressing it does (Ticket 0207d).
+      //
+      // Review, after playing the 0207 build: "'Tell them something' and 'Have
+      // it out with them' does not make sense to everyone. Please make them say
+      // what they mean." The rule that came out of it is that a label has to be
+      // readable WITHOUT the prompt above it, because the standing menus — the
+      // person page, the Love screen — have no prompt at all, and a player
+      // scanning a decision card reads the buttons before the paragraph.
+      //
+      // Machine-checkable in two ways only, and both are worth having: a label
+      // needs a verb and an object rather than a bare gesture, and the specific
+      // constructions review rejected are blocked by name so they cannot come
+      // back through a later edit.
+      for (const choice of choices) {
+        const label = (choice.label ?? '').trim();
+        const bare = label.replace(/\{[a-zA-Z]+\}/g, 'them').toLowerCase();
+
+        for (const banned of VAGUE_LABELS) {
+          if (bare === banned) {
+            fail(
+              rel,
+              `${event.id}: choice label "${label}" says nothing on its own. ` +
+                `A label has to be readable without the prompt above it.`,
+            );
+          }
+        }
+        // One word is a gesture, not an instruction. "Go", "Pass", "Coast".
+        if (bare.split(/\s+/).filter(Boolean).length < 2) {
+          fail(
+            rel,
+            `${event.id}: choice label "${label}" is a single word. Say what it does.`,
           );
         }
       }

@@ -52,9 +52,9 @@ export const ADULT_AGE = 18;
 export type RomanceStage = 'interested' | 'seeing' | 'together' | 'engaged' | 'married';
 
 export const ROMANCE_STAGE_LABELS: Readonly<Record<RomanceStage, string>> = {
-  interested: 'You like them',
-  seeing: 'Seeing each other',
-  together: 'Going out',
+  interested: 'You have a crush on them',
+  seeing: 'Dating',
+  together: 'In a relationship',
   engaged: 'Engaged',
   married: 'Married',
 };

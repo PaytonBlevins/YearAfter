@@ -106,7 +106,7 @@
       },
       "weight": 12,
       "text": [
-        "Slept through the night for the first time. The household treated it as a public holiday."
+        "Slept through the night for the first time. The household treated it as a public vacation."
       ],
       "effects": {
         "stats": {
@@ -1122,7 +1122,7 @@
       "weight": 10,
       "cooldown": 4,
       "text": [
-        "A proper holiday. Sunburn, a rented car, and photographs that get better with age."
+        "A proper vacation. Sunburn, a rented car, and photographs that get better with age."
       ],
       "effects": {
         "stats": {
@@ -1149,7 +1149,7 @@
       "weight": 10,
       "cooldown": 5,
       "text": [
-        "A camping trip that went wrong in four separate ways and is now the family's favourite story."
+        "A camping trip that went wrong in four separate ways and is now the family's favorite story."
       ],
       "effects": {
         "stats": {
@@ -1435,7 +1435,7 @@
       },
       "weight": 12,
       "text": [
-        "{parent} taught you to drive in an empty car park and aged five years doing it."
+        "{parent} taught you to drive in an empty parking lot and aged five years doing it."
       ],
       "effects": {
         "stats": {
@@ -1597,7 +1597,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "With this many siblings, dinner was a negotiation and the bathroom was a queue."
+        "With this many siblings, dinner was a negotiation and the bathroom was a line."
       ],
       "effects": {
         "stats": {
@@ -2316,7 +2316,7 @@
       },
       "weight": 11,
       "text": [
-        "Hit the wall in maths and spent a year quietly convinced everyone else had been told something."
+        "Hit the wall in math and spent a year quietly convinced everyone else had been told something."
       ],
       "effects": {
         "stats": {
@@ -3080,7 +3080,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "A first date at a cinema. Neither of you can name the film."
+        "A first date at a movie theater. Neither of you can name the film."
       ],
       "effects": {
         "stats": {
@@ -3169,7 +3169,7 @@
       "cooldown": 6,
       "text": [
         "First kiss. Neither of you had a plan and it showed.",
-        "Kissed {kid} at a party, badly, and thought about nothing else for a fortnight."
+        "Kissed {kid} at a party, badly, and thought about nothing else for a two weeks."
       ],
       "effects": {
         "stats": {
@@ -3610,7 +3610,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Discovered an arcade with {kid} and fed $25 of pocket money into one machine over a fortnight."
+        "Discovered an arcade with {kid} and fed $25 of pocket money into one machine over a two weeks."
       ],
       "effects": {
         "stats": {
@@ -3618,7 +3618,7 @@
         },
         "cash": {
           "delta": -25,
-          "source": "a fortnight at the arcade"
+          "source": "a two weeks at the arcade"
         },
         "stress": -4
       }
@@ -4182,7 +4182,7 @@
       },
       "weight": 11,
       "text": [
-        "Grew four inches in one year and spent all of it apologising to furniture."
+        "Grew four inches in one year and spent all of it apologizing to furniture."
       ],
       "effects": {
         "stats": {
@@ -4470,7 +4470,7 @@
       "weight": 9,
       "cooldown": 4,
       "text": [
-        "Found $20 on the pavement outside the laundromat and told nobody, ever."
+        "Found $20 on the sidewalk outside the laundromat and told nobody, ever."
       ],
       "effects": {
         "stats": {
@@ -4478,7 +4478,7 @@
         },
         "cash": {
           "delta": 20,
-          "source": "$20 found on the pavement"
+          "source": "$20 found on the sidewalk"
         }
       }
     },
@@ -4515,8 +4515,8 @@
       "weight": 12,
       "cooldown": 2,
       "text": [
-        "Called a teacher 'mum' in front of everybody and has never fully recovered.",
-        "Tripped on a completely flat surface in front of the entire year group.",
+        "Called a teacher 'mom' in front of everybody and has never fully recovered.",
+        "Tripped on a completely apartment surface in front of the entire year group.",
         "Waved at somebody who was waving at the person behind you."
       ],
       "effects": {
@@ -4559,7 +4559,7 @@
       "weight": 9,
       "cooldown": 5,
       "text": [
-        "Attempted a fringe with kitchen scissors. The regrowth took eleven months."
+        "Attempted a bangs with kitchen scissors. The regrowth took eleven months."
       ],
       "effects": {
         "stats": {
@@ -4665,7 +4665,7 @@
       "weight": 10,
       "cooldown": 2,
       "text": [
-        "The phone was confiscated for a fortnight. Life became medieval."
+        "The phone was confiscated for a two weeks. Life became medieval."
       ],
       "effects": {
         "stats": {
@@ -4721,7 +4721,7 @@
         }
       ],
       "text": [
-        "Got a library card and treated it as a licence to print money."
+        "Got a library card and treated it as a license to print money."
       ],
       "effects": {
         "stats": {
@@ -5193,7 +5193,7 @@
       },
       "weight": 9,
       "text": [
-        "Got a part in a real production at a real theatre with real strangers watching."
+        "Got a part in a real production at a real theater with real strangers watching."
       ],
       "effects": {
         "stats": {
@@ -6321,8 +6321,8 @@
       ],
       "cooldown": 3,
       "text": [
-        "{kid} is at the water fountain on {kidTheir} own and the bell is not for six minutes. You have had a crush on {kidThem} since September.",
-        "{kid} is sitting on the wall by the bike racks alone. You have thought about talking to {kidThem} since September."
+        "{kid} is standing alone at the water fountain and there are a few minutes before class. You've liked {kidThem} since September.",
+        "{kid} is sitting alone by the bike racks. You've wanted to talk to {kidThem} for months and nobody else is around."
       ],
       "choices": [
         {
@@ -6341,7 +6341,7 @@
             },
             {
               "weight": 3,
-              "text": "{kid} said 'okay' in a completely flat voice. You heard about it from three different people by Friday.",
+              "text": "{kid} said 'okay' in a completely apartment voice. You heard about it from three different people by Friday.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -6445,8 +6445,8 @@
       "weight": 16,
       "cooldown": 2,
       "text": [
-        "A folding table went up in the gym at lunch with a clipboard on it. Your school has activities available to join.",
-        "Sign-up sheets went up outside the office. Somebody has already written a fake name at the top of every one."
+        "There's a sign-up table in the gym at lunch. You could join a school club or team.",
+        "Sign-up sheets for clubs and teams are posted outside the office. You could put your name down."
       ],
       "choices": [
         {
@@ -6488,7 +6488,7 @@
         },
         {
           "id": "pass",
-          "label": "Pass",
+          "label": "Say no thanks",
           "text": "You walked past the sign-up table. The gym smelled like floor polish.",
           "effects": {
             "stats": {
@@ -6513,7 +6513,7 @@
       },
       "weight": 13,
       "text": [
-        "{sibling} knocked {mother}'s ceramic bowl off the counter and it broke into four pieces. {sibling} is staring at you. {mother} is in the next room."
+        "{sibling} just broke {mother}'s favorite bowl and is begging you not to say anything. {mother} is in the next room and will ask who did it."
       ],
       "choices": [
         {
@@ -6628,7 +6628,7 @@
       "weight": 12,
       "cooldown": 6,
       "text": [
-        "It is your birthday and {sibling} handed you an envelope with $25 in it, saved out of {siblingRel}'s own allowance."
+        "It's your birthday. {sibling} gave you $25 saved up from {siblingRel}'s own allowance. What do you do with it?"
       ],
       "effects": {
         "cash": {
@@ -6719,7 +6719,7 @@
       "weight": 12,
       "cooldown": 5,
       "text": [
-        "{father} has been on double shifts and the yard has got away from him. He has not asked you to do anything about it."
+        "{father} has been working double shifts and the yard is a mess. He hasn't asked you to help, but he clearly needs it."
       ],
       "choices": [
         {
@@ -6773,7 +6773,7 @@
             },
             {
               "weight": 4,
-              "text": "You asked {father} what he needed and he snapped at you. He apologised an hour later.",
+              "text": "You asked {father} what he needed and he snapped at you. He apologized an hour later.",
               "effects": {
                 "stats": {
                   "happiness": -3
@@ -6787,7 +6787,7 @@
         },
         {
           "id": "leave",
-          "label": "Leave it",
+          "label": "Leave the yard alone",
           "text": "The yard stayed long all summer. Nobody said a word about it, which was somehow worse.",
           "effects": {
             "stats": {
@@ -6816,7 +6816,7 @@
       "weight": 13,
       "cooldown": 4,
       "text": [
-        "{parent} has offered $30 for a genuinely unpleasant weekend of clearing out the garage."
+        "{parent} will pay you $30 to clean out the garage this weekend. It's a big, dirty job."
       ],
       "choices": [
         {
@@ -6840,7 +6840,7 @@
         },
         {
           "id": "negotiate",
-          "label": "Try for more",
+          "label": "Ask for more money",
           "outcomes": [
             {
               "weight": 5,
@@ -6881,7 +6881,7 @@
         },
         {
           "id": "free",
-          "label": "Do it for nothing",
+          "label": "Do it for free",
           "text": "You did the garage without taking the money. {parent} brought it up for years afterwards.",
           "effects": {
             "stats": {
@@ -6895,7 +6895,7 @@
         },
         {
           "id": "refuse",
-          "label": "Refuse",
+          "label": "Say no",
           "text": "You had better things to do that weekend, and you did them.",
           "effects": {
             "stats": {
@@ -6923,7 +6923,7 @@
       },
       "weight": 13,
       "text": [
-        "{sibling} has done something that is going to come out eventually, and has just asked you to sit on it."
+        "{sibling} did something bad and asked you to keep it secret. Your parents are going to find out eventually."
       ],
       "choices": [
         {
@@ -7032,7 +7032,7 @@
       ],
       "cooldown": 3,
       "text": [
-        "The report is in your bag, it is not good, and {parent} has not asked about it yet."
+        "{parent} is asking to see your report card, but your grades aren't good this time. What do you do?"
       ],
       "choices": [
         {
@@ -7070,7 +7070,7 @@
         },
         {
           "id": "hide",
-          "label": "Lose it",
+          "label": "Lose the report card",
           "outcomes": [
             {
               "weight": 5,
@@ -7099,7 +7099,7 @@
         },
         {
           "id": "preempt",
-          "label": "Get in first with a plan",
+          "label": "Tell {parent} before they ask",
           "text": "You handed it over with a plan already written down. {parent} was too surprised to shout.",
           "effects": {
             "stats": {
@@ -7139,7 +7139,7 @@
       ],
       "cooldown": 4,
       "text": [
-        "{parent} sat down on the end of your bed and asked, without warning, whether you are all right."
+        "{parent} sat down on your bed and asked if you're doing okay. You haven't been."
       ],
       "choices": [
         {
@@ -7234,7 +7234,7 @@
       "weight": 11,
       "cooldown": 5,
       "text": [
-        "The family holiday is being decided at the kitchen table and, unusually, you have been given a vote."
+        "The family is picking where to go on vacation, and for once they're asking what you want."
       ],
       "choices": [
         {
@@ -7318,13 +7318,13 @@
       "weight": 12,
       "cooldown": 4,
       "text": [
-        "{parent} needs a hand with something all Saturday, and you had plans with {kid}."
+        "{parent} needs your help all day Saturday, but you already made plans with {kid}."
       ],
       "choices": [
         {
           "id": "help",
           "label": "Cancel and help",
-          "text": "You cancelled on {kid} and helped. It took nine hours and was never mentioned again.",
+          "text": "You canceled on {kid} and helped. It took nine hours and was never mentioned again.",
           "effects": {
             "stats": {
               "happiness": -2,
@@ -7392,7 +7392,7 @@
       },
       "weight": 10,
       "text": [
-        "A grandparent is in hospital for a week, and visiting means giving up the one thing you had planned."
+        "Your grandparent is in the hospital for a week. Visiting means missing something you'd been looking forward to."
       ],
       "choices": [
         {
@@ -7415,7 +7415,7 @@
           "outcomes": [
             {
               "weight": 7,
-              "text": "You took in the newspaper and the boiled sweets they liked, every day that week.",
+              "text": "You took in the newspaper and the boiled candy they liked, every day that week.",
               "effects": {
                 "stats": {
                   "happiness": 5,
@@ -7444,7 +7444,7 @@
         },
         {
           "id": "skip",
-          "label": "Skip it",
+          "label": "Skip the visit",
           "text": "You did not go. Nobody said anything about it, which was worse than if they had.",
           "effects": {
             "stats": {
@@ -7472,7 +7472,7 @@
       "physical": true,
       "weight": 12,
       "text": [
-        "There is a serious conversation happening about a dog, and {parent} has used the word 'responsibility' four times."
+        "You want a dog. {parent} says yes only if you'll actually take care of it, and keeps repeating the word responsibility."
       ],
       "choices": [
         {
@@ -7580,12 +7580,12 @@
       ],
       "cooldown": 4,
       "text": [
-        "{sibling} has taken something of yours and broken it, and is standing in your doorway holding both halves."
+        "{sibling} took something of yours without asking and broke it, and is standing in your doorway holding the pieces."
       ],
       "choices": [
         {
           "id": "shout",
-          "label": "Lose it",
+          "label": "Yell at {sibling}",
           "outcomes": [
             {
               "weight": 6,
@@ -7618,7 +7618,7 @@
         },
         {
           "id": "let-go",
-          "label": "Let it go",
+          "label": "Let {sibling} off",
           "text": "You said it was fine. {sibling} noticed that you had, which was the entire point.",
           "effects": {
             "stats": {
@@ -7681,7 +7681,7 @@
       },
       "weight": 9,
       "text": [
-        "The family is leaving {city}, and you have been asked what you think about it, which has never happened before."
+        "Your family is moving away from {city}. They're actually asking how you feel about it."
       ],
       "choices": [
         {
@@ -7700,7 +7700,7 @@
         },
         {
           "id": "fight",
-          "label": "Fight it",
+          "label": "Argue against moving",
           "outcomes": [
             {
               "weight": 3,
@@ -7798,12 +7798,12 @@
         }
       ],
       "text": [
-        "{kid} has slid {kidTheir} maths test an inch to the left so you can see it. {adult} is at the window."
+        "{kid} moved {kidTheir} math test so you can see the answers. {adult} is looking out the window and hasn't noticed."
       ],
       "choices": [
         {
           "id": "copy",
-          "label": "Copy it",
+          "label": "Copy {kidTheir} answers",
           "outcomes": [
             {
               "weight": 5,
@@ -7833,7 +7833,7 @@
         },
         {
           "id": "own-work",
-          "label": "Look away",
+          "label": "Look away and do your own",
           "text": "You looked away and got a 61 that was entirely yours.",
           "effects": {
             "stats": {
@@ -7845,7 +7845,7 @@
         },
         {
           "id": "warn",
-          "label": "Hiss at {kidThem} to move it",
+          "label": "Whisper at {kidThem} to move it",
           "text": "You hissed at {kid} to move {kidTheir} paper. {KidThey} did, and {kidThey} never sat near you again.",
           "effects": {
             "stats": {
@@ -7873,12 +7873,12 @@
       "weight": 13,
       "cooldown": 3,
       "text": [
-        "Exams are eight weeks out and {adult} has just handed back a practice paper with a number on it you did not expect."
+        "Finals are two months away and you just bombed a practice test. {adult} handed it back without saying anything."
       ],
       "choices": [
         {
           "id": "grind",
-          "label": "Work for it",
+          "label": "Study hard for it",
           "outcomes": [
             {
               "weight": 7,
@@ -7936,7 +7936,7 @@
         },
         {
           "id": "coast",
-          "label": "Coast",
+          "label": "Don't bother studying",
           "text": "You coasted. It was a very good couple of months and a mediocre set of results.",
           "effects": {
             "stats": {
@@ -7968,12 +7968,12 @@
       "physical": true,
       "weight": 16,
       "text": [
-        "{kid} has been making your year difficult since October, and is standing in front of you in an empty corridor."
+        "{kid} has been bullying you all year. Now {kidThey}'s blocking your way in an empty hallway, and nobody else is around."
       ],
       "choices": [
         {
           "id": "fight",
-          "label": "Hit {kidThem}",
+          "label": "Fight {kidThem}",
           "outcomes": [
             {
               "weight": 5,
@@ -8013,7 +8013,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "{adult} handled it quietly and well, and it ended within a fortnight.",
+              "text": "{adult} handled it quietly and well, and it ended within a two weeks.",
               "effects": {
                 "stats": {
                   "happiness": 5
@@ -8038,7 +8038,7 @@
         },
         {
           "id": "endure",
-          "label": "Ride it out",
+          "label": "Put up with it",
           "text": "You said nothing and waited {kid} out. It took another year.",
           "effects": {
             "stats": {
@@ -8094,12 +8094,12 @@
       ],
       "weight": 12,
       "text": [
-        "A window in the science block is broken and {adult} is asking the whole class, in a general sort of way, who did it."
+        "A window got broken and {adult} is asking the class who did it. You know it was {kid}."
       ],
       "choices": [
         {
           "id": "own",
-          "label": "Own up",
+          "label": "Admit it was you",
           "text": "You owned it. The punishment was smaller than the silence would have been.",
           "effects": {
             "stats": {
@@ -8187,7 +8187,7 @@
       ],
       "cooldown": 4,
       "text": [
-        "{adult} has put your name down to speak in front of the whole school. It is optional in theory only."
+        "{adult} signed you up to give a speech in front of the whole school. You can say no, but it would look bad."
       ],
       "choices": [
         {
@@ -8221,7 +8221,7 @@
         },
         {
           "id": "refuse",
-          "label": "Get out of it",
+          "label": "Get out of the speech",
           "text": "You found a way out of it and felt the relief for about an hour.",
           "effects": {
             "stats": {
@@ -8232,7 +8232,7 @@
         },
         {
           "id": "rewrite",
-          "label": "Throw out the script",
+          "label": "Wing it without the script",
           "outcomes": [
             {
               "weight": 4,
@@ -8284,12 +8284,12 @@
         }
       ],
       "text": [
-        "{adult} has offered you a move up to the harder reading group, where you would be the youngest by a year."
+        "{adult} says you're good enough for the advanced class. You'd be the youngest kid in there by a year."
       ],
       "choices": [
         {
           "id": "move",
-          "label": "Move up",
+          "label": "Join the advanced class",
           "outcomes": [
             {
               "weight": 6,
@@ -8376,12 +8376,12 @@
       ],
       "cooldown": 4,
       "text": [
-        "Trials for the school team are on Thursday and {kid} has been going on about them for a fortnight."
+        "Tryouts for the school team are Thursday. {kid} has been talking about them for two weeks straight."
       ],
       "choices": [
         {
           "id": "try",
-          "label": "Try out",
+          "label": "Go to the tryouts",
           "outcomes": [
             {
               "weight": 5,
@@ -8413,7 +8413,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You trained for a month before the trial and walked it.",
+              "text": "You trained for a month before tryouts and made the team easily.",
               "effects": {
                 "stats": {
                   "health": 5,
@@ -8424,7 +8424,7 @@
             },
             {
               "weight": 4,
-              "text": "You trained for a month, pulled something in week three, and missed the trial entirely.",
+              "text": "You trained for a month, pulled something in week three, and missed tryouts entirely.",
               "effects": {
                 "stats": {
                   "health": -4,
@@ -8437,7 +8437,7 @@
         },
         {
           "id": "skip",
-          "label": "Don't bother",
+          "label": "Skip the tryouts",
           "text": "You did not go. It was the sensible call and it sat badly for about a year.",
           "effects": {
             "stats": {
@@ -8472,12 +8472,12 @@
         }
       ],
       "text": [
-        "{adult} is handing out instruments, and whatever you pick you are stuck with for years."
+        "{adult} is handing out instruments in band class. Whatever you pick, you're stuck with it for years."
       ],
       "choices": [
         {
           "id": "loud",
-          "label": "The loudest one on the table",
+          "label": "Pick the loudest one",
           "text": "You picked the loudest thing on the table and never once regretted it.",
           "effects": {
             "stats": {
@@ -8489,8 +8489,8 @@
         },
         {
           "id": "serious",
-          "label": "The hard one",
-          "text": "You picked the hard one and practised like it mattered, and after two years it did.",
+          "label": "Pick the hardest one",
+          "text": "You picked the hard one and practiced like it mattered, and after two years it did.",
           "effects": {
             "stats": {
               "discipline": 5,
@@ -8531,12 +8531,12 @@
       "weight": 12,
       "cooldown": 4,
       "text": [
-        "{adult} has given you detention on Thursday, and Thursday is the one evening you had wanted all year."
+        "{adult} gave you detention on Thursday — the same night as the one thing you've been waiting all year for."
       ],
       "choices": [
         {
           "id": "serve",
-          "label": "Serve it",
+          "label": "Take the detention",
           "text": "You sat out the detention and heard about the evening secondhand for a month.",
           "effects": {
             "stats": {
@@ -8639,12 +8639,12 @@
       ],
       "cooldown": 4,
       "text": [
-        "{kid} has proposed jumping the gap between the bike shed roof and the wall, and about nine people are watching."
+        "{kid} dared you to jump off the bike shed roof. About nine kids are watching to see if you'll do it."
       ],
       "choices": [
         {
           "id": "do-it",
-          "label": "Do it",
+          "label": "Take the dare",
           "outcomes": [
             {
               "weight": 5,
@@ -8687,7 +8687,7 @@
         },
         {
           "id": "refuse",
-          "label": "Refuse",
+          "label": "Back out of the dare",
           "text": "You said no. It cost you something socially and nothing else.",
           "effects": {
             "stats": {
@@ -8742,7 +8742,7 @@
       "weight": 13,
       "cooldown": 5,
       "text": [
-        "There is a new kid, {kid}, eating lunch alone by the recycling bins, and you already have a seat at a table."
+        "There's a new kid, {kid}, eating lunch alone. You already have a seat with your friends."
       ],
       "choices": [
         {
@@ -8785,7 +8785,7 @@
         },
         {
           "id": "leave",
-          "label": "Leave it",
+          "label": "Stay out of it",
           "text": "You left it. Somebody else did it a week later and you remember that too.",
           "effects": {
             "stats": {
@@ -8810,7 +8810,7 @@
       ],
       "weight": 13,
       "text": [
-        "The group has decided to freeze {kid2} out, and {kid} is watching to see what you do about it."
+        "Your friends have decided to stop talking to {kid2}. {kid} is watching to see whose side you take."
       ],
       "choices": [
         {
@@ -8827,7 +8827,7 @@
         },
         {
           "id": "refuse",
-          "label": "Refuse",
+          "label": "Refuse to go along with it",
           "outcomes": [
             {
               "weight": 5,
@@ -8897,12 +8897,12 @@
       ],
       "weight": 13,
       "text": [
-        "{kid} is being humiliated in front of thirty people in the cafeteria and nobody has moved."
+        "{kid} is being made fun of in front of the whole cafeteria and nobody is helping."
       ],
       "choices": [
         {
           "id": "step-in",
-          "label": "Step in",
+          "label": "Step in and defend {kid}",
           "outcomes": [
             {
               "weight": 6,
@@ -8931,7 +8931,7 @@
         },
         {
           "id": "laugh",
-          "label": "Laugh along",
+          "label": "Laugh along with them",
           "text": "You laughed with everyone else. {kid} saw you do it.",
           "effects": {
             "stats": {
@@ -8955,7 +8955,7 @@
         },
         {
           "id": "leave",
-          "label": "Walk out",
+          "label": "Walk out of the cafeteria",
           "text": "You left the room. Not brave, not complicit, and not forgotten either.",
           "effects": {
             "stats": {
@@ -8981,16 +8981,16 @@
       ],
       "weight": 12,
       "text": [
-        "{kid} told everyone what you said about {kid2}'s house. {kid2} is not speaking to you and {kid} is acting like nothing happened."
+        "{kid} repeated something mean you said about {kid2}. Now {kid2} won't talk to you, and {kid} is acting like nothing happened."
       ],
       "choices": [
         {
           "id": "apologise",
-          "label": "Apologise to {kid2}",
+          "label": "Apologize to {kid2}",
           "outcomes": [
             {
               "weight": 5,
-              "text": "You apologised to {kid2} at {kid2Their} locker. {Kid2They} said 'okay', and it took until March to be normal.",
+              "text": "You apologized to {kid2} at {kid2Their} locker. {Kid2They} said 'okay', and it took until March to be normal.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -9001,7 +9001,7 @@
             },
             {
               "weight": 5,
-              "text": "You apologised and {kid2} cried and hugged you, and {kid} was furious you had made {kidThem} look bad.",
+              "text": "You apologized and {kid2} cried and hugged you, and {kid} was furious you had made {kidThem} look bad.",
               "effects": {
                 "stats": {
                   "happiness": 5,
@@ -9013,7 +9013,7 @@
         },
         {
           "id": "confront",
-          "label": "Have it out with {kid}",
+          "label": "Confront {kid}",
           "outcomes": [
             {
               "weight": 5,
@@ -9067,7 +9067,7 @@
       "weight": 13,
       "cooldown": 3,
       "text": [
-        "{kid} wants the homework ten minutes before it is due, and is asking as a friend."
+        "{kid} wants to copy your homework ten minutes before class. {kidThey}'s asking you as a friend."
       ],
       "choices": [
         {
@@ -9098,7 +9098,7 @@
         {
           "id": "refuse",
           "label": "Say no",
-          "text": "You said no. {kid} found somebody else within a minute and it was awkward for a fortnight.",
+          "text": "You said no. {kid} found somebody else within a minute and it was awkward for a two weeks.",
           "effects": {
             "stats": {
               "discipline": 3,
@@ -9127,7 +9127,7 @@
       "weight": 14,
       "cooldown": 3,
       "text": [
-        "{kid} is having people round on Saturday and {parent} has already said no to it, twice."
+        "{kid} is having a party Saturday night. You already asked {parent} twice and got a no both times."
       ],
       "choices": [
         {
@@ -9178,7 +9178,7 @@
         },
         {
           "id": "negotiate",
-          "label": "Talk {parent} round",
+          "label": "Talk {parent} into it",
           "outcomes": [
             {
               "weight": 4,
@@ -9255,7 +9255,7 @@
       "weight": 12,
       "cooldown": 5,
       "text": [
-        "{kid} and {kid2} are having birthdays on the same afternoon and both have asked you directly."
+        "{kid} and {kid2} are having birthday parties at the same time, and both invited you."
       ],
       "choices": [
         {
@@ -9271,7 +9271,7 @@
         },
         {
           "id": "new",
-          "label": "Turn up at {kid2}'s",
+          "label": "Show up at {kid2}'s",
           "text": "You went to {kid2}'s, which surprised everybody including you, and it was the better party.",
           "effects": {
             "stats": {
@@ -9282,7 +9282,7 @@
         },
         {
           "id": "both",
-          "label": "An hour at each",
+          "label": "Split the day between both",
           "outcomes": [
             {
               "weight": 5,
@@ -9337,12 +9337,12 @@
       ],
       "weight": 11,
       "text": [
-        "{kid} broke something expensive at your house and the two of you are the only people who know."
+        "{kid} broke something expensive at your house. Nobody else knows it happened."
       ],
       "choices": [
         {
           "id": "cover",
-          "label": "Take it yourself",
+          "label": "Take the blame yourself",
           "text": "You took it. {kid} knew you had, and the friendship changed shape after that.",
           "effects": {
             "stats": {
@@ -9417,7 +9417,7 @@
       "weight": 11,
       "cooldown": 5,
       "text": [
-        "{kid}'s birthday is Saturday and you have $12 to your name."
+        "{kid}'s birthday is Saturday and you only have $12."
       ],
       "choices": [
         {
@@ -9482,7 +9482,7 @@
         },
         {
           "id": "nothing",
-          "label": "Turn up empty-handed",
+          "label": "Show up empty-handed",
           "text": "You went to {kid}'s with nothing. Nobody said a word about it and you thought about it all night.",
           "effects": {
             "stats": {
@@ -9508,7 +9508,7 @@
       "weight": 12,
       "cooldown": 3,
       "text": [
-        "{kid}'s parents are out and {kidThey} wants to stay up for the whole horror marathon."
+        "You're sleeping over at {kid}'s and {kidTheir} parents are out. {kidThey} wants to stay up all night watching movies."
       ],
       "choices": [
         {
@@ -9540,7 +9540,7 @@
         },
         {
           "id": "two",
-          "label": "Turn in around two",
+          "label": "Go to sleep around two",
           "text": "You fell asleep at two on {kid}'s floor. Good night, no wreckage.",
           "effects": {
             "stats": {
@@ -9577,7 +9577,7 @@
       ],
       "weight": 10,
       "text": [
-        "{kid}, who is three years above you and has no reason to, has started taking you seriously."
+        "{kid} is three years older and has started treating you like a real friend, which almost never happens."
       ],
       "choices": [
         {
@@ -9656,7 +9656,7 @@
         }
       ],
       "text": [
-        "There is a wallet on the pavement outside Trujillo's Market with $60 in it and a driver's licence."
+        "You found a wallet on the sidewalk outside the store. There's $60 inside and a driver's license with an address."
       ],
       "choices": [
         {
@@ -9691,11 +9691,11 @@
         },
         {
           "id": "keep",
-          "label": "Take the cash",
+          "label": "Keep the $60",
           "outcomes": [
             {
               "weight": 7,
-              "text": "You took the $60 and left the wallet on the pavement. Nobody ever came looking.",
+              "text": "You took the $60 and left the wallet on the sidewalk. Nobody ever came looking.",
               "effects": {
                 "stats": {
                   "happiness": -3,
@@ -9709,7 +9709,7 @@
             },
             {
               "weight": 3,
-              "text": "You took the $60, and two weeks later the owner's son recognised you from the photo on the licence.",
+              "text": "You took the $60, and two weeks later the owner's son recognized you from the photo on the license.",
               "effects": {
                 "stats": {
                   "happiness": -6,
@@ -9725,11 +9725,11 @@
         },
         {
           "id": "find-owner",
-          "label": "Go to the address on the licence",
+          "label": "Go to the address on the license",
           "outcomes": [
             {
               "weight": 6,
-              "text": "You walked the wallet to the address on the licence. They gave you $20 and a slice of cake.",
+              "text": "You walked the wallet to the address on the license. They gave you $20 and a slice of cake.",
               "effects": {
                 "stats": {
                   "happiness": 7,
@@ -9744,7 +9744,7 @@
             },
             {
               "weight": 4,
-              "text": "You walked to the address on the licence and nobody answered, three times.",
+              "text": "You walked to the address on the license and nobody answered, three times.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -9758,7 +9758,7 @@
         {
           "id": "leave",
           "label": "Leave it where it is",
-          "text": "You left the wallet on the pavement. Somebody else got to it within the hour.",
+          "text": "You left the wallet on the sidewalk. Somebody else got to it within the hour.",
           "effects": {
             "stats": {
               "happiness": -3
@@ -9779,7 +9779,7 @@
       "physical": true,
       "weight": 11,
       "text": [
-        "There is a dog outside the corner shop with no collar, and it has decided to follow you home."
+        "A dog with no collar followed you home from the store and won't leave."
       ],
       "choices": [
         {
@@ -9846,7 +9846,7 @@
         },
         {
           "id": "leave",
-          "label": "Leave it",
+          "label": "Leave the dog",
           "text": "You left it outside the shop. You thought about it for a long time afterwards.",
           "effects": {
             "stats": {
@@ -9890,12 +9890,12 @@
         }
       ],
       "text": [
-        "{kid} has produced a packet behind the sports hall and is offering it round."
+        "{kid} pulled out a pack of cigarettes behind the gym and is offering you one."
       ],
       "choices": [
         {
           "id": "try",
-          "label": "Try it",
+          "label": "Smoke one",
           "text": "You tried it, coughed for a full minute, and pretended otherwise for the rest of the afternoon.",
           "effects": {
             "stats": {
@@ -9908,7 +9908,7 @@
         },
         {
           "id": "decline",
-          "label": "Pass",
+          "label": "Say no thanks",
           "text": "You passed. {kid} noted it, and it was briefly held against you.",
           "effects": {
             "stats": {
@@ -9921,7 +9921,7 @@
         },
         {
           "id": "take-and-not",
-          "label": "Take one and not smoke it",
+          "label": "Take one but don't smoke it",
           "text": "You took one, held it the whole time, and put it in your pocket unlit. Nobody checked.",
           "effects": {
             "stats": {
@@ -9966,7 +9966,7 @@
         }
       ],
       "text": [
-        "There is a bottle going round at {kid}'s and somebody has put a cup in your hand without asking."
+        "There's alcohol going around at {kid}'s party and somebody handed you a cup."
       ],
       "choices": [
         {
@@ -10055,12 +10055,12 @@
       "physical": true,
       "weight": 11,
       "text": [
-        "{kid} and {kid2} are jumping off the train bridge into the river. {kid} says it is twelve feet. It is closer to twenty."
+        "{kid} and {kid2} are jumping off the train bridge into the river. {kid} says it's twelve feet down. It looks more like twenty."
       ],
       "choices": [
         {
           "id": "jump",
-          "label": "Jump",
+          "label": "Jump off the bridge",
           "outcomes": [
             {
               "weight": 5,
@@ -10100,7 +10100,7 @@
         },
         {
           "id": "say-no",
-          "label": "Say it is too high",
+          "label": "Say it's too high",
           "outcomes": [
             {
               "weight": 5,
@@ -10139,7 +10139,7 @@
       "physical": true,
       "weight": 11,
       "text": [
-        "You woke up with a sore throat on the morning of the aquarium trip."
+        "You woke up with a sore throat, and today is the school aquarium trip you've been excited about."
       ],
       "choices": [
         {
@@ -10231,13 +10231,13 @@
       "weight": 11,
       "cooldown": 4,
       "text": [
-        "The coffee can under your bed has $150 in it, and there is something in a shop window in {city}."
+        "You've saved $150, and there's something you really want in a store window downtown."
       ],
       "choices": [
         {
           "id": "buy",
-          "label": "Buy the thing",
-          "text": "You spent the whole $150 in one afternoon and had an excellent fortnight.",
+          "label": "Spend the $150 on it",
+          "text": "You spent the whole $150 in one afternoon and had an excellent two weeks.",
           "effects": {
             "stats": {
               "happiness": 7,
@@ -10245,13 +10245,13 @@
             },
             "cash": {
               "delta": -150,
-              "source": "the thing in the shop window"
+              "source": "the thing in the store window"
             }
           }
         },
         {
           "id": "wait",
-          "label": "Leave it alone",
+          "label": "Keep saving",
           "text": "You left the $150 where it was. It was hard, and the pile got bigger.",
           "effects": {
             "stats": {
@@ -10292,7 +10292,7 @@
       "weight": 11,
       "cooldown": 5,
       "text": [
-        "There is a collection at school for a family who lost their house, and you have $40 saved for something else."
+        "School is collecting money for a family who lost their home. You have $40 saved for something you wanted."
       ],
       "choices": [
         {
@@ -10326,7 +10326,7 @@
         },
         {
           "id": "keep",
-          "label": "Keep it",
+          "label": "Keep your $40",
           "text": "You kept the $40 and bought the thing. It was excellent, briefly, and then it was not.",
           "effects": {
             "stats": {
@@ -10356,12 +10356,12 @@
       "weight": 12,
       "cooldown": 3,
       "text": [
-        "You have been in the chair two minutes and {adult} has asked the same question twice."
+        "You're in the barber's chair and {adult} is waiting to hear how you want your hair cut."
       ],
       "choices": [
         {
           "id": "bold",
-          "label": "Something drastic",
+          "label": "Cut it all off",
           "outcomes": [
             {
               "weight": 5,
@@ -10389,7 +10389,7 @@
         },
         {
           "id": "same",
-          "label": "The usual",
+          "label": "Same as always",
           "text": "You had the usual. It was fine. It is always fine.",
           "effects": {
             "stats": {
@@ -10441,12 +10441,12 @@
       "weight": 12,
       "cooldown": 3,
       "text": [
-        "Somebody has posted something about you and there is a reply box open on your phone at midnight."
+        "Somebody posted something mean about you online. It's midnight and you're staring at the reply box."
       ],
       "choices": [
         {
           "id": "fire-back",
-          "label": "Fire back",
+          "label": "Reply angrily",
           "outcomes": [
             {
               "weight": 5,
@@ -10526,12 +10526,12 @@
       "weight": 12,
       "cooldown": 3,
       "text": [
-        "It is one in the morning and you are nowhere near finished with what you are doing."
+        "It's one in the morning and you're nowhere close to finishing what you're working on."
       ],
       "choices": [
         {
           "id": "push-on",
-          "label": "Keep going",
+          "label": "Stay up and finish",
           "text": "You kept going until four and paid for it every day that week.",
           "effects": {
             "stats": {
@@ -10599,13 +10599,13 @@
       "weight": 13,
       "cooldown": 2,
       "text": [
-        "Summer is eleven weeks long and, as of this afternoon, completely undecided."
+        "School's out for eleven weeks and you have no plans at all."
       ],
       "choices": [
         {
           "id": "work",
           "label": "Take a summer job",
-          "text": "You worked at the garden centre all summer. It was dull, it paid $1,100, and it made the autumn easier.",
+          "text": "You worked at the garden centre all summer. It was dull, it paid $1,100, and it made the fall easier.",
           "effects": {
             "stats": {
               "discipline": 4,
@@ -10669,12 +10669,12 @@
       "weight": 12,
       "cooldown": 3,
       "text": [
-        "You have decided that something about how you look is going to be different by September."
+        "You've decided you want to look different by the time school starts again."
       ],
       "choices": [
         {
           "id": "effort",
-          "label": "Put real effort in",
+          "label": "Work on how you look",
           "outcomes": [
             {
               "weight": 6,
@@ -10775,12 +10775,12 @@
         }
       ],
       "text": [
-        "There is a twenty on the kitchen counter and nobody in the house has mentioned it for three days."
+        "There's a $20 bill sitting on the kitchen counter. It's been there three days and nobody has mentioned it."
       ],
       "choices": [
         {
           "id": "take",
-          "label": "Take it",
+          "label": "Take the money",
           "outcomes": [
             {
               "weight": 7,
@@ -10859,7 +10859,7 @@
       ],
       "weight": 10,
       "text": [
-        "{adult} next door, who you barely know, has offered to teach you something {adultThey} is very good at."
+        "Your neighbor {adult} offered to teach you something {adultThey} is really good at. You barely know {adultThem}."
       ],
       "choices": [
         {
@@ -10913,12 +10913,12 @@
       "weight": 11,
       "cooldown": 6,
       "text": [
-        "There is a competition with a $600 prize and the entry form has been on the kitchen table for a week."
+        "There's a contest with a $600 prize. The entry form has been sitting on the kitchen table for a week."
       ],
       "choices": [
         {
           "id": "enter",
-          "label": "Enter it",
+          "label": "Enter the contest",
           "outcomes": [
             {
               "weight": 2,
@@ -10978,7 +10978,7 @@
         },
         {
           "id": "bin",
-          "label": "Leave it",
+          "label": "Don't enter",
           "text": "The form stayed on the table until somebody threw it out with the junk mail.",
           "effects": {
             "stats": {
@@ -11008,12 +11008,12 @@
       ],
       "weight": 10,
       "text": [
-        "Somebody has dropped out of the exchange trip and {adult} is offering you the place."
+        "Someone dropped out of the school trip abroad and {adult} is offering you their spot."
       ],
       "choices": [
         {
           "id": "go",
-          "label": "Take it",
+          "label": "Take the spot",
           "outcomes": [
             {
               "weight": 7,
@@ -11112,12 +11112,12 @@
       "physical": true,
       "weight": 14,
       "text": [
-        "The thing you are good at now wants four evenings a week, and {adult} has asked you straight out whether you are serious about it."
+        "{adult} asked if you're serious about the thing you're good at. Getting better would take four evenings a week."
       ],
       "choices": [
         {
           "id": "commit",
-          "label": "Go all in",
+          "label": "Commit to it fully",
           "outcomes": [
             {
               "weight": 6,
@@ -11149,7 +11149,7 @@
         },
         {
           "id": "balance",
-          "label": "Keep it balanced",
+          "label": "Keep it a hobby",
           "text": "You kept it balanced, which meant being second-best at both and fine about it.",
           "effects": {
             "stats": {
@@ -11161,7 +11161,7 @@
         },
         {
           "id": "drop",
-          "label": "Let it go",
+          "label": "Give up on it",
           "text": "You told {adult} you were done. It was a relief for about a year.",
           "effects": {
             "stats": {
@@ -11197,12 +11197,12 @@
       "physical": true,
       "weight": 12,
       "text": [
-        "{kid} is visibly better at your thing than you are, and has just been picked for something you were not."
+        "{kid} is better than you at the one thing you're good at, and just got picked for something you didn't."
       ],
       "choices": [
         {
           "id": "train",
-          "label": "Out-work {kid}",
+          "label": "Practice harder than {kid}",
           "outcomes": [
             {
               "weight": 5,
@@ -11278,12 +11278,12 @@
       "weight": 12,
       "cooldown": 4,
       "text": [
-        "There is a chance to do your thing in front of a room of people who have never seen you do it."
+        "You have a chance to perform in front of a room full of people who've never seen what you can do."
       ],
       "choices": [
         {
           "id": "perform",
-          "label": "Go for the hard version",
+          "label": "Try the hard version",
           "outcomes": [
             {
               "weight": 6,
@@ -11347,12 +11347,12 @@
       },
       "weight": 11,
       "text": [
-        "A letter came about an audition that does not usually come to {city}, and it is on a Tuesday."
+        "An audition is coming to {city} — the kind that usually never does. It's on a Tuesday, during school."
       ],
       "choices": [
         {
           "id": "go",
-          "label": "Go",
+          "label": "Go to the audition",
           "outcomes": [
             {
               "weight": 3,
@@ -11415,7 +11415,7 @@
         },
         {
           "id": "skip",
-          "label": "Don't go",
+          "label": "Skip the audition",
           "text": "You did not go. It is one of the ones you still think about.",
           "effects": {
             "stats": {
@@ -11444,12 +11444,12 @@
       "physical": true,
       "weight": 11,
       "text": [
-        "A club two hours away has invited you to trial, and somebody would have to drive you there and back."
+        "A team two hours away invited you to try out. Someone would have to drive you there and back."
       ],
       "choices": [
         {
           "id": "go",
-          "label": "Go",
+          "label": "Go to the tryout",
           "outcomes": [
             {
               "weight": 4,
@@ -11512,7 +11512,7 @@
         },
         {
           "id": "skip",
-          "label": "Let it go",
+          "label": "Give up on it",
           "text": "It was too far and there was nobody free to drive. That was the whole reason.",
           "effects": {
             "stats": {
@@ -11537,12 +11537,12 @@
       },
       "weight": 11,
       "text": [
-        "A school you had not considered has written to you directly about a place and a bursary."
+        "A school you'd never thought about wrote to you. They're offering a spot and money to cover it."
       ],
       "choices": [
         {
           "id": "apply",
-          "label": "Apply",
+          "label": "Apply for the spot",
           "outcomes": [
             {
               "weight": 4,
@@ -11646,7 +11646,7 @@
       },
       "weight": 11,
       "text": [
-        "The name was decided in the car park. It was not the first choice, or the second."
+        "The name was decided in the parking lot. It was not the first choice, or the second."
       ]
     },
     {
