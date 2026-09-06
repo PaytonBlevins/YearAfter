@@ -265,6 +265,46 @@ const migrations: Readonly<Record<number, Migration>> = {
 
     return { ...save, version: 10, circle, education };
   },
+
+  /**
+   * v10 → v11 (Ticket 0207c) — repair duplicate timeline ids already on disk.
+   *
+   * A user-reported React warning, twice: "Encountered two children with the
+   * same key, `t:2012:study`". 0206b fixed the PRODUCER — every repeatable
+   * action now puts its repeat counter in the id, and a test plays a whole life
+   * pressing everything and asserts the ids are unique. That fix was correct
+   * and it was not enough, because no code in the build can emit a bare
+   * `t:2012:study` any more: the duplicates were written by the pre-fix build
+   * and are sitting in saves, and nothing was ever going to take them out.
+   *
+   * CORE_RULES 13.12 says a timeline entry's id is unique, FOREVER. Enforcing
+   * that in the producer alone leaves every save written before the fix in
+   * violation of it for the life of the save. A save outlives the bug that
+   * wrote it, so a data bug needs a data fix.
+   *
+   * Pure, as CORE_RULES 12 requires: no RNG, no clock. The suffix is the
+   * entry's position among the duplicates, so the same save always migrates to
+   * the same result and a life still replays from its seed. The FIRST holder of
+   * an id keeps it unchanged, so nothing that already renders correctly moves.
+   */
+  10: (save) => {
+    const player = { ...((save['player'] as Record<string, unknown>) ?? {}) };
+    const timeline = Array.isArray(player['timeline']) ? player['timeline'] : [];
+
+    const seen = new Map<string, number>();
+    player['timeline'] = timeline.map((raw) => {
+      const entry = raw as Record<string, unknown>;
+      const id = entry['id'];
+      if (typeof id !== 'string') return entry;
+      const already = seen.get(id) ?? 0;
+      seen.set(id, already + 1);
+      // `dup` rather than a bare number, so a repaired id can never collide
+      // with one the current producers make — those end in a plain counter.
+      return already === 0 ? entry : { ...entry, id: `${id}:dup${already}` };
+    });
+
+    return { ...save, version: 11, player };
+  },
 };
 
 export function describeMigrationError(error: MigrationError): string {

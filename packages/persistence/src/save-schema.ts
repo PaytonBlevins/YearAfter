@@ -17,7 +17,7 @@ import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 10;
+export const CURRENT_SAVE_VERSION = 11;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -44,6 +44,7 @@ export type { WorldState };
  * v9 added `circle` — classmates, friends and teachers (Ticket 0206).
  * v10 replaced the circle's once-a-year cap with per-year contact counting,
  *     and gave every joined activity a performance record (Ticket 0206b).
+ * v11 de-duplicated timeline ids written by pre-0206b builds (Ticket 0207c).
  *
  * Ticket 0207 (Love) did NOT bump the version, and that is a decision rather
  * than an oversight. It added one optional field, `romance`, to a person in the
@@ -52,10 +53,15 @@ export type { WorldState };
  * for a migration to compute. A version bump whose migration is the identity
  * function is a lie about what changed.
  *
+ * v11 repairs duplicate timeline ids left in saves written before 0206b
+ * (Ticket 0207c). It changes no field and adds none — and it is still a real
+ * migration, because it is the only thing that can fix data a fixed producer
+ * can no longer produce.
+ *
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV10 {
-  readonly version: 10;
+export interface SaveGameV11 {
+  readonly version: 11;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -82,8 +88,8 @@ export interface SaveGameV10 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV10;
-export type CurrentSaveGame = SaveGameV10;
+export type AnySaveGame = SaveGameV11;
+export type CurrentSaveGame = SaveGameV11;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

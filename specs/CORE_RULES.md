@@ -316,6 +316,19 @@ terminal. `advance.test.ts` now plays a life pressing every repeatable action to
 its limit and asserts no id repeats, so the next thing to become repeatable
 fails the build instead.
 
+
+Fixing the PRODUCER is only half of it, and Ticket 0207c is why this paragraph
+exists. 0206b put a repeat counter in every repeatable action's id and added a
+test that plays a whole life pressing all of them, and the same React duplicate-
+key warning came back — because no code in the build could still emit the bad
+id. The duplicates had been written by the pre-fix build and were sitting in the
+save, where a fixed producer can never reach them.
+
+A save outlives the bug that wrote it. So an invariant on stored data needs a
+MIGRATION as well as a guard at the point of writing, and "forever" in the
+heading means saves too. The migration stays pure like every other one — repair
+by position, never by a fresh draw — or the life stops replaying from its seed.
+
 ### 13.13 An event never spends money the character does not have
 
 Anything with a negative cash effect carries `cashAtLeast` covering the largest

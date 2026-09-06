@@ -541,3 +541,138 @@ describe('a decision keeps its people across a save', () => {
     }
   });
 });
+
+/**
+ * Ticket 0207c — repairing duplicate timeline ids already written to disk.
+ *
+ * Reported twice by the product owner, the second time AFTER 0206b fixed the
+ * producer: "Encountered two children with the same key, `t:2012:study`."
+ *
+ * The second report is the interesting one. No code in the build can emit a
+ * bare `t:2012:study` any more — every repeatable action puts its repeat
+ * counter in the id, and a simulation test plays a whole life pressing all of
+ * them and asserts uniqueness. The duplicates were written by the PRE-FIX build
+ * and are sitting in the save, where a fixed producer can never reach them.
+ *
+ * CORE_RULES 13.12 says a timeline entry's id is unique, forever. Enforcing it
+ * only where ids are made leaves every save written before the fix in violation
+ * of it for the life of that save.
+ */
+describe('v10 -> v11 migration (Ticket 0207c duplicate timeline ids)', () => {
+  const withTimeline = (
+    save: ReturnType<typeof toSave>,
+    timeline: readonly Record<string, unknown>[],
+  ) => ({ ...save, version: 10, player: { ...save.player, timeline } });
+
+  /** The exact shape reported, twice. */
+  const REPORTED = [
+    { id: 't:2012:study', age: 12, year: 2012, kind: 'passive', text: 'Studied harder.', sequence: 0 },
+    { id: 't:2012:study', age: 12, year: 2012, kind: 'passive', text: 'Studied harder again.', sequence: 1 },
+  ];
+
+  it('makes the reported key unique', () => {
+    const { save } = newSave('DUP');
+    const migrated = migrateSave(withTimeline(save, REPORTED));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    const ids = migrated.value.player.timeline.map((entry) => entry.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    // The first holder keeps its id, so nothing that already rendered moves.
+    expect(ids[0]).toBe('t:2012:study');
+    expect(ids[1]).not.toBe('t:2012:study');
+  });
+
+  it('leaves the entries themselves alone apart from the id', () => {
+    const { save } = newSave('DUP-TEXT');
+    const migrated = migrateSave(withTimeline(save, REPORTED));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    const timeline = migrated.value.player.timeline;
+    expect(timeline).toHaveLength(2);
+    expect(timeline[0]?.text).toBe('Studied harder.');
+    expect(timeline[1]?.text).toBe('Studied harder again.');
+    expect(timeline[1]?.age).toBe(12);
+  });
+
+  it('de-duplicates a whole life, however many times an id repeats', () => {
+    const { save } = newSave('DUP-MANY');
+    const timeline = [
+      ...Array.from({ length: 5 }, (_, i) => ({
+        id: 't:2012:study',
+        age: 12,
+        year: 2012,
+        kind: 'passive',
+        text: `study ${i}`,
+        sequence: i,
+      })),
+      ...Array.from({ length: 3 }, (_, i) => ({
+        id: 't:2013:social:npc:peer:2000:1:hang-out',
+        age: 13,
+        year: 2013,
+        kind: 'relationship',
+        text: `hang ${i}`,
+        sequence: i,
+      })),
+      { id: 't:2014:tryout:basketball', age: 14, year: 2014, kind: 'passive', text: 'once', sequence: 0 },
+    ];
+    const migrated = migrateSave(withTimeline(save, timeline));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    const ids = migrated.value.player.timeline.map((entry) => entry.id);
+    expect(ids).toHaveLength(9);
+    expect(new Set(ids).size).toBe(9);
+    // An id that was already unique is untouched.
+    expect(ids).toContain('t:2014:tryout:basketball');
+  });
+
+  it('cannot collide with an id the current producers make', () => {
+    // Live producers end in a plain counter (`…:study:1`). A repaired id ends
+    // in `:dup1`, so a migrated save and a year played afterwards cannot
+    // generate the same key.
+    const { save } = newSave('DUP-COLLIDE');
+    const timeline = [
+      { id: 't:2012:study', age: 12, year: 2012, kind: 'passive', text: 'a', sequence: 0 },
+      { id: 't:2012:study', age: 12, year: 2012, kind: 'passive', text: 'b', sequence: 1 },
+      { id: 't:2012:study:1', age: 12, year: 2012, kind: 'passive', text: 'c', sequence: 2 },
+    ];
+    const migrated = migrateSave(withTimeline(save, timeline));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+
+    const ids = migrated.value.player.timeline.map((entry) => entry.id);
+    expect(new Set(ids).size).toBe(3);
+    expect(ids).toContain('t:2012:study:1');
+  });
+
+  it('is pure — the same save migrates to the same result every time', () => {
+    // CORE_RULES 12: no RNG, no clock, or the life stops replaying from its seed.
+    const { save } = newSave('DUP-PURE');
+    const once = migrateSave(withTimeline(save, REPORTED));
+    const twice = migrateSave(withTimeline(save, REPORTED));
+    expect(once.ok && twice.ok).toBe(true);
+    if (!once.ok || !twice.ok) return;
+    expect(once.value.player.timeline.map((e) => e.id)).toEqual(
+      twice.value.player.timeline.map((e) => e.id),
+    );
+  });
+
+  it('leaves a save with no duplicates completely untouched', () => {
+    const { save } = newSave('DUP-NONE');
+    const before = save.player.timeline.map((entry) => entry.id);
+    const migrated = migrateSave({ ...save, version: 10 });
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.player.timeline.map((entry) => entry.id)).toEqual(before);
+  });
+
+  it('survives a timeline entry with no id at all', () => {
+    const { save } = newSave('DUP-JUNK');
+    const migrated = migrateSave(
+      withTimeline(save, [{ age: 12, year: 2012, kind: 'passive', text: 'no id', sequence: 0 }]),
+    );
+    expect(migrated.ok).toBe(true);
+  });
+});
