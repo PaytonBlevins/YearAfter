@@ -81,6 +81,9 @@ export function matchesCondition(condition: EventCondition, context: EventContex
   if (condition.partnered !== undefined && context.partnered !== condition.partnered) {
     return false;
   }
+  if (condition.hasChildren !== undefined && context.hasChildren !== condition.hasChildren) {
+    return false;
+  }
   if (condition.cashAtLeast !== undefined && context.cash < condition.cashAtLeast) {
     return false;
   }

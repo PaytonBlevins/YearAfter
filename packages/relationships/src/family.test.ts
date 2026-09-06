@@ -3,6 +3,8 @@ import { asNpcId, dollars } from '@yearafter/core';
 import { createPersonality } from '@yearafter/character';
 import {
   EMPTY_HOUSEHOLD,
+  children,
+  livingChildren,
   WEALTH_BANDS,
   father,
   findMember,
@@ -109,5 +111,60 @@ describe('wealth bands', () => {
       'affluent',
       'wealthy',
     ]);
+  });
+});
+
+/**
+ * Ticket 0208 — a fourth role, and the query that could not survive one.
+ *
+ * `parents` was `members.filter(m => m.role !== 'sibling')`. A negative filter
+ * over an enum is correct exactly until the enum grows, and then it is silently
+ * wrong in the worst possible way: every child the player ever had would have
+ * counted as one of the player's own parents — in `parents`, in
+ * `livingParents`, and therefore in the `anyParent` event requirement that
+ * decides whether a childhood event about Mom or Dad may fire at all.
+ *
+ * Nothing would have thrown. A forty-year-old with two kids and both parents
+ * dead would simply have started getting events about their mother again.
+ */
+describe('children are not parents (Ticket 0208)', () => {
+  const withKids: Household = {
+    members: [
+      member('mom', 'mother', 1960),
+      member('dad', 'father', 1958),
+      member('sis', 'sibling', 1988),
+      member('kid1', 'child', 2015),
+      member('kid2', 'child', 2018),
+    ],
+    finances: { band: 'modest', annualIncome: dollars(50_000) },
+  };
+
+  it('never counts a child as a parent', () => {
+    expect(parents(withKids).map((m) => m.id)).toEqual([asNpcId('mom'), asNpcId('dad')]);
+    expect(livingParents(withKids)).toHaveLength(2);
+  });
+
+  it('never counts a child as a sibling', () => {
+    expect(siblings(withKids).map((m) => m.id)).toEqual([asNpcId('sis')]);
+  });
+
+  it('lists children oldest first', () => {
+    expect(children(withKids).map((m) => m.id)).toEqual([asNpcId('kid1'), asNpcId('kid2')]);
+  });
+
+  it('leaves dead children out of livingChildren but keeps them on the roster', () => {
+    const bereaved: Household = {
+      ...withKids,
+      members: withKids.members.map((m) =>
+        m.id === asNpcId('kid1') ? { ...m, alive: false } : m,
+      ),
+    };
+    expect(children(bereaved)).toHaveLength(2);
+    expect(livingChildren(bereaved).map((m) => m.id)).toEqual([asNpcId('kid2')]);
+  });
+
+  it('puts children last on the Family screen, after parents and siblings', () => {
+    const order = orderedMembers(withKids).map((m) => m.role);
+    expect(order).toEqual(['mother', 'father', 'sibling', 'child', 'child']);
   });
 });

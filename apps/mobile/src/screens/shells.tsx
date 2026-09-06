@@ -429,7 +429,15 @@ export function ActivitiesScreen() {
           },
           { icon: 'surgery', title: 'Plastic Surgery', ticket: '1004' },
           { icon: 'salon', title: 'Salon & Spa', ticket: '1004' },
-          { icon: 'adoption', title: 'Adoption', affordance: 'action', ticket: '0208' },
+          {
+            icon: 'adoption',
+            title: 'Adoption',
+            // Same destination as Relationships -> Family, on purpose: there is
+            // one place children live and one place you start a family, and two
+            // screens that both half-did it would be worse than a shared one.
+            subtitle: 'Apply, wait, and bring a child home',
+            route: { screen: 'family' as const, title: 'Family' },
+          },
           { icon: 'lawsuit', title: 'Lawsuit', affordance: 'action', ticket: '1005' },
           { icon: 'estate', title: 'Will & Estate', affordance: 'action', ticket: '0212' },
         ]}

@@ -305,6 +305,20 @@ const migrations: Readonly<Record<number, Migration>> = {
 
     return { ...save, version: 11, player };
   },
+
+  /**
+   * v11 → v12 (Ticket 0208) — the parenting slice.
+   *
+   * An existing character gets an EMPTY one: no pregnancy, no adoption, no
+   * open question. Not a guess at what they might have been up to — the same
+   * rule migration 9 followed about odd jobs, and migration 4 about grades.
+   * Inventing a child the save never simulated would be far worse than the
+   * alternative, and there is no honest way to derive one.
+   *
+   * Children live in `family.members` with role 'child', so a save with none
+   * simply has none. Nothing to convert there either.
+   */
+  11: (save) => ({ ...save, version: 12, parenting: save['parenting'] ?? { answered: {} } }),
 };
 
 export function describeMigrationError(error: MigrationError): string {

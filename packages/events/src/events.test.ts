@@ -68,6 +68,7 @@ const context = (overrides: Partial<EventContext> = {}): EventContext => ({
   personality: createPersonality(),
   family: FULL_FAMILY,
   partnered: false,
+  hasChildren: false,
   nameCultureId: 'us-en',
   homeCity: 'Toledo, OH',
   flags: new Set<string>(),
@@ -807,5 +808,25 @@ describe('partnered (Ticket 0207)', () => {
   it('is not a constraint when the event does not say', () => {
     expect(matchesCondition({}, context({ partnered: true }))).toBe(true);
     expect(matchesCondition({}, context({ partnered: false }))).toBe(true);
+  });
+});
+
+/**
+ * Ticket 0208 — the same rule as `partnered`, one ticket later.
+ *
+ * Eleven parenting events went in reading "Your kid spiked a fever at 2am" with
+ * nothing stopping them firing at a thirty-year-old who has never had a child.
+ */
+describe('hasChildren (Ticket 0208)', () => {
+  it('is a real constraint in both directions', () => {
+    expect(matchesCondition({ hasChildren: true }, context({ hasChildren: true }))).toBe(true);
+    expect(matchesCondition({ hasChildren: true }, context({ hasChildren: false }))).toBe(false);
+    expect(matchesCondition({ hasChildren: false }, context({ hasChildren: false }))).toBe(true);
+    expect(matchesCondition({ hasChildren: false }, context({ hasChildren: true }))).toBe(false);
+  });
+
+  it('is not a constraint when the event does not say', () => {
+    expect(matchesCondition({}, context({ hasChildren: true }))).toBe(true);
+    expect(matchesCondition({}, context({ hasChildren: false }))).toBe(true);
   });
 });

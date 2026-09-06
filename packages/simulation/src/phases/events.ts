@@ -21,7 +21,7 @@ import {
   type EventOutcome,
   type PendingDecision,
 } from '@yearafter/events';
-import type { Household } from '@yearafter/relationships';
+import { livingChildren, type Household } from '@yearafter/relationships';
 import {
   displayName,
   isCurrent,
@@ -93,6 +93,9 @@ export function buildEventContext(
     // without it, "dinner at their parents'" fired about a classmate the
     // character had never spoken to.
     partnered: partnerOf(state.circle.people) !== undefined,
+    // Ticket 0208. Without it, "your kid spiked a fever" fires at somebody who
+    // has never had a child — the same defect `partnered` was added for.
+    hasChildren: livingChildren(state.family).length > 0,
     // Only people who are still around. Somebody who drifted out two years ago
     // must not turn up in the cafeteria as though nothing happened.
     people: state.circle.people.filter(isCurrent).map((person) => ({

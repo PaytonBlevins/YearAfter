@@ -31,6 +31,10 @@ import {
   leaveActivity as leaveTheActivity,
   practise,
   romanticMove,
+  answerChild,
+  applyToAdopt,
+  kickOut,
+  tryForBaby,
   useDatingApp,
   quitGig,
   takeGig,
@@ -90,6 +94,12 @@ interface GameContextValue {
   readonly romanceWith: (personId: string, moveId: string) => void;
   /** Ticket 0207b. A month on the apps, once a year, often for nothing. */
   readonly tryDatingApp: () => void;
+  /** Ticket 0208. Try for a baby, once a year, and it can simply not happen. */
+  readonly tryForABaby: () => void;
+  readonly startAdoption: () => void;
+  /** Spec 61: the one parenting decision — answer what a child asked for. */
+  readonly answerChildAsk: (yes: boolean) => void;
+  readonly kickChildOut: (childId: string) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   readonly updateSettings: (patch: Partial<SaveSettings>) => void;
 }
@@ -366,6 +376,34 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     });
   }, [persist, saveId, settings]);
 
+  const runParenting = useCallback(
+    (act: (current: GameState) => ReturnType<typeof tryForBaby>) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = act(current);
+        if (!result.ok) {
+          setSaveError(`Cannot do that right now (${result.error}).`);
+          return current;
+        }
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const tryForABaby = useCallback(() => runParenting(tryForBaby), [runParenting]);
+  const startAdoption = useCallback(() => runParenting(applyToAdopt), [runParenting]);
+  const answerChildAsk = useCallback(
+    (yes: boolean) => runParenting((current) => answerChild(current, yes)),
+    [runParenting],
+  );
+  const kickChildOut = useCallback(
+    (childId: string) => runParenting((current) => kickOut(current, childId)),
+    [runParenting],
+  );
+
   const takeAGig = useCallback(
     (gigId: string) => {
       mutateEducation((current) => {
@@ -419,6 +457,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       interactWith,
       romanceWith,
       tryDatingApp,
+      tryForABaby,
+      startAdoption,
+      answerChildAsk,
+      kickChildOut,
       startNewLife,
       updateSettings,
     }),
@@ -441,6 +483,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       interactWith,
       romanceWith,
       tryDatingApp,
+      tryForABaby,
+      startAdoption,
+      answerChildAsk,
+      kickChildOut,
       startNewLife,
       updateSettings,
     ],

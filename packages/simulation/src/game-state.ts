@@ -13,6 +13,7 @@ import { NOT_YET_ENROLLED, type EducationState } from '@yearafter/education';
 import { EMPTY_HISTORY, type EventHistory, type PendingDecision } from '@yearafter/events';
 import { EMPTY_HOUSEHOLD, type Household } from '@yearafter/relationships';
 import { EMPTY_CIRCLE, type SocialCircle } from '@yearafter/social';
+import { EMPTY_PARENTING, type ParentingState } from '@yearafter/parenting';
 import { Rng } from './rng/rng';
 
 /** World state that outlives any single character (spec 818–827 continuation). */
@@ -59,6 +60,14 @@ export interface GameState {
    */
   readonly circle: SocialCircle;
   /**
+   * Ticket 0208: a pregnancy, an open adoption, and what a child has asked for.
+   *
+   * The CHILDREN themselves live in `family`, because they are household
+   * members like a sibling is. This is the part that is happening this year
+   * rather than the part that is true about the family.
+   */
+  readonly parenting: ParentingState;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -81,6 +90,7 @@ export interface CreateGameStateOptions {
   readonly events?: EventHistory;
   readonly education?: EducationState;
   readonly circle?: SocialCircle;
+  readonly parenting?: ParentingState;
   readonly pending?: readonly PendingDecision[];
 }
 
@@ -97,6 +107,7 @@ export const createGameState = (
   events: options.events ?? EMPTY_HISTORY,
   education: options.education ?? NOT_YET_ENROLLED,
   circle: options.circle ?? EMPTY_CIRCLE,
+  parenting: options.parenting ?? EMPTY_PARENTING,
   pending: options.pending ?? [],
   rng,
 });

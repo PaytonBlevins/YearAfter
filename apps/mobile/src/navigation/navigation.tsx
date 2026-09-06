@@ -43,6 +43,8 @@ export type ScreenKey =
   | 'gigs'
   /** Ticket 0207. Who there is, who there was, and where you stand. */
   | 'love'
+  /** Ticket 0208. One child: how they are doing, and what they cost. */
+  | 'child'
   | 'debug';
 
 export interface Route {

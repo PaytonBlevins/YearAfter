@@ -12,12 +12,13 @@
 import type { Character } from '@yearafter/character';
 import type { EducationState } from '@yearafter/education';
 import type { SocialCircle } from '@yearafter/social';
+import type { ParentingState } from '@yearafter/parenting';
 import type { EventHistory, PendingDecision } from '@yearafter/events';
 import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 11;
+export const CURRENT_SAVE_VERSION = 12;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -45,6 +46,8 @@ export type { WorldState };
  * v10 replaced the circle's once-a-year cap with per-year contact counting,
  *     and gave every joined activity a performance record (Ticket 0206b).
  * v11 de-duplicated timeline ids written by pre-0206b builds (Ticket 0207c).
+ * v12 added `parenting` — a pregnancy, an adoption, and what a child asked for
+ *     (Ticket 0208). Children themselves live in `family` as a fourth role.
  *
  * Ticket 0207 (Love) did NOT bump the version, and that is a decision rather
  * than an oversight. It added one optional field, `romance`, to a person in the
@@ -60,8 +63,8 @@ export type { WorldState };
  *
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV11 {
-  readonly version: 11;
+export interface SaveGameV12 {
+  readonly version: 12;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -81,6 +84,8 @@ export interface SaveGameV11 {
   /** Ticket 0204: enrolment, grades, behaviour and extracurriculars. */
   readonly education: EducationState;
   readonly circle: SocialCircle;
+  /** Ticket 0208: pregnancy, adoption, and the open question from a child. */
+  readonly parenting: ParentingState;
   readonly settings: SaveSettings;
   /** Unix ms. Metadata only — never used in simulation logic. */
   readonly createdAt: number;
@@ -88,8 +93,8 @@ export interface SaveGameV11 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV11;
-export type CurrentSaveGame = SaveGameV11;
+export type AnySaveGame = SaveGameV12;
+export type CurrentSaveGame = SaveGameV12;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

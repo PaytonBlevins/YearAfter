@@ -464,6 +464,38 @@ More generally, when one record is derived from a filter over another
 field has to maintain the invariant. Funnel them through one function rather
 than trusting each caller to remember.
 
+### 13.20 A negative filter over an enum is a bug with a delay on it
+
+`parents(household)` was `members.filter(m => m.role !== 'sibling')`, which was
+correct for three roles and silently wrong the moment Ticket 0208 added a
+fourth. Every child the player ever had would have counted as one of their own
+parents — in `parents`, in `livingParents`, and therefore in the `anyParent`
+event requirement that decides whether an event about Mom or Dad may fire.
+Nothing would have thrown: a forty-year-old with two kids and both parents dead
+would simply have started getting events about their mother again.
+
+So a query over a closed set names what it wants, never what it excludes. The
+same applies to a `Record` keyed on a subset of an enum — TypeScript catches
+that one, which is how the Family screen's role labels were found in the same
+hour, and is the argument for exhaustive `switch` over a lookup table.
+
+### 13.21 Gating on a system that has not shipped, twice
+
+CORE_RULES 13.16 was written after Ticket 0207 priced a wedding at $9,000 in a
+build whose median thirty-year-old holds thirteen dollars. Ticket 0208 then
+priced a child's school play at $90 and a computer at $650, and reading 90
+played families found children asking for things 702 times and the parent able
+to say yes ZERO times — with the knock-on that every family in the game ended
+estranged, because the closeness model drains when nobody ever answers.
+
+Writing the rule down did not prevent the second occurrence. What would have is
+the measurement: both times the defect was invisible to a green suite and
+obvious the moment output was read. So 13.7's requirement is restated here with
+teeth — **any price, threshold or gate is measured against what characters
+actually have before it ships**, and the measurement goes in a comment beside
+the constant. A number nobody has checked against real output is a guess, and
+this project has now shipped that guess twice.
+
 ## 16. Performance
 
 Annual processing under ~250 ms for an ordinary life. Background NPCs are

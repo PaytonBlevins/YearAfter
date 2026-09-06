@@ -569,6 +569,21 @@ if (existsSync(eventsPath)) {
         }
       }
 
+      // V11 — a parenting event says it needs a child (Ticket 0208).
+      //
+      // The same rule as V8's age gate, learned from `partnered` one ticket
+      // earlier: eleven events reading "your kid spiked a fever at 2am" went in
+      // with nothing stopping them firing at somebody who has never had a
+      // child. Checked by id prefix on purpose — a prefix is a promise the
+      // author makes, and this is what holds them to it.
+      if (event.id.startsWith('parent.') && event.eligibility?.hasChildren !== true) {
+        fail(
+          rel,
+          `${event.id}: a parenting event must declare hasChildren: true, or it ` +
+            `fires at somebody who has never had a child.`,
+        );
+      }
+
       // V9 — a choice label says what pressing it does (Ticket 0207d).
       //
       // Review, after playing the 0207 build: "'Tell them something' and 'Have

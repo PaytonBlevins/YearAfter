@@ -20,7 +20,8 @@
     "@yearafter/events": "workspace:*",
     "@yearafter/relationships": "workspace:*",
     "@yearafter/simulation": "workspace:*",
-    "@yearafter/social": "workspace:*"
+    "@yearafter/social": "workspace:*",
+    "@yearafter/parenting": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3",

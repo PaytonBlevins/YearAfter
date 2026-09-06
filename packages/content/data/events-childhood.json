@@ -3090,6 +3090,238 @@
       }
     },
     {
+      "id": "parent.first-night",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 19,
+        "hasChildren": true
+      },
+      "weight": 11,
+      "cooldown": 4,
+      "text": [
+        "First night home with the baby. Nobody slept and nobody minded.",
+        "The first week was a blur. You have almost no memory of it and you were never happier."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": 6,
+          "health": -3
+        }
+      }
+    },
+    {
+      "id": "parent.fever",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 19,
+        "hasChildren": true
+      },
+      "weight": 11,
+      "cooldown": 3,
+      "text": [
+        "Your kid spiked a fever at 2am and you sat up the whole night watching them breathe."
+      ],
+      "effects": {
+        "stats": {
+          "health": -3,
+          "happiness": -2,
+          "willpower": 3
+        }
+      }
+    },
+    {
+      "id": "parent.school-run",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 23,
+        "hasChildren": true
+      },
+      "weight": 10,
+      "cooldown": 4,
+      "text": [
+        "You did the school run every morning for a year and got very good at the radio."
+      ],
+      "effects": {
+        "stats": {
+          "discipline": 2,
+          "happiness": 2
+        }
+      }
+    },
+    {
+      "id": "parent.recital",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 24,
+        "hasChildren": true
+      },
+      "weight": 11,
+      "cooldown": 3,
+      "text": [
+        "Sat through a school concert that was mostly terrible and cried anyway.",
+        "Watched your kid play a tree in the school play. Best tree there."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": 5
+        }
+      }
+    },
+    {
+      "id": "parent.sick-day",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 22,
+        "hasChildren": true
+      },
+      "weight": 10,
+      "cooldown": 3,
+      "text": [
+        "Took a day off you could not spare because there was nobody else to take it."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": -1,
+          "willpower": 2
+        }
+      }
+    },
+    {
+      "id": "parent.first-day",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 24,
+        "hasChildren": true
+      },
+      "weight": 10,
+      "cooldown": 5,
+      "text": [
+        "Dropped your kid at school and cried in the car, which you had promised yourself you would not do."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": 3
+        }
+      }
+    },
+    {
+      "id": "parent.teenager",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 32,
+        "hasChildren": true
+      },
+      "weight": 11,
+      "cooldown": 3,
+      "text": [
+        "Your teenager stopped talking to you for most of a year. Nobody could say why.",
+        "Had the same argument with your teenager about the same thing eleven times."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": -4,
+          "willpower": 3
+        }
+      }
+    },
+    {
+      "id": "parent.proud",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 26,
+        "hasChildren": true
+      },
+      "weight": 10,
+      "cooldown": 4,
+      "text": [
+        "Your kid did something genuinely kind when nobody was watching, and somebody told you."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": 7
+        }
+      }
+    },
+    {
+      "id": "parent.money",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 23,
+        "hasChildren": true
+      },
+      "weight": 10,
+      "cooldown": 3,
+      "text": [
+        "The kids needed shoes, again, and something else had to wait."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": -3,
+          "willpower": 2
+        }
+      }
+    },
+    {
+      "id": "parent.driving",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 36,
+        "hasChildren": true
+      },
+      "weight": 10,
+      "cooldown": 6,
+      "text": [
+        "Taught your kid to drive. You have never gripped anything so hard in your life."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": 3,
+          "health": -1
+        }
+      }
+    },
+    {
+      "id": "parent.quiet-house",
+      "category": "family",
+      "type": "passive",
+      "rarity": "common",
+      "eligibility": {
+        "ageMin": 40,
+        "hasChildren": true
+      },
+      "weight": 10,
+      "cooldown": 5,
+      "text": [
+        "The house got quiet. You had been looking forward to it and it was not what you expected."
+      ],
+      "effects": {
+        "stats": {
+          "happiness": -2,
+          "willpower": 2
+        }
+      }
+    },
+    {
       "id": "love.note",
       "category": "friendship",
       "type": "passive",

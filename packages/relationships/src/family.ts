@@ -14,10 +14,29 @@
 import { dollars, type Money, type NpcId } from '@yearafter/core';
 import type { Npc } from './npc';
 
-export type FamilyRole = 'mother' | 'father' | 'sibling';
+export type FamilyRole = 'mother' | 'father' | 'sibling' | 'child';
 
 export interface FamilyMember extends Npc {
   readonly role: FamilyRole;
+  /**
+   * Ticket 0208. For a child: the player's age when they arrived.
+   *
+   * Stored rather than derived from `birthYear`, because an adopted child was
+   * born before they arrived and the two facts are different. The child's own
+   * age still comes from `birthYear` like everybody else's.
+   */
+  readonly arrivedWhenPlayerWas?: number;
+  readonly arrivedBy?: 'birth' | 'adoption';
+  /**
+   * For a child: the other parent, as their id in the social circle.
+   *
+   * A REFERENCE, not a copy. The partner is an `Acquaintance` and stays one —
+   * duplicating them into the household would be the same two-places-disagree
+   * failure CORE_RULES 13.19 exists to prevent, and this time the two records
+   * would disagree about whether the player is still with the mother of their
+   * children. Absent for an adoption by a single parent.
+   */
+  readonly otherParentId?: NpcId;
 }
 
 /**
@@ -79,8 +98,27 @@ export const mother = (household: Household): FamilyMember | undefined =>
 export const father = (household: Household): FamilyMember | undefined =>
   household.members.find((member) => member.role === 'father');
 
+/**
+ * The player's own parents.
+ *
+ * Named explicitly rather than as "everybody who is not a sibling", which is
+ * what this was until Ticket 0208 added a fourth role. A negative filter over
+ * an enum is correct exactly until the enum grows, and then it is silently
+ * wrong: every child the player had would have been counted as one of their
+ * parents, by `parents`, by `livingParents`, and by the `anyParent` event
+ * requirement that decides whether a childhood event may fire.
+ */
 export const parents = (household: Household): FamilyMember[] =>
-  household.members.filter((member) => member.role !== 'sibling');
+  household.members.filter((member) => member.role === 'mother' || member.role === 'father');
+
+/** Ticket 0208. The player's own children, oldest first. */
+export const children = (household: Household): FamilyMember[] =>
+  household.members
+    .filter((member) => member.role === 'child')
+    .sort((a, b) => a.birthYear - b.birthYear);
+
+export const livingChildren = (household: Household): FamilyMember[] =>
+  children(household).filter((member) => member.alive);
 
 export const siblings = (household: Household): FamilyMember[] =>
   household.members.filter((member) => member.role === 'sibling');
@@ -96,7 +134,7 @@ export const findMember = (household: Household, id: NpcId): FamilyMember | unde
  * youngest. Stable, so the list does not reshuffle between renders.
  */
 export function orderedMembers(household: Household): FamilyMember[] {
-  const rank: Record<FamilyRole, number> = { mother: 0, father: 1, sibling: 2 };
+  const rank: Record<FamilyRole, number> = { mother: 0, father: 1, sibling: 2, child: 3 };
   return [...household.members].sort(
     (a, b) => rank[a.role] - rank[b.role] || a.birthYear - b.birthYear,
   );

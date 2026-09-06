@@ -110,6 +110,15 @@ export interface EventCondition {
    * any of them were the player's partner.
    */
   readonly partnered?: boolean;
+  /**
+   * Ticket 0208. Whether the character must (true) or must not (false) have
+   * children for this to fire.
+   *
+   * The same lesson as `partnered`, one ticket later: eleven parenting events
+   * went in reading "Your kid spiked a fever at 2am", and without this every
+   * one of them could fire at a thirty-year-old who has never had a child.
+   */
+  readonly hasChildren?: boolean;
   readonly requires?: readonly FamilyRequirement[];
   /** Any one of these talents. */
   readonly talentsAny?: readonly TalentKey[];

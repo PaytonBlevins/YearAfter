@@ -25,8 +25,11 @@ import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
 import { runEducation } from './phases/education';
 import { runEvents } from './phases/events';
+import { partnerOf } from '@yearafter/social';
+import { runFamily } from './phases/family';
 import { runSocial } from './phases/social';
 import { runStress } from './phases/stress';
+import { nameContext, uniqueFirstName } from './social-generator';
 import { RngDomains } from './rng/rng';
 
 export interface AdvanceResult {
@@ -78,12 +81,38 @@ export function advanceYear(state: GameState): AdvanceResult {
     previousStage: state.education.stage,
   });
 
+  // Then the family. After social, because a pregnancy needs to know who the
+  // player is with and social is where a relationship can end; before events,
+  // so an event this year can name a child who already exists (Ticket 0208).
+  const partner = partnerOf(social.circle.people);
+  const familyStream = state.rng.stream(RngDomains.Family);
+  const names = nameContext(
+    state.nameCultureId,
+    social.circle,
+    state.family,
+    state.player.firstName,
+  );
+  const family = runFamily({
+    family: state.family,
+    parenting: state.parenting,
+    stream: familyStream,
+    age: nextAge,
+    worldYear: nextYear,
+    personality: education.player.personality,
+    ...(partner ? { partnerPersonality: partner.personality, partnerId: partner.id } : {}),
+    playerLastName: state.player.lastName,
+    takenNames: names.taken,
+    nameFor: (sex) => uniqueFirstName(familyStream, names, sex),
+  });
+
   const events = runEvents(
     {
       ...state,
       player: education.player,
       education: education.education,
       circle: social.circle,
+      family: family.family,
+      parenting: family.parenting,
     },
     nextAge,
     nextYear,
@@ -123,6 +152,16 @@ export function advanceYear(state: GameState): AdvanceResult {
         sequence: education.lines.length + index,
       }),
     ),
+    ...family.lines.map((line, index) =>
+      createTimelineEntry({
+        age: nextAge,
+        year: nextYear,
+        kind: line.kind,
+        text: line.text,
+        id: `t:${nextYear}:family:${index}`,
+        sequence: education.lines.length + social.lines.length + index,
+      }),
+    ),
     ...events.lines.map((line, index) =>
       createTimelineEntry({
         age: nextAge,
@@ -130,7 +169,7 @@ export function advanceYear(state: GameState): AdvanceResult {
         kind: line.kind,
         text: line.text,
         eventId: asEventId(line.eventId),
-        sequence: education.lines.length + social.lines.length + index,
+        sequence: education.lines.length + social.lines.length + family.lines.length + index,
       }),
     ),
     // Last in the year, because it is the line about the year as a whole.
@@ -141,7 +180,12 @@ export function advanceYear(state: GameState): AdvanceResult {
         kind: line.kind,
         text: line.text,
         id: `t:${nextYear}:stress:${index}`,
-        sequence: education.lines.length + social.lines.length + events.lines.length + index,
+        sequence:
+          education.lines.length +
+          social.lines.length +
+          family.lines.length +
+          events.lines.length +
+          index,
       }),
     ),
   ];
@@ -175,6 +219,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       player,
       family: events.family,
       circle: events.circle,
+      parenting: family.parenting,
       events: events.history,
       // Events can move school standing (detention, suspension, being caught);
       // the education phase set the rest of it.

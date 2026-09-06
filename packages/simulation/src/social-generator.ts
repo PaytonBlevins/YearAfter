@@ -181,7 +181,7 @@ export function nameContext(
  * a legitimate draw. Extended here to the class, because two Wrens in one year
  * is realistic and unreadable.
  */
-function uniqueFirstName(stream: RandomStream, names: NameContext, sex: Sex): string {
+export function uniqueFirstName(stream: RandomStream, names: NameContext, sex: Sex): string {
   if (!names.culture) return sex === 'male' ? 'Alex' : 'Sam';
   const pool = sex === 'male' ? names.culture.male : names.culture.female;
   let candidate = stream.pick(pool);

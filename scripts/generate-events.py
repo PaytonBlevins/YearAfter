@@ -200,6 +200,7 @@ def COND(
     flags_all: list[str] | None = None,
     flags_none: list[str] | None = None,
     partnered: bool | None = None,
+    has_children: bool | None = None,
 ) -> dict:
     return prune(
         {
@@ -223,6 +224,8 @@ def COND(
             # this field needs: "must NOT be seeing anybody" is a real
             # constraint and is not the same as no constraint at all.
             "partnered": partnered,
+            # Ticket 0208. Like `partnered`, False is a real constraint.
+            "hasChildren": has_children,
         }
     )
 
@@ -986,6 +989,75 @@ E("friend.first-date", "friendship", [
     "A first date at a movie theater. Neither of you can name the film.",
 ], age_min=14, age_max=17, weight=10, cooldown=3,
    effects=FX(stats={"happiness": 4, "charisma": 2}))
+
+# -----------------------------------------------------------------------------
+# PARENTING (Ticket 0208)
+#
+# The ordinary business of having children, which spec 1986 otherwise abstracts.
+# These are the "meaningful event" half of that rule: not the school run, the
+# night the fever spiked.
+#
+# All gated at 18+ like everything else adult, and written to the 0207d clarity
+# rules — plain words, contractions, and nothing that needs decoding.
+# -----------------------------------------------------------------------------
+
+E("parent.first-night", "family", [
+    "First night home with the baby. Nobody slept and nobody minded.",
+    "The first week was a blur. You have almost no memory of it and you were never happier.",
+], age_min=19, weight=11, cooldown=4,
+   effects=FX(stats={"happiness": 6, "health": -3}), has_children=True)
+
+E("parent.fever", "family", [
+    "Your kid spiked a fever at 2am and you sat up the whole night watching them breathe.",
+], age_min=19, weight=11, cooldown=3,
+   effects=FX(stats={"health": -3, "happiness": -2, "willpower": 3}), has_children=True)
+
+E("parent.school-run", "family", [
+    "You did the school run every morning for a year and got very good at the radio.",
+], age_min=23, weight=10, cooldown=4,
+   effects=FX(stats={"discipline": 2, "happiness": 2}), has_children=True)
+
+E("parent.recital", "family", [
+    "Sat through a school concert that was mostly terrible and cried anyway.",
+    "Watched your kid play a tree in the school play. Best tree there.",
+], age_min=24, weight=11, cooldown=3,
+   effects=FX(stats={"happiness": 5}), has_children=True)
+
+E("parent.sick-day", "family", [
+    "Took a day off you could not spare because there was nobody else to take it.",
+], age_min=22, weight=10, cooldown=3,
+   effects=FX(stats={"happiness": -1, "willpower": 2}), has_children=True)
+
+E("parent.first-day", "family", [
+    "Dropped your kid at school and cried in the car, which you had promised yourself you would not do.",
+], age_min=24, weight=10, cooldown=5,
+   effects=FX(stats={"happiness": 3}), has_children=True)
+
+E("parent.teenager", "family", [
+    "Your teenager stopped talking to you for most of a year. Nobody could say why.",
+    "Had the same argument with your teenager about the same thing eleven times.",
+], age_min=32, weight=11, cooldown=3,
+   effects=FX(stats={"happiness": -4, "willpower": 3}), has_children=True)
+
+E("parent.proud", "family", [
+    "Your kid did something genuinely kind when nobody was watching, and somebody told you.",
+], age_min=26, weight=10, cooldown=4,
+   effects=FX(stats={"happiness": 7}), has_children=True)
+
+E("parent.money", "family", [
+    "The kids needed shoes, again, and something else had to wait.",
+], age_min=23, weight=10, cooldown=3,
+   effects=FX(stats={"happiness": -3, "willpower": 2}), has_children=True)
+
+E("parent.driving", "family", [
+    "Taught your kid to drive. You have never gripped anything so hard in your life.",
+], age_min=36, weight=10, cooldown=6,
+   effects=FX(stats={"happiness": 3, "health": -1}), has_children=True)
+
+E("parent.quiet-house", "family", [
+    "The house got quiet. You had been looking forward to it and it was not what you expected.",
+], age_min=40, weight=10, cooldown=5,
+   effects=FX(stats={"happiness": -2, "willpower": 2}), has_children=True)
 
 # -----------------------------------------------------------------------------
 # ROMANCE (Ticket 0207)

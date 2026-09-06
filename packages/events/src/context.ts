@@ -45,6 +45,8 @@ export interface EventContext {
   readonly activityCount: number;
   /** Ticket 0207. Whether the character is currently seeing somebody. */
   readonly partnered: boolean;
+  /** Ticket 0208. Whether the character has any living children. */
+  readonly hasChildren: boolean;
   /** Whole dollars the character is actually holding, for `cashAtLeast`. */
   readonly cash: number;
   /**
