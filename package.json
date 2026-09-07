@@ -17,7 +17,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md,yml}\"",
     "mobile": "pnpm --filter @yearafter/mobile start",
-    "mobile:clear": "pnpm --filter @yearafter/mobile exec expo start -c"
+    "mobile:clear": "pnpm install && pnpm --filter @yearafter/mobile exec expo start -c"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
