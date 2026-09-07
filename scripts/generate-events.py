@@ -102,6 +102,9 @@ for _person in ("kid", "kid2", "adult"):
 # Bare gendered pronouns. Fine in a line about Mom; wrong in a line about a
 # person whose name the engine drew, which is what this rule covers.
 BARE_PRONOUN_RE = re.compile(r"\b(he|him|his|she|her|hers)\b", re.IGNORECASE)
+# For {parent}, which renders "Mom" or "Dad": a bare "they" is as wrong as a
+# bare "she", because the household has one of them and it is not plural.
+ANY_PRONOUN_RE = re.compile(r"\b(he|him|his|she|her|hers|they|them|their)\b", re.IGNORECASE)
 
 
 def norm_token(token: str) -> str:
@@ -120,6 +123,14 @@ TOKEN_GUARDS = {
     "motherName": {"mother", "bothParents"},
     "fatherName": {"father", "bothParents"},
     "parent": {"mother", "father", "anyParent", "bothParents", "singleParent"},
+    # The pronoun of whichever parent {parent} resolved to. Same guard as
+    # {parent} itself: the copy cannot say "she" about somebody the eligibility
+    # did not guarantee exists. Reading the built app found "You told Mom the
+    # truth and they did not know what to do with it" — a hardcoded pronoun
+    # beside a token that renders "Mom".
+    "parentThey": {"mother", "father", "anyParent", "bothParents", "singleParent"},
+    "parentThem": {"mother", "father", "anyParent", "bothParents", "singleParent"},
+    "parentTheir": {"mother", "father", "anyParent", "bothParents", "singleParent"},
     "parents": {"bothParents"},
     "sibling": {"sibling", "siblings2", "olderSibling"},
     "siblingRel": {"sibling", "siblings2", "olderSibling"},
@@ -1370,7 +1381,7 @@ E("random.dinosaurs", "random", [
    effects=FX(stats={"smarts": 3, "charisma": -1}))
 
 E("random.space-phase", "random", [
-    "Decided on becoming an astronaut and researched it with genuine rigour.",
+    "Decided on becoming an astronaut and researched it more thoroughly than any homework.",
 ], age_min=5, age_max=11, weight=10,
    effects=FX(stats={"smarts": 3}),
    modifiers=[MOD(1.7, talents_any=["academics", "inventive"])])
@@ -1926,7 +1937,7 @@ D("d.family.birthday-money", "family", [
       text="Put the $25 birthday money in the coffee can under your bed and left it there.",
       effects=FX(stats={"happiness": 2, "discipline": 4, "willpower": 2})),
     C("split", "Give half back to {sibling}",
-      text="Gave {sibling} back half the birthday money, $12. {siblingRel} tried to refuse and you made {them} take it.",
+      text="Gave {sibling} back half the birthday money, $12. {SiblingRel} tried to refuse and you made {them} take it.",
       effects=FX(cash=CASH(-12, "half the birthday money, given back to {sibling}"),
                  stats={"happiness": 5}, relationship={"siblings": 10})),
 ], age_min=7, age_max=16, weight=12, cooldown=6, requires=["sibling"],
@@ -2010,7 +2021,7 @@ D("d.family.report-card", "family", [
         OUT(5, "It surfaced in March, which made it a much larger problem than it had ever been in October.",
             FX(stats={"happiness": -6}, relationship={"parents": -9}, behaviour=-6)),
     ]),
-    C("preempt", "Tell {parent} before they ask",
+    C("preempt", "Tell {parent} before {parentThey} asks",
       text="You handed it over with a plan already written down. {parent} was too surprised to shout.",
       effects=FX(stats={"happiness": 2, "discipline": 5, "charisma": 3}, relationship={"parents": 5})),
 ], age_min=9, age_max=17, requires=["anyParent"], weight=13, cooldown=3,
@@ -2020,18 +2031,18 @@ D("d.family.parent-asks", "family", [
     "{parent} sat down on your bed and asked if you're doing okay. You haven't been.",
 ], [
     C("honest", "Tell them the truth", outcomes=[
-        OUT(7, "You told {parent} the truth. They listened better than you had expected them to.",
+        OUT(7, "You told {parent} the truth. {ParentThey} listened better than you had expected {parentThem} to.",
             FX(stats={"happiness": 7, "health": 1}, relationship={"parents": 9})),
-        OUT(3, "You told {parent} the truth and they did not know what to do with it. They tried, which counted.",
+        OUT(3, "You told {parent} the truth and {parentThey} did not know what to do with it. {ParentThey} tried, which counted.",
             FX(stats={"happiness": 2}, relationship={"parents": 3})),
     ]),
     C("deflect", "Say you're fine",
       text="You said you were fine. {parent} knew, and let it go, and turned the light off.",
       effects=FX(stats={"happiness": -3, "willpower": 1}, relationship={"parents": -2})),
     C("turn-it", "Ask them the same thing", outcomes=[
-        OUT(6, "You asked {parent} the same question back. They sat there a long time before answering.",
+        OUT(6, "You asked {parent} the same question back. {ParentThey} sat there a long time before answering.",
             FX(stats={"happiness": 4, "charisma": 3}, relationship={"parents": 7})),
-        OUT(4, "You asked {parent} the same question back and they laughed it off and left.",
+        OUT(4, "You asked {parent} the same question back and {parentThey} laughed it off and left.",
             FX(stats={"happiness": -2, "charisma": 1})),
     ]),
 ], age_min=11, age_max=17, requires=["anyParent"], weight=12, cooldown=4,
@@ -2436,7 +2447,7 @@ D("d.friend.betrayal", "friendship", [
 ], age_min=9, age_max=17, weight=12, person_tokens=["kid", "kid2"])
 
 D("d.friend.homework", "friendship", [
-    "{kid} wants to copy your homework ten minutes before class. {kidThey}'s asking you as a friend.",
+    "{kid} wants to copy your homework ten minutes before class. {KidThey}'s asking you as a friend.",
 ], [
     C("give", "Hand it over",
       text="You handed it over. {kid} copied it word for word, including a mistake, and {adult} noticed.",
@@ -2533,7 +2544,7 @@ D("d.friend.gift", "friendship", [
 ], age_min=8, age_max=16, weight=11, cooldown=5, person_tokens=["kid"])
 
 D("d.friend.late-night", "friendship", [
-    "You're sleeping over at {kid}'s and {kidTheir} parents are out. {kidThey} wants to stay up all night watching movies.",
+    "You're sleeping over at {kid}'s and {kidTheir} parents are out. {KidThey} wants to stay up all night watching movies.",
 ], [
     C("all-night", "Stay up all night", outcomes=[
         OUT(6, "You stayed up until six at {kid}'s and slept through Saturday entirely.",
@@ -2733,7 +2744,7 @@ D("d.random.haircut", "random", [
     C("bold", "Cut it all off", outcomes=[
         OUT(5, "It was a triumph. Three people asked where you had it done.",
             FX(stats={"looks": 6, "charisma": 4, "happiness": 6})),
-        OUT(5, "It was a catastrophe, and hair grows about a centimetre a month.",
+        OUT(5, "It was a catastrophe, and hair grows about half an inch a month.",
             FX(stats={"looks": -6, "happiness": -5, "willpower": 3})),
     ]),
     C("same", "Same as always",
@@ -2788,8 +2799,8 @@ D("d.random.summer", "random", [
     "School's out for eleven weeks and you have no plans at all.",
 ], [
     C("work", "Take a summer job",
-      text="You worked at the garden centre all summer. It was dull, it paid $1,100, and it made the fall easier.",
-      effects=FX(cash=CASH(1100, "a summer at the garden centre"),
+      text="You worked at the garden center all summer. It was dull, it paid $1,100, and it made the fall easier.",
+      effects=FX(cash=CASH(1100, "a summer at the garden center"),
                  stats={"discipline": 4, "health": -1, "happiness": -1})),
     C("train", "Train for one thing",
       text="You spent the whole summer getting better at one thing and came back visibly different.",
@@ -3397,6 +3408,22 @@ def check_text(problems: list[str], event: dict, text: str, where: str, choice=N
             f"cannot know the sex — use {{kidThey}}/{{kidThem}}/{{kidTheir}} "
             f"(or the kid2/adult forms), which are resolved from the name."
         )
+
+    # A line that says {parent} cannot then write a bare "she" or "they".
+    #
+    # {parent} renders "Mom" or "Dad" depending on which the household has, so
+    # the copy does not know the sex. Reading the built app found "You told Mom
+    # the truth and they did not know what to do with it" and four more like it,
+    # all of them shipped and none of them checked. {mother} and {father} are
+    # exempt: those DO know, and "she" beside {mother} is correct.
+    if "parent" in tokens and not tokens & {"parents", "mother", "father"}:
+        if ANY_PRONOUN_RE.search(TOKEN_RE.sub(" ", text)):
+            problems.append(
+                f"{event['id']}: {where} says {{parent}} and then writes a bare "
+                f"'he'/'she'/'they'. {{parent}} renders Mom or Dad depending on the "
+                f"household, so the copy cannot know — use {{parentThey}}, "
+                f"{{parentThem}} or {{parentTheir}}."
+            )
 
     have = guaranteed_requirements(event, choice)
     for token in tokens:

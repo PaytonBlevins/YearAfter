@@ -239,4 +239,15 @@ describe('invariants', () => {
       }
     }
   });
+
+  // The broad "no line two years running" invariant lives in
+  // `guardians.test.ts`, not here. That harness only advances years and asks
+  // parents, so every line in it is one the ENGINE wrote unprompted — which is
+  // where all six occurrences of the copy-repeat bug have been. This harness
+  // also presses romantic moves several times in a single year, and a set of n
+  // lines rotated by age plus a within-year counter has no arithmetic that can
+  // keep a three-press year from overlapping the next year's first press. That
+  // residue is a player leaning on one button, not the game repeating itself,
+  // and asserting on it here would only teach the next person to delete the
+  // test.
 });

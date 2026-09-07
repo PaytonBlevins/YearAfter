@@ -9,7 +9,7 @@
  * exist (spec 0202 requires them) but they are backend — a child does not read
  * the family books, and spec 22 removed lifestyle levels precisely so wealth is
  * something the player *experiences* rather than a number they manage. What the
- * player will see is what their parents do with the money, which is Ticket 0209.
+ * player will see is what their parents do with the money (Ticket 0209).
  *
  * Per-person interactions — talk, ask for money, argue — are later tickets. This
  * screen is the roster.
@@ -76,7 +76,23 @@ export function FamilyScreen() {
         {parentRows.map((member, index) => (
           <Fragment key={member.id}>
             {index > 0 ? <RowDivider /> : null}
-            <MemberRow member={member} worldYear={world.year} />
+            <MemberRow
+              member={member}
+              worldYear={world.year}
+              onPress={() =>
+                // "Mom", not "Yue". A child does not call their mother by her
+                // first name (event-writing-rules 5), and the ask replies on
+                // the screen this opens have followed that since 0209 — a
+                // screenshot of the built app was headed "Yue" above a page
+                // whose every line said Mom. The row below still shows the full
+                // name, because a child does know it.
+                push({
+                  screen: 'parent',
+                  title: member.role === 'mother' ? 'Mom' : 'Dad',
+                  personId: member.id,
+                })
+              }
+            />
           </Fragment>
         ))}
       </Card>
@@ -180,9 +196,15 @@ export function FamilyScreen() {
       ) : null}
 
       <View style={styles.note}>
+        {/*
+          This read "…is Ticket 0209" until 0209 shipped, and a ticket number in
+          player-facing copy is exactly what spec 1247-1263 forbids: a note to a
+          developer that a player reads as the game talking to somebody else.
+          Found on a screenshot of the built app, not by a test.
+        */}
         <Text style={styles.noteText}>
-          Talking, arguing and asking for help arrive with the relationship actions. What your
-          parents decide on their own — activities, money, housing — is Ticket 0209.
+          Open a parent to ask them for something. What they say is theirs to decide, and they do
+          things you never asked for either way.
         </Text>
       </View>
     </ScrollView>

@@ -104,6 +104,17 @@ export const MOTHER_TAKES_SURNAME = 0.62;
 /* -------------------------------------------------------------------------- */
 
 export interface FamilyOptions {
+  /**
+   * The player's own given name, so nobody in the household is handed it.
+   *
+   * Found on a screenshot of the built app: a sixteen-year-old Esperanza
+   * Arellano with a twenty-five-year-old sister called Esperanza Arellano. The
+   * uniqueness set below has guarded against two NPCs colliding since 0202 and
+   * never contained the one person the household is built around — a gate that
+   * checks everybody except the subject, which is CORE_RULES 13.15 wearing a
+   * different hat.
+   */
+  readonly playerFirstName: string;
   readonly playerLastName: string;
   readonly playerBirthYear: number;
   /** The naming tradition the player's own name came from; the family shares it. */
@@ -168,7 +179,7 @@ export function generateFamily(stream: RandomStream, options: FamilyOptions): Ho
    * Andrea". Unisex names in several of the catalog's traditions make the
    * collision far likelier than it looks.
    */
-  const usedNames = new Set<string>();
+  const usedNames = new Set<string>([options.playerFirstName]);
   const uniqueFirstName = (sex: Sex): string => {
     let name = pickFirstName(stream, culture, sex);
     for (let attempt = 0; attempt < 6 && usedNames.has(name); attempt += 1) {

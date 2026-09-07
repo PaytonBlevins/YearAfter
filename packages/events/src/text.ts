@@ -58,6 +58,14 @@ export const TEXT_TOKENS = [
   'kidThey',
   'kidThem',
   'kidTheir',
+  // The parent `{parent}` resolved to. Reading the built app found "You told
+  // Mom the truth and they did not know what to do with it" — the copy carried
+  // a hardcoded "they" beside a token that renders "Mom", so the pronoun was
+  // wrong for every household that has one. `{parent}` prefers the mother, so
+  // these follow whichever parent it actually picked.
+  'parentThey',
+  'parentThem',
+  'parentTheir',
   'kid2They',
   'kid2Them',
   'kid2Their',
@@ -339,6 +347,10 @@ export function renderEvent(
     mother: mumWord,
     father: dadWord,
     parent: mumWord ?? dadWord,
+    // Sexed to whichever parent `parent` resolved to, above.
+    parentThey: mum ? 'she' : dad ? 'he' : undefined,
+    parentThem: mum ? 'her' : dad ? 'him' : undefined,
+    parentTheir: mum ? 'her' : dad ? 'his' : undefined,
     parents: mum && dad ? 'Mom and Dad' : (mumWord ?? dadWord),
     // First names, for the rare line where a child genuinely would use one.
     motherName: mum?.firstName,
@@ -396,6 +408,9 @@ const FALLBACKS: Record<string, string> = {
   fatherName: 'your dad',
   sibling: 'your sibling',
   siblingRel: 'sibling',
+  parentThey: 'they',
+  parentThem: 'them',
+  parentTheir: 'their',
   olderSibling: 'your older sibling',
   city: 'town',
   kid: 'a kid you knew',

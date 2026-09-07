@@ -47,6 +47,18 @@ export interface EventContext {
   readonly partnered: boolean;
   /** Ticket 0208. Whether the character has any living children. */
   readonly hasChildren: boolean;
+  /**
+   * Ticket 0209. Lines the year already holds before events run.
+   *
+   * `MAX_EVENTS_PER_YEAR` was a budget for the event phase alone, which was
+   * correct while the event phase was the only thing filling a year. It is now
+   * the fifth of six writers, and adding a sixth pushed the worst year to eight
+   * entries against a cap of seven — the same overflow reading output found in
+   * 0206, arriving again by the same route.
+   *
+   * So the budget is now the YEAR's, and events spend what is left of it.
+   */
+  readonly alreadyThisYear: number;
   /** Whole dollars the character is actually holding, for `cashAtLeast`. */
   readonly cash: number;
   /**

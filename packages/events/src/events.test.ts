@@ -69,6 +69,7 @@ const context = (overrides: Partial<EventContext> = {}): EventContext => ({
   family: FULL_FAMILY,
   partnered: false,
   hasChildren: false,
+  alreadyThisYear: 0,
   nameCultureId: 'us-en',
   homeCity: 'Toledo, OH',
   flags: new Set<string>(),

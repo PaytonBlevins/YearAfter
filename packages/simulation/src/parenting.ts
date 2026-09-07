@@ -101,7 +101,7 @@ export function tryForBaby(state: GameState): Result<ParentingOutcome, Parenting
 
   const text = worked
     ? `You and ${partner.firstName} are expecting.`
-    : NOT_THIS_YEAR[Math.floor(stream.next() * NOT_THIS_YEAR.length)] ?? NOT_THIS_YEAR[0]!;
+    : notThisYear(state.player.age);
 
   const { player, entry } = write(
     state,
@@ -118,11 +118,27 @@ export function tryForBaby(state: GameState): Result<ParentingOutcome, Parenting
   return ok({ state: { ...state, player, parenting }, entry });
 }
 
+/**
+ * Trying, and it did not happen — a line a player can see many years running.
+ *
+ * CORE_RULES 13.17, found for the seventh time by the invariant in
+ * `family.test.ts`: a uniform draw over three lines put "You spent the year
+ * hoping" at twenty-eight and again at twenty-nine. A player who tries for six
+ * straight years reads this six times, so the set is longer than the repeat and
+ * the index is AGE, which cannot land twice in a row. No RNG is consumed here,
+ * which also means the choice is stable across a reload.
+ */
 const NOT_THIS_YEAR: readonly string[] = [
   'Another year of trying, and no news.',
   'You spent the year hoping. It did not happen this time.',
   'Nothing this year. You are both fine about it, mostly.',
+  'No news again. You stopped counting out loud some time ago.',
+  'Another year. Somebody else announced theirs and you were pleased for them.',
+  'Nothing. The waiting got easier to carry and no easier to explain.',
 ];
+
+const notThisYear = (age: number): string =>
+  NOT_THIS_YEAR[age % NOT_THIS_YEAR.length] as string;
 
 /* -------------------------------------------------------------------------- */
 /* Adopt                                                                       */

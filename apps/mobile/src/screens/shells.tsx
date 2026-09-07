@@ -629,9 +629,10 @@ export function DebugScreen() {
       </Card>
 
       <View style={styles.note}>
+        {/* Age, cash, attributes, talents, career, fame and event injection are Ticket 1180. */}
         <Text style={styles.noteText}>
           Development-only tools (spec 1264–1281). Age, cash, attributes, talents, career, fame and
-          event injection arrive with Ticket 1180.
+          event injection are not wired up yet.
         </Text>
       </View>
     </Screen>

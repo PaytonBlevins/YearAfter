@@ -27,7 +27,8 @@ import {
   decide as resolveDecision,
   generateSeed,
   interact,
-  joinActivity as joinTheActivity,
+  askToJoin,
+  askParent,
   leaveActivity as leaveTheActivity,
   practise,
   romanticMove,
@@ -77,6 +78,8 @@ interface GameContextValue {
    */
   readonly studyHarder: () => void;
   readonly joinActivity: (activityId: string) => void;
+  /** Ticket 0209. Ask a parent for something. They may well say no. */
+  readonly askAParent: (parentId: string, requestId: string) => void;
   /** Put the hours in at something. Three sessions an activity a year. */
   readonly practiseAt: (activityId: string) => void;
   /** Take or leave an odd job (Ticket 0206b). */
@@ -268,12 +271,38 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   }, [persist, saveId, settings]);
 
   // Joining draws in two teammates as well as changing education state, which
-  // is why it goes through the simulation rather than being done here.
+  // is why it goes through the simulation rather than being done here. Ticket
+  // 0209 added the other reason: anything that costs money needs a parent to
+  // agree first, and they can say no.
   const joinActivity = useCallback(
     (activityId: string) => {
-      mutateEducation((current) => joinTheActivity(current, activityId));
+      setState((current) => {
+        if (!current) return current;
+        const outcome = askToJoin(current, activityId);
+        if (outcome.state === current) return current;
+        if (!outcome.joined) setLastEntries((entries) => [...entries, outcome.state.player.timeline.at(-1)!]);
+        if (saveId) persist(outcome.state, saveId, settings);
+        return outcome.state;
+      });
     },
-    [mutateEducation],
+    [persist, saveId, settings],
+  );
+
+  const askAParent = useCallback(
+    (parentId: string, requestId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = askParent(current, parentId, requestId);
+        if (!result.ok) {
+          setSaveError(`Cannot ask right now (${result.error}).`);
+          return current;
+        }
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
   );
 
   const leaveActivity = useCallback(
@@ -293,7 +322,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         if (!current) return current;
         const result = practise(current, activityId);
         if (!result.ok) {
-          setSaveError(`Cannot practise right now (${result.error}).`);
+          setSaveError(`Cannot practice right now (${result.error}).`);
           return current;
         }
         setLastEntries((entries) => [...entries, result.value.entry]);
@@ -449,6 +478,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       answer,
       studyHarder,
       joinActivity,
+      askAParent,
       practiseAt,
       takeAGig,
       quitAGig,
@@ -475,6 +505,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       answer,
       studyHarder,
       joinActivity,
+      askAParent,
       practiseAt,
       takeAGig,
       quitAGig,

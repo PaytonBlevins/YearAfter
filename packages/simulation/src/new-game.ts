@@ -229,11 +229,12 @@ export function createNewGame(options: NewGameOptions): GameState {
 /** Ticket 0202. Uses its own RNG stream so family tuning cannot shift the player. */
 export function generateFamilyFor(
   rng: Rng,
-  character: { lastName: string; birthYear: number },
+  character: { firstName: string; lastName: string; birthYear: number },
   nameCultureId: string,
   seed: string,
 ): Household {
   return generateFamily(rng.stream(RngDomains.Family), {
+    playerFirstName: character.firstName,
     playerLastName: character.lastName,
     playerBirthYear: character.birthYear,
     nameCultureId,

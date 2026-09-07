@@ -70,6 +70,7 @@ export function buildEventContext(
   age: number,
   year: number,
   history: EventHistory,
+  linesSoFar = 0,
 ): EventContext {
   return {
     age,
@@ -96,6 +97,9 @@ export function buildEventContext(
     // Ticket 0208. Without it, "your kid spiked a fever" fires at somebody who
     // has never had a child — the same defect `partnered` was added for.
     hasChildren: livingChildren(state.family).length > 0,
+    // Ticket 0209: what education, the class and the family have already
+    // written this year. The line budget belongs to the YEAR, not to events.
+    alreadyThisYear: linesSoFar,
     // Only people who are still around. Somebody who drifted out two years ago
     // must not turn up in the cafeteria as though nothing happened.
     people: state.circle.people.filter(isCurrent).map((person) => ({
@@ -209,9 +213,14 @@ export function rememberOutcome(
 }
 
 /** Run the year's events and return everything that changed. */
-export function runEvents(state: GameState, age: number, year: number): EventPhaseOutput {
+export function runEvents(
+  state: GameState,
+  age: number,
+  year: number,
+  linesSoFar = 0,
+): EventPhaseOutput {
   const stream = state.rng.stream(RngDomains.Events);
-  const context = buildEventContext(state, age, year, state.events);
+  const context = buildEventContext(state, age, year, state.events, linesSoFar);
   const result = runEventPhase(context, stream, state.events);
 
   let player = state.player;

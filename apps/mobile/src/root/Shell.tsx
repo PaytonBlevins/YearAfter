@@ -18,6 +18,7 @@ import { ActivityScreen } from '../screens/ActivityScreen';
 import { GigsScreen } from '../screens/GigsScreen';
 import { PeopleScreen } from '../screens/PeopleScreen';
 import { ChildScreen } from '../screens/ChildScreen';
+import { ParentScreen } from '../screens/ParentScreen';
 import { LoveScreen } from '../screens/LoveScreen';
 import { PersonScreen } from '../screens/PersonScreen';
 import {
@@ -53,6 +54,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   gigs: GigsScreen,
   love: LoveScreen,
   child: ChildScreen,
+  parent: ParentScreen,
   debug: DebugScreen,
 };
 

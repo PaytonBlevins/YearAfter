@@ -62,7 +62,7 @@ export const SECOND_MATCH_CHANCE = 0.3;
  * Warmth somebody arrives at.
  *
  * Higher than a neighbour, because you have both already said why you are
- * there and have been talking for a fortnight — but deliberately straddling
+ * there and have been talking for two weeks — but deliberately straddling
  * `ask-out`'s threshold of 45, so some matches can be asked out straight away
  * and some have to be talked to first. A source of people who all arrive ready
  * to be asked out would make every other way of meeting somebody pointless.
@@ -78,7 +78,7 @@ const NOTHING_LINES = [
 
 const MET_ONE = [
   'Matched with {name}, and the conversation kept going past the point where they usually stop.',
-  '{name} messaged first. You have been talking for a fortnight.',
+  '{name} messaged first. You have been talking for two weeks now.',
   'Got as far as coffee with {name}, which is further than the last four.',
 ];
 

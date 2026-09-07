@@ -76,6 +76,11 @@ const TOKEN_GUARDS: Record<string, string[]> = {
   mother: ['mother', 'bothParents'],
   father: ['father', 'bothParents'],
   parent: ['mother', 'father', 'anyParent', 'bothParents', 'singleParent'],
+  // The pronoun of whichever parent {parent} resolved to — same guard, because
+  // the copy cannot say "she" about somebody eligibility did not guarantee.
+  parentThey: ['mother', 'father', 'anyParent', 'bothParents', 'singleParent'],
+  parentThem: ['mother', 'father', 'anyParent', 'bothParents', 'singleParent'],
+  parentTheir: ['mother', 'father', 'anyParent', 'bothParents', 'singleParent'],
   parents: ['bothParents'],
   sibling: ['sibling', 'siblings2', 'olderSibling'],
   siblingRel: ['sibling', 'siblings2', 'olderSibling'],

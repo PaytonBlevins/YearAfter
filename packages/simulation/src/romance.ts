@@ -101,14 +101,18 @@ export function romanticMove(
     state.player.age,
     chance,
     stream.next(),
-    // The phrasing draw is STABLE for this person, this move, this year, rather
-    // than fresh on every press — and that is what actually fixes the repeated
-    // lines. `resolveMove` rotates the line by how many times the move has been
-    // used this year, which only guarantees a different sentence if the base
-    // index holds still. Drawn afresh each press it did not: reading the output
-    // still found "Missed the last bus with Harper" twice in one year, because
-    // a new draw landing one lower cancelled the rotation exactly.
-    stableUnit(`${state.world.year}:${person.id}:${move.id}`),
+    // The phrasing draw is STABLE for this person and this move FOR THE WHOLE
+    // LIFE, and `resolveMove` rotates it by age and by how many times the move
+    // has been pressed this year.
+    //
+    // It was keyed on the year as well, and that was still wrong for the same
+    // reason it was wrong before: a base that is redrawn cannot guarantee
+    // anything. Within a year the repeat counter did the work, but the counter
+    // resets, so ACROSS years the index was the redrawn base alone — and
+    // reading sixty played lives found the same rejection line at fourteen and
+    // fifteen, which is exactly the one-in-six a fresh draw over six lines
+    // predicts. The year comes out of the key; age does the moving.
+    stableUnit(`${person.id}:${move.id}`),
     displayName(person),
     spent.light,
     cash,

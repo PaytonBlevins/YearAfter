@@ -496,6 +496,62 @@ actually have before it ships**, and the measurement goes in a comment beside
 the constant. A number nobody has checked against real output is a guess, and
 this project has now shipped that guess twice.
 
+### 13.22 A rotation cannot fix a base that is redrawn
+
+Eight times now, in six systems, always with a green suite and always found by
+reading output: 0206's drift lines, 0207's romance replies, 0207d's moves,
+0208's milestones, 0208's conception lines, 0209's parent acts, 0209's ask
+replies, and the stress phase's yearly summary. "Dad came home with something
+you had not asked for" at four, five, six AND seven.
+
+The bug is always the same and the first fix is always wrong the same way.
+Rotating a line index by a counter looks like it works, and it cannot work while
+the base index is a fresh draw each time — a new draw landing one lower cancels
+the rotation exactly as often as it helps. So:
+
+- the base holds still for the LIFE — one stable value, from `stableUnit` on a
+  key that contains no year and no age;
+- AGE does all the moving, so two consecutive years cannot collide by
+  construction;
+- the key contains the household, not the person acting, wherever two people can
+  produce the same sentence — a line that names nobody is not saved by the
+  `{parent}` substitution;
+- and the set is longer than the number of times it can fire.
+
+`guardians.test.ts` asserts the guarantee over the whole engine-written feed
+rather than one system at a time, because eight occurrences in six places is a
+class of bug, not six bugs.
+
+### 13.23 A rule that only sees half the game is half a rule
+
+Ticket 0207d added an American-English check and pointed it at the rendered
+event catalog, for a good reason: event ids are permanent and several of them
+contain `favourite`, so a blanket source rewrite renamed five of them. What that
+left unchecked was every copy table written in TypeScript — and 0209 found "a
+fortnight", "a corridor", "solicitors", "practised", "centimetre", "rigour" and
+"the garden centre" shipping out of them.
+
+The same shape appeared three more times in one ticket: a blurb-width cap that
+covered the friendship menu and not the parent menu; a name-uniqueness set that
+guarded the NPCs against each other and never contained the player, so a
+sixteen-year-old had a sister with her exact name; and a token-guard table that
+existed in three separate files, so a new token had to be registered three
+times.
+
+When a rule is scoped, the scope is the thing to check next — and every one of
+these was found on a screenshot, not by a test.
+
+### 13.24 A ticket number is not player-facing copy
+
+"What your parents decide on their own — activities, money, housing — is Ticket
+0209" shipped on the family screen, and was still there after 0209 shipped.
+"Real jobs arrive with Ticket 0210" shipped on the gigs screen. Both were honest
+notes to a developer that a player reads as the game talking about itself.
+
+A ticket reference belongs in a comment, which is where it stays useful and
+where it cannot go stale in front of somebody. The validator now fails on
+`Ticket NNNN` surviving comment-stripping anywhere under `apps/`.
+
 ## 16. Performance
 
 Annual processing under ~250 ms for an ordinary life. Background NPCs are

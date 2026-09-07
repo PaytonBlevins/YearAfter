@@ -15,7 +15,7 @@
  *
  * Nothing romantic exists below `CRUSH_AGE`. Between there and adulthood the
  * whole system is the one a thirteen-year-old would recognise — asking somebody
- * out, going out, a first date at the cinema, breaking up in a corridor — and
+ * out, going out, a first date at the cinema, breaking up in a hallway — and
  * the copy stays at exactly the register the childhood catalog already uses.
  * Moving in together, engagement and marriage are gated at `ADULT_AGE` and
  * cannot be reached before it by any route: `stagesFor` will not return them,

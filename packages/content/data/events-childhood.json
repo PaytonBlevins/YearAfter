@@ -4573,7 +4573,7 @@
         }
       ],
       "text": [
-        "Decided on becoming an astronaut and researched it with genuine rigour."
+        "Decided on becoming an astronaut and researched it more thoroughly than any homework."
       ],
       "effects": {
         "stats": {
@@ -6919,7 +6919,7 @@
         {
           "id": "split",
           "label": "Give half back to {sibling}",
-          "text": "Gave {sibling} back half the birthday money, $12. {siblingRel} tried to refuse and you made {them} take it.",
+          "text": "Gave {sibling} back half the birthday money, $12. {SiblingRel} tried to refuse and you made {them} take it.",
           "effects": {
             "stats": {
               "happiness": 5
@@ -7331,7 +7331,7 @@
         },
         {
           "id": "preempt",
-          "label": "Tell {parent} before they ask",
+          "label": "Tell {parent} before {parentThey} asks",
           "text": "You handed it over with a plan already written down. {parent} was too surprised to shout.",
           "effects": {
             "stats": {
@@ -7380,7 +7380,7 @@
           "outcomes": [
             {
               "weight": 7,
-              "text": "You told {parent} the truth. They listened better than you had expected them to.",
+              "text": "You told {parent} the truth. {ParentThey} listened better than you had expected {parentThem} to.",
               "effects": {
                 "stats": {
                   "happiness": 7,
@@ -7393,7 +7393,7 @@
             },
             {
               "weight": 3,
-              "text": "You told {parent} the truth and they did not know what to do with it. They tried, which counted.",
+              "text": "You told {parent} the truth and {parentThey} did not know what to do with it. {ParentThey} tried, which counted.",
               "effects": {
                 "stats": {
                   "happiness": 2
@@ -7425,7 +7425,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You asked {parent} the same question back. They sat there a long time before answering.",
+              "text": "You asked {parent} the same question back. {ParentThey} sat there a long time before answering.",
               "effects": {
                 "stats": {
                   "happiness": 4,
@@ -7438,7 +7438,7 @@
             },
             {
               "weight": 4,
-              "text": "You asked {parent} the same question back and they laughed it off and left.",
+              "text": "You asked {parent} the same question back and {parentThey} laughed it off and left.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -9299,7 +9299,7 @@
       "weight": 13,
       "cooldown": 3,
       "text": [
-        "{kid} wants to copy your homework ten minutes before class. {kidThey}'s asking you as a friend."
+        "{kid} wants to copy your homework ten minutes before class. {KidThey}'s asking you as a friend."
       ],
       "choices": [
         {
@@ -9740,7 +9740,7 @@
       "weight": 12,
       "cooldown": 3,
       "text": [
-        "You're sleeping over at {kid}'s and {kidTheir} parents are out. {kidThey} wants to stay up all night watching movies."
+        "You're sleeping over at {kid}'s and {kidTheir} parents are out. {KidThey} wants to stay up all night watching movies."
       ],
       "choices": [
         {
@@ -10608,7 +10608,7 @@
             },
             {
               "weight": 5,
-              "text": "It was a catastrophe, and hair grows about a centimetre a month.",
+              "text": "It was a catastrophe, and hair grows about half an inch a month.",
               "effects": {
                 "stats": {
                   "looks": -6,
@@ -10837,7 +10837,7 @@
         {
           "id": "work",
           "label": "Take a summer job",
-          "text": "You worked at the garden centre all summer. It was dull, it paid $1,100, and it made the fall easier.",
+          "text": "You worked at the garden center all summer. It was dull, it paid $1,100, and it made the fall easier.",
           "effects": {
             "stats": {
               "discipline": 4,
@@ -10846,7 +10846,7 @@
             },
             "cash": {
               "delta": 1100,
-              "source": "a summer at the garden centre"
+              "source": "a summer at the garden center"
             }
           }
         },

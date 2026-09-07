@@ -359,7 +359,7 @@ export function resolveMove(
   const scale = move.weight === 'light' ? repeatScale(alreadyDone) : 1;
 
   if (scale <= 0) {
-    const index = pick(WORN_LINES, variant);
+    const index = pick(WORN_LINES, variant, age);
     return {
       worked: false,
       warmth: 0,
@@ -384,7 +384,7 @@ export function resolveMove(
       endedBecause: move.id === 'divorce' ? 'divorced' : 'broke up',
       worn: false,
       spent: costOf(move, cash),
-      text: fill(lines[pick(lines, variant, alreadyDone)] as string, name),
+      text: fill(lines[pick(lines, variant, age + alreadyDone)] as string, name),
     };
   }
 
@@ -412,20 +412,26 @@ export function resolveMove(
     // has had a bad one will confirm. A ring or a wedding that was refused is
     // not, because it did not happen.
     spent: worked || move.to === undefined ? costOf(move, cash) : 0,
-    text: fill(lines[pick(lines, variant, alreadyDone)] as string, name),
+    text: fill(lines[pick(lines, variant, age + alreadyDone)] as string, name),
   };
 }
 
 /**
- * Which line, offset by how many times this has already been pressed this year.
+ * Which line, offset by AGE plus how many times this has been pressed this year.
  *
- * The offset is the fix for the second thing reading the output found. With one
- * uniform draw and three lines, a player who took the same person out four
- * times a year got "Shared chips with Diya on a wall" four times, twice of them
- * back to back, and then did it again every year for seventeen years. Rotating
- * by the repeat counter makes a same-year repeat impossible up to the length of
- * the set, which is why the sets below are longer than they need to be for one
- * press.
+ * Two separate defects, found a ticket apart, and the offset answers both.
+ *
+ * The first: with one uniform draw and three lines, a player who took the same
+ * person out four times a year got "Shared chips with Diya on a wall" four
+ * times, twice of them back to back. The repeat counter fixed that.
+ *
+ * The second, found by reading sixty played lives in 0209: the same rejection
+ * line at fourteen and again at fifteen. The repeat counter resets to zero
+ * every year, so across YEARS the index was the base and nothing else — and the
+ * base was a fresh draw keyed on the year, which is a one-in-six coin flip, not
+ * a guarantee. Holding the base still for the life and rotating by AGE makes
+ * two consecutive years impossible to collide, which is the same construction
+ * `guardians.ts` and the family phase now use. CORE_RULES 13.17.
  */
 const pick = (lines: readonly string[], variant: number, repeat = 0): number =>
   (Math.min(lines.length - 1, Math.floor(variant * lines.length)) + repeat) % lines.length;
@@ -538,7 +544,7 @@ const GOOD_LINES: Readonly<Record<AskedMoveId, readonly string[]>> = {
   'ask-out': [
     'Asked {name} in the corridor, quietly, and {name} said yes before you finished.',
     'Got the words out to {name} on the way to the bus. {name} said yes, and you got the wrong bus.',
-    'Asked {name}. {name} thought about it for a second that lasted a fortnight, and said yes.',
+    'Asked {name}. {name} thought about it for a second that lasted a month, and said yes.',
     'Wrote it down, could not hand it over, and said it out loud to {name} instead. Yes.',
   ],
   date: TEEN_DATE.good,
@@ -587,13 +593,13 @@ const BAD_LINES: Readonly<Record<AskedMoveId, readonly string[]>> = {
 
 const BREAK_UP_LINES: readonly string[] = [
   'Ended it with {name}. Ten minutes, most of it silence, and then a bus each.',
-  'Told {name} it was over. {name} had known for a fortnight and let you say it.',
-  'You and {name} finished it badly, in a corridor, with people going past.',
+  'Told {name} it was over. {name} had known for two weeks and let you say it.',
+  'You and {name} finished it badly, in a hallway, with people going past.',
 ];
 
 const DIVORCE_LINES: readonly string[] = [
   'You and {name} divorced. It took fourteen months and there was no bad guy in it.',
-  'Divorced {name}. The solicitors were expensive and the worst day was the sofa.',
+  'Divorced {name}. The lawyers were expensive and the worst day was the sofa.',
 ];
 
 /**

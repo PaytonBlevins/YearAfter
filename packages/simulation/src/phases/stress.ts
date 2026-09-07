@@ -72,7 +72,9 @@ export function runStress(input: StressPhaseInput): StressPhaseOutput {
     stress: { level, hiddenLoad: input.player.stress.hiddenLoad },
   };
 
-  const line = stressLine(level, previous, sources);
+  // Age rotates the phrasing, so two hard years running do not use the same
+  // sentence. `input.player.age` is the age the character is finishing.
+  const line = stressLine(level, previous, sources, input.player.age);
   return {
     player,
     performance: clampStat(input.education.performance + cost.performance),

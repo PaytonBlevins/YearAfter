@@ -91,6 +91,27 @@ const BRITISH = [
   ['corridor', 'hallway'],
   ['fortnight', 'two weeks'],
   ['whilst', 'while'],
+  // Reading a played childhood found both of these shipping in player-facing
+  // copy with a green validator: "researched it with genuine rigour" and "the
+  // garden centre". A word list is only as good as the last time somebody read
+  // the output — which is the whole argument for reading the output.
+  ['rigour', 'rigor'],
+  ['centre', 'center'],
+  ['theatre', 'theater'],
+  // `\b${stem}` cannot see inside a compound, exactly as it could not see
+  // inside `apologising`. "hair grows about a centimetre a month" shipped past
+  // a list that contained `metre`.
+  ['metre', 'meter'],
+  ['centimetre', 'inch'],
+  ['millimetre', 'inch'],
+  ['kilometre', 'mile'],
+  ['kilogram', 'pound'],
+  ['aluminium', 'aluminum'],
+  ['grey', 'gray'],
+  ['jumper', 'sweater'],
+  ['torch', 'flashlight'],
+  ['queue', 'line'],
+  ['holiday', 'vacation'],
   ['learnt', 'learned'],
   ['amongst', 'among'],
   ['solicitor', 'lawyer'],
@@ -116,6 +137,16 @@ const BRITISH = [
   // somebody deletes, which is worse than not having it.
   ['wind them up', 'annoy them'],
 ];
+/**
+ * Tokens whose rendered value is lowercase, so they cannot open a sentence.
+ *
+ * NOT `parent`, `adult` or `city`: those render "Mom", a given name and a city
+ * name, all capitalized. Only their FALLBACKS are lowercase, and the catalog
+ * test makes a fallback unreachable — flagging them would be the validator
+ * firing on correct copy, which is the failure mode V10's comment warns about.
+ */
+const LOWERCASE_TOKENS = new Set(['siblingRel']);
+
 const notes = [];
 
 const fail = (file, message) => problems.push({ file, message });
@@ -164,6 +195,48 @@ for (const root of SOURCE_ROOTS) {
     const deepImport = source.match(/from '@yearafter\/[a-z-]+\/(?!sqlite)[^']+'/);
     if (deepImport) {
       fail(rel, `Deep import into another package: ${deepImport[0]}. Use its public API.`);
+    }
+
+    // V12 — American English in the copy tables, not just the catalog.
+    //
+    // The 0207d rule checked the RENDERED catalog only, which was right for the
+    // reason V10 gives and left half the game's player-facing prose unchecked:
+    // reading 0209's output found "a fortnight", "a corridor" and "solicitors"
+    // shipping from `romantic.ts`, which is a TypeScript table rather than a
+    // JSON catalog.
+    //
+    // Only literals with a space in them are checked, which is what keeps V10's
+    // problem from coming back: an event id or a key never contains a space, so
+    // an id like `random.favourite-teacher` cannot trip this and get renamed.
+    // Comments are stripped first, for the reason the `any` rule strips them.
+    if (!isTest) {
+      for (const literal of stripComments(source).matchAll(/(['"`])((?:[^\\\n]|\\.)*?\s(?:[^\\\n]|\\.)*?)\1/g)) {
+        const copy = literal[2];
+        // Prose only. A match that starts mid-expression is the regex having
+        // run from one string's closing quote to the next string's opening one
+        // — `'alternative' && behaviour <= THRESHOLD` is not copy, it is two
+        // quotes with code between them. A player-facing line starts with a
+        // capital or a token and ends in sentence punctuation.
+        if (!/^[A-Z{$]/.test(copy) || !/[.!?…]$/.test(copy) || /\n/.test(copy)) continue;
+        for (const [british, american] of BRITISH) {
+          if (new RegExp(`\\b${british}`, 'i').test(copy)) {
+            fail(rel, `"${british}" is British — use "${american}" — in: ${copy.slice(0, 70)}`);
+          }
+        }
+      }
+    }
+
+    // V14 — a ticket number never reaches the player.
+    //
+    // Two shipped: "What your parents decide on their own is Ticket 0209" on the
+    // family screen and "Real jobs arrive with Ticket 0210" on the gigs screen.
+    // Both were honest notes to a developer that a player reads as the game
+    // talking about itself, and the first was still there after 0209 shipped.
+    // Comments are stripped first, so the rule sees only JSX text and string
+    // literals — a ticket reference in a header comment is documentation and
+    // stays welcome.
+    if (rel.startsWith('apps/') && /Ticket\s+\d{4}/.test(stripComments(source))) {
+      fail(rel, 'a ticket number appears in player-facing text. Say what the screen does instead.');
     }
 
     // Spec 1247-1263 — placeholder work must be labelled, not silently shipped.
@@ -566,6 +639,25 @@ if (existsSync(eventsPath)) {
       for (const [british, american] of BRITISH) {
         if (new RegExp(`\\b${british}`, 'i').test(copy)) {
           fail(rel, `${event.id}: "${british}" is British — use "${american}".`);
+        }
+      }
+
+      // V13 — a token that renders lowercase cannot start a sentence.
+      //
+      // Reading the built app found "…ten minutes before class. he's asking you
+      // as a friend." `{kidThey}` renders "he"/"she"/"they" and `{siblingRel}`
+      // renders "brother"/"sister", both lowercase. The capitalized form
+      // (`{KidThey}`) has existed since 0203 and resolves to the same value
+      // sentence-cased — these two lines simply did not use it, and nothing
+      // was checking.
+      for (const match of copy.matchAll(/[.!?]\s+\{([a-z][A-Za-z0-9]*)\}/g)) {
+        const token = match[1];
+        if (/They|Them|Their|Rel$/i.test(token) || LOWERCASE_TOKENS.has(token)) {
+          fail(
+            rel,
+            `${event.id}: "{${token}}" renders lowercase and starts a sentence — ` +
+              `use "{${token.charAt(0).toUpperCase()}${token.slice(1)}}".`,
+          );
         }
       }
 

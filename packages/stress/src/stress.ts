@@ -334,6 +334,7 @@ export function stressLine(
   level: number,
   previous: number,
   sources: readonly StressSource[],
+  age = 0,
 ): string | undefined {
   const band = stressBand(level);
   if (band === 'fine') {
@@ -351,7 +352,30 @@ export function stressLine(
   const worst = [...sources].sort((a, b) => b.points - a.points)[0];
   const because = worst && worst.points > 0 ? worst.phrase : 'it was a lot, all year';
 
-  if (band === 'overwhelmed') return `You were running on nothing — ${because}.`;
-  if (band === 'struggling') return `A hard year: ${because}.`;
-  return `You were stretched thin — ${because}.`;
+  //
+  // CORE_RULES 13.17, eighth occurrence, found by the whole-feed invariant in
+  // `guardians.test.ts`: one opener per band meant two hard years with the same
+  // worst source wrote the identical sentence twice running. A repeated year
+  // deserves to be reported twice — it happened twice — but not in the same
+  // words, which reads as the game having nothing to say rather than as the
+  // character having a second bad year.
+  //
+  // The index is AGE, so consecutive years cannot collide and no RNG is
+  // consumed, which means the line survives a reload unchanged.
+  const openers = OPENERS[band];
+  return `${openers[age % openers.length] as string}${because}.`;
 }
+
+const OPENERS: Readonly<Record<'overwhelmed' | 'struggling' | 'stretched', readonly string[]>> = {
+  overwhelmed: [
+    'You were running on nothing — ',
+    'There was nothing left in the tank by the end of it — ',
+    'You got through the year and could not have told anybody how — ',
+  ],
+  struggling: ['A hard year: ', 'A year that took something out of you: ', 'A rough one: '],
+  stretched: [
+    'You were stretched thin — ',
+    'You were spread too thin all year — ',
+    'It was more than there was room for — ',
+  ],
+};

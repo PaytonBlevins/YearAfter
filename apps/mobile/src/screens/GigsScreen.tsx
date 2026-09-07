@@ -112,8 +112,8 @@ export function GigsScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.noteText}>
-          Real jobs — a salary, a boss, somewhere to be promoted to — arrive with Ticket 0210. These
-          are the things you can do before then.
+          These are the things you can do for money before a real job — a salary, a boss, somewhere
+          to be promoted to — is on the table.
         </Text>
       </View>
     </ScrollView>

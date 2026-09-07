@@ -20,7 +20,7 @@
  */
 
 import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
-import { asEventId, clampStat } from '@yearafter/core';
+import { add, asEventId, clampStat, dollars } from '@yearafter/core';
 import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
 import { runEducation } from './phases/education';
@@ -101,6 +101,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     personality: education.player.personality,
     ...(partner ? { partnerPersonality: partner.personality, partnerId: partner.id } : {}),
     playerLastName: state.player.lastName,
+    behaviour: education.education.behaviour,
     takenNames: names.taken,
     nameFor: (sex) => uniqueFirstName(familyStream, names, sex),
   });
@@ -116,6 +117,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     },
     nextAge,
     nextYear,
+    education.lines.length + social.lines.length + family.lines.length,
   );
 
   // Stress last: it summarises the year rather than making things happen in it,
@@ -209,6 +211,9 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Set by the education phase; employment (Ticket 0210) takes it over for
     // characters who have left school.
     occupation: education.player.occupation,
+    // Ticket 0209: a parent buying you something unprompted is real money, and
+    // the line that reported it named the amount (CORE_RULES 13.6).
+    cash: family.gifted > 0 ? add(stress.player.cash, dollars(family.gifted)) : stress.player.cash,
     timeline: [...state.player.timeline, ...entries],
   };
 
@@ -225,7 +230,9 @@ export function advanceYear(state: GameState): AdvanceResult {
       // the education phase set the rest of it.
       education: {
         ...education.education,
-        behaviour: clampStat(events.behaviour),
+        // Ticket 0209: a parent grounding you moves school standing through the
+        // same field events use, rather than a parallel one.
+        behaviour: clampStat(events.behaviour + family.behaviourDelta),
         // Stress takes its cut of school last, after everything else has had
         // its say about the year.
         performance: clampStat(stress.performance),

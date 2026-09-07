@@ -322,9 +322,13 @@ export function runEventPhase(
     (definition) => definition.type === 'passive' && isEligible(definition, context, nextHistory),
   );
   const passiveCount = random.weightedChoice(PASSIVE_COUNT_WEIGHTS);
+  // What is left of the YEAR's budget after education, the class, the family
+  // and anything else that has already written a line. Always at least one, so
+  // a busy year still says something happened rather than going silent.
+  const yearRoom = Math.max(1, MAX_EVENTS_PER_YEAR - (context.alreadyThisYear ?? 0));
   for (const definition of drawEvents(
     passivePool,
-    passiveCount,
+    Math.min(passiveCount, yearRoom),
     context,
     random,
     usedCategories,
@@ -358,7 +362,7 @@ export function runEventPhase(
     // year already holds — trimming the draw rather than skipping it keeps a
     // seeded life reproducible.
     const drawnCount = random.weightedChoice(DECISION_COUNT_WEIGHTS);
-    const room = Math.max(0, MAX_EVENTS_PER_YEAR - outcomes.length - decisions.length);
+    const room = Math.max(0, yearRoom - outcomes.length - decisions.length);
     const wanted = Math.min(drawnCount - decisions.length, room);
     if (wanted > 0) {
       for (const definition of drawEvents(
