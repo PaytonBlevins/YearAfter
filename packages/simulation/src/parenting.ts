@@ -103,11 +103,7 @@ export function tryForBaby(state: GameState): Result<ParentingOutcome, Parenting
     ? `You and ${partner.firstName} are expecting.`
     : notThisYear(state.player.age);
 
-  const { player, entry } = write(
-    state,
-    text,
-    `t:${state.world.year}:baby:${state.player.age}`,
-  );
+  const { player, entry } = write(state, text, `t:${state.world.year}:baby:${state.player.age}`);
 
   const parenting: ParentingState = {
     ...state.parenting,
@@ -137,8 +133,7 @@ const NOT_THIS_YEAR: readonly string[] = [
   'Nothing. The waiting got easier to carry and no easier to explain.',
 ];
 
-const notThisYear = (age: number): string =>
-  NOT_THIS_YEAR[age % NOT_THIS_YEAR.length] as string;
+const notThisYear = (age: number): string => NOT_THIS_YEAR[age % NOT_THIS_YEAR.length] as string;
 
 /* -------------------------------------------------------------------------- */
 /* Adopt                                                                       */

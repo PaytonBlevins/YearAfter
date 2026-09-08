@@ -122,7 +122,8 @@ export function joinActivity(state: GameState, activityId: string): GameState {
 export function askToJoin(state: GameState, activityId: string): JoinOutcome {
   const activity = findActivity(activityId);
   if (!activity) return { state, joined: false };
-  if (!needsFunding(state, activity)) return { state: joinActivity(state, activityId), joined: true };
+  if (!needsFunding(state, activity))
+    return { state: joinActivity(state, activityId), joined: true };
 
   const odds = fundingOdds(state, activity);
   if (!odds) return { state: joinActivity(state, activityId), joined: true };

@@ -144,8 +144,8 @@ export function JobOfferScreen() {
 
       <View style={styles.note}>
         <Text style={styles.noteText}>
-          One application each per year. They will let you know either way, and a no is not a
-          reason to stop — the same job comes round again.
+          One application each per year. They will let you know either way, and a no is not a reason
+          to stop — the same job comes round again.
         </Text>
       </View>
     </ScrollView>

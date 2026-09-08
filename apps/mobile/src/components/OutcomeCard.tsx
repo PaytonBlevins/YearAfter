@@ -90,7 +90,9 @@ export function OutcomeCard({ outcome, onDismiss }: OutcomeCardProps) {
         <Text style={[styles.title, { color: accent }]}>{outcome.title}</Text>
         <Text style={styles.body}>{outcome.body}</Text>
 
-        {outcome.value ? <Text style={[styles.value, { color: accent }]}>{outcome.value}</Text> : null}
+        {outcome.value ? (
+          <Text style={[styles.value, { color: accent }]}>{outcome.value}</Text>
+        ) : null}
 
         {outcome.meter ? (
           <View style={styles.meterRow}>

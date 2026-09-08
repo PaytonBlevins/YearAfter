@@ -316,7 +316,6 @@ terminal. `advance.test.ts` now plays a life pressing every repeatable action to
 its limit and asserts no id repeats, so the next thing to become repeatable
 fails the build instead.
 
-
 Fixing the PRODUCER is only half of it, and Ticket 0207c is why this paragraph
 exists. 0206b put a repeat counter in every repeatable action's id and added a
 test that plays a whole life pressing all of them, and the same React duplicate-
@@ -587,10 +586,10 @@ better in a restaurant than in a warehouse, and the column earns its width.
 
 ### 13.27 Answer the player where they pressed
 
-Review, after playing 0210: *"When I tried out for the basketball team, the
+Review, after playing 0210: _"When I tried out for the basketball team, the
 result landed on the homepage as it should, but I want a pop up result for
 things like that... Please make this common across important, entertaining, and
-interactive moments in the game."*
+interactive moments in the game."_
 
 Every interactive moment in this game resolved silently into the Life feed, from
 0206 onward. A player could tap Try Out on the Clubs screen, or Work Harder on
@@ -609,8 +608,8 @@ The corollary is that a new interactive action is not finished when it returns a
 
 ### 13.28 A tap is not a decision
 
-Review, in the same pass: *"when I click on a job, it automatically hires me.
-That should not be the case."* Tapping a listing applied for it — no card, no
+Review, in the same pass: _"when I click on a job, it automatically hires me.
+That should not be the case."_ Tapping a listing applied for it — no card, no
 confirmation, and no chance to see the salary, the requirement or the benefits
 before committing.
 
@@ -648,3 +647,52 @@ Changes to these require explicit product-owner approval:
 - shared economic and world contracts
 
 AI may author these. The restriction is oversight, not authorship.
+
+### 13.29 A subtitle that reads the same every time is decoration
+
+Review, after playing 0210b: _"Under category tabs like the love, doctor, mind &
+body, etc., the subtext is fine. Under general options like work harder, the
+subtext is useless and just takes up space. It is also oddly worded and cringy."_
+
+The line is drawn exactly where the player drew it. A row that OPENS something
+uses its subtitle to answer "what is behind this?", and that answer is different
+per row and changes with the save — how many openings are going, who you know at
+work, what a degree would cost. A row that DOES something has already said what
+it does in its title, and anything under it is the interface admiring itself.
+
+"A stretch of real effort. It usually shows." sat under Work Harder every year of
+every working life and told the player nothing the two words above it had not.
+Eight of these were shipped across five tickets, each one written while looking
+at a single screen where it read as tone rather than as a line that would repeat
+forever.
+
+The test before writing one: would this sentence be different next year, or for a
+different player? If not, it is not a subtitle, it is a comment — put it in the
+source where it belongs.
+
+State lines are not decoration and stay: a reason a row is disabled, a price, a
+cooldown, a catalog blurb describing something the player cannot otherwise
+identify. Those change, and a greyed-out row with no reason reads as broken.
+
+### 13.30 A cap the player can see is a cap they play against
+
+Review, in the same pass: _"On options like work harder, it says 2 left, 1 left,
+etc. I dont want a visual limit, the buttons can be hit as many times, but I only
+want an affect to happen a maximum of 2 times. So, if i hit the button 10x, my
+work reputation only went up twice."_
+
+Study Harder, Work Harder and Put the hours in each showed their remaining
+presses and then disabled themselves. That turns an in-world action — putting the
+hours in — into an allowance to be spent down, and a player optimising a counter
+is a player looking at the mechanism instead of the life.
+
+So the model keeps its cap and the screen stops mentioning it. The button is
+always live, a press past the cap is a normal outcome rather than an error, and
+the popup says plainly that there was nothing more to give.
+
+Two things this must not do. It must not write to the feed — ten taps would be
+eight junk lines in a life story. And it must NOT DRAW: the early return sits
+above the RNG stream in all three, because a dead button that consumes randomness
+would make two identical lives diverge on how often somebody mashed it, and the
+seed would quietly stop meaning anything. `careers.test.ts` advances a year after
+twenty-five futile presses and asserts the timeline is identical.

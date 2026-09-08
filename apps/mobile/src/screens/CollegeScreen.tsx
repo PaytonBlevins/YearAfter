@@ -87,12 +87,12 @@ export function CollegeScreen() {
       */}
       <SectionHeading>What it costs</SectionHeading>
       <Card>
-        <ListRow
-          title="Tuition"
-          subtitle={next === 'postgrad' ? 'A year of graduate school.' : 'A year of college.'}
-          value={money(tuitionDue(state))}
-          affordance="none"
-        />
+        {/*
+          Ticket 0210c removed the subtitle here. "A year of college." under a
+          row headed Tuition, on a screen headed What it costs, inside a college
+          application — four ways of saying college, three of them for nothing.
+        */}
+        <ListRow title="Tuition" meta="a year" value={money(tuitionDue(state))} affordance="none" />
         {support > 0 ? (
           <>
             <RowDivider />
@@ -140,8 +140,8 @@ export function CollegeScreen() {
 
       <View style={styles.note}>
         <Text style={styles.noteText}>
-          What you study decides which careers open up. Nothing is closed off by picking wrong —
-          it is just harder from further away.
+          What you study decides which careers open up. Nothing is closed off by picking wrong — it
+          is just harder from further away.
         </Text>
       </View>
     </ScrollView>

@@ -44,12 +44,7 @@ const majorOpens = (state: GameState): readonly string[] => {
 import type { GameState } from './game-state';
 import { RngDomains, stableUnit } from './rng/rng';
 
-export type WorkError =
-  | CannotApply
-  | 'no-such-job'
-  | 'no-job'
-  /** Work Harder is twice a year, like Study Harder. */
-  | 'no-push-left';
+export type WorkError = CannotApply | 'no-such-job' | 'no-job';
 
 export const WORK_ERROR_LABELS: Readonly<Record<WorkError, string>> = {
   'too-young': 'You are too young for this one.',
@@ -59,7 +54,6 @@ export const WORK_ERROR_LABELS: Readonly<Record<WorkError, string>> = {
   'needs-education': 'You do not have the qualification this one needs.',
   'no-such-job': 'That job is not in the catalog.',
   'no-job': 'You are not working anywhere.',
-  'no-push-left': 'You have put in what you have to put in this year.',
 };
 
 export interface WorkOutcome {
@@ -69,6 +63,31 @@ export interface WorkOutcome {
 
 export interface ApplyOutcome extends WorkOutcome {
   readonly hired: boolean;
+}
+
+/**
+ * Ticket 0210c — the result of pressing Work Harder, including pressing it for
+ * nothing.
+ *
+ * Review: *"I dont want a visual limit, the buttons can be hit as many times,
+ * but I only want an affect to happen a maximum of 2 times. So, if i hit the
+ * button 10x, my work reputation only went up twice."*
+ *
+ * Running out is no longer an error, because an error is a thing the player did
+ * wrong and this is not one. It is an outcome with `spent: true` and no entry:
+ * the state comes back untouched, nothing reaches the feed, and — the part that
+ * matters most — NO RANDOMNESS IS SPENT. A futile tap that consumed a draw
+ * would shift every roll after it, so two players who lived identical lives and
+ * pressed a dead button a different number of times would diverge. The early
+ * return above the stream is what makes the cap invisible rather than merely
+ * quiet.
+ */
+export interface PushOutcome {
+  readonly state: GameState;
+  /** Absent when the year's effort was already spent — nothing happened. */
+  readonly entry?: TimelineEntry;
+  /** True when this press changed nothing. */
+  readonly spent: boolean;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -258,13 +277,15 @@ export function applyFor(state: GameState, jobId: string): Result<ApplyOutcome, 
  * towards for as long as they hold the job. Pressing it once helps; pressing it
  * every year compounds.
  */
-export function workHarder(state: GameState): Result<WorkOutcome, WorkError> {
+export function workHarder(state: GameState): Result<PushOutcome, WorkError> {
   const held = state.employment.job;
   if (!held) return err('no-job');
 
   const fresh = held.pushedAtAge !== state.player.age;
   const pushed = fresh ? 0 : held.pushedThisYear;
-  if (pushed >= PUSHES_PER_YEAR) return err('no-push-left');
+  // Above the stream, deliberately. See `PushOutcome`: a press past the cap
+  // must not draw, or the seed stops meaning anything.
+  if (pushed >= PUSHES_PER_YEAR) return ok({ state, spent: true });
 
   const stream = state.rng.stream(RngDomains.Careers);
   const worked = stream.chance(WORK_SUCCESS_CHANCE);
@@ -293,9 +314,17 @@ export function workHarder(state: GameState): Result<WorkOutcome, WorkError> {
       player: { ...state.player, timeline: [...state.player.timeline, entry] },
     },
     entry,
+    spent: false,
   });
 }
 
+/**
+ * How many pushes are left in the year.
+ *
+ * Ticket 0210c took this off the screen — see `PushOutcome` — but it stays here
+ * because the model still has a cap and the tests still measure it. What changed
+ * is who is allowed to read it: the simulation, not the button.
+ */
 export const pushesLeft = (state: GameState): number => {
   const held = state.employment.job;
   if (!held) return 0;

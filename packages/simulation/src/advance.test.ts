@@ -302,10 +302,19 @@ describe('Study Harder', () => {
     // The second term is worth less than the first, and still worth something.
     expect(second.value.gained).toBeLessThanOrEqual(first.value.gained);
 
+    // Ticket 0210c. The third press is allowed and does nothing — no error, no
+    // gain, no feed line, and no draw. Review: "the buttons can be hit as many
+    // times, but I only want an affect to happen a maximum of 2 times."
     const third = study(second.value.state);
-    expect(third.ok).toBe(false);
-    if (third.ok) return;
-    expect(third.error).toBe('already-studied');
+    expect(third.ok).toBe(true);
+    if (!third.ok) return;
+    expect(third.value.spent).toBe(true);
+    expect(third.value.entry).toBeUndefined();
+    expect(third.value.state).toBe(second.value.state);
+    expect(third.value.state.education.performance).toBe(second.value.state.education.performance);
+    expect(third.value.state.player.timeline.length).toBe(
+      second.value.state.player.timeline.length,
+    );
 
     // Next year both terms are available again.
     const nextYear = answerAll(advanceYear(second.value.state).state);
@@ -330,7 +339,8 @@ describe('Study Harder', () => {
       if (state.education.performance < 100) {
         expect(result.value.gained).toBeGreaterThan(0);
       }
-      expect(result.value.entry.text.length).toBeGreaterThan(0);
+      expect(result.value.spent).toBe(false);
+      expect(result.value.entry?.text.length ?? 0).toBeGreaterThan(0);
     }
     expect(attempts).toBeGreaterThan(50);
     expect(worked / attempts).toBeGreaterThan(0.55);
@@ -639,11 +649,15 @@ describe('teams, practice and work', () => {
     }
     expect(enrolmentIn(state.education, club.activity.id)?.standing).toBeGreaterThan(before);
 
-    // A fourth is refused — three afternoons is a good week, not a montage.
+    // A fourth is allowed and does nothing — three afternoons is a good week,
+    // not a montage — but that is the model's business, not a wall the player
+    // gets pushed into. Ticket 0210c.
     const extra = practise(state, club.activity.id);
-    expect(extra.ok).toBe(false);
-    if (extra.ok) return;
-    expect(extra.error).toBe('no-sessions-left');
+    expect(extra.ok).toBe(true);
+    if (!extra.ok) return;
+    expect(extra.value.spent).toBe(true);
+    expect(extra.value.entry).toBeUndefined();
+    expect(extra.value.state).toBe(state);
 
     // Next year the sessions come back.
     const next = answerAll(advanceYear(state).state);

@@ -51,9 +51,7 @@ export function ParentScreen() {
         <ListRow
           icon="family"
           title={`${parent.firstName} ${parent.lastName}`}
-          subtitle={
-            parent.alive ? `${who} · ${npcAge(parent, state.world.year)}` : `${who} · died`
-          }
+          subtitle={parent.alive ? `${who} · ${npcAge(parent, state.world.year)}` : `${who} · died`}
           affordance="none"
           meter={parent.alive ? parent.relationship : undefined}
           meterColor={relationshipColor(parent.relationship)}

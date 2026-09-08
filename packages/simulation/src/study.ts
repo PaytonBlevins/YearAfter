@@ -22,10 +22,7 @@ import {
 import type { GameState } from './game-state';
 import { RngDomains } from './rng/rng';
 
-export type StudyError =
-  | 'not-in-school'
-  /** One press per school year. Come back after Advance. */
-  | 'already-studied';
+export type StudyError = 'not-in-school';
 
 export interface StudyOutcome {
   readonly state: GameState;
@@ -34,12 +31,25 @@ export interface StudyOutcome {
   readonly gained: number;
   /** Terms of this school year still available afterwards. */
   readonly termsLeft: number;
-  readonly entry: TimelineEntry;
+  /** Absent when the year's terms were already spent — nothing happened. */
+  readonly entry?: TimelineEntry;
+  /**
+   * Ticket 0210c. True when this press changed nothing.
+   *
+   * Running out of terms stopped being an error, for the reason spelled out on
+   * `PushOutcome` in `careers.ts`: the player is allowed to press the button as
+   * often as they like, the effect is capped at two, and a press past the cap
+   * draws no randomness and writes no line. See CORE_RULES 13.30.
+   */
+  readonly spent: boolean;
 }
 
 export function study(state: GameState): Result<StudyOutcome, StudyError> {
   if (!isInSchool(state.education)) return err('not-in-school');
-  if (hasStudiedThisYear(state.education, state.player.age)) return err('already-studied');
+  // Before the stream is touched. A dead press must not move the seed.
+  if (hasStudiedThisYear(state.education, state.player.age)) {
+    return ok({ state, worked: false, gained: 0, termsLeft: 0, spent: true });
+  }
 
   // Three draws from the Education stream, in a fixed order, so a life replays.
   const stream = state.rng.stream(RngDomains.Education);
@@ -88,5 +98,6 @@ export function study(state: GameState): Result<StudyOutcome, StudyError> {
     gained: result.gained,
     termsLeft: STUDY_TERMS - (termsAlready + 1),
     entry,
+    spent: false,
   });
 }

@@ -140,7 +140,10 @@ export function admissionOdds(state: GameState): number {
  * can try again next year — the 0209 lesson about refusals, and the 0210 lesson
  * about applications, for the third time.
  */
-export function applyToCollege(state: GameState, majorId: string): Result<CollegeOutcome, CollegeError> {
+export function applyToCollege(
+  state: GameState,
+  majorId: string,
+): Result<CollegeOutcome, CollegeError> {
   const blocked = cannotEnrol(state);
   if (blocked) return err(blocked);
 
@@ -251,18 +254,16 @@ function pick(lines: readonly string[], key: string, age: number): string {
 }
 
 const acceptedLine = (state: GameState, major: Major, postgrad: boolean): string =>
-  pick(
-    postgrad ? POSTGRAD_IN : ACCEPTED_LINES,
-    `college:${major.id}`,
-    state.player.age,
-  ).replace(/\{major\}/g, major.name.toLowerCase());
+  pick(postgrad ? POSTGRAD_IN : ACCEPTED_LINES, `college:${major.id}`, state.player.age).replace(
+    /\{major\}/g,
+    major.name.toLowerCase(),
+  );
 
 const rejectedLine = (state: GameState, major: Major, postgrad: boolean): string =>
-  pick(
-    postgrad ? POSTGRAD_NO : REJECTED_LINES,
-    `nocollege:${major.id}`,
-    state.player.age,
-  ).replace(/\{major\}/g, major.name.toLowerCase());
+  pick(postgrad ? POSTGRAD_NO : REJECTED_LINES, `nocollege:${major.id}`, state.player.age).replace(
+    /\{major\}/g,
+    major.name.toLowerCase(),
+  );
 
 const ACCEPTED_LINES: readonly string[] = [
   'Got in. Four years of {major}, starting in the fall.',

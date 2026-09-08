@@ -120,14 +120,12 @@ export function LoveScreen() {
             <ListRow
               icon="social"
               title="Spend a month on the apps"
-              subtitle={
-                usedApp
-                  ? 'You have given it a go this year.'
-                  // Short enough not to clip. The first screenshot ran to
-                  // "Some months it …", which is a subtitle that stops mid-
-                  // sentence and looks like a bug rather than a style.
-                  : 'Most months it comes to nothing.'
-              }
+              // Ticket 0210c: the flavour line is gone and the state line stays.
+              // "Most months it comes to nothing" said the same thing every year
+              // to every player; "you have given it a go" says why the row is
+              // greyed out, which is the difference (CORE_RULES 13.29). The
+              // heading beside it already carries "once a year".
+              subtitle={usedApp ? 'You have given it a go this year.' : undefined}
               affordance={usedApp ? 'none' : 'action'}
               disabled={usedApp}
               onPress={usedApp ? undefined : tryDatingApp}

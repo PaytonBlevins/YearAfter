@@ -72,8 +72,8 @@ export function JobsScreen() {
 
           <View style={styles.note}>
             <Text style={styles.noteText}>
-              Open one to see what it pays, what it needs and what comes with it. One
-              application each per year.
+              Open one to see what it pays, what it needs and what comes with it. One application
+              each per year.
             </Text>
           </View>
         </>

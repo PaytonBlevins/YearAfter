@@ -90,9 +90,7 @@ export function PersonScreen() {
       */}
       {around && isRomantic(person) ? (
         <>
-          <SectionHeading>
-            {ROMANCE_STAGE_LABELS[person.romance?.stage ?? 'seeing']}
-          </SectionHeading>
+          <SectionHeading>{ROMANCE_STAGE_LABELS[person.romance?.stage ?? 'seeing']}</SectionHeading>
           <Card>
             {[...starting, ...ending].map((move, index) => (
               <Fragment key={move.id}>

@@ -13,13 +13,7 @@
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { findActivity } from '@yearafter/content';
-import {
-  PRACTICE_SESSIONS,
-  enrolmentIn,
-  practiceLeft,
-  standingBand,
-  standingLabelFor,
-} from '@yearafter/education';
+import { enrolmentIn, standingBand, standingLabelFor } from '@yearafter/education';
 import { bondOf, displayName, isCurrent } from '@yearafter/social';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
@@ -42,7 +36,6 @@ export function ActivityScreen() {
     );
   }
 
-  const left = practiceLeft(entry, state.player.age);
   const years = state.player.age - entry.joinedAtAge;
   const teammates = state.circle.people.filter(
     (person) => person.viaActivityId === activity.id && isCurrent(person),
@@ -70,11 +63,7 @@ export function ActivityScreen() {
         />
       </Card>
 
-      <SectionHeading
-        note={left > 0 ? `${left} of ${PRACTICE_SESSIONS} left` : 'done for the year'}
-      >
-        Practice
-      </SectionHeading>
+      <SectionHeading>Practice</SectionHeading>
       <Card>
         {/*
           Unlike Study Harder this cannot fail. Putting the hours in at something
@@ -82,18 +71,16 @@ export function ActivityScreen() {
           and willpower and how good you already are. Three sessions an activity
           a year — spread across five clubs it is three afternoons and nothing
           changes anywhere, which is the actual trade.
+
+          Ticket 0210c took the counter off the heading and the subtitle off the
+          row. The cap is still three; the player just is not made to play against
+          a number. Press four and the popup says so. CORE_RULES 13.29 and 13.30.
         */}
         <ListRow
           icon="school"
           title="Put the hours in"
-          subtitle={
-            left > 0
-              ? 'An afternoon at it. Always worth something.'
-              : 'You have done what you can with this year.'
-          }
-          affordance={left > 0 ? 'action' : 'none'}
-          disabled={left === 0}
-          onPress={left > 0 ? () => practiseAt(activity.id) : undefined}
+          affordance="action"
+          onPress={() => practiseAt(activity.id)}
         />
       </Card>
 
@@ -131,7 +118,6 @@ export function ActivityScreen() {
       <Card>
         <ListRow
           title={`Quit ${activity.name.toLowerCase()}`}
-          subtitle="The hours go back. So does everything you built here."
           affordance="action"
           onPress={() => {
             leaveActivity(activity.id);

@@ -29,15 +29,22 @@ import { RngDomains } from './rng/rng';
 export type PracticeError =
   | 'no-such-activity'
   /** You cannot practise something you are not in. */
-  | 'not-joined'
-  /** Three sessions a year. Any more is a montage, not a childhood. */
-  | 'no-sessions-left';
+  | 'not-joined';
 
 export interface PracticeOutcome {
   readonly state: GameState;
   readonly gained: number;
   readonly sessionsLeft: number;
-  readonly entry: TimelineEntry;
+  /** Absent when the year's sessions were already spent — nothing happened. */
+  readonly entry?: TimelineEntry;
+  /**
+   * Ticket 0210c. True when this press changed nothing.
+   *
+   * Three sessions a year is still the model — any more is a montage, not a
+   * childhood — but the cap is no longer a thing the player is shown or blocked
+   * by. Same treatment as Work Harder; see `PushOutcome` in `careers.ts`.
+   */
+  readonly spent: boolean;
 }
 
 const LINES = [
@@ -55,7 +62,10 @@ export function practise(
   if (!activity) return err('no-such-activity');
   const entry = enrolmentIn(state.education, activityId);
   if (!entry) return err('not-joined');
-  if (practiceLeft(entry, state.player.age) <= 0) return err('no-sessions-left');
+  // Before the draw below, so a futile tap cannot shift the Education stream.
+  if (practiceLeft(entry, state.player.age) <= 0) {
+    return ok({ state, gained: 0, sessionsLeft: 0, spent: true });
+  }
 
   const sessions = practisedThisYear(entry, state.player.age);
   const gained = practiceGain(state.player.stats, entry.standing, sessions);
@@ -102,5 +112,6 @@ export function practise(
     gained,
     sessionsLeft: practiceLeft(updated, state.player.age),
     entry: timelineEntry,
+    spent: false,
   });
 }

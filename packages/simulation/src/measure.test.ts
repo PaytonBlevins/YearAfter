@@ -22,7 +22,8 @@ describe('college', () => {
         state = advanceYear(state).state;
         let guard = 0;
         while (state.pending.length > 0 && (guard += 1) < 12) {
-          const d = state.pending[0]; const c = d?.choices[0];
+          const d = state.pending[0];
+          const c = d?.choices[0];
           if (!d || !c) break;
           const r = decide(state, d.eventId, c.id);
           if (!r.ok) break;
@@ -34,7 +35,8 @@ describe('college', () => {
           if (r.ok) state = r.value.state;
         }
       }
-      levels[levelOf(state.education.credentials)] = (levels[levelOf(state.education.credentials)] ?? 0) + 1;
+      levels[levelOf(state.education.credentials)] =
+        (levels[levelOf(state.education.credentials)] ?? 0) + 1;
     }
     console.log('\npassive player, one application at 18, no help asked:');
     console.log(' ', JSON.stringify(levels));
@@ -43,20 +45,27 @@ describe('college', () => {
   it('is reachable, costs something, and not everybody finishes', () => {
     const N = 300;
     const levels: Record<string, number> = {};
-    let applied = 0, accepted = 0, blocked: Record<string, number> = {};
-    let finishedCollege = 0, failedOut = 0, ranOut = 0, wentPostgrad = 0;
+    let applied = 0,
+      accepted = 0,
+      blocked: Record<string, number> = {};
+    let finishedCollege = 0,
+      failedOut = 0,
+      ranOut = 0,
+      wentPostgrad = 0;
     const cashAt22: number[] = [];
     const cashAt30: number[] = [];
     const oddsSeen: number[] = [];
 
     for (let i = 0; i < N; i += 1) {
       let state = createNewGame({ seed: `col-${i}` });
-      let sawFail = false, sawBroke = false;
+      let sawFail = false,
+        sawBroke = false;
       for (let y = 0; y < 40; y += 1) {
         state = advanceYear(state).state;
         let guard = 0;
         while (state.pending.length > 0 && (guard += 1) < 12) {
-          const d = state.pending[0]; const c = d?.choices[0];
+          const d = state.pending[0];
+          const c = d?.choices[0];
           if (!d || !c) break;
           const r = decide(state, d.eventId, c.id);
           if (!r.ok) break;
@@ -72,9 +81,14 @@ describe('college', () => {
         // Ask the parents for help first — 0209 built exactly this request and
         // it has meant nothing until now.
         if (age >= 17 && age <= 24) {
-          for (const parent of state.family.members.filter((m) => (m.role === 'mother' || m.role === 'father') && m.alive)) {
+          for (const parent of state.family.members.filter(
+            (m) => (m.role === 'mother' || m.role === 'father') && m.alive,
+          )) {
             const r = askParent(state, parent.id, 'help-with-college');
-            if (r.ok) { state = r.value.state; break; }
+            if (r.ok) {
+              state = r.value.state;
+              break;
+            }
           }
         }
         const why = cannotEnrol(state);
@@ -96,7 +110,9 @@ describe('college', () => {
         // version of this harness excluded students, which is not the game.
         if (age >= 18) {
           if (!state.employment.job) {
-            const list = [...openings(state)].sort((a, b) => chanceOf(state, b) - chanceOf(state, a));
+            const list = [...openings(state)].sort(
+              (a, b) => chanceOf(state, b) - chanceOf(state, a),
+            );
             for (const job of list.slice(0, 2)) {
               const r = applyFor(state, String(job.id));
               if (!r.ok) continue;
@@ -121,12 +137,20 @@ describe('college', () => {
 
     console.log(`\n${N} lives, player always tries for a degree\n`);
     console.log('final education level:', JSON.stringify(levels));
-    console.log(`applications ${applied}, accepted ${accepted} (${Math.round((accepted / Math.max(1, applied)) * 100)}%)`);
-    console.log(`finished a degree ${finishedCollege} (${Math.round((finishedCollege / N) * 100)}%)`);
+    console.log(
+      `applications ${applied}, accepted ${accepted} (${Math.round((accepted / Math.max(1, applied)) * 100)}%)`,
+    );
+    console.log(
+      `finished a degree ${finishedCollege} (${Math.round((finishedCollege / N) * 100)}%)`,
+    );
     console.log(`postgraduate ${wentPostgrad} (${Math.round((wentPostgrad / N) * 100)}%)`);
     console.log(`failed out ${failedOut}   ran out of money ${ranOut}`);
     console.log('why blocked (18-30):', JSON.stringify(blocked));
-    console.log(`admission odds: p10 ${q(oddsSeen, 0.1).toFixed(2)} med ${q(oddsSeen, 0.5).toFixed(2)} p90 ${q(oddsSeen, 0.9).toFixed(2)}`);
-    console.log(`cash at 22: med $${q(cashAt22, 0.5).toFixed(0)}   at 30: med $${q(cashAt30, 0.5).toFixed(0)}`);
+    console.log(
+      `admission odds: p10 ${q(oddsSeen, 0.1).toFixed(2)} med ${q(oddsSeen, 0.5).toFixed(2)} p90 ${q(oddsSeen, 0.9).toFixed(2)}`,
+    );
+    console.log(
+      `cash at 22: med $${q(cashAt22, 0.5).toFixed(0)}   at 30: med $${q(cashAt30, 0.5).toFixed(0)}`,
+    );
   });
 });

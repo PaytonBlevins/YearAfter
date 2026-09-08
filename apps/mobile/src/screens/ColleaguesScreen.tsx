@@ -56,7 +56,11 @@ export function ColleaguesScreen() {
             <ListRow
               icon="social"
               title={`${person.firstName} ${person.lastName}`}
-              subtitle={person.lastContactAge === state.player.age ? 'Seen this year' : 'You have not spoken in a while'}
+              subtitle={
+                person.lastContactAge === state.player.age
+                  ? 'Seen this year'
+                  : 'You have not spoken in a while'
+              }
               affordance="navigate"
               meter={person.relationship}
               meterColor={relationshipColor(person.relationship)}
@@ -70,8 +74,8 @@ export function ColleaguesScreen() {
 
       <View style={styles.note}>
         <Text style={styles.noteText}>
-          People from work stay here rather than on the Relationships screen. If one of them
-          becomes an actual friend, that is where they will turn up.
+          People from work stay here rather than on the Relationships screen. If one of them becomes
+          an actual friend, that is where they will turn up.
         </Text>
       </View>
     </ScrollView>

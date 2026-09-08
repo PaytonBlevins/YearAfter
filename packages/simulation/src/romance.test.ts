@@ -35,7 +35,11 @@ const UNTIL = 30;
 
 interface Life {
   readonly state: GameState;
-  readonly pressed: readonly { readonly age: number; readonly move: string; readonly text: string }[];
+  readonly pressed: readonly {
+    readonly age: number;
+    readonly move: string;
+    readonly text: string;
+  }[];
 }
 
 /**
@@ -104,8 +108,10 @@ describe('the age gate holds across a played life', () => {
       for (const person of life.state.circle.people) {
         const stage = person.romance?.stage;
         if (stage !== 'engaged' && stage !== 'married') continue;
-        expect(person.romance?.since, `${person.firstName} in ${life.state.player.firstName}'s life`)
-          .toBeGreaterThanOrEqual(18);
+        expect(
+          person.romance?.since,
+          `${person.firstName} in ${life.state.player.firstName}'s life`,
+        ).toBeGreaterThanOrEqual(18);
       }
     }
   });

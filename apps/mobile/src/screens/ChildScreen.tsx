@@ -107,12 +107,12 @@ export function ChildScreen() {
               onPress={affordable ? () => answerChildAsk(true) : undefined}
             />
             <RowDivider />
-            <ListRow
-              title="Say no"
-              subtitle={`Tell ${child.firstName} it is not happening.`}
-              affordance="action"
-              onPress={() => answerChildAsk(false)}
-            />
+            {/*
+              "Say yes" keeps its subtitle because it names the price. "Say no"
+              had one that restated the title in a longer sentence, which is
+              exactly the kind of line Ticket 0210c went looking for.
+            */}
+            <ListRow title="Say no" affordance="action" onPress={() => answerChildAsk(false)} />
           </Card>
         </>
       ) : null}

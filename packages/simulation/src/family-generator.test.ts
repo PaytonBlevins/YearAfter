@@ -37,7 +37,7 @@ const familyFor = (seed: string, culture = 'us-en'): Household =>
   });
 
 describe('names inside one household', () => {
-  it('never gives a relative the player\'s own given name', () => {
+  it("never gives a relative the player's own given name", () => {
     // A screenshot of the built app showed a sixteen-year-old Esperanza
     // Arellano whose sister was Esperanza Arellano, aged twenty-five. The
     // uniqueness set guarded the NPCs against each other and never contained
@@ -46,10 +46,9 @@ describe('names inside one household', () => {
       const seed = `names-${index}`;
       const state = createNewGame({ seed });
       for (const member of state.family.members) {
-        expect(
-          member.firstName,
-          `${member.role} shares the player's name in ${seed}`,
-        ).not.toBe(state.player.firstName);
+        expect(member.firstName, `${member.role} shares the player's name in ${seed}`).not.toBe(
+          state.player.firstName,
+        );
       }
     }
   });

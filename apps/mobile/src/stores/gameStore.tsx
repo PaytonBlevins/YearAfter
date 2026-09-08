@@ -51,6 +51,7 @@ import {
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
+import type { Detail } from '../components/DetailCard';
 import type { Outcome } from '../components/OutcomeCard';
 import {
   DEFAULT_SETTINGS,
@@ -71,6 +72,10 @@ interface GameContextValue {
   /** Ticket 0210b. The result of the last thing the player pressed, if unread. */
   readonly outcome?: Outcome;
   readonly dismissOutcome: () => void;
+  /** Ticket 0210c. A breakdown the player asked to see, if open. */
+  readonly detail?: Detail;
+  readonly showDetail: (detail: Detail) => void;
+  readonly dismissDetail: () => void;
   /**
    * The question the game is waiting on, if any (Ticket 0203). One at a time:
    * a year can raise up to three, and stacking three cards on a phone is how a
@@ -150,6 +155,12 @@ export function GameProvider({ repository, children }: GameProviderProps) {
    * they pressed it on is an answer that can be lost.
    */
   const [outcome, setOutcome] = useState<Outcome | undefined>(undefined);
+  /**
+   * Ticket 0210c. A breakdown the player opened. Beside `outcome` rather than
+   * inside a screen for the same reason: the overlay lives in the Shell, and a
+   * screen inside a ScrollView cannot render one that is not clipped by it.
+   */
+  const [detail, setDetail] = useState<Detail | undefined>(undefined);
 
   const createdAt = useRef<number>(Date.now());
 
@@ -293,13 +304,29 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         setSaveError(`Cannot study right now (${result.error}).`);
         return current;
       }
+      // Ticket 0210c. Pressing it again after the year's two terms is allowed
+      // and does nothing, and the player is told that in the same place the two
+      // that counted were answered — not by a greyed-out row with a counter on
+      // it. Nothing is saved, because nothing changed.
+      if (result.value.spent) {
+        setOutcome({
+          title: 'Nothing more to give',
+          body: 'You are already putting in everything this year has room for. Next year is a fresh start.',
+          tone: 'neutral',
+          meter: { label: 'Grades', value: current.education.performance },
+        });
+        return current;
+      }
       setOutcome({
         title: 'A term of work',
-        body: result.value.entry.text,
+        body: result.value.entry?.text ?? '',
         tone: 'neutral',
         meter: { label: 'Grades', value: result.value.state.education.performance },
       });
-      setLastEntries((entries) => [...entries, result.value.entry]);
+      if (result.value.entry) {
+        const written = result.value.entry;
+        setLastEntries((entries) => [...entries, written]);
+      }
       if (saveId) persist(result.value.state, saveId, settings);
       return result.value.state;
     });
@@ -315,7 +342,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         if (!current) return current;
         const outcome = askToJoin(current, activityId);
         if (outcome.state === current) return current;
-        if (!outcome.joined) setLastEntries((entries) => [...entries, outcome.state.player.timeline.at(-1)!]);
+        if (!outcome.joined)
+          setLastEntries((entries) => [...entries, outcome.state.player.timeline.at(-1)!]);
         if (saveId) persist(outcome.state, saveId, settings);
         return outcome.state;
       });
@@ -326,6 +354,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0210: work ------------------------------------------------ */
 
   const dismissOutcome = useCallback(() => setOutcome(undefined), []);
+  const showDetail = useCallback((next: Detail) => setDetail(next), []);
+  const dismissDetail = useCallback(() => setDetail(undefined), []);
 
   const applyForJob = useCallback(
     (jobId: string) => {
@@ -358,13 +388,28 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         return current;
       }
       const after = result.value.state.employment.job;
+      // Ticket 0210c, and the exact case the review named: "if i hit the button
+      // 10x, my work reputation only went up twice." Press eleven, twelve and
+      // twenty all land here — an honest sentence, no change, nothing saved.
+      if (result.value.spent) {
+        setOutcome({
+          title: 'Nothing more to give',
+          body: 'You have already put your back into this year. More hours now would just be hours.',
+          tone: 'neutral',
+          ...(after ? { meter: { label: 'At work', value: after.performance } } : {}),
+        });
+        return current;
+      }
       setOutcome({
         title: 'A real shift',
-        body: result.value.entry.text,
+        body: result.value.entry?.text ?? '',
         tone: 'neutral',
         ...(after ? { meter: { label: 'At work', value: after.performance } } : {}),
       });
-      setLastEntries((entries) => [...entries, result.value.entry]);
+      if (result.value.entry) {
+        const written = result.value.entry;
+        setLastEntries((entries) => [...entries, written]);
+      }
       if (saveId) persist(result.value.state, saveId, settings);
       return result.value.state;
     });
@@ -465,7 +510,22 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           setSaveError(`Cannot practice right now (${result.error}).`);
           return current;
         }
-        setLastEntries((entries) => [...entries, result.value.entry]);
+        // Ticket 0210c. Same shape as Work Harder, and the popup 0210b never
+        // gave this button in the first place: a press that moved a number and
+        // said nothing about it is a press the player has to go and look up.
+        if (result.value.spent) {
+          setOutcome({
+            title: 'Nothing more to give',
+            body: 'You have put in the afternoons this year had in it. Any more and it is just being there.',
+            tone: 'neutral',
+          });
+          return current;
+        }
+        if (result.value.entry) {
+          const written = result.value.entry;
+          setOutcome({ title: 'Time well spent', body: written.text, tone: 'good' });
+          setLastEntries((entries) => [...entries, written]);
+        }
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
       });
@@ -633,6 +693,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       lastEntries,
       outcome,
       dismissOutcome,
+      detail,
+      showDetail,
+      dismissDetail,
       decision: state?.pending[0] ?? null,
       advance,
       answer,
@@ -668,6 +731,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       lastEntries,
       outcome,
       dismissOutcome,
+      detail,
+      showDetail,
+      dismissDetail,
       advance,
       answer,
       studyHarder,

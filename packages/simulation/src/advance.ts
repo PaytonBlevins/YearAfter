@@ -158,10 +158,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     },
     nextAge,
     nextYear,
-    education.lines.length +
-      social.lines.length +
-      family.lines.length +
-      employment.lines.length,
+    education.lines.length + social.lines.length + family.lines.length + employment.lines.length,
   );
 
   // Stress last: it summarises the year rather than making things happen in it,
@@ -283,9 +280,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     occupation: occupationFor(
       education.education,
       nextAge,
-      employment.employment.job
-        ? findJob(employment.employment.job.jobId)?.title
-        : undefined,
+      employment.employment.job ? findJob(employment.employment.job.jobId)?.title : undefined,
     ),
     // Ticket 0209: a parent buying you something unprompted is real money, and
     // the line that reported it named the amount (CORE_RULES 13.6).

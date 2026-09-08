@@ -256,3 +256,77 @@ describe('invariants', () => {
     }
   });
 });
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0210c — the cap the player cannot see                                */
+/* -------------------------------------------------------------------------- */
+
+describe('pressing Work Harder past the cap', () => {
+  /** A life advanced to the first year with a job in hand. */
+  const employed = (): GameState | undefined => {
+    for (const life of LIFETIMES) {
+      if (life.state.employment.job) return life.state;
+    }
+    return undefined;
+  };
+
+  it('is allowed, and does nothing at all', () => {
+    // Review: "I dont want a visual limit, the buttons can be hit as many
+    // times, but I only want an affect to happen a maximum of 2 times. So, if i
+    // hit the button 10x, my work reputation only went up twice."
+    let state = employed();
+    expect(state).toBeDefined();
+    if (!state) return;
+
+    // Spend the two the year has. They may already be spent by `playALife`;
+    // either way, what follows is the state with nothing left in it.
+    for (let i = 0; i < 2; i += 1) {
+      const result = workHarder(state);
+      if (result.ok && !result.value.spent) state = result.value.state;
+    }
+
+    const before = state;
+    for (let press = 0; press < 10; press += 1) {
+      const result = workHarder(state);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.spent).toBe(true);
+      expect(result.value.entry).toBeUndefined();
+      state = result.value.state;
+    }
+
+    // Ten presses, byte for byte the same life. Performance, the feed, and the
+    // RNG cursor all sit exactly where they did.
+    expect(state).toBe(before);
+    expect(state.employment.job?.performance).toBe(before.employment.job?.performance);
+    expect(state.player.timeline.length).toBe(before.player.timeline.length);
+  });
+
+  it('does not spend a draw, so the seed still means something', () => {
+    // The defect this exists to prevent: a dead button that consumes randomness
+    // makes two identical lives diverge on how often somebody mashed it, which
+    // would quietly break replay from a seed. The early return sits ABOVE the
+    // stream in `workHarder` for this reason alone.
+    const state = employed();
+    expect(state).toBeDefined();
+    if (!state) return;
+
+    let spent = state;
+    for (let i = 0; i < 2; i += 1) {
+      const result = workHarder(spent);
+      if (result.ok && !result.value.spent) spent = result.value.state;
+    }
+
+    const untouched = advanceYear(spent).state;
+    let mashed = spent;
+    for (let press = 0; press < 25; press += 1) {
+      const result = workHarder(mashed);
+      if (result.ok) mashed = result.value.state;
+    }
+    const after = advanceYear(mashed).state;
+
+    expect(after.player.timeline.map((entry) => entry.text)).toEqual(
+      untouched.player.timeline.map((entry) => entry.text),
+    );
+  });
+});

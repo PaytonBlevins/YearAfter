@@ -26,17 +26,16 @@ import {
 } from '@yearafter/character';
 import { describeCity } from '@yearafter/content';
 import {
-  STUDY_TERMS,
   gradePointAverage,
-  hasStudiedThisYear,
+  isAtCollege,
   isInSchool,
   joinedActivities,
+  levelOf,
   COLLEGE_YEARS,
   POSTGRAD_YEARS,
   findMajor,
   letterGrade,
   schoolLabel,
-  studiedThisYear,
 } from '@yearafter/education';
 import { isCurrent, stagesFor } from '@yearafter/social';
 import { livingChildren } from '@yearafter/relationships';
@@ -54,9 +53,9 @@ import {
   occupationFor,
   openings,
   outOfPocket,
-  pushesLeft,
 } from '@yearafter/simulation';
 import { salaryLabel } from './JobsScreen';
+import type { Detail } from '../components/DetailCard';
 import {
   Card,
   ComingSoon,
@@ -166,149 +165,105 @@ function Screen({ children }: { children: React.ReactNode }) {
 /* 0107 — Career                                                               */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Ticket 0210c — three cards, in the same order, whatever age you are.
+ *
+ * Review, after playing 0210b: *"The career page is also very run together. Can
+ * we clean these up?"* They were right, and the cause was that this screen had
+ * grown one section per feature rather than one section per question. At
+ * nineteen and enrolled it rendered FIVE cards — Current, School, Studying,
+ * Work, Where the money goes — of which Current and Studying both named the
+ * degree and School and Studying both offered a way out of it. With a job it
+ * showed the job title twice: once as the occupation and once as the Work row
+ * under it.
+ *
+ * So the page is now three questions, asked in the same order at every age:
+ *
+ *   WHERE YOU ARE   — the one fact that describes this stage of life, and how
+ *                     it is going. Read-only, always.
+ *   WHAT YOU CAN DO — the buttons for that fact, and nothing else.
+ *   ELSEWHERE       — the ways out: another job, a degree, work on the side.
+ *
+ * Facts and buttons are in separate cards deliberately. Mixing them in one
+ * column, with identical rows and identical dividers, is most of what "run
+ * together" meant — there was no way to tell by looking which rows did anything.
+ */
 export function CareerScreen() {
-  const { state, studyHarder } = useGame();
-  const { push } = useNavigation();
+  const { state } = useGame();
   if (!state) return null;
-  const { player, education } = state;
-
-  const atSchool = isInSchool(education);
-  // A school record does not vanish the day you leave. Once there is one, it
-  // keeps being shown — as "Final grades" rather than "Grades".
-  const hasGrades = atSchool || education.stage === 'graduated' || education.stage === 'droppedOut';
-  const joined = joinedActivities(education);
-  const termsUsed = studiedThisYear(education, player.age);
-  const studiedOut = hasStudiedThisYear(education, player.age);
 
   return (
     <Screen>
-      <SectionHeading>Current</SectionHeading>
-      <Card>
-        {/*
-          Derived from education state at render time, exactly like the header —
-          the two must never disagree, and reading the stored `occupation` here
-          is what made them. Grade on the title line, school on the second, at
-          every age: review asked for school facts that read the same way each
-          year rather than a grade one year and a school type the next.
-        */}
-        <ListRow
-          icon={atSchool ? 'school' : 'career'}
-          // Ticket 0210: the same derivation the header uses, so the two can
-          // never disagree. A screenshot of the built app had this card reading
-          // "Unemployed / Finished school" directly above a Work card saying
-          // "Sales associate · Retail · 7 years in".
-          title={occupationFor(education, player.age, currentJobTitle(state))}
-          subtitle={schoolLabel(education)}
-          affordance="none"
-        />
-        {hasGrades ? (
-          <>
-            <RowDivider />
-            {/*
-              A letter and a GPA, never the underlying number. Spec 786-795:
-              explain outcomes through context, not formulas.
-            */}
-            <ListRow
-              title={atSchool ? 'Grades' : 'Final grades'}
-              value={letterGrade(education.performance)}
-              meta={`${gradePointAverage(education.performance).toFixed(1)} GPA`}
-              affordance="none"
-            />
-          </>
-        ) : null}
-        {atSchool ? (
-          <>
-            <RowDivider />
-            <ListRow
-              title="Standing"
-              subtitle={standingLabel(education.behaviour)}
-              affordance="none"
-              meter={education.behaviour}
-              meterColor={education.behaviour < 40 ? colors.negative : colors.statHealth}
-            />
-          </>
-        ) : null}
-      </Card>
-
-      {atSchool ? (
-        <>
-          <SectionHeading>School</SectionHeading>
-          <Card>
-            {/*
-              Spec 1821: "major + Study Harder is generally enough". This is the
-              whole school interaction, and review asked for it to be exactly
-              one button: "I want there to just be a button that says study
-              harder and it potentially (most of the time) boosts their grades."
-
-              TWO terms a school year — review asked for "at least twice" — and
-              it can fail to show on the report card either time. The subtitle
-              says which state the row is in, because a disabled button with no
-              reason reads as broken.
-            */}
-            <ListRow
-              icon="school"
-              title="Study Harder"
-              subtitle={
-                studiedOut
-                  ? 'Both terms of work are behind you this year.'
-                  : termsUsed > 0
-                    ? 'A second term. Worth less than the first.'
-                    : 'A term of real effort. It usually shows.'
-              }
-              value={studiedOut ? undefined : `${STUDY_TERMS - termsUsed} left`}
-              affordance={studiedOut ? 'none' : 'action'}
-              disabled={studiedOut}
-              onPress={studiedOut ? undefined : studyHarder}
-            />
-            <RowDivider />
-            {/*
-              "Clubs & Teams", not "Activities" — there is already an Activities
-              world in the tab bar, and two things with the same name one tap
-              apart is the kind of collision a player only notices by ending up
-              on the wrong screen.
-            */}
-            <ListRow
-              icon="social"
-              title="Clubs & Teams"
-              subtitle={
-                joined.length === 0
-                  ? 'Not in anything'
-                  : joined.map((activity) => activity.name).join(', ')
-              }
-              value={joined.length > 0 ? String(joined.length) : undefined}
-              affordance="navigate"
-              onPress={() => push({ screen: 'schoolActivities', title: 'Clubs & Teams' })}
-            />
-          </Card>
-        </>
-      ) : null}
-
-      <FurtherEducation />
-      <WorkSection />
-      <MoneyThisYear />
+      <WhereYouAre />
+      <WhatYouCanDo />
+      <Elsewhere />
     </Screen>
   );
 }
 
 /**
- * Ticket 0210b — college and graduate school.
+ * The one card that says what this person is, right now.
  *
- * Review: "when you graduate from highschool, there is no college or post
- * graduate options. Those are Necessary!"
- *
- * Only appears once school is behind them and there is something left to
- * study, so it never sits on a nine-year-old's screen. While enrolled it turns
- * into the degree itself: what you are studying, how it is going, and the exit.
+ * Four situations, one card, never two of them at once — which is the fix for
+ * the college case, where the old screen described the same degree in a Current
+ * card and again in a Studying card two rows below it.
  */
-function FurtherEducation() {
-  const { state, leaveStudies } = useGame();
+function WhereYouAre() {
+  const { state, showDetail } = useGame();
   if (!state) return null;
+  const { player, education } = state;
 
-  const { education, player } = state;
-  const studying = education.stage === 'college' || education.stage === 'postgrad';
-  const next = nextDegreeFor(state);
+  const held = state.employment.job;
+  const job = held ? findJob(held.jobId) : undefined;
+  const atCollege = isAtCollege(education);
+  const atSchool = isInSchool(education) && !atCollege;
 
-  if (studying) {
+  /* -- Working -------------------------------------------------------------- */
+  if (job && held) {
+    const years = Math.max(0, player.age - held.since);
+    return (
+      <>
+        <SectionHeading>Your job</SectionHeading>
+        <Card>
+          {/*
+            The salary is the row, and the row opens the arithmetic behind it.
+            Review: "just allow for a popup, showing the salary, tax rate, and
+            what that tax equates to in dollars, whenever I click on my
+            occupation on that page." See `payDetail`.
+
+            `payFor`, not `job.pay`. The first screenshot of this row read "$25k"
+            over a popup that said $27,602, because `job.pay` is the ADVERTISED
+            starting salary — right on the Openings screen, wrong for a job you
+            have held for five years. A summary and its own detail disagreeing by
+            $2,600 is the 0210 header defect over again (CORE_RULES 13.23).
+          */}
+          <ListRow
+            icon="career"
+            title={job.title}
+            subtitle={`${TRACK_LABELS[job.track]} · ${yearsInLabel(years)}`}
+            value={salaryLabel(
+              payFor(job, years, held.performance, state.employment.standing[job.track] ?? 50),
+            )}
+            meta="tap for the breakdown"
+            affordance="action"
+            onPress={() => showDetail(payDetail(state))}
+          />
+          <RowDivider />
+          {/* Performance in words, never the number. Spec 786-795. */}
+          <ListRow
+            title="How it is going"
+            subtitle={goingLabel(held.performance)}
+            affordance="none"
+            meter={held.performance}
+            meterColor={held.performance < 45 ? colors.negative : colors.statHealth}
+          />
+        </Card>
+      </>
+    );
+  }
+
+  /* -- Studying for a degree ------------------------------------------------ */
+  if (atCollege) {
     const major = education.majorId ? findMajor(education.majorId) : undefined;
     const year = (education.collegeYear ?? 0) + 1;
     const total = education.stage === 'postgrad' ? POSTGRAD_YEARS : COLLEGE_YEARS;
@@ -321,211 +276,243 @@ function FurtherEducation() {
             title={major?.name ?? 'Your degree'}
             subtitle={`Year ${year} of ${total}`}
             value={letterGrade(education.performance)}
+            meta={`${gradePointAverage(education.performance).toFixed(1)} GPA`}
             affordance="none"
-          />
-          <RowDivider />
-          <ListRow
-            title="Leave the program"
-            subtitle="No pausing and no coming back to this year."
-            affordance="action"
-            onPress={leaveStudies}
           />
         </Card>
       </>
     );
   }
 
-  if (!next || player.age < 18) return null;
+  /* -- At school ------------------------------------------------------------ */
+  if (atSchool) {
+    return (
+      <>
+        <SectionHeading>School</SectionHeading>
+        <Card>
+          {/*
+            Derived from education state at render time, exactly like the header
+            — the two must never disagree, and reading the stored `occupation`
+            here is what made them (Ticket 0210).
+          */}
+          <ListRow
+            icon="school"
+            title={occupationFor(education, player.age, undefined)}
+            subtitle={schoolLabel(education)}
+            value={letterGrade(education.performance)}
+            meta={`${gradePointAverage(education.performance).toFixed(1)} GPA`}
+            affordance="none"
+          />
+          <RowDivider />
+          <ListRow
+            title="Standing"
+            subtitle={standingLabel(education.behaviour)}
+            affordance="none"
+            meter={education.behaviour}
+            meterColor={education.behaviour < 40 ? colors.negative : colors.statHealth}
+          />
+        </Card>
+      </>
+    );
+  }
 
+  /* -- Between things ------------------------------------------------------- */
+  // Final grades stay only while they are still the most recent thing that
+  // happened. A forty-year-old carrying a high-school GPA at the top of their
+  // career screen is a row that says the same thing every year forever, which
+  // CORE_RULES 13.26 already rules out one screen over.
+  const finished = education.stage === 'graduated' || education.stage === 'droppedOut';
+  const credentialled = levelOf(education.credentials) !== 'none';
   return (
     <>
-      <SectionHeading>Further education</SectionHeading>
-      <RowGroup
-        rows={[
-          {
-            icon: 'school',
-            title: next === 'postgrad' ? 'Apply to graduate school' : 'Apply to college',
-            subtitle:
-              outOfPocket(state) <= Math.floor(Number(player.cash) / 100)
-                ? 'Pick a subject and put your name in.'
-                : `You would need ${'$' + outOfPocket(state).toLocaleString('en-US')} a year.`,
-            route: { screen: 'college', title: 'College' },
-          },
-        ]}
-      />
-    </>
-  );
-}
-
-/**
- * Ticket 0210b — where the salary actually went.
- *
- * Review, after playing 0210: *"I selected a job for $44k and only got paid a
- * few grand."* They were not wrong and it was not a bug — the salary is gross,
- * and what reaches the bank is what is left after tax and after living. But a
- * model nobody can see is indistinguishable from a broken one, and the player
- * was reading a correct number as a fault.
- *
- * So the gap is shown, in full, on the screen that produced it. Spec 1323 puts
- * income and tax rate on the finance overview and says "specific
- * expenses/income live on the entity that produces them" — the job produces the
- * salary, so this is where the arithmetic belongs.
- *
- * When 0301's ledger and 0303's living expenses land, this card reads from them
- * instead of computing it here, and `livingCostOf` is deleted rather than kept
- * alongside (CORE_RULES 13.8).
- */
-function MoneyThisYear() {
-  const { state } = useGame();
-  if (!state) return null;
-  const held = state.employment.job;
-  const job = held ? findJob(held.jobId) : undefined;
-  if (!job || !held) return null;
-
-  const years = Math.max(0, state.player.age - held.since);
-  const standing = state.employment.standing[job.track] ?? 50;
-  const gross = payFor(job, years, held.performance, standing);
-  const tax = gross - afterTax(gross);
-  const dependents = livingChildren(state.family).length;
-  const living = livingCostOf(afterTax(gross), dependents);
-  const kept = savedFrom(gross, dependents);
-
-  const money = (amount: number) => `$${Math.round(amount).toLocaleString('en-US')}`;
-
-  return (
-    <>
-      <SectionHeading note="a year">Where the money goes</SectionHeading>
+      <SectionHeading>Current</SectionHeading>
       <Card>
-        <ListRow title="Salary" value={money(gross)} affordance="none" />
-        <RowDivider />
         <ListRow
-          title="Tax"
-          subtitle={`About ${Math.round((tax / Math.max(1, gross)) * 100)}% at this income.`}
-          value={`−${money(tax)}`}
+          icon="career"
+          title={occupationFor(education, player.age, undefined)}
+          subtitle={schoolLabel(education)}
           affordance="none"
         />
-        <RowDivider />
-        <ListRow
-          title="Living"
-          subtitle={
-            dependents > 0
-              ? `Rent, food, everything — for ${dependents + 1} of you.`
-              : 'Rent, food, and everything else.'
-          }
-          value={`−${money(living)}`}
-          affordance="none"
-        />
-        <RowDivider />
-        <ListRow
-          title={kept < 0 ? 'Short by' : 'What you keep'}
-          subtitle={
-            kept < 0
-              ? 'This wage does not cover this household.'
-              : 'This is what actually reaches your account.'
-          }
-          value={money(Math.abs(kept))}
-          accent
-          affordance="none"
-        />
+        {finished && !credentialled ? (
+          <>
+            <RowDivider />
+            <ListRow
+              title="Final grades"
+              value={letterGrade(education.performance)}
+              meta={`${gradePointAverage(education.performance).toFixed(1)} GPA`}
+              affordance="none"
+            />
+          </>
+        ) : null}
       </Card>
     </>
   );
 }
 
 /**
- * Ticket 0210 — the working half of the Career screen.
+ * The buttons, in their own card.
  *
- * Spec 1321: "Ordinary jobs show concise compensation/performance information."
- * So this is a job, what it pays, how it is going in words, and the two things
- * a player can do about it — and nothing else. There is no quota (spec 104), no
- * workload or travel line (spec 97), and no performance number, because spec
- * 786–795 says explain outcomes through context rather than formulas.
+ * Ticket 0210c dropped every subtitle in here. Review: *"Under general options
+ * like work harder, the subtext is useless and just takes up space. It is also
+ * oddly worded and cringy."* "A stretch of real effort. It usually shows." told
+ * a player nothing the two words above it had not already told them, and said it
+ * every year of a working life. See CORE_RULES 13.29.
  */
-function WorkSection() {
-  const { state, workHarderAt, quitJob } = useGame();
+function WhatYouCanDo() {
+  const { state, studyHarder, workHarderAt, quitJob, leaveStudies } = useGame();
+  const { push } = useNavigation();
   if (!state) return null;
+  const { education } = state;
 
-  const { education, player } = state;
   const held = state.employment.job;
   const job = held ? findJob(held.jobId) : undefined;
+  const atCollege = isAtCollege(education);
+  const atSchool = isInSchool(education) && !atCollege;
+  const joined = joinedActivities(education);
   const colleagues = state.circle.people.filter(
     (person) => isCurrent(person) && person.context === 'work',
   );
 
+  const rows: React.ReactNode[] = [];
+
+  if (job && held) {
+    // No counter and no disabled state. Ticket 0210c: "I dont want a visual
+    // limit, the buttons can be hit as many times, but I only want an affect to
+    // happen a maximum of 2 times." The third press answers in a popup.
+    rows.push(
+      <ListRow
+        key="work"
+        icon="career"
+        title="Work Harder"
+        affordance="action"
+        onPress={workHarderAt}
+      />,
+    );
+    rows.push(
+      <ListRow
+        key="colleagues"
+        icon="social"
+        title="People at work"
+        subtitle={
+          colleagues.length === 0
+            ? 'Nobody you would call by name yet'
+            : colleagues.map((person) => person.firstName).join(', ')
+        }
+        affordance="navigate"
+        onPress={() => push({ screen: 'colleagues', title: 'People at work' })}
+      />,
+    );
+    rows.push(
+      <ListRow key="quit" title="Hand in your notice" affordance="action" onPress={quitJob} />,
+    );
+  }
+
+  if (atSchool || atCollege) {
+    rows.push(
+      <ListRow
+        key="study"
+        icon="school"
+        title="Study Harder"
+        affordance="action"
+        onPress={studyHarder}
+      />,
+    );
+  }
+
+  if (atSchool) {
+    // "Clubs & Teams", not "Activities" — there is already an Activities world
+    // in the tab bar, and two things with the same name one tap apart is the
+    // kind of collision a player only notices by ending up on the wrong screen.
+    // The subtitle stays: it names what you are actually in, which changes.
+    rows.push(
+      <ListRow
+        key="clubs"
+        icon="social"
+        title="Clubs & Teams"
+        subtitle={
+          joined.length === 0
+            ? 'Not in anything'
+            : joined.map((activity) => activity.name).join(', ')
+        }
+        value={joined.length > 0 ? String(joined.length) : undefined}
+        affordance="navigate"
+        onPress={() => push({ screen: 'schoolActivities', title: 'Clubs & Teams' })}
+      />,
+    );
+  }
+
+  if (atCollege) {
+    rows.push(
+      <ListRow key="leave" title="Leave the program" affordance="action" onPress={leaveStudies} />,
+    );
+  }
+
+  if (rows.length === 0) return null;
+
   return (
     <>
-      <SectionHeading>Work</SectionHeading>
-      {job && held ? (
-        <Card>
-          <ListRow
-            icon="career"
-            title={job.title}
-            subtitle={`${TRACK_LABELS[job.track]} · ${yearsInLabel(player.age - held.since)}`}
-            value={salaryLabel(job.pay)}
-            affordance="none"
-          />
-          <RowDivider />
-          {/*
-            Performance in words, never as the number. The same rule the school
-            card follows for grades, for the same reason.
-          */}
-          <ListRow
-            title="How it is going"
-            subtitle={goingLabel(held.performance)}
-            affordance="none"
-            meter={held.performance}
-            meterColor={held.performance < 45 ? colors.negative : colors.statHealth}
-          />
-          <RowDivider />
-          {/*
-            The mirror of Study Harder, down to being available twice a year and
-            being able to fail. See @yearafter/careers `WORK_SUCCESS_CHANCE`.
-          */}
-          <ListRow
-            icon="career"
-            title="Work Harder"
-            subtitle={
-              pushesLeft(state) === 0
-                ? 'You have put in what you have to put in this year.'
-                : pushesLeft(state) === 1
-                  ? 'A second push. Worth less than the first.'
-                  : 'A stretch of real effort. It usually shows.'
-            }
-            value={pushesLeft(state) > 0 ? `${pushesLeft(state)} left` : undefined}
-            affordance={pushesLeft(state) > 0 ? 'action' : 'none'}
-            disabled={pushesLeft(state) === 0}
-            onPress={pushesLeft(state) > 0 ? workHarderAt : undefined}
-          />
-          <RowDivider />
-          <ListRow
-            title="Hand in your notice"
-            subtitle="No notice period, and nothing to sign."
-            affordance="action"
-            onPress={quitJob}
-          />
-        </Card>
-      ) : null}
+      <SectionHeading>What you can do</SectionHeading>
+      <Card>
+        {rows.map((row, index) => (
+          <Fragment key={index}>
+            {index > 0 ? <RowDivider /> : null}
+            {row}
+          </Fragment>
+        ))}
+      </Card>
+    </>
+  );
+}
 
+/**
+ * Ticket 0210c — every way off this screen, in one card.
+ *
+ * Openings, a degree and odd jobs were three separate sections with three
+ * headings, which is how a page with nine rows on it came to need five headings.
+ * They are one question — what else could you be doing — so they are one card.
+ *
+ * These rows KEEP their subtitles. Review drew the line exactly where it belongs:
+ * *"Under category tabs like the love, doctor, mind & body, etc., the subtext is
+ * fine. Under general options like work harder, the subtext is useless."* A row
+ * that opens a screen is answering "what is behind this?" and the subtitle is
+ * the answer — and here every one of them is live state, not flavour: how many
+ * openings there are this year, what a degree would cost, how many gigs are on.
+ */
+function Elsewhere() {
+  const { state } = useGame();
+  if (!state) return null;
+
+  const { education, player } = state;
+  const job = state.employment.job ? findJob(state.employment.job.jobId) : undefined;
+  const next = isAtCollege(education) ? undefined : nextDegreeFor(state);
+  const owed = outOfPocket(state);
+
+  return (
+    <>
+      <SectionHeading>Elsewhere</SectionHeading>
       <RowGroup
         rows={[
           {
             icon: 'career',
             title: job ? 'Look for something else' : 'Find a job',
+            // Short enough not to clip. The full sentence — "School first. There
+            // are odd jobs in the meantime." — ran off the row as "in the
+            // meanti…", and a subtitle that stops mid-word reads as a bug.
             subtitle: canWork(state)
               ? `${openings(state).length} going this year`
-              : 'School first. There are odd jobs in the meantime.',
+              : 'School first — try the odd jobs',
             route: { screen: 'jobs', title: 'Openings' },
           },
-          ...(job
+          ...(next && player.age >= 18
             ? [
                 {
-                  icon: 'social' as const,
-                  title: 'People at work',
+                  icon: 'school' as const,
+                  title: next === 'postgrad' ? 'Apply to graduate school' : 'Apply to college',
                   subtitle:
-                    colleagues.length === 0
-                      ? 'Nobody you would call by name yet'
-                      : colleagues.map((person) => person.firstName).join(', '),
-                  route: { screen: 'colleagues' as const, title: 'People at work' },
+                    owed <= Math.floor(Number(player.cash) / 100)
+                      ? 'Pick a subject and put your name in'
+                      : `You would need $${owed.toLocaleString('en-US')} a year`,
+                  route: { screen: 'college' as const, title: 'College' },
                 },
               ]
             : []),
@@ -544,9 +531,70 @@ function WorkSection() {
   );
 }
 
-/** The job title, when there is one. Used by both cards on this screen. */
-function currentJobTitle(state: NonNullable<ReturnType<typeof useGame>['state']>) {
-  return state.employment.job ? findJob(state.employment.job.jobId)?.title : undefined;
+/**
+ * Ticket 0210b, moved behind a tap by 0210c — where the salary actually went.
+ *
+ * Review, after playing 0210: *"I selected a job for $44k and only got paid a
+ * few grand."* They were not wrong and it was not a bug — the salary is gross,
+ * and what reaches the bank is what is left after tax and after living. But a
+ * model nobody can see is indistinguishable from a broken one, and the player
+ * was reading a correct number as a fault.
+ *
+ * 0210b answered that with a permanent four-row card on the Career screen. The
+ * follow-up review: *"I dont need to see the whole expense breakdown, just allow
+ * for a popup, showing the salary, tax rate, and what that tax equates to in
+ * dollars, whenever I click on my occupation on that page."*
+ *
+ * So it is a popup, and it leads with the three things asked for by name. The
+ * fourth line stays, in one row rather than two: cutting straight from tax to
+ * nothing would re-open the exact question 0210b was built to close, because tax
+ * is not most of the gap — living is. The living cost is the note under the
+ * take-home figure rather than a row of its own, which is the difference between
+ * an answer and an expense breakdown.
+ *
+ * Spec 1323 puts income and tax rate on the finance overview and says "specific
+ * expenses/income live on the entity that produces them" — the job produces the
+ * salary, so this is where the arithmetic belongs. When 0301's ledger and 0303's
+ * living expenses land, this reads from them and `livingCostOf` is deleted
+ * rather than kept alongside (CORE_RULES 13.8).
+ */
+function payDetail(state: NonNullable<ReturnType<typeof useGame>['state']>): Detail {
+  const held = state.employment.job;
+  const job = held ? findJob(held.jobId) : undefined;
+  if (!job || !held) return { title: 'Your pay', lines: [] };
+
+  const years = Math.max(0, state.player.age - held.since);
+  const standing = state.employment.standing[job.track] ?? 50;
+  const gross = payFor(job, years, held.performance, standing);
+  const tax = gross - afterTax(gross);
+  const dependents = livingChildren(state.family).length;
+  const living = livingCostOf(afterTax(gross), dependents);
+  const kept = savedFrom(gross, dependents);
+  const rate = Math.round((tax / Math.max(1, gross)) * 100);
+
+  const money = (amount: number) => `$${Math.round(amount).toLocaleString('en-US')}`;
+
+  return {
+    title: job.title,
+    note: 'a year',
+    lines: [
+      { label: 'Salary', value: money(gross) },
+      { label: 'Tax rate', value: `${rate}%`, note: 'at this income' },
+      { label: 'Tax', value: `−${money(tax)}` },
+      {
+        label: kept < 0 ? 'Short by' : 'What reaches your account',
+        value: money(Math.abs(kept)),
+        note:
+          dependents > 0
+            ? `after ${money(living)} of living, for ${dependents + 1} of you`
+            : `after ${money(living)} of rent, food and everything else`,
+        accent: true,
+      },
+    ],
+    ...(kept < 0
+      ? { footnote: 'This wage does not cover this household. Something has to change.' }
+      : {}),
+  };
 }
 
 /** How long you have been somewhere, said the way a person would say it. */

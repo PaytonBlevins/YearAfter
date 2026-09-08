@@ -28,7 +28,12 @@ const UNTIL = 22;
 
 interface Life {
   readonly state: GameState;
-  readonly said: readonly { readonly age: number; readonly request: string; readonly yes: boolean; readonly text: string }[];
+  readonly said: readonly {
+    readonly age: number;
+    readonly request: string;
+    readonly yes: boolean;
+    readonly text: string;
+  }[];
   readonly granted: readonly { readonly request: string; readonly age: number }[];
 }
 

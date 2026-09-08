@@ -25,11 +25,7 @@ import {
   type FamilyMember,
 } from '@yearafter/relationships';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
-import {
-  canBecomeParent,
-  isWaiting,
-  triedThisYear,
-} from '@yearafter/parenting';
+import { canBecomeParent, isWaiting, triedThisYear } from '@yearafter/parenting';
 import { canAdoptNow, canTryForBaby } from '@yearafter/simulation';
 import { useGame } from '../stores/gameStore';
 import { useNavigation } from '../navigation/navigation';
@@ -129,11 +125,7 @@ export function FamilyScreen() {
           </SectionHeading>
           <Card>
             {state.parenting.pregnancy ? (
-              <ListRow
-                title="A baby is on the way"
-                subtitle="Due next year."
-                affordance="none"
-              />
+              <ListRow title="A baby is on the way" subtitle="Due next year." affordance="none" />
             ) : (
               <ListRow
                 title="Try for a baby"
@@ -149,9 +141,7 @@ export function FamilyScreen() {
                     ? 'action'
                     : 'none'
                 }
-                disabled={
-                  !canTryForBaby(state) || triedThisYear(state.parenting, state.player.age)
-                }
+                disabled={!canTryForBaby(state) || triedThisYear(state.parenting, state.player.age)}
                 onPress={
                   canTryForBaby(state) && !triedThisYear(state.parenting, state.player.age)
                     ? tryForABaby

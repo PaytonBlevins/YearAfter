@@ -377,13 +377,17 @@ function meetSomebodyNew(
   const chance = ADULT_MEETING_CHANCE * (1 + openness * 0.45);
   if (!stream.chance(Math.max(0.08, Math.min(0.92, chance)))) return people;
 
-  const names = nameContext(input.nameCultureId, { ...circle, people }, input.family, input.firstName);
+  const names = nameContext(
+    input.nameCultureId,
+    { ...circle, people },
+    input.family,
+    input.firstName,
+  );
   // Three doors, and 0210 finally opened the third. Work first, because for an
   // employed adult it is where most of a week goes and the 0207b write-up named
   // it as the missing one; then something you still do; then where you live.
   const viaWork = input.working && stream.chance(0.4);
-  const viaActivity =
-    !viaWork && input.joinedActivityIds.length > 0 && stream.chance(0.45);
+  const viaActivity = !viaWork && input.joinedActivityIds.length > 0 && stream.chance(0.45);
   const activityId = viaActivity ? stream.pick([...input.joinedActivityIds]) : undefined;
 
   const person = newClassmate(stream, names, input.age, input.worldYear - input.age, people.length);

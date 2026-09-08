@@ -136,8 +136,10 @@ export function askParent(
   // is worth a little. Small either way: a parent is not a friendship meter.
   const family = updateMember(state.family, parent.id, (member) => ({
     ...member,
-    relationship: Math.max(0, Math.min(100, member.relationship + (saidYes ? 2 : -3))) as
-      typeof member.relationship,
+    relationship: Math.max(
+      0,
+      Math.min(100, member.relationship + (saidYes ? 2 : -3)),
+    ) as typeof member.relationship,
   }));
 
   const asked = state.parenting.askedParents ?? {};

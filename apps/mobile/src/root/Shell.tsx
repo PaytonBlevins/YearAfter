@@ -11,6 +11,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { findJob } from '@yearafter/careers';
 import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
+import { DetailCard } from '../components/DetailCard';
 import { OutcomeCard } from '../components/OutcomeCard';
 import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
@@ -69,7 +70,17 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
 };
 
 export function Shell() {
-  const { ready, state, advance, decision, answer, outcome, dismissOutcome } = useGame();
+  const {
+    ready,
+    state,
+    advance,
+    decision,
+    answer,
+    outcome,
+    dismissOutcome,
+    detail,
+    dismissDetail,
+  } = useGame();
   const { world, current, selectWorld, push, pop, closeToLife } = useNavigation();
 
   /**
@@ -215,8 +226,15 @@ export function Shell() {
         only lived on the screen they pressed it on would be lost.
         A pending decision wins — time being stopped is the more urgent fact.
       */}
-      {!decision && outcome ? (
-        <OutcomeCard outcome={outcome} onDismiss={dismissOutcome} />
+      {!decision && outcome ? <OutcomeCard outcome={outcome} onDismiss={dismissOutcome} /> : null}
+
+      {/*
+        Ticket 0210c. A breakdown the player asked for by tapping a row. Last in
+        the stack and last in priority: a decision stops time, an outcome answers
+        a press, and this is the player reading something at their leisure.
+      */}
+      {!decision && !outcome && detail ? (
+        <DetailCard detail={detail} onDismiss={dismissDetail} />
       ) : null}
     </View>
   );
