@@ -110,10 +110,22 @@ export interface Acquaintance extends Npc {
    * not a cast.
    *
    * A friend who has moved to another school stays `current` but stops being
-   * `inClass`, and from then on the friendship has to survive on its own. That
-   * is the moment childhood friendships are actually decided.
+   * in the room, and from then on the friendship has to survive on its own.
+   * That is the moment childhood friendships are actually decided.
+   *
+   * **Ticket 0211a renamed this from `inClass`,** and the rename is the fix
+   * rather than tidying. A field called `inClass` had exactly one room in it,
+   * so when 0210 gave adults a job the only way to be surrounded by people was
+   * still to be at school — the player's report: *"on the people page, in the
+   * friends tab, it shows two people in my class, yet I am working a job. It
+   * also shows no coworkers on the job screen when it should. You will be
+   * surrounded by people, its up to you to build a relationship or not."*
+   *
+   * A room is now anything you turn up to every week: a class, a team you are
+   * still on, and — since 0211a — the job you currently hold. `context` says
+   * WHICH room; this says whether you are still in it. CORE_RULES 13.23.
    */
-  readonly inClass: boolean;
+  readonly inRoom: boolean;
   /**
    * The activity this person came from, when they are a teammate.
    *
@@ -123,6 +135,15 @@ export interface Acquaintance extends Npc {
    * of what happens to the people you only knew through a thing you did.
    */
   readonly viaActivityId?: string;
+  /**
+   * The job this person came from, when they are a colleague (Ticket 0211a).
+   *
+   * The exact counterpart of `viaActivityId`, and it exists for the same
+   * reason: the room has to be identifiable, or leaving it cannot end it. Two
+   * spells in the same TITLE at different places are different rooms, so this
+   * is the job id rather than the title.
+   */
+  readonly viaJobId?: string;
   /** For a teacher: what they teach, so a row can say "Mrs. Okafor · English". */
   readonly subject?: string;
   /**
@@ -355,14 +376,15 @@ export function endPerson(
  *
  * Two exemptions, both load-bearing:
  *
- *  - anybody `inClass`, because sharing a room every weekday is contact whether
- *    or not the player pressed a button about it;
+ *  - anybody `inRoom`, because sharing a room every weekday is contact whether
+ *    or not the player pressed a button about it — a classroom, a team, or
+ *    since 0211a the job they hold;
  *  - teachers, because a teacher is a relationship with a school year rather
  *    than a friendship that fades — they leave when the year ends.
  */
 export function driftPerson(person: Acquaintance, age: number): Acquaintance {
   if (!isCurrent(person)) return person;
-  if (person.kind === 'teacher' || person.inClass) return person;
+  if (person.kind === 'teacher' || person.inRoom) return person;
   if (person.lastContactAge >= age) return person;
 
   // Year by year rather than in one step, because the rate depends on where the

@@ -7,7 +7,7 @@
  * the whole difference between the two halves of this ticket.
  */
 
-import { createTimelineEntry, type TimelineEntry } from '@yearafter/character';
+import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
 import {
   START_STANDING,
   WORK_GAIN_MAX,
@@ -257,7 +257,7 @@ export function applyFor(state: GameState, jobId: string): Result<ApplyOutcome, 
     state: {
       ...state,
       employment,
-      player: { ...state.player, timeline: [...state.player.timeline, entry] },
+      player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
     },
     hired,
     entry,
@@ -295,7 +295,14 @@ export function workHarder(state: GameState): Result<PushOutcome, WorkError> {
   const text = worked
     ? pick(WORKED_LINES, `${state.world.year}:work`, state.player.age)
     : pick(DID_NOT_LINES, `${state.world.year}:work`, state.player.age);
-  const entry = write(state, text, `t:${state.world.year}:work:${pushed}`);
+  // The JOB is in the id, not just the counter. Reported by the player:
+  // "ERROR Encountered two children with the same key, `t:2020:work:1`."
+  // `pushedThisYear` lives on the JobHeld, so quitting and being hired somewhere
+  // else in the same year resets it to zero and the next two pushes re-emit
+  // `:0` and `:1` for that year. An id has to carry everything that resets the
+  // counter inside it (CORE_RULES 13.12), and `applyFor` resetting the counter
+  // was invisible from here.
+  const entry = write(state, text, `t:${state.world.year}:work:${held.jobId}:${pushed}`);
 
   return ok({
     state: {
@@ -311,7 +318,7 @@ export function workHarder(state: GameState): Result<PushOutcome, WorkError> {
           pushedAtAge: state.player.age,
         },
       },
-      player: { ...state.player, timeline: [...state.player.timeline, entry] },
+      player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
     },
     entry,
     spent: false,
@@ -356,7 +363,12 @@ export function resign(state: GameState): Result<WorkOutcome, WorkError> {
       : years === 1
         ? `Handed in your notice after a year. ${job ? job.title : 'The job'} was not it.`
         : `Left after ${years} years. You had known for a while.`;
-  const entry = write(state, text, `t:${state.world.year}:resign`);
+  // The job, for the same reason Work Harder carries it: two jobs can be left
+  // in one year, and this id said only which year it was. Found by the
+  // job-hopping test in the same run that proved the work-id fix — one bug's
+  // regression test finding its neighbour, which is the argument for playing a
+  // population rather than a path.
+  const entry = write(state, text, `t:${state.world.year}:resign:${held.jobId}`);
 
   return ok({
     state: {
@@ -369,7 +381,7 @@ export function resign(state: GameState): Result<WorkOutcome, WorkError> {
           { jobId: held.jobId, from: held.since, to: state.player.age, because: 'resigned' },
         ],
       },
-      player: { ...state.player, timeline: [...state.player.timeline, entry] },
+      player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
     },
     entry,
   });

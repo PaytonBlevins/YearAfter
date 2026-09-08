@@ -28,9 +28,43 @@ export function PeopleScreen() {
   const people = state.circle.people;
   const current = people.filter(isCurrent);
   const friends = current.filter(isFriend);
-  const classmates = current.filter((person) => person.kind === 'peer' && !isFriend(person));
   const teachers = current.filter((person) => person.kind === 'teacher');
   const past = people.filter((person) => !isCurrent(person)).reverse();
+
+  /*
+    Ticket 0211a. Everybody who is not yet a friend, grouped by WHERE THEY ARE
+    rather than lumped under one heading.
+
+    The old line was `current.filter(peer && !isFriend)` under a heading reading
+    "Class · in your year", which is how a working thirty-three-year-old came to
+    be shown two colleagues as classmates — the player's report. That heading was
+    not describing the people underneath it; it was describing the only room the
+    build had when it was written, and it kept saying so for the rest of the life.
+
+    A section now exists only when somebody is actually in that room, so the
+    headings answer for themselves.
+  */
+  const others = current.filter(
+    (person) =>
+      person.kind === 'peer' &&
+      !isFriend(person) &&
+      // Colleagues you have not befriended live on the Career screen, which
+      // already says so out loud: "People from work stay here rather than on
+      // the Relationships screen. If one of them becomes an actual friend, that
+      // is where they will turn up." Listing them here as well would put the
+      // same three people on two screens — and the first version of this fix
+      // did exactly that, which is how the note caught it.
+      !(person.context === 'work' && person.inRoom),
+  );
+  const inRoomsOf = (context: Acquaintance['context']) =>
+    others.filter((person) => person.context === context && person.inRoom);
+  const classmates = inRoomsOf('school');
+  const teammates = inRoomsOf('activity');
+  // Everybody else: people you met somewhere, and people whose room you left —
+  // including somebody from a job you no longer have, which is the honest place
+  // for them. "Around" is the group drift is working on.
+  const placed = new Set([...classmates, ...teammates].map((person) => person.id));
+  const around = others.filter((person) => !placed.has(person.id));
 
   if (people.length === 0) {
     return (
@@ -76,23 +110,20 @@ export function PeopleScreen() {
         )}
       </Card>
 
-      {classmates.length > 0 ? (
-        <>
-          <SectionHeading note="in your year">Class</SectionHeading>
-          <Card>
-            {classmates.map((person, index) => (
-              <Fragment key={person.id}>
-                {index > 0 ? <RowDivider /> : null}
-                <PersonRow
-                  person={person}
-                  playerAge={state.player.age}
-                  onPress={() => open(person)}
-                />
-              </Fragment>
-            ))}
-          </Card>
-        </>
-      ) : null}
+      <RoomSection
+        heading="Class"
+        note="in your year"
+        people={classmates}
+        age={state.player.age}
+        open={open}
+      />
+      <RoomSection
+        heading="Teams and clubs"
+        people={teammates}
+        age={state.player.age}
+        open={open}
+      />
+      <RoomSection heading="Around" people={around} age={state.player.age} open={open} />
 
       {teachers.length > 0 ? (
         <>
@@ -139,6 +170,42 @@ export function PeopleScreen() {
         </Text>
       </View>
     </ScrollView>
+  );
+}
+
+/**
+ * One room's worth of people, or nothing at all.
+ *
+ * Ticket 0211a. Rendering nothing when the room is empty is the whole point:
+ * a heading that is always there stops being a fact about this life and starts
+ * being furniture, which is how "Class" ended up over a list of colleagues.
+ */
+function RoomSection({
+  heading,
+  note,
+  people,
+  age,
+  open,
+}: {
+  heading: string;
+  note?: string;
+  people: readonly Acquaintance[];
+  age: number;
+  open: (person: Acquaintance) => void;
+}) {
+  if (people.length === 0) return null;
+  return (
+    <>
+      <SectionHeading {...(note ? { note } : {})}>{heading}</SectionHeading>
+      <Card>
+        {people.map((person, index) => (
+          <Fragment key={person.id}>
+            {index > 0 ? <RowDivider /> : null}
+            <PersonRow person={person} playerAge={age} onPress={() => open(person)} />
+          </Fragment>
+        ))}
+      </Card>
+    </>
   );
 }
 

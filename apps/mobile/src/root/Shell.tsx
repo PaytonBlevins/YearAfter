@@ -11,7 +11,9 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { findJob } from '@yearafter/careers';
 import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
+import { DoctorScreen } from '../screens/DoctorScreen';
 import { DetailCard } from '../components/DetailCard';
+import { EndOfLifeCard } from '../components/EndOfLifeCard';
 import { OutcomeCard } from '../components/OutcomeCard';
 import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
@@ -33,7 +35,6 @@ import {
   AssetsScreen,
   CareerScreen,
   DebugScreen,
-  DoctorScreen,
   MindBodyScreen,
   RelationshipsScreen,
   RelocateScreen,
@@ -80,6 +81,7 @@ export function Shell() {
     dismissOutcome,
     detail,
     dismissDetail,
+    startNewLife,
   } = useGame();
   const { world, current, selectWorld, push, pop, closeToLife } = useNavigation();
 
@@ -235,6 +237,22 @@ export function Shell() {
       */}
       {!decision && !outcome && detail ? (
         <DetailCard detail={detail} onDismiss={dismissDetail} />
+      ) : null}
+
+      {/*
+        Ticket 0211. Above everything, and not dismissible: there is nothing
+        else to do. Without it a dead character leaves the player on the Life
+        screen with a greyed-out Advance button and no way forward, which reads
+        as the app breaking rather than the life ending. 0212 replaces this with
+        the real ending — cause, summary, who survives them, a few highlights.
+      */}
+      {!state.player.alive ? (
+        <EndOfLifeCard
+          name={`${state.player.firstName} ${state.player.lastName}`}
+          age={state.health.diedAtAge ?? state.player.age}
+          cause={state.health.causeOfDeath ?? 'Their health'}
+          onStartAgain={() => void startNewLife()}
+        />
       ) : null}
     </View>
   );

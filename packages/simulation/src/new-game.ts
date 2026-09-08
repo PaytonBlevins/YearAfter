@@ -223,6 +223,10 @@ export function createNewGame(options: NewGameOptions): GameState {
   return createGameState(createWorldState(options.startYear ?? 2000, 1), character, rng, {
     family,
     nameCultureId: nameCulture,
+    // Ticket 0211. Vitality starts where the generated body is, which is the
+    // only honest value — the age curve takes it from here, and a newborn owes
+    // nothing yet.
+    health: { conditions: [], vitality: character.stats.health, deficit: 0 },
   });
 }
 

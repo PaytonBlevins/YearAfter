@@ -696,3 +696,128 @@ above the RNG stream in all three, because a dead button that consumes randomnes
 would make two identical lives diverge on how often somebody mashed it, and the
 seed would quietly stop meaning anything. `careers.test.ts` advances a year after
 twenty-five futile presses and asserts the timeline is identical.
+
+### 13.31 An invariant kept in sixteen places is sixteen promises
+
+CORE_RULES 13.12 says a timeline entry's id is unique, forever. Enforcing it in
+each producer has now failed three times, and the player reported all three:
+
+- **0206b** — `t:2012:study` twice, because Study Harder became twice a year and
+  the id did not carry the term.
+- **0207c** — the same id again, this time already written into saves where a
+  fixed producer could never reach it.
+- **0211a** — `t:2020:work:1` twice, because quitting a job and being hired
+  somewhere else in the SAME YEAR resets `pushedThisYear`, and the id carried
+  the counter but not the job. Fixing that immediately exposed `t:YEAR:resign`
+  doing the same thing, two jobs left in one year.
+
+Two rules come out of it.
+
+**An id has to carry everything that can reset the counter inside it.** The work
+id was written in `workHarder` and the counter is reset in `applyFor`, one file
+away — so the producer could be read carefully, in full, and still be wrong.
+Where a counter lives on an object, the object's id belongs in the key.
+
+**And the invariant gets ONE implementation.** `appendToTimeline` is now the only
+supported way into the feed, and it suffixes rather than collides. That is a NET,
+not a licence: a `:dup` suffix appearing in a freshly played life means a producer
+asked for an id that was taken, and `careers.test.ts` fails on it. The net keeps
+React rendering; the test keeps the producers honest.
+
+The migration is the third layer, because a save outlives the bug that wrote it
+(13.12) and this is now the second time the same repair has been needed.
+
+### 13.32 A room is not a door
+
+Player report, after playing 0210c: _"on the people page, in the friends tab, it
+shows two people in my class, yet I am working a job. It also shows no coworkers
+on the job screen when it should. **You will be surrounded by people, its up to
+you to build a relationship or not.**"_
+
+That last sentence is the rule. 0206 already had it right for school — five
+classmates, every year, whether or not the player pressed anything, exempt from
+drift because sharing a room IS contact. 0210 then gave adults a job and made it
+a DOOR instead: one of three possible outcomes of a per-year meeting roll, behind
+a total-circle cap of four. Measured afterwards, most working characters never
+had a single colleague.
+
+A place the character turns up to every week puts people in front of them. Not a
+chance to meet somebody — people, already there, with names. What the player does
+about them is the game; whether they exist is not.
+
+Two corollaries, both of which were also wrong:
+
+**The room has to be identifiable, or leaving it cannot end it.** A crew keyed on
+a job TITLE would follow a character from one kitchen to the next. It is keyed on
+the job, and leaving takes them out of the room without ending them — what happens
+after that is drift's business, which is the honest test of whether it was a
+friendship or a desk.
+
+**And a field named after one room will only ever hold one.** `inClass` is now
+`inRoom`. The rename is the fix, not tidying: while the field was called
+`inClass`, "surrounded by people" could only mean school, and `changedSchool` was
+quietly ending everybody the character worked with. That is 13.23 again, inside
+the rule that already carries a warning about it.
+
+### 13.33 A budget kept per writer is not a budget
+
+Spec 725–770 says a busy character should not be bombarded, and until 0211 that
+was enforced by every phase keeping itself small — six writers, six separate
+promises, no arithmetic anywhere. It held for exactly as long as nobody added a
+seventh.
+
+0211 added health. Health took ONE line. A year that was already at the cap went
+to eight, and two invariant tests written five tickets apart failed together.
+Trimming the health phase to one line did not fix it, and could not have: the
+overflow was not health's, it was the year's.
+
+So the cap moved to `advanceYear`, where the year is assembled and where the
+total is visible for the first time. Milestones are never dropped — a
+graduation, a wedding, a birth and a death are what a life is remembered by, and
+a feed that swallowed one to make room for a cold would be worse than a long
+year — and the surviving lines are re-sequenced, because leaving the original
+gaps sorts correctly and then reads as though something is missing.
+
+The general form: when a rule is about a TOTAL, it cannot be kept by the parts.
+Each part is behaving correctly and the sum is still wrong, which is why every
+contributor's tests stay green while the thing they were protecting breaks.
+
+The same shape appeared twice more in this ticket, in the tests rather than the
+code. A test that counted a year's lines was counting the player's own answers
+alongside the year's, and a test that compared two clamped deltas was measuring
+the clamp. Both had been right for five tickets and both were measuring
+something adjacent to what they claimed.
+
+### 13.34 Health is a condition, not a resource
+
+Ticket 0211 measured before it built, and found health p10 38 / median 52 /
+p90 63 at twenty — and the same three numbers at thirty, forty, fifty, sixty,
+seventy and eighty. Nothing in the build had written to it since childhood
+workload, and 80 of 80 characters were alive at eighty. A bar the player had
+been looking at since 0106 had never once meant anything.
+
+Three rules came out of building the fix.
+
+**A stat that does not move cannot carry a rule.** Adding mortality on top of a
+frozen number produces a flat hazard — the same chance of dying at twenty-five
+as at ninety. Health had to move before death could depend on it, which is why
+this ticket is an ageing curve first and a mortality curve second.
+
+**One number cannot be two things.** The first version kept a single health value
+that age lowered, illness lowered harder, and recovery raised. Recovery at 2.2 a
+year swamped an age curve costing 0.45, so nobody aged, everything that moved
+health was a condition ceiling, and the median character died at sixty-four.
+Splitting it into VITALITY — what age has done, never given back — and DEFICIT —
+what illness took and time returns — made both curves tunable, because each one
+then had exactly one job.
+
+**And the baseline is the population's, not the word's.** `frailtyFactor` treated
+70 as healthy because seventy sounds healthy. The played population sits at 66.
+Every character in the game was therefore frail for their entire adult life.
+That is 13.25 for the third time, and it will not be the last.
+
+Spec 531, 1165 and 1974 are what keep this from becoming a management screen:
+routine health maintenance is removed BY NAME. So there is one button, once a
+year, worth a few points — because a check-up worth ten points makes skipping it
+a mistake, and a control you are punished for not pressing every January for
+eighty years is the chore the spec deletes.

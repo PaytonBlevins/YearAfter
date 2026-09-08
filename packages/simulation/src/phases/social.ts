@@ -47,6 +47,8 @@ export interface SocialPhaseInput {
    * new person a year.
    */
   readonly jobTitle?: string;
+  /** Ticket 0211a: which job, so its crew can belong to it and end with it. */
+  readonly jobId?: string;
 }
 
 export interface SocialPhaseOutput {
@@ -66,6 +68,7 @@ export function runSocial(input: SocialPhaseInput): SocialPhaseOutput {
     joinedActivityIds: input.education.activities.map((entry) => entry.activityId),
     working: input.jobTitle !== undefined,
     ...(input.jobTitle !== undefined ? { jobTitle: input.jobTitle } : {}),
+    ...(input.jobId !== undefined ? { jobId: input.jobId } : {}),
     family: input.family,
     atSchool,
     // Starting school counts as changing it: the class exists from that year

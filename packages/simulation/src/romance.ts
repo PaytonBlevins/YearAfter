@@ -18,7 +18,12 @@
  *    enforced here, where the whole circle is in hand.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { cents, err, ok, subtract, type Result } from '@yearafter/core';
 import {
   contactWith,
@@ -147,7 +152,7 @@ export function romanticMove(
 
   const player: Character = {
     ...state.player,
-    timeline: [...state.player.timeline, entry],
+    timeline: appendToTimeline(state.player.timeline, entry),
     // Charged once, here, and only what `movesFor` already confirmed is there.
     cash: result.spent > 0 ? subtract(state.player.cash, cents(result.spent)) : state.player.cash,
   };

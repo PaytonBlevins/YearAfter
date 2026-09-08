@@ -120,14 +120,18 @@ export const isRomantic = (person: Acquaintance): boolean =>
 export const partnerOf = (people: readonly Acquaintance[]): Acquaintance | undefined =>
   people.find(
     (person) =>
-      isRomantic(person) && person.romance?.stage !== 'interested' && person.endedAtAge === undefined,
+      isRomantic(person) &&
+      person.romance?.stage !== 'interested' &&
+      person.endedAtAge === undefined,
   );
 
 /** People the player likes who do not yet know it, or do not yet agree. */
 export const crushesOf = (people: readonly Acquaintance[]): readonly Acquaintance[] =>
   people.filter(
     (person) =>
-      isRomantic(person) && person.romance?.stage === 'interested' && person.endedAtAge === undefined,
+      isRomantic(person) &&
+      person.romance?.stage === 'interested' &&
+      person.endedAtAge === undefined,
   );
 
 export const exesOf = (people: readonly Acquaintance[]): readonly Acquaintance[] =>

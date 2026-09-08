@@ -12,7 +12,12 @@
  * button was pressed. One attempt per school year enforces the rest.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { findActivity } from '@yearafter/content';
 import { err, ok, type Result } from '@yearafter/core';
 import { attemptTryout, hasAttemptedThisYear, hasJoined, isInSchool } from '@yearafter/education';
@@ -75,7 +80,7 @@ export function tryOut(state: GameState, activityId: string): Result<TryoutOutco
 
   const player: Character = {
     ...state.player,
-    timeline: [...state.player.timeline, entry],
+    timeline: appendToTimeline(state.player.timeline, entry),
   };
 
   // Making a team puts you next to the people on it (Ticket 0206b). Reading

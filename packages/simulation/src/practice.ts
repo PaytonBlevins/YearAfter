@@ -12,7 +12,12 @@
  * clubs stays in the middle of all of them, which is the real trade.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { findActivity } from '@yearafter/content';
 import { clampStat, err, ok, type Result } from '@yearafter/core';
 import {
@@ -95,7 +100,7 @@ export function practise(
 
   const player: Character = {
     ...state.player,
-    timeline: [...state.player.timeline, timelineEntry],
+    timeline: appendToTimeline(state.player.timeline, timelineEntry),
   };
 
   return ok({

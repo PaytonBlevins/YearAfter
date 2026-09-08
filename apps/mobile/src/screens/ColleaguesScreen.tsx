@@ -28,7 +28,9 @@ export function ColleaguesScreen() {
   if (!state) return null;
 
   const colleagues = state.circle.people.filter(
-    (person) => isCurrent(person) && person.context === 'work',
+    // Ticket 0211a: still IN the room. A colleague from a job you left is
+    // somebody you know, not somebody at your work.
+    (person) => isCurrent(person) && person.context === 'work' && person.inRoom,
   );
 
   if (colleagues.length === 0) {

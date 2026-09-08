@@ -87,6 +87,47 @@ export function createTimelineEntry(
   return { id: id ?? `t:${rest.year}:${rest.sequence}`, ...rest };
 }
 
+/**
+ * Ticket 0211a — the only supported way to put an entry in the feed.
+ *
+ * CORE_RULES 13.12 says a timeline entry's id is unique, forever. Enforcing
+ * that in each producer has now failed THREE TIMES, and the player reported all
+ * three:
+ *
+ *  - 0206b: `t:2012:study` twice, because Study Harder became twice a year and
+ *    the id did not carry the term.
+ *  - 0207c: the same id again, this time already sitting in saved games where a
+ *    fixed producer could never reach it.
+ *  - 0210c: `t:2020:work:1` twice, because quitting a job and being hired
+ *    somewhere else in the SAME YEAR resets the push counter, and the id
+ *    carried the counter but not the job.
+ *
+ * Sixteen places appended to the timeline and every one of them invented its
+ * own id, so the invariant was sixteen separate promises. This is the one
+ * place, and it keeps the promise itself: an id that is already in the feed
+ * gets a suffix rather than a collision.
+ *
+ * The suffix is deliberately the same shape the 0207c migration writes, so a
+ * repaired save and a live one are indistinguishable, and it is derived only
+ * from what is already in the timeline — no RNG, no clock — so a life still
+ * replays identically from its seed.
+ *
+ * This is a NET, not a licence. A producer whose ids collide is still a
+ * producer with a bug: the suffix keeps React rendering while the real id stays
+ * wrong, and `everyIdIsUnique` in the simulation tests is what catches that.
+ * The work id was fixed at the same time this landed.
+ */
+export function appendToTimeline(
+  timeline: readonly TimelineEntry[],
+  entry: TimelineEntry,
+): readonly TimelineEntry[] {
+  if (!timeline.some((existing) => existing.id === entry.id)) return [...timeline, entry];
+
+  let suffix = 1;
+  while (timeline.some((existing) => existing.id === `${entry.id}:dup${suffix}`)) suffix += 1;
+  return [...timeline, { ...entry, id: `${entry.id}:dup${suffix}` }];
+}
+
 /** Group the feed by age, newest age first — the order the Life screen renders. */
 export function groupByAge(
   entries: readonly TimelineEntry[],

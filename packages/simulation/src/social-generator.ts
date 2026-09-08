@@ -100,6 +100,39 @@ export const ADULT_WARMTH: readonly [number, number] = [18, 38];
 export const ADULT_MOVES_ON = 0.22;
 
 /**
+ * Ticket 0211a — how many colleagues a job puts in front of you.
+ *
+ * Player report: *"It also shows no coworkers on the job screen when it should.
+ * You will be surrounded by people, its up to you to build a relationship or
+ * not."* That is the correct model and it was not what 0210 built.
+ *
+ * 0210 made work the third DOOR — one of three ways `meetSomebodyNew` might
+ * pick, behind a per-year meeting roll, behind a total-circle cap of four. So a
+ * colleague needed two rolls to line up in a year when the circle happened to
+ * have a seat free, and most working characters never had one. A door you might
+ * walk through is not a room you are in.
+ *
+ * Work is now a ROOM, exactly like a class: hold a job and there are people
+ * there, from the first year, whether or not you ever speak to them. Three
+ * rather than the class's five, because a workplace hands you fewer people you
+ * are actually near than a classroom does, and because these sit ALONGSIDE the
+ * four an adult holds from elsewhere rather than inside that budget.
+ *
+ * The crew belongs to the JOB. Leave it and they stop being in the room — the
+ * same thing changing school does to a class, and for the same reason: what
+ * happens next is the honest test of whether it was a friendship or a desk.
+ */
+export const WORK_CREW = 3;
+
+/**
+ * Warmth a colleague starts at.
+ *
+ * Lower than a classmate (26–46) and higher than a stranger (18–38). You know
+ * their name and what they do and nothing else, and adults are slower about it.
+ */
+export const COLLEAGUE_WARMTH: readonly [number, number] = [20, 36];
+
+/**
  * Teammates who arrive with a team.
  *
  * Review: "…and interact with peers." Joining something should put you next to
@@ -247,7 +280,7 @@ function newClassmate(
     metAtAge: age,
     lastContactAge: age,
     memories: [],
-    inClass: true,
+    inRoom: true,
   };
 }
 
@@ -277,7 +310,7 @@ function newTeacher(
     metAtAge: age,
     lastContactAge: age,
     memories: [],
-    inClass: true,
+    inRoom: true,
     subject: stream.pick(SUBJECTS),
     // The title a child uses, chosen here so it can never disagree with the
     // one the event text renders for {adult}.
@@ -344,7 +377,7 @@ export function teammatesFor(
       relationship: clampStat(stream.range(TEAMMATE_WARMTH[0], TEAMMATE_WARMTH[1])) as StatValue,
       // NOT in the class — they are in the club. Which means the friendship has
       // to be kept up, exactly like one that survived a change of school.
-      inClass: false,
+      inRoom: false,
       lastContactAge: input.age,
     });
   }
@@ -397,9 +430,9 @@ function meetSomebodyNew(
     context: viaWork ? 'work' : activityId !== undefined ? 'activity' : 'neighbourhood',
     ...(activityId !== undefined ? { viaActivityId: activityId } : {}),
     relationship: clampStat(stream.range(ADULT_WARMTH[0], ADULT_WARMTH[1])) as StatValue,
-    // Never `inClass` — there is no class. An adult friendship has to be kept
+    // Never `inRoom` — there is no class. An adult friendship has to be kept
     // up from the first day, which is the whole difference from a school one.
-    inClass: false,
+    inRoom: false,
     lastContactAge: input.age,
   };
 
@@ -411,6 +444,103 @@ function meetSomebodyNew(
         : `Met ${met.firstName}, who lives close enough to keep running into.`,
   );
   return [...people, met];
+}
+
+/**
+ * Ticket 0211a — put people at work, and take them away when the job ends.
+ *
+ * The mirror of filling a class, which is the point: the player asked for work
+ * to be a place with people in it — *"You will be surrounded by people, its up
+ * to you to build a relationship or not."* — and a class is the one thing this
+ * build already did that way.
+ *
+ * Three things happen here, in order:
+ *
+ *  1. Anybody from a DIFFERENT job stops being in the room. They are not ended
+ *     — a colleague you got somewhere with is still somebody you know, and
+ *     whether that survives is now up to drift, which is the honest test.
+ *  2. The current job's crew is topped back up to `WORK_CREW`. People leave
+ *     jobs, so a seat that emptied fills with somebody new next year.
+ *  3. One line, and only the first year, because "there are people at your work"
+ *     is not news every January.
+ *
+ * No draw is made when there is no job, so an unemployed year costs the
+ * Relationships stream nothing and a life still replays from its seed.
+ */
+function staffTheJob(
+  people: readonly Acquaintance[],
+  circle: SocialCircle,
+  stream: RandomStream,
+  input: SocialYearInput,
+  lines: string[],
+): Acquaintance[] {
+  const jobId = input.jobId;
+
+  // Anybody still marked as being at a job that is not this one has left it —
+  // resigned, fired, promoted onto a different rung, or simply stopped working.
+  let next = people.map((person) =>
+    person.viaJobId !== undefined && person.viaJobId !== jobId && person.inRoom
+      ? { ...person, inRoom: false }
+      : person,
+  );
+
+  if (jobId === undefined) return next;
+
+  // IN THE ROOM, not merely alive and once from this job. Measuring caught the
+  // difference: a character fired from a shop at 28 and hired back at the same
+  // job at 30 counted her three former colleagues as seats already filled, so
+  // the second stint got one new person and an empty room. Somebody you used to
+  // work with keeps their `viaJobId` forever — that is their history — and the
+  // room is only who is standing in it now.
+  const here = next.filter(
+    (person) => person.viaJobId === jobId && person.inRoom && person.endedAtAge === undefined,
+  );
+  if (here.length >= WORK_CREW) return next;
+
+  const names = nameContext(
+    input.nameCultureId,
+    { ...circle, people: next },
+    input.family,
+    input.firstName,
+  );
+
+  const arrived: Acquaintance[] = [];
+  let index = next.length;
+  for (let seat = here.length; seat < WORK_CREW; seat += 1) {
+    const base = newClassmate(stream, names, input.age, input.worldYear - input.age, index);
+    index += 1;
+    arrived.push({
+      ...base,
+      id: asNpcId(`npc:work:${jobId}:${input.worldYear}:${seat}`),
+      context: 'work',
+      viaJobId: jobId,
+      // A colleague is an adult you have just met, not a child you sat beside.
+      relationship: clampStat(stream.range(COLLEAGUE_WARMTH[0], COLLEAGUE_WARMTH[1])) as StatValue,
+      inRoom: true,
+      lastContactAge: input.age,
+    });
+  }
+  next = [...next, ...arrived];
+
+  // The first year only. `here.length === 0` is true when the job is new, and
+  // false every year after it, so this cannot repeat every January the way
+  // 0209's parent lines did (CORE_RULES 13.22).
+  if (here.length === 0 && arrived.length > 0) {
+    const names_ = arrived.map((person) => person.firstName);
+    lines.push(
+      input.jobTitle
+        ? `There are people at the ${input.jobTitle.toLowerCase()} job — ${listOf(names_)}. Whether any of them become anything is up to you.`
+        : `There are people where you work — ${listOf(names_)}. Whether any of them become anything is up to you.`,
+    );
+  }
+
+  return next;
+}
+
+/** "A, B and C", the way somebody would say it. */
+function listOf(names: readonly string[]): string {
+  if (names.length <= 1) return names[0] ?? 'nobody';
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
 export interface SocialYearInput {
@@ -425,6 +555,14 @@ export interface SocialYearInput {
   readonly working?: boolean;
   /** What the job is called, for the line that says where you met somebody. */
   readonly jobTitle?: string;
+  /**
+   * Ticket 0211a: WHICH job, so the crew can belong to it.
+   *
+   * The title is not enough — two spells as a line cook at different places are
+   * different rooms with different people in them, and a crew keyed on the
+   * title would follow the player from one to the other.
+   */
+  readonly jobId?: string;
   readonly worldYear: number;
   readonly nameCultureId: string;
   readonly firstName: string;
@@ -437,8 +575,8 @@ export interface SocialYearInput {
    * Ticket 0207b. Leaving used to be missing, and the omission was structural
    * rather than cosmetic. `changedSchool` was computed as
    * `atSchool && stage !== previousStage`, so the year a character graduated it
-   * was FALSE — nobody's `inClass` was ever cleared, and `driftPerson` exempts
-   * anybody `inClass`. Measuring found the same five high-school classmates
+   * was FALSE — nobody's `inRoom` was ever cleared, and `driftPerson` exempts
+   * anybody `inRoom`. Measuring found the same five high-school classmates
    * still in the circle, still not drifting, at thirty-five: a mean of 4.9
    * available people at every adult age, all of them seventeen years stale.
    * Nobody in this game could meet a person after leaving school, and every
@@ -480,6 +618,13 @@ export function runSocialYear(
     people = people.map((person) => {
       // Teachers have their own ending, below. Somebody already gone stays gone.
       if (person.kind === 'teacher' || person.endedAtAge !== undefined) return person;
+      // Ticket 0211a: changing school is a fact about SCHOOL. This ended
+      // everybody, because when it was written school was the only room there
+      // was — so a twenty-year-old who started college lost the three people
+      // they worked with, "moved on", in the same year. Found by measuring the
+      // new work crew: three colleagues at nineteen and one at twenty-three.
+      // CORE_RULES 13.23, in the rule that already carries a warning about it.
+      if (person.context === 'work') return person;
       // A friendship survives a change of building — but it leaves the class,
       // and from here it has to hold up on its own. That is the moment a
       // childhood friendship is actually decided.
@@ -487,8 +632,8 @@ export function runSocialYear(
       // So does somebody you are going out with, obviously. 0207b found that
       // omission the hard way: leaving school was ending the person while
       // leaving the romance live, and the player picked up a second partner.
-      if (isFriend(person) || isRomantic(person)) return { ...person, inClass: false };
-      return endPerson({ ...person, inClass: false }, input.age, 'moved on');
+      if (isFriend(person) || isRomantic(person)) return { ...person, inRoom: false };
+      return endPerson({ ...person, inRoom: false }, input.age, 'moved on');
     });
   }
 
@@ -500,7 +645,7 @@ export function runSocialYear(
       person.relationship >= TEACHER_STAYS_THRESHOLD &&
       stream.chance(TEACHER_STAYS);
     if (keeps) return person;
-    return endPerson({ ...person, inClass: false }, input.age, 'moved on');
+    return endPerson({ ...person, inRoom: false }, input.age, 'moved on');
   });
 
   // ---- another year in the same room --------------------------------------
@@ -523,7 +668,7 @@ export function runSocialYear(
     // adult social world with total annual churn is the same failure as a class
     // that turns over every September, in a different room.
     const together =
-      person.inClass ||
+      person.inRoom ||
       (person.viaActivityId !== undefined && stillIn.has(person.viaActivityId)) ||
       (person.context === 'neighbourhood' && person.kind === 'peer');
     if (!together) return person;
@@ -611,6 +756,14 @@ export function runSocialYear(
       return endPerson(person, input.age, 'moved away');
     });
   }
+
+  // ---- the job is a room --------------------------------------------------
+  //
+  // Ticket 0211a, and it runs OUTSIDE the school/adult branch below on purpose:
+  // a seventeen-year-old with a job has colleagues and classmates at the same
+  // time, and putting this inside either branch would have hidden one of them.
+  // That is the shape of the bug it fixes.
+  people = staffTheJob(people, circle, stream, input, lines);
 
   // ---- an adult year -----------------------------------------------------
   //

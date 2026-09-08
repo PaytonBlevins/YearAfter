@@ -10,7 +10,12 @@
  * the player takes between years is now a recognisable pattern in this package.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { err, ok, type Result } from '@yearafter/core';
 import {
   STUDY_TERMS,
@@ -77,7 +82,7 @@ export function study(state: GameState): Result<StudyOutcome, StudyError> {
 
   const player: Character = {
     ...state.player,
-    timeline: [...state.player.timeline, entry],
+    timeline: appendToTimeline(state.player.timeline, entry),
   };
 
   return ok({

@@ -45,7 +45,7 @@ const peer = (overrides: Partial<Acquaintance> = {}): Acquaintance => ({
   metAtAge: 6,
   lastContactAge: 6,
   memories: [],
-  inClass: false,
+  inRoom: false,
   ...overrides,
 });
 
@@ -146,7 +146,7 @@ describe('drift', () => {
     // Reading output found the first version turning the whole class over every
     // September: classmates start around 30, drift costs 7 a year, and the
     // drift-out floor is 22. Being in the same class IS contact.
-    const person = peer({ relationship: 30, lastContactAge: 6, inClass: true });
+    const person = peer({ relationship: 30, lastContactAge: 6, inRoom: true });
     expect(driftPerson(person, 12).relationship).toBe(30);
     expect(isCurrent(driftPerson(person, 12))).toBe(true);
   });
@@ -403,7 +403,8 @@ describe('menu copy is plain (Ticket 0207d)', () => {
     'talk back',
     'make a joke',
   ];
-  const BRITISH = /\b(apologise|realise|recognise|practise|maths|licence|pavement|corridor|fortnight|neighbour|favourite|colour|whilst|learnt|amongst|solicitor|wind them up)\b/i;
+  const BRITISH =
+    /\b(apologise|realise|recognise|practise|maths|licence|pavement|corridor|fortnight|neighbour|favourite|colour|whilst|learnt|amongst|solicitor|wind them up)\b/i;
 
   const everyLabel = [
     ...INTERACTIONS.map((entry) => ({ what: entry.id, label: entry.label, blurb: entry.blurb })),

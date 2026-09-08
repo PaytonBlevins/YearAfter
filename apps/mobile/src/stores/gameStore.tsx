@@ -47,6 +47,9 @@ import {
   resign,
   applyToCollege,
   leaveCollege,
+  seeDoctor,
+  treatCondition,
+  stopTreatment,
 } from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
 
@@ -104,6 +107,11 @@ interface GameContextValue {
   readonly applyToStudy: (majorId: string) => void;
   /** Ticket 0210b. Leave a degree. Spec 1824 removes leave-of-absence. */
   readonly leaveStudies: () => void;
+  /** Ticket 0211. The yearly check-up. Small on purpose — spec 531. */
+  readonly visitDoctor: () => void;
+  /** Ticket 0211. Put a doctor on a condition, or take them off it. */
+  readonly treatFor: (conditionId: string) => void;
+  readonly stopTreatingFor: (conditionId: string) => void;
   /** Put the hours in at something. Three sessions an activity a year. */
   readonly practiseAt: (activityId: string) => void;
   /** Take or leave an odd job (Ticket 0206b). */
@@ -429,6 +437,60 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     });
   }, [persist, saveId, settings]);
 
+  /* ---- Ticket 0211: the Doctor -------------------------------------------- */
+
+  const visitDoctor = useCallback(() => {
+    setState((current) => {
+      if (!current) return current;
+      const result = seeDoctor(current);
+      if (!result.ok) {
+        setSaveError(`Cannot see a doctor right now (${result.error}).`);
+        return current;
+      }
+      setOutcome({
+        title: result.value.title,
+        body: result.value.body,
+        tone: result.value.good ? 'good' : 'bad',
+        meter: { label: 'Health', value: current.player.stats.health },
+      });
+      if (saveId) persist(result.value.state, saveId, settings);
+      return result.value.state;
+    });
+  }, [persist, saveId, settings]);
+
+  const treatFor = useCallback(
+    (conditionId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = treatCondition(current, conditionId);
+        if (!result.ok) {
+          setSaveError(`Cannot start treatment (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'neutral',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const stopTreatingFor = useCallback(
+    (conditionId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const next = stopTreatment(current, conditionId);
+        if (saveId) persist(next, saveId, settings);
+        return next;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const applyToStudy = useCallback(
     (majorId: string) => {
       setState((current) => {
@@ -707,6 +769,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       quitJob,
       applyToStudy,
       leaveStudies,
+      visitDoctor,
+      treatFor,
+      stopTreatingFor,
       practiseAt,
       takeAGig,
       quitAGig,
@@ -744,6 +809,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       quitJob,
       applyToStudy,
       leaveStudies,
+      visitDoctor,
+      treatFor,
+      stopTreatingFor,
       practiseAt,
       takeAGig,
       quitAGig,

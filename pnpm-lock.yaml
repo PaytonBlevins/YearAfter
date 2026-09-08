@@ -47,6 +47,9 @@ importers:
       '@yearafter/events':
         specifier: workspace:*
         version: link:../../packages/events
+      '@yearafter/health':
+        specifier: workspace:*
+        version: link:../../packages/health
       '@yearafter/parenting':
         specifier: workspace:*
         version: link:../../packages/parenting
@@ -204,6 +207,19 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
 
+  packages/health:
+    dependencies:
+      '@yearafter/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)
+
   packages/parenting:
     dependencies:
       '@yearafter/character':
@@ -240,6 +256,9 @@ importers:
       '@yearafter/events':
         specifier: workspace:*
         version: link:../events
+      '@yearafter/health':
+        specifier: workspace:*
+        version: link:../health
       '@yearafter/parenting':
         specifier: workspace:*
         version: link:../parenting
@@ -299,6 +318,9 @@ importers:
       '@yearafter/events':
         specifier: workspace:*
         version: link:../events
+      '@yearafter/health':
+        specifier: workspace:*
+        version: link:../health
       '@yearafter/parenting':
         specifier: workspace:*
         version: link:../parenting

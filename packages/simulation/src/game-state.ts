@@ -15,6 +15,7 @@ import { EMPTY_HOUSEHOLD, type Household } from '@yearafter/relationships';
 import { EMPTY_CIRCLE, type SocialCircle } from '@yearafter/social';
 import { EMPTY_PARENTING, type ParentingState } from '@yearafter/parenting';
 import { EMPTY_EMPLOYMENT, type EmploymentState } from '@yearafter/careers';
+import { EMPTY_HEALTH, type HealthState } from '@yearafter/health';
 import { Rng } from './rng/rng';
 
 /** World state that outlives any single character (spec 818–827 continuation). */
@@ -78,6 +79,17 @@ export interface GameState {
    */
   readonly employment: EmploymentState;
   /**
+   * Ticket 0211: what is wrong with them, and whether a doctor is on it.
+   *
+   * The health STAT stays on the character with the other six, because the
+   * player has been looking at that bar since 0106. This is the part the bar
+   * cannot say: which conditions are held, since when, and whether the year's
+   * check-up has been used. Beside the player for the same reason as education
+   * and employment — on dynasty continuation the player is replaced and a body
+   * does not carry over.
+   */
+  readonly health: HealthState;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -95,6 +107,7 @@ export const createWorldState = (year: number, generation = 1): WorldState => ({
 });
 
 export interface CreateGameStateOptions {
+  readonly health?: HealthState;
   readonly family?: Household;
   readonly nameCultureId?: string;
   readonly events?: EventHistory;
@@ -120,6 +133,7 @@ export const createGameState = (
   circle: options.circle ?? EMPTY_CIRCLE,
   parenting: options.parenting ?? EMPTY_PARENTING,
   employment: options.employment ?? EMPTY_EMPLOYMENT,
+  health: options.health ?? EMPTY_HEALTH,
   pending: options.pending ?? [],
   rng,
 });

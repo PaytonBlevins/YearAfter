@@ -289,20 +289,9 @@ const migrations: Readonly<Record<number, Migration>> = {
    */
   10: (save) => {
     const player = { ...((save['player'] as Record<string, unknown>) ?? {}) };
-    const timeline = Array.isArray(player['timeline']) ? player['timeline'] : [];
-
-    const seen = new Map<string, number>();
-    player['timeline'] = timeline.map((raw) => {
-      const entry = raw as Record<string, unknown>;
-      const id = entry['id'];
-      if (typeof id !== 'string') return entry;
-      const already = seen.get(id) ?? 0;
-      seen.set(id, already + 1);
-      // `dup` rather than a bare number, so a repaired id can never collide
-      // with one the current producers make — those end in a plain counter.
-      return already === 0 ? entry : { ...entry, id: `${id}:dup${already}` };
-    });
-
+    player['timeline'] = dedupeTimeline(
+      Array.isArray(player['timeline']) ? player['timeline'] : [],
+    );
     return { ...save, version: 11, player };
   },
 
@@ -366,7 +355,98 @@ const migrations: Readonly<Record<number, Migration>> = {
       },
     };
   },
+
+  /**
+   * v14 → v15 (Ticket 0211a) — repair duplicate timeline ids, again.
+   *
+   * Reported by the player, word for word the third time: "ERROR Encountered
+   * two children with the same key, `t:2020:work:1`." Different producer from
+   * 0207c — quitting a job and being hired somewhere else in the SAME YEAR
+   * resets `pushedThisYear`, so the next two presses of Work Harder re-emit the
+   * same two ids — and identical in the part that matters: the duplicates are
+   * already written into saves, where a fixed producer can never reach them.
+   *
+   * This is v11's body, unchanged and now shared. `dedupeTimeline` runs over the
+   * whole feed rather than over work ids alone, because the point of CORE_RULES
+   * 13.12 is that the invariant holds for the timeline, not that it holds for
+   * whichever producer last broke it. If a fourth one is found, this migration
+   * is already the fix.
+   *
+   * Pure — no RNG, no clock — so the same save always migrates identically and a
+   * life still replays from its seed. The first holder of an id keeps it.
+   */
+  14: (save) => {
+    const player = { ...((save['player'] as Record<string, unknown>) ?? {}) };
+    player['timeline'] = dedupeTimeline(
+      Array.isArray(player['timeline']) ? player['timeline'] : [],
+    );
+
+    // And the other half of 0211a: `inClass` became `inRoom`, because a field
+    // with one room hardcoded into its name is why an employed character had
+    // nobody at work. A pure rename — every existing person keeps exactly the
+    // value they had, and nobody is put in a room they were not in. Colleagues
+    // arrive the next time a year is advanced, which is the only honest moment
+    // for them to: a migration inventing three people the save never met would
+    // be a guess, and CORE_RULES 12 does not allow one.
+    const circle = { ...((save['circle'] as Record<string, unknown>) ?? {}) };
+    const people = Array.isArray(circle['people']) ? circle['people'] : [];
+    circle['people'] = people.map((raw) => {
+      const person = { ...(raw as Record<string, unknown>) };
+      if (!('inClass' in person)) return person;
+      const { inClass, ...rest } = person;
+      return { ...rest, inRoom: person['inRoom'] ?? inClass };
+    });
+
+    return { ...save, version: 15, player, circle };
+  },
+
+  /**
+   * v15 → v16 (Ticket 0211) — the body.
+   *
+   * An existing character gets an EMPTY set of conditions and a vitality seeded
+   * from the health they already have. That is not a guess: `vitality` is the
+   * age-driven part of health, and the health on the save IS where that
+   * character's body currently is. The same rule migration 9 followed for odd
+   * jobs and 4 for grades — default to the fact already recorded, never invent
+   * a history.
+   *
+   * Nobody arrives with a condition, which is the honest reading of the same
+   * rule: no save in existence has ever been ill, so inventing a bad knee for a
+   * fifty-year-old would be writing history rather than migrating it. They start
+   * with a clean record and age from here.
+   */
+  15: (save) => {
+    const player = (save['player'] ?? {}) as Record<string, unknown>;
+    const stats = (player['stats'] ?? {}) as Record<string, unknown>;
+    const health = typeof stats['health'] === 'number' ? stats['health'] : 50;
+    return {
+      ...save,
+      version: 16,
+      health: save['health'] ?? { conditions: [], vitality: health, deficit: 0 },
+    };
+  },
 };
+
+/**
+ * Give every entry a unique id, keeping the first holder's unchanged.
+ *
+ * Shared by migrations 10 and 14, which is the honest way to say that this has
+ * been needed twice. The suffix is the entry's POSITION among the duplicates, so
+ * the result depends only on the save — that is what makes it pure.
+ */
+function dedupeTimeline(timeline: readonly unknown[]): unknown[] {
+  const seen = new Map<string, number>();
+  return timeline.map((raw) => {
+    const entry = raw as Record<string, unknown>;
+    const id = entry['id'];
+    if (typeof id !== 'string') return entry;
+    const already = seen.get(id) ?? 0;
+    seen.set(id, already + 1);
+    // `dup` rather than a bare number, so a repaired id can never collide with
+    // one the current producers make — those end in a plain counter.
+    return already === 0 ? entry : { ...entry, id: `${id}:dup${already}` };
+  });
+}
 
 export function describeMigrationError(error: MigrationError): string {
   switch (error.kind) {

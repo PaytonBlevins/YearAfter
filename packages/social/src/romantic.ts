@@ -30,14 +30,7 @@ import {
 } from './romance';
 
 export type RomanceMoveId =
-  | 'flirt'
-  | 'ask-out'
-  | 'date'
-  | 'make-official'
-  | 'propose'
-  | 'marry'
-  | 'break-up'
-  | 'divorce';
+  'flirt' | 'ask-out' | 'date' | 'make-official' | 'propose' | 'marry' | 'break-up' | 'divorce';
 
 /** The stage a move starts from. `none` means you are not seeing them at all. */
 export type RomanceFrom = RomanceStage | 'none';
@@ -463,7 +456,11 @@ function linesFor(
     // of you planned" is a lovely line about a new relationship and a strange
     // one about a marriage.
     const set =
-      age < ADULT_AGE ? TEEN_DATE : stage === 'married' || stage === 'engaged' ? SETTLED_DATE : ADULT_DATE;
+      age < ADULT_AGE
+        ? TEEN_DATE
+        : stage === 'married' || stage === 'engaged'
+          ? SETTLED_DATE
+          : ADULT_DATE;
     return worked ? set.good : set.bad;
   }
   // Unreachable from `resolveMove`, which handles the certain moves before it

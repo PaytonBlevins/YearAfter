@@ -370,7 +370,9 @@ function WhatYouCanDo() {
   const atSchool = isInSchool(education) && !atCollege;
   const joined = joinedActivities(education);
   const colleagues = state.circle.people.filter(
-    (person) => isCurrent(person) && person.context === 'work',
+    // Ticket 0211a: still IN the room. A colleague from a job you left is
+    // somebody you know, not somebody at your work.
+    (person) => isCurrent(person) && person.context === 'work' && person.inRoom,
   );
 
   const rows: React.ReactNode[] = [];
@@ -814,27 +816,6 @@ export function MindBodyScreen() {
 /* -------------------------------------------------------------------------- */
 /* 0112 — Doctor                                                               */
 /* -------------------------------------------------------------------------- */
-
-export function DoctorScreen() {
-  return (
-    <Screen>
-      <RowGroup
-        rows={[
-          { title: 'General Care', affordance: 'action', ticket: '0211' },
-          { title: 'Fertility', ticket: '0208' },
-          { title: 'Rehab', ticket: '0211' },
-          { title: 'Treatment', ticket: '0211' },
-        ]}
-      />
-      <View style={styles.note}>
-        <Text style={styles.noteText}>
-          Routine physicals and screenings stay backend — preventive care must not become a chore
-          (spec 531).
-        </Text>
-      </View>
-    </Screen>
-  );
-}
 
 /* -------------------------------------------------------------------------- */
 /* 0113 — Relocate                                                             */

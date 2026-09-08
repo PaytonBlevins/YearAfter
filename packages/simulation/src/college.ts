@@ -10,7 +10,7 @@
  * leaving is one row with no confirmation and no way back into the same year.
  */
 
-import { createTimelineEntry, type TimelineEntry } from '@yearafter/character';
+import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
 import {
   COLLEGE_AGE,
   MAJORS,
@@ -172,7 +172,7 @@ export function applyToCollege(
   return ok({
     state: {
       ...state,
-      player: { ...state.player, timeline: [...state.player.timeline, entry] },
+      player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
       education: {
         ...state.education,
         appliedToCollegeAtAge: state.player.age,
@@ -230,7 +230,7 @@ export function leaveCollege(state: GameState): Result<CollegeOutcome, CollegeEr
   return ok({
     state: {
       ...state,
-      player: { ...state.player, timeline: [...state.player.timeline, entry] },
+      player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
       education: {
         ...state.education,
         stage: 'graduated',

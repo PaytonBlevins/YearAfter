@@ -10,7 +10,12 @@
  * is a line about the year, not a retry button with prose on it.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { add, dollars, err, ok, type Result } from '@yearafter/core';
 import {
   alreadyAskedParent,
@@ -128,7 +133,7 @@ export function askParent(
 
   const player: Character = {
     ...state.player,
-    timeline: [...state.player.timeline, entry],
+    timeline: appendToTimeline(state.player.timeline, entry),
     cash: toPlayer > 0 ? add(state.player.cash, dollars(toPlayer)) : state.player.cash,
   };
 

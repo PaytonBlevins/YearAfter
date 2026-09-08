@@ -14,7 +14,7 @@ import { findActivity, type Activity } from '@yearafter/content';
 import { join, leave } from '@yearafter/education';
 import { PARENT_AGE, likeliestYes, willThey, type ParentRequest } from '@yearafter/parenting';
 import { livingParents, type FamilyMember } from '@yearafter/relationships';
-import { createTimelineEntry } from '@yearafter/character';
+import { appendToTimeline, createTimelineEntry } from '@yearafter/character';
 import type { GameState } from './game-state';
 import { teammatesFor } from './social-generator';
 import { RngDomains } from './rng/rng';
@@ -145,7 +145,7 @@ export function askToJoin(state: GameState, activityId: string): JoinOutcome {
   return {
     state: {
       ...state,
-      player: { ...state.player, timeline: [...state.player.timeline, entry] },
+      player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
     },
     joined: false,
     refusedBy: who,

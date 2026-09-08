@@ -10,7 +10,12 @@
  * event that prompted it.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { asEventId } from '@yearafter/core';
 import { resolveChoice, type PendingDecision } from '@yearafter/events';
 import { applyImmediateStress } from '@yearafter/stress';
@@ -94,7 +99,7 @@ export function decide(
         state.player.personality,
       ),
     },
-    timeline: [...state.player.timeline, entry],
+    timeline: appendToTimeline(state.player.timeline, entry),
   };
 
   return ok({

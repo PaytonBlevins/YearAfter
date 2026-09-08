@@ -13,6 +13,7 @@
   "dependencies": {
     "@expo/metro-runtime": "^57.0.14",
     "@yearafter/careers": "workspace:*",
+    "@yearafter/health": "workspace:*",
     "@yearafter/character": "workspace:*",
     "@yearafter/content": "workspace:*",
     "@yearafter/core": "workspace:*",

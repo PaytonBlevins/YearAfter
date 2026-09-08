@@ -566,8 +566,22 @@ describe('v10 -> v11 migration (Ticket 0207c duplicate timeline ids)', () => {
 
   /** The exact shape reported, twice. */
   const REPORTED = [
-    { id: 't:2012:study', age: 12, year: 2012, kind: 'passive', text: 'Studied harder.', sequence: 0 },
-    { id: 't:2012:study', age: 12, year: 2012, kind: 'passive', text: 'Studied harder again.', sequence: 1 },
+    {
+      id: 't:2012:study',
+      age: 12,
+      year: 2012,
+      kind: 'passive',
+      text: 'Studied harder.',
+      sequence: 0,
+    },
+    {
+      id: 't:2012:study',
+      age: 12,
+      year: 2012,
+      kind: 'passive',
+      text: 'Studied harder again.',
+      sequence: 1,
+    },
   ];
 
   it('makes the reported key unique', () => {
@@ -615,7 +629,14 @@ describe('v10 -> v11 migration (Ticket 0207c duplicate timeline ids)', () => {
         text: `hang ${i}`,
         sequence: i,
       })),
-      { id: 't:2014:tryout:basketball', age: 14, year: 2014, kind: 'passive', text: 'once', sequence: 0 },
+      {
+        id: 't:2014:tryout:basketball',
+        age: 14,
+        year: 2014,
+        kind: 'passive',
+        text: 'once',
+        sequence: 0,
+      },
     ];
     const migrated = migrateSave(withTimeline(save, timeline));
     expect(migrated.ok).toBe(true);
@@ -674,5 +695,107 @@ describe('v10 -> v11 migration (Ticket 0207c duplicate timeline ids)', () => {
       withTimeline(save, [{ age: 12, year: 2012, kind: 'passive', text: 'no id', sequence: 0 }]),
     );
     expect(migrated.ok).toBe(true);
+  });
+});
+
+/**
+ * Ticket 0211a — the SECOND duplicate-id repair, and the field rename with it.
+ *
+ * The player reported `t:2020:work:1` twice, a different producer from 0207c's
+ * `t:2012:study` and identical in the part that matters: the duplicates are
+ * already written into saves where a fixed producer can never reach them. v11's
+ * body is now shared with v15 rather than copied, which is the honest way to
+ * say this has been needed twice.
+ */
+describe('v14 -> v15 migration (Ticket 0211a)', () => {
+  const REPORTED = [
+    { id: 't:2020:work:0', age: 33, year: 2020, kind: 'passive', text: 'A shift.', sequence: 0 },
+    { id: 't:2020:work:1', age: 33, year: 2020, kind: 'passive', text: 'Another.', sequence: 1 },
+    { id: 't:2020:work:0', age: 33, year: 2020, kind: 'passive', text: 'New job.', sequence: 2 },
+    { id: 't:2020:work:1', age: 33, year: 2020, kind: 'passive', text: 'And again.', sequence: 3 },
+  ];
+
+  it('makes the reported key unique', () => {
+    const { save } = newSave('WORKDUP');
+    const migrated = migrateSave({
+      ...save,
+      version: 14,
+      player: { ...save.player, timeline: REPORTED },
+    });
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    const ids = migrated.value.player.timeline.map((entry) => entry.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids[0]).toBe('t:2020:work:0');
+    expect(ids[2]).toBe('t:2020:work:0:dup1');
+  });
+
+  it('renames inClass to inRoom without moving anybody between rooms', () => {
+    const { save } = newSave('INROOM');
+    const people = [
+      { id: 'npc:a', firstName: 'Ada', inClass: true, context: 'school' },
+      { id: 'npc:b', firstName: 'Ben', inClass: false, context: 'neighbourhood' },
+    ];
+    const migrated = migrateSave({
+      ...save,
+      version: 14,
+      circle: { ...save.circle, people },
+    });
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    const migratedPeople = migrated.value.circle.people as unknown as Record<string, unknown>[];
+    expect(migratedPeople[0]?.['inRoom']).toBe(true);
+    expect(migratedPeople[1]?.['inRoom']).toBe(false);
+    // The old key is gone, so nothing can read it by accident afterwards.
+    expect(migratedPeople[0]).not.toHaveProperty('inClass');
+  });
+});
+
+/**
+ * Ticket 0211 — the body.
+ *
+ * Vitality is seeded from the health already on the save, which is not a guess:
+ * vitality IS the age-driven part of health, and the recorded health is where
+ * that character's body currently is. Nobody arrives with a condition, because
+ * no save in existence has ever been ill and inventing a bad knee for a
+ * fifty-year-old would be writing history rather than migrating it.
+ */
+describe('v15 -> v16 migration (Ticket 0211 health)', () => {
+  /** A v15 save, which by definition has no `health` block on it at all. */
+  const asV15 = (save: ReturnType<typeof toSave>) => {
+    const { health: _health, ...rest } = save;
+    return { ...rest, version: 15 };
+  };
+
+  it('seeds vitality from the health the save already records', () => {
+    const { save } = newSave('BODY');
+    const before = save.player.stats.health;
+    const migrated = migrateSave(asV15(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.health.vitality).toBe(before);
+    expect(migrated.value.health.deficit).toBe(0);
+  });
+
+  it('gives an existing character no conditions and no cause of death', () => {
+    const { save } = newSave('CLEAN');
+    const migrated = migrateSave(asV15(save));
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.health.conditions).toEqual([]);
+    expect(migrated.value.health.causeOfDeath).toBeUndefined();
+  });
+
+  it('leaves a save that already has health alone', () => {
+    const { save } = newSave('KEEP');
+    const held = {
+      conditions: [{ conditionId: 'cond.knee', since: 30, treated: true }],
+      vitality: 61,
+      deficit: 4,
+    };
+    const migrated = migrateSave({ ...asV15(save), health: held });
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.health).toEqual(held);
   });
 });

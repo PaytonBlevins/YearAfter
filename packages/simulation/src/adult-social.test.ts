@@ -4,8 +4,8 @@
  * 0207 shipped a romance system on top of a social world that stopped at
  * seventeen, and measuring after the fact found the failure: `changedSchool`
  * was `atSchool && stage !== previousStage`, so the year a character graduated
- * it was false, nobody's `inClass` was ever cleared, and `driftPerson` exempts
- * anybody `inClass`. The same five high-school classmates were a character's
+ * it was false, nobody's `inRoom` was ever cleared, and `driftPerson` exempts
+ * anybody `inRoom`. The same five high-school classmates were a character's
  * entire social world at thirty-five — a mean of 4.9 available people at every
  * adult age, none of them met after seventeen.
  *

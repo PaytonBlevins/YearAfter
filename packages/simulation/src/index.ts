@@ -3,6 +3,7 @@ export * from './game-state';
 export * from './advance';
 export * from './dating';
 export * from './decide';
+export * from './doctor';
 export * from './new-game';
 export * from './interact';
 export * from './gigs';

@@ -25,7 +25,12 @@
  * ordinary person drawn the same way a neighbour is.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { asNpcId, clampStat, err, ok, type Result, type StatValue } from '@yearafter/core';
 import {
   ADULT_AGE,
@@ -129,7 +134,7 @@ export function useDatingApp(state: GameState): Result<DatingAppOutcome, DatingA
 
   const player: Character = {
     ...state.player,
-    timeline: [...state.player.timeline, entry],
+    timeline: appendToTimeline(state.player.timeline, entry),
   };
   const circle: SocialCircle = {
     people: [...state.circle.people, ...met],
@@ -184,7 +189,7 @@ function match(
     // Nothing keeps an app match in your life. Somebody you met on an app and
     // then did not speak to is gone, faster than a neighbour, and that is the
     // truthful version rather than a punishment.
-    inClass: false,
+    inRoom: false,
     lastContactAge: state.player.age,
   };
 }

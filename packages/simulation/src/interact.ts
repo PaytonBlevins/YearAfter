@@ -13,7 +13,12 @@
  * per year." What replaced it is a year that wears out rather than a wall.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { clampStat, err, ok, type Result } from '@yearafter/core';
 import {
   contactWith,
@@ -125,7 +130,7 @@ export function interact(
 
   const player: Character = {
     ...state.player,
-    timeline: [...state.player.timeline, entry],
+    timeline: appendToTimeline(state.player.timeline, entry),
   };
 
   return ok({

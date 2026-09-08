@@ -38,6 +38,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     circle: state.circle,
     parenting: state.parenting,
     employment: state.employment,
+    health: state.health,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -53,6 +54,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     circle: save.circle,
     parenting: save.parenting,
     employment: save.employment,
+    health: save.health ?? { conditions: [], vitality: save.player.stats.health, deficit: 0 },
     pending: save.pending,
   });
 }

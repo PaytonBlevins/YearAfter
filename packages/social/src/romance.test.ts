@@ -65,7 +65,7 @@ const peer = (overrides: Partial<Acquaintance> = {}): Acquaintance => ({
   metAtAge: 6,
   lastContactAge: 6,
   memories: [],
-  inClass: true,
+  inRoom: true,
   ...overrides,
 });
 

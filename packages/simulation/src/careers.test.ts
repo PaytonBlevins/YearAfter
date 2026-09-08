@@ -27,7 +27,7 @@ import { findJob, savedFrom } from '@yearafter/careers';
 import { feeFor } from '@yearafter/parenting';
 import { ROMANCE_MOVES, costOf } from '@yearafter/social';
 import { advanceYear } from './advance';
-import { applyFor, chanceOf, openings, workHarder } from './careers';
+import { applyFor, chanceOf, openings, resign, workHarder } from './careers';
 import { decide } from './decide';
 import type { GameState } from './game-state';
 import { createNewGame } from './new-game';
@@ -86,6 +86,52 @@ function playALife(seed: string): Life {
 const LIFETIMES: readonly Life[] = Array.from({ length: LIVES }, (_, index) =>
   playALife(`career-${index}`),
 );
+
+/**
+ * Ticket 0211a — a player who does not settle.
+ *
+ * Every year from eighteen: work hard twice, then walk out and take whatever
+ * else is going. That is a legal way to play and nothing had ever simulated it,
+ * which is why `t:2020:work:1` reached a real player's terminal with a green
+ * suite behind it. Resigning resets `pushedThisYear` on the new job, so the
+ * next two pushes re-used the year's ids.
+ */
+function playAJobHoppingLife(seed: string): GameState {
+  let state = createNewGame({ seed });
+  for (let year = 0; year < 40; year += 1) {
+    state = advanceYear(state).state;
+    let guard = 0;
+    while (state.pending.length > 0 && (guard += 1) < 12) {
+      const decision = state.pending[0];
+      const choice = decision?.choices[0];
+      if (!decision || !choice) break;
+      const result = decide(state, decision.eventId, choice.id);
+      if (!result.ok) break;
+      state = result.value.state;
+    }
+    if (state.player.age < 18) continue;
+
+    // Two applications, two pushes, then out — twice over, in one year.
+    for (let round = 0; round < 2; round += 1) {
+      if (!state.employment.job) {
+        for (const job of openings(state)) {
+          const applied = applyFor(state, String(job.id));
+          if (!applied.ok) continue;
+          state = applied.value.state;
+          if (applied.value.hired) break;
+        }
+      }
+      if (!state.employment.job) break;
+      for (let push = 0; push < 3; push += 1) {
+        const pushed = workHarder(state);
+        if (pushed.ok) state = pushed.value.state;
+      }
+      const quit = resign(state);
+      if (quit.ok) state = quit.value.state;
+    }
+  }
+  return state;
+}
 
 const median = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b);
@@ -207,6 +253,31 @@ describe('invariants', () => {
     for (const life of LIFETIMES) {
       const ids = life.state.player.timeline.map((entry) => entry.id);
       expect(new Set(ids).size, life.state.player.firstName).toBe(ids.length);
+    }
+  });
+
+  it('never asks the net to save it, for somebody who JOB-HOPS', () => {
+    // Ticket 0211a, and this assertion is the interesting part.
+    //
+    // The test above passed for 150 lives and shipped a duplicate key to the
+    // player anyway, because `playALife` never quits: it applies once and then
+    // pushes for thirty years. A player who resigns and takes another job in
+    // the SAME YEAR was never simulated, and that is the only way to hit it —
+    // the population a test plays is the test (CORE_RULES 13.25).
+    //
+    // But asserting uniqueness alone would now pass whatever the producers do,
+    // because `appendToTimeline` guarantees it. So the assertion is on the
+    // SUFFIX: a `:dup` in a freshly played life means a producer asked for an id
+    // that was already taken and the net caught it. The net exists so React
+    // keeps rendering; it is not permission for a producer to collide.
+    for (let seed = 0; seed < 25; seed += 1) {
+      const life = playAJobHoppingLife(`hop-${seed}`);
+      const ids = life.player.timeline.map((entry) => entry.id);
+      expect(
+        ids.filter((id) => id.includes(':dup')),
+        `seed hop-${seed}`,
+      ).toEqual([]);
+      expect(new Set(ids).size, `seed hop-${seed}`).toBe(ids.length);
     }
   });
 

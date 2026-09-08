@@ -22,6 +22,7 @@
     "@yearafter/parenting": "workspace:*",
     "@yearafter/relationships": "workspace:*",
     "@yearafter/social": "workspace:*",
+    "@yearafter/health": "workspace:*",
     "@yearafter/stress": "workspace:*"
   },
   "devDependencies": {

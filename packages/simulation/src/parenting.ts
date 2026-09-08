@@ -15,7 +15,12 @@
  * the thing than a management screen would be.
  */
 
-import { createTimelineEntry, type Character, type TimelineEntry } from '@yearafter/character';
+import {
+  appendToTimeline,
+  createTimelineEntry,
+  type Character,
+  type TimelineEntry,
+} from '@yearafter/character';
 import { cents, err, ok, subtract, type Result } from '@yearafter/core';
 import {
   feeFor,
@@ -70,7 +75,7 @@ const write = (
   return {
     player: {
       ...state.player,
-      timeline: [...state.player.timeline, entry],
+      timeline: appendToTimeline(state.player.timeline, entry),
       cash: spend > 0 ? subtract(state.player.cash, cents(spend)) : state.player.cash,
     },
     entry,
