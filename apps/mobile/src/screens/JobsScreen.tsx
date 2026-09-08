@@ -18,6 +18,7 @@ import { oddsLabel, type Job } from '@yearafter/careers';
 import { chanceOf, openings } from '@yearafter/simulation';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
+import { useNavigation } from '../navigation/navigation';
 import { colors, spacing, typography } from '../theme/theme';
 
 /** A salary, at the width a row has for it. */
@@ -25,7 +26,8 @@ export const salaryLabel = (pay: number): string =>
   pay >= 100_000 ? `$${Math.round(pay / 1000)}k` : `$${(pay / 1000).toFixed(0)}k`;
 
 export function JobsScreen() {
-  const { state, applyForJob } = useGame();
+  const { state } = useGame();
+  const { push } = useNavigation();
   if (!state) return null;
 
   const listings = openings(state);
@@ -50,11 +52,19 @@ export function JobsScreen() {
             {listings.map((job, index) => (
               <Fragment key={String(job.id)}>
                 {index > 0 ? <RowDivider /> : null}
+                {/*
+                  Opens the job, never applies for it. Review: "when I click on
+                  a job, it automatically hires me. That should not be the
+                  case." A tap that commits a decision with no confirmation is
+                  not a decision.
+                */}
                 <JobRow
                   job={job}
                   chance={chanceOf(state, job)}
                   applied={appliedThisYear.includes(String(job.id))}
-                  onPress={() => applyForJob(String(job.id))}
+                  onPress={() =>
+                    push({ screen: 'jobOffer', title: job.title, jobId: String(job.id) })
+                  }
                 />
               </Fragment>
             ))}
@@ -62,8 +72,8 @@ export function JobsScreen() {
 
           <View style={styles.note}>
             <Text style={styles.noteText}>
-              One application each per year. The odds are a feeling, not a number — what they
-              actually want is somebody who has done the job below this one.
+              Open one to see what it pays, what it needs and what comes with it. One
+              application each per year.
             </Text>
           </View>
         </>
@@ -104,7 +114,7 @@ function JobRow({
       subtitle={applied ? 'Your application is in.' : job.blurb}
       value={salaryLabel(job.pay)}
       {...(applied ? {} : { meta: oddsLabel(chance) })}
-      affordance={applied ? 'none' : 'action'}
+      affordance={applied ? 'none' : 'navigate'}
       disabled={applied}
       onPress={applied ? undefined : onPress}
     />

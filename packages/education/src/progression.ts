@@ -39,6 +39,16 @@ import {
   type EducationState,
 } from './school';
 import { gigLine, gigPay } from './gigs';
+import { runCollegeYear } from './college-year';
+
+/**
+ * Weekly hours a degree takes against the hidden capacity model.
+ *
+ * Spec 1823 allows full-time work during college and says "stress/performance
+ * handles overcommitment", so this exists to make that true: a character
+ * working a demanding job through a degree pays for it, and nobody warns them.
+ */
+export const COLLEGE_HOURS = 16;
 import { driftStanding, seasonLine } from './standing';
 import {
   OVERLOAD_EVENT_THRESHOLD,
@@ -74,6 +84,15 @@ export interface SchoolYearInput {
    * defaulted to 1, which is the value that never triggers anything.
    */
   readonly roll?: number;
+  /**
+   * Ticket 0210b. Whole dollars the character holds, for tuition.
+   *
+   * College is the first thing in this package that can be priced out of reach,
+   * so it is the first that needs to know what the player has.
+   */
+  readonly cash?: number;
+  /** Ticket 0210b. Whole dollars a year a parent committed towards tuition. */
+  readonly collegeSupport?: number;
 }
 
 /**
@@ -95,7 +114,16 @@ export interface SchoolCost {
   readonly dollars: number;
   /** Reads inside a sentence: "a rented clarinet at $18 a month". */
   readonly source: string;
-  readonly payer: 'household';
+  /**
+   * Who is actually out of pocket.
+   *
+   * 'household' is REPORTED and not charged — a fifteen-year-old does not pay
+   * band fees, their parents do. 'self' is charged, and tuition is the first
+   * thing in this package that is: a degree the character does not pay for is a
+   * degree that costs nothing, and 0209's parent who helps with college would be
+   * helping with nothing.
+   */
+  readonly payer: 'household' | 'self';
 }
 
 export interface SchoolYearResult {
@@ -116,6 +144,15 @@ export interface SchoolYearResult {
   readonly hours: number;
   readonly capacity: number;
   readonly costs: readonly SchoolCost[];
+  /**
+   * Ticket 0210b. Whole dollars of tuition to CHARGE, as opposed to report.
+   *
+   * `costs` above is reported and not charged — activity fees are borne by the
+   * household. Tuition is different: it is the character's own money and it has
+   * to actually leave, or a degree is free and 0209's parent who helps with
+   * college is helping with nothing.
+   */
+  readonly tuition?: number;
   /** Feed lines, in order. Milestones first, then consequences. */
   readonly lines: readonly { readonly kind: 'milestone' | 'passive'; readonly text: string }[];
 }
@@ -194,6 +231,42 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
    */
   let justEnrolled = false;
 
+  // Ticket 0210b. A degree year is its own thing — no behaviour, no clubs, no
+  // grade to repeat — so it runs in `runCollegeYear` and returns here.
+  if (state.stage === 'college' || state.stage === 'postgrad') {
+    const college = runCollegeYear(state, {
+      age: input.age,
+      smarts: input.stats.smarts,
+      discipline: input.stats.discipline,
+      academics: input.talents.academics,
+      cash: input.cash ?? 0,
+      support: input.collegeSupport ?? 0,
+      roll: input.roll ?? 1,
+    });
+    return {
+      state: college.state,
+      statDeltas:
+        college.ending === 'finished'
+          ? { happiness: 8, smarts: 3 }
+          : college.ending
+            ? { happiness: -6 }
+            : { smarts: 2 },
+      hiddenLoad: 0,
+      earned: [],
+      // A degree is a real commitment against the same hidden capacity a job
+      // takes (spec 1823: full-time work during college is allowed, and stress
+      // handles the overcommitment).
+      hours: COLLEGE_HOURS,
+      capacity: capacityFor(input.stats, input.personality, input.age),
+      costs:
+        college.tuition > 0
+          ? [{ dollars: college.tuition, source: 'a year of tuition', payer: 'self' as const }]
+          : [],
+      tuition: college.tuition,
+      lines: college.lines.map((line) => ({ kind: line.kind, text: line.text })),
+    };
+  }
+
   if (state.stage === 'graduated' || state.stage === 'droppedOut') {
     // School is over; work is not. Somebody who left at sixteen still has the
     // kitchen shifts, and returning early without running them would silently
@@ -271,7 +344,17 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
         `Graduated from high school with a ${letterGrade(state.performance)} average.`,
       );
       return {
-        state: { ...state, stage: 'graduated', finishedAtAge: input.age, activities: [] },
+        state: {
+          ...state,
+          stage: 'graduated',
+          finishedAtAge: input.age,
+          activities: [],
+          // Ticket 0210b. The diploma is a CREDENTIAL now, not just a stage —
+          // it is what a job asks for and what a college application needs, and
+          // a character who finished school has to be able to prove it after
+          // they have gone on to do something else.
+          credentials: { ...state.credentials, highSchool: input.age },
+        },
         statDeltas: { happiness: 6, discipline: 2 },
         hiddenLoad: 0,
         earned: [],

@@ -58,6 +58,22 @@ export interface ParentingState {
    * copy (0207d) wearing a different hat.
    */
   readonly askedBefore?: Readonly<Record<string, readonly string[]>>;
+  /**
+   * Ticket 0210b. Whole dollars a year a parent committed towards college.
+   *
+   * A COMMITMENT, not a cheque. Spec 61 and 1197 both list "fund college" among
+   * the things an NPC parent does, and 0209 built the request — but a one-off
+   * payment against a four-year degree is not funding it, and measuring proved
+   * the point: with tuition priced at $9,400 and a school leaver holding $150,
+   * `cannot-afford` blocked enrolment 2,282 times in 300 lives and 78 characters
+   * ran out of money PART-WAY THROUGH a degree they had been accepted onto.
+   *
+   * So a yes means they pay their share every year the character is studying,
+   * which is what funding somebody's education actually is, and it makes the
+   * difference between a family that can and one that cannot into the real
+   * class divide it should be.
+   */
+  readonly collegeSupport?: number;
 }
 
 /**

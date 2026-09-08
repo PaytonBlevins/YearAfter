@@ -10,7 +10,8 @@
       "pay": 27000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 38,
       "blurb": "Shifts on the floor, and the rest."
     },
@@ -23,7 +24,8 @@
       "pay": 34000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 44,
       "blurb": "You open, you close, you lock up."
     },
@@ -36,7 +38,8 @@
       "pay": 46000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 54,
       "blurb": "The rota, the till, everyone's problems."
     },
@@ -49,7 +52,8 @@
       "pay": 63000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 62,
       "blurb": "The store, and a number to hit."
     },
@@ -62,7 +66,8 @@
       "pay": 92000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 70,
       "blurb": "Eleven stores and a lot of driving."
     },
@@ -75,7 +80,8 @@
       "pay": 25000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 45,
       "blurb": "Hot, loud, over at midnight."
     },
@@ -88,7 +94,8 @@
       "pay": 26000,
       "spread": 0.55,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 44,
       "blurb": "The money is in what they leave you."
     },
@@ -101,7 +108,8 @@
       "pay": 34000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 55,
       "blurb": "One station, every ticket, all night."
     },
@@ -114,7 +122,8 @@
       "pay": 48000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 64,
       "blurb": "You run the pass when he is out."
     },
@@ -127,7 +136,8 @@
       "pay": 68000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 74,
       "blurb": "The menu is yours. So is the blame."
     },
@@ -140,7 +150,8 @@
       "pay": 32000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 52,
       "blurb": "Whatever needs carrying, in any weather."
     },
@@ -153,7 +164,8 @@
       "pay": 39000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 54,
       "blurb": "Learning it properly, slowly."
     },
@@ -166,7 +178,8 @@
       "pay": 61000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 58,
       "blurb": "Your own van and your own jobs."
     },
@@ -179,7 +192,8 @@
       "pay": 82000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 66,
       "blurb": "Twenty people and the weather."
     },
@@ -192,7 +206,8 @@
       "pay": 105000,
       "spread": 0.6,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 72,
       "blurb": "You bid the work. Some years it lands."
     },
@@ -205,7 +220,8 @@
       "pay": 30000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "none",
+      "prefers": "highSchool",
       "demand": 36,
       "blurb": "The front desk and everyone's parcels."
     },
@@ -218,7 +234,8 @@
       "pay": 40000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "none",
+      "prefers": "highSchool",
       "demand": 42,
       "blurb": "The place runs because you do."
     },
@@ -231,7 +248,8 @@
       "pay": 58000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "university",
+      "prefers": "none",
       "demand": 52,
       "blurb": "Numbers, and what they mean."
     },
@@ -244,7 +262,8 @@
       "pay": 79000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "university",
+      "prefers": "none",
       "demand": 58,
       "blurb": "The work nobody else can check."
     },
@@ -257,7 +276,8 @@
       "pay": 118000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "university",
+      "prefers": "none",
       "demand": 70,
       "blurb": "A department and a budget."
     },
@@ -270,7 +290,8 @@
       "pay": 28000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 56,
       "blurb": "Twelve-hour shifts, and they need you."
     },
@@ -283,7 +304,8 @@
       "pay": 37000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "none",
+      "prefers": "highSchool",
       "demand": 60,
       "blurb": "The parts of it nobody films."
     },
@@ -296,7 +318,8 @@
       "pay": 54000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "university",
+      "prefers": "none",
       "demand": 68,
       "blurb": "Nights, and you are the one they ask."
     },
@@ -309,7 +332,8 @@
       "pay": 76000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "university",
+      "prefers": "none",
       "demand": 74,
       "blurb": "The floor, and every bad call."
     },
@@ -322,7 +346,8 @@
       "pay": 29000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 50,
       "blurb": "A headset and eleven miles a shift."
     },
@@ -335,7 +360,8 @@
       "pay": 38000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 52,
       "blurb": "Your route, and a lot of time alone."
     },
@@ -348,7 +374,8 @@
       "pay": 55000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 72,
       "blurb": "Four nights a week in the cab."
     },
@@ -361,7 +388,8 @@
       "pay": 68000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 64,
       "blurb": "Three shifts and forty people."
     },
@@ -374,7 +402,8 @@
       "pay": 30000,
       "spread": 0.7,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 48,
       "blurb": "Small base. The rest is what you sell."
     },
@@ -387,7 +416,8 @@
       "pay": 52000,
       "spread": 0.85,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 58,
       "blurb": "A patch, a list, and a number."
     },
@@ -400,7 +430,8 @@
       "pay": 62000,
       "spread": 1.05,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 60,
       "blurb": "Some years are extraordinary."
     },
@@ -413,7 +444,8 @@
       "pay": 88000,
       "spread": 1.15,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 70,
       "blurb": "Other people's money, and a cut."
     },
@@ -426,7 +458,8 @@
       "pay": 130000,
       "spread": 0.5,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 76,
       "blurb": "You carry the team's number now."
     },
@@ -439,7 +472,8 @@
       "pay": 26000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 44,
       "blurb": "Everybody's coffee, and sometimes more."
     },
@@ -452,7 +486,8 @@
       "pay": 44000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 50,
       "blurb": "Somebody else's brief, six times over."
     },
@@ -465,7 +500,8 @@
       "pay": 72000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 58,
       "blurb": "It is your name on how it looks."
     },
@@ -478,7 +514,8 @@
       "pay": 78000,
       "spread": 1.15,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 54,
       "blurb": "No boss, no floor, no ceiling."
     },
@@ -491,7 +528,8 @@
       "pay": 33000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 36,
       "blurb": "The filing of a small city."
     },
@@ -504,7 +542,8 @@
       "pay": 52000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "none",
+      "prefers": "highSchool",
       "demand": 48,
       "blurb": "Sixty sites a month, clipboard in hand."
     },
@@ -517,7 +556,8 @@
       "pay": 71000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "none",
+      "prefers": "highSchool",
       "demand": 58,
       "blurb": "A department, and never enough budget."
     },
@@ -530,7 +570,8 @@
       "pay": 104000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "university",
+      "prefers": "none",
       "demand": 62,
       "blurb": "Budgets, council, and a long horizon."
     },
@@ -543,7 +584,8 @@
       "pay": 29000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 52,
       "blurb": "Thirty children and one of you."
     },
@@ -556,7 +598,8 @@
       "pay": 56000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "university",
+      "prefers": "none",
       "demand": 66,
       "blurb": "Thirty of them, and the marking after."
     },
@@ -569,7 +612,8 @@
       "pay": 70000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "university",
+      "prefers": "none",
       "demand": 68,
       "blurb": "Your subject and six teachers."
     },
@@ -582,7 +626,8 @@
       "pay": 88000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "postgraduate",
+      "prefers": "none",
       "demand": 74,
       "blurb": "The building, and every parent in it."
     },
@@ -595,7 +640,8 @@
       "pay": 42000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": false,
+      "requires": "none",
+      "prefers": "none",
       "demand": 64,
       "blurb": "The voice on somebody's worst call."
     },
@@ -608,7 +654,8 @@
       "pay": 58000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "none",
+      "prefers": "highSchool",
       "demand": 70,
       "blurb": "A radio, and everybody's worst night."
     },
@@ -621,7 +668,8 @@
       "pay": 74000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "none",
+      "prefers": "highSchool",
       "demand": 72,
       "blurb": "The ones that stay with you."
     },
@@ -634,7 +682,8 @@
       "pay": 91000,
       "spread": 0.0,
       "minAge": 16,
-      "wantsDiploma": true,
+      "requires": "none",
+      "prefers": "highSchool",
       "demand": 74,
       "blurb": "A shift of them, and their decisions."
     }

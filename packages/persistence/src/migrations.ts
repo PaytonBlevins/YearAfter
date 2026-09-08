@@ -341,6 +341,31 @@ const migrations: Readonly<Record<number, Migration>> = {
     version: 13,
     employment: save['employment'] ?? { standing: {}, history: [], appliedTo: [], openings: [] },
   }),
+
+  /**
+   * v13 → v14 (Ticket 0210b) — credentials.
+   *
+   * The one migration in this file that DERIVES rather than defaults, and it can
+   * because the fact is already in the save. A character whose stage is
+   * 'graduated' finished high school; `finishedAtAge` says when. That is not a
+   * guess — it is the same fact, written where the new code looks for it.
+   *
+   * A dropout gets nothing, which is correct: they did not finish. And nobody
+   * gets a degree, because no save in existence has ever been to college.
+   */
+  13: (save) => {
+    const education = (save['education'] ?? {}) as Record<string, unknown>;
+    const finished = education['finishedAtAge'];
+    const graduated = education['stage'] === 'graduated' && typeof finished === 'number';
+    return {
+      ...save,
+      version: 14,
+      education: {
+        ...education,
+        credentials: education['credentials'] ?? (graduated ? { highSchool: finished } : {}),
+      },
+    };
+  },
 };
 
 export function describeMigrationError(error: MigrationError): string {

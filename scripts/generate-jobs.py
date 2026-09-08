@@ -46,6 +46,11 @@ TRACKS = {
 TEMPLATES = {
     "salary", "performance", "trade", "government", "professional", "management",
 }
+# Mirrors EducationLevel in @yearafter/education. `requires` is a HARD floor —
+# you legally cannot be a nurse without the license — and `prefers` is a door
+# that is heavier without it, never shut (spec 119 keeps reinvention open).
+LEVELS = {"none", "highSchool", "university", "postgraduate"}
+LEVEL_ORDER = ["none", "highSchool", "university", "postgraduate"]
 
 
 def J(
@@ -59,7 +64,8 @@ def J(
     *,
     spread: float = 0.0,
     min_age: int = 16,
-    wants_diploma: bool = False,
+    requires: str = "none",
+    prefers: str = "none",
     demand: int = 40,
 ) -> None:
     """
@@ -79,7 +85,8 @@ def J(
             "pay": pay,
             "spread": spread,
             "minAge": min_age,
-            "wantsDiploma": wants_diploma,
+            "requires": requires,
+            "prefers": prefers,
             "demand": demand,
             "blurb": blurb,
         }
@@ -132,15 +139,15 @@ J("job.trades.contractor", "General contractor", "trades", 4, "performance", 105
 # Office — the ladder toward professional work, with no degree in the way.
 # ---------------------------------------------------------------------------
 J("job.office.reception", "Receptionist", "office", 0, "salary", 30_000,
-  "The front desk and everyone's parcels.", wants_diploma=True, demand=36)
+  "The front desk and everyone's parcels.", prefers="highSchool", demand=36)
 J("job.office.admin", "Office administrator", "office", 1, "salary", 40_000,
-  "The place runs because you do.", wants_diploma=True, demand=42)
+  "The place runs because you do.", prefers="highSchool", demand=42)
 J("job.office.analyst", "Analyst", "office", 2, "professional", 58_000,
-  "Numbers, and what they mean.", wants_diploma=True, demand=52)
+  "Numbers, and what they mean.", requires="university", demand=52)
 J("job.office.senior", "Senior analyst", "office", 3, "professional", 79_000,
-  "The work nobody else can check.", wants_diploma=True, demand=58)
+  "The work nobody else can check.", requires="university", demand=58)
 J("job.office.director", "Operations director", "office", 4, "management", 118_000,
-  "A department and a budget.", wants_diploma=True, demand=70)
+  "A department and a budget.", requires="university", demand=70)
 
 # ---------------------------------------------------------------------------
 # Care and health — the top rung a build with no college can honestly reach.
@@ -148,11 +155,11 @@ J("job.office.director", "Operations director", "office", 4, "management", 118_0
 J("job.care.aide", "Care aide", "care", 0, "salary", 28_000,
   "Twelve-hour shifts, and they need you.", demand=56)
 J("job.care.tech", "Care technician", "care", 1, "salary", 37_000,
-  "The parts of it nobody films.", wants_diploma=True, demand=60)
+  "The parts of it nobody films.", prefers="highSchool", demand=60)
 J("job.care.nurse", "Practical nurse", "care", 2, "professional", 54_000,
-  "Nights, and you are the one they ask.", wants_diploma=True, demand=68)
+  "Nights, and you are the one they ask.", requires="university", demand=68)
 J("job.care.charge", "Charge nurse", "care", 3, "professional", 76_000,
-  "The floor, and every bad call.", wants_diploma=True, demand=74)
+  "The floor, and every bad call.", requires="university", demand=74)
 
 # ---------------------------------------------------------------------------
 # Logistics — steady, physical, and there is always more of it.
@@ -202,11 +209,11 @@ J("job.creative.freelance", "Freelance creative", "creative", 3, "performance", 
 J("job.public.clerk", "Records clerk", "public", 0, "government", 33_000,
   "The filing of a small city.", demand=36)
 J("job.public.inspector", "Building inspector", "public", 1, "government", 52_000,
-  "Sixty sites a month, clipboard in hand.", wants_diploma=True, demand=48)
+  "Sixty sites a month, clipboard in hand.", prefers="highSchool", demand=48)
 J("job.public.manager", "Department manager", "public", 2, "government", 71_000,
-  "A department, and never enough budget.", wants_diploma=True, demand=58)
+  "A department, and never enough budget.", prefers="highSchool", demand=58)
 J("job.public.city", "City administrator", "public", 3, "government", 104_000,
-  "Budgets, council, and a long horizon.", wants_diploma=True, demand=62)
+  "Budgets, council, and a long horizon.", requires="university", demand=62)
 
 # ---------------------------------------------------------------------------
 # Education and public safety are their OWN ladders, not rungs of public
@@ -218,20 +225,20 @@ J("job.public.city", "City administrator", "public", 3, "government", 104_000,
 J("job.school.aide", "Teaching assistant", "education", 0, "salary", 29_000,
   "Thirty children and one of you.", demand=52)
 J("job.school.teacher", "Teacher", "education", 1, "professional", 56_000,
-  "Thirty of them, and the marking after.", wants_diploma=True, demand=66)
+  "Thirty of them, and the marking after.", requires="university", demand=66)
 J("job.school.head", "Department head", "education", 2, "professional", 70_000,
-  "Your subject and six teachers.", wants_diploma=True, demand=68)
+  "Your subject and six teachers.", requires="university", demand=68)
 J("job.school.principal", "School principal", "education", 3, "management", 88_000,
-  "The building, and every parent in it.", wants_diploma=True, demand=74)
+  "The building, and every parent in it.", requires="postgraduate", demand=74)
 
 J("job.safety.dispatch", "Emergency dispatcher", "safety", 0, "government", 42_000,
   "The voice on somebody's worst call.", demand=64)
 J("job.safety.officer", "Police officer", "safety", 1, "government", 58_000,
-  "A radio, and everybody's worst night.", wants_diploma=True, demand=70)
+  "A radio, and everybody's worst night.", prefers="highSchool", demand=70)
 J("job.safety.detective", "Detective", "safety", 2, "government", 74_000,
-  "The ones that stay with you.", wants_diploma=True, demand=72)
+  "The ones that stay with you.", prefers="highSchool", demand=72)
 J("job.safety.sergeant", "Sergeant", "safety", 3, "management", 91_000,
-  "A shift of them, and their decisions.", wants_diploma=True, demand=74)
+  "A shift of them, and their decisions.", prefers="highSchool", demand=74)
 
 
 def check() -> None:
@@ -248,6 +255,12 @@ def check() -> None:
             problems.append(f"{jid}: unknown track {job['track']!r}")
         if job["template"] not in TEMPLATES:
             problems.append(f"{jid}: unknown template {job['template']!r}")
+        if job["requires"] not in LEVELS:
+            problems.append(f"{jid}: unknown requires {job['requires']!r}")
+        if job["prefers"] not in LEVELS:
+            problems.append(f"{jid}: unknown prefers {job['prefers']!r}")
+        if LEVEL_ORDER.index(job["prefers"]) > LEVEL_ORDER.index(job["requires"]) and job["requires"] != "none":
+            problems.append(f"{jid}: prefers more than it requires, which is two rules for one thing")
         if job["pay"] <= 0:
             problems.append(f"{jid}: pay must be positive")
         if job["spread"] > 0 and job["template"] not in ("performance", "trade", "management"):
@@ -304,7 +317,7 @@ def check() -> None:
     # system is unreachable for the population the build actually produces.
     # CORE_RULES 13.16: this is the check that would have caught the $9,000
     # wedding and the $650 school play.
-    open_doors = [job for job in JOBS if job["rung"] == 0 and not job["wantsDiploma"]]
+    open_doors = [job for job in JOBS if job["rung"] == 0 and job["requires"] == "none" and job["prefers"] == "none"]
     if len(open_doors) < 5:
         problems.append(
             f"only {len(open_doors)} job(s) need neither experience nor a diploma — "
@@ -334,8 +347,15 @@ def main() -> None:
         jobs = sorted((job for job in JOBS if job["track"] == track), key=lambda j: j["rung"])
         pay = " -> ".join(f"${job['pay'] // 1000}k" for job in jobs)
         print(f"  {track:<10} {len(jobs)} rungs   {pay}")
-    doors = [job for job in JOBS if job["rung"] == 0 and not job["wantsDiploma"]]
+    doors = [job for job in JOBS if job["rung"] == 0 and job["requires"] == "none" and job["prefers"] == "none"]
     print(f"\n{len(doors)} way(s) in with no diploma and no experience")
+    for level in LEVEL_ORDER:
+        reachable = [
+            job for job in JOBS
+            if LEVEL_ORDER.index(job["requires"]) <= LEVEL_ORDER.index(level)
+        ]
+        top = max(job["pay"] for job in reachable)
+        print(f"  with {level:<13} {len(reachable):>2} jobs reachable, best ${top // 1000}k")
 
 
 if __name__ == "__main__":

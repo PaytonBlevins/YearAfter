@@ -7,6 +7,7 @@ export * from './new-game';
 export * from './interact';
 export * from './gigs';
 export * from './careers';
+export * from './college';
 export * from './guardians';
 export * from './joining';
 export * from './parenting';

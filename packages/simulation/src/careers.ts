@@ -17,6 +17,7 @@ import {
   SECOND_PUSH_SCALE,
   applicantFor,
   cannotApply,
+  CANNOT_APPLY_LABELS,
   findJob,
   hireChance,
   openingsFor,
@@ -25,7 +26,21 @@ import {
   type Job,
 } from '@yearafter/careers';
 import { clampStat, err, ok, type Result, type StatValue } from '@yearafter/core';
-import { isInSchool } from '@yearafter/education';
+import { employerFor } from '@yearafter/content';
+import { findMajor, isInSchool, levelOf } from '@yearafter/education';
+
+/**
+ * The career tracks this character's degree was actually for.
+ *
+ * Empty for anybody without one, which is why a major is a real decision: it is
+ * worth twenty points of hiring odds in the right field and nothing anywhere
+ * else (spec 1821 makes the major the one choice college asks for).
+ */
+const majorOpens = (state: GameState): readonly string[] => {
+  if (levelOf(state.education.credentials) === 'none') return [];
+  const major = state.education.majorId ? findMajor(state.education.majorId) : undefined;
+  return major?.opens ?? [];
+};
 import type { GameState } from './game-state';
 import { RngDomains, stableUnit } from './rng/rng';
 
@@ -41,6 +56,7 @@ export const WORK_ERROR_LABELS: Readonly<Record<WorkError, string>> = {
   'already-applied': 'You have already applied for this one this year.',
   'already-doing-it': 'This is the job you have.',
   'out-of-reach': 'They would want somebody who has done the job below this.',
+  'needs-education': 'You do not have the qualification this one needs.',
   'no-such-job': 'That job is not in the catalog.',
   'no-job': 'You are not working anywhere.',
   'no-push-left': 'You have put in what you have to put in this year.',
@@ -73,7 +89,7 @@ export function openings(state: GameState): readonly Job[] {
   return openingsFor(
     {
       age: state.player.age,
-      graduated: state.education.stage === 'graduated',
+      education: levelOf(state.education.credentials),
       reached: reachedBy(state.employment),
       ...(held ? { currentJobId: held } : {}),
     },
@@ -101,6 +117,35 @@ export function experienceOf(employment: EmploymentState, age: number): number {
   return past + now;
 }
 
+/**
+ * Who this opening is with, stably for the year.
+ *
+ * Ticket 0210b. Drawn rather than stored, for the same reason the listings are:
+ * an employer is texture on a listing and putting it in the save would mean
+ * migrating it forever for something nobody can act on.
+ */
+export const employerOf = (state: GameState, job: Job): string =>
+  employerFor(job.track, stableUnit(`${state.world.year}:employer:${String(job.id)}`));
+
+/**
+ * Why this job cannot be applied for, in words the player can act on.
+ *
+ * Review: tapping a job used to hire the player instantly. Now it opens a card,
+ * and a card whose button is greyed out with no reason is the other half of the
+ * same mistake — so this returns the sentence rather than a boolean.
+ */
+export function whyNotJob(state: GameState, job: Job): string | undefined {
+  const held = state.employment.job?.jobId;
+  const blocked = cannotApply(job, {
+    age: state.player.age,
+    education: levelOf(state.education.credentials),
+    reached: reachedBy(state.employment),
+    ...(held ? { currentJobId: held } : {}),
+  });
+  if (!blocked) return undefined;
+  return CANNOT_APPLY_LABELS[blocked];
+}
+
 /** The odds, for the row the player reads before they apply. */
 export function chanceOf(state: GameState, job: Job): number {
   return hireChance(
@@ -113,7 +158,8 @@ export function chanceOf(state: GameState, job: Job): number {
         charisma: state.player.stats.charisma,
         discipline: state.player.stats.discipline,
         looks: state.player.stats.looks,
-        graduated: state.education.stage === 'graduated',
+        education: levelOf(state.education.credentials),
+        opens: majorOpens(state),
         experience: experienceOf(state.employment, state.player.age),
       },
       state.employment.standing,
@@ -145,7 +191,7 @@ export function applyFor(state: GameState, jobId: string): Result<ApplyOutcome, 
   const held = state.employment.job?.jobId;
   const blocked = cannotApply(job, {
     age: state.player.age,
-    graduated: state.education.stage === 'graduated',
+    education: levelOf(state.education.credentials),
     reached: reachedBy(state.employment),
     ...(held ? { currentJobId: held } : {}),
   });

@@ -14,6 +14,7 @@
  */
 
 import { clampStat, type StatValue } from '@yearafter/core';
+import { meetsLevel, type EducationLevel } from '@yearafter/education';
 import type { CareerTrack, Job } from './jobs';
 import { TEMPLATES } from './jobs';
 
@@ -101,7 +102,15 @@ export interface Applicant {
   readonly charisma: number;
   readonly discipline: number;
   readonly looks: number;
-  readonly graduated: boolean;
+  /** What they actually hold (Ticket 0210b). */
+  readonly education: EducationLevel;
+  /**
+   * Tracks their degree was FOR, if they have one.
+   *
+   * A nursing degree is worth a great deal in care and very little in
+   * logistics, which is the whole reason choosing a major is a decision.
+   */
+  readonly opens: readonly string[];
   /** Years of paid work behind them, anywhere. */
   readonly experience: number;
   /** Standing on this job's own track. */
@@ -115,13 +124,16 @@ export type CannotApply =
   | 'already-applied'
   | 'already-doing-it'
   /** Nobody hires a stranger into the top of a ladder. */
-  | 'out-of-reach';
+  | 'out-of-reach'
+  /** Ticket 0210b. A licence or a degree you do not have. */
+  | 'needs-education';
 
 export const CANNOT_APPLY_LABELS: Readonly<Record<CannotApply, string>> = {
   'too-young': 'You are too young for this one.',
   'already-applied': 'You have already applied this year.',
   'already-doing-it': 'This is the job you have.',
   'out-of-reach': 'They would want somebody who has done the job below this.',
+  'needs-education': 'You do not have the qualification this one needs.',
 };
 
 /**
@@ -185,16 +197,23 @@ export function hireChance(job: Job, applicant: Applicant): number {
   // nothing at all.
   const seen = Math.min(1, applicant.experience / 6) * 0.18;
 
-  // Finishing school where it is expected. A door that is heavier, never shut —
-  // see the header of `jobs.ts` on why this is not a credential gate.
-  const paper = job.wantsDiploma && !applicant.graduated ? -0.24 : 0;
+  // The soft door: they would rather you had it. Heavier without, never shut.
+  const paper = meetsLevel(applicant.education, job.prefers) ? 0 : -0.24;
+  // And the right degree for this field is worth real money. Spec 1821 makes a
+  // major the one decision college asks; this is what makes it a decision.
+  const relevant = applicant.opens.includes(job.track) ? 0.2 : 0;
 
   // Measured at 0.42 and rejected: the hire rate came out at 72–79% and did not
   // move between a driven player and one who barely tried, which makes applying
   // a formality rather than a decision. A first application should be roughly a
   // coin flip for somebody ordinary.
   const base = 0.26 - job.rung * 0.05;
-  const chance = base + climb + charm + smarts + steady + known + seen + paper;
+  // The HARD door. `canApply` blocks these before the odds are ever asked, so
+  // this is the second enforcement point rather than the only one — CORE_RULES
+  // 13.15, a gate guards what it hands back as well as what it lets through.
+  if (!meetsLevel(applicant.education, job.requires)) return 0;
+
+  const chance = base + climb + charm + smarts + steady + known + seen + paper + relevant;
 
   // Never certain in either direction, for the reason `willThey` gives: an
   // employer who always says yes is a vending machine, and one who never does is

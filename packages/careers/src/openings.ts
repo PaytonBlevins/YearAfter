@@ -16,6 +16,7 @@
 
 import { ALL_JOBS, type Job } from './jobs';
 import { REACH, type Applicant, type CannotApply } from './employment';
+import { meetsLevel, type EducationLevel } from '@yearafter/education';
 
 /** How many listings a year. Enough to choose between, few enough to read. */
 export const LISTINGS = 6;
@@ -25,7 +26,8 @@ export const WORKING_AGE = 16;
 
 export interface OpeningsContext {
   readonly age: number;
-  readonly graduated: boolean;
+  /** What they hold (Ticket 0210b). */
+  readonly education: EducationLevel;
   /** Highest rung ever held, per track. Absent means never worked in it. */
   readonly reached: Readonly<Record<string, number>>;
   /** The job held right now, if any — it is never in its own listings. */
@@ -43,6 +45,11 @@ export interface OpeningsContext {
 export function cannotApply(job: Job, context: OpeningsContext): CannotApply | undefined {
   if (String(job.id) === context.currentJobId) return 'already-doing-it';
   if (context.age < job.minAge) return 'too-young';
+  // Ticket 0210b. The hard credential, checked BEFORE the odds — a licensed
+  // job is not "unlikely" without the license, it is closed, and the row has to
+  // say which. Review: "make it realistic as to what jobs require college
+  // degrees and what not."
+  if (!meetsLevel(context.education, job.requires)) return 'needs-education';
   const reached = context.reached[job.track] ?? -1;
   if (job.rung > reached + 1 + REACH - 1) return 'out-of-reach';
   return undefined;
@@ -75,7 +82,7 @@ export function openingsFor(
     const reached = context.reached[job.track] ?? -1;
     const stepUp = job.rung === reached + 1 && reached >= 0;
     const known = reached >= 0;
-    const wall = job.wantsDiploma && !context.graduated;
+    const wall = !meetsLevel(context.education, job.prefers);
     const weight = (stepUp ? 3 : known ? 1.6 : 1) * (wall ? 0.55 : 1);
     // A stable draw scaled by weight. Sorting on this is a weighted sample
     // without replacement, and it consumes no RNG state.

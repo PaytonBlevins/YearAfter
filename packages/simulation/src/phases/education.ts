@@ -13,7 +13,7 @@
  */
 
 import { nudgeStats, type Character } from '@yearafter/character';
-import { add, dollars } from '@yearafter/core';
+import { add, dollars, subtract } from '@yearafter/core';
 import { isInSchool, runSchoolYear, statusLabel, type EducationState } from '@yearafter/education';
 import type { TimelineKind } from '@yearafter/character';
 import type { GameState } from '../game-state';
@@ -50,6 +50,13 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     // stops going. The package stays pure — it is handed a number, it does not
     // make one.
     roll: state.rng.stream(RngDomains.Education).next(),
+    // Ticket 0210b. Tuition is the first thing in the school model that can
+    // price a character out, so it is the first that needs to know what they
+    // hold.
+    cash: Math.floor(Number(state.player.cash) / 100),
+    // Ticket 0209's parent who said yes to college, honouring it every year.
+    collegeSupport:
+      state.education.stage === 'postgrad' ? 0 : (state.parenting.collegeSupport ?? 0),
   });
 
   // Money the character EARNED. Unlike an activity fee — which the household
@@ -57,9 +64,15 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
   // the first money in this game that is genuinely theirs.
   const wages = result.earned.reduce((total, entry) => total + entry.dollars, 0);
 
+  // Ticket 0210b. Tuition actually LEAVES, unlike an activity fee, which the
+  // household bears and this phase only reports. A degree nobody pays for is a
+  // degree that costs nothing.
+  const tuition = result.tuition ?? 0;
+  const afterWages = wages > 0 ? add(state.player.cash, dollars(wages)) : state.player.cash;
+
   const player: Character = {
     ...state.player,
-    cash: wages > 0 ? add(state.player.cash, dollars(wages)) : state.player.cash,
+    cash: tuition > 0 ? subtract(afterWages, dollars(tuition)) : afterWages,
     stats: nudgeStats(state.player.stats, result.statDeltas),
     // Ticket 0205 turns hidden load into visible stress. 0204 only reports it.
     stress: { ...state.player.stress, hiddenLoad: result.hiddenLoad },

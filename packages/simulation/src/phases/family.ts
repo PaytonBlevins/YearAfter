@@ -24,6 +24,8 @@ import {
   ASK_CHANCE,
   PARENT_ACTS,
   actChance,
+  costFor,
+  findRequest,
   alreadyAsked,
   parentYearFor,
   asksFor,
@@ -257,6 +259,18 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
       lines.push({ kind: 'relationship', text: result.text });
       behaviourDelta += result.behaviour;
       gifted += result.gift;
+      // Ticket 0210b. A parent who offers to cover college commits to a yearly
+      // share of the household's income, exactly as the asked-for version does.
+      if (result.offersCollege && !parenting.collegeSupport) {
+        parenting = {
+          ...parenting,
+          collegeSupport: costFor(
+            findRequest('help-with-college')!,
+            { ...household, members },
+            input.age,
+          ),
+        };
+      }
       if (result.warmth !== 0) {
         members = updateMember({ ...household, members }, chosen.parent.id, (member) => ({
           ...member,
@@ -289,7 +303,7 @@ function resolveParentAct(
   who: string,
   salt: string,
   age: number,
-): { text: string; behaviour: number; gift: number; warmth: number } {
+): { text: string; behaviour: number; gift: number; warmth: number; offersCollege?: boolean } {
   //
   // CORE_RULES 13.17, and this is the FIFTH time this exact bug has shipped —
   // 0206's drift lines, 0207d, 0208's milestones, 0209's ask replies, and now
@@ -312,6 +326,22 @@ function resolveParentAct(
   };
 
   switch (id) {
+    case 'paid-for-college':
+      // The GIFT is zero and the money is not here: what this does is set
+      // `collegeSupport`, which the caller reads, because a commitment to pay
+      // tuition every year is not a lump sum handed to a seventeen-year-old.
+      return {
+        text: pick([
+          '{parent} sat you down and said they would cover college if you wanted to go.',
+          '{parent} had been putting money aside for college since you were small.',
+          '{parent} said the tuition was handled. You had not known there was anything set aside.',
+          'There was a college fund. {parent} had never mentioned it and it was not large, but it was there.',
+        ]),
+        behaviour: 0,
+        gift: 0,
+        warmth: 6,
+        offersCollege: true,
+      };
     case 'bought-you-something':
       return {
         text: pick([

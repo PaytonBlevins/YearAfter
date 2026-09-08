@@ -14,6 +14,7 @@
  */
 
 import type { StatValue } from '@yearafter/core';
+import { EDUCATION_LABELS, findMajor, levelOf, type Credentials } from './college';
 
 /**
  * Where a character is in the school system.
@@ -22,8 +23,27 @@ import type { StatValue } from '@yearafter/core';
  * schools for badly behaved students, and a character in one is still in
  * whatever grade their age implies.
  */
+/**
+ * Where the character is RIGHT NOW, which is not the same as what they hold.
+ *
+ * `graduated` means "not in school", not "has a diploma" — a character who
+ * finishes university is `graduated` again, and what they earned lives in
+ * `credentials` (see `college.ts`). Ticket 0210b added `college` and `postgrad`
+ * after review: "when you graduate from highschool, there is no college or post
+ * graduate options. Those are Necessary!"
+ *
+ * One field cannot answer both "are you at school" and "what did you finish",
+ * and the version that tried is why `graduated` reads ambiguously here.
+ */
 export type SchoolStage =
-  'preschool' | 'elementary' | 'middle' | 'high' | 'graduated' | 'droppedOut';
+  | 'preschool'
+  | 'elementary'
+  | 'middle'
+  | 'high'
+  | 'graduated'
+  | 'droppedOut'
+  | 'college'
+  | 'postgrad';
 
 export type SchoolType = 'public' | 'private' | 'alternative' | 'homeschool';
 
@@ -132,6 +152,12 @@ export function enrolmentLabel(state: EducationState, age = 0): string {
     return 'Preschooler';
   }
 
+  // Ticket 0210b. University has years, not grades, and a major.
+  if (state.stage === 'college' || state.stage === 'postgrad') {
+    const year = (state.collegeYear ?? 0) + 1;
+    const which = state.stage === 'postgrad' ? 'Grad Student' : 'College Student';
+    return `${which} (Year ${year})`;
+  }
   const grade = state.gradeLevel;
   if (grade === 0) return 'Kindergartner';
   if (state.stage === 'high') {
@@ -164,6 +190,16 @@ export function statusLabel(state: EducationState, age: number): string {
   // For a few years after leaving, what you did last is still who you are.
   // Calling an eighteen-year-old "Unemployed" the summer they graduate is
   // technically true and reads like an accusation.
+  //
+  // Ticket 0210b: a degree is the strongest version of that, so it wins over a
+  // diploma and lasts longer — somebody is "a graduate" for a while, not a year.
+  const held = levelOf(state.credentials);
+  if (held === 'postgraduate' || held === 'university') {
+    const earned = state.credentials?.postgraduate ?? state.credentials?.university ?? 0;
+    if (age - earned <= 4) {
+      return held === 'postgraduate' ? 'Graduate Degree' : 'College Graduate';
+    }
+  }
   if (state.finishedAtAge !== undefined && age - state.finishedAtAge <= 3) {
     return state.stage === 'graduated' ? 'High School Graduate' : 'Left School';
   }
@@ -182,7 +218,20 @@ export function statusLabel(state: EducationState, age: number): string {
  */
 export function schoolLabel(state: EducationState): string | undefined {
   if (state.stage === 'preschool') return undefined;
-  if (state.stage === 'graduated') return 'Finished school';
+  // Ticket 0210b. What you are studying is the second line while you study it,
+  // and the highest thing you finished once you are done.
+  if (state.stage === 'college' || state.stage === 'postgrad') {
+    const major = state.majorId ? findMajor(state.majorId) : undefined;
+    return major ? major.name : 'University';
+  }
+  if (state.stage === 'graduated') {
+    const held = levelOf(state.credentials);
+    if (held === 'postgraduate' || held === 'university') {
+      const major = state.majorId ? findMajor(state.majorId) : undefined;
+      return major ? `${EDUCATION_LABELS[held]} · ${major.name}` : EDUCATION_LABELS[held];
+    }
+    return 'Finished school';
+  }
   if (state.stage === 'droppedOut') return 'Left school';
   return SCHOOL_TYPE_LABELS[state.schoolType];
 }
@@ -274,6 +323,22 @@ export interface EnrolledActivity {
 
 export interface EducationState {
   readonly stage: SchoolStage;
+  /**
+   * Ticket 0210b. What they have actually finished, and when.
+   *
+   * Separate from `stage` on purpose — see `SchoolStage`. A job asks this, never
+   * the stage, because "is at university" and "has a degree" are opposite facts
+   * about the same person.
+   */
+  readonly credentials?: Credentials;
+  /** Ticket 0210b. What they are studying, while they are studying it. */
+  readonly majorId?: string;
+  /** Ticket 0210b. Years completed of the current degree. */
+  readonly collegeYear?: number;
+  /** Ticket 0210b. Age they enrolled, for "three years in" and for tuition. */
+  readonly enrolledAtAge?: number;
+  /** Ticket 0210b. One college application a year, like a job application. */
+  readonly appliedToCollegeAtAge?: number;
   /** 0 = kindergarten, 12 = final year. Held rather than derived so a repeated
    * year or a late start is representable. */
   readonly gradeLevel: number;
@@ -341,8 +406,23 @@ export const NOT_YET_ENROLLED: EducationState = {
   gigs: [],
 };
 
+/**
+ * At school or at university — anywhere with a term timetable.
+ *
+ * College counts. Ticket 0210b: the year a character starts a degree, every
+ * caller of this had them down as an unemployed adult, which would have shown
+ * "Unemployed" in the header of somebody in their second year of nursing.
+ */
 export const isInSchool = (state: EducationState): boolean =>
-  state.stage === 'elementary' || state.stage === 'middle' || state.stage === 'high';
+  state.stage === 'elementary' ||
+  state.stage === 'middle' ||
+  state.stage === 'high' ||
+  state.stage === 'college' ||
+  state.stage === 'postgrad';
+
+/** Specifically further education, which has different rules from school. */
+export const isAtCollege = (state: EducationState): boolean =>
+  state.stage === 'college' || state.stage === 'postgrad';
 
 /** Terms of real effort available in one school year. */
 export const STUDY_TERMS = 2;

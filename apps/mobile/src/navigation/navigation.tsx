@@ -50,6 +50,15 @@ export type ScreenKey =
   /** Ticket 0210. What is going this year, and the odds on each of it. */
   | 'jobs'
   /**
+   * Ticket 0210b. ONE job, before you apply for it.
+   *
+   * Review: "when I click on a job, it automatically hires me. That should not
+   * be the case." A listing opens this; applying is a separate press.
+   */
+  | 'jobOffer'
+  /** Ticket 0210b. What is on offer to study, and what it costs. */
+  | 'college'
+  /**
    * Ticket 0210. The people at work.
    *
    * Spec 1305–1309: the Relationships screen is Family and Friends, and
@@ -72,6 +81,8 @@ export interface Route {
   readonly personId?: string;
   /** Which activity this screen is about (0206b). Same reasoning as personId. */
   readonly activityId?: string;
+  /** Which job this screen is about (0210b). Same reasoning again. */
+  readonly jobId?: string;
 }
 
 type Stacks = Record<World, Route[]>;

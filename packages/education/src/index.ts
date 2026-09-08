@@ -8,6 +8,8 @@
  * the balance tooling can run ten thousand school careers in plain Node.
  */
 
+export * from './college';
+export * from './college-year';
 export * from './school';
 export * from './standing';
 export * from './gigs';

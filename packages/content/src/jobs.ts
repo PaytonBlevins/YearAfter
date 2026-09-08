@@ -24,7 +24,10 @@ export interface JobEntry {
   readonly pay: number;
   readonly spread: number;
   readonly minAge: number;
-  readonly wantsDiploma: boolean;
+  /** Hard floor: you legally cannot do this job without it. */
+  readonly requires: string;
+  /** Soft: a heavier door without it, never a shut one (spec 119). */
+  readonly prefers: string;
   readonly demand: number;
   readonly blurb: string;
 }
@@ -59,3 +62,34 @@ export const JOB_TRACKS: readonly string[] = [...new Set(JOBS.map((job) => job.t
  */
 export const nextRungAfter = (job: JobEntry): JobEntry | undefined =>
   jobsOnTrack(job.track).find((entry) => entry.rung === job.rung + 1);
+
+/* -------------------------------------------------------------------------- */
+/* Employers (Ticket 0210b)                                                    */
+/* -------------------------------------------------------------------------- */
+
+import employersData from '../data/employers.json';
+
+interface EmployerCatalogFile {
+  readonly version: number;
+  readonly byTrack: Readonly<Record<string, readonly string[]>>;
+}
+
+const employers = employersData as unknown as EmployerCatalogFile;
+
+export const EMPLOYERS_BY_TRACK = employers.byTrack;
+export const EMPLOYER_CATALOG_VERSION = employers.version;
+
+/**
+ * Who this opening is with.
+ *
+ * `draw` is a stable [0,1) supplied by the caller — the same job in the same
+ * year is always at the same company, so opening the card twice does not
+ * reshuffle the employer, and next year's opening for the same title is
+ * somewhere else. No RNG is consumed and nothing is stored: an employer is
+ * texture on a listing, not state on a save.
+ */
+export function employerFor(track: string, draw: number): string {
+  const names = employers.byTrack[track];
+  if (!names || names.length === 0) return 'a local firm';
+  return names[Math.min(names.length - 1, Math.floor(draw * names.length))] as string;
+}

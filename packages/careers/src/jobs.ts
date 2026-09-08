@@ -23,6 +23,7 @@
 
 import { JOBS as CATALOG, jobsOnTrack, nextRungAfter, type JobEntry } from '@yearafter/content';
 import { asCareerId, type CareerId } from '@yearafter/core';
+import { EDUCATION_ORDER, type EducationLevel } from '@yearafter/education';
 
 /**
  * How a job pays and how it moves, which is the only thing a template decides.
@@ -119,14 +120,27 @@ export interface Job {
   /** Nobody hires a twelve-year-old. Gigs are what a child does. */
   readonly minAge: number;
   /**
-   * Whether finishing school is expected.
+   * The credential you legally cannot do this job without.
    *
-   * NOT a degree — see the header. This is the one credential the build can
-   * actually produce, and 0210 makes leaving school early reachable so that it
-   * separates anybody at all. A job that expects a diploma is HARDER to get
-   * without one, never impossible: spec 119 keeps reinvention open.
+   * Ticket 0210b made this real. 0210 shipped with no hard requirement anywhere
+   * — deliberately, because the build had no college and gating on one would
+   * have been CORE_RULES 13.16 — and review asked for the door: *"Please make it
+   * realistic as to what jobs require college degrees and what not."*
+   *
+   * It is a SHORT list on purpose: licensed and credentialed work only. A nurse
+   * needs the license, a teacher needs the degree, a principal needs the
+   * graduate one. A store manager does not, and the highest-paying job in the
+   * catalog is still reachable with no diploma at all, because spec 119 keeps
+   * reinvention open and spec 1405 keeps major life paths unlocked.
    */
-  readonly wantsDiploma: boolean;
+  readonly requires: EducationLevel;
+  /**
+   * The credential they would rather you had.
+   *
+   * A heavier door, never a shut one — the shape `wantsDiploma` had in 0210,
+   * kept for everything that is a preference rather than a law.
+   */
+  readonly prefers: EducationLevel;
   /**
    * Hidden capacity this consumes, 0–100 (spec 661, 1985).
    *
@@ -156,6 +170,25 @@ export interface TemplateRules {
   readonly raise: number;
 }
 
+/**
+ * What comes with the job, beyond the salary.
+ *
+ * Spec 1699 asks to "display concise benefits" and spec 1827 says they "can
+ * include bonuses, retirement match, pensions where appropriate, but avoid
+ * insurance gameplay" — so this is one short line per template and there is
+ * nothing to manage. Derived from the template rather than authored per job,
+ * because forty-nine hand-written benefit strings would drift from the pay
+ * model the first time somebody changed a template.
+ */
+export const BENEFITS: Readonly<Record<JobTemplate, string>> = {
+  salary: 'Retirement match, paid time off.',
+  performance: 'A cut of everything you bring in.',
+  trade: 'Overtime, tools, and a per-diem on travel.',
+  government: 'Pension, and it is a real one.',
+  professional: 'Retirement match, and they pay for training.',
+  management: 'Bonus tied to what the team does.',
+};
+
 export const TEMPLATES: Readonly<Record<JobTemplate, TemplateRules>> = {
   salary: { atRisk: 0.06, promotes: 0.11, fires: 0.05, raise: 0.02 },
   // The one the spec singles out twice. Half the money is on the table.
@@ -182,6 +215,11 @@ export const TEMPLATES: Readonly<Record<JobTemplate, TemplateRules>> = {
  * is a real situation once saves outlive builds, and silently treating an
  * unknown template as `salary` would pay somebody the wrong money forever.
  */
+const level = (value: string): EducationLevel =>
+  (EDUCATION_ORDER as readonly string[]).includes(value)
+    ? (value as EducationLevel)
+    : 'none';
+
 const widen = (entry: JobEntry): Job | undefined => {
   if (!(entry.track in TRACK_LABELS)) return undefined;
   if (!(entry.template in TEMPLATES)) return undefined;
@@ -194,7 +232,8 @@ const widen = (entry: JobEntry): Job | undefined => {
     pay: entry.pay,
     spread: entry.spread,
     minAge: entry.minAge,
-    wantsDiploma: entry.wantsDiploma,
+    requires: level(entry.requires),
+    prefers: level(entry.prefers),
     demand: entry.demand,
     blurb: entry.blurb,
   };

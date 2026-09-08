@@ -585,6 +585,41 @@ and the label bands are placed where the measured density actually is rather
 than on round numbers. A player who is quick and scattered now genuinely does
 better in a restaurant than in a warehouse, and the column earns its width.
 
+### 13.27 Answer the player where they pressed
+
+Review, after playing 0210: *"When I tried out for the basketball team, the
+result landed on the homepage as it should, but I want a pop up result for
+things like that... Please make this common across important, entertaining, and
+interactive moments in the game."*
+
+Every interactive moment in this game resolved silently into the Life feed, from
+0206 onward. A player could tap Try Out on the Clubs screen, or Work Harder on
+the Career screen, or ask a parent for money, and get NO answer at all until
+they navigated somewhere else and scrolled. Ten call sites, one omission,
+repeated for five tickets because each one only ever wrote a timeline entry and
+a timeline entry is not a reply.
+
+So: **if the player pressed it and it had an outcome, they are told in a card,
+where they pressed it.** A year passing still writes to the feed and always
+will — spec 725–770 makes the feed the story of a life, and a modal in front of
+every passive line would be a slideshow. The distinction is who initiated it.
+
+The corollary is that a new interactive action is not finished when it returns a
+`Result`. It is finished when it answers.
+
+### 13.28 A tap is not a decision
+
+Review, in the same pass: *"when I click on a job, it automatically hires me.
+That should not be the case."* Tapping a listing applied for it — no card, no
+confirmation, and no chance to see the salary, the requirement or the benefits
+before committing.
+
+Opening a thing and committing to a thing are different gestures and must be
+different taps. Where a row commits something irreversible, it opens a detail
+first; the second press is the decision. This is not a confirmation dialog —
+those ask "are you sure?" and imply the player erred — it is the information
+they needed in order to choose, shown before the choice rather than after it.
+
 ## 16. Performance
 
 Annual processing under ~250 ms for an ordinary life. Background NPCs are

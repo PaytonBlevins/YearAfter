@@ -31,13 +31,31 @@ import {
   hasStudiedThisYear,
   isInSchool,
   joinedActivities,
+  COLLEGE_YEARS,
+  POSTGRAD_YEARS,
+  findMajor,
   letterGrade,
   schoolLabel,
   studiedThisYear,
 } from '@yearafter/education';
 import { isCurrent, stagesFor } from '@yearafter/social';
-import { TRACK_LABELS, findJob } from '@yearafter/careers';
-import { canWork, occupationFor, openings, pushesLeft } from '@yearafter/simulation';
+import { livingChildren } from '@yearafter/relationships';
+import {
+  TRACK_LABELS,
+  afterTax,
+  findJob,
+  livingCostOf,
+  payFor,
+  savedFrom,
+} from '@yearafter/careers';
+import {
+  canWork,
+  nextDegreeFor,
+  occupationFor,
+  openings,
+  outOfPocket,
+  pushesLeft,
+} from '@yearafter/simulation';
 import { salaryLabel } from './JobsScreen';
 import {
   Card,
@@ -265,8 +283,152 @@ export function CareerScreen() {
         </>
       ) : null}
 
+      <FurtherEducation />
       <WorkSection />
+      <MoneyThisYear />
     </Screen>
+  );
+}
+
+/**
+ * Ticket 0210b — college and graduate school.
+ *
+ * Review: "when you graduate from highschool, there is no college or post
+ * graduate options. Those are Necessary!"
+ *
+ * Only appears once school is behind them and there is something left to
+ * study, so it never sits on a nine-year-old's screen. While enrolled it turns
+ * into the degree itself: what you are studying, how it is going, and the exit.
+ */
+function FurtherEducation() {
+  const { state, leaveStudies } = useGame();
+  if (!state) return null;
+
+  const { education, player } = state;
+  const studying = education.stage === 'college' || education.stage === 'postgrad';
+  const next = nextDegreeFor(state);
+
+  if (studying) {
+    const major = education.majorId ? findMajor(education.majorId) : undefined;
+    const year = (education.collegeYear ?? 0) + 1;
+    const total = education.stage === 'postgrad' ? POSTGRAD_YEARS : COLLEGE_YEARS;
+    return (
+      <>
+        <SectionHeading>Studying</SectionHeading>
+        <Card>
+          <ListRow
+            icon="school"
+            title={major?.name ?? 'Your degree'}
+            subtitle={`Year ${year} of ${total}`}
+            value={letterGrade(education.performance)}
+            affordance="none"
+          />
+          <RowDivider />
+          <ListRow
+            title="Leave the program"
+            subtitle="No pausing and no coming back to this year."
+            affordance="action"
+            onPress={leaveStudies}
+          />
+        </Card>
+      </>
+    );
+  }
+
+  if (!next || player.age < 18) return null;
+
+  return (
+    <>
+      <SectionHeading>Further education</SectionHeading>
+      <RowGroup
+        rows={[
+          {
+            icon: 'school',
+            title: next === 'postgrad' ? 'Apply to graduate school' : 'Apply to college',
+            subtitle:
+              outOfPocket(state) <= Math.floor(Number(player.cash) / 100)
+                ? 'Pick a subject and put your name in.'
+                : `You would need ${'$' + outOfPocket(state).toLocaleString('en-US')} a year.`,
+            route: { screen: 'college', title: 'College' },
+          },
+        ]}
+      />
+    </>
+  );
+}
+
+/**
+ * Ticket 0210b — where the salary actually went.
+ *
+ * Review, after playing 0210: *"I selected a job for $44k and only got paid a
+ * few grand."* They were not wrong and it was not a bug — the salary is gross,
+ * and what reaches the bank is what is left after tax and after living. But a
+ * model nobody can see is indistinguishable from a broken one, and the player
+ * was reading a correct number as a fault.
+ *
+ * So the gap is shown, in full, on the screen that produced it. Spec 1323 puts
+ * income and tax rate on the finance overview and says "specific
+ * expenses/income live on the entity that produces them" — the job produces the
+ * salary, so this is where the arithmetic belongs.
+ *
+ * When 0301's ledger and 0303's living expenses land, this card reads from them
+ * instead of computing it here, and `livingCostOf` is deleted rather than kept
+ * alongside (CORE_RULES 13.8).
+ */
+function MoneyThisYear() {
+  const { state } = useGame();
+  if (!state) return null;
+  const held = state.employment.job;
+  const job = held ? findJob(held.jobId) : undefined;
+  if (!job || !held) return null;
+
+  const years = Math.max(0, state.player.age - held.since);
+  const standing = state.employment.standing[job.track] ?? 50;
+  const gross = payFor(job, years, held.performance, standing);
+  const tax = gross - afterTax(gross);
+  const dependents = livingChildren(state.family).length;
+  const living = livingCostOf(afterTax(gross), dependents);
+  const kept = savedFrom(gross, dependents);
+
+  const money = (amount: number) => `$${Math.round(amount).toLocaleString('en-US')}`;
+
+  return (
+    <>
+      <SectionHeading note="a year">Where the money goes</SectionHeading>
+      <Card>
+        <ListRow title="Salary" value={money(gross)} affordance="none" />
+        <RowDivider />
+        <ListRow
+          title="Tax"
+          subtitle={`About ${Math.round((tax / Math.max(1, gross)) * 100)}% at this income.`}
+          value={`−${money(tax)}`}
+          affordance="none"
+        />
+        <RowDivider />
+        <ListRow
+          title="Living"
+          subtitle={
+            dependents > 0
+              ? `Rent, food, everything — for ${dependents + 1} of you.`
+              : 'Rent, food, and everything else.'
+          }
+          value={`−${money(living)}`}
+          affordance="none"
+        />
+        <RowDivider />
+        <ListRow
+          title={kept < 0 ? 'Short by' : 'What you keep'}
+          subtitle={
+            kept < 0
+              ? 'This wage does not cover this household.'
+              : 'This is what actually reaches your account.'
+          }
+          value={money(Math.abs(kept))}
+          accent
+          affordance="none"
+        />
+      </Card>
+    </>
   );
 }
 

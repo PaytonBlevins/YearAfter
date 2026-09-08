@@ -148,6 +148,9 @@ export function askParent(
       family,
       parenting: {
         ...state.parenting,
+        // Ticket 0210b. Help with college is a COMMITMENT: they pay this much a
+        // year for as long as the character is studying. See `collegeSupport`.
+        ...(saidYes && request.id === 'help-with-college' ? { collegeSupport: given } : {}),
         ...(saidYes && request.oncePerLife
           ? { granted: { ...(state.parenting.granted ?? {}), [request.id]: state.player.age } }
           : {}),

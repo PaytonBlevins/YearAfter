@@ -11,6 +11,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { findJob } from '@yearafter/careers';
 import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
+import { OutcomeCard } from '../components/OutcomeCard';
 import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
 import { FamilyScreen } from '../screens/FamilyScreen';
@@ -21,6 +22,8 @@ import { PeopleScreen } from '../screens/PeopleScreen';
 import { ChildScreen } from '../screens/ChildScreen';
 import { ParentScreen } from '../screens/ParentScreen';
 import { JobsScreen } from '../screens/JobsScreen';
+import { JobOfferScreen } from '../screens/JobOfferScreen';
+import { CollegeScreen } from '../screens/CollegeScreen';
 import { ColleaguesScreen } from '../screens/ColleaguesScreen';
 import { LoveScreen } from '../screens/LoveScreen';
 import { PersonScreen } from '../screens/PersonScreen';
@@ -59,12 +62,14 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   child: ChildScreen,
   parent: ParentScreen,
   jobs: JobsScreen,
+  jobOffer: JobOfferScreen,
+  college: CollegeScreen,
   colleagues: ColleaguesScreen,
   debug: DebugScreen,
 };
 
 export function Shell() {
-  const { ready, state, advance, decision, answer } = useGame();
+  const { ready, state, advance, decision, answer, outcome, dismissOutcome } = useGame();
   const { world, current, selectWorld, push, pop, closeToLife } = useNavigation();
 
   /**
@@ -201,6 +206,17 @@ export function Shell() {
           remaining={state.pending.length}
           onChoose={(choiceId) => answerAndNavigate(decision.eventId, choiceId)}
         />
+      ) : null}
+
+      {/*
+        Ticket 0210b. The answer to whatever the player just pressed, rendered
+        here for the same reason the decision is: it follows them. A player can
+        tap Work Harder and immediately open another screen, and an answer that
+        only lived on the screen they pressed it on would be lost.
+        A pending decision wins — time being stopped is the more urgent fact.
+      */}
+      {!decision && outcome ? (
+        <OutcomeCard outcome={outcome} onDismiss={dismissOutcome} />
       ) : null}
     </View>
   );

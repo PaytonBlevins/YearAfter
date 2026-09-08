@@ -328,6 +328,27 @@ walk(contentDir, (file) => {
     fail(rel, `Invalid JSON: ${cause.message}`);
     return;
   }
+  // Ticket 0210b. A catalog keyed by something — employers by track — is a
+  // legitimate shape and not a list with ids. Flattened here so the id and
+  // duplicate checks below still see every string, without pretending the file
+  // has an `entries` array it does not have.
+  const keyed =
+    !Array.isArray(data) && !Array.isArray(data.entries) && typeof data.byTrack === 'object'
+      ? Object.values(data.byTrack).flat()
+      : null;
+  if (keyed) {
+    const seen = new Set();
+    for (const name of keyed) {
+      if (typeof name !== 'string' || name.trim() === '') {
+        fail(rel, 'A keyed catalog may only contain non-empty strings.');
+      } else if (seen.has(name)) {
+        fail(rel, `duplicate entry ${name}`);
+      }
+      seen.add(name);
+    }
+    return;
+  }
+
   const entries = Array.isArray(data) ? data : Array.isArray(data.entries) ? data.entries : null;
   if (!entries) {
     fail(rel, 'Catalog must be an array or an object with an "entries" array.');

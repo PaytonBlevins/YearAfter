@@ -36,7 +36,8 @@ const leaver: Applicant = {
   charisma: 76,
   discipline: 68,
   looks: 60,
-  graduated: true,
+  education: 'highSchool' as const,
+  opens: [] as readonly string[],
   experience: 0,
   standing: START_STANDING,
   reached: -1,
@@ -90,7 +91,7 @@ describe('a school leaver can actually get hired', () => {
   });
 
   it('makes leaving school early harder without closing anything', () => {
-    const dropout: Applicant = { ...MEDIAN_SCHOOL_LEAVER, graduated: false };
+    const dropout: Applicant = { ...MEDIAN_SCHOOL_LEAVER, education: 'none' };
     let worseSomewhere = false;
     for (const job of ALL_JOBS.filter((entry) => entry.rung === 0)) {
       const withPaper = hireChance(job, MEDIAN_SCHOOL_LEAVER);
@@ -100,7 +101,9 @@ describe('a school leaver can actually get hired', () => {
     }
     expect(worseSomewhere).toBe(true);
     // And the doors that expect nothing are exactly as open either way.
-    const open = ALL_JOBS.filter((job) => job.rung === 0 && !job.wantsDiploma);
+    const open = ALL_JOBS.filter(
+      (job) => job.rung === 0 && job.requires === 'none' && job.prefers === 'none',
+    );
     for (const job of open) {
       expect(hireChance(job, dropout), job.title).toBeCloseTo(
         hireChance(job, MEDIAN_SCHOOL_LEAVER),

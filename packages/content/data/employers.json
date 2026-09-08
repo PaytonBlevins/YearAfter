@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "byTrack": {
+    "retail": [
+      "Marlow & Pine",
+      "Halcott Stores",
+      "The Bramble Group",
+      "Verity Home",
+      "Ashgrove Retail",
+      "Ninth Street Supply"
+    ],
+    "food": [
+      "The Copper Kettle",
+      "Solano's",
+      "Birchwood Tavern",
+      "Fig & Ash",
+      "The Weathervane",
+      "Muroto Kitchen"
+    ],
+    "trades": [
+      "Fenwick Contracting",
+      "Bright Line Electric",
+      "Aldergate Builders",
+      "Rusk & Sons",
+      "Cardinal Mechanical",
+      "Stonebridge Works"
+    ],
+    "office": [
+      "Kellerman & Fisk",
+      "Arbor Analytics",
+      "Whitlock Partners",
+      "Meridian Consulting",
+      "Pellham Group",
+      "Coastwise Advisory"
+    ],
+    "care": [
+      "St. Alder Medical",
+      "Willowbrook Care",
+      "Havenridge Health",
+      "Marian Hollis Hospital",
+      "Cedar County Health",
+      "Northgate Clinic"
+    ],
+    "logistics": [
+      "Tannerman Freight",
+      "Blue Ridge Logistics",
+      "Overland Haulage",
+      "Pratt Distribution",
+      "Redfern Warehousing",
+      "Cross Creek Transport"
+    ],
+    "sales": [
+      "Quill & Marchant",
+      "Aspen Realty Partners",
+      "Devereaux Financial",
+      "Halstead Brokers",
+      "Ironwood Capital",
+      "The Ferris Agency"
+    ],
+    "creative": [
+      "Fable & Grain",
+      "Studio Verhoek",
+      "The Wren Collective",
+      "Ostrander Design",
+      "Bright Fold",
+      "Marrow Creative"
+    ],
+    "public": [
+      "City of Rockhaven",
+      "Dunmore County",
+      "Office of the City Clerk",
+      "Fairhaven Municipal",
+      "State Records Bureau",
+      "Talbot County"
+    ],
+    "education": [
+      "Ridgeview Public Schools",
+      "St. Brendan's Academy",
+      "Lakemont Unified",
+      "Harrowgate School District",
+      "Beckett Elementary",
+      "Pinehurst Schools"
+    ],
+    "safety": [
+      "Rockhaven Police Department",
+      "Dunmore County Sheriff",
+      "Fairhaven PD",
+      "Talbot County Emergency",
+      "Rockhaven Fire & Rescue",
+      "Metro Dispatch Center"
+    ]
+  }
+}

@@ -366,6 +366,17 @@ export function moodLabel(chance: number): string {
  * other people's decisions.
  */
 export type ParentActId =
+  /**
+   * Ticket 0210b. Offering to put you through college, unasked.
+   *
+   * Spec 1197: NPC parents "may independently pay for or deny activities, buy a
+   * vehicle, provide housing, FUND COLLEGE, give or refuse money". Measured, it
+   * had to exist: a player who simply pressed "apply to college" at eighteen
+   * without knowing to ask their parents first got "You cannot cover the first
+   * year" and NOTHING ELSE, every time, in 200 of 200 lives. A path whose only
+   * entrance is a menu the player has not thought to open is not a path.
+   */
+  | 'paid-for-college'
   | 'bought-you-something'
   | 'paid-for-it-anyway'
   | 'grounded-you'
@@ -389,6 +400,9 @@ export interface ParentAct {
 export const IN_TROUBLE = 42;
 
 export const PARENT_ACTS: readonly ParentAct[] = [
+  // Narrow window on purpose: this is the conversation that happens the year
+  // somebody finishes school, and it does not happen twice.
+  { id: 'paid-for-college', minAge: 17, maxAge: 19, base: 0.34, generosityPull: 0.22 },
   { id: 'bought-you-something', minAge: 4, maxAge: 17, base: 0.12, generosityPull: 0.14 },
   { id: 'paid-for-it-anyway', minAge: 8, maxAge: 17, base: 0.08, generosityPull: 0.12 },
   {

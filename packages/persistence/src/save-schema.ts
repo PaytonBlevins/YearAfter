@@ -19,7 +19,7 @@ import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 13;
+export const CURRENT_SAVE_VERSION = 14;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -51,6 +51,8 @@ export type { WorldState };
  *     (Ticket 0208). Children themselves live in `family` as a fourth role.
  * v13 added `employment` — the job, its performance, and standing in every
  *     field ever worked in (Ticket 0210).
+ * v14 added `credentials` to education — what a character has actually
+ *     finished, derived from the stage a save already recorded (Ticket 0210b).
  *
  * Ticket 0207 (Love) did NOT bump the version, and that is a decision rather
  * than an oversight. It added one optional field, `romance`, to a person in the
@@ -66,8 +68,8 @@ export type { WorldState };
  *
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV13 {
-  readonly version: 13;
+export interface SaveGameV14 {
+  readonly version: 14;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -105,8 +107,8 @@ export interface SaveGameV13 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV13;
-export type CurrentSaveGame = SaveGameV13;
+export type AnySaveGame = SaveGameV14;
+export type CurrentSaveGame = SaveGameV14;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

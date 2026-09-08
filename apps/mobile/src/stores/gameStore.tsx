@@ -45,10 +45,13 @@ import {
   applyFor,
   workHarder,
   resign,
+  applyToCollege,
+  leaveCollege,
 } from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
+import type { Outcome } from '../components/OutcomeCard';
 import {
   DEFAULT_SETTINGS,
   fromSave,
@@ -65,6 +68,9 @@ interface GameContextValue {
   readonly saveError: string | null;
   /** Entries produced by the most recent Advance, for feed emphasis. */
   readonly lastEntries: readonly TimelineEntry[];
+  /** Ticket 0210b. The result of the last thing the player pressed, if unread. */
+  readonly outcome?: Outcome;
+  readonly dismissOutcome: () => void;
   /**
    * The question the game is waiting on, if any (Ticket 0203). One at a time:
    * a year can raise up to three, and stacking three cards on a phone is how a
@@ -89,6 +95,10 @@ interface GameContextValue {
   readonly workHarderAt: () => void;
   /** Ticket 0210. Walk out. No confirmation — see `resign`. */
   readonly quitJob: () => void;
+  /** Ticket 0210b. Apply to study a subject. Being turned down is a real outcome. */
+  readonly applyToStudy: (majorId: string) => void;
+  /** Ticket 0210b. Leave a degree. Spec 1824 removes leave-of-absence. */
+  readonly leaveStudies: () => void;
   /** Put the hours in at something. Three sessions an activity a year. */
   readonly practiseAt: (activityId: string) => void;
   /** Take or leave an odd job (Ticket 0206b). */
@@ -130,6 +140,16 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   const [saveId, setSaveId] = useState<SaveId | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [lastEntries, setLastEntries] = useState<readonly TimelineEntry[]>([]);
+  /**
+   * Ticket 0210b. The answer to the last thing the player pressed.
+   *
+   * Review: "I want a pop up result for things like that... Please make this
+   * common across important, entertaining, and interactive moments in the game."
+   * Held here rather than in each screen because the player can navigate away
+   * between pressing and reading, and an answer that only exists on the screen
+   * they pressed it on is an answer that can be lost.
+   */
+  const [outcome, setOutcome] = useState<Outcome | undefined>(undefined);
 
   const createdAt = useRef<number>(Date.now());
 
@@ -273,6 +293,12 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         setSaveError(`Cannot study right now (${result.error}).`);
         return current;
       }
+      setOutcome({
+        title: 'A term of work',
+        body: result.value.entry.text,
+        tone: 'neutral',
+        meter: { label: 'Grades', value: result.value.state.education.performance },
+      });
       setLastEntries((entries) => [...entries, result.value.entry]);
       if (saveId) persist(result.value.state, saveId, settings);
       return result.value.state;
@@ -299,6 +325,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
 
   /* ---- Ticket 0210: work ------------------------------------------------ */
 
+  const dismissOutcome = useCallback(() => setOutcome(undefined), []);
+
   const applyForJob = useCallback(
     (jobId: string) => {
       setState((current) => {
@@ -308,6 +336,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           setSaveError(`Cannot apply right now (${result.error}).`);
           return current;
         }
+        setOutcome({
+          title: result.value.hired ? 'You got it' : 'They went elsewhere',
+          body: result.value.entry.text,
+          tone: result.value.hired ? 'good' : 'bad',
+        });
         setLastEntries((entries) => [...entries, result.value.entry]);
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
@@ -324,6 +357,13 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         setSaveError(`Cannot put more in right now (${result.error}).`);
         return current;
       }
+      const after = result.value.state.employment.job;
+      setOutcome({
+        title: 'A real shift',
+        body: result.value.entry.text,
+        tone: 'neutral',
+        ...(after ? { meter: { label: 'At work', value: after.performance } } : {}),
+      });
       setLastEntries((entries) => [...entries, result.value.entry]);
       if (saveId) persist(result.value.state, saveId, settings);
       return result.value.state;
@@ -344,6 +384,42 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     });
   }, [persist, saveId, settings]);
 
+  const applyToStudy = useCallback(
+    (majorId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = applyToCollege(current, majorId);
+        if (!result.ok) {
+          setSaveError(`Cannot apply right now (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.accepted ? 'You are going' : 'Turned down',
+          body: result.value.entry.text,
+          tone: result.value.accepted ? 'good' : 'bad',
+        });
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const leaveStudies = useCallback(() => {
+    setState((current) => {
+      if (!current) return current;
+      const result = leaveCollege(current);
+      if (!result.ok) {
+        setSaveError(`Cannot leave right now (${result.error}).`);
+        return current;
+      }
+      setLastEntries((entries) => [...entries, result.value.entry]);
+      if (saveId) persist(result.value.state, saveId, settings);
+      return result.value.state;
+    });
+  }, [persist, saveId, settings]);
+
   const askAParent = useCallback(
     (parentId: string, requestId: string) => {
       setState((current) => {
@@ -353,6 +429,14 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           setSaveError(`Cannot ask right now (${result.error}).`);
           return current;
         }
+        setOutcome({
+          title: result.value.saidYes ? 'They said yes' : 'They said no',
+          body: result.value.entry.text,
+          tone: result.value.saidYes ? 'good' : 'bad',
+          ...(result.value.saidYes && result.value.given > 0
+            ? { value: `$${result.value.given.toLocaleString('en-US')}` }
+            : {}),
+        });
         setLastEntries((entries) => [...entries, result.value.entry]);
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
@@ -405,6 +489,14 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           setSaveError(`Cannot try out right now (${result.error}).`);
           return current;
         }
+        // The one review named by name: "When I tried out for the basketball
+        // team, the result landed on the homepage as it should, but I want a
+        // pop up result for things like that."
+        setOutcome({
+          title: result.value.made ? 'You made it' : 'Not this time',
+          body: result.value.entry.text,
+          tone: result.value.made ? 'good' : 'bad',
+        });
         setLastEntries((entries) => [...entries, result.value.entry]);
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
@@ -422,6 +514,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           setSaveError(`Cannot do that right now (${result.error}).`);
           return current;
         }
+        setOutcome({
+          title: result.value.worked ? 'That went well' : 'That went badly',
+          body: result.value.entry.text,
+          tone: result.value.worked ? 'good' : 'bad',
+        });
         setLastEntries((entries) => [...entries, result.value.entry]);
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
@@ -439,6 +536,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           setSaveError(`Cannot do that right now (${result.error}).`);
           return current;
         }
+        setOutcome({
+          title: result.value.worked ? 'It went well' : 'It did not land',
+          body: result.value.entry.text,
+          tone: result.value.worked ? 'good' : 'bad',
+        });
         setLastEntries((entries) => [...entries, result.value.entry]);
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
@@ -529,6 +631,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       saveId,
       saveError,
       lastEntries,
+      outcome,
+      dismissOutcome,
       decision: state?.pending[0] ?? null,
       advance,
       answer,
@@ -538,6 +642,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       applyForJob,
       workHarderAt,
       quitJob,
+      applyToStudy,
+      leaveStudies,
       practiseAt,
       takeAGig,
       quitAGig,
@@ -560,6 +666,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       saveId,
       saveError,
       lastEntries,
+      outcome,
+      dismissOutcome,
       advance,
       answer,
       studyHarder,
@@ -568,6 +676,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       applyForJob,
       workHarderAt,
       quitJob,
+      applyToStudy,
+      leaveStudies,
       practiseAt,
       takeAGig,
       quitAGig,
