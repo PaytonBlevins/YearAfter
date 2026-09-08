@@ -138,6 +138,21 @@ const BRITISH = [
   ['wind them up', 'annoy them'],
 ];
 /**
+ * Words 0207d's Americanisation swept in, in positions they cannot occupy.
+ *
+ * `apartment` is a noun and cannot follow "completely"; `bangs` is plural and
+ * cannot follow "a". Both shipped, and both read as perfect American English to
+ * every rule that was looking for British English — which is why this looks at
+ * grammar rather than at vocabulary.
+ */
+const SWEPT_IN = new RegExp(
+  '\\b(?:completely|entirely|absolutely|perfectly|totally)\\s+' +
+    '(?:apartment|sweater|flashlight|sidewalk|hallway|vacation|cookie|candy)\\b' +
+    '|\\ba\\s+(?:bangs|sneakers|trousers|scissors|chips)\\b',
+  'gi',
+);
+
+/**
  * Tokens whose rendered value is lowercase, so they cannot open a sentence.
  *
  * NOT `parent`, `adult` or `city`: those render "Mom", a given name and a city
@@ -640,6 +655,27 @@ if (existsSync(eventsPath)) {
         if (new RegExp(`\\b${british}`, 'i').test(copy)) {
           fail(rel, `${event.id}: "${british}" is British — use "${american}".`);
         }
+      }
+
+      // V15 — a word the Americanisation swept in, in a place it cannot go.
+      //
+      // Reading a played life found "Tripped on a completely APARTMENT surface",
+      // "said okay in a completely APARTMENT voice", and "Attempted A BANGS with
+      // kitchen scissors". All three are 0207d's blanket source sweep — flat →
+      // apartment, fringe → bangs — landing on the wrong sense of the word, and
+      // all three shipped because the OUTPUT is impeccable American English and
+      // every rule was looking for British English.
+      //
+      // The check is narrow on purpose: a replacement word directly after an
+      // -ly adverb (where only an adjective fits) or after "a" (where only a
+      // singular fits). It cannot catch every bad substitution and it catches
+      // the shape this sweep actually produced.
+      for (const match of copy.matchAll(SWEPT_IN)) {
+        fail(
+          rel,
+          `${event.id}: "${match[0]}" — a word the Americanisation pass swapped ` +
+            `in, in a place its other sense cannot go.`,
+        );
       }
 
       // V13 — a token that renders lowercase cannot start a sentence.

@@ -38,6 +38,15 @@ export interface SocialPhaseInput {
   readonly education: EducationState;
   /** The stage they were in last year, to spot a change of school. */
   readonly previousStage: EducationState['stage'];
+  /**
+   * Ticket 0210: the job, if there is one.
+   *
+   * The third door an adult meets people through, and the one 0207b's write-up
+   * named as missing. It arrives here rather than in the employment phase
+   * because meeting somebody is a social event, and social already owns the one
+   * new person a year.
+   */
+  readonly jobTitle?: string;
 }
 
 export interface SocialPhaseOutput {
@@ -55,6 +64,8 @@ export function runSocial(input: SocialPhaseInput): SocialPhaseOutput {
     charisma: input.charisma,
     personality: input.personality,
     joinedActivityIds: input.education.activities.map((entry) => entry.activityId),
+    working: input.jobTitle !== undefined,
+    ...(input.jobTitle !== undefined ? { jobTitle: input.jobTitle } : {}),
     family: input.family,
     atSchool,
     // Starting school counts as changing it: the class exists from that year

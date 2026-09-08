@@ -552,6 +552,39 @@ A ticket reference belongs in a comment, which is where it stays useful and
 where it cannot go stale in front of somebody. The validator now fails on
 `Ticket NNNN` surviving comment-stripping anywhere under `apps/`.
 
+### 13.25 Measure the population, not the concept
+
+Ticket 0210 needed characters who had not finished school, so it gated leaving
+on "failing and in trouble" — performance under 38, behaviour under 42. It
+produced ZERO leavers in five hundred lives, and measuring said why: this build
+cannot make a failing student. Performance at sixteen runs p10 67, median 78,
+and its minimum across five hundred lives is 50, because Smarts alone is p10 70
+by eighteen. A floor at 38 was gating on a distribution that does not exist.
+
+The same mistake, twice more in one ticket. An unpushed worker was let go 0.1
+times in a thirty-two-year career, because the population's own Discipline
+carried them past the firing floor. And zero of twelve entry-level jobs would
+hire a median school leaver, because rung 0 counted as a reach.
+
+So a threshold is measured against the DISTRIBUTION THE BUILD PRODUCES, never
+against what the word means in the world. 13.7 says measure before you tune;
+this says measure the right thing — the characters that actually exist, at the
+age the rule fires.
+
+### 13.26 A column that says the same thing on every row is not information
+
+The openings screen showed six jobs and all six read "Worth a shot". Measuring
+found nine of twelve entry-level jobs at EXACTLY 0.56 for the same applicant:
+charisma and smarts were weighted for sales and office and everything else
+shared one flat coefficient, so which job you applied for did not change your
+odds. The label was not broken; the model behind it had nothing to say.
+
+Every track now wants somebody different — the weights sum to about the same
+total everywhere, so no field is easier, they are easier for different people —
+and the label bands are placed where the measured density actually is rather
+than on round numbers. A player who is quick and scattered now genuinely does
+better in a restaurant than in a warehouse, and the column earns its width.
+
 ## 16. Performance
 
 Annual processing under ~250 ms for an ordinary life. Background NPCs are

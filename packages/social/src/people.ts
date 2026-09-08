@@ -42,13 +42,27 @@ import type { Romance } from './romance';
 export type AcquaintanceKind = 'peer' | 'teacher';
 
 /** Where the player knows this person from. Renders inside a sentence. */
-export type MeetingContext = 'school' | 'neighbourhood' | 'activity' | 'app';
+/**
+ * Where somebody came from.
+ *
+ * `work` arrives with Ticket 0210 and closes a gap 0207b left open by name: an
+ * adult met people through where they lived and what they still did, and work —
+ * the place most adults meet most people — was missing, so a character's social
+ * world thinned out the moment school ended.
+ *
+ * Spec 1305–1309 decides where these people are SHOWN, and it is emphatic:
+ * the Relationships screen is Family and Friends, and "professional
+ * relationships stay in their own worlds". A colleague is on the Career screen.
+ * They become a friend, and move, only if the friendship outlives the job.
+ */
+export type MeetingContext = 'school' | 'neighbourhood' | 'activity' | 'app' | 'work';
 
 export const CONTEXT_LABELS: Readonly<Record<MeetingContext, string>> = {
   school: 'from school',
   neighbourhood: 'from your street',
   activity: 'from a club',
   app: 'from an app',
+  work: 'from work',
 };
 
 /**

@@ -47,6 +47,16 @@ export type ScreenKey =
   | 'child'
   /** Ticket 0209. One of your own parents, and what you can ask them for. */
   | 'parent'
+  /** Ticket 0210. What is going this year, and the odds on each of it. */
+  | 'jobs'
+  /**
+   * Ticket 0210. The people at work.
+   *
+   * Spec 1305–1309: the Relationships screen is Family and Friends, and
+   * "professional relationships stay in their own worlds". So colleagues are
+   * reached from Career and appear nowhere else until one becomes a friend.
+   */
+  | 'colleagues'
   | 'debug';
 
 export interface Route {

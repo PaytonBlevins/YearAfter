@@ -37,6 +37,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     education: state.education,
     circle: state.circle,
     parenting: state.parenting,
+    employment: state.employment,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -51,6 +52,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     education: save.education,
     circle: save.circle,
     parenting: save.parenting,
+    employment: save.employment,
     pending: save.pending,
   });
 }

@@ -42,6 +42,9 @@ import {
   study,
   tryOut as attemptTryout,
   type GameState,
+  applyFor,
+  workHarder,
+  resign,
 } from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
 
@@ -80,6 +83,12 @@ interface GameContextValue {
   readonly joinActivity: (activityId: string) => void;
   /** Ticket 0209. Ask a parent for something. They may well say no. */
   readonly askAParent: (parentId: string, requestId: string) => void;
+  /** Ticket 0210. Put your name in for a job. Once each per year, and it can fail. */
+  readonly applyForJob: (jobId: string) => void;
+  /** Ticket 0210. Work Harder, twice a year, the mirror of Study Harder. */
+  readonly workHarderAt: () => void;
+  /** Ticket 0210. Walk out. No confirmation — see `resign`. */
+  readonly quitJob: () => void;
   /** Put the hours in at something. Three sessions an activity a year. */
   readonly practiseAt: (activityId: string) => void;
   /** Take or leave an odd job (Ticket 0206b). */
@@ -288,6 +297,53 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  /* ---- Ticket 0210: work ------------------------------------------------ */
+
+  const applyForJob = useCallback(
+    (jobId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = applyFor(current, jobId);
+        if (!result.ok) {
+          setSaveError(`Cannot apply right now (${result.error}).`);
+          return current;
+        }
+        setLastEntries((entries) => [...entries, result.value.entry]);
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const workHarderAt = useCallback(() => {
+    setState((current) => {
+      if (!current) return current;
+      const result = workHarder(current);
+      if (!result.ok) {
+        setSaveError(`Cannot put more in right now (${result.error}).`);
+        return current;
+      }
+      setLastEntries((entries) => [...entries, result.value.entry]);
+      if (saveId) persist(result.value.state, saveId, settings);
+      return result.value.state;
+    });
+  }, [persist, saveId, settings]);
+
+  const quitJob = useCallback(() => {
+    setState((current) => {
+      if (!current) return current;
+      const result = resign(current);
+      if (!result.ok) {
+        setSaveError(`Cannot resign right now (${result.error}).`);
+        return current;
+      }
+      setLastEntries((entries) => [...entries, result.value.entry]);
+      if (saveId) persist(result.value.state, saveId, settings);
+      return result.value.state;
+    });
+  }, [persist, saveId, settings]);
+
   const askAParent = useCallback(
     (parentId: string, requestId: string) => {
       setState((current) => {
@@ -479,6 +535,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       studyHarder,
       joinActivity,
       askAParent,
+      applyForJob,
+      workHarderAt,
+      quitJob,
       practiseAt,
       takeAGig,
       quitAGig,
@@ -506,6 +565,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       studyHarder,
       joinActivity,
       askAParent,
+      applyForJob,
+      workHarderAt,
+      quitJob,
       practiseAt,
       takeAGig,
       quitAGig,

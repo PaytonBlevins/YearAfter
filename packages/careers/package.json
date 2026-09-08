@@ -1,5 +1,5 @@
 {
-  "name": "@yearafter/simulation",
+  "name": "@yearafter/careers",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -13,16 +13,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@yearafter/careers": "workspace:*",
     "@yearafter/character": "workspace:*",
     "@yearafter/content": "workspace:*",
     "@yearafter/core": "workspace:*",
-    "@yearafter/education": "workspace:*",
-    "@yearafter/events": "workspace:*",
-    "@yearafter/parenting": "workspace:*",
-    "@yearafter/relationships": "workspace:*",
-    "@yearafter/social": "workspace:*",
-    "@yearafter/stress": "workspace:*"
+    "@yearafter/education": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3",

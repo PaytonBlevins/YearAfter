@@ -29,7 +29,9 @@ import {
 } from './performance';
 import {
   GRADES_TO_GRADUATE,
+  LEAVING_CHANCE,
   SCHOOL_START_AGE,
+  couldLeaveSchool,
   gradeForAge,
   isInSchool,
   letterGrade,
@@ -38,7 +40,12 @@ import {
 } from './school';
 import { gigLine, gigPay } from './gigs';
 import { driftStanding, seasonLine } from './standing';
-import { OVERLOAD_EVENT_THRESHOLD, assessWorkload, overloadPenalties } from './workload';
+import {
+  OVERLOAD_EVENT_THRESHOLD,
+  assessWorkload,
+  capacityFor,
+  overloadPenalties,
+} from './workload';
 
 /**
  * Which of a line's two phrasings a season gets.
@@ -57,6 +64,16 @@ export interface SchoolYearInput {
   readonly talents: Talents;
   readonly personality: Personality;
   readonly wealth: WealthBand;
+  /**
+   * One [0,1) draw for the year, passed IN rather than generated here.
+   *
+   * This package is pure and stays pure: it receives randomness as a value the
+   * way `milestoneFor` does in @yearafter/parenting, so the balance tools can
+   * replay a school career exactly and a save still reproduces from its seed.
+   * Defaulted so every existing caller and test keeps working unchanged — and
+   * defaulted to 1, which is the value that never triggers anything.
+   */
+  readonly roll?: number;
 }
 
 /**
@@ -187,8 +204,16 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
       statDeltas: EMPTY,
       hiddenLoad: 0,
       earned: work.earned,
+      // An adult has a capacity too.
+      //
+      // This returned ZERO until Ticket 0210 measured what happened next:
+      // `workloadPressure` bails out when capacity is zero, so the hours a JOB
+      // takes contributed nothing to stress for anybody out of school, and
+      // stress at fifty was identical for a character working nights in a
+      // kitchen and one who had never worked at all. A whole system was wired
+      // to a divisor of zero. CORE_RULES 13.7, found by measuring.
       hours: 0,
-      capacity: 0,
+      capacity: capacityFor(input.stats, input.personality, input.age),
       costs: [],
       lines: work.lines.map((text) => ({ kind: 'passive' as const, text })),
     };
@@ -211,6 +236,34 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
     justEnrolled = true;
     push('milestone', 'Started kindergarten.');
   } else {
+    // ---- leaving early --------------------------------------------------
+    //
+    // Before the grade advances, because a character who has stopped going does
+    // not get moved up first. See `couldLeaveSchool` for why this is not a
+    // button: it is four years of the player's own decisions arriving.
+    if (couldLeaveSchool(state, input.age) && (input.roll ?? 1) < LEAVING_CHANCE) {
+      return {
+        state: {
+          ...state,
+          stage: 'droppedOut',
+          finishedAtAge: input.age,
+          activities: [],
+        },
+        statDeltas: { happiness: -4, discipline: -3 },
+        hiddenLoad: 0,
+        earned: [],
+        hours: 0,
+        capacity: 0,
+        costs: [],
+        lines: [
+          {
+            kind: 'milestone',
+            text: leavingLine(input.age, state.behaviour),
+          },
+        ],
+      };
+    }
+
     const grade = state.gradeLevel + 1;
     if (grade > GRADES_TO_GRADUATE) {
       push(
@@ -431,3 +484,27 @@ function joinedCostSources(state: EducationState): string {
 }
 
 export { gradeForAge, isInSchool };
+
+/**
+ * What the feed says when somebody stops going.
+ *
+ * A milestone, not a punishment. It reads as a thing that happened to a
+ * sixteen-year-old rather than as the game telling them off, because the
+ * decisions that led here were theirs and the game has already said so four
+ * times. CORE_RULES 13.22: the base holds still, age does the moving.
+ */
+function leavingLine(age: number, behaviour: number): string {
+  const lines =
+    behaviour < 25
+      ? [
+          'Stopped going, and nobody from the school called about it for eleven days.',
+          'Left school at ' + age + '. It had stopped being a question some time before.',
+          'Walked out in the spring term and did not go back.',
+        ]
+      : [
+          'Left school at ' + age + ' without finishing. There were reasons, and they were yours.',
+          'Stopped going halfway through the year. It was the right call and it still cost something.',
+          'Left school early. Everybody had an opinion and none of them were asked for.',
+        ];
+  return lines[age % lines.length] as string;
+}

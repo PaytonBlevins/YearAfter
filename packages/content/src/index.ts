@@ -92,3 +92,6 @@ export * from './activities';
 
 /** Ticket 0206b — odd jobs a child can actually do for money. */
 export * from './gigs';
+
+/** Ticket 0210 — real jobs, with salaries and ladders. */
+export * from './jobs';

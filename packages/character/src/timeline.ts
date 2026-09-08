@@ -27,7 +27,17 @@ export type TimelineKind =
   /** Health and injury developments. */
   | 'health'
   /** Relationship developments. */
-  | 'relationship';
+  | 'relationship'
+  /**
+   * Work: getting hired, being promoted, being let go, being paid.
+   *
+   * Ticket 0210. A protected contract (spec 1440) grown by one variant rather
+   * than reusing 'finance', because a paycheck and a promotion are different
+   * things to a reader and the feed colours them apart. Every exhaustive switch
+   * over this union is a compile error until it handles the new one, which is
+   * the point of the union being exhaustive.
+   */
+  | 'career';
 
 export interface TimelineEntry {
   readonly id: string;

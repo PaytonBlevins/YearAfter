@@ -1423,7 +1423,7 @@ E("random.snow-day", "random", [
 
 E("random.embarrassment", "random", [
     "Called a teacher 'mom' in front of everybody and has never fully recovered.",
-    "Tripped on a completely apartment surface in front of the entire year group.",
+    "Tripped on a completely flat surface in front of the entire year group.",
     "Waved at somebody who was waving at the person behind you.",
 ], age_min=6, age_max=17, weight=12, cooldown=2,
    effects=FX(stats={"happiness": -2, "charisma": 1}))
@@ -1434,7 +1434,7 @@ E("random.magic-phase", "random", [
    effects=FX(stats={"charisma": 2, "smarts": 1}))
 
 E("random.bad-haircut-self", "random", [
-    "Attempted a bangs with kitchen scissors. The regrowth took eleven months.",
+    "Attempted bangs with kitchen scissors. The regrowth took eleven months.",
 ], age_min=8, age_max=16, weight=9, cooldown=5,
    effects=FX(stats={"looks": -3, "happiness": -1}))
 
@@ -1853,7 +1853,7 @@ D("d.friend.crush", "friendship", [
     C("compliment", "Compliment {kidTheir} jacket", outcomes=[
         OUT(5, "{kid} was flattered — {kidThey} said nobody ever notices that jacket, and asked where you sit at lunch.",
             FX(stats={"happiness": 6, "charisma": 3})),
-        OUT(3, "{kid} said 'okay' in a completely apartment voice. You heard about it from three different people by Friday.",
+        OUT(3, "{kid} said 'okay' in a completely flat voice. You heard about it from three different people by Friday.",
             FX(stats={"happiness": -5, "charisma": -1})),
         OUT(2, "{kid} was visibly creeped out and moved to the other fountain.",
             FX(stats={"happiness": -6, "charisma": -3})),

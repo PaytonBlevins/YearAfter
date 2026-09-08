@@ -41,7 +41,37 @@ export interface StressPhaseInput {
   readonly eventStress: number;
   /** Whether the character is at school this year, for the standing input. */
   readonly atSchool: boolean;
+  /**
+   * Ticket 0210. How demanding this year's job is, 0–100, or 0 for nobody
+   * working. Spec 661 forbids a visible time budget, so this arrives here as a
+   * number the player never sees and leaves as a sentence about their year.
+   */
+  readonly workDemand?: number;
 }
+
+/**
+ * A job's demand as discretionary hours a week.
+ *
+ * NOT the hours the job takes — a forty-hour job is not forty hours of the
+ * capacity this model measures, because capacity here is what is left after the
+ * things a life already requires (0205 measured it at 17–21 hours a week). What
+ * a job spends is the SLACK it takes: an easy one leaves most of the evening,
+ * a hard one leaves none of it.
+ *
+ * MEASURED, and the first value was wrong by a hair, which is the worst way to
+ * be wrong. At 0.16 the hardest job in the catalog came to twelve hours against
+ * a capacity of nineteen — under `WORKLOAD_SHOULDER` of 0.7, which is 13.3 — so
+ * NOTHING a job did ever reached the stress model and a character working
+ * nights in a kitchen had the same stress at fifty as one who had never worked.
+ * The wiring existed and carried nothing. CORE_RULES 13.7 again, and the reason
+ * the number below is chosen against the shoulder rather than against a guess.
+ *
+ * At 0.28 an easy job (demand 36) costs ten hours and stays under the shoulder,
+ * a middling one (50) just reaches it, and the hardest (76) costs twenty-one
+ * and hurts. So a demanding job plus two children is a bad year and an easy job
+ * plus two children is a busy one, which is the distinction the model is for.
+ */
+export const HOURS_PER_DEMAND = 0.28;
 
 export interface StressPhaseOutput {
   readonly player: Character;
@@ -54,7 +84,7 @@ export function runStress(input: StressPhaseInput): StressPhaseOutput {
   const previous = input.player.stress.level;
 
   const sources = stressSources({
-    hours: input.hours,
+    hours: input.hours + (input.workDemand ?? 0) * HOURS_PER_DEMAND,
     capacity: input.capacity,
     household: input.family,
     ...(input.atSchool ? { behaviour: input.education.behaviour } : {}),

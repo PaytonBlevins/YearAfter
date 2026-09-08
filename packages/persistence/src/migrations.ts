@@ -319,6 +319,28 @@ const migrations: Readonly<Record<number, Migration>> = {
    * simply has none. Nothing to convert there either.
    */
   11: (save) => ({ ...save, version: 12, parenting: save['parenting'] ?? { answered: {} } }),
+
+  /**
+   * v12 → v13 (Ticket 0210) — the employment slice.
+   *
+   * An existing character gets an EMPTY one: no job, no history, no standing
+   * anywhere. Same rule as migration 11 and every one before it — a save that
+   * never simulated a career does not get given one retroactively, and there is
+   * no honest way to derive a job from a character who has only ever been at
+   * school.
+   *
+   * The one thing this migration deliberately does NOT do is infer a job from
+   * the character's stored `occupation` string. That field is a rendered LABEL
+   * ("High School Graduate", "Unemployed") and has never been anything else;
+   * parsing display text back into state is exactly the mistake CORE_RULES 13
+   * forbids when it says logic depends on stable ids and never on display
+   * names.
+   */
+  12: (save) => ({
+    ...save,
+    version: 13,
+    employment: save['employment'] ?? { standing: {}, history: [], appliedTo: [], openings: [] },
+  }),
 };
 
 export function describeMigrationError(error: MigrationError): string {

@@ -33,10 +33,12 @@ import {
   joinedActivities,
   letterGrade,
   schoolLabel,
-  statusLabel,
   studiedThisYear,
 } from '@yearafter/education';
-import { stagesFor } from '@yearafter/social';
+import { isCurrent, stagesFor } from '@yearafter/social';
+import { TRACK_LABELS, findJob } from '@yearafter/careers';
+import { canWork, occupationFor, openings, pushesLeft } from '@yearafter/simulation';
+import { salaryLabel } from './JobsScreen';
 import {
   Card,
   ComingSoon,
@@ -173,7 +175,11 @@ export function CareerScreen() {
         */}
         <ListRow
           icon={atSchool ? 'school' : 'career'}
-          title={statusLabel(education, player.age)}
+          // Ticket 0210: the same derivation the header uses, so the two can
+          // never disagree. A screenshot of the built app had this card reading
+          // "Unemployed / Finished school" directly above a Work card saying
+          // "Sales associate · Retail · 7 years in".
+          title={occupationFor(education, player.age, currentJobTitle(state))}
           subtitle={schoolLabel(education)}
           affordance="none"
         />
@@ -259,9 +265,108 @@ export function CareerScreen() {
         </>
       ) : null}
 
+      <WorkSection />
+    </Screen>
+  );
+}
+
+/**
+ * Ticket 0210 — the working half of the Career screen.
+ *
+ * Spec 1321: "Ordinary jobs show concise compensation/performance information."
+ * So this is a job, what it pays, how it is going in words, and the two things
+ * a player can do about it — and nothing else. There is no quota (spec 104), no
+ * workload or travel line (spec 97), and no performance number, because spec
+ * 786–795 says explain outcomes through context rather than formulas.
+ */
+function WorkSection() {
+  const { state, workHarderAt, quitJob } = useGame();
+  if (!state) return null;
+
+  const { education, player } = state;
+  const held = state.employment.job;
+  const job = held ? findJob(held.jobId) : undefined;
+  const colleagues = state.circle.people.filter(
+    (person) => isCurrent(person) && person.context === 'work',
+  );
+
+  return (
+    <>
       <SectionHeading>Work</SectionHeading>
+      {job && held ? (
+        <Card>
+          <ListRow
+            icon="career"
+            title={job.title}
+            subtitle={`${TRACK_LABELS[job.track]} · ${yearsInLabel(player.age - held.since)}`}
+            value={salaryLabel(job.pay)}
+            affordance="none"
+          />
+          <RowDivider />
+          {/*
+            Performance in words, never as the number. The same rule the school
+            card follows for grades, for the same reason.
+          */}
+          <ListRow
+            title="How it is going"
+            subtitle={goingLabel(held.performance)}
+            affordance="none"
+            meter={held.performance}
+            meterColor={held.performance < 45 ? colors.negative : colors.statHealth}
+          />
+          <RowDivider />
+          {/*
+            The mirror of Study Harder, down to being available twice a year and
+            being able to fail. See @yearafter/careers `WORK_SUCCESS_CHANCE`.
+          */}
+          <ListRow
+            icon="career"
+            title="Work Harder"
+            subtitle={
+              pushesLeft(state) === 0
+                ? 'You have put in what you have to put in this year.'
+                : pushesLeft(state) === 1
+                  ? 'A second push. Worth less than the first.'
+                  : 'A stretch of real effort. It usually shows.'
+            }
+            value={pushesLeft(state) > 0 ? `${pushesLeft(state)} left` : undefined}
+            affordance={pushesLeft(state) > 0 ? 'action' : 'none'}
+            disabled={pushesLeft(state) === 0}
+            onPress={pushesLeft(state) > 0 ? workHarderAt : undefined}
+          />
+          <RowDivider />
+          <ListRow
+            title="Hand in your notice"
+            subtitle="No notice period, and nothing to sign."
+            affordance="action"
+            onPress={quitJob}
+          />
+        </Card>
+      ) : null}
+
       <RowGroup
         rows={[
+          {
+            icon: 'career',
+            title: job ? 'Look for something else' : 'Find a job',
+            subtitle: canWork(state)
+              ? `${openings(state).length} going this year`
+              : 'School first. There are odd jobs in the meantime.',
+            route: { screen: 'jobs', title: 'Openings' },
+          },
+          ...(job
+            ? [
+                {
+                  icon: 'social' as const,
+                  title: 'People at work',
+                  subtitle:
+                    colleagues.length === 0
+                      ? 'Nobody you would call by name yet'
+                      : colleagues.map((person) => person.firstName).join(', '),
+                  route: { screen: 'colleagues' as const, title: 'People at work' },
+                },
+              ]
+            : []),
           {
             icon: 'money',
             title: 'Odd Jobs',
@@ -271,17 +376,36 @@ export function CareerScreen() {
                 : 'What you can do for money at your age',
             route: { screen: 'gigs', title: 'Odd Jobs' },
           },
-          { icon: 'career', title: 'Find a Job', ticket: '0210' },
         ]}
       />
-
-      <SectionHeading note="none yet">Opportunities</SectionHeading>
-      <Card>
-        <ListRow title="Nothing on the table right now" affordance="none" disabled />
-      </Card>
-      <ComingSoon ticket="0210" what="Employment" />
-    </Screen>
+    </>
   );
+}
+
+/** The job title, when there is one. Used by both cards on this screen. */
+function currentJobTitle(state: NonNullable<ReturnType<typeof useGame>['state']>) {
+  return state.employment.job ? findJob(state.employment.job.jobId)?.title : undefined;
+}
+
+/** How long you have been somewhere, said the way a person would say it. */
+function yearsInLabel(years: number): string {
+  if (years <= 0) return 'Started this year';
+  if (years === 1) return 'A year in';
+  return `${years} years in`;
+}
+
+/**
+ * Performance in words.
+ *
+ * The player never sees the number, only where it has got them — the same rule
+ * `standingLabel` follows for school, and spec 786–795 for everything.
+ */
+function goingLabel(performance: number): string {
+  if (performance >= 80) return 'They would be in trouble without you';
+  if (performance >= 62) return 'Doing the job, and doing it well';
+  if (performance >= 45) return 'Getting by';
+  if (performance >= 30) return 'It has been noticed, and not kindly';
+  return 'You are one bad month from being let go';
 }
 
 /**

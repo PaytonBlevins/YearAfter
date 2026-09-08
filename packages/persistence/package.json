@@ -14,14 +14,15 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@yearafter/careers": "workspace:*",
     "@yearafter/character": "workspace:*",
     "@yearafter/core": "workspace:*",
     "@yearafter/education": "workspace:*",
     "@yearafter/events": "workspace:*",
+    "@yearafter/parenting": "workspace:*",
     "@yearafter/relationships": "workspace:*",
     "@yearafter/simulation": "workspace:*",
-    "@yearafter/social": "workspace:*",
-    "@yearafter/parenting": "workspace:*"
+    "@yearafter/social": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3",

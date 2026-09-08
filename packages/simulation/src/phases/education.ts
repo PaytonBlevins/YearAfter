@@ -14,9 +14,10 @@
 
 import { nudgeStats, type Character } from '@yearafter/character';
 import { add, dollars } from '@yearafter/core';
-import { runSchoolYear, statusLabel, type EducationState } from '@yearafter/education';
+import { isInSchool, runSchoolYear, statusLabel, type EducationState } from '@yearafter/education';
 import type { TimelineKind } from '@yearafter/character';
 import type { GameState } from '../game-state';
+import { RngDomains } from '../rng/rng';
 
 export interface EducationPhaseOutput {
   readonly player: Character;
@@ -44,6 +45,11 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     talents: state.player.talents,
     personality: state.player.personality,
     wealth: state.family.finances.band,
+    // Ticket 0210. One draw a year, for the only thing in the school model that
+    // is not deterministic: whether a character who has stopped caring actually
+    // stops going. The package stays pure — it is handed a number, it does not
+    // make one.
+    roll: state.rng.stream(RngDomains.Education).next(),
   });
 
   // Money the character EARNED. Unlike an activity fee — which the household
@@ -57,6 +63,9 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     stats: nudgeStats(state.player.stats, result.statDeltas),
     // Ticket 0205 turns hidden load into visible stress. 0204 only reports it.
     stress: { ...state.player.stress, hiddenLoad: result.hiddenLoad },
+    // School's own answer. `advanceYear` overwrites this once the employment
+    // phase has run, because the job the character finishes the year in is the
+    // one the header should name.
     occupation: occupationFor(result.state, age),
   };
 
@@ -77,6 +86,11 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
  * screens then disagree about the same child. Kept written here so the save
  * list can show "8th Grader" without loading and migrating the whole document.
  */
-export function occupationFor(education: EducationState, age: number): string {
+export function occupationFor(education: EducationState, age: number, jobTitle?: string): string {
+  // Ticket 0210. A job outranks a school record: somebody who left at eighteen
+  // and has been a line cook for six years is a line cook, not a "High School
+  // Graduate", and calling them the second is the header quietly still
+  // describing the last thing that happened before the game had employment.
+  if (jobTitle !== undefined && !isInSchool(education)) return jobTitle;
   return statusLabel(education, age);
 }

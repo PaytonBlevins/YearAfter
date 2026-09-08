@@ -4748,7 +4748,7 @@
       "cooldown": 2,
       "text": [
         "Called a teacher 'mom' in front of everybody and has never fully recovered.",
-        "Tripped on a completely apartment surface in front of the entire year group.",
+        "Tripped on a completely flat surface in front of the entire year group.",
         "Waved at somebody who was waving at the person behind you."
       ],
       "effects": {
@@ -4791,7 +4791,7 @@
       "weight": 9,
       "cooldown": 5,
       "text": [
-        "Attempted a bangs with kitchen scissors. The regrowth took eleven months."
+        "Attempted bangs with kitchen scissors. The regrowth took eleven months."
       ],
       "effects": {
         "stats": {
@@ -6573,7 +6573,7 @@
             },
             {
               "weight": 3,
-              "text": "{kid} said 'okay' in a completely apartment voice. You heard about it from three different people by Friday.",
+              "text": "{kid} said 'okay' in a completely flat voice. You heard about it from three different people by Friday.",
               "effects": {
                 "stats": {
                   "happiness": -5,

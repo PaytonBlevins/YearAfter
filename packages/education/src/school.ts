@@ -38,7 +38,61 @@ export const SCHOOL_TYPE_LABELS: Readonly<Record<SchoolType, string>> = {
 export const SCHOOL_START_AGE = 5;
 export const GRADES_TO_GRADUATE = 12;
 /** Age at which a character may leave school without graduating. */
+/**
+ * The age a character may legally stop, and the age the dropout path opens.
+ *
+ * It has existed since 0204 and nothing ever read it. Measured across 400 lives
+ * while building 0210: one hundred per cent of characters graduated and NOTHING
+ * IN THE CODEBASE EVER WROTE `droppedOut` — the state was read in five places
+ * and written in zero. So the whole lower half of the adult population did not
+ * exist, and a job model with an education requirement would have had nobody to
+ * separate. CORE_RULES 13.7, found by measuring rather than by a test.
+ */
 export const LEAVING_AGE = 16;
+
+/**
+ * Where school has to have collapsed before a character walks out of it.
+ *
+ * BOTH, not either. Failing while behaving is a character who needs help, and
+ * behaving badly while passing is a character who is bored — neither of those
+ * leaves. It takes a year that has gone wrong in both directions at once, which
+ * is what actually precedes somebody leaving at sixteen.
+ *
+ * THE NUMBERS ARE MEASURED AGAINST THIS BUILD, NOT AGAINST A SCHOOL.
+ *
+ * The first version used 38 and 42, which are what "failing" and "in trouble"
+ * mean in the abstract, and produced ZERO leavers in 500 lives. Measuring the
+ * sixteen-year-olds the game actually makes says why: performance runs p10 67,
+ * median 78, and its MINIMUM ACROSS FIVE HUNDRED LIVES IS 50. This build cannot
+ * produce a failing student — Smarts alone is p10 70 by eighteen — so a floor
+ * at 38 was CORE_RULES 13.16 for the fifth time, in brand new code, gating on a
+ * distribution that does not exist.
+ *
+ * These are the bottom of the population that is really there. The underlying
+ * problem — that nobody in this game is bad at school — belongs to the ticket
+ * that owns character generation, and is recorded in build-status rather than
+ * papered over here.
+ */
+export const LEAVING_PERFORMANCE = 72;
+export const LEAVING_BEHAVIOUR = 52;
+
+/** Chance in a given year, once both floors are through. */
+export const LEAVING_CHANCE = 0.45;
+
+/**
+ * Whether this year is the one they stop.
+ *
+ * Not a decision the player presses. It is the consequence of the decisions
+ * they have already made — Study Harder, and every behaviour event of the last
+ * four years — arriving, the same way alternative school arrives (spec 73).
+ * A character who has been in trouble all year and is failing everything does
+ * not weigh it up in a menu; they simply stop going.
+ */
+export function couldLeaveSchool(state: EducationState, age: number): boolean {
+  if (!isInSchool(state)) return false;
+  if (age < LEAVING_AGE) return false;
+  return state.performance < LEAVING_PERFORMANCE && state.behaviour < LEAVING_BEHAVIOUR;
+}
 
 /**
  * Grade level for an age, 0 = kindergarten.

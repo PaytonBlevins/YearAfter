@@ -14,6 +14,7 @@ import { EMPTY_HISTORY, type EventHistory, type PendingDecision } from '@yearaft
 import { EMPTY_HOUSEHOLD, type Household } from '@yearafter/relationships';
 import { EMPTY_CIRCLE, type SocialCircle } from '@yearafter/social';
 import { EMPTY_PARENTING, type ParentingState } from '@yearafter/parenting';
+import { EMPTY_EMPLOYMENT, type EmploymentState } from '@yearafter/careers';
 import { Rng } from './rng/rng';
 
 /** World state that outlives any single character (spec 818–827 continuation). */
@@ -68,6 +69,15 @@ export interface GameState {
    */
   readonly parenting: ParentingState;
   /**
+   * Ticket 0210: the job, what it pays, and standing in every field ever
+   * worked in.
+   *
+   * Beside the player rather than on them, like education and family, for the
+   * same reason: on dynasty continuation the player is replaced and a career
+   * does not carry over.
+   */
+  readonly employment: EmploymentState;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -91,6 +101,7 @@ export interface CreateGameStateOptions {
   readonly education?: EducationState;
   readonly circle?: SocialCircle;
   readonly parenting?: ParentingState;
+  readonly employment?: EmploymentState;
   readonly pending?: readonly PendingDecision[];
 }
 
@@ -108,6 +119,7 @@ export const createGameState = (
   education: options.education ?? NOT_YET_ENROLLED,
   circle: options.circle ?? EMPTY_CIRCLE,
   parenting: options.parenting ?? EMPTY_PARENTING,
+  employment: options.employment ?? EMPTY_EMPLOYMENT,
   pending: options.pending ?? [],
   rng,
 });

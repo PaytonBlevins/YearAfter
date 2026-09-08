@@ -13,13 +13,16 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Character } from '@yearafter/character';
 import { formatMoney } from '@yearafter/core';
-import { statusLabel, type EducationState } from '@yearafter/education';
+import type { EducationState } from '@yearafter/education';
+import { occupationFor } from '@yearafter/simulation';
 import { colors, layout, radii, spacing, typography } from '../theme/theme';
 import { Glyph } from '../theme/icons';
 
 export interface CharacterHeaderProps {
   readonly character: Character;
   readonly education: EducationState;
+  /** Ticket 0210. The job, when there is one — it outranks the school record. */
+  readonly jobTitle?: string;
   readonly year: number;
   readonly onPressDebug?: () => void;
 }
@@ -27,6 +30,7 @@ export interface CharacterHeaderProps {
 export function CharacterHeader({
   character,
   education,
+  jobTitle,
   year,
   onPressDebug,
 }: CharacterHeaderProps) {
@@ -34,7 +38,15 @@ export function CharacterHeader({
   // Derived, not read from `character.occupation`: a stored label is only
   // rewritten on Advance, so a resumed or migrated save showed one thing here
   // and something else on the Career screen for the same child.
-  const status = statusLabel(education, character.age);
+  //
+  // Ticket 0210 found the same disagreement one layer up. `statusLabel` knows
+  // about school and nothing else, so a screenshot of the built app showed
+  // "26 · Unemployed" in this header above a Work card reading "Sales associate
+  // · Retail · 7 years in" — because the character had been hired BETWEEN
+  // advances and the derivation had no way to know. `occupationFor` is the one
+  // function both this and the Career screen now call, which is the only way
+  // two places can be guaranteed to agree.
+  const status = occupationFor(education, character.age, jobTitle);
 
   return (
     <View style={styles.header}>

@@ -8,6 +8,7 @@
  */
 
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { findJob } from '@yearafter/careers';
 import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
 import { Glyph } from '../theme/icons';
@@ -19,6 +20,8 @@ import { GigsScreen } from '../screens/GigsScreen';
 import { PeopleScreen } from '../screens/PeopleScreen';
 import { ChildScreen } from '../screens/ChildScreen';
 import { ParentScreen } from '../screens/ParentScreen';
+import { JobsScreen } from '../screens/JobsScreen';
+import { ColleaguesScreen } from '../screens/ColleaguesScreen';
 import { LoveScreen } from '../screens/LoveScreen';
 import { PersonScreen } from '../screens/PersonScreen';
 import {
@@ -55,6 +58,8 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   love: LoveScreen,
   child: ChildScreen,
   parent: ParentScreen,
+  jobs: JobsScreen,
+  colleagues: ColleaguesScreen,
   debug: DebugScreen,
 };
 
@@ -85,12 +90,16 @@ export function Shell() {
   }
 
   const Leaf = current ? LEAF_SCREENS[current.screen] : undefined;
+  // Ticket 0210. Derived here and handed down rather than read from the stored
+  // `occupation`, which is only rewritten on Advance — see CharacterHeader.
+  const currentJob = state.employment.job ? findJob(state.employment.job.jobId) : undefined;
 
   return (
     <View style={styles.root}>
       <CharacterHeader
         character={state.player}
         education={state.education}
+        {...(currentJob ? { jobTitle: currentJob.title } : {})}
         year={state.world.year}
         onPressDebug={() => push({ screen: 'debug', title: 'Developer' })}
       />

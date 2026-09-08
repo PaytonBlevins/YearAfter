@@ -378,16 +378,19 @@ function meetSomebodyNew(
   if (!stream.chance(Math.max(0.08, Math.min(0.92, chance)))) return people;
 
   const names = nameContext(input.nameCultureId, { ...circle, people }, input.family, input.firstName);
-  // Somebody you are still doing something with brings people; otherwise it is
-  // wherever you live. Work will be a third of these when 0210 lands.
-  const viaActivity = input.joinedActivityIds.length > 0 && stream.chance(0.45);
+  // Three doors, and 0210 finally opened the third. Work first, because for an
+  // employed adult it is where most of a week goes and the 0207b write-up named
+  // it as the missing one; then something you still do; then where you live.
+  const viaWork = input.working && stream.chance(0.4);
+  const viaActivity =
+    !viaWork && input.joinedActivityIds.length > 0 && stream.chance(0.45);
   const activityId = viaActivity ? stream.pick([...input.joinedActivityIds]) : undefined;
 
   const person = newClassmate(stream, names, input.age, input.worldYear - input.age, people.length);
   const met: Acquaintance = {
     ...person,
     id: asNpcId(`npc:met:${input.worldYear}:${people.length}`),
-    context: activityId !== undefined ? 'activity' : 'neighbourhood',
+    context: viaWork ? 'work' : activityId !== undefined ? 'activity' : 'neighbourhood',
     ...(activityId !== undefined ? { viaActivityId: activityId } : {}),
     relationship: clampStat(stream.range(ADULT_WARMTH[0], ADULT_WARMTH[1])) as StatValue,
     // Never `inClass` — there is no class. An adult friendship has to be kept
@@ -397,9 +400,11 @@ function meetSomebodyNew(
   };
 
   lines.push(
-    activityId !== undefined
-      ? `Met ${met.firstName} through something you do. You have got as far as first names.`
-      : `Met ${met.firstName}, who lives close enough to keep running into.`,
+    viaWork
+      ? workMetLine(met.firstName, input.jobTitle, input.age)
+      : activityId !== undefined
+        ? `Met ${met.firstName} through something you do. You have got as far as first names.`
+        : `Met ${met.firstName}, who lives close enough to keep running into.`,
   );
   return [...people, met];
 }
@@ -412,6 +417,10 @@ export interface SocialYearInput {
   readonly personality: Personality;
   /** Activities the character is still in, so teammates count as contact. */
   readonly joinedActivityIds: readonly string[];
+  /** Ticket 0210: whether there is a job, which is a room full of people. */
+  readonly working?: boolean;
+  /** What the job is called, for the line that says where you met somebody. */
+  readonly jobTitle?: string;
   readonly worldYear: number;
   readonly nameCultureId: string;
   readonly firstName: string;
@@ -650,4 +659,26 @@ export function runSocialYear(
   }
 
   return { circle: { ...circle, people }, lines };
+}
+
+/**
+ * Meeting somebody at work.
+ *
+ * CORE_RULES 13.22 from the start: the base holds still for the life and AGE
+ * does the moving, so two consecutive years cannot use the same sentence.
+ */
+function workMetLine(name: string, jobTitle: string | undefined, age: number): string {
+  const lines = jobTitle
+    ? [
+        `Met ${name} at work. Two years of nodding, then an actual conversation.`,
+        `${name} started the same month you did, and that was enough to go on.`,
+        `Got to know ${name} over a long shift and a broken machine.`,
+        `${name} is the only person at work worth eating lunch with.`,
+      ]
+    : [
+        `Met ${name} through work.`,
+        `${name} works with you, and you have started talking outside it.`,
+        `Fell in with ${name} at work, the way you do.`,
+      ];
+  return lines[age % lines.length] as string;
 }
