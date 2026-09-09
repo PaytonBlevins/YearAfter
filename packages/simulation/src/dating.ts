@@ -88,7 +88,7 @@ const MET_ONE = [
 ];
 
 const MET_TWO = [
-  'A better month. You have been talking to {name} and {other}, and have not decided anything.',
+  "A better month. You have been talking to {name} and {other}, and haven't decided anything.",
   'Matched with {name} and {other} in the same week, which felt like more than it was.',
 ];
 

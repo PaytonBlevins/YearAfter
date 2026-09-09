@@ -28,6 +28,13 @@
  * sixty-eight with a p10 of fifty-seven, which is a population dying of things
  * people do not die of. CORE_RULES 13.25.
  */
+/*
+ * Ticket 0211b renamed every label. They were written as descriptions — "Sugar
+ * you have to watch", "Your heart, and they are not happy", "Something they
+ * found and are treating" — which is how a novelist names an illness and not how
+ * a person does. A player looking at their own Doctor screen wants to know what
+ * they have. They have diabetes.
+ */
 export type Severity = 'minor' | 'serious' | 'grave';
 
 export interface ConditionKind {
@@ -65,7 +72,7 @@ export interface ConditionKind {
 export const CONDITIONS: readonly ConditionKind[] = [
   {
     id: 'cond.chest',
-    label: 'Trouble with your chest',
+    label: 'Chest trouble',
     severity: 'minor',
     ceiling: 82,
     hazard: 1.15,
@@ -75,7 +82,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.back',
-    label: 'Your back, permanently',
+    label: 'A bad back',
     severity: 'minor',
     ceiling: 80,
     hazard: 1.05,
@@ -85,7 +92,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.knee',
-    label: 'A knee that never came back',
+    label: 'A knee that never healed right',
     severity: 'minor',
     ceiling: 78,
     hazard: 1.0,
@@ -95,7 +102,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.hearing',
-    label: 'Hearing you will not get back',
+    label: 'Hearing loss',
     severity: 'minor',
     ceiling: 84,
     hazard: 1.0,
@@ -105,7 +112,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.stomach',
-    label: 'Something wrong with your stomach',
+    label: 'Stomach problems',
     severity: 'minor',
     ceiling: 79,
     hazard: 1.12,
@@ -115,7 +122,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.blood',
-    label: 'Blood pressure they keep mentioning',
+    label: 'High blood pressure',
     severity: 'serious',
     ceiling: 72,
     hazard: 1.28,
@@ -125,7 +132,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.sugar',
-    label: 'Sugar you have to watch',
+    label: 'Diabetes',
     severity: 'serious',
     ceiling: 70,
     hazard: 1.3,
@@ -135,7 +142,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.heart',
-    label: 'Your heart, and they are not happy',
+    label: 'Heart trouble',
     severity: 'serious',
     ceiling: 60,
     hazard: 1.9,
@@ -145,7 +152,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.lungs',
-    label: 'Lungs that are not what they were',
+    label: 'Bad lungs',
     severity: 'serious',
     ceiling: 62,
     hazard: 1.7,
@@ -155,7 +162,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.spine',
-    label: 'A back injury that ended things',
+    label: 'A serious back injury',
     severity: 'serious',
     ceiling: 58,
     hazard: 1.2,
@@ -165,7 +172,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.growth',
-    label: 'Something they found and are treating',
+    label: 'Cancer',
     severity: 'grave',
     ceiling: 44,
     hazard: 3.6,
@@ -175,7 +182,7 @@ export const CONDITIONS: readonly ConditionKind[] = [
   },
   {
     id: 'cond.stroke',
-    label: 'What the stroke left behind',
+    label: 'A stroke',
     severity: 'grave',
     ceiling: 42,
     hazard: 3.0,

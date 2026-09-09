@@ -62,13 +62,13 @@ const WORKED_LINES = [
 const WORKED_AGAIN_LINES = [
   'Went at it again after Christmas, and the second half of the year was better than the first.',
   'Kept it up through the second term. The grades moved again, by less, which is how it works.',
-  'Did not let it slide after the first report card. It showed.',
+  "Didn't let it slide after the first report card. It showed.",
 ];
 
 const DID_NOT_LINES = [
   'Studied hard all term and the grades barely moved. Some years are like that.',
   'Put the work in. The report card came back looking much the same.',
-  'Revised for weeks and it did not show up where it was supposed to.',
+  "Revised for weeks and it didn't show up where it was supposed to.",
 ];
 
 /**

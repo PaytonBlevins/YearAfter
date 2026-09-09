@@ -131,7 +131,7 @@ export function tryForBaby(state: GameState): Result<ParentingOutcome, Parenting
  */
 const NOT_THIS_YEAR: readonly string[] = [
   'Another year of trying, and no news.',
-  'You spent the year hoping. It did not happen this time.',
+  "You spent the year hoping. It didn't happen this time.",
   'Nothing this year. You are both fine about it, mostly.',
   'No news again. You stopped counting out loud some time ago.',
   'Another year. Somebody else announced theirs and you were pleased for them.',

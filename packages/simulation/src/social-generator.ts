@@ -528,9 +528,12 @@ function staffTheJob(
   if (here.length === 0 && arrived.length > 0) {
     const names_ = arrived.map((person) => person.firstName);
     lines.push(
+      // Ticket 0211b shortened this. The first version ran to 130 characters
+      // and ended on "Whether any of them become anything is up to you", which
+      // is the game explaining its own design to the player mid-feed.
       input.jobTitle
-        ? `There are people at the ${input.jobTitle.toLowerCase()} job — ${listOf(names_)}. Whether any of them become anything is up to you.`
-        : `There are people where you work — ${listOf(names_)}. Whether any of them become anything is up to you.`,
+        ? `Started at the new job. ${listOf(names_)} work there too.`
+        : `${listOf(names_)} work with you now.`,
     );
   }
 
@@ -704,7 +707,7 @@ export function runSocialYear(
     lines.push(
       stage === 'married'
         ? `${person.firstName} left. It had been coming for a while and it still arrived all at once.`
-        : `${person.firstName} ended it. You had known and you had not known.`,
+        : `${person.firstName} ended it. You had known and you hadn't known.`,
     );
     return {
       ...stayed,
@@ -751,7 +754,7 @@ export function runSocialYear(
       if (!stream.chance(ADULT_MOVES_ON)) return person;
       if (person.relationship >= NOTABLE_LOSS && !movedLine) {
         movedLine = true;
-        lines.push(`${person.firstName} moved. You said you would keep in touch and did not.`);
+        lines.push(`${person.firstName} moved. You said you would keep in touch and didn't.`);
       }
       return endPerson(person, input.age, 'moved away');
     });

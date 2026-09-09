@@ -219,7 +219,7 @@ function payLine(job: Job, earned: number, saved: number, dependents: number, ag
 
 const FINE_LINES: readonly string[] = [
   'Earned {earned} and had {saved} of it left at the end.',
-  'A year of it. {earned}, and {saved} that did not get spent.',
+  'Made {earned} this year and put {saved} away.',
   '{earned} for the year. {saved} still there in December.',
   'The job paid {earned}. You put {saved} aside without really trying.',
   'Made {earned}. Living took most of it and left {saved}.',
@@ -233,7 +233,7 @@ const FAMILY_LINES: readonly string[] = [
 ];
 
 const TIGHT_LINES: readonly string[] = [
-  'Earned {earned} and finished the year {saved} up, which is not much.',
+  "Earned {earned} and finished the year {saved} up, which isn't much.",
   '{earned} came in and almost exactly {earned} went out. {saved} left.',
   'A year of it for {earned}, and {saved} to show for it.',
   'Made {earned}. Broke about even, and {saved} is what even looks like.',
@@ -241,14 +241,14 @@ const TIGHT_LINES: readonly string[] = [
 
 const BEHIND_LINES: readonly string[] = [
   'Earned {earned} and still went {short} backwards over the year.',
-  '{earned} was not enough. The year ended {short} down.',
+  "{earned} wasn't enough. The year ended {short} down.",
   'Worked all year for {earned} and finished {short} worse off.',
-  'The {job} money did not cover it. Down {short} by December.',
+  "The {job} money didn't cover it. Down {short} by December.",
 ];
 
 const PROMOTED_LINES: readonly string[] = [
   'Promoted. {job}, starting Monday, and a raise that took a month to arrive.',
-  'They moved you up. {job}, and the person who had it before you was not pleased.',
+  "They moved you up. {job}, and the person who had it before you wasn't pleased.",
   'Made {job}. You had wanted it long enough to be surprised it happened.',
   'Promoted to {job}. Somebody had put your name forward without telling you.',
 ];
@@ -264,7 +264,7 @@ const FIRED_LINES: readonly string[] = [
 ];
 
 const LAID_OFF_LINES: readonly string[] = [
-  'Made redundant. Nothing to do with you, which did not help.',
+  "Made redundant. Nothing to do with you, which didn't help.",
   'The whole team went. You found out by email, with everybody else.',
   'Laid off. They said it was the numbers, and it was.',
   'The {job} work dried up. You were one of eleven let go that week.',

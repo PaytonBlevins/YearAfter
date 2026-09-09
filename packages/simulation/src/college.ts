@@ -43,12 +43,12 @@ export const COLLEGE_ERROR_LABELS: Readonly<Record<CollegeError, string>> = {
   'too-young': 'You are too young to start a degree.',
   'still-at-school': 'Finish high school first.',
   'already-enrolled': 'You are already studying.',
-  'nothing-left-to-study': 'There is nothing further to study.',
+  'nothing-left-to-study': "There's nothing left to study.",
   'no-diploma': 'They want a high school diploma first.',
-  'cannot-afford': 'You cannot cover the first year.',
-  'no-such-major': 'That subject is not on offer.',
+  'cannot-afford': "You can't cover the first year.",
+  'no-such-major': "That subject isn't on offer.",
   'already-applied': 'You have already applied this year.',
-  'not-enrolled': 'You are not studying anywhere.',
+  'not-enrolled': "You aren't studying anywhere.",
 };
 
 export interface CollegeOutcome {
@@ -215,7 +215,7 @@ export function leaveCollege(state: GameState): Result<CollegeOutcome, CollegeEr
     years === 0
       ? `Dropped out before the first year of ${subject} was over.`
       : years === 1
-        ? `Left after a year of ${subject}. It was not going to be the thing.`
+        ? `Left after a year of ${subject}. It wasn't going to be the thing.`
         : `Left ${subject} with ${years} years done and nothing to show for them.`;
 
   const entry = createTimelineEntry({
@@ -273,7 +273,7 @@ const ACCEPTED_LINES: readonly string[] = [
 ];
 
 const REJECTED_LINES: readonly string[] = [
-  'Applied to study {major} and did not get in. There is always next year.',
+  "Applied to study {major} and didn't get in. There is always next year.",
   'The {major} application came back as a no, in a very short letter.',
   'Turned down. They said the year was competitive, which they say every year.',
 ];
@@ -281,10 +281,10 @@ const REJECTED_LINES: readonly string[] = [
 const POSTGRAD_IN: readonly string[] = [
   'Accepted onto the graduate program in {major}. Two more years of it.',
   'Got a place on the {major} program. Everybody else there is very sure of themselves.',
-  'Going back for a graduate degree in {major}. It was not an easy decision.',
+  "Going back for a graduate degree in {major}. It wasn't an easy decision.",
 ];
 
 const POSTGRAD_NO: readonly string[] = [
   'The graduate program in {major} said no. Your undergraduate record did that.',
-  'Applied for the {major} program and was not offered a place.',
+  "Applied for the {major} program and wasn't offered a place.",
 ];

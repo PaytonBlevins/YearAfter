@@ -70,6 +70,59 @@ const VAGUE_LABELS = [
  * `favourite` and `neighbour` — a blanket rewrite of the source renamed five of
  * them and broke every save that referenced one.
  */
+/**
+ * Ticket 0211b — forms a person contracts when they speak.
+ *
+ * Kept short and unambiguous. Every entry here is one a human being contracts
+ * essentially always in conversation, which is what makes the expanded form
+ * read as narration rather than speech. "Should not" and "must not" are absent
+ * on purpose: those DO get said in full, and a rule that fires on a legitimate
+ * line teaches the next author to work around it rather than to write better.
+ */
+const EXPANDED = [
+  ['did not', "didn't"],
+  ['does not', "doesn't"],
+  ['do not', "don't"],
+  ['was not', "wasn't"],
+  ['were not', "weren't"],
+  ['is not', "isn't"],
+  ['are not', "aren't"],
+  ['could not', "couldn't"],
+  ['would not', "wouldn't"],
+  ['had not', "hadn't"],
+  ['has not', "hasn't"],
+  ['have not', "haven't"],
+  ['will not', "won't"],
+  ['it is not', "it isn't"],
+];
+
+/**
+ * Ticket 0211b — the constructions that summarise instead of happening.
+ *
+ * Every one of these is lifted from a line the product owner quoted back, or
+ * from the same paragraph as one. They share a shape: they describe the
+ * CHARACTER of an event rather than the event, which reads as a novelist
+ * narrating and not as something a person would say about their own year.
+ *
+ *   "A steady year. The kind that does not make it into the telling."
+ *   "Another year went by without much fanfare."
+ *   "It stopped, and it cost you nothing you could measure."
+ *
+ * The fix is always the same and always available: name a real detail. "Same
+ * job, same apartment, same weekends."
+ */
+const VAGUE = [
+  /\bthe kind (?:that|of)\b/i,
+  /\bwithout much fanfare\b/i,
+  /\bin the way (?:they|it|that)\b/i,
+  /\bwhich was (?:its own|somehow) [a-z]/i,
+  /\bnothing you could measure\b/i,
+  /\bits own kind of\b/i,
+  /\bwhich counted\b/i,
+  /\bit did not entirely\b/i,
+  /\bmuch as you\b/i,
+];
+
 const BRITISH = [
   // STEMS, not whole words. The first version listed 'apologise' and shipped a
   // line reading "spent all of it apologising to furniture" — `\bapologise`
@@ -225,7 +278,7 @@ for (const root of SOURCE_ROOTS) {
     // an id like `random.favourite-teacher` cannot trip this and get renamed.
     // Comments are stripped first, for the reason the `any` rule strips them.
     if (!isTest) {
-      for (const literal of stripComments(source).matchAll(/(['"`])((?:[^\\\n]|\\.)*?\s(?:[^\\\n]|\\.)*?)\1/g)) {
+      for (const literal of stripComments(source).matchAll(/(['"`])((?:[^\\\n]|\\.)*?)\1/g)) {
         const copy = literal[2];
         // Prose only. A match that starts mid-expression is the regex having
         // run from one string's closing quote to the next string's opening one
@@ -236,6 +289,46 @@ for (const root of SOURCE_ROOTS) {
         for (const [british, american] of BRITISH) {
           if (new RegExp(`\\b${british}`, 'i').test(copy)) {
             fail(rel, `"${british}" is British — use "${american}" — in: ${copy.slice(0, 70)}`);
+          }
+        }
+      }
+    }
+
+    // V16 — contractions, because rule 7 asked for them and nothing checked.
+    //
+    // `event-writing-rules.md` rule 7 has said "use contractions" since 0207d.
+    // Measured at the start of 0211b: SEVEN of 455 catalog strings used one,
+    // and forty-five spelled them out. The product owner, reading his own feed:
+    // *"These texts are so awkward... Nobody talks like that."*
+    //
+    // That is the CORE_RULES 13.33 shape in the writing rules — a rule kept by
+    // every author separately is not a rule, it is a hope, and this one went
+    // four tickets before anybody measured it. So it is a check now.
+    //
+    // Narrow on purpose. It fires only on the handful of two-word forms that a
+    // person always contracts in speech, and only inside prose (V12's literal
+    // test). "Do not" as an instruction on a button is legitimate and rare
+    // enough to write around; "did not" in a story line never is.
+    if (!isTest) {
+      for (const literal of stripComments(source).matchAll(/(['"`])((?:[^\\\n]|\\.)*?)\1/g)) {
+        const copy = literal[2];
+        if (!/^[A-Z{$]/.test(copy) || !/[.!?…]$/.test(copy) || /\n/.test(copy)) continue;
+        for (const [expanded, contracted] of EXPANDED) {
+          if (new RegExp(`\\b${expanded}\\b`, 'i').test(copy)) {
+            fail(
+              rel,
+              `"${expanded}" reads as written rather than spoken — use "${contracted}" — ` +
+                `in: ${copy.slice(0, 70)}`,
+            );
+          }
+        }
+        for (const vague of VAGUE) {
+          if (vague.test(copy)) {
+            fail(
+              rel,
+              `"${copy.match(vague)?.[0]}" is a summary rather than a thing that ` +
+                `happened — name a real detail — in: ${copy.slice(0, 70)}`,
+            );
           }
         }
       }
@@ -678,6 +771,37 @@ if (existsSync(eventsPath)) {
         }
       }
 
+      // V16 — the same voice rules, on the catalog this time.
+      //
+      // The first version of V16 ran over SOURCE FILES only, because that is
+      // where 0211b's rewrite started. It passed clean while the catalog still
+      // held the exact line the product owner had quoted back — "Reinstalled
+      // the app, met somebody for a coffee, and neither of you texted after" —
+      // and "It was not a disaster, which is a low bar cleared."
+      //
+      // That is CORE_RULES 13.23 inside the rule written to enforce 13.23: a
+      // check that sees half the game is half a check, and the half it could
+      // not see is where four hundred of the game's five hundred player-facing
+      // lines live.
+      for (const [expanded, contracted] of EXPANDED) {
+        if (new RegExp(`\\b${expanded}\\b`, 'i').test(copy)) {
+          fail(
+            rel,
+            `${event.id}: "${expanded}" reads as written rather than spoken — ` +
+              `use "${contracted}".`,
+          );
+        }
+      }
+      for (const vague of VAGUE) {
+        if (vague.test(copy)) {
+          fail(
+            rel,
+            `${event.id}: "${copy.match(vague)?.[0]}" is a summary rather than a ` +
+              `thing that happened — name a real detail.`,
+          );
+        }
+      }
+
       // V15 — a word the Americanisation swept in, in a place it cannot go.
       //
       // Reading a played life found "Tripped on a completely APARTMENT surface",
@@ -761,10 +885,7 @@ if (existsSync(eventsPath)) {
         }
         // One word is a gesture, not an instruction. "Go", "Pass", "Coast".
         if (bare.split(/\s+/).filter(Boolean).length < 2) {
-          fail(
-            rel,
-            `${event.id}: choice label "${label}" is a single word. Say what it does.`,
-          );
+          fail(rel, `${event.id}: choice label "${label}" is a single word. Say what it does.`);
         }
       }
 

@@ -54,6 +54,8 @@ const answerAll = (state: GameState): GameState => {
 
 interface Life {
   readonly state: GameState;
+  /** Every condition this character ever picked up, cleared or not. */
+  readonly everHeld: ReadonlySet<string>;
   readonly diedAt: number;
   readonly healthAt: Readonly<Record<number, number>>;
   readonly everInjured: number;
@@ -76,6 +78,7 @@ function live(seed: string): Life {
   let injuredAthlete = 0;
   let injuredHazard = 0;
   let injuredOrdinary = 0;
+  const everHeld = new Set<string>();
   const HAZARD = ['trade', 'labour', 'food', 'transport', 'care'];
 
   for (let year = 0; year < UNTIL; year += 1) {
@@ -138,9 +141,11 @@ function live(seed: string): Life {
       if (result.ok) state = result.value.state;
     }
     healthAt[state.player.age] = state.player.stats.health;
+    for (const held of state.health.conditions) everHeld.add(held.conditionId);
   }
   return {
     state,
+    everHeld,
     diedAt: state.health.diedAtAge ?? UNTIL,
     healthAt,
     everInjured,
@@ -297,13 +302,14 @@ describe('a life ends', () => {
     // CORE_RULES 13.7. A condition nobody ever gets is content that does not
     // exist, and twelve of them shipped untested would be twelve chances to be
     // wrong about which ones the roll can even select.
+    // Measured on STATE, not on the feed. The first version searched timeline
+    // text for each condition's label and broke the moment 0211b renamed them —
+    // the feed lowercases a label mid-sentence, so "A bad back" never matched
+    // "a bad back". A test that reads prose to find out what the model did is
+    // testing the copy.
     const seen = new Set<string>();
     for (const life of LIFETIMES) {
-      for (const entry of life.state.player.timeline) {
-        for (const condition of CONDITIONS) {
-          if (entry.text.includes(condition.label)) seen.add(condition.id);
-        }
-      }
+      for (const id of life.everHeld) seen.add(id);
     }
     const missing = CONDITIONS.filter((condition) => !seen.has(condition.id)).map((c) => c.id);
     expect(missing, `never reached in ${LIVES} lives`).toEqual([]);

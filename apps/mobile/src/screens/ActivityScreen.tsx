@@ -31,7 +31,7 @@ export function ActivityScreen() {
   if (!activity || !entry) {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <EmptyState title="Not in this" body="You are not in this any more." />
+        <EmptyState title="Not in this" body="You're not in this anymore." />
       </ScrollView>
     );
   }

@@ -159,8 +159,7 @@ export const MAJORS: readonly Major[] = [
   },
 ];
 
-export const findMajor = (id: string): Major | undefined =>
-  MAJORS.find((major) => major.id === id);
+export const findMajor = (id: string): Major | undefined => MAJORS.find((major) => major.id === id);
 
 /* -------------------------------------------------------------------------- */
 /* Getting in                                                                  */

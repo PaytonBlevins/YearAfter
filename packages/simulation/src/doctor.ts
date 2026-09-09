@@ -35,9 +35,9 @@ export type DoctorError =
   | 'already-treated';
 
 export const DOCTOR_ERROR_LABELS: Readonly<Record<DoctorError, string>> = {
-  'already-seen': 'You have been this year.',
-  'no-such-condition': 'That is not something you have.',
-  'already-treated': 'Somebody is already on that one.',
+  'already-seen': "You've already been this year.",
+  'no-such-condition': "That's not something you have.",
+  'already-treated': "You're already being treated for that.",
 };
 
 export interface DoctorOutcome {
@@ -79,10 +79,22 @@ export function seeDoctor(state: GameState): Result<DoctorOutcome, DoctorError> 
       ...state,
       health: { ...state.health, checkedAtAge: state.player.age },
     },
-    title: kind ? 'They found something' : 'Nothing to report',
+    /*
+      Ticket 0211b. The old version of the clean result read "Bloods, blood
+      pressure, the usual questions. Nothing they want to see you about." The
+      product owner: *"That's odd, just have it say 'You do not need to visit
+      the doctor' or 'You had a checkup and everything was fine'."* Taken as
+      written.
+
+      And when something IS found, the line now says what to do next by name.
+      The visit and the treatment are deliberately two presses — the player
+      confirmed that — so the copy has to hand them the second one rather than
+      leaving them to work out that the row underneath is a button.
+    */
+    title: kind ? 'They found something' : 'All clear',
     body: kind
-      ? `A morning of waiting and one useful sentence: ${kind.label.toLowerCase()}. They can do something about it if you let them.`
-      : 'Bloods, blood pressure, the usual questions. Nothing they want to see you about.',
+      ? `The doctor found something: ${kind.label.toLowerCase()}. Tap it below to start treatment.`
+      : 'You had a check-up and everything looked fine.',
     good: !kind,
   });
 }
@@ -116,11 +128,11 @@ export function treatCondition(
         ),
       },
     },
-    title: 'Somebody is on it',
+    title: 'Treatment started',
     body:
       kind.treatable > 0
-        ? `They have a plan for ${kind.label.toLowerCase()}. It will take as long as it takes.`
-        : `They will keep an eye on ${kind.label.toLowerCase()}. Nobody is pretending it will go.`,
+        ? `You're being treated for ${kind.label.toLowerCase()}. It might clear up, and it might take a few years.`
+        : `They'll keep an eye on your ${kind.label.toLowerCase()}, but nobody's pretending it'll go away.`,
     good: kind.treatable > 0,
   });
 }

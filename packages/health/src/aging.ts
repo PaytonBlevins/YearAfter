@@ -120,10 +120,20 @@ export function bandOf(health: number): HealthBand {
   return 'failing';
 }
 
+/*
+ * Ticket 0211b rewrote these. The product owner, reading "Not what you were"
+ * on the Doctor screen: *"That is odd for real life people to read. There
+ * probably doesn't even need to be anything there."*
+ *
+ * He is right about the register and half right about the row. The bar already
+ * says how much; what the words have to add is what that AMOUNT MEANS, in the
+ * sentence a person would actually use about themselves. "Not what you were" is
+ * a line from a novel. "You're getting older" is a thing people say.
+ */
 export const HEALTH_LABELS: Readonly<Record<HealthBand, string>> = {
-  well: 'Nothing wrong with you',
-  fine: 'Fine, mostly',
-  wearing: 'Not what you were',
-  poor: 'Something is going on',
-  failing: 'You are not well',
+  well: "You're healthy",
+  fine: "You're doing fine",
+  wearing: "You're getting older",
+  poor: "Something's wrong",
+  failing: "You're very sick",
 };

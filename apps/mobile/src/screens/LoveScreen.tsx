@@ -99,7 +99,7 @@ export function LoveScreen() {
             subtitle={
               age < 18
                 ? 'Which is where most of it starts.'
-                : 'Which is not the same as being alone.'
+                : "Which isn't the same as being alone."
             }
             affordance="none"
           />
@@ -143,7 +143,7 @@ export function LoveScreen() {
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
                   title={displayName(person)}
-                  subtitle="You have not said anything. Yet."
+                  subtitle="You haven't said anything. Yet."
                   meter={person.relationship}
                   meterColor={warmthColor(person.relationship)}
                   onPress={() => open(person)}

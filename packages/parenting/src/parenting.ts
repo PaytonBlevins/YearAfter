@@ -217,11 +217,7 @@ export type ParentYear = 'answered' | 'refused' | 'nothing-asked';
  */
 export const SETTLES_AT = 62;
 
-export function closenessYear(
-  warmth: number,
-  year: ParentYear,
-  childAge: number,
-): StatValue {
+export function closenessYear(warmth: number, year: ParentYear, childAge: number): StatValue {
   // Teenagers pull away regardless. That is not a failure of parenting and the
   // model should not punish the player for it as though it were.
   const teenPull = childAge >= 13 && childAge <= 17 ? -3 : 0;
@@ -252,9 +248,12 @@ export function closenessYear(
  */
 const MILESTONES: Readonly<Record<number, readonly string[]>> = {
   0: ['{name} was born. Everything else got smaller for a while.'],
-  1: ['{name} took a first step, into a table.', '{name} said a first word. It was not either of your names.'],
-  3: ['{name} started asking why, and did not stop.'],
-  5: ['{name} started kindergarten and did not look back once.'],
+  1: [
+    '{name} took a first step, into a table.',
+    "{name} said a first word. It wasn't either of your names.",
+  ],
+  3: ["{name} started asking why, and didn't stop."],
+  5: ["{name} started kindergarten and didn't look back once."],
   8: ['{name} got obsessed with one thing and talked about nothing else all year.'],
   11: ['{name} started middle school and came home quieter.'],
   13: ['{name} turned thirteen and started closing the bedroom door.'],
@@ -296,18 +295,88 @@ export interface ChildAsk {
 }
 
 export const CHILD_ASKS: readonly ChildAsk[] = [
-  { id: 'basketball', wants: 'to play basketball', cost: 22_000, minAge: 6, maxAge: 17, gives: 'body' },
-  { id: 'martial-arts', wants: 'to take martial arts lessons', cost: 34_000, minAge: 5, maxAge: 17, gives: 'body' },
-  { id: 'swimming', wants: 'to join the swim team', cost: 28_000, minAge: 5, maxAge: 17, gives: 'body' },
+  {
+    id: 'basketball',
+    wants: 'to play basketball',
+    cost: 22_000,
+    minAge: 6,
+    maxAge: 17,
+    gives: 'body',
+  },
+  {
+    id: 'martial-arts',
+    wants: 'to take martial arts lessons',
+    cost: 34_000,
+    minAge: 5,
+    maxAge: 17,
+    gives: 'body',
+  },
+  {
+    id: 'swimming',
+    wants: 'to join the swim team',
+    cost: 28_000,
+    minAge: 5,
+    maxAge: 17,
+    gives: 'body',
+  },
   { id: 'piano', wants: 'to learn piano', cost: 40_000, minAge: 5, maxAge: 17, gives: 'spark' },
   { id: 'art', wants: 'to take an art class', cost: 18_000, minAge: 5, maxAge: 17, gives: 'spark' },
-  { id: 'drama', wants: 'to be in the school play', cost: 9_000, minAge: 7, maxAge: 17, gives: 'people' },
-  { id: 'coding', wants: 'a computer for making things', cost: 65_000, minAge: 9, maxAge: 17, gives: 'mind' },
-  { id: 'tutor', wants: 'a tutor for the subject they are failing', cost: 55_000, minAge: 8, maxAge: 17, gives: 'mind' },
-  { id: 'camp', wants: 'to go to summer camp', cost: 48_000, minAge: 7, maxAge: 16, gives: 'people' },
-  { id: 'dog', wants: 'a dog, and promises to walk it', cost: 30_000, minAge: 5, maxAge: 14, gives: 'people' },
-  { id: 'phone', wants: 'a phone, because everyone else has one', cost: 25_000, minAge: 11, maxAge: 17, gives: 'people' },
-  { id: 'trip', wants: 'to go on the school trip', cost: 52_000, minAge: 10, maxAge: 17, gives: 'mind' },
+  {
+    id: 'drama',
+    wants: 'to be in the school play',
+    cost: 9_000,
+    minAge: 7,
+    maxAge: 17,
+    gives: 'people',
+  },
+  {
+    id: 'coding',
+    wants: 'a computer for making things',
+    cost: 65_000,
+    minAge: 9,
+    maxAge: 17,
+    gives: 'mind',
+  },
+  {
+    id: 'tutor',
+    wants: 'a tutor for the subject they are failing',
+    cost: 55_000,
+    minAge: 8,
+    maxAge: 17,
+    gives: 'mind',
+  },
+  {
+    id: 'camp',
+    wants: 'to go to summer camp',
+    cost: 48_000,
+    minAge: 7,
+    maxAge: 16,
+    gives: 'people',
+  },
+  {
+    id: 'dog',
+    wants: 'a dog, and promises to walk it',
+    cost: 30_000,
+    minAge: 5,
+    maxAge: 14,
+    gives: 'people',
+  },
+  {
+    id: 'phone',
+    wants: 'a phone, because everyone else has one',
+    cost: 25_000,
+    minAge: 11,
+    maxAge: 17,
+    gives: 'people',
+  },
+  {
+    id: 'trip',
+    wants: 'to go on the school trip',
+    cost: 52_000,
+    minAge: 10,
+    maxAge: 17,
+    gives: 'mind',
+  },
 ];
 
 export const asksFor = (childAge: number): readonly ChildAsk[] =>

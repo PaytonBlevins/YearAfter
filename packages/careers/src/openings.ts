@@ -67,10 +67,7 @@ export function cannotApply(job: Job, context: OpeningsContext): CannotApply | u
  * that only ever offered somebody more of what they already do would be a trap
  * dressed as a career.
  */
-export function openingsFor(
-  context: OpeningsContext,
-  draw: (job: Job) => number,
-): readonly Job[] {
+export function openingsFor(context: OpeningsContext, draw: (job: Job) => number): readonly Job[] {
   if (context.age < WORKING_AGE) return [];
 
   const eligible = ALL_JOBS.filter((job) => cannotApply(job, context) === undefined);
@@ -89,13 +86,15 @@ export function openingsFor(
     return { job, key: draw(job) / weight };
   });
 
-  return weighted
-    .sort((a, b) => a.key - b.key)
-    .slice(0, LISTINGS)
-    .map((entry) => entry.job)
-    // Presented cheapest-first so the list reads as a ladder rather than as a
-    // ranking of what the game thinks you deserve.
-    .sort((a, b) => a.pay - b.pay);
+  return (
+    weighted
+      .sort((a, b) => a.key - b.key)
+      .slice(0, LISTINGS)
+      .map((entry) => entry.job)
+      // Presented cheapest-first so the list reads as a ladder rather than as a
+      // ranking of what the game thinks you deserve.
+      .sort((a, b) => a.pay - b.pay)
+  );
 }
 
 /** What the player has actually done, in the shape `hireChance` wants. */

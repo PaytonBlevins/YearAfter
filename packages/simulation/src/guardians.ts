@@ -209,7 +209,7 @@ const YES_LINES: Readonly<Record<string, readonly string[]>> = {
   ],
   'a-lift': [
     '{parent} drove you there and waited in the car the whole time.',
-    '{parent} gave up an evening to drive you, and did not mention it once.',
+    "{parent} gave up an evening to drive you, and didn't mention it once.",
     '{parent} drove you both ways and played the same album twice.',
     '{parent} said yes before you finished asking and got the keys.',
   ],
@@ -230,10 +230,10 @@ const YES_LINES: Readonly<Record<string, readonly string[]>> = {
     '{parent} left the keys on the table. {amount} gone from somewhere, and no speech about it.',
   ],
   'help-with-college': [
-    '{parent} is putting in {amount} a year. It does not cover it, and it changes everything.',
+    "{parent} is putting in {amount} a year. It doesn't cover it, and it changes everything.",
     '{parent} said yes to {amount}. You will find the rest.',
     '{parent} worked out what they could do. It came to {amount}, and they said it like an apology.',
-    '{amount} a year, {parent} said, and do not come home in debt to anybody else.',
+    "{amount} a year, {parent} said, and don't come home in debt to anybody else.",
   ],
   'stay-a-while': [
     '{parent} said you could stay as long as you needed, and meant it.',
@@ -248,18 +248,18 @@ const NO_LINES: Readonly<Record<string, readonly string[]>> = {
   'pocket-money': [
     '{parent} said no, and then said it again when you asked differently.',
     'Asked {parent} for money at exactly the wrong moment.',
-    '{parent} said there was none spare this week, and there was not.',
+    "{parent} said there was none spare this week, and there wasn't.",
   ],
   'a-lift': [
-    '{parent} was not driving anywhere tonight. You worked something else out.',
+    "{parent} wasn't driving anywhere tonight. You worked something else out.",
     '{parent} said no. You got the bus and were forty minutes late.',
-    '{parent} had already had a day of it. You did not push.',
+    "{parent} had already had a day of it. You didn't push.",
   ],
   'pay-for-it': [
-    '{parent} said it was not happening this year, and it was not.',
-    'You asked. {parent} did the thing where they do not answer, which is an answer.',
+    "{parent} said it wasn't happening this year, and it wasn't.",
+    "You asked. {parent} did the thing where they don't answer, which is an answer.",
     '{parent} looked at the {amount} and said to ask again when you had half of it.',
-    '{parent} said no, and you could tell it was not really about the money.',
+    "{parent} said no, and you could tell it wasn't really about the money.",
   ],
   'a-car': [
     '{parent} laughed, then realized you were serious, then said no.',
@@ -268,7 +268,7 @@ const NO_LINES: Readonly<Record<string, readonly string[]>> = {
     'You asked about a car. {parent} asked what you thought insurance cost, and that was that.',
   ],
   'help-with-college': [
-    '{parent} said they could not help with it. It was true and it still landed hard.',
+    "{parent} said they couldn't help with it. It was true and it still landed hard.",
     'You asked about college. {parent} changed the subject twice and then said no.',
     '{parent} said there was nothing there. You already knew and asked anyway.',
     '{parent} told you to look at loans, in the voice of somebody who had already looked.',

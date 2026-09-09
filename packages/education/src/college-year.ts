@@ -66,10 +66,7 @@ export const yearsNeeded = (state: EducationState): number =>
  * a line saying so, which is the honest version and the one that makes 0209's
  * parent-funded college worth asking for.
  */
-export function runCollegeYear(
-  state: EducationState,
-  input: CollegeYearInput,
-): CollegeYearResult {
+export function runCollegeYear(state: EducationState, input: CollegeYearInput): CollegeYearResult {
   const lines: { kind: 'milestone' | 'passive'; text: string }[] = [];
   const postgrad = state.stage === 'postgrad';
   // What the character is personally out of pocket, after whoever is helping.
@@ -84,7 +81,7 @@ export function runCollegeYear(
       lines: [
         {
           kind: 'milestone',
-          text: `Could not cover the next year of tuition. You left without finishing.`,
+          text: `Couldn't cover the next year of tuition. You left without finishing.`,
         },
       ],
     };
@@ -124,7 +121,7 @@ export function runCollegeYear(
           kind: 'milestone',
           text: postgrad
             ? 'Left the program. It had stopped going anywhere some time before.'
-            : 'Failed out. The letter was polite and it did not soften anything.',
+            : "Failed out. The letter was polite and it didn't soften anything.",
         },
       ],
     };

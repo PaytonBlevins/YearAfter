@@ -510,7 +510,7 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
 const OVERLOAD_LINES = {
   severeMany: [
     'Between everything you signed up for, you fell asleep in third period most days and stopped being good at any of it.',
-    'You were at school from seven in the morning until nine at night and could not have said what for.',
+    "You were at school from seven in the morning until nine at night and couldn't have said what for.",
     'Something had to give and it turned out to be all of it at once.',
     'You missed two things you had promised to be at, in the same week, and stopped promising after that.',
   ],
@@ -521,11 +521,11 @@ const OVERLOAD_LINES = {
   ],
   severeFew: [
     'You ran yourself into the ground this year and it showed in everything.',
-    'You were tired in a way that sleeping did not fix.',
-    'The year went past at a sprint and you do not remember most of it.',
+    "You were tired in a way that sleeping didn't fix.",
+    "The year went past at a sprint and you don't remember most of it.",
   ],
   mildFew: [
-    'There was not quite enough week for everything you had taken on.',
+    "There wasn't quite enough week for everything you had taken on.",
     'You were always ten minutes late to the second thing.',
   ],
 } as const;
@@ -582,7 +582,7 @@ function leavingLine(age: number, behaviour: number): string {
       ? [
           'Stopped going, and nobody from the school called about it for eleven days.',
           'Left school at ' + age + '. It had stopped being a question some time before.',
-          'Walked out in the spring term and did not go back.',
+          "Walked out in the spring term and didn't go back.",
         ]
       : [
           'Left school at ' + age + ' without finishing. There were reasons, and they were yours.',

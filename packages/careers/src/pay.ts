@@ -130,12 +130,7 @@ export const livingCostOf = (afterTaxIncome: number, dependents: number): number
  * spec 1394 asks for it by name. `standing` is career-specific reputation
  * (spec 113–118), worth a little everywhere.
  */
-export function payFor(
-  job: Job,
-  years: number,
-  performance: number,
-  standing: number,
-): number {
+export function payFor(job: Job, years: number, performance: number, standing: number): number {
   const rules = TEMPLATES[job.template];
   // Raises compound, and are capped so a forty-year career does not quietly
   // become a fortune through nothing but attendance.

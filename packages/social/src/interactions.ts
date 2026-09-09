@@ -393,7 +393,7 @@ export const MAX_LIGHT_PRESSES = 4;
 const WORN_LINES: Readonly<Record<Acquaintance['kind'], readonly string[]>> = {
   peer: [
     'You have been round at {name}’s a lot lately. Enough that it was starting to show.',
-    '{name} was polite about it, in the way that means give it a week.',
+    '{name} was nice about it, which usually means give it a week.',
     '{name} had other people to see this term, and said so without saying it.',
     'There is only so much of a year, and you have had most of {name}’s.',
   ],
@@ -431,44 +431,44 @@ const GOOD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   joke: [
     'Made {name} laugh so hard a teacher came over to find out what was happening.',
     'The joke landed. {name} still brings it up.',
-    '{name} did the laugh they do when it is real, which you do not hear often.',
+    "{name} did the laugh they do when it is real, which you don't hear often.",
     'Got {name} at exactly the wrong moment and neither of you recovered for ten minutes.',
-    'It was not even that funny. {name} was gone anyway.',
+    "It wasn't even that funny. {name} was gone anyway.",
   ],
   secret: [
-    'Told {name} the thing you had not told anybody. {name} kept it, and still has.',
+    "Told {name} the thing you hadn't told anybody. {name} kept it, and still has.",
     'Said it out loud to {name} for the first time. Nothing bad happened, which was the surprise.',
   ],
   'ask-for-help': [
-    '{name} sat with you until it made sense, and did not make it a thing.',
+    "{name} sat with you until it made sense, and didn't make it a thing.",
     'Asked {name} for help and got it, immediately, without the price you were expecting.',
     '{name} said “oh, that” and had it sorted before you finished explaining.',
     'Turned up at {name}’s with the problem. {name} cleared the table.',
-    'Asked. {name} did not ask why, which was the part that mattered.',
+    "Asked. {name} didn't ask why, which was the part that mattered.",
   ],
   'ask-about-work': [
     'Stayed behind and asked. {name} explained it twice and was pleased to be asked.',
     '{name} kept you back ten minutes and it was the ten minutes the year turned on.',
     '{name} drew it on the board again, slower, for one person.',
     'Asked the question everybody had. {name} looked relieved that somebody did.',
-    '{name} lent you a book that was not on the list.',
+    "{name} lent you a book that wasn't on the list.",
   ],
   'help-out': [
-    'Stayed to stack the chairs. {name} did not make a thing of it and did not forget it either.',
+    "Stayed to stack the chairs. {name} didn't make a thing of it and didn't forget it either.",
     'Carried the boxes down for {name}, who started leaving the good jobs for you.',
     'Wiped the board without being asked. {name} noticed, and said nothing, and noticed.',
     'Gave up a lunch hour to sort {name}’s cupboard out. It took the whole hour.',
-    'Stayed to lock up with {name}, twice, and got told to call them by their first name. You did not.',
+    "Stayed to lock up with {name}, twice, and got told to call them by their first name. You didn't.",
   ],
   'ask-reference': [
-    '{name} put a word in for you with somebody who mattered, and did not mention it.',
+    "{name} put a word in for you with somebody who mattered, and didn't mention it.",
     '{name} said yes before you had finished asking, which told you something.',
   ],
   'wind-up': [
     'Got {name} going for a solid four minutes. The class has never respected you more.',
     'Said it under your breath and {name} chose not to have heard it.',
     'Answered every question with another question until {name} gave up on the lesson.',
-    'Moved everything on {name}’s desk two inches to the left. It took a fortnight to be noticed.',
+    'Moved everything on {name}’s desk two inches to the left. It took two weeks to be noticed.',
     'Did the impression. {name} walked in halfway through and pretended not to know whose it was.',
   ],
   'talk-back': [
@@ -478,13 +478,13 @@ const GOOD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   'fall-out': ['You said it. {name} took it, thought about it, and said you were probably right.'],
   'make-up': [
     'You went first. {name} had been waiting for somebody to, and it was over in a minute.',
-    'Apologised properly to {name}. It took a term to be normal again, and then it was.',
+    'Apologized properly to {name}. It took a term to be normal again, and then it was.',
   ],
 };
 
 const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   'hang-out': [
-    '{name} already had plans, and was not sorry enough about it.',
+    "{name} already had plans, and wasn't sorry enough about it.",
     'Sat around at {name}’s not talking. You both went home early.',
     '{name} spent the afternoon waiting for somebody else to arrive.',
     'Turned up and {name} had forgotten. You could hear them deciding what to do about it.',
@@ -506,10 +506,10 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   ],
   secret: [
     'Told {name}. Four people knew by Friday and you never worked out how.',
-    '{name} made a joke of it in front of everybody, and did not understand why that was the end.',
+    "{name} made a joke of it in front of everybody, and didn't understand why that was the end.",
   ],
   'ask-for-help': [
-    '{name} said yes and then did not turn up, twice.',
+    "{name} said yes and then didn't turn up, twice.",
     'Asked {name}, who told you to work it out yourself. It was fair and it still stung.',
     '{name} helped, and mentioned it to three people by Thursday.',
     'Got halfway through asking and {name} was already looking over your shoulder.',
@@ -519,22 +519,22 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
     '{name} was packing up and told you to read the chapter again.',
     'Asked, and got the same explanation at the same speed, twice.',
     '{name} answered somebody else’s question instead and never came back to yours.',
-    'Got told it had been covered. It had, and that was not the problem.',
+    "Got told it had been covered. It had, and that wasn't the problem.",
     '{name} suggested you ask somebody in your group. You had.',
   ],
   'help-out': [
     '{name} said they had it, in a voice that meant go away.',
     'Offered, and got given the job nobody wanted, which was the point.',
     '{name} thanked you and gave the interesting half to somebody else.',
-    'Broke something of {name}’s while helping. {name} said it did not matter.',
+    "Broke something of {name}’s while helping. {name} said it didn't matter.",
     'Stayed behind for twenty minutes doing nothing while {name} finished an email.',
   ],
   'ask-reference': [
-    'Asked {name}, who said they did not really know you well enough. Which was fair.',
+    "Asked {name}, who said they didn't really know you well enough. Which was fair.",
     '{name} said yes and then wrote something so lukewarm it did more harm than nothing.',
   ],
   'wind-up': [
-    'It landed badly. {name} did not shout, which was worse, and remembered it all year.',
+    "It landed badly. {name} didn't shout, which was worse, and remembered it all year.",
     'Nobody laughed and {name} moved your seat.',
     '{name} waited for you to finish, then carried on, and the class went quiet on its own.',
     'It was funnier in your head. {name} kept the note.',
@@ -552,7 +552,7 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
     'It went further than you meant. Neither of you took any of it back.',
   ],
   'make-up': [
-    'You apologised. {name} accepted it in the way that means nothing has been accepted.',
+    "You apologized. {name} said it's fine. You could tell it wasn't.",
     'Went first, and found out {name} had already stopped caring.',
   ],
 };

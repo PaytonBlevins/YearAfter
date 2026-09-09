@@ -309,7 +309,7 @@ export function attemptTryout(
     return {
       made: false,
       state: { ...state, tryouts, tryoutYear },
-      text: activity.cutText ?? `Did not make ${activity.name.toLowerCase()}.`,
+      text: activity.cutText ?? `Didn't make ${activity.name.toLowerCase()}.`,
     };
   }
   return {

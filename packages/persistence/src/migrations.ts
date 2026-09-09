@@ -451,7 +451,7 @@ function dedupeTimeline(timeline: readonly unknown[]): unknown[] {
 export function describeMigrationError(error: MigrationError): string {
   switch (error.kind) {
     case 'notAnObject':
-      return 'Save data is not an object.';
+      return "Save data isn't an object.";
     case 'missingVersion':
       return 'Save data has no version field.';
     case 'unknownVersion':

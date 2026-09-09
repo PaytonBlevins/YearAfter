@@ -94,7 +94,7 @@ export function DoctorScreen() {
         <ListRow
           icon="doctor"
           title="See a doctor"
-          {...(canVisit ? {} : { subtitle: 'You have been this year.' })}
+          {...(canVisit ? {} : { subtitle: "You've already been this year." })}
           affordance={canVisit ? 'action' : 'none'}
           disabled={!canVisit}
           onPress={canVisit ? visitDoctor : undefined}
@@ -103,8 +103,8 @@ export function DoctorScreen() {
 
       <View style={styles.note}>
         <Text style={styles.noteText}>
-          Nothing here needs keeping on top of. Physicals and screenings happen in the background,
-          and how you are is mostly your age and what has already happened to you.
+          There's nothing here you need to keep on top of. Check-ups happen in the background, and
+          how you're doing comes down to your age and what's already happened to you.
         </Text>
       </View>
     </ScrollView>

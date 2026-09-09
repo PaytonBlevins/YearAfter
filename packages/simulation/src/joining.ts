@@ -137,7 +137,7 @@ export function askToJoin(state: GameState, activityId: string): JoinOutcome {
     age: state.player.age,
     year: state.world.year,
     kind: 'relationship',
-    text: `${who} said no to ${activity.name.toLowerCase()}. It was the money, and it was not only the money.`,
+    text: `${who} said no to ${activity.name.toLowerCase()}. It was the money, and it wasn't only the money.`,
     id: `t:${state.world.year}:funding:${activityId}`,
     sequence,
   });

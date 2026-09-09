@@ -334,8 +334,8 @@ function resolveParentAct(
         text: pick([
           '{parent} sat you down and said they would cover college if you wanted to go.',
           '{parent} had been putting money aside for college since you were small.',
-          '{parent} said the tuition was handled. You had not known there was anything set aside.',
-          'There was a college fund. {parent} had never mentioned it and it was not large, but it was there.',
+          "{parent} said the tuition was handled. You hadn't known there was anything set aside.",
+          "There was a college fund. {parent} had never mentioned it and it wasn't large, but it was there.",
         ]),
         behaviour: 0,
         gift: 0,
@@ -345,9 +345,9 @@ function resolveParentAct(
     case 'bought-you-something':
       return {
         text: pick([
-          '{parent} came home with something you had not asked for and had wanted for months.',
+          "{parent} came home with something you hadn't asked for and had wanted for months.",
           '{parent} bought you something for no reason. It was $40 and it is still on your shelf.',
-          '{parent} spent $40 on you on an ordinary Tuesday and would not say why.',
+          "{parent} spent $40 on you on an ordinary Tuesday and wouldn't say why.",
           'There was a bag on your bed. {parent} never mentioned it, then or after.',
           '{parent} saw it in a window and thought of you, and $40 later here it was.',
         ]),
@@ -375,10 +375,10 @@ function resolveParentAct(
           // catalog already has that line, and two systems telling the same
           // joke reads as the game repeating itself rather than as a callback.
           '{parent} grounded you until further notice and forgot to lift it for a month.',
-          '{parent} took your phone for a month and did not budge.',
+          "{parent} took your phone for a month and didn't budge.",
           '{parent} said no going out until the grades came back up, and meant every word.',
           'You were grounded for the whole of a weekend everybody else was out.',
-          '{parent} stopped your allowance and did not say for how long.',
+          "{parent} stopped your allowance and didn't say for how long.",
         ]),
         behaviour: 4,
         gift: 0,
@@ -388,10 +388,10 @@ function resolveParentAct(
       return {
         text: pick([
           '{parent} sat you down and said the disappointed thing, which was worse than shouting.',
-          '{parent} asked what was going on with you. You did not have an answer ready.',
+          "{parent} asked what was going on with you. You didn't have an answer ready.",
           '{parent} turned the TV off and asked you to talk to them. It took an hour.',
           'The school called {parent}. The conversation afterwards was very quiet.',
-          '{parent} said they were not angry, and it turned out they were not, and that was worse.',
+          "{parent} said they weren't angry, and it turned out they weren't, and that was worse.",
         ]),
         behaviour: 6,
         gift: 0,
@@ -404,7 +404,7 @@ function resolveParentAct(
           'There was no money for it this year. Nobody said so out loud.',
           'You stopped asking for things for a while, without deciding to.',
           '{parent} said maybe next year in a voice that meant no.',
-          'Everybody else went. {parent} could not make it work and did not pretend otherwise.',
+          "Everybody else went. {parent} couldn't make it work and didn't pretend otherwise.",
         ]),
         behaviour: 0,
         gift: 0,
@@ -414,7 +414,7 @@ function resolveParentAct(
       return {
         text: pick([
           '{parent} told you it was time to find your own place. You had a month.',
-          '{parent} said you could not stay. You were out by the end of the season.',
+          "{parent} said you couldn't stay. You were out by the end of the season.",
           '{parent} had your things by the door before you understood it was happening.',
           'The row ended with {parent} telling you to go, and neither of you took it back.',
           '{parent} said they needed the room. That was the whole reason and it was enough.',

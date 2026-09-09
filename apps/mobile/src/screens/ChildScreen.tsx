@@ -139,7 +139,7 @@ export function ChildScreen() {
         <Text style={styles.noteText}>
           {child.relationship < DISTANT
             ? `You and ${child.firstName} have got out of the habit of talking. Saying yes when ${them === 'her' ? 'she' : 'he'} asks for something is most of how that comes back.`
-            : `Most of raising ${them} does not need you to press anything. Turning up when ${them === 'her' ? 'she' : 'he'} asks is the part that does.`}
+            : `Most of raising ${them} doesn't need you to press anything. Turning up when ${them === 'her' ? 'she' : 'he'} asks is the part that does.`}
         </Text>
       </View>
     </ScrollView>

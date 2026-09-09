@@ -216,9 +216,7 @@ export const TEMPLATES: Readonly<Record<JobTemplate, TemplateRules>> = {
  * unknown template as `salary` would pay somebody the wrong money forever.
  */
 const level = (value: string): EducationLevel =>
-  (EDUCATION_ORDER as readonly string[]).includes(value)
-    ? (value as EducationLevel)
-    : 'none';
+  (EDUCATION_ORDER as readonly string[]).includes(value) ? (value as EducationLevel) : 'none';
 
 const widen = (entry: JobEntry): Job | undefined => {
   if (!(entry.track in TRACK_LABELS)) return undefined;

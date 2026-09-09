@@ -78,9 +78,10 @@ describe('a school leaver can actually get hired', () => {
     const doors = ALL_JOBS.filter((job) => job.rung === 0);
     const odds = doors.map((job) => hireChance(job, MEDIAN_SCHOOL_LEAVER));
     const decent = odds.filter((chance) => chance >= 0.4);
-    expect(decent.length, `only ${decent.length} of ${doors.length} doors are open`).toBeGreaterThan(
-      6,
-    );
+    expect(
+      decent.length,
+      `only ${decent.length} of ${doors.length} doors are open`,
+    ).toBeGreaterThan(6);
     expect(Math.max(...odds)).toBeGreaterThan(0.55);
   });
 

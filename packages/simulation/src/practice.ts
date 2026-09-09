@@ -56,7 +56,7 @@ const LINES = [
   'Stayed behind after {what} twice a week. It started to show.',
   'Put the work in at {what} when nobody was watching.',
   'Practiced {what} until it was boring, and then a bit longer.',
-  'Went at {what} in the garage, badly, until it was not bad.',
+  "Went at {what} in the garage, badly, until it wasn't bad.",
 ];
 
 export function practise(

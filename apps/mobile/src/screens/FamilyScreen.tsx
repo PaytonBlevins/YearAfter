@@ -260,7 +260,7 @@ function canStartAdoption(state: NonNullable<ReturnType<typeof useGame>['state']
 
 function adoptionLine(state: NonNullable<ReturnType<typeof useGame>['state']>): string {
   if (isWaiting(state.parenting.adoption)) return 'Applied. Now it is a matter of waiting.';
-  return 'Takes years, and does not need a partner.';
+  return "Takes years, and you don't need a partner.";
 }
 
 const styles = StyleSheet.create({

@@ -55,8 +55,8 @@ export function SchoolActivitiesScreen() {
           title="Nothing to sign up for"
           body={
             education.stage === 'preschool'
-              ? 'School has not started yet.'
-              : 'School is finished. Whatever comes next is not on a clipboard in a gym.'
+              ? "School hasn't started yet."
+              : "School's done. Whatever comes next isn't on a clipboard in a gym."
           }
         />
       </ScrollView>

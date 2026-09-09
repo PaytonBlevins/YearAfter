@@ -59,12 +59,7 @@ import type { FamilyMember, Household } from '@yearafter/relationships';
 /* -------------------------------------------------------------------------- */
 
 export type RequestId =
-  | 'pocket-money'
-  | 'pay-for-it'
-  | 'a-lift'
-  | 'a-car'
-  | 'help-with-college'
-  | 'stay-a-while';
+  'pocket-money' | 'pay-for-it' | 'a-lift' | 'a-car' | 'help-with-college' | 'stay-a-while';
 
 export interface ParentRequest {
   readonly id: RequestId;
@@ -194,7 +189,7 @@ export const PARENT_REQUESTS: readonly ParentRequest[] = [
   {
     id: 'stay-a-while',
     label: 'Ask to stay a while longer',
-    blurb: 'You are grown and you are not ready.',
+    blurb: "You are grown and you aren't ready.",
     minAge: 18,
     cost: 0,
     base: 0.55,
@@ -249,9 +244,7 @@ export function costFor(request: ParentRequest, household: Household, age?: numb
   if (request.costShare === undefined) return costAt(request, age);
   const income = Number(household.finances.annualIncome) / 100;
   const share = income * request.costShare;
-  return Math.round(
-    Math.min(request.costCap ?? share, Math.max(request.costFloor ?? 0, share)),
-  );
+  return Math.round(Math.min(request.costCap ?? share, Math.max(request.costFloor ?? 0, share)));
 }
 
 /**

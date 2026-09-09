@@ -179,12 +179,12 @@ export function seasonLine(
 
   if (band === 'star') {
     return roll < 0.5
-      ? `Carried ${noun} this season. People who do not follow it knew your name.`
+      ? `Carried ${noun} this season. People who don't follow it knew your name.`
       : `Best season yet at ${noun}. There was talk, and some of it was serious.`;
   }
   if (band === 'regular') {
     return roll < 0.5
-      ? `A solid season at ${noun}. In every week, and missed when you were not.`
+      ? `A solid season at ${noun}. In every week, and missed when you weren't.`
       : `Held your place at ${noun} all year without ever quite taking it over.`;
   }
   if (band === 'squad') {

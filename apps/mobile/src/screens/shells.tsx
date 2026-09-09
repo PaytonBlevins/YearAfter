@@ -594,7 +594,7 @@ function payDetail(state: NonNullable<ReturnType<typeof useGame>['state']>): Det
       },
     ],
     ...(kept < 0
-      ? { footnote: 'This wage does not cover this household. Something has to change.' }
+      ? { footnote: "This wage doesn't cover this household. Something has to change." }
       : {}),
   };
 }

@@ -155,9 +155,7 @@ describe('children are not parents (Ticket 0208)', () => {
   it('leaves dead children out of livingChildren but keeps them on the roster', () => {
     const bereaved: Household = {
       ...withKids,
-      members: withKids.members.map((m) =>
-        m.id === asNpcId('kid1') ? { ...m, alive: false } : m,
-      ),
+      members: withKids.members.map((m) => (m.id === asNpcId('kid1') ? { ...m, alive: false } : m)),
     };
     expect(children(bereaved)).toHaveLength(2);
     expect(livingChildren(bereaved).map((m) => m.id)).toEqual([asNpcId('kid2')]);

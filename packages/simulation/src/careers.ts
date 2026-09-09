@@ -47,13 +47,13 @@ import { RngDomains, stableUnit } from './rng/rng';
 export type WorkError = CannotApply | 'no-such-job' | 'no-job';
 
 export const WORK_ERROR_LABELS: Readonly<Record<WorkError, string>> = {
-  'too-young': 'You are too young for this one.',
-  'already-applied': 'You have already applied for this one this year.',
+  'too-young': "You're too young for this one.",
+  'already-applied': "You've already applied for this one this year.",
   'already-doing-it': 'This is the job you have.',
-  'out-of-reach': 'They would want somebody who has done the job below this.',
-  'needs-education': 'You do not have the qualification this one needs.',
-  'no-such-job': 'That job is not in the catalog.',
-  'no-job': 'You are not working anywhere.',
+  'out-of-reach': "They'd want somebody who's done the job below this one.",
+  'needs-education': "You don't have the qualification for this one.",
+  'no-such-job': "That job isn't in the catalog.",
+  'no-job': "You aren't working anywhere.",
 };
 
 export interface WorkOutcome {
@@ -359,9 +359,9 @@ export function resign(state: GameState): Result<WorkOutcome, WorkError> {
 
   const text =
     years <= 0
-      ? `Quit ${job ? job.title.toLowerCase() : 'the job'} inside a year. It was not going to work.`
+      ? `Quit ${job ? job.title.toLowerCase() : 'the job'} inside a year. It wasn't going to work.`
       : years === 1
-        ? `Handed in your notice after a year. ${job ? job.title : 'The job'} was not it.`
+        ? `Handed in your notice after a year. ${job ? job.title : 'The job'} wasn't it.`
         : `Left after ${years} years. You had known for a while.`;
   // The job, for the same reason Work Harder carries it: two jobs can be left
   // in one year, and this id said only which year it was. Found by the
@@ -417,7 +417,7 @@ const turnedDownLine = (state: GameState, job: Job): string =>
 
 const FIRST_JOB_LINES: readonly string[] = [
   'Got the job. {job}, and a first paycheck with your name on it.',
-  'They took you on as {job}. You told everybody, including people who did not ask.',
+  "They took you on as {job}. You told everybody, including people who didn't ask.",
   'Started as {job}. The first week was longer than the whole summer before it.',
   'Hired as {job}. Nobody had ever paid you properly before.',
 ];
@@ -438,17 +438,40 @@ const TURNED_DOWN_LINES: readonly string[] = [
   'Went for the {job} job. They wanted somebody who had already done it.',
 ];
 
+/*
+ * Ticket 0211b widened both sets, and the reason is a measurement rather than a
+ * preference. Work Harder is pressed twice a year for a forty-year career —
+ * EIGHTY draws — and this held four lines. Reading a played decade showed "Got
+ * good at the parts of the job nobody trains you on" at twenty-six, twenty-eight
+ * and thirty, which is CORE_RULES 13.17 broken in plain sight: repeatable copy
+ * needs more lines than repeats.
+ *
+ * Ten and eight is still short of eighty. The honest fix is an adult event
+ * library, which is a content ticket; this is the difference between a line
+ * every other year and a line every fifth.
+ */
 const WORKED_LINES: readonly string[] = [
-  'Put a real shift in this year, and it was noticed.',
-  'Stayed late through most of it and came out of the year better at the job.',
-  'Took the work seriously this year. Somebody senior said so out loud.',
+  'Put a real shift in this year, and somebody noticed.',
+  'Stayed late most of the year and got better at the job for it.',
+  'Took the work seriously. Somebody senior said so out loud.',
   'Got good at the parts of the job nobody trains you on.',
+  'Picked up the thing everybody else avoided and got known for it.',
+  'Stopped waiting to be asked. It went over well.',
+  'Fixed something nobody had gotten around to in years.',
+  'Ran the thing when the person who normally runs it was out.',
+  'Said yes to the ugly project. It turned out fine.',
+  'Learned the part of the job you had been faking.',
 ];
 
 const DID_NOT_LINES: readonly string[] = [
-  'Worked hard all year and none of it seemed to land anywhere.',
-  'Put the hours in. The year went the way it was going to go regardless.',
-  'Tried to make a mark and picked a year when nobody was looking.',
+  'Worked hard all year and none of it landed anywhere.',
+  'Put the hours in. The year went how it was going to go regardless.',
+  'Tried to make a mark and picked a year when nobody was watching.',
+  'Did everything right and got nothing back for it.',
+  'Busted it all year. Your boss changed and none of it carried over.',
+  'Gave it everything and the whole thing got shelved in March.',
+  'Worked yourself into the ground for a project that got cancelled.',
+  'Nobody noticed. You checked.',
 ];
 
 /* -------------------------------------------------------------------------- */

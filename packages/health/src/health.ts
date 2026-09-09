@@ -74,7 +74,7 @@ export function illnessChance({ age, health, stress }: IllnessOdds): number {
  * Health lost to a year of being ill, before it comes back.
  *
  * Acute illness is a dip, not a debt: `ageingLoss` is what accumulates and this
- * is not. The range is wide because "ill" covers a fortnight in bed and three
+ * is not. The range is wide because "ill" covers two weeks in bed and three
  * months of not being right.
  */
 export const ILLNESS_COST: readonly [number, number] = [4, 14];

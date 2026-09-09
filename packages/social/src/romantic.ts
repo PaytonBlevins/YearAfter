@@ -306,10 +306,10 @@ export function moveUnavailable(
   cash: number,
 ): string | undefined {
   if (move.minRelationship !== undefined && person.relationship < move.minRelationship) {
-    return 'Not yet. You are not there.';
+    return "Not yet. You aren't there.";
   }
   if (move.minYearsAtStage !== undefined && yearsShort(move, person, age)) {
-    return 'It has not been long enough.';
+    return "It hasn't been long enough.";
   }
   if (move.cost !== undefined && cash < move.cost) return 'You cannot afford it.';
   return undefined;
@@ -488,7 +488,7 @@ const TEEN_DATE = {
     '{name} spent most of it on their phone, and you spent most of it deciding not to mention it.',
     'It rained, the place was shut, and neither of you had a second idea.',
     'Brought {name} somewhere you thought they would like. They were polite about it.',
-    'Your friends turned up. {name} did not say anything about it, all evening.',
+    "Your friends turned up. {name} didn't say anything about it, all evening.",
   ],
 } as const;
 
@@ -534,15 +534,15 @@ const GOOD_LINES: Readonly<Record<AskedMoveId, readonly string[]>> = {
     'Said something to {name} that came out better than it had any right to.',
     'Made {name} laugh and then had to look at the floor for a bit.',
     '{name} found a reason to stand next to you twice in one afternoon.',
-    'Caught {name} looking, and {name} did not look away first.',
+    "Caught {name} looking, and {name} didn't look away first.",
     'Sat next to {name} on purpose and neither of you mentioned it.',
     'Ended up talking to {name} for an hour about nothing at all.',
   ],
   'ask-out': [
-    'Asked {name} in the corridor, quietly, and {name} said yes before you finished.',
+    'Asked {name} in the hallway, quietly, and {name} said yes before you finished.',
     'Got the words out to {name} on the way to the bus. {name} said yes, and you got the wrong bus.',
     'Asked {name}. {name} thought about it for a second that lasted a month, and said yes.',
-    'Wrote it down, could not hand it over, and said it out loud to {name} instead. Yes.',
+    "Wrote it down, couldn't hand it over, and said it out loud to {name} instead. Yes.",
   ],
   date: TEEN_DATE.good,
   'make-official': [
@@ -565,12 +565,12 @@ const BAD_LINES: Readonly<Record<AskedMoveId, readonly string[]>> = {
     'Said it, heard yourself say it, and watched {name} decide not to have heard it.',
     '{name} laughed at the wrong bit and you thought about it for a week.',
     'Tried it on {name} and got the voice people use on somebody else’s little brother.',
-    '{name} answered the question you actually asked, which was not the one you meant.',
+    "{name} answered the question you actually asked, which wasn't the one you meant.",
     'Made your move in front of {name}’s friends. They enjoyed it more than {name} did.',
   ],
   'ask-out': [
-    'Asked {name}. {name} said no, gently, and gently did not help.',
-    '{name} said they did not think of you like that, and meant it, and said it kindly.',
+    "Asked {name}. {name} said no, gently, and gently didn't help.",
+    "{name} said they didn't think of you like that, and meant it, and said it kindly.",
     'Asked {name} in front of two other people, which turned out to be the mistake.',
   ],
   date: TEEN_DATE.bad,
@@ -579,7 +579,7 @@ const BAD_LINES: Readonly<Record<AskedMoveId, readonly string[]>> = {
     'Brought it up and {name} changed the subject so smoothly you nearly missed it.',
   ],
   propose: [
-    'Asked {name}. {name} said they were not ready, and the ring stayed in a drawer for a year.',
+    "Asked {name}. {name} said they weren't ready, and the ring stayed in a drawer for a year.",
     '{name} said no. You had been so certain that it took a while to hear.',
   ],
   marry: [

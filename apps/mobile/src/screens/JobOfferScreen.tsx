@@ -86,7 +86,7 @@ export function JobOfferScreen() {
           subtitle={
             job.requires === 'none'
               ? 'Nothing formal. They will train you.'
-              : `${EDUCATION_LABELS[job.requires]} — this one is not negotiable.`
+              : `${EDUCATION_LABELS[job.requires]} — this one isn't negotiable.`
           }
           value={meetsLevel(held, job.requires) ? 'You have it' : 'You do not'}
           affordance="none"

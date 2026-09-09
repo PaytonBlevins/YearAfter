@@ -81,7 +81,7 @@ export function ParentScreen() {
         <Text style={styles.noteText}>
           {parent.alive
             ? `Whether ${who} says yes is up to ${who === 'Mom' ? 'her' : 'him'}. It depends on how the year has gone, what the family can afford, and how the two of you have been.`
-            : `${who} is not here any more. What they did for you stays in the timeline.`}
+            : `${who} isn't here anymore. What they did for you stays in the timeline.`}
         </Text>
       </View>
     </ScrollView>

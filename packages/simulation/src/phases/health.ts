@@ -168,7 +168,7 @@ function lineFor(
         return [
           {
             kind: 'passive' as TimelineKind,
-            text: `${pick(ILL_LINES)} It did not entirely go — ${kind.label.toLowerCase()}.`,
+            text: `${pick(ILL_LINES)} It left you with ${kind.label.toLowerCase()}.`,
           },
         ];
       }
@@ -180,7 +180,7 @@ function lineFor(
         return [
           {
             kind: 'passive' as TimelineKind,
-            text: `${pick(HURT_LINES)} ${kind.label} — that one is staying.`,
+            text: `${pick(HURT_LINES)} You're stuck with ${kind.label.toLowerCase()}.`,
           },
         ];
       }
@@ -214,34 +214,34 @@ function lineFor(
  * cannot read it twice in eight years even if they fall ill every one of them.
  */
 const ILL_LINES: readonly string[] = [
-  'Spent most of a month flat out and getting nothing done.',
-  'Whatever it was went round everybody, and you got it worst.',
-  'Got properly ill for the first time in ages. It took a while.',
-  'A bad few weeks. You went back before you should have.',
-  'Something knocked you sideways and would not shift.',
-  'Ended up at a doctor for something you had been ignoring.',
-  'Ill enough to cancel things you had been looking forward to.',
-  'The kind of ill where people keep asking if you are alright.',
+  'Spent most of a month in bed and got nothing done.',
+  'Whatever was going around, you got it worst.',
+  'Got really sick for the first time in years. Took a while to shake it.',
+  'Rough few weeks. You went back to normal way too early.',
+  "Caught something nasty and couldn't shake it for two months.",
+  'Finally saw a doctor about something you had been ignoring.',
+  'Sick enough that you cancelled things you had been looking forward to.',
+  'Sick enough that people kept asking if you were okay.',
 ];
 
 const CLEARED_LINES: readonly string[] = [
-  'Whatever they did about {what} seems to have worked.',
-  '{what} — gone, finally. You had almost stopped noticing it.',
-  'Got the all-clear on {what}. Nobody made a fuss about it.',
-  "They signed you off. {what} is somebody else's problem now.",
-  'Turns out {what} was not for life after all.',
-  'One appointment, one shrug, and {what} was behind you.',
-  'It went the way these things sometimes go: {what}, and then not.',
-  'Stopped thinking about {what} at some point and never started again.',
+  'Whatever they did about your {what} worked.',
+  'Your {what} finally cleared up. You had almost stopped noticing it.',
+  'Got the all-clear on your {what}.',
+  "They signed you off. Your {what} isn't your problem anymore.",
+  "Turns out your {what} wasn't permanent after all.",
+  'One appointment, one shrug, and your {what} was behind you.',
+  'Your {what} cleared up on its own, which happens sometimes.',
+  'Stopped thinking about your {what} at some point and never started again.',
 ];
 
 const HURT_LINES: readonly string[] = [
-  'Went over badly and heard something go.',
+  'Went down hard and heard something pop.',
   'Got hurt doing something you have done a thousand times.',
-  'One wrong movement and that was the rest of the season.',
-  'An accident, quick and stupid and expensive.',
-  'Came off worse than the thing you came off.',
-  'Hurt yourself properly for the first time in your life.',
-  'A bad fall. You knew right away it was not nothing.',
-  'Something gave way that was never supposed to give way.',
+  'One wrong move and that was the rest of the season.',
+  'A quick, stupid accident that cost you a lot of money.',
+  'Came off worse than whatever you came off of.',
+  'Really hurt yourself for the first time in your life.',
+  'A bad fall. You knew right away it was serious.',
+  'Something gave out that was never supposed to give out.',
 ];

@@ -38,7 +38,7 @@ export function ColleaguesScreen() {
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <EmptyState
           title="Nobody yet"
-          body="You have not got past first names with anybody at work. It takes a while, and it does not happen every year."
+          body="You haven't got past first names with anybody at work. It takes a while, and it doesn't happen every year."
         />
       </ScrollView>
     );

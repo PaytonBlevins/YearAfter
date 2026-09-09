@@ -133,7 +133,7 @@ export const CANNOT_APPLY_LABELS: Readonly<Record<CannotApply, string>> = {
   'already-applied': 'You have already applied this year.',
   'already-doing-it': 'This is the job you have.',
   'out-of-reach': 'They would want somebody who has done the job below this.',
-  'needs-education': 'You do not have the qualification this one needs.',
+  'needs-education': "You don't have the qualification for this one.",
 };
 
 /**
@@ -285,11 +285,7 @@ export const SECOND_PUSH_SCALE = 0.55;
  * they drift towards rather than adding a fixed bonus, so pressing the button
  * every year compounds and pressing it once does not.
  */
-export function performanceTarget(
-  effort: WorkEffort,
-  discipline: number,
-  smarts: number,
-): number {
+export function performanceTarget(effort: WorkEffort, discipline: number, smarts: number): number {
   const aptitude = (discipline * 0.6 + smarts * 0.4 - 50) / 50; // -1 .. 1
   // MEASURED, not guessed. At a steady base of 55 the population's own stats
   // — Discipline p10 56, Smarts p10 70 — carried an unpushed worker to 61
@@ -379,6 +375,7 @@ export function firingChance(job: Job, performance: number, years: number): numb
   const badness = (FIRING_SAFE - performance) / FIRING_SAFE; // 0..1
   // A long-serving employee is harder to move, everywhere but the performance
   // template — where the whole arrangement is that you produce or you go.
-  const tenure = job.template === 'performance' ? 1 : Math.max(0.55, 1 - Math.min(1, years / 12) * 0.45);
+  const tenure =
+    job.template === 'performance' ? 1 : Math.max(0.55, 1 - Math.min(1, years / 12) * 0.45);
   return Math.max(0, Math.min(0.6, rules.fires * (0.2 + badness * 3.4) * tenure));
 }

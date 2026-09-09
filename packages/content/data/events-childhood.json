@@ -175,7 +175,7 @@
       },
       "weight": 12,
       "text": [
-        "{sibling} was not consulted about your arrival and made that position clear.",
+        "{sibling} wasn't consulted about your arrival and made that position clear.",
         "{sibling} asked, politely, when you were going back."
       ],
       "effects": {
@@ -259,7 +259,7 @@
       },
       "weight": 12,
       "text": [
-        "Formed an unbreakable attachment to one specific object and would not be reasoned with."
+        "Formed an unbreakable attachment to one specific object and wouldn't be reasoned with."
       ],
       "effects": {
         "stats": {
@@ -591,7 +591,7 @@
       "weight": 9,
       "cooldown": 4,
       "text": [
-        "There was shouting downstairs that everyone pretended in the morning had not happened."
+        "There was shouting downstairs that everyone pretended in the morning hadn't happened."
       ],
       "effects": {
         "stats": {
@@ -842,7 +842,7 @@
       },
       "weight": 6,
       "text": [
-        "The family pet died. It was explained gently and it did not help much."
+        "The family pet died. It was explained gently and it didn't help much."
       ],
       "effects": {
         "stats": {
@@ -1789,7 +1789,7 @@
         }
       ],
       "text": [
-        "Won the spelling bee. The trophy was small and the feeling was not."
+        "Won the spelling bee. The trophy was small and the feeling wasn't."
       ],
       "effects": {
         "stats": {
@@ -1903,7 +1903,7 @@
         }
       ],
       "text": [
-        "Got the lead in the school play and did not fumble a single line."
+        "Got the lead in the school play and didn't fumble a single line."
       ],
       "effects": {
         "stats": {
@@ -1927,7 +1927,7 @@
       "weight": 13,
       "cooldown": 2,
       "text": [
-        "Discovered that homework does not do itself, several times, at cost."
+        "Discovered that homework doesn't do itself, several times, at cost."
       ],
       "effects": {
         "stats": {
@@ -2131,7 +2131,7 @@
       "cooldown": 2,
       "text": [
         "A field trip to a museum, remembered mostly for the bus.",
-        "A field trip where somebody was sick on the coach and it was not you."
+        "A field trip where somebody was sick on the coach and it wasn't you."
       ],
       "effects": {
         "stats": {
@@ -2214,7 +2214,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Picked last for teams, consistently, for years, by people who were not wrong."
+        "Picked last for teams, consistently, for years, by people who weren't wrong."
       ],
       "effects": {
         "stats": {
@@ -2514,7 +2514,7 @@
       },
       "weight": 9,
       "text": [
-        "Got a yearbook quote in that has not aged well."
+        "Got a yearbook quote in that hasn't aged well."
       ],
       "effects": {
         "stats": {
@@ -3035,7 +3035,7 @@
       },
       "weight": 9,
       "text": [
-        "The crush turned out to be mutual, which was somehow more alarming than the alternative."
+        "The crush turned out to be mutual, and that was scarier than being turned down."
       ],
       "effects": {
         "stats": {
@@ -3057,7 +3057,7 @@
       "weight": 11,
       "cooldown": 3,
       "text": [
-        "Asked. Was turned down kindly, which did not help at all."
+        "Asked. Was turned down kindly, which didn't help at all."
       ],
       "effects": {
         "stats": {
@@ -3187,7 +3187,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Took a day off you could not spare because there was nobody else to take it."
+        "Took a day off you couldn't spare because there was nobody else to take it."
       ],
       "effects": {
         "stats": {
@@ -3208,7 +3208,7 @@
       "weight": 10,
       "cooldown": 5,
       "text": [
-        "Dropped your kid at school and cried in the car, which you had promised yourself you would not do."
+        "Dropped your kid at school and cried in the car, which you had promised yourself you wouldn't do."
       ],
       "effects": {
         "stats": {
@@ -3312,7 +3312,7 @@
       "weight": 10,
       "cooldown": 5,
       "text": [
-        "The house got quiet. You had been looking forward to it and it was not what you expected."
+        "The house got quiet. You had been looking forward to it and it wasn't what you expected."
       ],
       "effects": {
         "stats": {
@@ -3334,8 +3334,8 @@
       "weight": 11,
       "cooldown": 3,
       "text": [
-        "Somebody put a note in your bag. It was not signed and you have a theory.",
-        "A note went round the class about you and {kid}, and it was not unkind, which was worse."
+        "Somebody put a note in your bag. It wasn't signed and you have a theory.",
+        "A note went round the class about you and {kid}, and it wasn't unkind, which was worse."
       ],
       "effects": {
         "stats": {
@@ -3379,7 +3379,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Somebody told {kid} you liked them. It was true, and you have not decided whether to be grateful."
+        "Somebody told {kid} you liked them. It was true, and you haven't decided whether to be grateful."
       ],
       "effects": {
         "stats": {
@@ -3511,7 +3511,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Spent a whole evening making {kid} a playlist and then did not send it."
+        "Spent a whole evening making {kid} a playlist and then didn't send it."
       ],
       "effects": {
         "stats": {
@@ -3598,7 +3598,9 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "A friend set you up with somebody. It was not a disaster, which is a low bar cleared."
+        "A friend set you up with somebody. It went fine. Nobody followed up.",
+        "A friend set you up. You both laughed about it after and left it there.",
+        "Got set up with a friend of a friend. You had one good hour and no second date."
       ],
       "effects": {
         "stats": {
@@ -3620,7 +3622,9 @@
       "cooldown": 2,
       "text": [
         "Spent a month on the apps. Met three people and liked one of them.",
-        "Reinstalled the app, met somebody for a coffee, and neither of you texted after."
+        "Matched with somebody funny and it fizzled out over two weeks of texting.",
+        "Downloaded the app again. Met someone for coffee. Neither of you texted after.",
+        "Went on four first dates and there was no second one."
       ],
       "effects": {
         "stats": {
@@ -3661,7 +3665,8 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Went to a wedding on your own and had a much better time than expected."
+        "Went to a wedding alone and had way more fun than you expected.",
+        "Went to a wedding solo, got seated with strangers, and stayed till the end."
       ],
       "effects": {
         "stats": {
@@ -3681,7 +3686,8 @@
       "weight": 10,
       "cooldown": 5,
       "text": [
-        "Ran into somebody you used to know. You were both polite and it took a week to shake."
+        "Ran into an ex at the store. You were both polite and you thought about it all week.",
+        "Bumped into somebody you used to date. Five awkward minutes, then a week of thinking."
       ],
       "effects": {
         "stats": {
@@ -3702,7 +3708,8 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "A year with nobody in it. You got quite good at your own company."
+        "Nobody this year. You got pretty good at being on your own.",
+        "No dates, no drama. You cooked a lot and slept fine."
       ],
       "effects": {
         "stats": {
@@ -3867,7 +3874,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Lent {kid} something you loved. It has not come back and it is not going to."
+        "Lent {kid} something you loved. It hasn't come back and it isn't going to."
       ],
       "effects": {
         "stats": {
@@ -4974,7 +4981,7 @@
       },
       "weight": 7,
       "text": [
-        "Wore a proper suit for the first time, for a sad reason, and it did not fit."
+        "Wore a proper suit for the first time, for a sad reason, and it didn't fit."
       ],
       "effects": {
         "stats": {
@@ -5089,7 +5096,7 @@
       },
       "weight": 6,
       "text": [
-        "Saw a meteor shower from a roof at two in the morning and did not tell anyone about being up there."
+        "Saw a meteor shower from a roof at two in the morning and didn't tell anyone about being up there."
       ],
       "effects": {
         "stats": {
@@ -5201,7 +5208,7 @@
       "weight": 13,
       "cooldown": 3,
       "text": [
-        "Made a team two age groups up and was not the worst player on it."
+        "Made a team two age groups up and wasn't the worst player on it."
       ],
       "effects": {
         "stats": {
@@ -5611,7 +5618,7 @@
       },
       "weight": 11,
       "text": [
-        "Formed a band in a garage with {kid} and {kid2}. It was loud and it was not good yet."
+        "Formed a band in a garage with {kid} and {kid2}. It was loud and it wasn't good yet."
       ],
       "effects": {
         "stats": {
@@ -5691,7 +5698,7 @@
       },
       "weight": 9,
       "text": [
-        "Played a recital from memory without a single mistake, and could not sleep afterwards."
+        "Played a recital from memory without a single mistake, and couldn't sleep afterwards."
       ],
       "effects": {
         "stats": {
@@ -6072,7 +6079,7 @@
       "weight": 11,
       "cooldown": 4,
       "text": [
-        "Learned chess properly and beat an adult who had not been trying, and then one who was."
+        "Learned chess properly and beat an adult who hadn't been trying, and then one who was."
       ],
       "effects": {
         "stats": {
@@ -6098,7 +6105,7 @@
       },
       "weight": 14,
       "text": [
-        "Took apart a household appliance to see inside. It did not go back together."
+        "Took apart a household appliance to see inside. It didn't go back together."
       ],
       "effects": {
         "stats": {
@@ -6285,7 +6292,7 @@
       "weight": 13,
       "cooldown": 3,
       "text": [
-        "Took something small from a shop and was not caught, which was the worst possible outcome."
+        "Took something small from a shop and wasn't caught, which was the worst possible outcome."
       ],
       "effects": {
         "stats": {
@@ -6399,7 +6406,7 @@
       "weight": 10,
       "cooldown": 4,
       "text": [
-        "Was the lookout. Was good at it. Did not enjoy discovering that."
+        "Was the lookout. Was good at it. Didn't enjoy discovering that."
       ],
       "effects": {
         "stats": {
@@ -6422,7 +6429,7 @@
       },
       "weight": 9,
       "text": [
-        "An older crowd started including you in things they did not explain in advance."
+        "An older crowd started including you in things they didn't explain in advance."
       ],
       "effects": {
         "stats": {
@@ -6481,7 +6488,7 @@
       "weight": 11,
       "cooldown": 3,
       "text": [
-        "Tried four different clubs looking for the thing, and did not find it this year."
+        "Tried four different clubs looking for the thing, and didn't find it this year."
       ],
       "effects": {
         "stats": {
@@ -6511,7 +6518,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Was not the best at anything and got better at everything by simply not stopping."
+        "Wasn't the best at anything and got better at everything by simply not stopping."
       ],
       "effects": {
         "stats": {
@@ -6599,7 +6606,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "{kid} talked for the full six minutes about {kidTheir} sister's dog. You were late to class and did not care.",
+              "text": "{kid} talked all six minutes about {kidTheir} sister's dog. You were late to class and didn't care.",
               "effects": {
                 "stats": {
                   "happiness": 5,
@@ -6620,11 +6627,11 @@
         },
         {
           "id": "joke",
-          "label": "Make a silly joke",
+          "label": "Make a dumb joke",
           "outcomes": [
             {
               "weight": 4,
-              "text": "{kid} laughed so hard {kidThey} snorted water out of {kidTheir} nose, and then could not look at you.",
+              "text": "{kid} laughed so hard {kidThey} snorted water out of {kidTheir} nose and then couldn't look at you.",
               "effects": {
                 "stats": {
                   "happiness": 7,
@@ -6647,7 +6654,7 @@
         {
           "id": "nothing",
           "label": "Walk past",
-          "text": "You walked past {kid} and the bell went. Nothing happened, which was the point.",
+          "text": "You walked past {kid} right as the bell rang. Nothing happened. That was the point.",
           "effects": {
             "stats": {
               "happiness": -2,
@@ -6685,7 +6692,7 @@
           "id": "see",
           "label": "See what they offer",
           "opens": "activities",
-          "text": "You went and had a proper look at what the school had on offer.",
+          "text": "You took a real look at what the school actually offered.",
           "effects": {
             "stats": {
               "happiness": 2
@@ -6698,7 +6705,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "{kid} talked you into the same thing {kidThey} does, and it turned out to be a good year for it.",
+              "text": "{kid} talked you into the same thing {kidThey} does, and it turned out to be your year.",
               "effects": {
                 "stats": {
                   "happiness": 4,
@@ -6768,7 +6775,7 @@
             },
             {
               "weight": 4,
-              "text": "You took the blame and {mother} did not believe you for a second. She grounded {sibling} anyway.",
+              "text": "You took the blame. {mother} didn't buy it for a second and grounded {sibling} anyway.",
               "effects": {
                 "stats": {
                   "happiness": -3,
@@ -6784,7 +6791,7 @@
         {
           "id": "tell",
           "label": "Tell {mother} what happened",
-          "text": "You told {mother} the truth. {sibling} got grounded and did not speak to you for three days.",
+          "text": "You told {mother} the truth. {sibling} got grounded and didn't speak to you for three days.",
           "effects": {
             "stats": {
               "happiness": -3,
@@ -6798,11 +6805,11 @@
         },
         {
           "id": "glue",
-          "label": "Glue it before she notices",
+          "label": "Glue it before anyone notices",
           "outcomes": [
             {
               "weight": 5,
-              "text": "You and {sibling} glued the bowl badly. {mother} found out a week later and was angrier about the glue than the bowl.",
+              "text": "You and {sibling} glued the bowl badly. {mother} found out and was madder about the glue than the bowl.",
               "effects": {
                 "stats": {
                   "happiness": -5
@@ -6815,7 +6822,7 @@
             },
             {
               "weight": 5,
-              "text": "You and {sibling} glued the bowl and {mother} never noticed. It is still on the shelf.",
+              "text": "You and {sibling} glued the bowl and {mother} never noticed. It's still on the shelf.",
               "effects": {
                 "stats": {
                   "happiness": 6,
@@ -6831,7 +6838,7 @@
         {
           "id": "cat",
           "label": "Blame the cat",
-          "text": "{mother} pointed out that the cat has been at the vet since Tuesday.",
+          "text": "{mother} pointed out the cat had been at the vet since Tuesday.",
           "effects": {
             "stats": {
               "happiness": -5,
@@ -6956,7 +6963,7 @@
       "choices": [
         {
           "id": "mow",
-          "label": "Mow it before he gets home",
+          "label": "Mow it before anybody gets home",
           "outcomes": [
             {
               "weight": 5,
@@ -6974,7 +6981,7 @@
             },
             {
               "weight": 5,
-              "text": "You mowed the yard before {father} got home. He sat on the back step and looked at it for a long time.",
+              "text": "{father} got home to a mowed yard and sat on the back step looking at it for a long time.",
               "effects": {
                 "stats": {
                   "health": -1,
@@ -6993,7 +7000,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You asked {father} what he needed. He said 'company', and you sat out there until it got dark.",
+              "text": "You asked what {father} needed. The answer was 'company', so you sat out there till dark.",
               "effects": {
                 "stats": {
                   "happiness": 6
@@ -7005,7 +7012,7 @@
             },
             {
               "weight": 4,
-              "text": "You asked {father} what he needed and he snapped at you. He apologized an hour later.",
+              "text": "You asked what {father} needed and got snapped at. The apology came an hour later.",
               "effects": {
                 "stats": {
                   "happiness": -3
@@ -7020,7 +7027,7 @@
         {
           "id": "leave",
           "label": "Leave the yard alone",
-          "text": "The yard stayed long all summer. Nobody said a word about it, which was somehow worse.",
+          "text": "The yard stayed long all summer. Nobody said a word about it, which was worse than being yelled at.",
           "effects": {
             "stats": {
               "happiness": -3
@@ -7076,7 +7083,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You talked {parent} up to $50, which was noticed and quietly respected.",
+              "text": "You talked {parent} up to $50, and it earned you a little quiet respect.",
               "effects": {
                 "stats": {
                   "charisma": 4,
@@ -7093,7 +7100,7 @@
             },
             {
               "weight": 5,
-              "text": "You pushed, the offer was withdrawn, and {sibling} did it instead for the original $30.",
+              "text": "You pushed, the offer got pulled, and {sibling} did it instead for the original $30.",
               "effects": {
                 "stats": {
                   "charisma": 1,
@@ -7114,7 +7121,7 @@
         {
           "id": "free",
           "label": "Do it for free",
-          "text": "You did the garage without taking the money. {parent} brought it up for years afterwards.",
+          "text": "You did the garage and wouldn't take the money. {parent} brought it up for years.",
           "effects": {
             "stats": {
               "happiness": 3,
@@ -7164,7 +7171,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You kept it. It never came out, and {sibling} has not forgotten that you did.",
+              "text": "You kept it. It never came out, and {sibling} hasn't forgotten that you did.",
               "effects": {
                 "stats": {
                   "happiness": 2,
@@ -7193,7 +7200,7 @@
         {
           "id": "tell",
           "label": "Tell {parent}",
-          "text": "You told {parent}. It was probably the right call and it did not feel like one for a month.",
+          "text": "You told {parent}. It was probably the right call, and it didn't feel like one for a month.",
           "effects": {
             "stats": {
               "happiness": -4,
@@ -7211,7 +7218,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You talked {sibling} into owning up before anyone found out. It went far better than it should have.",
+              "text": "You talked {sibling} into owning up before anyone found out. It went way better than it should've.",
               "effects": {
                 "stats": {
                   "happiness": 4,
@@ -7224,7 +7231,7 @@
             },
             {
               "weight": 5,
-              "text": "{sibling} agreed to sort it out and then did not, and it landed on both of you.",
+              "text": "{sibling} swore it was handled, and it wasn't, and both of you got dragged in.",
               "effects": {
                 "stats": {
                   "happiness": -4
@@ -7287,7 +7294,7 @@
             },
             {
               "weight": 4,
-              "text": "You handed it over and it went far worse than the report deserved. Nobody spoke at dinner for a week.",
+              "text": "You handed it over and it blew up worse than the report deserved. Nobody talked at dinner for a week.",
               "effects": {
                 "stats": {
                   "happiness": -6,
@@ -7306,7 +7313,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "It was never found. You spent four months waiting for it to be.",
+              "text": "It never turned up. You spent four months expecting it to.",
               "effects": {
                 "stats": {
                   "happiness": -3,
@@ -7316,7 +7323,7 @@
             },
             {
               "weight": 5,
-              "text": "It surfaced in March, which made it a much larger problem than it had ever been in October.",
+              "text": "It came out in March, and by then it was a much bigger deal than it was in October.",
               "effects": {
                 "stats": {
                   "happiness": -6
@@ -7380,7 +7387,7 @@
           "outcomes": [
             {
               "weight": 7,
-              "text": "You told {parent} the truth. {ParentThey} listened better than you had expected {parentThem} to.",
+              "text": "You told {parent} the truth. {ParentThey} listened better than you'd expected {parentThem} to.",
               "effects": {
                 "stats": {
                   "happiness": 7,
@@ -7393,7 +7400,7 @@
             },
             {
               "weight": 3,
-              "text": "You told {parent} the truth and {parentThey} did not know what to do with it. {ParentThey} tried, which counted.",
+              "text": "You told {parent} the truth and {parentThey} didn't know what to do with it. {ParentThey} tried anyway.",
               "effects": {
                 "stats": {
                   "happiness": 2
@@ -7505,7 +7512,7 @@
         {
           "id": "defer",
           "label": "Let {sibling} pick",
-          "text": "You let {sibling} pick, which bought you something you cashed in months later.",
+          "text": "You let {sibling} pick, and you cashed that favor in about six months later.",
           "effects": {
             "stats": {
               "happiness": 1,
@@ -7519,7 +7526,7 @@
         {
           "id": "stay",
           "label": "Argue for staying home",
-          "text": "You argued for staying home. You got eleven days on your own street and no photographs at all.",
+          "text": "You argued for staying home. You got eleven days on your own street and zero photos.",
           "effects": {
             "stats": {
               "happiness": 3,
@@ -7570,8 +7577,8 @@
         },
         {
           "id": "plans",
-          "label": "Keep your plans",
-          "text": "You went out with {kid}. It was a good day with a shadow on it.",
+          "label": "Stick to your plans",
+          "text": "You went out with {kid}. A good day, except for the one thing neither of you mentioned.",
           "effects": {
             "stats": {
               "happiness": 3
@@ -7629,8 +7636,8 @@
       "choices": [
         {
           "id": "visit",
-          "label": "Go and sit with them",
-          "text": "You went. It was awkward for ten minutes and then they told you a story nobody else in the family had heard.",
+          "label": "Go sit with them",
+          "text": "You went. Ten awkward minutes, then they told you a story nobody else in the family knew.",
           "effects": {
             "stats": {
               "happiness": 3,
@@ -7643,11 +7650,11 @@
         },
         {
           "id": "bring",
-          "label": "Take something in for them",
+          "label": "Bring something in for them",
           "outcomes": [
             {
               "weight": 7,
-              "text": "You took in the newspaper and the boiled candy they liked, every day that week.",
+              "text": "You carried in the paper and the hard candy every day that week.",
               "effects": {
                 "stats": {
                   "happiness": 5,
@@ -7661,7 +7668,7 @@
             },
             {
               "weight": 3,
-              "text": "You took things in and they were asleep for most of it. You sat there anyway.",
+              "text": "You brought things by and sat there while they slept through most of it.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -7677,7 +7684,7 @@
         {
           "id": "skip",
           "label": "Skip the visit",
-          "text": "You did not go. Nobody said anything about it, which was worse than if they had.",
+          "text": "You didn't go. Nobody said anything about it, and that was worse than being asked.",
           "effects": {
             "stats": {
               "happiness": -5
@@ -7713,7 +7720,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You promised everything, got the dog, and did about half of it. The dog did not mind.",
+              "text": "You promised everything, got the dog, and did about half of it. The dog didn't mind.",
               "effects": {
                 "stats": {
                   "happiness": 7,
@@ -7727,7 +7734,7 @@
             },
             {
               "weight": 4,
-              "text": "You promised everything and, to universal astonishment, did all of it for four years.",
+              "text": "You promised everything and, to everybody's shock, actually did all of it for four years.",
               "effects": {
                 "stats": {
                   "happiness": 7,
@@ -7744,7 +7751,7 @@
         {
           "id": "honest",
           "label": "Be honest about it",
-          "text": "You said you probably would not keep it up. The answer was no, and it was fair.",
+          "text": "You admitted you probably wouldn't stick with it. The answer was no, and that was fair.",
           "effects": {
             "stats": {
               "happiness": -3,
@@ -7761,7 +7768,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You proposed fostering first. It worked, and the foster dog never left.",
+              "text": "You pitched fostering first. It worked, and the foster dog never left.",
               "effects": {
                 "stats": {
                   "happiness": 6,
@@ -7775,7 +7782,7 @@
             },
             {
               "weight": 4,
-              "text": "You proposed fostering first, and after three weeks the dog went to somebody else.",
+              "text": "You pitched fostering first, and after three weeks the dog went to somebody else.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -7821,7 +7828,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You lost it completely. {sibling} was punished and the house stayed sour for months.",
+              "text": "You lost it completely. {sibling} got grounded and the house stayed sour for months.",
               "effects": {
                 "stats": {
                   "happiness": -4,
@@ -7834,7 +7841,7 @@
             },
             {
               "weight": 4,
-              "text": "You lost it, and you were the one who ended up in trouble, for the noise.",
+              "text": "You lost it, and somehow you were the one in trouble, just for being loud.",
               "effects": {
                 "stats": {
                   "happiness": -5
@@ -7851,7 +7858,7 @@
         {
           "id": "let-go",
           "label": "Let {sibling} off",
-          "text": "You said it was fine. {sibling} noticed that you had, which was the entire point.",
+          "text": "You said it was fine. {sibling} knew you didn't mean it, which was the whole point.",
           "effects": {
             "stats": {
               "happiness": -1,
@@ -7936,7 +7943,7 @@
           "outcomes": [
             {
               "weight": 3,
-              "text": "You made enough of a case that the move was put back a year.",
+              "text": "You made enough of a case to push the move back a year.",
               "effects": {
                 "stats": {
                   "happiness": 5,
@@ -7949,7 +7956,7 @@
             },
             {
               "weight": 7,
-              "text": "You lost the argument and the move happened on schedule, and you had said all of that for nothing.",
+              "text": "You lost the argument, the move happened on schedule, and you'd said all that for nothing.",
               "effects": {
                 "stats": {
                   "happiness": -6,
@@ -7968,7 +7975,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You agreed to the move in exchange for one condition, and {parent} kept to it.",
+              "text": "You agreed to the move on one condition, and {parent} actually stuck to it.",
               "effects": {
                 "stats": {
                   "happiness": 2,
@@ -7982,7 +7989,7 @@
             },
             {
               "weight": 4,
-              "text": "You agreed to the move in exchange for a promise that was quietly forgotten by August.",
+              "text": "You agreed to the move for one promise. By August, nobody remembered making it.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -8126,7 +8133,7 @@
             },
             {
               "weight": 3,
-              "text": "You worked hard and the results were middling anyway, which was its own lesson.",
+              "text": "You worked your tail off and still landed square in the middle.",
               "effects": {
                 "stats": {
                   "discipline": 4,
@@ -8144,7 +8151,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "{adult} gave you an hour a week for two months and you have never forgotten it.",
+              "text": "{adult} gave you an hour a week for two months and you've never forgotten it.",
               "effects": {
                 "stats": {
                   "smarts": 5,
@@ -8156,7 +8163,7 @@
             },
             {
               "weight": 4,
-              "text": "{adult} said {adultThey} would help and then was off sick for a month.",
+              "text": "{adult} said {adultThey}'d help, then was out sick for a month.",
               "effects": {
                 "stats": {
                   "happiness": -3,
@@ -8169,7 +8176,7 @@
         {
           "id": "coast",
           "label": "Don't bother studying",
-          "text": "You coasted. It was a very good couple of months and a mediocre set of results.",
+          "text": "You coasted. It was a great couple of months and the grades came back mediocre.",
           "effects": {
             "stats": {
               "happiness": 4,
@@ -8227,7 +8234,7 @@
             },
             {
               "weight": 5,
-              "text": "You hit {kid}, lost, and it got considerably worse before it got better.",
+              "text": "You hit {kid}, lost, and it got a whole lot worse before it got better.",
               "effects": {
                 "stats": {
                   "health": -4,
@@ -8245,7 +8252,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "{adult} handled it quietly and well, and it ended within a two weeks.",
+              "text": "{adult} handled it quietly and it was over inside two weeks.",
               "effects": {
                 "stats": {
                   "happiness": 5
@@ -8258,7 +8265,7 @@
             },
             {
               "weight": 4,
-              "text": "{adult} handled it badly, and it became a much more public problem than it had been.",
+              "text": "{adult} handled it badly, and suddenly the whole school knew.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -8299,7 +8306,7 @@
             },
             {
               "weight": 7,
-              "text": "You tried to make {kid} laugh and gave {kidThem} three new things to use.",
+              "text": "You tried to make {kid} laugh and handed {kidThem} three new things to make fun of you for.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -8332,7 +8339,7 @@
         {
           "id": "own",
           "label": "Admit it was you",
-          "text": "You owned it. The punishment was smaller than the silence would have been.",
+          "text": "You owned it. The punishment was smaller than the silence would've been.",
           "effects": {
             "stats": {
               "willpower": 4,
@@ -8348,7 +8355,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "Nobody said anything and the whole class was kept back. It was never mentioned again.",
+              "text": "Nobody said anything, so the whole class got kept after school. It never came up again.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -8358,7 +8365,7 @@
             },
             {
               "weight": 4,
-              "text": "{kid} named you within a day, and it landed much harder for the delay.",
+              "text": "{kid} gave your name up the next day, and waiting for it made it worse.",
               "effects": {
                 "stats": {
                   "happiness": -5
@@ -8374,7 +8381,7 @@
         {
           "id": "blame",
           "label": "Blame {kid}",
-          "text": "You gave {adult} {kid}'s name. It worked, and it cost you a friend who worked out why.",
+          "text": "You gave {adult} {kid}'s name. It worked, and it cost you a friend who figured out why.",
           "effects": {
             "stats": {
               "charisma": -3,
@@ -8428,7 +8435,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You did it, and two teachers who had never spoken to you mentioned it afterwards.",
+              "text": "You did it, and two teachers who'd never spoken to you brought it up after.",
               "effects": {
                 "stats": {
                   "charisma": 6,
@@ -8440,7 +8447,7 @@
             },
             {
               "weight": 4,
-              "text": "You did it, it went badly, and you survived it — which was the actual lesson.",
+              "text": "You did it, it went badly, and you lived. That was the actual lesson.",
               "effects": {
                 "stats": {
                   "charisma": 2,
@@ -8479,7 +8486,7 @@
             },
             {
               "weight": 6,
-              "text": "You threw out the script and it did not land, and {adult} was not pleased about either half.",
+              "text": "You threw out the script and bombed. {adult} wasn't happy about either half of that.",
               "effects": {
                 "stats": {
                   "charisma": 1,
@@ -8525,7 +8532,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You moved up and kept pace, quietly, all year.",
+              "text": "You moved up a level and kept up all year. Nobody made a thing of it.",
               "effects": {
                 "stats": {
                   "smarts": 5,
@@ -8536,7 +8543,7 @@
             },
             {
               "weight": 4,
-              "text": "You moved up and struggled, in public, for two terms.",
+              "text": "You moved up a level and struggled, in front of everybody, for two semesters.",
               "effects": {
                 "stats": {
                   "smarts": 2,
@@ -8550,7 +8557,7 @@
         {
           "id": "stay",
           "label": "Stay where you are",
-          "text": "You stayed put with your friends and coasted comfortably for a year.",
+          "text": "You stayed put with your friends and coasted for a year. No complaints.",
           "effects": {
             "stats": {
               "happiness": 3,
@@ -8561,8 +8568,8 @@
         },
         {
           "id": "trial",
-          "label": "Ask to try it for a term",
-          "text": "You asked {adult} for a term's trial. {AdultThey} had not been asked that before and said yes.",
+          "label": "Ask to try one term",
+          "text": "You asked {adult} for a semester to try it. {AdultThey} clearly hadn't been asked before, and said yes.",
           "effects": {
             "stats": {
               "smarts": 3,
@@ -8617,7 +8624,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You made the squad. Not the first eleven, but the squad, and {kid} did not.",
+              "text": "You made the team. Not a starter, but you made it, and {kid} didn't.",
               "effects": {
                 "stats": {
                   "health": 4,
@@ -8670,7 +8677,7 @@
         {
           "id": "skip",
           "label": "Skip the tryouts",
-          "text": "You did not go. It was the sensible call and it sat badly for about a year.",
+          "text": "You didn't go. It was the smart call, and it ate at you for about a year.",
           "effects": {
             "stats": {
               "happiness": -3,
@@ -8734,7 +8741,7 @@
         {
           "id": "none",
           "label": "Don't take one",
-          "text": "You did not take one, and spent three years of assemblies watching other people play.",
+          "text": "You didn't take one, and spent three years of assemblies watching other people play.",
           "effects": {
             "stats": {
               "happiness": -2,
@@ -8769,7 +8776,7 @@
         {
           "id": "serve",
           "label": "Take the detention",
-          "text": "You sat out the detention and heard about the evening secondhand for a month.",
+          "text": "You sat out the detention and heard about that night secondhand for a month.",
           "effects": {
             "stats": {
               "happiness": -4,
@@ -8784,7 +8791,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You skipped detention, went anyway, and nobody ever followed it up.",
+              "text": "You skipped detention, showed up anyway, and nobody ever brought it up.",
               "effects": {
                 "stats": {
                   "happiness": 6
@@ -8794,7 +8801,7 @@
             },
             {
               "weight": 5,
-              "text": "You skipped detention and it became a much bigger thing than the detention had been.",
+              "text": "You skipped detention, and that turned into a way bigger deal than detention.",
               "effects": {
                 "stats": {
                   "happiness": -5
@@ -8824,7 +8831,7 @@
             },
             {
               "weight": 6,
-              "text": "{adult} said that was rather the point of a detention.",
+              "text": "{adult} said that was pretty much the whole point of detention.",
               "effects": {
                 "stats": {
                   "charisma": 1,
@@ -8880,7 +8887,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You made it. You were a legend for roughly six weeks.",
+              "text": "You made it. You were a legend for about six weeks.",
               "effects": {
                 "stats": {
                   "charisma": 6,
@@ -8892,7 +8899,7 @@
             },
             {
               "weight": 4,
-              "text": "You did not make it. There was blood, and an adult, and a story that outlived the injury.",
+              "text": "You didn't make it. There was blood, an adult, and a story that outlived the injury.",
               "effects": {
                 "stats": {
                   "health": -5,
@@ -8903,7 +8910,7 @@
             },
             {
               "weight": 2,
-              "text": "You did not make it, and somebody's parents were called, and yours came to get you.",
+              "text": "You didn't make it. Somebody's parents got called, and yours came to get you.",
               "effects": {
                 "stats": {
                   "health": -6,
@@ -8920,7 +8927,7 @@
         {
           "id": "refuse",
           "label": "Back out of the dare",
-          "text": "You said no. It cost you something socially and nothing else.",
+          "text": "You said no. It cost you a couple of friends and nothing else.",
           "effects": {
             "stats": {
               "willpower": 5,
@@ -8983,7 +8990,7 @@
           "outcomes": [
             {
               "weight": 7,
-              "text": "You brought {kid} over. It turned into one of the good ones — years of it.",
+              "text": "You brought {kid} over. It stuck, and you're still friends years later.",
               "effects": {
                 "stats": {
                   "charisma": 4,
@@ -8993,7 +9000,7 @@
             },
             {
               "weight": 3,
-              "text": "You brought {kid} over and it did not take. You were still glad you had.",
+              "text": "You brought {kid} over and it didn't take. You were still glad you did.",
               "effects": {
                 "stats": {
                   "charisma": 3,
@@ -9048,7 +9055,7 @@
         {
           "id": "join",
           "label": "Go along with it",
-          "text": "You went along with it. It was easy, and it is one of the ones that stayed with you.",
+          "text": "You went along with it. Easy at the time, and you still think about it.",
           "effects": {
             "stats": {
               "charisma": 2,
@@ -9074,7 +9081,7 @@
             },
             {
               "weight": 5,
-              "text": "You refused, and were frozen out alongside {kid2}.",
+              "text": "You said no, and got frozen out right alongside {kid2}.",
               "effects": {
                 "stats": {
                   "willpower": 5,
@@ -9087,11 +9094,11 @@
         },
         {
           "id": "quiet",
-          "label": "Say nothing, sit with {kid2} anyway",
+          "label": "Say nothing, sit with {kid2}",
           "outcomes": [
             {
               "weight": 6,
-              "text": "You did not argue about it, you just sat with {kid2} every lunchtime until it stopped mattering.",
+              "text": "You didn't argue. You just sat with {kid2} every lunch until it stopped mattering.",
               "effects": {
                 "stats": {
                   "willpower": 4,
@@ -9102,7 +9109,7 @@
             },
             {
               "weight": 4,
-              "text": "You sat with {kid2} and lost {kid} over it without a word ever being said.",
+              "text": "You sat with {kid2} and lost {kid} over it. Neither of you ever said a word about it.",
               "effects": {
                 "stats": {
                   "willpower": 3,
@@ -9138,7 +9145,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You stepped in. It stopped, and it cost you nothing you could measure.",
+              "text": "You stepped in, and it stopped. Nobody ever mentioned it again.",
               "effects": {
                 "stats": {
                   "willpower": 5,
@@ -9149,7 +9156,7 @@
             },
             {
               "weight": 4,
-              "text": "You stepped in and it turned on you for the rest of term.",
+              "text": "You stepped in, and it turned on you for the rest of the school year.",
               "effects": {
                 "stats": {
                   "willpower": 6,
@@ -9175,8 +9182,8 @@
         },
         {
           "id": "after",
-          "label": "Find {kid} afterwards",
-          "text": "You did not step in, but you found {kid} afterwards by the lockers and stayed a while.",
+          "label": "Find {kid} afterward",
+          "text": "You didn't step in, but you found {kid} by the lockers after and stayed a while.",
           "effects": {
             "stats": {
               "happiness": 2,
@@ -9188,7 +9195,7 @@
         {
           "id": "leave",
           "label": "Walk out of the cafeteria",
-          "text": "You left the room. Not brave, not complicit, and not forgotten either.",
+          "text": "You left the room. Not brave, not in on it, and you never quite forgot it.",
           "effects": {
             "stats": {
               "happiness": -2,
@@ -9217,12 +9224,12 @@
       ],
       "choices": [
         {
-          "id": "apologise",
+          "id": "apologize",
           "label": "Apologize to {kid2}",
           "outcomes": [
             {
               "weight": 5,
-              "text": "You apologized to {kid2} at {kid2Their} locker. {Kid2They} said 'okay', and it took until March to be normal.",
+              "text": "You apologized to {kid2} at {kid2Their} locker. {Kid2They} said 'okay', and things weren't normal until March.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -9233,7 +9240,7 @@
             },
             {
               "weight": 5,
-              "text": "You apologized and {kid2} cried and hugged you, and {kid} was furious you had made {kidThem} look bad.",
+              "text": "You apologized, {kid2} cried and hugged you, and {kid} was furious you'd made {kidThem} look bad.",
               "effects": {
                 "stats": {
                   "happiness": 5,
@@ -9249,7 +9256,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You told {kid} exactly what you thought of {kidThem} in front of six people. {KidThey} did not deny any of it.",
+              "text": "You told {kid} exactly what you thought of {kidThem} in front of six people. {KidThey} didn't deny it.",
               "effects": {
                 "stats": {
                   "happiness": -3,
@@ -9260,7 +9267,7 @@
             },
             {
               "weight": 5,
-              "text": "You confronted {kid} and {kidThey} cried, which you had not expected at all.",
+              "text": "You confronted {kid} and {kidThey} cried, which you hadn't seen coming at all.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -9273,7 +9280,7 @@
         {
           "id": "blow-over",
           "label": "Let it blow over",
-          "text": "It blew over by Easter. {kid2} never quite trusted you again and never said so.",
+          "text": "It blew over by Easter. {kid2} never really trusted you again, and never said so.",
           "effects": {
             "stats": {
               "happiness": -5,
@@ -9330,7 +9337,7 @@
         {
           "id": "refuse",
           "label": "Say no",
-          "text": "You said no. {kid} found somebody else within a minute and it was awkward for a two weeks.",
+          "text": "You said no. {kid} found somebody else in about a minute, and it was weird for two weeks.",
           "effects": {
             "stats": {
               "discipline": 3,
@@ -9368,7 +9375,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You went, got back in through the window at one, and were never found out.",
+              "text": "You went, climbed back in the window at one, and nobody ever found out.",
               "effects": {
                 "stats": {
                   "happiness": 6,
@@ -9427,7 +9434,7 @@
             },
             {
               "weight": 6,
-              "text": "The answer stayed no, and got firmer for the asking.",
+              "text": "You asked again, and the no just got louder.",
               "effects": {
                 "stats": {
                   "charisma": 1,
@@ -9443,7 +9450,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "{parent} said yes to hosting, and eleven people came, and nothing was broken.",
+              "text": "{parent} said yes to hosting. Eleven people came and nothing got broken.",
               "effects": {
                 "stats": {
                   "happiness": 6,
@@ -9456,7 +9463,7 @@
             },
             {
               "weight": 5,
-              "text": "{parent} said yes to hosting, and something was broken, and it was expensive.",
+              "text": "{parent} said yes to hosting. Something got broken, and it wasn't cheap.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -9518,7 +9525,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You did an hour at each and both of them were pleased you had bothered.",
+              "text": "You did an hour at each, and both of them were glad you'd bothered.",
               "effects": {
                 "stats": {
                   "charisma": 5,
@@ -9542,7 +9549,7 @@
         {
           "id": "neither",
           "label": "Stay home",
-          "text": "You went to neither and stayed home, which solved nothing at all.",
+          "text": "You skipped both and stayed home. It didn't fix anything.",
           "effects": {
             "stats": {
               "happiness": -4,
@@ -9575,7 +9582,7 @@
         {
           "id": "cover",
           "label": "Take the blame yourself",
-          "text": "You took it. {kid} knew you had, and the friendship changed shape after that.",
+          "text": "You took it. {kid} knew you did, and things were never quite the same after.",
           "effects": {
             "stats": {
               "willpower": 4,
@@ -9589,7 +9596,7 @@
         {
           "id": "truth",
           "label": "Tell the truth",
-          "text": "You told the truth. It was the correct thing to do and it ended the friendship.",
+          "text": "You told the truth. It was the right call, and it ended the friendship.",
           "effects": {
             "stats": {
               "discipline": 3,
@@ -9702,7 +9709,7 @@
             },
             {
               "weight": 4,
-              "text": "You made {kid} a present and {kidTheir} cousin asked out loud why you had not just bought one.",
+              "text": "You made {kid} a present and {kidTheir} cousin asked out loud why you hadn't just bought one.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -9830,7 +9837,7 @@
             },
             {
               "weight": 3,
-              "text": "{kid} was not the influence anybody had hoped for, and the year got away from you.",
+              "text": "{kid} wasn't the influence anybody hoped for, and the year got away from you.",
               "effects": {
                 "stats": {
                   "charisma": 4,
@@ -9845,7 +9852,7 @@
         {
           "id": "distance",
           "label": "Keep your distance",
-          "text": "You kept your distance, politely, and it faded out by spring.",
+          "text": "You stopped answering. By spring you'd stopped thinking about it too.",
           "effects": {
             "stats": {
               "willpower": 2,
@@ -9856,7 +9863,7 @@
         {
           "id": "ask",
           "label": "Ask {kid} outright why",
-          "text": "You asked {kid} why {kidThey} bothered with you. {KidThey} said you reminded {kidThem} of {kidThem}self, which was a lot to carry.",
+          "text": "You asked {kid} why {kidThey} bothered with you. {KidThey} said you reminded {kidThem} of {kidThem}self.",
           "effects": {
             "stats": {
               "charisma": 3,
@@ -10033,7 +10040,7 @@
             },
             {
               "weight": 4,
-              "text": "It had an owner, who was extremely relieved, and pressed $20 on you.",
+              "text": "The owner nearly cried and pushed $20 into your hand.",
               "effects": {
                 "stats": {
                   "happiness": 3
@@ -10054,7 +10061,7 @@
         {
           "id": "owner",
           "label": "Look for the owner",
-          "text": "You knocked on doors for two hours until you found the right one. They were in tears about it.",
+          "text": "You knocked on doors for two hours till you found the right one. The owner teared up.",
           "effects": {
             "stats": {
               "charisma": 3,
@@ -10067,7 +10074,7 @@
         {
           "id": "shelter",
           "label": "Walk it to the shelter",
-          "text": "You walked the dog two miles to the shelter and did not stay to watch them take it in.",
+          "text": "You walked the dog two miles to the shelter and didn't stick around to watch.",
           "effects": {
             "stats": {
               "happiness": -2,
@@ -10078,8 +10085,8 @@
         },
         {
           "id": "leave",
-          "label": "Leave the dog",
-          "text": "You left it outside the shop. You thought about it for a long time afterwards.",
+          "label": "Leave the dog there",
+          "text": "You left it outside the store. You thought about it for weeks after.",
           "effects": {
             "stats": {
               "happiness": -4,
@@ -10128,7 +10135,7 @@
         {
           "id": "try",
           "label": "Smoke one",
-          "text": "You tried it, coughed for a full minute, and pretended otherwise for the rest of the afternoon.",
+          "text": "You tried it, coughed for a solid minute, and acted like you hadn't all afternoon.",
           "effects": {
             "stats": {
               "health": -3,
@@ -10141,7 +10148,7 @@
         {
           "id": "decline",
           "label": "Say no thanks",
-          "text": "You passed. {kid} noted it, and it was briefly held against you.",
+          "text": "You passed. {kid} noticed, and held it against you for a couple of weeks.",
           "effects": {
             "stats": {
               "willpower": 4,
@@ -10153,7 +10160,7 @@
         },
         {
           "id": "take-and-not",
-          "label": "Take one but don't smoke it",
+          "label": "Take one, don't smoke it",
           "text": "You took one, held it the whole time, and put it in your pocket unlit. Nobody checked.",
           "effects": {
             "stats": {
@@ -10207,7 +10214,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You drank it, disliked it, and pretended otherwise for the rest of the night.",
+              "text": "You drank it, hated it, and pretended otherwise the rest of the night.",
               "effects": {
                 "stats": {
                   "health": -2,
@@ -10218,7 +10225,7 @@
             },
             {
               "weight": 4,
-              "text": "You drank rather more than that, and the night ended badly and publicly on {kid}'s lawn.",
+              "text": "You drank way more than that, and the night ended on {kid}'s lawn in front of everybody.",
               "effects": {
                 "stats": {
                   "health": -4,
@@ -10232,7 +10239,7 @@
         {
           "id": "pour",
           "label": "Put it down somewhere",
-          "text": "You put the cup down behind a plant pot and nobody noticed either way.",
+          "text": "You set the cup down behind a potted plant and nobody noticed either way.",
           "effects": {
             "stats": {
               "willpower": 4,
@@ -10296,7 +10303,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You jumped off the bridge and came up whooping. {kid2} would not do it.",
+              "text": "You jumped off the bridge and came up whooping. {kid2} wouldn't do it.",
               "effects": {
                 "stats": {
                   "health": -2,
@@ -10321,7 +10328,7 @@
         },
         {
           "id": "swim",
-          "label": "Swim from the bank",
+          "label": "Swim in from the bank",
           "text": "You swam from the bank while {kid} and {kid2} jumped. Good afternoon, nothing broken.",
           "effects": {
             "stats": {
@@ -10430,7 +10437,7 @@
             },
             {
               "weight": 5,
-              "text": "{parent} said you would live, and you did, and you saw the rays.",
+              "text": "{parent} said you'd live. You did, and you got to see the rays.",
               "effects": {
                 "stats": {
                   "health": -2,
@@ -10546,7 +10553,7 @@
         {
           "id": "help",
           "label": "Help run the collection instead",
-          "text": "You kept your $40 and spent two weeks of lunchtimes counting other people's.",
+          "text": "You kept your $40 and spent two weeks of lunches watching everybody else spend theirs.",
           "effects": {
             "stats": {
               "happiness": -1,
@@ -10559,7 +10566,7 @@
         {
           "id": "keep",
           "label": "Keep your $40",
-          "text": "You kept the $40 and bought the thing. It was excellent, briefly, and then it was not.",
+          "text": "You kept the $40 and bought it. It was great for about a month, then it broke.",
           "effects": {
             "stats": {
               "happiness": -2,
@@ -10621,8 +10628,8 @@
         },
         {
           "id": "same",
-          "label": "Same as always",
-          "text": "You had the usual. It was fine. It is always fine.",
+          "label": "Do what you always do",
+          "text": "You had the usual. It was fine. It's always fine.",
           "effects": {
             "stats": {
               "happiness": 1
@@ -10646,7 +10653,7 @@
             },
             {
               "weight": 3,
-              "text": "{adult} did what {adultThey} thought suited you and {adultThey} was not right at all.",
+              "text": "{adult} did what {adultThey} thought suited you and {adultThey} wasn't even close.",
               "effects": {
                 "stats": {
                   "looks": -3,
@@ -10678,11 +10685,11 @@
       "choices": [
         {
           "id": "fire-back",
-          "label": "Reply angrily",
+          "label": "Send an angry reply",
           "outcomes": [
             {
               "weight": 5,
-              "text": "You destroyed them, publicly, and it followed you around for a year.",
+              "text": "You trashed them in front of everybody, and it followed you around for a year.",
               "effects": {
                 "stats": {
                   "charisma": 2,
@@ -10693,7 +10700,7 @@
             },
             {
               "weight": 5,
-              "text": "You fired back badly and it was screenshotted before you could delete it.",
+              "text": "You fired back, badly, and somebody screenshotted it before you could delete it.",
               "effects": {
                 "stats": {
                   "charisma": -4,
@@ -10707,7 +10714,7 @@
         {
           "id": "ignore",
           "label": "Close the app",
-          "text": "You put the phone face down. It died within two days, the way they do.",
+          "text": "You put the phone face down. The whole thing died out in two days.",
           "effects": {
             "stats": {
               "willpower": 5,
@@ -10722,7 +10729,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You messaged them directly. It turned out to be a misunderstanding and they took the post down.",
+              "text": "You messaged the person directly. Turned out it was a misunderstanding, and the post came down.",
               "effects": {
                 "stats": {
                   "charisma": 4,
@@ -10733,7 +10740,7 @@
             },
             {
               "weight": 4,
-              "text": "You messaged them directly and the message itself got screenshotted.",
+              "text": "You messaged the person directly, and your message got screenshotted and passed around.",
               "effects": {
                 "stats": {
                   "happiness": -5,
@@ -10764,7 +10771,7 @@
         {
           "id": "push-on",
           "label": "Stay up and finish",
-          "text": "You kept going until four and paid for it every day that week.",
+          "text": "You kept going until four in the morning and paid for it every day that week.",
           "effects": {
             "stats": {
               "health": -3,
@@ -10776,7 +10783,7 @@
         {
           "id": "sleep",
           "label": "Go to bed",
-          "text": "You went to bed. It was still there in the morning and it was easier.",
+          "text": "You went to bed. It was still there in the morning, but it didn't feel as heavy.",
           "effects": {
             "stats": {
               "health": 3,
@@ -10853,7 +10860,7 @@
         {
           "id": "train",
           "label": "Train for one thing",
-          "text": "You spent the whole summer getting better at one thing and came back visibly different.",
+          "text": "You spent all summer getting good at one thing, and people noticed when you got back.",
           "effects": {
             "stats": {
               "discipline": 4,
@@ -10866,7 +10873,7 @@
         {
           "id": "nothing",
           "label": "Do absolutely nothing",
-          "text": "You did nothing for eleven weeks and it remains one of the great summers.",
+          "text": "You did nothing for eleven weeks. Still one of the best summers you've had.",
           "effects": {
             "stats": {
               "happiness": 7,
@@ -10878,7 +10885,7 @@
         {
           "id": "kid",
           "label": "Spend it with {kid}",
-          "text": "You spent all eleven weeks with {kid} and cannot now remember a single specific day of it.",
+          "text": "You spent all eleven weeks with {kid} and can't remember one specific day of it now.",
           "effects": {
             "stats": {
               "happiness": 6,
@@ -10910,7 +10917,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "It worked. People noticed and mostly did not say so.",
+              "text": "It worked. People noticed and mostly didn't say so.",
               "effects": {
                 "stats": {
                   "looks": 6,
@@ -10922,7 +10929,7 @@
             },
             {
               "weight": 4,
-              "text": "It half worked, which is roughly what happens at that age.",
+              "text": "It half worked. At that age that's about as good as it gets.",
               "effects": {
                 "stats": {
                   "looks": 2,
@@ -10936,7 +10943,7 @@
         {
           "id": "fit",
           "label": "Get fit instead",
-          "text": "You started running, hated it for six weeks, and then did not.",
+          "text": "You started running, hated it for six weeks, and then didn't.",
           "effects": {
             "stats": {
               "health": 6,
@@ -10952,7 +10959,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "You decided not to care. It took more willpower than the alternative would have.",
+              "text": "You decided not to care. That took way more work than caring would've.",
               "effects": {
                 "stats": {
                   "willpower": 5,
@@ -10962,7 +10969,7 @@
             },
             {
               "weight": 4,
-              "text": "You said you had stopped caring, out loud, several times, to people who had not asked.",
+              "text": "You told people you'd stopped caring. Nobody had asked.",
               "effects": {
                 "stats": {
                   "willpower": 2,
@@ -11016,7 +11023,7 @@
           "outcomes": [
             {
               "weight": 7,
-              "text": "You took the $20. Nothing was ever said, which was somehow not a relief.",
+              "text": "You took the $20. Nobody ever said anything, which somehow wasn't a relief.",
               "effects": {
                 "stats": {
                   "happiness": -2,
@@ -11030,7 +11037,7 @@
             },
             {
               "weight": 3,
-              "text": "You took the $20, and {parent} had known exactly how much was there.",
+              "text": "You took the $20. {parent} knew exactly how much had been there.",
               "effects": {
                 "stats": {
                   "happiness": -5
@@ -11049,7 +11056,7 @@
         {
           "id": "ask",
           "label": "Ask about it",
-          "text": "You asked. The $20 was yours anyway — {parent} had left it out for you — and you kept it cleanly.",
+          "text": "You asked. Turns out the $20 was yours anyway — {parent} had left it out for you.",
           "effects": {
             "stats": {
               "happiness": 4,
@@ -11108,8 +11115,8 @@
         },
         {
           "id": "decline",
-          "label": "Politely decline",
-          "text": "You said no thanks to {adult}, and the offer was never made again.",
+          "label": "Turn it down politely",
+          "text": "You told {adult} no thanks. Nobody ever asked you again.",
           "effects": {
             "stats": {
               "happiness": -2
@@ -11168,7 +11175,7 @@
             },
             {
               "weight": 8,
-              "text": "You did not win, and the entry took more nerve than the result required.",
+              "text": "You didn't win. Signing up took more nerve than the result makes it sound.",
               "effects": {
                 "stats": {
                   "willpower": 4,
@@ -11198,7 +11205,7 @@
             },
             {
               "weight": 8,
-              "text": "You and {kid} did not win, and had a much better week than the winners.",
+              "text": "You and {kid} didn't win and still had a better week than the people who did.",
               "effects": {
                 "stats": {
                   "happiness": 3,
@@ -11210,7 +11217,7 @@
         },
         {
           "id": "bin",
-          "label": "Don't enter",
+          "label": "Skip the contest",
           "text": "The form stayed on the table until somebody threw it out with the junk mail.",
           "effects": {
             "stats": {
@@ -11249,7 +11256,7 @@
           "outcomes": [
             {
               "weight": 7,
-              "text": "Three weeks somewhere else rearranged your sense of how big things are.",
+              "text": "Three weeks away, and your own town looked tiny when you got back.",
               "effects": {
                 "stats": {
                   "smarts": 5,
@@ -11261,7 +11268,7 @@
             },
             {
               "weight": 3,
-              "text": "You were homesick for the entire three weeks and learned something anyway.",
+              "text": "You were homesick for all three weeks and still didn't want to leave at the end.",
               "effects": {
                 "stats": {
                   "willpower": 5,
@@ -11278,7 +11285,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "{parent} found the money from somewhere and did not say where.",
+              "text": "{parent} found the money somewhere and never said where.",
               "effects": {
                 "stats": {
                   "smarts": 4,
@@ -11292,7 +11299,7 @@
             },
             {
               "weight": 4,
-              "text": "{parent} could not make it work, and was more upset about it than you were.",
+              "text": "{parent} couldn't make it work, and was more upset about it than you were.",
               "effects": {
                 "stats": {
                   "happiness": -4
@@ -11312,7 +11319,7 @@
         {
           "id": "decline",
           "label": "Turn it down",
-          "text": "You turned {adult} down. The reasons were good and it nagged for years.",
+          "text": "You turned {adult} down. Good reasons, and it still nagged at you for years.",
           "effects": {
             "stats": {
               "happiness": -3
@@ -11349,11 +11356,11 @@
       "choices": [
         {
           "id": "commit",
-          "label": "Commit to it fully",
+          "label": "Go all in on it",
           "outcomes": [
             {
               "weight": 6,
-              "text": "You went all in. School slipped a grade and the thing got serious.",
+              "text": "You went all in. Your grades slipped a whole letter and it stopped being a hobby.",
               "effects": {
                 "stats": {
                   "discipline": 5,
@@ -11382,7 +11389,7 @@
         {
           "id": "balance",
           "label": "Keep it a hobby",
-          "text": "You kept it balanced, which meant being second-best at both and fine about it.",
+          "text": "You split your time between both and ended up second-best at each. Didn't bother you.",
           "effects": {
             "stats": {
               "discipline": 3,
@@ -11438,7 +11445,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "You out-worked {kid}. It took two years and it took.",
+              "text": "You out-worked {kid}. It took two years, and it stuck.",
               "effects": {
                 "stats": {
                   "discipline": 6,
@@ -11465,7 +11472,7 @@
         {
           "id": "learn",
           "label": "Ask {kid} how",
-          "text": "You asked {kid} how it was done. {kid} told you, and you both got better for it.",
+          "text": "You asked {kid} how it was done. {kid} just told you, and you both got better at it.",
           "effects": {
             "stats": {
               "smarts": 3,
@@ -11478,7 +11485,7 @@
         {
           "id": "quit",
           "label": "Find something else",
-          "text": "You moved on to something with less competition in it and were quietly happier.",
+          "text": "You switched to something with less competition and were quietly a lot happier.",
           "effects": {
             "stats": {
               "happiness": 3,
@@ -11519,7 +11526,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "It landed. Several people looked at you differently afterwards, including {kid}.",
+              "text": "It landed. A few people looked at you differently after that, {kid} included.",
               "effects": {
                 "stats": {
                   "charisma": 5,
@@ -11529,7 +11536,7 @@
             },
             {
               "weight": 4,
-              "text": "It did not land, and the silence afterwards lasted a geological age.",
+              "text": "It didn't land. Somebody coughed, and that was the whole reaction.",
               "effects": {
                 "stats": {
                   "charisma": -2,
@@ -11543,7 +11550,7 @@
         {
           "id": "small",
           "label": "Play it safe",
-          "text": "You did the version you could not get wrong. It was fine and nobody remembered it.",
+          "text": "You did the version you couldn't get wrong. It was fine, and nobody remembered it.",
           "effects": {
             "stats": {
               "charisma": 1,
@@ -11554,7 +11561,7 @@
         {
           "id": "decline",
           "label": "Keep it to yourself",
-          "text": "You kept it to yourself, which is also a choice a person can make.",
+          "text": "You kept it to yourself, and nobody ever asked.",
           "effects": {
             "stats": {
               "willpower": 2,
@@ -11579,7 +11586,7 @@
       },
       "weight": 11,
       "text": [
-        "An audition is coming to {city} — the kind that usually never does. It's on a Tuesday, during school."
+        "A real audition is coming to {city}, which basically never happens. It's on a Tuesday, during school."
       ],
       "choices": [
         {
@@ -11602,7 +11609,7 @@
             },
             {
               "weight": 7,
-              "text": "You did not get it, and the room itself was an education.",
+              "text": "You didn't get it, but an hour in that room taught you plenty.",
               "effects": {
                 "stats": {
                   "charisma": 3,
@@ -11634,7 +11641,7 @@
             },
             {
               "weight": 5,
-              "text": "You prepared for a month and over-rehearsed it into something stiff.",
+              "text": "You prepped for a month and rehearsed it so much it came out flat.",
               "effects": {
                 "stats": {
                   "discipline": 4,
@@ -11648,7 +11655,7 @@
         {
           "id": "skip",
           "label": "Skip the audition",
-          "text": "You did not go. It is one of the ones you still think about.",
+          "text": "You didn't go. It's one of the ones you still think about.",
           "effects": {
             "stats": {
               "happiness": -4,
@@ -11699,7 +11706,7 @@
             },
             {
               "weight": 6,
-              "text": "You did not make it, and you were closer than the result suggested.",
+              "text": "You didn't make it. You were a lot closer than it looked.",
               "effects": {
                 "stats": {
                   "health": 2,
@@ -11716,7 +11723,7 @@
           "outcomes": [
             {
               "weight": 6,
-              "text": "{parent} took the day off work to drive you. You have never quite squared that.",
+              "text": "{parent} took the day off work to drive you. You've never known what to do with that.",
               "effects": {
                 "stats": {
                   "health": 3,
@@ -11730,7 +11737,7 @@
             },
             {
               "weight": 4,
-              "text": "{parent} could not get the day off, and neither of you brought it up again.",
+              "text": "{parent} couldn't get the day off, and neither of you brought it up again.",
               "effects": {
                 "stats": {
                   "happiness": -5
@@ -11745,7 +11752,7 @@
         {
           "id": "skip",
           "label": "Give up on it",
-          "text": "It was too far and there was nobody free to drive. That was the whole reason.",
+          "text": "It was too far and nobody was free to drive. That was the whole reason.",
           "effects": {
             "stats": {
               "happiness": -5,
@@ -11793,7 +11800,7 @@
             },
             {
               "weight": 6,
-              "text": "You did not get in, and writing the application taught you how to write about yourself.",
+              "text": "You didn't get in, but writing the application taught you how to write about yourself.",
               "effects": {
                 "stats": {
                   "smarts": 3,
@@ -11806,11 +11813,11 @@
         },
         {
           "id": "visit",
-          "label": "Go and look at it first",
+          "label": "Go look at it first",
           "outcomes": [
             {
               "weight": 5,
-              "text": "You visited, hated the feel of the place, and did not apply. Good instinct.",
+              "text": "You visited, hated the feel of the place, and didn't apply. Good instinct.",
               "effects": {
                 "stats": {
                   "smarts": 2,
@@ -11834,7 +11841,7 @@
         {
           "id": "stay",
           "label": "Stay where you are",
-          "text": "You stayed. Your friends were there, and that was a real reason.",
+          "text": "You stayed. Your friends were there, and that's a good enough reason.",
           "effects": {
             "stats": {
               "happiness": 4,
@@ -11878,7 +11885,7 @@
       },
       "weight": 11,
       "text": [
-        "The name was decided in the parking lot. It was not the first choice, or the second."
+        "The name was decided in the parking lot. It wasn't the first choice, or the second."
       ]
     },
     {
@@ -12189,7 +12196,7 @@
       },
       "weight": 12,
       "text": [
-        "Would not go anywhere without a specific blanket that was, by then, mostly holes."
+        "Wouldn't go anywhere without a specific blanket that was, by then, mostly holes."
       ],
       "effects": {
         "stats": {
@@ -12297,7 +12304,7 @@
       },
       "weight": 12,
       "text": [
-        "Learned the alphabet as a song and could not say it any other way for years."
+        "Learned the alphabet as a song and couldn't say it any other way for years."
       ],
       "effects": {
         "stats": {
@@ -12494,7 +12501,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "Got moved to the front of the class, which was framed as a compliment and was not one."
+        "Got moved to the front of the class, which was framed as a compliment and wasn't one."
       ],
       "effects": {
         "stats": {
@@ -12633,7 +12640,7 @@
       "weight": 9,
       "cooldown": 3,
       "text": [
-        "There was a locker search. Yours was fine, which was not true of everybody's."
+        "There was a locker search. Yours was fine, which wasn't true of everybody's."
       ],
       "effects": {
         "stats": {
@@ -12706,7 +12713,7 @@
       "weight": 10,
       "cooldown": 3,
       "text": [
-        "You were not in anything this year. The afternoons were long and entirely your own."
+        "You weren't in anything this year. The afternoons were long and entirely your own."
       ],
       "effects": {
         "stats": {
@@ -12749,7 +12756,9 @@
       "weight": 6,
       "cooldown": 2,
       "text": [
-        "Another year went by without much fanfare."
+        "Same job, same apartment, same weekends.",
+        "Nothing happened this year worth telling anybody about.",
+        "You meant to do more with the year than you did."
       ]
     },
     {
@@ -12763,7 +12772,9 @@
       "weight": 6,
       "cooldown": 2,
       "text": [
-        "Kept mostly to a routine this year."
+        "Same coffee, same walk, most mornings.",
+        "Ate lunch at the same desk about two hundred times.",
+        "You had a routine and you mostly stuck to it."
       ]
     },
     {
@@ -12777,7 +12788,9 @@
       "weight": 6,
       "cooldown": 2,
       "text": [
-        "Nothing remarkable happened, which was its own kind of relief."
+        "Quiet year. After the last few, you'd take it.",
+        "Nothing went wrong, which was new.",
+        "Boring year, and you weren't complaining."
       ]
     },
     {
@@ -12791,7 +12804,9 @@
       "weight": 6,
       "cooldown": 2,
       "text": [
-        "A steady year. The kind that does not make it into the telling."
+        "You'd struggle to name one thing that happened this year.",
+        "Started three things and finished one.",
+        "Went out less than last year and didn't really miss it."
       ]
     },
     {
@@ -12805,7 +12820,9 @@
       "weight": 6,
       "cooldown": 2,
       "text": [
-        "Made a few plans this year and kept about half of them."
+        "Made a bunch of plans and kept about half of them.",
+        "Said yes to things you meant to say no to.",
+        "Kept meaning to call people back and mostly didn't."
       ]
     },
     {
@@ -12819,7 +12836,9 @@
       "weight": 6,
       "cooldown": 2,
       "text": [
-        "The year passed quickly, in the way they start to."
+        "The year went fast. They'd started doing that.",
+        "You looked up and it was somehow October.",
+        "Blinked and it was over."
       ]
     },
     {
@@ -12833,7 +12852,9 @@
       "weight": 6,
       "cooldown": 2,
       "text": [
-        "Spent the year much as you spent the last one, and did not mind."
+        "Spent the year pretty much like the last one, and that was fine.",
+        "Realized you'd been doing the same thing for four years. Didn't hate it.",
+        "Nothing changed, and you'd stopped expecting it to."
       ]
     },
     {
@@ -12847,7 +12868,9 @@
       "weight": 8,
       "cooldown": 2,
       "text": [
-        "Slower year. Less happened and more of it was noticed."
+        "Slower year. You noticed more of it.",
+        "Started going to bed early and sleeping better for it.",
+        "Less happened, and you didn't mind that either."
       ]
     }
   ]
