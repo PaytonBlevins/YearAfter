@@ -821,3 +821,105 @@ routine health maintenance is removed BY NAME. So there is one button, once a
 year, worth a few points — because a check-up worth ten points makes skipping it
 a mistake, and a control you are punished for not pressing every January for
 eighty years is the chore the spec deletes.
+
+### 13.35 A rule scoped to a word instead of a sense writes the bug itself
+
+Ticket 0211b, found by reading a played childhood after the voice pass shipped:
+
+> "Slept through the night for the first time. The household treated it as a
+> public vacation."
+
+Nobody wrote that. The American English table said `holiday` → `vacation`, the
+Americanisation sweep obeyed it, and "public holiday" became "public vacation".
+The word has two senses and only one of them is British: a trip you take is,
+a day the country takes off is not. A rule that names the WORD rejects the
+correct use along with the wrong one — and because a sweep trusts the rule, it
+then produces copy that is wrong in a new way the rule cannot see.
+
+This is the **fourth** casualty of that one table. `flat` → `apartment` gave us
+"a completely apartment surface", `fringe` → `bangs` gave us "attempted a bangs
+with kitchen scissors", and both shipped for three tickets reading as perfect
+American English to every check that was looking for British English. **V15**
+was written for those two and catches them by grammar. It could never catch this
+one, because "public vacation" is grammatical.
+
+So:
+
+- **Scope a copy rule to the sense, not the word.** `on holiday`, `summer
+  holidays`, `family holiday` — the phrases where the British sense actually
+  lives. Never the bare stem when the stem is ambiguous. The table already knew
+  this: it declines to flag `trial`, for exactly this reason, in a comment
+  written three tickets earlier and not generalised.
+- **A rule that fires on correct copy is worse than no rule**, because the
+  correction is what ships.
+- **Check the output of a sweep, not the exit code of the rule that drove it.**
+  All four of these were found by reading a played life. None of them could have
+  been found by running the suite, because in each case the suite is asserting
+  the rule that caused the defect.
+
+### 13.36 A field nothing writes is not state — it is a comment with a type
+
+Ticket 0212 opened by measuring 400 played lives and found the player dying at a
+median of seventy-three **survived by a hundred-and-five-year-old mother**.
+Nothing in eleven tickets had ever written `alive: false` to an NPC.
+
+That is the third time, and the three are worth listing because they are the
+same bug wearing different clothes:
+
+- **`droppedOut`** (found in 0210) — read in five places, written in zero. A
+  whole employment model was built on a distinction between school leavers and
+  graduates that the build could not make.
+- **`alive: false` on a family member** (found here) — read by the stress model
+  since 0205, written by nothing. The comment beside it said *"a member who is
+  `alive: false` is somebody who died while the player watched"*, which had
+  never once been true.
+- **`character.records`** (found here) — declared in Sprint Zero with the
+  comment *"structured history for dynasty records and the death summary"*,
+  initialized to `[]`, and still empty eleven tickets later. The 3–5 highlights
+  spec 1284 asks for were supposed to come from it.
+
+Each was written in good faith, for a ticket that had not happened yet. Each
+looked like progress and was a promise. And in every case the cost was paid by
+whichever ticket finally needed the field — which discovered, late, that it was
+not building a feature but building the thing the feature had been assuming.
+
+So:
+
+- **A field a ticket does not populate does not ship in that ticket.** If the
+  shape is genuinely worth agreeing on early, the comment says NOT WRITTEN YET
+  and names the ticket that will write it, the way `livingCostOf` names 0303.
+- **A reader of a field nobody writes is dead code that tests green.** The stress
+  model's bereavement term had unit tests. They passed. They constructed the
+  dead parent by hand, because nothing else could.
+- **When a ticket adds the writer, re-measure everything downstream.** Making
+  NPCs mortal turned the bereavement term — a flat penalty, charged forever —
+  into every character over forty carrying twenty-two points of permanent stress
+  about something in another decade, and pulled the player's own p10 age at
+  death from 62 to 55. A constant that was never exercised is not a tuned
+  constant; it is an untested guess that has been sitting still.
+
+### 13.37 A state object holding a live cursor is not a value
+
+`GameState` is treated as immutable everywhere in this build — phases take it,
+return a new one, and never write through. Every field obeys that except one:
+`rng` is a live `Rng` with mutable per-domain streams, held by reference.
+
+So two calls to `advanceYear(state)` on the same object are **not** two runs from
+the same starting point. The second continues on streams the first consumed.
+
+Ticket 0212 found a test asserting exactly the wrong thing because of this. It
+claimed to prove that mashing a spent button does not spend a draw — *"the seed
+still means something"* — and did it by advancing one state, then mashing that
+same state and advancing it again. It was comparing year N with year N+1. It
+passed for two tickets because, with seven writers, the two years happened to
+produce the same sentences; adding an eighth moved the cursor and the assertion
+came apart. **The eighth writer did not break the test. It revealed it.**
+
+- **To compare two branches of one life, give each a fresh cursor from the same
+  seed**: `rng.snapshot()` once, `Rng.restore(snapshot)` into each branch.
+- **A test that runs the simulation twice from one state object is testing
+  sequence, not determinism**, whatever its name says.
+- **The rule generalises past RNG.** Anything reachable from a state object that
+  is not itself a value — a cache, a cursor, a handle — makes "the same state"
+  a lie, and the lie is invisible until something changes how much of it gets
+  used.

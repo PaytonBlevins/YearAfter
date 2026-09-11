@@ -87,11 +87,41 @@ export function workloadPressure(hours: number, capacity: number): number {
  * would make every character permanently stressed by their own family, which is
  * both untrue and boring.
  */
+/** Above this, losing a parent is a loss rather than the floor coming out. */
+export const ADULT_GRIEF_FROM = 18;
+
 export const HOME_COMFORT_THRESHOLD = 45;
 export const HOME_STRAIN_WEIGHT = 0.5;
 
-/** A parent who has died, or is otherwise gone from the household. */
+/**
+ * A parent who has died.
+ *
+ * Ticket 0212 split this in two and gave it a fade, because the moment NPCs
+ * became mortal the original — one flat number, charged forever — became the
+ * single worst constant in the build. Every character over forty had lost a
+ * parent, so every character over forty carried twenty-two points of permanent
+ * stress about something in another decade, which raised the illness roll for
+ * the rest of their life. Measured: it pulled the player's own p10 age at death
+ * from 62 to 55. A model that made the player die younger because their mother
+ * had died is not a model of grief.
+ *
+ * So: losing a parent while you are still a child is the thing the original
+ * comment was about and keeps the original weight. Losing one as an adult is
+ * real and smaller. Both fade — not to nothing because it stopped mattering,
+ * but because stress here means what is pressing on you THIS year, and the
+ * fourth year is not the first.
+ */
 export const BEREAVEMENT_STRESS = 22;
+export const BEREAVEMENT_STRESS_ADULT = 10;
+/** Years over which the weight falls to zero. */
+export const GRIEF_FADES_OVER = 5;
+
+/** 1 in the year it happened, 0 once `GRIEF_FADES_OVER` years have passed. */
+export function griefWeight(yearsSince: number): number {
+  if (yearsSince < 0) return 0;
+  if (yearsSince >= GRIEF_FADES_OVER) return 0;
+  return 1 - yearsSince / GRIEF_FADES_OVER;
+}
 export const SOLE_PARENT_STRESS = 4;
 
 /** School standing low enough that being at school is itself a problem. */
@@ -108,6 +138,11 @@ export interface StressInputs {
   readonly behaviour?: number;
   /** Sum of `stress` effects from this year's events. Can be negative. */
   readonly eventStress: number;
+  /**
+   * Ticket 0212. The player's age, for grief — which needs to know both how
+   * long ago it happened and whether it happened to a child or to an adult.
+   */
+  readonly age?: number;
 }
 
 /**
@@ -145,14 +180,24 @@ export function stressSources(inputs: StressInputs): readonly StressSource[] {
 
   // Losing a parent is the single largest thing that can happen to a child, and
   // it should not be reachable by adding up hours. The household knows: a
-  // member who is `alive: false` is somebody who died while the player watched.
-  const lost = inputs.household.members.filter(
-    (member) => !member.alive && (member.role === 'mother' || member.role === 'father'),
-  ).length;
-  if (lost > 0) {
+  // member who is `alive: false` is somebody who died while the player watched,
+  // and since 0212 `diedWhenPlayerWas` says when — which is what lets this
+  // fade instead of being charged for the rest of the character's life.
+  const grief = inputs.household.members
+    .filter((member) => !member.alive && (member.role === 'mother' || member.role === 'father'))
+    .reduce((total, member) => {
+      // No recorded year means a save written before 0212, where the only way a
+      // parent could be dead was to have been generated that way. Treat it as
+      // long ago rather than as this year.
+      if (member.diedWhenPlayerWas === undefined || inputs.age === undefined) return total;
+      const weight = griefWeight(inputs.age - member.diedWhenPlayerWas);
+      const full = inputs.age < ADULT_GRIEF_FROM ? BEREAVEMENT_STRESS : BEREAVEMENT_STRESS_ADULT;
+      return total + full * weight;
+    }, 0);
+  if (grief > 0) {
     sources.push({
       kind: 'home',
-      points: BEREAVEMENT_STRESS * lost,
+      points: grief,
       phrase: 'the house was still short a person',
     });
   } else if (parents.length === 1) {

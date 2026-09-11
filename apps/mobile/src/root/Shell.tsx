@@ -9,6 +9,8 @@
 
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { findJob } from '@yearafter/careers';
+import type { FamilyMember } from '@yearafter/relationships';
+import { eulogyFor, heirsIn } from '@yearafter/simulation';
 import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
 import { DoctorScreen } from '../screens/DoctorScreen';
@@ -82,6 +84,7 @@ export function Shell() {
     detail,
     dismissDetail,
     startNewLife,
+    continueAs,
   } = useGame();
   const { world, current, selectWorld, push, pop, closeToLife } = useNavigation();
 
@@ -240,17 +243,21 @@ export function Shell() {
       ) : null}
 
       {/*
-        Ticket 0211. Above everything, and not dismissible: there is nothing
-        else to do. Without it a dead character leaves the player on the Life
-        screen with a greyed-out Advance button and no way forward, which reads
-        as the app breaking rather than the life ending. 0212 replaces this with
-        the real ending — cause, summary, who survives them, a few highlights.
+        Ticket 0212. Above everything, and not dismissible: there is nothing
+        else to do. 0211 shipped a placeholder here so a dead character did not
+        leave the player on the Life screen with a greyed-out Advance button and
+        no way forward; this is the real ending it named — cause, identity, a
+        summary, who survives them, five highlights, and the two ways on.
       */}
       {!state.player.alive ? (
         <EndOfLifeCard
-          name={`${state.player.firstName} ${state.player.lastName}`}
-          age={state.health.diedAtAge ?? state.player.age}
-          cause={state.health.causeOfDeath ?? 'Their health'}
+          eulogy={eulogyFor(state)}
+          heirs={heirsIn(state.family).map((heir) => ({
+            id: heir.id,
+            name: heir.firstName,
+            detail: heirLine(heir, state.world.year),
+          }))}
+          onContinueAs={(childId) => void continueAs(childId)}
           onStartAgain={() => void startNewLife()}
         />
       ) : null}
@@ -289,3 +296,19 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
 });
+
+/**
+ * What a heir's button says under their name.
+ *
+ * Their age and what they are doing — the two facts that decide whether a
+ * player wants to be them. "Continue as Marcus" on its own is a name and a
+ * gamble; "43 · Charge nurse" is a choice. CORE_RULES 13.28: a tap that commits
+ * to eighty years has to say what it commits to.
+ */
+function heirLine(heir: FamilyMember, worldYear: number): string {
+  const age = worldYear - heir.birthYear;
+  const life = heir.life as { jobTitle?: string; stage?: string } | undefined;
+  const doing =
+    life?.jobTitle ?? (life?.stage === 'college' ? 'At college' : life?.stage === 'school' ? 'At school' : undefined);
+  return doing ? `${age} · ${doing}` : `${age}`;
+}

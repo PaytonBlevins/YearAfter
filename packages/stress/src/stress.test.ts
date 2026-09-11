@@ -27,7 +27,9 @@ const member = (
   role: 'mother' | 'father' | 'sibling',
   relationship = 70,
   alive = true,
+  diedWhenPlayerWas?: number,
 ): FamilyMember => ({
+  ...(diedWhenPlayerWas !== undefined ? { diedWhenPlayerWas } : {}),
   id: asNpcId(`npc:${role}`),
   role,
   firstName: 'Ana',
@@ -54,6 +56,7 @@ const inputs = (overrides: Partial<Parameters<typeof stressSources>[0]> = {}) =>
   household: warmHome,
   behaviour: 70,
   eventStress: 0,
+  age: 14,
   ...overrides,
 });
 
@@ -88,11 +91,63 @@ describe('where stress comes from', () => {
   });
 
   it('treats losing a parent as its own thing, not as accumulated hours', () => {
-    const bereaved = household([member('mother'), member('father', 70, false)]);
-    const sources = stressSources(inputs({ household: bereaved }));
+    const bereaved = household([member('mother'), member('father', 70, false, 13)]);
+    const sources = stressSources(inputs({ household: bereaved, age: 14 }));
     const home = sources.filter((source) => source.kind === 'home');
     expect(home.length).toBeGreaterThan(0);
     expect(Math.max(...home.map((source) => source.points))).toBeGreaterThan(15);
+  });
+
+  /*
+    Ticket 0212. The three properties grief has to have, and the reason it has
+    them: until this ticket nobody could die, so a flat permanent penalty was
+    indistinguishable from a correct one. The moment NPCs became mortal it made
+    every character over forty carry twenty-two points of stress for life about
+    something in another decade, and it pulled the player's own p10 age at death
+    from 62 to 55. That is the defect these three tests exist to prevent
+    returning.
+  */
+  it('lets grief fade', () => {
+    const lost = (yearsAgo: number, age: number) =>
+      Math.max(
+        0,
+        ...stressSources(
+          inputs({
+            household: household([member('mother'), member('father', 70, false, age - yearsAgo)]),
+            age,
+          }),
+        )
+          .filter((source) => source.kind === 'home')
+          .map((source) => source.points),
+      );
+    expect(lost(0, 14)).toBeGreaterThan(lost(3, 14));
+    expect(lost(3, 14)).toBeGreaterThan(lost(20, 34));
+  });
+
+  it('charges an adult less for it than a child', () => {
+    const at = (age: number) =>
+      Math.max(
+        0,
+        ...stressSources(
+          inputs({
+            household: household([member('mother'), member('father', 70, false, age)]),
+            age,
+          }),
+        )
+          .filter((source) => source.kind === 'home')
+          .map((source) => source.points),
+      );
+    expect(at(12)).toBeGreaterThan(at(45));
+  });
+
+  it('charges nothing at all for a parent who died decades ago', () => {
+    const old = household([member('mother'), member('father', 70, false, 30)]);
+    const sources = stressSources(inputs({ household: old, age: 70 }));
+    // The sole-parent line may still be there; the BEREAVEMENT one must not.
+    const bereavement = sources.filter(
+      (source) => source.phrase === 'the house was still short a person',
+    );
+    expect(bereavement).toHaveLength(0);
   });
 
   it('lets events push stress in both directions', () => {

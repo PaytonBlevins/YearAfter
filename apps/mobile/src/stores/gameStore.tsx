@@ -50,7 +50,7 @@ import {
   seeDoctor,
   treatCondition,
   stopTreatment,
-} from '@yearafter/simulation';
+  continueAsChild,} from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
@@ -136,6 +136,15 @@ interface GameContextValue {
   readonly answerChildAsk: (yes: boolean) => void;
   readonly kickChildOut: (childId: string) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
+  /**
+   * Ticket 0212. Carry on as one of your children.
+   *
+   * A NEW SAVE, not an edit of this one. The life that just ended is a life
+   * somebody played and it stays on disk — overwriting it in place would make
+   * continuing a dynasty the one action in this game that destroys history, and
+   * the save list is where a player looks for the ancestor they remember.
+   */
+  readonly continueAs: (childId: string) => Promise<void>;
   readonly updateSettings: (patch: Partial<SaveSettings>) => void;
 }
 
@@ -183,6 +192,27 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         .catch((cause: unknown) => setSaveError(String(cause)));
     },
     [repository],
+  );
+
+  const continueAs = useCallback(
+    async (childId: string) => {
+      if (!state) return;
+      const next = continueAsChild(state, childId);
+      if (!next) return;
+
+      const id = asSaveId(`save-${next.rng.getSeed()}-g${next.world.generation}`);
+      createdAt.current = Date.now();
+      const save = toSave(next, { id, settings, createdAt: createdAt.current });
+      const created = await repository.create(save);
+      if (!created.ok) await repository.update(save);
+
+      setState(next);
+      setSaveId(id);
+      setLastEntries([]);
+      setOutcome(undefined);
+      setSaveError(null);
+    },
+    [repository, settings, state],
   );
 
   const startNewLife = useCallback(
@@ -785,6 +815,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       answerChildAsk,
       kickChildOut,
       startNewLife,
+      continueAs,
       updateSettings,
     }),
     [
@@ -825,6 +856,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       answerChildAsk,
       kickChildOut,
       startNewLife,
+      continueAs,
       updateSettings,
     ],
   );

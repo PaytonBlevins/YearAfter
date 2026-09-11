@@ -39,6 +39,8 @@ export interface StressPhaseInput {
   readonly capacity: number;
   /** Stress points this year's events contributed, from the events phase. */
   readonly eventStress: number;
+  /** The age the character is becoming this year. See the note in `runStress`. */
+  readonly age: number;
   /** Whether the character is at school this year, for the standing input. */
   readonly atSchool: boolean;
   /**
@@ -89,6 +91,15 @@ export function runStress(input: StressPhaseInput): StressPhaseOutput {
     household: input.family,
     ...(input.atSchool ? { behaviour: input.education.behaviour } : {}),
     eventStress: input.eventStress,
+    /*
+      Ticket 0212. Grief needs to know how long ago and how old they were — and
+      it must be the age the character is BECOMING, not the one they were.
+      `input.player.age` is still last year's here: `advanceYear` stamps the new
+      age at commit time, after every phase has run. Using it would have made
+      `age - diedWhenPlayerWas` come out at MINUS ONE in the year a parent died,
+      so grief would have weighed zero in the only year it certainly matters.
+    */
+    age: input.age,
   });
 
   const level = advanceStress(previous, sources, input.player.stats, input.player.personality);

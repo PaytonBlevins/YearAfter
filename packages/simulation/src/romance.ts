@@ -19,8 +19,10 @@
  */
 
 import {
+  appendRecord,
   appendToTimeline,
   createTimelineEntry,
+  stampRecord,
   type Character,
   type TimelineEntry,
 } from '@yearafter/character';
@@ -150,9 +152,29 @@ export function romanticMove(
     sequence,
   });
 
+  /*
+    Ticket 0212. A wedding is the clearest highlight a life has, and it is a
+    PLAYER ACTION rather than something a phase produces — so it is stamped here
+    rather than in `advanceYear`. Getting engaged is not recorded: spec 1284
+    allows five highlights across eighty years, and an engagement followed by a
+    wedding would spend two of them on one relationship.
+  */
+  const married = updated.romance?.stage === 'married' && person.romance?.stage !== 'married';
   const player: Character = {
     ...state.player,
     timeline: appendToTimeline(state.player.timeline, entry),
+    ...(married
+      ? {
+          records: appendRecord(
+            state.player.records,
+            stampRecord(
+              { category: 'family', label: `Married ${person.firstName}`, referenceId: person.id },
+              state.player.age,
+              state.world.year,
+            ),
+          ),
+        }
+      : {}),
     // Charged once, here, and only what `movesFor` already confirmed is there.
     cash: result.spent > 0 ? subtract(state.player.cash, cents(result.spent)) : state.player.cash,
   };

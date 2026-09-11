@@ -42,3 +42,4 @@ export {
   STAT_MIN,
   STAT_MAX,
 } from './percentage';
+export * from './stable';

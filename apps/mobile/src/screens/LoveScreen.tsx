@@ -254,6 +254,7 @@ function endLine(person: Acquaintance): string {
     'they ended it': 'They ended it',
     divorced: 'Divorced',
     drifted: 'It went quietly',
+    died: 'They died',
   }[romance.endedBecause ?? 'drifted'];
   return `${how} · you were ${romance.endedAtAge}`;
 }

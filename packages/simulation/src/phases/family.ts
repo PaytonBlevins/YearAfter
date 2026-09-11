@@ -18,7 +18,7 @@
  * three of them.
  */
 
-import type { Personality, Sex, TimelineKind } from '@yearafter/character';
+import type { NewLifeRecord, Personality, Sex, TimelineKind } from '@yearafter/character';
 import { asNpcId, clampStat, type StatValue } from '@yearafter/core';
 import {
   ASK_CHANCE,
@@ -74,6 +74,8 @@ export interface FamilyPhaseOutput {
   readonly family: Household;
   readonly parenting: ParentingState;
   readonly lines: readonly { readonly kind: TimelineKind; readonly text: string }[];
+  /** Ticket 0212. Structured history, for the death screen. */
+  readonly records: readonly NewLifeRecord[];
   /** Ticket 0209. School standing a parent's discipline moved, signed. */
   readonly behaviourDelta: number;
   /** Whole dollars a parent handed the player unprompted. */
@@ -82,6 +84,7 @@ export interface FamilyPhaseOutput {
 
 export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
   const lines: { kind: TimelineKind; text: string }[] = [];
+  const records: NewLifeRecord[] = [];
   let members = [...input.family.members];
   let parenting = input.parenting;
   const taken = new Set(input.takenNames);
@@ -125,6 +128,7 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
       kind: 'relationship',
       text: `${baby.firstName} was born. Everything else got smaller for a while.`,
     });
+    records.push({ category: 'family', label: `${baby.firstName} was born`, referenceId: baby.id });
     parenting = { ...parenting, pregnancy: undefined, lastBirthAtAge: input.age };
   }
 
@@ -146,6 +150,11 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
           arrivalAge === 0
             ? `The adoption went through. ${child.firstName} came home at three weeks old.`
             : `The adoption went through. ${child.firstName} is ${arrivalAge}, and moved in with one bag.`,
+      });
+      records.push({
+        category: 'family',
+        label: `Adopted ${child.firstName}`,
+        referenceId: child.id,
       });
       parenting = { ...parenting, adoption: { ...application, placedAtAge: input.age } };
     } else if (waiting === 1) {
@@ -284,6 +293,7 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
     family: { ...input.family, members },
     parenting,
     lines,
+    records,
     behaviourDelta,
     gifted,
   };

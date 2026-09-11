@@ -27,25 +27,17 @@ export interface WeightedOption<T> {
   readonly weight: number;
 }
 
-/** Hash an arbitrary seed string into a uint32. */
-export function hashSeed(seed: string): number {
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < seed.length; i += 1) {
-    h ^= seed.charCodeAt(i);
-    h = Math.imul(h, 16777619) >>> 0;
-  }
-  return h >>> 0;
-}
+/*
+  Ticket 0212 moved both of these into `@yearafter/core`, and they are
+  re-exported here so no call site had to change.
 
-/**
- * A stable draw in [0, 1) from a string, without touching any stream.
- *
- * For choices that must be the SAME every time they are asked within one
- * context rather than fresh on every call — see the phrasing seed in
- * `romance.ts`. It consumes no RNG state, so calling it can never shift what
- * any stream produces next.
- */
-export const stableUnit = (key: string): number => hashSeed(key) / 4294967296;
+  The reason is in `core/src/stable.ts`: `@yearafter/health` needed the same
+  stable draw, a domain package may never import the simulation package, and
+  copying the hash would have left two implementations that have to agree about
+  which sentence describes a dead man.
+*/
+import { hashSeed } from '@yearafter/core';
+export { hashSeed, stablePick, stableUnit } from '@yearafter/core';
 
 /** splitmix32 — expands one uint32 into a well-distributed state vector. */
 function splitmix32(seed: number): () => number {

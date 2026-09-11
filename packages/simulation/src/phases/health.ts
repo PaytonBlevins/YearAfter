@@ -24,7 +24,7 @@
  * lever they have is the Doctor, which acts between years like Work Harder.
  */
 
-import type { TimelineKind } from '@yearafter/character';
+import type { NewLifeRecord, TimelineKind } from '@yearafter/character';
 import {
   CHECKUP_RECOVERY,
   findCondition,
@@ -71,6 +71,8 @@ export interface HealthPhaseOutput {
   readonly alive: boolean;
   readonly cause?: string;
   readonly lines: readonly { readonly kind: TimelineKind; readonly text: string }[];
+  /** Ticket 0212. Structured history, for the death screen. */
+  readonly records: readonly NewLifeRecord[];
 }
 
 export function runHealth(input: HealthPhaseInput): HealthPhaseOutput {
@@ -115,6 +117,27 @@ export function runHealth(input: HealthPhaseInput): HealthPhaseOutput {
     alive: result.alive,
     ...(died && died.kind === 'died' ? { cause: died.cause } : {}),
     lines: capped(result.events.flatMap((event) => lineFor(event, input.age))),
+    /*
+      Only GRAVE diagnoses, and deliberately not the year's colds.
+
+      Spec 1284 caps the death screen at five highlights, and a records list
+      that logged every sprained ankle would push a wedding off it. A diagnosis
+      that carries a real ceiling is a thing a life turns on; a bad winter is
+      not. Note this reads `severity` — structure — rather than the sentence
+      the line above wrote, which is the whole point of `LifeRecord`.
+    */
+    records: result.events.flatMap((event) => {
+      if (event.kind !== 'ill' && event.kind !== 'hurt') return [];
+      const kind = event.conditionId ? findCondition(event.conditionId) : undefined;
+      if (!kind || kind.severity !== 'grave') return [];
+      return [
+        {
+          category: 'health' as const,
+          label: `Diagnosed with ${kind.label.toLowerCase()}`,
+          referenceId: kind.id,
+        },
+      ];
+    }),
   };
 }
 

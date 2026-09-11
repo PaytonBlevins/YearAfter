@@ -156,7 +156,7 @@ export interface Acquaintance extends Npc {
   /** The player's age when this ended. Present means they are in the past. */
   readonly endedAtAge?: number;
   /** How it ended, for the one line the feed writes about it. */
-  readonly endedBecause?: 'drifted' | 'fell out' | 'moved away' | 'moved on';
+  readonly endedBecause?: 'drifted' | 'fell out' | 'moved away' | 'moved on' | 'died';
   /**
    * Ticket 0207. Whether the player is, or was, going out with this person.
    *
@@ -365,8 +365,20 @@ export function endPerson(
     ...person,
     endedAtAge: age,
     endedBecause: because,
+    /*
+      Ticket 0212. The reason CARRIES now. It used to hardcode 'drifted', which
+      was true for every way a person could leave in 0207b — and stopped being
+      true the moment people could die. A widow whose Love screen says the
+      relationship "drifted" is the game getting a fact about her life wrong.
+    */
     ...(romance && romance.endedAtAge === undefined
-      ? { romance: { ...romance, endedAtAge: age, endedBecause: 'drifted' as const } }
+      ? {
+          romance: {
+            ...romance,
+            endedAtAge: age,
+            endedBecause: because === 'died' ? ('died' as const) : ('drifted' as const),
+          },
+        }
       : {}),
   };
 }

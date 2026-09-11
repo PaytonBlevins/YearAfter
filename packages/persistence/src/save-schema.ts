@@ -20,7 +20,7 @@ import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 16;
+export const CURRENT_SAVE_VERSION = 17;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -75,8 +75,8 @@ export type { WorldState };
  *
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV16 {
-  readonly version: 16;
+export interface SaveGameV17 {
+  readonly version: 17;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -109,6 +109,13 @@ export interface SaveGameV16 {
   readonly employment: EmploymentState;
   /** Ticket 0211: conditions held, the age curve's running total, and the deficit. */
   readonly health: HealthState;
+  /*
+    Ticket 0212 adds no top-level field. `player.records` is finally populated
+    and children carry a `life`, but both were already part of `Character` and
+    `FamilyMember` — declared in Sprint Zero and 0208 respectively, and written
+    by nothing until now. That is CORE_RULES 13.36, and it is also why this
+    version bump changes a number and a default rather than a shape.
+  */
   readonly settings: SaveSettings;
   /** Unix ms. Metadata only — never used in simulation logic. */
   readonly createdAt: number;
@@ -116,8 +123,8 @@ export interface SaveGameV16 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV16;
-export type CurrentSaveGame = SaveGameV16;
+export type AnySaveGame = SaveGameV17;
+export type CurrentSaveGame = SaveGameV17;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { asSaveId } from '@yearafter/core';
+import { asNpcId, asSaveId } from '@yearafter/core';
+import type { NpcTier } from '@yearafter/relationships';
 import { advanceYear, createNewGame, decide, type GameState } from '@yearafter/simulation';
 import { MemorySaveRepository } from './adapters/memory';
 import { migrateSave } from './migrations';
@@ -797,5 +798,65 @@ describe('v15 -> v16 migration (Ticket 0211 health)', () => {
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
     expect(migrated.value.health).toEqual(held);
+  });
+});
+
+describe('Ticket 0212 — what a save has to carry now', () => {
+  /*
+    Two fields that had never been written to before this ticket, and one that
+    is new. All three ride inside `player` and `family`, which `toSave` copies
+    whole — so this passes today for a structural reason rather than because
+    anybody listed them, and that is exactly why it is worth asserting. The
+    serialiser is one `const` away from becoming a field list, and the day it
+    does, the thing that breaks is a dynasty's memory.
+  */
+  it('round-trips life records, a child’s own life, and a death date', () => {
+    const state = createNewGame({ seed: 'ROUNDTRIP-0212' });
+    const child = {
+      id: asNpcId('npc:child:0'),
+      role: 'child' as const,
+      firstName: 'Ada',
+      lastName: state.player.lastName,
+      sex: 'female' as const,
+      birthYear: state.world.year - 30,
+      alive: true,
+      tier: 2 as NpcTier,
+      personality: state.player.personality,
+      relationship: state.player.stats.charisma,
+      life: { stage: 'working', jobTitle: 'Line cook', rung: 1, timeline: [{ age: 23, year: 2053, text: 'Started work.' }] },
+    };
+    const forebear = {
+      id: asNpcId('npc:mother'),
+      role: 'mother' as const,
+      firstName: 'Iris',
+      lastName: state.player.lastName,
+      sex: 'female' as const,
+      birthYear: state.world.year - 80,
+      alive: false,
+      diedWhenPlayerWas: 41,
+      tier: 1 as NpcTier,
+      personality: state.player.personality,
+      relationship: state.player.stats.charisma,
+    };
+    const withHistory = {
+      ...state,
+      player: {
+        ...state.player,
+        records: [
+          { id: 'r:2018:education:0', category: 'education' as const, age: 18, year: 2018, label: 'Graduated high school' },
+        ],
+      },
+      family: { ...state.family, members: [forebear, child] },
+    };
+
+    const save = toSave(withHistory, { id: asSaveId('save-roundtrip') });
+    const back = fromSave(save);
+
+    expect(back.player.records).toHaveLength(1);
+    expect(back.player.records[0]?.label).toBe('Graduated high school');
+    const backChild = back.family.members.find((member) => member.role === 'child');
+    expect((backChild?.life as { jobTitle?: string } | undefined)?.jobTitle).toBe('Line cook');
+    const backMother = back.family.members.find((member) => member.role === 'mother');
+    expect(backMother?.diedWhenPlayerWas).toBe(41);
   });
 });

@@ -17,6 +17,8 @@ export * from './romance';
 export * from './social-generator';
 export * from './study';
 export * from './tryout';
+export * from './continue';
+export * from './eulogy';
 export * from './family-generator';
 export * from './phases/education';
 export * from './phases/employment';

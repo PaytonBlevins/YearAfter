@@ -14,8 +14,14 @@
 
 import { nudgeStats, type Character } from '@yearafter/character';
 import { add, dollars, subtract } from '@yearafter/core';
-import { isInSchool, runSchoolYear, statusLabel, type EducationState } from '@yearafter/education';
-import type { TimelineKind } from '@yearafter/character';
+import {
+  MAJORS,
+  isInSchool,
+  runSchoolYear,
+  statusLabel,
+  type EducationState,
+} from '@yearafter/education';
+import type { NewLifeRecord, TimelineKind } from '@yearafter/character';
 import type { GameState } from '../game-state';
 import { RngDomains } from '../rng/rng';
 
@@ -26,6 +32,67 @@ export interface EducationPhaseOutput {
   readonly hours: number;
   readonly capacity: number;
   readonly lines: readonly { readonly kind: TimelineKind; readonly text: string }[];
+  /** Ticket 0212. Structured history, for the death screen. */
+  readonly records: readonly NewLifeRecord[];
+}
+
+/**
+ * What school produced this year, as a fact rather than a sentence.
+ *
+ * Derived from the STAGE TRANSITION and from the credential count, not from the
+ * lines the domain package wrote. That distinction is the whole reason
+ * `LifeRecord` exists — spec 3 wants major accomplishments to stay queryable
+ * data, and its comment in `timeline.ts` says "never derived by parsing
+ * timeline text". Reading `before.stage !== after.stage` is reading structure;
+ * matching on the word "Graduated" would be reading prose, and would break the
+ * first time somebody rewrote the line. 0211b rewrote a hundred and eighty of
+ * them.
+ */
+function schoolRecords(
+  before: EducationState,
+  after: EducationState,
+  majorTitle: (majorId: string | undefined) => string,
+): NewLifeRecord[] {
+  const records: NewLifeRecord[] = [];
+  if (before.stage === after.stage) return recordsForDegree(before, after, majorTitle, records);
+  if (after.stage === 'graduated' && before.stage === 'high') {
+    records.push({ category: 'education', label: 'Graduated high school' });
+  }
+  if (after.stage === 'droppedOut') {
+    records.push({ category: 'education', label: 'Left school early' });
+  }
+  if (after.stage === 'college' && before.stage !== 'college') {
+    records.push({
+      category: 'education',
+      label: `Started a degree in ${majorTitle(after.majorId)}`,
+      ...(after.majorId !== undefined ? { referenceId: after.majorId } : {}),
+    });
+  }
+  return recordsForDegree(before, after, majorTitle, records);
+}
+
+function recordsForDegree(
+  before: EducationState,
+  after: EducationState,
+  majorTitle: (majorId: string | undefined) => string,
+  records: NewLifeRecord[],
+): NewLifeRecord[] {
+  const had = before.credentials ?? {};
+  const has = after.credentials ?? {};
+  if (has.university !== undefined && had.university === undefined) {
+    records.push({
+      category: 'education',
+      label: `Graduated — ${majorTitle(before.majorId ?? after.majorId)}`,
+      ...(before.majorId !== undefined ? { referenceId: before.majorId } : {}),
+    });
+  }
+  if (has.postgraduate !== undefined && had.postgraduate === undefined) {
+    records.push({
+      category: 'education',
+      label: `Postgraduate degree — ${majorTitle(before.majorId ?? after.majorId)}`,
+    });
+  }
+  return records;
 }
 
 /**
@@ -88,6 +155,11 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     hours: result.hours,
     capacity: result.capacity,
     lines: result.lines.map((line) => ({ kind: line.kind as TimelineKind, text: line.text })),
+    records: schoolRecords(
+      state.education,
+      result.state,
+      (majorId) => MAJORS.find((major) => major.id === majorId)?.name ?? 'a subject',
+    ),
   };
 }
 

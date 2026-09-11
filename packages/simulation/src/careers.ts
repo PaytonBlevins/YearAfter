@@ -7,7 +7,13 @@
  * the whole difference between the two halves of this ticket.
  */
 
-import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
+import {
+  appendRecord,
+  appendToTimeline,
+  createTimelineEntry,
+  stampRecord,
+  type TimelineEntry,
+} from '@yearafter/character';
 import {
   START_STANDING,
   WORK_GAIN_MAX,
@@ -257,7 +263,29 @@ export function applyFor(state: GameState, jobId: string): Result<ApplyOutcome, 
     state: {
       ...state,
       employment,
-      player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
+      player: {
+        ...state.player,
+        timeline: appendToTimeline(state.player.timeline, entry),
+        /*
+          Ticket 0212. The FIRST job only. Every subsequent hire is a job
+          change, which a life is not remembered by — "Hired as a line cook" at
+          nineteen is a highlight; the same sentence at forty-one, for the
+          fourth time, is a CV. Promotions and being let go are recorded by the
+          employment phase, which is where those happen.
+        */
+        ...(hired && state.employment.history.length === 0 && state.employment.job === undefined
+          ? {
+              records: appendRecord(
+                state.player.records,
+                stampRecord(
+                  { category: 'career', label: `First job — ${job.title}`, referenceId: job.id },
+                  state.player.age,
+                  state.world.year,
+                ),
+              ),
+            }
+          : {}),
+      },
     },
     hired,
     entry,

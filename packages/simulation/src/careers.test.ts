@@ -31,6 +31,7 @@ import { applyFor, chanceOf, openings, resign, workHarder } from './careers';
 import { decide } from './decide';
 import type { GameState } from './game-state';
 import { createNewGame } from './new-game';
+import { Rng } from './rng/rng';
 
 const LIVES = 150;
 const UNTIL = 55;
@@ -378,6 +379,19 @@ describe('pressing Work Harder past the cap', () => {
     // makes two identical lives diverge on how often somebody mashed it, which
     // would quietly break replay from a seed. The early return sits ABOVE the
     // stream in `workHarder` for this reason alone.
+    //
+    // TICKET 0212 REWROTE THIS TEST, because it was not testing that.
+    //
+    // `Rng` is a live object with mutable streams, and `GameState` holds a
+    // REFERENCE to it. So the original — advance `spent`, then mash `spent` and
+    // advance it again — was running the second year on streams the first year
+    // had already consumed. It was comparing year N against year N+1 and
+    // passing because, with seven writers, the two happened to produce the same
+    // sentences. Adding an eighth writer moved the cursor and the comparison
+    // came apart, which is the only reason anybody looked.
+    //
+    // A test of "the seed still means something" has to give both branches the
+    // SAME seed and a FRESH cursor. That is what `snapshot`/`restore` are for.
     const state = employed();
     expect(state).toBeDefined();
     if (!state) return;
@@ -388,8 +402,10 @@ describe('pressing Work Harder past the cap', () => {
       if (result.ok && !result.value.spent) spent = result.value.state;
     }
 
-    const untouched = advanceYear(spent).state;
-    let mashed = spent;
+    const snapshot = spent.rng.snapshot();
+    const untouched = advanceYear({ ...spent, rng: Rng.restore(snapshot) }).state;
+
+    let mashed: GameState = { ...spent, rng: Rng.restore(snapshot) };
     for (let press = 0; press < 25; press += 1) {
       const result = workHarder(mashed);
       if (result.ok) mashed = result.value.state;

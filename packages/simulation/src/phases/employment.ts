@@ -18,7 +18,7 @@
  * built for parents, and it is the reason a job feels like a job.
  */
 
-import type { TimelineKind } from '@yearafter/character';
+import type { NewLifeRecord, TimelineKind } from '@yearafter/character';
 import {
   ALL_JOBS,
   START_STANDING,
@@ -52,6 +52,8 @@ export interface EmploymentPhaseInput {
 export interface EmploymentPhaseOutput {
   readonly employment: EmploymentState;
   readonly lines: readonly { readonly kind: TimelineKind; readonly text: string }[];
+  /** Ticket 0212. Structured history, for the death screen. See `timeline.ts`. */
+  readonly records: readonly NewLifeRecord[];
   /**
    * Whole dollars the year left the character with, signed.
    *
@@ -68,11 +70,12 @@ export interface EmploymentPhaseOutput {
 
 export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutput {
   const lines: { kind: TimelineKind; text: string }[] = [];
+  const records: NewLifeRecord[] = [];
   let employment = input.employment;
   const held = employment.job;
 
   if (!held) {
-    return { employment, lines, saved: 0, earned: 0, demand: 0 };
+    return { employment, lines, records, saved: 0, earned: 0, demand: 0 };
   }
 
   const job = findJob(held.jobId);
@@ -83,6 +86,7 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
     return {
       employment: { ...employment, job: undefined },
       lines,
+      records,
       saved: 0,
       earned: 0,
       demand: 0,
@@ -132,6 +136,7 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
       standing: { ...employment.standing, [track]: standing },
     };
     lines.push({ kind: 'career', text: promotedLine(next, input.age) });
+    records.push({ category: 'career', label: `Promoted to ${next.title}`, referenceId: next.id });
     stillThere = false;
   } else if (input.stream.chance(firingChance(job, performance, years))) {
     // A layoff and a sacking are different lines about different years, and the
@@ -152,6 +157,11 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
       },
     };
     lines.push({ kind: 'career', text: leftLine(because, job, input.age) });
+    records.push({
+      category: 'career',
+      label: because === 'fired' ? `Fired from ${job.title}` : `Laid off — ${job.title}`,
+      referenceId: job.id,
+    });
     stillThere = false;
   }
 
@@ -168,7 +178,7 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
     };
   }
 
-  return { employment, lines, saved, earned, demand: job.demand };
+  return { employment, lines, records, saved, earned, demand: job.demand };
 }
 
 /* -------------------------------------------------------------------------- */

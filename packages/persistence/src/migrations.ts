@@ -425,6 +425,45 @@ const migrations: Readonly<Record<number, Migration>> = {
       health: save['health'] ?? { conditions: [], vitality: health, deficit: 0 },
     };
   },
+
+  /**
+   * v16 → v17 (Ticket 0212) — records, and a world where people die.
+   *
+   * Three additions, and all three default to the same principle every
+   * migration in this file has followed: DEFAULT TO THE FACT ALREADY RECORDED,
+   * never invent a history.
+   *
+   *  - `player.records` becomes an empty array rather than being reconstructed
+   *    from the timeline. It would be possible to scan the feed for the word
+   *    "Graduated" and synthesise a record — and it would be wrong twice over:
+   *    `LifeRecord`'s own contract says it is never derived by parsing timeline
+   *    text, and 0211b rewrote a hundred and eighty of those sentences, so the
+   *    scan would find a different history depending on which build last
+   *    touched the save. An existing character's highlights start from here.
+   *
+   *  - Nobody is retroactively killed. A ninety-year-old parent on an existing
+   *    save has been alive for the whole of that save's history, and a
+   *    migration that quietly buried them would be rewriting somebody's life
+   *    rather than migrating it. They become mortal from the NEXT year on,
+   *    which the kin phase handles with no help from here.
+   *
+   *  - A dead family member with no `diedWhenPlayerWas` keeps none. The stress
+   *    model reads that absence as "long ago", which is the only honest reading
+   *    for a death that was never actually simulated.
+   *
+   * The `life` field on children is likewise absent, and `runOffspringYear`
+   * starts them at whatever stage their age implies. A forty-year-old on an
+   * existing save therefore has no history to inherit — the one real cost of
+   * this migration, and the alternative was inventing forty years of it.
+   */
+  16: (save) => {
+    const player = (save['player'] ?? {}) as Record<string, unknown>;
+    return {
+      ...save,
+      version: 17,
+      player: { ...player, records: Array.isArray(player['records']) ? player['records'] : [] },
+    };
+  },
 };
 
 /**

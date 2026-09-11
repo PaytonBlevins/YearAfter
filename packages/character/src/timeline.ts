@@ -57,6 +57,14 @@ export interface TimelineEntry {
 export type LifeRecordCategory =
   | 'education'
   | 'career'
+  /**
+   * Ticket 0212. A grave diagnosis is a thing a life turns on, and there was
+   * nowhere to put one — the union was written in Sprint Zero, before the game
+   * had a body. Grown by one variant rather than filed under 'family', the same
+   * way 0210 grew `TimelineKind` rather than reusing 'finance': a diagnosis and
+   * a wedding are different things to a reader of the death screen.
+   */
+  | 'health'
   | 'award'
   | 'championship'
   | 'business'
@@ -145,3 +153,61 @@ export function groupByAge(
       entries: [...list].sort((a, b) => a.sequence - b.sequence),
     }));
 }
+
+/* -------------------------------------------------------------------------- */
+/* Life records — Ticket 0212                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A milestone, before it knows when it happened.
+ *
+ * The producer supplies the two things only it can know — what KIND of thing
+ * this was, and what to call it — and `advanceYear` (or the player action that
+ * caused it) stamps the age, the year and the id. That split is deliberate: a
+ * producer that had to invent its own id is sixteen producers inventing sixteen
+ * id schemes, which is the whole of CORE_RULES 13.31 and the reason
+ * `appendToTimeline` exists two hundred lines above this.
+ */
+export interface NewLifeRecord {
+  readonly category: LifeRecordCategory;
+  readonly label: string;
+  readonly referenceId?: string;
+}
+
+/**
+ * The one supported way into `records`.
+ *
+ * `records` was declared in Sprint Zero with the comment "structured history
+ * for dynasty records and the death summary", initialized to `[]`, and written
+ * by nothing for eleven tickets — the third instance of CORE_RULES 13.36 in
+ * this build, after `droppedOut` and `alive`. 0212 is the ticket that finally
+ * needed it, and discovered it was not building a death screen but building the
+ * thing the death screen had been assuming.
+ *
+ * Defensive in the same way the timeline door is, and for the same reason: two
+ * producers can legitimately both notice a marriage in one year, and a record
+ * list with the wedding in it twice is a highlights reel that says "Married
+ * Priya" and then says it again.
+ */
+export function appendRecord(
+  records: readonly LifeRecord[],
+  record: LifeRecord,
+): readonly LifeRecord[] {
+  if (records.some((existing) => existing.id === record.id)) return records;
+  return [...records, record];
+}
+
+/** Stamp a producer's record with when it happened. */
+export const stampRecord = (
+  record: NewLifeRecord,
+  age: number,
+  year: number,
+  ordinal = 0,
+): LifeRecord => ({
+  id: `r:${year}:${record.category}:${ordinal}`,
+  category: record.category,
+  age,
+  year,
+  label: record.label,
+  ...(record.referenceId !== undefined ? { referenceId: record.referenceId } : {}),
+});

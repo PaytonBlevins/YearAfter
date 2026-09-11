@@ -22,10 +22,14 @@
  */
 
 import {
+  appendRecord,
   appendToTimeline,
   createTimelineEntry,
+  stampRecord,
   type Character,
+  type LifeRecord,
   type TimelineEntry,
+  type TimelineKind,
 } from '@yearafter/character';
 import { asEventId, clampStat, dollars, type Money } from '@yearafter/core';
 import type { GameState } from './game-state';
@@ -36,6 +40,7 @@ import { runEmployment } from './phases/employment';
 import { runEvents } from './phases/events';
 import { partnerOf } from '@yearafter/social';
 import { runFamily } from './phases/family';
+import { runKin } from './phases/kin';
 import { runSocial } from './phases/social';
 import { runHealth } from './phases/health';
 import { runStress } from './phases/stress';
@@ -88,7 +93,37 @@ export function advanceYear(state: GameState): AdvanceResult {
   const nextAge = state.player.age + 1;
   const nextYear = state.world.year + 1;
 
-  // Education first: an event that fires this year should be able to read the
+  /*
+    Ticket 0212. Kin FIRST, and it is the only phase that was ever prepended.
+    Every other one was appended because it depended on what came before it;
+    this one goes first because it is the only phase that changes WHO EXISTS.
+    Run it last and somebody who died in January would still have been flirted
+    with, named by an event and promoted alongside the player, and would then
+    stop existing at the bottom of the same year.
+  */
+  /*
+    The kin phase needs a name source for the partner a child brings home, and
+    it has to come from the FAMILY's naming tradition rather than a global pool
+    — a grandchild called Beatriz in a household of Nakamuras is the same defect
+    0201 built `nameCultureId` to prevent. Drawn from the Family stream so it
+    cannot shift the relationship draws that decide who dies.
+  */
+  const kinNames = state.rng.stream(RngDomains.Family);
+  const kin = runKin({
+    family: state.family,
+    circle: state.circle,
+    stream: state.rng.stream(RngDomains.Relationships),
+    age: nextAge,
+    worldYear: nextYear,
+    nameFor: () => uniqueFirstName(kinNames, nameContext(
+      state.nameCultureId,
+      state.circle,
+      state.family,
+      state.player.firstName,
+    ), kinNames.chance(0.5) ? 'male' : 'female'),
+  });
+
+  // Education next: an event that fires this year should be able to read the
   // grade the character is now in, and a report-card event that arrives before
   // the report card is nonsense.
   const education = runEducation(state, nextAge);
@@ -96,7 +131,7 @@ export function advanceYear(state: GameState): AdvanceResult {
   // Then the class. Before events, so an event that fires this year can name
   // somebody who is actually in it — which is the whole of Ticket 0206.
   const social = runSocial({
-    circle: state.circle,
+    circle: kin.circle,
     stream: state.rng.stream(RngDomains.Relationships),
     age: nextAge,
     worldYear: nextYear,
@@ -104,7 +139,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     firstName: state.player.firstName,
     charisma: education.player.stats.charisma,
     personality: education.player.personality,
-    family: state.family,
+    family: kin.family,
     education: education.education,
     previousStage: state.education.stage,
     // Ticket 0210. The job the character walks into on the FIRST of January,
@@ -123,11 +158,11 @@ export function advanceYear(state: GameState): AdvanceResult {
   const names = nameContext(
     state.nameCultureId,
     social.circle,
-    state.family,
+    kin.family,
     state.player.firstName,
   );
   const family = runFamily({
-    family: state.family,
+    family: kin.family,
     parenting: state.parenting,
     stream: familyStream,
     age: nextAge,
@@ -175,6 +210,7 @@ export function advanceYear(state: GameState): AdvanceResult {
   // moving, and the stress those events contributed.
   const stress = runStress({
     player: events.player,
+    age: nextAge,
     family: events.family,
     education: { ...education.education, behaviour: clampStat(events.behaviour) },
     hours: education.hours,
@@ -217,102 +253,57 @@ export function advanceYear(state: GameState): AdvanceResult {
     checkedUp: state.health.checkedAtAge === state.player.age,
   });
 
-  const entries: TimelineEntry[] = [
-    ...education.lines.map((line, index) =>
-      createTimelineEntry({
-        age: nextAge,
-        year: nextYear,
-        kind: line.kind,
-        text: line.text,
-        id: `t:${nextYear}:school:${index}`,
-        sequence: index,
-      }),
-    ),
-    ...social.lines.map((line, index) =>
-      createTimelineEntry({
-        age: nextAge,
-        year: nextYear,
-        kind: line.kind,
-        text: line.text,
-        id: `t:${nextYear}:social:${index}`,
-        sequence: education.lines.length + index,
-      }),
-    ),
-    ...family.lines.map((line, index) =>
-      createTimelineEntry({
-        age: nextAge,
-        year: nextYear,
-        kind: line.kind,
-        text: line.text,
-        id: `t:${nextYear}:family:${index}`,
-        sequence: education.lines.length + social.lines.length + index,
-      }),
-    ),
-    ...employment.lines.map((line, index) =>
-      createTimelineEntry({
-        age: nextAge,
-        year: nextYear,
-        kind: line.kind,
-        text: line.text,
-        // NOT `:work:` — `workHarder` already writes `t:YEAR:work:N` when the
-        // player presses the button, and the two collided into duplicate
-        // timeline ids the moment somebody pushed in a year they were also
-        // paid. CORE_RULES 13.12, and the same duplicate-key class the player
-        // reported twice in 0207c, caught here by its own invariant test.
-        id: `t:${nextYear}:pay:${index}`,
-        sequence: education.lines.length + social.lines.length + family.lines.length + index,
-      }),
-    ),
-    ...events.lines.map((line, index) =>
-      createTimelineEntry({
-        age: nextAge,
-        year: nextYear,
-        kind: line.kind,
-        text: line.text,
-        eventId: asEventId(line.eventId),
-        sequence:
-          education.lines.length +
-          social.lines.length +
-          family.lines.length +
-          employment.lines.length +
-          index,
-      }),
-    ),
-    ...health.lines.map((line, index) =>
-      createTimelineEntry({
-        age: nextAge,
-        year: nextYear,
-        kind: line.kind,
-        text: line.text,
-        id: `t:${nextYear}:health:${index}`,
-        sequence:
-          education.lines.length +
-          social.lines.length +
-          family.lines.length +
-          employment.lines.length +
-          events.lines.length +
-          index,
-      }),
-    ),
-    // Last in the year, because it is the line about the year as a whole.
-    ...stress.lines.map((line, index) =>
-      createTimelineEntry({
-        age: nextAge,
-        year: nextYear,
-        kind: line.kind,
-        text: line.text,
-        id: `t:${nextYear}:stress:${index}`,
-        sequence:
-          education.lines.length +
-          social.lines.length +
-          family.lines.length +
-          employment.lines.length +
-          events.lines.length +
-          health.lines.length +
-          index,
-      }),
-    ),
-  ];
+  /*
+    Ticket 0212. This used to be one array literal whose `sequence` was a chain
+    of cumulative additions — `education.lines.length + social.lines.length +
+    family.lines.length + ...` — recopied and extended by hand in every writer.
+    It was correct, and it was correct the way a tower of coins is upright: the
+    eighth writer could not be added without editing seven other expressions,
+    and getting one of them wrong would have mis-ordered a year silently.
+
+    So the year is assembled in order now, with a counter. Same ids, same
+    ordering, and adding a ninth writer is one line instead of eight.
+  */
+  let sequence = 0;
+  const entries: TimelineEntry[] = [];
+  const write = (
+    lines: readonly { readonly kind: TimelineKind; readonly text: string; readonly eventId?: string }[],
+    id: (index: number) => string | undefined,
+  ) => {
+    lines.forEach((line, index) => {
+      const entryId = id(index);
+      entries.push(
+        createTimelineEntry({
+          age: nextAge,
+          year: nextYear,
+          kind: line.kind,
+          text: line.text,
+          ...(entryId !== undefined ? { id: entryId } : {}),
+          ...(line.eventId !== undefined ? { eventId: asEventId(line.eventId) } : {}),
+          sequence: sequence++,
+        }),
+      );
+    });
+  };
+
+  // Kin first, because it is the year's largest news and because the phase that
+  // produced it ran first. A death notice under a line about a promotion is the
+  // wrong way round.
+  write(kin.lines, (index) => `t:${nextYear}:kin:${index}`);
+  write(education.lines, (index) => `t:${nextYear}:school:${index}`);
+  write(social.lines, (index) => `t:${nextYear}:social:${index}`);
+  write(family.lines, (index) => `t:${nextYear}:family:${index}`);
+  // NOT `:work:` — `workHarder` already writes `t:YEAR:work:N` when the player
+  // presses the button, and the two collided into duplicate timeline ids the
+  // moment somebody pushed in a year they were also paid. CORE_RULES 13.12, and
+  // the same duplicate-key class the player reported twice in 0207c, caught
+  // here by its own invariant test.
+  write(employment.lines, (index) => `t:${nextYear}:pay:${index}`);
+  // Events carry their own id, assigned by the event engine.
+  write(events.lines, () => undefined);
+  write(health.lines, (index) => `t:${nextYear}:health:${index}`);
+  // Last in the year, because it is the line about the year as a whole.
+  write(stress.lines, (index) => `t:${nextYear}:stress:${index}`);
 
   // ---- the year's line budget --------------------------------------------
   //
@@ -370,9 +361,35 @@ export function advanceYear(state: GameState): AdvanceResult {
     // says honestly how far behind the year went.
     cash: earnedThisYear(stress.player.cash, family.gifted, employment.saved),
     // Folded rather than spread, so the year's own lines are checked against
-    // each other as well as against the life before them (0211a). Six phases
+    // each other as well as against the life before them (0211a). Seven phases
     // write here and none of them can see what the others chose.
     timeline: budgeted.reduce(appendToTimeline, state.player.timeline),
+    /*
+      Ticket 0212. `records` finally gets written, eleven tickets after it was
+      declared (CORE_RULES 13.36).
+
+      Stamped HERE and nowhere else, for the same reason `appendToTimeline`
+      exists: a producer that invents its own id is one of several producers
+      inventing several id schemes. A phase says WHAT happened and what kind of
+      thing it was; this is the only place that knows when, and the ordinal
+      keeps two records of the same category in one year apart — twins, or a
+      degree finished in the year a parent died.
+
+      NOT budgeted. The line budget is about a feed a person reads in one
+      screen; the records are structured history, five of which are shown at the
+      end of eighty years. Capping them would mean losing a marriage to make
+      room for a promotion, permanently, in the only place the game keeps it.
+    */
+    records: [
+      ...kin.records,
+      ...education.records,
+      ...family.records,
+      ...employment.records,
+      ...health.records,
+    ].reduce<readonly LifeRecord[]>(
+      (all, record, index) => appendRecord(all, stampRecord(record, nextAge, nextYear, index)),
+      state.player.records,
+    ),
   };
 
   return {

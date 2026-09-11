@@ -247,6 +247,10 @@ export function howLong(person: Acquaintance, playerAge: number): string {
 }
 
 function endedLabel(person: Acquaintance): string {
+  // Ticket 0212. 'died' first, because it is the one reason that is not a
+  // relationship ending — and the only one where "you were 61" is the sentence
+  // a person would actually say about it.
+  if (person.endedBecause === 'died') return `They died · you were ${person.endedAtAge}`;
   const how =
     person.endedBecause === 'fell out'
       ? 'Fell out'

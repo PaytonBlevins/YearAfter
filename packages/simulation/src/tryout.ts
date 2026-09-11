@@ -13,8 +13,10 @@
  */
 
 import {
+  appendRecord,
   appendToTimeline,
   createTimelineEntry,
+  stampRecord,
   type Character,
   type TimelineEntry,
 } from '@yearafter/character';
@@ -81,6 +83,33 @@ export function tryOut(state: GameState, activityId: string): Result<TryoutOutco
   const player: Character = {
     ...state.player,
     timeline: appendToTimeline(state.player.timeline, entry),
+    /*
+      Ticket 0212. Making a competitive team is a record, and it is the one a
+      PASSIVE childhood can plausibly reach.
+
+      Measured before adding it: a life where the player only presses Advance
+      finished with a median of THREE records, two of which were "Lost Dad" and
+      "Lost Mom". A highlights reel of a graduation and two funerals is an
+      accurate summary of nothing anybody did, and spec 1284 asks for highlights
+      rather than an obituary. Failing a tryout is not recorded — it is a line
+      in the feed, which is where a thing you tried belongs.
+    */
+    ...(result.made
+      ? {
+          records: appendRecord(
+            state.player.records,
+            stampRecord(
+              {
+                category: 'championship',
+                label: `Made the ${activity.name.toLowerCase()} team`,
+                referenceId: activity.id,
+              },
+              state.player.age,
+              state.world.year,
+            ),
+          ),
+        }
+      : {}),
   };
 
   // Making a team puts you next to the people on it (Ticket 0206b). Reading

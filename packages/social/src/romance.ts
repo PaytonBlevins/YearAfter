@@ -65,7 +65,7 @@ export interface Romance {
   readonly since: number;
   /** The player's age when it ended, if it did. */
   readonly endedAtAge?: number;
-  readonly endedBecause?: 'broke up' | 'they ended it' | 'drifted' | 'divorced';
+  readonly endedBecause?: 'broke up' | 'they ended it' | 'drifted' | 'divorced' | 'died';
 }
 
 /** Stages a character of this age may reach. Adult ones are simply absent. */

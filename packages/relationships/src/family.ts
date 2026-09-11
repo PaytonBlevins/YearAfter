@@ -28,6 +28,35 @@ export interface FamilyMember extends Npc {
   readonly arrivedWhenPlayerWas?: number;
   readonly arrivedBy?: 'birth' | 'adoption';
   /**
+   * Ticket 0212. The PLAYER's age when this person died.
+   *
+   * Stored rather than derived, for the same reason `arrivedWhenPlayerWas` is:
+   * `alive: false` says that they died, and nothing in the household says when.
+   * Grief is the thing that needs it — the stress model had been charging a
+   * flat, PERMANENT penalty for a dead parent since 0205, which the moment NPCs
+   * became mortal turned into every character over forty carrying twenty-two
+   * points of stress for the rest of their life about something that happened
+   * in another decade. Measured: it pulled the player's own p10 age at death
+   * from 62 down to 55.
+   *
+   * Their own age at death is derivable from this plus their birth year, so
+   * only one number is stored.
+   */
+  readonly diedWhenPlayerWas?: number;
+  /**
+   * Ticket 0212. For a CHILD: the life they have been living while you lived
+   * yours — school, a job, a partner, their own children, and about twenty
+   * lines of their own timeline.
+   *
+   * Typed as `unknown` here on purpose. `@yearafter/relationships` is below
+   * `@yearafter/parenting` in the dependency order and importing upwards would
+   * invert it; the shape is `OffspringLife` and the parenting package owns it.
+   * The alternative — moving the type down here — would drag school stages,
+   * career rungs and a copy budget into the package that knows what a sibling
+   * is, which is worse.
+   */
+  readonly life?: unknown;
+  /**
    * For a child: the other parent, as their id in the social circle.
    *
    * A REFERENCE, not a copy. The partner is an `Acquaintance` and stays one —
