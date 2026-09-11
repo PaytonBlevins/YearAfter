@@ -84,6 +84,11 @@ const TOKEN_GUARDS: Record<string, string[]> = {
   parents: ['bothParents'],
   sibling: ['sibling', 'siblings2', 'olderSibling'],
   siblingRel: ['sibling', 'siblings2', 'olderSibling'],
+  // Ticket 0211b. Same guard as {sibling}: copy cannot say "she" about
+  // somebody the eligibility did not guarantee exists.
+  siblingThey: ['sibling', 'siblings2', 'olderSibling'],
+  siblingThem: ['sibling', 'siblings2', 'olderSibling'],
+  siblingTheir: ['sibling', 'siblings2', 'olderSibling'],
   olderSibling: ['olderSibling'],
 };
 

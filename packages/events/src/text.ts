@@ -66,6 +66,18 @@ export const TEXT_TOKENS = [
   'parentThey',
   'parentThem',
   'parentTheir',
+  // The sibling `{sibling}` resolved to. Ticket 0211b, reading a played
+  // childhood: "Cristina paid you back over four months out of sister's own
+  // allowance" and "Sister tried to refuse and you made him take it." The first
+  // used `{siblingRel}` — which renders the RELATION, "sister" — where a
+  // possessive pronoun belongs; the second used `{them}`, which is the
+  // PLAYER's pronoun, about a girl. Every guard in the build was looking for a
+  // bare "him" or "her" typed into the copy, and neither line has one: the
+  // wrong TOKEN is invisible to a rule that only reads words. Siblings now have
+  // their own pronouns, like every other named person.
+  'siblingThey',
+  'siblingThem',
+  'siblingTheir',
   'kid2They',
   'kid2Them',
   'kid2Their',
@@ -357,6 +369,9 @@ export function renderEvent(
     fatherName: dad?.firstName,
     sibling: sibling?.firstName,
     siblingRel: sibling ? (sibling.sex === 'male' ? 'brother' : 'sister') : undefined,
+    siblingThey: sibling ? (sibling.sex === 'male' ? 'he' : 'she') : undefined,
+    siblingThem: sibling ? (sibling.sex === 'male' ? 'him' : 'her') : undefined,
+    siblingTheir: sibling ? (sibling.sex === 'male' ? 'his' : 'her') : undefined,
     olderSibling: older?.firstName,
     city: context.homeCity,
     kid: kid?.name,
@@ -408,6 +423,9 @@ const FALLBACKS: Record<string, string> = {
   fatherName: 'your dad',
   sibling: 'your sibling',
   siblingRel: 'sibling',
+  siblingThey: 'they',
+  siblingThem: 'them',
+  siblingTheir: 'their',
   parentThey: 'they',
   parentThem: 'them',
   parentTheir: 'their',

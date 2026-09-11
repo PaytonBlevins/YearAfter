@@ -85,7 +85,15 @@ interface Row {
    * a row opens a screen or acts in place.
    */
   readonly affordance?: RowAffordance;
-  /** Ticket that builds this. Present means the row is a shell, not a system. */
+  /**
+   * Ticket that builds this. Present means the row is a shell, not a system.
+   *
+   * This value is for US. It is NOT rendered — Ticket 0211b found a
+   * forty-year-old character opening Activities and reading "Crime · Ticket
+   * 0901", which is CORE_RULES 13.24 in the plainest possible form, six tickets
+   * after that rule was written about one instance of it. An unbuilt row says
+   * so in words a player understands.
+   */
   readonly ticket?: string;
 }
 
@@ -99,7 +107,7 @@ function RowGroup({ rows }: { rows: readonly Row[] }) {
           <ListRow
             icon={row.icon}
             title={row.title}
-            subtitle={row.ticket ? `Ticket ${row.ticket}` : row.subtitle}
+            subtitle={row.ticket ? 'Not built yet' : row.subtitle}
             value={row.value}
             affordance={row.affordance ?? 'navigate'}
             disabled={!row.route}
@@ -698,12 +706,10 @@ export function RelationshipsScreen() {
           },
         ]}
       />
-      <View style={styles.note}>
-        <Text style={styles.noteText}>
-          Professional relationships stay in their own worlds — coaches in sports, agents in acting,
-          employees in business, tenants in property.
-        </Text>
-      </View>
+      {/* Professional relationships stay in their own worlds — coaches in
+          sports, agents in acting, employees in business, tenants in property
+          (spec 1305–1309). That is a rule for us, not a caption for a player,
+          and it used to be printed under this menu. */}
     </Screen>
   );
 }
@@ -778,9 +784,8 @@ export function ActivitiesScreen() {
           { icon: 'estate', title: 'Will & Estate', affordance: 'action', ticket: '0212' },
         ]}
       />
-      <View style={styles.note}>
-        <Text style={styles.noteText}>15 rows — within the 10–16 target (spec 879–943).</Text>
-      </View>
+      {/* 15 rows — within the 10–16 target (spec 879–943). A note to us, so it
+          lives in a comment. It used to be printed under the menu. */}
     </Screen>
   );
 }
@@ -804,11 +809,7 @@ export function MindBodyScreen() {
           { title: 'Walk', affordance: 'action', ticket: '0205' },
         ]}
       />
-      <View style={styles.note}>
-        <Text style={styles.noteText}>
-          Martial Arts lives here, not as a top-level activity (spec 879–943).
-        </Text>
-      </View>
+      {/* Martial Arts lives here, not as a top-level activity (spec 879–943). */}
     </Screen>
   );
 }
@@ -945,9 +946,10 @@ export function DebugScreen() {
 
       <View style={styles.note}>
         {/* Age, cash, attributes, talents, career, fame and event injection are Ticket 1180. */}
+        {/* Spec 1264–1281 is where these tools come from. */}
         <Text style={styles.noteText}>
-          Development-only tools (spec 1264–1281). Age, cash, attributes, talents, career, fame and
-          event injection are not wired up yet.
+          Development-only tools. Age, cash, attributes, talents, career, fame and event injection
+          are not wired up yet.
         </Text>
       </View>
     </Screen>

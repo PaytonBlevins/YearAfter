@@ -164,7 +164,16 @@ const BRITISH = [
   ['jumper', 'sweater'],
   ['torch', 'flashlight'],
   ['queue', 'line'],
-  ['holiday', 'vacation'],
+  // NOT bare 'holiday'. It has two senses and only one of them is British: a
+  // trip ("on holiday") is, a day off work ("a national holiday") is ordinary
+  // American English. The bare entry is what MADE the 0211b defect — it
+  // rejected the correct word and the sweep obligingly wrote "public vacation".
+  // Scope the rule to the sense, or the rule writes the bug (CORE_RULES 13.35).
+  ['on holiday', 'on vacation'],
+  ['summer holidays', 'summer vacation'],
+  ['school holidays', 'school vacation'],
+  ['family holiday', 'family vacation'],
+  ['holiday home', 'vacation home'],
   ['learnt', 'learned'],
   ['amongst', 'among'],
   ['solicitor', 'lawyer'],
@@ -185,6 +194,14 @@ const BRITISH = [
   ['in hospital', 'in the hospital'],
   ['sports hall', 'gym'],
   ['car park', 'parking lot'],
+  // Ticket 0211b, found by reading a played childhood — both had shipped since
+  // 0203b and neither was on any list. "on the coach" is a school bus; the
+  // BARE word is not flagged, because a sports coach is the more common sense
+  // in this game and a rule that fires on correct copy is a rule somebody
+  // deletes (13.35).
+  ['year group', 'grade'],
+  ['on the coach', 'on the bus'],
+  ['by coach', 'by bus'],
   // NOT 'trial': "a trial run" for a dog is ordinary English, and the tryout
   // sense is the only British one. A rule that fires on correct copy is a rule
   // somebody deletes, which is worse than not having it.
@@ -197,11 +214,25 @@ const BRITISH = [
  * cannot follow "a". Both shipped, and both read as perfect American English to
  * every rule that was looking for British English — which is why this looks at
  * grammar rather than at vocabulary.
+ *
+ * Ticket 0211b found a FOURTH, three tickets after the first three, by reading a
+ * played childhood: *"Slept through the night for the first time. The household
+ * treated it as a public vacation."* That is `holiday` → `vacation` landing on
+ * the wrong sense, and it is grammatical, so the two shapes above could never
+ * see it. The third arm below is therefore about COLLOCATION rather than
+ * grammar: `vacation` is the time off, `holiday` is the day itself, and the
+ * modifiers that pick out a day never take `vacation`.
+ *
+ * `summer vacation` and `school vacation` are deliberately absent — those are
+ * ordinary American English, and a rule that fires on correct copy is a rule
+ * somebody deletes.
  */
 const SWEPT_IN = new RegExp(
   '\\b(?:completely|entirely|absolutely|perfectly|totally)\\s+' +
     '(?:apartment|sweater|flashlight|sidewalk|hallway|vacation|cookie|candy)\\b' +
-    '|\\ba\\s+(?:bangs|sneakers|trousers|scissors|chips)\\b',
+    '|\\ba\\s+(?:bangs|sneakers|trousers|scissors|chips)\\b' +
+    '|\\b(?:public|bank|national|federal|legal|religious)\\s+vacation\\b' +
+    '|\\bvacation\\s+(?:season|spirit|cheer|decorations)\\b',
   'gi',
 );
 
@@ -343,8 +374,34 @@ for (const root of SOURCE_ROOTS) {
     // Comments are stripped first, so the rule sees only JSX text and string
     // literals — a ticket reference in a header comment is documentation and
     // stays welcome.
-    if (rel.startsWith('apps/') && /Ticket\s+\d{4}/.test(stripComments(source))) {
+    //
+    // Ticket 0211b: the literal form was only half the rule. `Ticket ${row.ticket}`
+    // has no four-digit number in it, so twenty-eight unbuilt rows on the
+    // Activities, Assets and Mind & Body screens rendered "Ticket 0901",
+    // "Ticket 1003", "Ticket 0212" straight to a forty-year-old player, for six
+    // tickets after 13.24 was written about exactly this. A rule that matches
+    // the string a developer typed and not the string a player reads is half a
+    // rule (13.23, 13.35). It now matches the interpolation too.
+    if (rel.startsWith('apps/') && /Ticket\s+(?:\d{4}|\$\{)/.test(stripComments(source))) {
       fail(rel, 'a ticket number appears in player-facing text. Say what the screen does instead.');
+    }
+
+    // V17 — a spec citation never reaches the player either.
+    //
+    // Same ticket, same screens, same class: "15 rows — within the 10–16 target
+    // (spec 879–943)" and "Martial Arts lives here, not as a top-level activity
+    // (spec 879–943)" were notes to a reviewer rendered underneath a player's
+    // menu. Comments are stripped first, so a spec reference in documentation
+    // is untouched — only one that survives into rendered text fails.
+    //
+    // The developer screen is exempt BY PATH, because it is the one screen
+    // whose audience is a developer.
+    if (
+      rel.startsWith('apps/') &&
+      !/DeveloperScreen/i.test(rel) &&
+      /\bspec\s+\d{2,4}/i.test(stripComments(source).replace(/DEV_[A-Z_]*/g, ''))
+    ) {
+      fail(rel, 'a spec reference appears in player-facing text. Cut it or say it in plain words.');
     }
 
     // Spec 1247-1263 — placeholder work must be labelled, not silently shipped.

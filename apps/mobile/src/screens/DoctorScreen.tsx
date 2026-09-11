@@ -8,41 +8,43 @@
  * chores". Spec 1030 folds mental health into Happiness and Stress rather than
  * a second system.
  *
- * So this screen is three short answers to three questions a person actually
- * asks about their own body:
+ * So this screen is two short answers to the two questions a person actually
+ * asks at a doctor's office:
  *
- *   HOW ARE YOU        — the band, in words, and the bar. Never the number
- *                        (spec 786–795), the same rule grades and job
- *                        performance follow.
- *   WHAT IS WRONG      — the conditions, and whether anybody is on them.
+ *   WHAT'S WRONG       — the conditions, and whether anybody is on them.
  *   WHAT YOU CAN DO    — one button.
  *
  * There is no screening schedule, no fitness plan, no diet and no insurance,
  * because every one of those is the chore the spec deletes. Fertility already
  * lives in Family (0208) and Rehab waits on an addiction system that does not
  * exist; the shell rows for those stay labelled rather than pretending.
+ *
+ * Ticket 0211b removed a third section. It was headed "How you are" and it held
+ * one row reading "Not what you were", and the product owner's note on it was
+ * the shortest of the whole review: *"That is odd for real life people to read.
+ * There probably doesn't even need to be anything there."* He was right twice
+ * over — the phrasing was a verdict rather than a fact (writing rule 10), and
+ * the Health bar is on screen at the bottom of every screen in the game
+ * already, so the section was a caption for a number the player could see.
+ * Rewriting the words would have kept the caption. It is gone instead.
+ *
+ * The explanatory paragraph under the button went with it. It said, at length,
+ * that there was nothing here to keep on top of — which a screen with two rows
+ * has already demonstrated (CORE_RULES 13.29).
  */
 
 import { Fragment } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import {
-  HEALTH_LABELS,
-  SEVERITY_LABELS,
-  bandOf,
-  findCondition,
-  type HeldCondition,
-} from '@yearafter/health';
+import { ScrollView, StyleSheet } from 'react-native';
+import { SEVERITY_LABELS, findCondition, type HeldCondition } from '@yearafter/health';
 import { canSeeDoctor } from '@yearafter/simulation';
 import { Card, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
-import { colors, spacing, typography } from '../theme/theme';
+import { colors, spacing } from '../theme/theme';
 
 export function DoctorScreen() {
   const { state, visitDoctor, treatFor, stopTreatingFor } = useGame();
   if (!state) return null;
 
-  const health = state.player.stats.health;
-  const band = bandOf(health);
   const conditions = state.health.conditions;
   const canVisit = canSeeDoctor(state);
 
@@ -52,35 +54,32 @@ export function DoctorScreen() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      <SectionHeading>How you are</SectionHeading>
+      <SectionHeading {...(conditions.length > 0 ? { note: `${conditions.length}` } : {})}>
+        What&apos;s wrong
+      </SectionHeading>
       <Card>
-        <ListRow
-          icon="doctor"
-          title={HEALTH_LABELS[band]}
-          affordance="none"
-          meter={health}
-          meterColor={band === 'failing' || band === 'poor' ? colors.negative : colors.statHealth}
-        />
+        {conditions.length > 0 ? (
+          conditions.map((held, index) => (
+            <Fragment key={held.conditionId}>
+              {index > 0 ? <RowDivider /> : null}
+              <ConditionRow
+                held={held}
+                age={state.player.age}
+                onTreat={() => treatFor(held.conditionId)}
+                onStop={() => stopTreatingFor(held.conditionId)}
+              />
+            </Fragment>
+          ))
+        ) : (
+          /*
+            The empty state is a sentence, not a hidden section. A heading that
+            disappears when the answer is "nothing" makes the player wonder
+            whether the screen is broken; a row that says nothing is wrong has
+            answered the question they opened it to ask.
+          */
+          <ListRow icon="doctor" title="Nothing's wrong with you right now" affordance="none" />
+        )}
       </Card>
-
-      {conditions.length > 0 ? (
-        <>
-          <SectionHeading note={`${conditions.length}`}>What is wrong</SectionHeading>
-          <Card>
-            {conditions.map((held, index) => (
-              <Fragment key={held.conditionId}>
-                {index > 0 ? <RowDivider /> : null}
-                <ConditionRow
-                  held={held}
-                  age={state.player.age}
-                  onTreat={() => treatFor(held.conditionId)}
-                  onStop={() => stopTreatingFor(held.conditionId)}
-                />
-              </Fragment>
-            ))}
-          </Card>
-        </>
-      ) : null}
 
       <SectionHeading>What you can do</SectionHeading>
       <Card>
@@ -100,13 +99,6 @@ export function DoctorScreen() {
           onPress={canVisit ? visitDoctor : undefined}
         />
       </Card>
-
-      <View style={styles.note}>
-        <Text style={styles.noteText}>
-          There's nothing here you need to keep on top of. Check-ups happen in the background, and
-          how you're doing comes down to your age and what's already happened to you.
-        </Text>
-      </View>
     </ScrollView>
   );
 }
@@ -152,11 +144,4 @@ function ConditionRow({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: spacing.xxl },
-  note: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
-  noteText: {
-    fontFamily: typography.family,
-    fontSize: typography.sizes.caption,
-    lineHeight: typography.lineHeights.caption,
-    color: colors.inkFaint,
-  },
 });

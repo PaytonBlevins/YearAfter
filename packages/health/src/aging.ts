@@ -102,38 +102,23 @@ export function ageingLoss(age: number): number {
   return SLOW_DECLINE + past * FAST_DECLINE_PER_YEAR;
 }
 
-/**
- * How a life is going, in words.
- *
- * Spec 786–795: explain outcomes through context rather than formulas, which is
- * the same rule the school card follows for grades and the Career screen for
- * performance. The player sees the bar and this sentence, never the arithmetic
- * above.
- */
-export type HealthBand = 'well' | 'fine' | 'wearing' | 'poor' | 'failing';
-
-export function bandOf(health: number): HealthBand {
-  if (health >= 72) return 'well';
-  if (health >= 55) return 'fine';
-  if (health >= 38) return 'wearing';
-  if (health >= 20) return 'poor';
-  return 'failing';
-}
-
 /*
- * Ticket 0211b rewrote these. The product owner, reading "Not what you were"
- * on the Doctor screen: *"That is odd for real life people to read. There
- * probably doesn't even need to be anything there."*
+ * There was a `HealthBand` type, a `bandOf()` and a `HEALTH_LABELS` table here.
+ * Ticket 0211b deleted all three.
  *
- * He is right about the register and half right about the row. The bar already
- * says how much; what the words have to add is what that AMOUNT MEANS, in the
- * sentence a person would actually use about themselves. "Not what you were" is
- * a line from a novel. "You're getting older" is a thing people say.
+ * They existed to caption the Health bar on the Doctor screen — "Not what you
+ * were", then, after a first pass at the copy, "You're getting older". The
+ * product owner's note was the shortest of the review: *"That is odd for real
+ * life people to read. There probably doesn't even need to be anything there."*
+ *
+ * The first instinct was to rewrite the words, and that is what the first pass
+ * did. It was wrong: the Health bar sits at the bottom of EVERY screen in the
+ * game, so the row was a label on a number the player was already looking at,
+ * and no wording fixes that. The row went, and with nothing left to call the
+ * bands, the bands went too. A five-value enum with one dead consumer is
+ * CORE_RULES 13.7 waiting to happen.
+ *
+ * If a later ticket wants health in words — 0212's life summary is the obvious
+ * candidate — it should write the words for that screen, not resurrect a
+ * general-purpose vocabulary nobody asked for.
  */
-export const HEALTH_LABELS: Readonly<Record<HealthBand, string>> = {
-  well: "You're healthy",
-  fine: "You're doing fine",
-  wearing: "You're getting older",
-  poor: "Something's wrong",
-  failing: "You're very sick",
-};

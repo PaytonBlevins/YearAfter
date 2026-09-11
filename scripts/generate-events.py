@@ -23,6 +23,7 @@ ticket is 250-500. See the assertion in `check()`.
 
 Text tokens available, all resolved in packages/events/src/text.ts:
   {me} {mother} {father} {parent} {parents} {sibling} {siblingRel}
+  {siblingThey} {siblingThem} {siblingTheir}
   {olderSibling} {city} {kid} {kid2} {adult} {they} {them} {their}
   {motherName} {fatherName}
 
@@ -134,6 +135,15 @@ TOKEN_GUARDS = {
     "parents": {"bothParents"},
     "sibling": {"sibling", "siblings2", "olderSibling"},
     "siblingRel": {"sibling", "siblings2", "olderSibling"},
+    # The sibling's own pronouns. Ticket 0211b: {siblingRel} renders the
+    # RELATION ("sister"), and shipped copy used it where a possessive pronoun
+    # belonged — "out of sister's own allowance" — while another line reached for
+    # {them}, the PLAYER's pronoun, and called a girl "him". Same guard as
+    # {sibling}: the copy cannot say "she" about somebody eligibility did not
+    # guarantee.
+    "siblingThey": {"sibling", "siblings2", "olderSibling"},
+    "siblingThem": {"sibling", "siblings2", "olderSibling"},
+    "siblingTheir": {"sibling", "siblings2", "olderSibling"},
     "olderSibling": {"olderSibling"},
 }
 FREE_TOKENS = {"me", "city", "they", "them", "their"} | set(PERSON_OF)
@@ -362,7 +372,7 @@ E("family.inf.first-steps", "family", [
 ], age_min=1, age_max=2, weight=14, effects=FX(stats={"health": 1, "willpower": 1}))
 
 E("family.inf.slept-through", "family", [
-    "Slept through the night for the first time. The household treated it as a public vacation.",
+    "Slept through the night for the first time. The whole house acted like it was a national holiday.",
 ], age_min=0, age_max=1, requires=["anyParent"], weight=12,
    effects=FX(stats={"health": 1}, relationship={"parents": 2}))
 
@@ -569,7 +579,7 @@ E("family.mc.second-job", "family", [
    effects=FX(stats={"happiness": -1, "discipline": 2}, relationship={"parents": 1}))
 
 E("family.mc.family-holiday", "family", [
-    "A proper vacation. Sunburn, a rented car, and photographs that get better with age.",
+    "An actual vacation. Sunburn, a rental car, and photos that get better every year you look at them.",
 ], age_min=4, age_max=17, requires=["anyParent"], weight=10, cooldown=4,
    wealth_any=["comfortable", "affluent", "wealthy"],
    effects=FX(stats={"happiness": 4}, relationship={"family": 2}))
@@ -776,7 +786,7 @@ E("school.new-school", "school", [
 
 E("school.field-trip", "school", [
     "A field trip to a museum, remembered mostly for the bus.",
-    "A field trip where somebody was sick on the coach and it wasn't you.",
+    "A field trip where somebody threw up on the bus and it wasn't you.",
 ], age_min=6, age_max=14, weight=12, cooldown=2,
    effects=FX(stats={"smarts": 1, "happiness": 2}))
 
@@ -982,7 +992,7 @@ E("friend.defended", "friendship", [
    effects=FX(stats={"happiness": 5, "charisma": 1}))
 
 E("friend.first-crush", "friendship", [
-    "Developed a crush that was total, silent, and known to the entire year group.",
+    "Developed a crush that was total, silent, and known to your entire grade.",
 ], age_min=10, age_max=16, weight=13, cooldown=3,
    effects=FX(stats={"happiness": 2, "charisma": 1}))
 
@@ -1430,7 +1440,7 @@ E("random.snow-day", "random", [
 
 E("random.embarrassment", "random", [
     "Called a teacher 'mom' in front of everybody and has never fully recovered.",
-    "Tripped on a completely flat surface in front of the entire year group.",
+    "Tripped on a completely flat surface in front of your entire grade.",
     "Waved at somebody who was waving at the person behind you.",
 ], age_min=6, age_max=17, weight=12, cooldown=2,
    effects=FX(stats={"happiness": -2, "charisma": 1}))
@@ -1930,7 +1940,7 @@ D("d.family.broken-bowl", "family", [
 ], age_min=6, age_max=16, weight=13, requires=["sibling", "mother"], person_tokens=[])
 
 D("d.family.birthday-money", "family", [
-    "It's your birthday. {sibling} gave you $25 saved up from {siblingRel}'s own allowance. What do you do with it?",
+    "It's your birthday. {sibling} gave you $25 saved up from {siblingTheir} own allowance. What do you do with it?",
 ], [
     C("spend", "Spend it all today", outcomes=[
         OUT(6, "Blew the whole $25 on comics and candy at the corner store in one afternoon. Worth it.",
@@ -1944,7 +1954,7 @@ D("d.family.birthday-money", "family", [
       text="Put the $25 birthday money in the coffee can under your bed and left it there.",
       effects=FX(stats={"happiness": 2, "discipline": 4, "willpower": 2})),
     C("split", "Give half back to {sibling}",
-      text="Gave {sibling} back half the birthday money, $12. {SiblingRel} tried to refuse and you made {them} take it.",
+      text="Gave {sibling} back half the birthday money, $12. {SiblingThey} tried to refuse and you made {siblingThem} take it.",
       effects=FX(cash=CASH(-12, "half the birthday money, given back to {sibling}"),
                  stats={"happiness": 5}, relationship={"siblings": 10})),
 ], age_min=7, age_max=16, weight=12, cooldown=6, requires=["sibling"],
@@ -2139,8 +2149,8 @@ D("d.family.sibling-broke-it", "family", [
       text="You said it was fine. {sibling} knew you didn't mean it, which was the whole point.",
       effects=FX(stats={"happiness": -1, "willpower": 4}, relationship={"siblings": 7})),
     C("make-pay", "Make {sibling} replace it", outcomes=[
-        OUT(5, "{sibling} paid you back over four months out of {siblingRel}'s own allowance. $18, in coins.",
-            FX(cash=CASH(18, "{sibling} paying you back for what {siblingRel} broke"),
+        OUT(5, "{sibling} paid you back over four months out of {siblingTheir} own allowance. $18, in coins.",
+            FX(cash=CASH(18, "{sibling} paying you back for what {siblingThey} broke"),
                stats={"happiness": 2, "discipline": 2}, relationship={"siblings": -2})),
         OUT(5, "{sibling} agreed to pay you back and never did, and you brought it up for years.",
             FX(stats={"happiness": -3}, relationship={"siblings": -5})),
@@ -3448,6 +3458,48 @@ def check_text(problems: list[str], event: dict, text: str, where: str, choice=N
             f"cannot know the sex — use {{kidThey}}/{{kidThem}}/{{kidTheir}} "
             f"(or the kid2/adult forms), which are resolved from the name."
         )
+
+    # Ticket 0211b — the same rule, for the sibling.
+    #
+    # {sibling} is a real person with a known sex and was not in PERSON_OF, so
+    # the check above never looked at it. Two lines shipped: "Sister tried to
+    # refuse and you made him take it" — {them}, the PLAYER's pronoun, about a
+    # girl — and "out of sister's own allowance", which used the RELATION word
+    # where a possessive pronoun belongs. Neither contains a bare "him" or
+    # "her", so every guard in the build was blind to both: a wrong TOKEN is
+    # invisible to a rule that only reads words (CORE_RULES 13.35).
+    if "sibling" in tokens and tokens & PLAYER_PRONOUNS:
+        problems.append(
+            f"{event['id']}: {where} names {{sibling}} AND uses a player pronoun — "
+            f"{{they}}/{{them}}/{{their}} are the player's. Use {{siblingThey}}, "
+            f"{{siblingThem}} or {{siblingTheir}}."
+        )
+    if "sibling" in tokens and BARE_PRONOUN_RE.search(TOKEN_RE.sub(" ", text)):
+        problems.append(
+            f"{event['id']}: {where} names {{sibling}} and then writes a bare "
+            f"'he'/'she'/'him'/'her'. A sibling can be either — use "
+            f"{{siblingThey}}/{{siblingThem}}/{{siblingTheir}}."
+        )
+
+    # A relation word is not a pronoun.
+    #
+    # {siblingRel} renders "brother" or "sister". Two shapes are always wrong
+    # and neither can appear in correct copy, which is why they are checked
+    # exactly rather than by judgement:
+    #   {siblingRel}'s  — a possessive pronoun's job. "out of sister's own
+    #                     allowance" reads as a stranger's allowance.
+    #   {SiblingRel}    — a sentence subject's job. "Sister tried to refuse."
+    for rel in ("siblingRel",):
+        if f"{{{rel}}}'s" in text:
+            problems.append(
+                f"{event['id']}: {where} writes {{{rel}}}'s, but {{{rel}}} renders a "
+                f"relation ('sister'), not a name. Use {{siblingTheir}}."
+            )
+        if f"{{{rel[0].upper()}{rel[1:]}}}" in text:
+            problems.append(
+                f"{event['id']}: {where} opens a sentence with {{{rel[0].upper()}{rel[1:]}}}, "
+                f"which renders 'Sister'. Use {{SiblingThey}}."
+            )
 
     # A line that says {parent} cannot then write a bare "she" or "they".
     #

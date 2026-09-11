@@ -106,7 +106,7 @@
       },
       "weight": 12,
       "text": [
-        "Slept through the night for the first time. The household treated it as a public vacation."
+        "Slept through the night for the first time. The whole house acted like it was a national holiday."
       ],
       "effects": {
         "stats": {
@@ -1122,7 +1122,7 @@
       "weight": 10,
       "cooldown": 4,
       "text": [
-        "A proper vacation. Sunburn, a rented car, and photographs that get better with age."
+        "An actual vacation. Sunburn, a rental car, and photos that get better every year you look at them."
       ],
       "effects": {
         "stats": {
@@ -2131,7 +2131,7 @@
       "cooldown": 2,
       "text": [
         "A field trip to a museum, remembered mostly for the bus.",
-        "A field trip where somebody was sick on the coach and it wasn't you."
+        "A field trip where somebody threw up on the bus and it wasn't you."
       ],
       "effects": {
         "stats": {
@@ -3012,7 +3012,7 @@
       "weight": 13,
       "cooldown": 3,
       "text": [
-        "Developed a crush that was total, silent, and known to the entire year group."
+        "Developed a crush that was total, silent, and known to your entire grade."
       ],
       "effects": {
         "stats": {
@@ -4755,7 +4755,7 @@
       "cooldown": 2,
       "text": [
         "Called a teacher 'mom' in front of everybody and has never fully recovered.",
-        "Tripped on a completely flat surface in front of the entire year group.",
+        "Tripped on a completely flat surface in front of your entire grade.",
         "Waved at somebody who was waving at the person behind you."
       ],
       "effects": {
@@ -6867,7 +6867,7 @@
       "weight": 12,
       "cooldown": 6,
       "text": [
-        "It's your birthday. {sibling} gave you $25 saved up from {siblingRel}'s own allowance. What do you do with it?"
+        "It's your birthday. {sibling} gave you $25 saved up from {siblingTheir} own allowance. What do you do with it?"
       ],
       "effects": {
         "cash": {
@@ -6926,7 +6926,7 @@
         {
           "id": "split",
           "label": "Give half back to {sibling}",
-          "text": "Gave {sibling} back half the birthday money, $12. {SiblingRel} tried to refuse and you made {them} take it.",
+          "text": "Gave {sibling} back half the birthday money, $12. {SiblingThey} tried to refuse and you made {siblingThem} take it.",
           "effects": {
             "stats": {
               "happiness": 5
@@ -7875,7 +7875,7 @@
           "outcomes": [
             {
               "weight": 5,
-              "text": "{sibling} paid you back over four months out of {siblingRel}'s own allowance. $18, in coins.",
+              "text": "{sibling} paid you back over four months out of {siblingTheir} own allowance. $18, in coins.",
               "effects": {
                 "stats": {
                   "happiness": 2,
@@ -7886,7 +7886,7 @@
                 },
                 "cash": {
                   "delta": 18,
-                  "source": "{sibling} paying you back for what {siblingRel} broke"
+                  "source": "{sibling} paying you back for what {siblingThey} broke"
                 }
               }
             },

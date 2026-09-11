@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { PEAK_AGE, ageingLoss, bandOf } from './aging';
+import { PEAK_AGE, ageingLoss } from './aging';
 import { CONDITIONS, ceilingWith, findCondition, hazardWith, HAZARD_CAP } from './conditions';
 import {
   HEALTHY_ADULT,
@@ -40,12 +40,6 @@ describe('the age curve', () => {
 
   it('costs an eighty-year-old more than a forty-year-old', () => {
     expect(ageingLoss(80)).toBeGreaterThan(ageingLoss(40));
-  });
-
-  it('bands the whole range without a gap', () => {
-    for (let health = 0; health <= 100; health += 1) {
-      expect(bandOf(health), `health ${health}`).toBeTruthy();
-    }
   });
 });
 
