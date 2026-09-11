@@ -34,3 +34,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# Build tarballs pushed over the bridge. Artifacts, never sources.
+*.tgz
+*.tar.gz
