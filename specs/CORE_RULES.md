@@ -991,3 +991,42 @@ The corollary is the useful part: **a test like this reports nothing until
 something else moves.** It is not protecting the invariant it names. Rewrite it
 so the thing it subtracts is explicit and complete, or it will be rewritten by
 whichever ticket it ambushes.
+
+### 13.40 A warning the build prints on every run is a warning nobody reads
+
+Ticket 0301, from a screenshot of the product owner's terminal — not from a test,
+a measurement, or anything in this repo:
+
+```
+WARN  Require cycle: simulation/src/new-game.ts
+   -> simulation/src/family-generator.ts
+   -> simulation/src/new-game.ts
+Require cycles are allowed, but can result in uninitialized values.
+```
+
+Metro had printed that on **every single bundle since Ticket 0202** — nine
+tickets, hundreds of runs, scrolling past above the line everybody was actually
+reading. It survived four review rounds that were specifically about reading
+output.
+
+The cycle was held together by **two constants**. `new-game.ts` declared the
+personality band; `family-generator.ts` imported the two numbers back out of it.
+That is the entire back-edge, and the fix was to move them beside the type they
+describe in `@yearafter/character`, where they belonged anyway.
+
+"Can result in uninitialized values" is not a style note. Whichever module the
+bundler enters first gets a partially-evaluated copy of the other, and a `const`
+read during module initialisation comes back `undefined`. Here that would have
+been `stream.range(undefined, undefined)` for every NPC in the game. It never
+fired because both reads sit inside functions rather than at module scope —
+which is luck, not design, and luck that any future refactor could spend.
+
+- **A warning that prints every run has stopped being a warning.** It is part of
+  the background, and the cost of clearing it is almost always smaller than the
+  cost of reading past it for a year.
+- **Not every cycle is one.** A scan of all fifteen packages found two more —
+  `events/context ↔ events/text` and `social/people ↔ social/romance` — and both
+  are `import type` only, erased at compile time, no runtime edge. Metro never
+  warned about them and was right not to. Chasing those would have been churn.
+- **The check is cheap enough to keep.** Walking relative imports across
+  `packages/*/src` and reporting cycles is twenty lines and runs in a second.

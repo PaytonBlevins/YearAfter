@@ -12,7 +12,13 @@
  * shift the player's own attributes, and vice versa.
  */
 
-import { createPersonality, type Personality, type Sex } from '@yearafter/character';
+import {
+  PERSONALITY_MAX,
+  PERSONALITY_MIN,
+  createPersonality,
+  type Personality,
+  type Sex,
+} from '@yearafter/character';
 import { findNameCulture, type NameCulture } from '@yearafter/content';
 import { asNpcId, clampStat, dollars, type Money } from '@yearafter/core';
 import {
@@ -22,7 +28,7 @@ import {
   type HouseholdFinances,
   type WealthBand,
 } from '@yearafter/relationships';
-import { PERSONALITY_MAX, PERSONALITY_MIN } from './new-game';
+
 import type { RandomStream } from './rng/rng';
 
 /* -------------------------------------------------------------------------- */

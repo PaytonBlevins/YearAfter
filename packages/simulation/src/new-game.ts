@@ -18,6 +18,8 @@ import {
   createPersonality,
   createTalents,
   PERSONALITY_KEYS,
+  PERSONALITY_MAX,
+  PERSONALITY_MIN,
   TALENT_KEYS,
   type Character,
   type PersonalityKey,
@@ -56,13 +58,13 @@ export const TALENT_PROBABILITY = 0.09;
 export const BIRTH_ATTRIBUTE_MIN = 25;
 export const BIRTH_ATTRIBUTE_MAX = 88;
 
-/**
- * Personality band. Wider than birth attributes because these never move much
- * after birth — they are dispositions, not skills — so the spread at generation
- * is most of the variation the trait will ever have.
- */
-export const PERSONALITY_MIN = 12;
-export const PERSONALITY_MAX = 92;
+/*
+  The personality band moved to `@yearafter/character`, beside the type it
+  describes, to break a require cycle this file was half of. The re-export keeps
+  the constants reachable from `@yearafter/simulation`, where callers have
+  imported them since 0201 — see the note in `personality.ts` for the cycle.
+*/
+export { PERSONALITY_MAX, PERSONALITY_MIN } from '@yearafter/character';
 
 /** Probability a character is born male. Even, and stated rather than assumed. */
 export const MALE_PROBABILITY = 0.5;

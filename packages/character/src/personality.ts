@@ -40,6 +40,39 @@ export type PersonalityKey = (typeof PERSONALITY_KEYS)[number];
 export type Personality = { readonly [K in PersonalityKey]: StatValue };
 
 /**
+ * The band a generated personality is drawn from.
+ *
+ * Wider than the birth-attribute band because these never move much after
+ * birth — they are dispositions, not skills — so the spread at generation is
+ * most of the variation a trait will ever have.
+ *
+ * THEY LIVE HERE BECAUSE OF A REQUIRE CYCLE.
+ *
+ * They were declared in `@yearafter/simulation`'s `new-game.ts`, which imports
+ * the family generator, which imported these two constants back out of
+ * `new-game.ts`. Metro said so on every bundle since Ticket 0202:
+ *
+ *   WARN Require cycle: simulation/src/new-game.ts
+ *     -> simulation/src/family-generator.ts
+ *     -> simulation/src/new-game.ts
+ *   Require cycles are allowed, but can result in uninitialized values.
+ *
+ * "Can result in uninitialized values" is the part that matters. Whichever
+ * module the bundler happens to enter first gets a partially-evaluated copy of
+ * the other, and a `const` read during module initialisation can come back
+ * `undefined` — which for these two would mean `stream.range(undefined,
+ * undefined)`, silently, for every NPC in the game. It has not happened because
+ * both reads are inside functions rather than at module scope, which is luck
+ * rather than design.
+ *
+ * A cycle held together by two numbers is a cycle with an obvious fix: the
+ * numbers are facts about `Personality`, so they belong beside it, and the
+ * edge disappears.
+ */
+export const PERSONALITY_MIN = 12;
+export const PERSONALITY_MAX = 92;
+
+/**
  * Developer-facing labels. Used only by the debug screen — there is no
  * player-facing surface for these and there must not be one.
  */
