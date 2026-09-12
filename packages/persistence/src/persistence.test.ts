@@ -823,7 +823,12 @@ describe('Ticket 0212 — what a save has to carry now', () => {
       tier: 2 as NpcTier,
       personality: state.player.personality,
       relationship: state.player.stats.charisma,
-      life: { stage: 'working', jobTitle: 'Line cook', rung: 1, timeline: [{ age: 23, year: 2053, text: 'Started work.' }] },
+      life: {
+        stage: 'working',
+        jobTitle: 'Line cook',
+        rung: 1,
+        timeline: [{ age: 23, year: 2053, text: 'Started work.' }],
+      },
     };
     const forebear = {
       id: asNpcId('npc:mother'),
@@ -843,7 +848,13 @@ describe('Ticket 0212 — what a save has to carry now', () => {
       player: {
         ...state.player,
         records: [
-          { id: 'r:2018:education:0', category: 'education' as const, age: 18, year: 2018, label: 'Graduated high school' },
+          {
+            id: 'r:2018:education:0',
+            category: 'education' as const,
+            age: 18,
+            year: 2018,
+            label: 'Graduated high school',
+          },
         ],
       },
       family: { ...state.family, members: [forebear, child] },
@@ -858,5 +869,114 @@ describe('Ticket 0212 — what a save has to carry now', () => {
     expect((backChild?.life as { jobTitle?: string } | undefined)?.jobTitle).toBe('Line cook');
     const backMother = back.family.members.find((member) => member.role === 'mother');
     expect(backMother?.diedWhenPlayerWas).toBe(41);
+  });
+});
+
+describe('Ticket 0302 — a save whose books are wrong does not load', () => {
+  /*
+    The third enforcement point, and the only one that sees a document this
+    build did not just compute. Spec 1678 says a mismatch fails validation, and
+    spec 1224–1246 says an unreadable save is an expected outcome with a
+    message rather than a crash — so every case here is `corrupt` with
+    something a person could act on, not a throw.
+
+    A corrupt ledger is REFUSED, never repaired. A save that silently fixed its
+    own money would hide both the bug that broke it and how much it invented.
+
+    Each corruption below is planted in a real save from a real played life, so
+    what is being validated is the shape the game actually writes.
+  */
+  const honest = () => {
+    let state = createNewGame({ seed: 'BOOKS-0302' });
+    for (let i = 0; i < 30; i += 1) {
+      state = advanceYear(state).state;
+      while (state.pending.length > 0) {
+        const decision = state.pending[0];
+        const choice = decision?.choices[0];
+        if (!decision || !choice) break;
+        const result = decide(state, decision.eventId, choice.id);
+        if (!result.ok) break;
+        state = result.value.state;
+      }
+      if (state.pending.length === 0 && state.finance.transactions.length > 0) break;
+    }
+    return JSON.parse(JSON.stringify(toSave(state, { id: asSaveId('save-books') })));
+  };
+
+  const reason = (save: Record<string, unknown>): string => {
+    const result = migrateSave(save);
+    expect(result.ok, 'the save loaded when it should not have').toBe(false);
+    if (result.ok) return '';
+    expect(result.error.kind).toBe('corrupt');
+    return result.error.kind === 'corrupt' ? result.error.detail : '';
+  };
+
+  it('loads the honest one, which is what makes the rest of this mean anything', () => {
+    expect(migrateSave(honest()).ok).toBe(true);
+  });
+
+  it('refuses a balance the transactions do not add up to', () => {
+    const save = honest();
+    const finance = save['finance'] as Record<string, unknown>;
+    const player = save['player'] as Record<string, unknown>;
+    // Both numbers moved together — a producer that skipped the ledger would
+    // have moved them together — so the mirror agrees and only the sum knows.
+    finance['balance'] = (finance['balance'] as number) + 250_00;
+    player['cash'] = (player['cash'] as number) + 250_00;
+    expect(reason(save)).toMatch(/finance does not balance/);
+  });
+
+  it('refuses a save whose cash and ledger disagree', () => {
+    /*
+      The check that is a tautology everywhere else. Inside `advanceYear` both
+      numbers come out of the same `postYear` call and cannot differ; I wrote
+      that check there, watched it be unfalsifiable, and moved it here. On a
+      save they were serialised separately — a dropped field, a torn write, a
+      migration that missed one — and disagreeing is exactly what they can do.
+    */
+    const save = honest();
+    (save['player'] as Record<string, unknown>)['cash'] = 1;
+    expect(reason(save)).toMatch(/player\.cash .* and finance\.balance .* disagree/);
+  });
+
+  it('refuses a ledger that went below zero', () => {
+    const save = honest();
+    const finance = save['finance'] as Record<string, unknown>;
+    const rows = finance['transactions'] as Record<string, unknown>[];
+    const year = rows[0]?.['year'] as number;
+    finance['transactions'] = [
+      { id: 'p1', year, age: 1, category: 'living', amount: -900_00, source: 'A charge' },
+      ...rows,
+      { id: 'p2', year: year + 1, age: 2, category: 'salary', amount: 900_00, source: 'And cover' },
+    ];
+    // Balances, and the mirror agrees. Only the walk sees the year in between.
+    expect(reason(save)).toMatch(/went below zero in \d{4}/);
+  });
+
+  it('refuses a transaction stamped outside the life', () => {
+    const save = honest();
+    const finance = save['finance'] as Record<string, unknown>;
+    const rows = finance['transactions'] as Record<string, unknown>[];
+    finance['transactions'] = rows.map((row, index) =>
+      index === 0 ? { ...row, year: 1899 } : row,
+    );
+    expect(reason(save)).toMatch(/money moving in 1899/);
+  });
+
+  it('refuses a transaction that is not a transaction, before doing any arithmetic', () => {
+    // Otherwise the message is a difference of NaN, which tells a player
+    // nothing and a developer less.
+    const save = honest();
+    const finance = save['finance'] as Record<string, unknown>;
+    finance['transactions'] = [{ id: 'x', year: 2020, age: 3, category: 'gift', source: 'A gift' }];
+    expect(reason(save)).toMatch(/transactions\[0\] is not a transaction/);
+  });
+
+  it('reports a missing field as a missing field rather than as bad accounting', () => {
+    // The shape checks run first on purpose: a save missing half of itself
+    // should say so, not complain that its books do not add up.
+    const save = honest();
+    delete save['world'];
+    expect(reason(save)).toMatch(/world\.year/);
   });
 });

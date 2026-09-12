@@ -404,6 +404,59 @@ for (const root of SOURCE_ROOTS) {
       fail(rel, 'a spec reference appears in player-facing text. Cut it or say it in plain words.');
     }
 
+    /*
+      V18 — Ticket 0302. Money is only moved by the ledger.
+
+      THE FIRST OF THREE ENFORCEMENT POINTS, and the only one that runs before
+      anything is played. The invariant in `advanceYear` catches a drift on the
+      year it happens; save validation catches a corrupt document on the way in.
+      Both of those need somebody to have PLAYED the defect. This one fails a
+      build, which is the only way a bypass never reaches a device at all.
+
+      What it looks for is the exact shape all six pre-0301 producers had:
+      arithmetic on a cash field. `add(state.player.cash, wage)` in careers,
+      `subtract(player.cash, fee)` in adoption, and four more, each with its own
+      idea of the zero floor and none of them writing down what moved or why.
+      That is CORE_RULES 13.31 — an invariant kept in six places is six
+      promises — and it is the one defect `reconcile` exists to catch after the
+      fact. This is the same defect caught before the fact.
+
+      The rule is about ARITHMETIC, not about the word `cash`, because a great
+      many honest lines mention cash: a type (`readonly cash: Money`), a
+      parameter (`costOf(move, cash)`), a read for an event context
+      (`cash: Math.floor(Number(state.player.cash) / 100)`). None of those move
+      money and a rule that fired on them would be deleted inside a ticket
+      (13.35). A rule scoped to the operation catches the six and none of the
+      honest ones.
+
+      `@yearafter/finance` and `simulation/src/money.ts` are exempt by path:
+      they are the ledger and its one door, and arithmetic on money is what
+      they are for.
+    */
+    const MAY_DO_MONEY_ARITHMETIC =
+      rel.startsWith('packages/finance/') || rel === 'packages/simulation/src/money.ts';
+    if (!isTest && !MAY_DO_MONEY_ARITHMETIC) {
+      const code = stripComments(source);
+      const arithmetic = [
+        // add(x.cash, ...) / subtract(player.cash, fee) / negate(state.player.cash)
+        /\b(?:add|subtract|negate)\s*\(\s*[A-Za-z_$][\w$.]*\.cash\b/,
+        // cash: add(...) — the assignment form, whatever it is added to.
+        /\bcash:\s*(?:add|subtract|negate)\s*\(/,
+        // player.cash + something, or - something, at the top of an expression.
+        // `Number(state.player.cash) / 100` is a READ into dollars and is not
+        // matched: the operand is the Number() call, not the cash field.
+        /\.cash\s*[-+]\s*[A-Za-z0-9_$(]/,
+      ].find((pattern) => pattern.test(code));
+      if (arithmetic) {
+        fail(
+          rel,
+          'money arithmetic on a cash field. `player.cash` is a mirror of the ledger — ' +
+            'post the transaction through moveMoney() or a phase’s `transactions` and let ' +
+            'the balance come out of it (CORE_RULES 13.31, spec 1678).',
+        );
+      }
+    }
+
     // Spec 1247-1263 — placeholder work must be labelled, not silently shipped.
     if (/\bTODO\b(?!:)/.test(source)) {
       notes.push(`${rel}: bare TODO — prefer "TODO(ticket NNNN): ..." so it is traceable.`);

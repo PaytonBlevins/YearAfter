@@ -293,6 +293,129 @@ export function reconcile(ledger: Ledger): Reconciliation {
   };
 }
 
+/**
+ * Spec 1678 in its own words, walked year by year.
+ *
+ *   "opening cash + cash in − cash out = closing cash. Any mismatch fails
+ *   validation."
+ *
+ * THE FIRST VERSION OF THIS FUNCTION WAS A TAUTOLOGY, and it is worth saying so
+ * because it looked exactly like a check. It computed one year's opening, in
+ * and out from the transactions, added them up, and compared the result to
+ * itself. It would have returned `ok: true` for every ledger ever built,
+ * including a corrupt one, and it would have sat in the suite looking like
+ * coverage.
+ *
+ * A period identity can only be a check if something OUTSIDE the period
+ * anchors it. So this walks every year in order, carries the closing balance of
+ * one into the opening of the next, and compares the final closing against
+ * `ledger.balance` — which is maintained by `post` and is the independent
+ * record.
+ *
+ * WHAT `ok` IS, HONESTLY: the same identity `reconcile` checks, restated a year
+ * at a time. Every transaction belongs to exactly one year and the year list is
+ * derived from the transactions, so the chain necessarily sums to the same
+ * number — `reconcileByYear(l).ok === reconcile(l).ok` for every ledger, and a
+ * test asserts it. It is stated here because the second draft of this comment
+ * claimed the walk caught a row stamped with a wrong year, which it does not:
+ * a row stamped 19700 does not fall outside the walk, it ADDS a year to it.
+ *
+ * What this adds over `reconcile` is the two things the sum cannot see:
+ *
+ *   `years`         the per-year rows, which is what a dashboard reads and
+ *                   what names the year a drift began in.
+ *   `firstBadYear`  a year that closes below zero. `post` floors at zero and
+ *                   writes the shortfall down, so the chain should never dip —
+ *                   and a life that ends at zero would hide a year that went
+ *                   to minus forty thousand and came back.
+ *
+ * The wrong-year defect needs an anchor this function does not have. It is
+ * `yearsOutside`, below, which takes the span from the life.
+ */
+export interface YearRow {
+  readonly year: number;
+  readonly opening: Money;
+  readonly in: Money;
+  readonly out: Money;
+  readonly closing: Money;
+}
+
+export interface YearReconciliation {
+  readonly ok: boolean;
+  readonly years: readonly YearRow[];
+  /** Where the chain ended. */
+  readonly closing: Money;
+  /** What `post` says it should be. */
+  readonly balance: Money;
+  readonly difference: Money;
+  /** The first year whose closing does not match the next year's opening. */
+  readonly firstBadYear?: number;
+}
+
+export function reconcileByYear(ledger: Ledger): YearReconciliation {
+  const years = [...new Set(ledger.transactions.map((entry) => entry.year))].sort((a, b) => a - b);
+  const rows: YearRow[] = [];
+  let running = 0;
+  for (const year of years) {
+    const opening = running;
+    let inflow = 0;
+    let outflow = 0;
+    for (const entry of ledger.transactions) {
+      if (entry.year !== year) continue;
+      const amount = Number(entry.amount);
+      if (amount > 0) inflow += amount;
+      else outflow -= amount;
+    }
+    running = opening + inflow - outflow;
+    rows.push({
+      year,
+      opening: cents(opening),
+      in: cents(inflow),
+      out: cents(outflow),
+      closing: cents(running),
+    });
+  }
+  const balance = Number(ledger.balance);
+  /*
+    A year whose closing balance is negative is a defect even when the totals
+    come out right: `post` floors at zero and records the shortfall, so the
+    chain should never dip below it. Reported as the first bad year rather than
+    failing outright, because the sum is the thing spec 1678 makes
+    build-blocking and this is the thing that tells you where to look.
+  */
+  const bad = rows.find((row) => Number(row.closing) < 0);
+  return {
+    ok: running === balance,
+    years: rows,
+    closing: cents(running),
+    balance: cents(balance),
+    difference: cents(balance - running),
+    ...(bad ? { firstBadYear: bad.year } : {}),
+  };
+}
+
+/** Every year the ledger touches, in order. */
+export const yearsIn = (ledger: Ledger): readonly number[] =>
+  [...new Set(ledger.transactions.map((entry) => entry.year))].sort((a, b) => a - b);
+
+/**
+ * Years the ledger records that the life never lived.
+ *
+ * THE ANCHOR `reconcileByYear` HAS NOT GOT. A ledger's own years cannot tell
+ * you a year is wrong — they are whatever the transactions say they are — so
+ * the span has to come from outside the ledger, and the caller is the only one
+ * who knows it: a life runs from the year it started to the year it is in, and
+ * money cannot move in any other one.
+ *
+ * The defect it catches is a stamping bug, not an arithmetic one. `post` takes
+ * the year as a parameter, so a producer that passed `state.world.year` where
+ * it meant `nextYear` — or, as 0212 nearly did with ages, a birth year where it
+ * meant a calendar year — writes rows that sum perfectly and belong to nothing.
+ * Every balance check in this file passes on that ledger.
+ */
+export const yearsOutside = (ledger: Ledger, from: number, to: number): readonly number[] =>
+  yearsIn(ledger).filter((year) => year < from || year > to);
+
 /* -------------------------------------------------------------------------- */
 /* Reading it back                                                             */
 /* -------------------------------------------------------------------------- */
@@ -302,11 +425,7 @@ export const transactionsIn = (ledger: Ledger, year: number): readonly Transacti
   ledger.transactions.filter((entry) => entry.year === year);
 
 /** Signed total for a category, over the whole life or one year. */
-export function totalFor(
-  ledger: Ledger,
-  category: TransactionCategory,
-  year?: number,
-): Money {
+export function totalFor(ledger: Ledger, category: TransactionCategory, year?: number): Money {
   return cents(
     ledger.transactions
       .filter((entry) => entry.category === category && (year === undefined || entry.year === year))

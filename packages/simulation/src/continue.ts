@@ -62,7 +62,7 @@ import {
   type TimelineEntry,
 } from '@yearafter/character';
 import { asCharacterId, asNpcId, cents, clampStat, stableUnit, type StatValue } from '@yearafter/core';
-import { EMPTY_LEDGER, post, type Ledger } from '@yearafter/finance';
+import { EMPTY_LEDGER, cashFrom, post, type Ledger } from '@yearafter/finance';
 import { NOT_YET_ENROLLED, type EducationState } from '@yearafter/education';
 import { EMPTY_HISTORY } from '@yearafter/events';
 import { EMPTY_EMPLOYMENT } from '@yearafter/careers';
@@ -217,6 +217,20 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
   const heir = heirsIn(state.family).find((member) => member.id === childId);
   if (!heir) return undefined;
 
+  /*
+    Ticket 0302. The estate is computed ONCE.
+
+    0301 shipped this as two derivations of the same number: `cash` read
+    `state.player.cash` and `inheritedLedger` read it again to build the opening
+    transaction. They agreed, because both read the same input — which is
+    exactly how CORE_RULES 13.23 defects look right up until somebody changes
+    one of them. 0307 adds debts to net off and 0310 adds a pension to roll in;
+    whichever of those lands first would have updated one and not the other, and
+    the heir would have started life holding a balance their own books did not
+    account for.
+
+    So the ledger is built first and the balance comes out of it.
+  */
   const life = (heir.life as OffspringLife | undefined) ?? {
     stage: 'working' as const,
     performance: 50,
@@ -226,6 +240,7 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
     timeline: [],
   };
   const age = state.world.year - heir.birthYear;
+  const finance = inheritedLedger(state, heir.lastName, age);
 
   const player: Character = {
     ...createCharacter({
@@ -246,7 +261,7 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
         books with a source that says where it came from, rather than a balance
         that simply appears. `inheritedLedger` below builds it.
       */
-      cash: state.player.cash,
+      cash: cashFrom(finance),
       occupation: life.jobTitle ?? 'Unemployed',
     }),
     timeline: timelineFrom(life),
@@ -310,7 +325,7 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
     {
       family,
       nameCultureId: state.nameCultureId,
-      finance: inheritedLedger(state, heir.lastName, age),
+      finance,
       // Everything below starts empty ON PURPOSE. A cooldown belongs to the
       // person who used the event, a friend belongs to the person who made
       // them, and a body belongs to the person who lived in it.

@@ -1030,3 +1030,70 @@ which is luck, not design, and luck that any future refactor could spend.
   warned about them and was right not to. Chasing those would have been churn.
 - **The check is cheap enough to keep.** Walking relative imports across
   `packages/*/src` and reporting cycles is twenty lines and runs in a second.
+
+### 13.41 A period identity is only a check if something outside the period anchors it
+
+Ticket 0302, and the defect was mine, written while implementing the rule that
+was supposed to prevent this class of thing.
+
+Spec 1678 says *"opening cash + cash in − cash out = closing cash. Any mismatch
+fails validation."* So I wrote a function that walked the ledger a year at a
+time, computed each year's opening, inflow and outflow from the transactions,
+added them up, and checked the identity held.
+
+It held. It would have held for **every ledger that has ever existed or ever
+will**, including a corrupt one, because all four numbers came from the same
+rows. Opening plus in minus out *is* closing when you define all four by summing
+the same list. It was a tautology with a `ok: boolean` on it, and it would have
+sat in the suite looking exactly like coverage.
+
+The rewrite chains the years — each year's closing becomes the next year's
+opening — and compares the final closing against `ledger.balance`, which `post`
+maintains separately. The chain is what makes it a check: `balance` is an
+independent record, and a producer that moved money without posting moves one
+and not the other.
+
+Then the second draft of the comment claimed the walk caught a class `reconcile`
+could not: a transaction stamped with the wrong year. **It does not.** The year
+list is derived from the transactions, so a row stamped 19700 does not fall
+outside the walk — it adds a year to it. `reconcileByYear(l).ok` is arithmetically
+identical to `reconcile(l).ok` for every ledger, and there is now a test asserting
+exactly that, because the honest claim is worth writing down where the flattering
+one was.
+
+Catching the wrong-year defect needed an anchor the ledger has not got: the span
+of the life, which only the caller knows. That is a third function, and a third
+check.
+
+- **Ask what could make it false.** If nothing can, it is a definition, not a
+  test. Every term in an identity coming from one source is the warning sign.
+- **A check needs a second source of truth.** `balance` anchors the sum; the
+  life's span anchors the years; a save anchors the mirror. Where there is only
+  one source, there is only arithmetic.
+- **Write down what a check does NOT catch**, next to what it does. The comment
+  that overclaims is how a real gap gets covered by a green test.
+
+### 13.42 A test that hands the engine a state it refuses to act on is testing the refusal
+
+Ticket 0302, ten minutes after 13.41, in the tests written to prove 13.41's
+rewrite actually worked.
+
+Three tests corrupted a ledger three ways and asserted `advanceYear` threw. Two
+went red as intended. The third stayed green — and the reason was not the check:
+`advanceYear` returns early, unchanged, when a decision is pending, and that
+seed happened to have an open question at the year the test stopped. The
+corruption was never examined. Nothing in the test said so.
+
+The control test in the same file — *"lets an honest year through"* — would have
+passed for precisely the same empty reason, and it is the test whose entire job
+is to prove the other three are not passing vacuously.
+
+- **A guard clause is a second exit.** Any test that calls a function with an
+  early return has to establish it got past it. Asserting on the throw is not
+  enough; the absence of a throw and the absence of an execution look identical.
+- **Assert the preconditions the test depends on.** The helper now refuses to
+  return a state with a question open or an empty ledger, and says which. That
+  turned a silent pass into a named failure in one run.
+- **Fixed counts hide this.** "Play six years" was doing two jobs — reach a state,
+  and reach an interesting one — and only announced when it failed at the first.
+  "Play until money has moved and nothing is pending, or say why not" does one.

@@ -11,6 +11,7 @@
 
 import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
+import { reconcile, reconcileByYear, yearsOutside, type Ledger } from '@yearafter/finance';
 import { CURRENT_SAVE_VERSION, type CurrentSaveGame } from './save-schema';
 
 export type MigrationError =
@@ -596,8 +597,109 @@ export function migrateSave(raw: unknown): Result<CurrentSaveGame, MigrationErro
 }
 
 /**
+ * Ticket 0302 — the books, checked on the way in.
+ *
+ * THE THIRD ENFORCEMENT POINT, and the only one of the three that sees data
+ * this build did not just compute. The static rule stops a bypass shipping; the
+ * invariant in `advanceYear` names the year a drift starts in. Both of those
+ * run inside a process that has the ledger in memory and is therefore, at
+ * bottom, checking its own arithmetic. This one checks a document — one that
+ * came off a device, through a migration, possibly written by a build that no
+ * longer exists.
+ *
+ * That is what makes the mirror check real HERE and a tautology anywhere else.
+ * In `advanceYear`, `player.cash` and `finance.balance` are both handed back by
+ * the same `postYear` call, and a check that they agree cannot fail; I wrote
+ * one there and took it out again. A save is two numbers that were serialized
+ * separately and can disagree — because a migration dropped a field, because a
+ * write was torn, or because the build that wrote it had the bug this ticket
+ * exists to prevent.
+ *
+ * A corrupt ledger is `corrupt`, not a repair. Spec 1224–1246 makes an
+ * unreadable save an expected outcome with a message, and a save that silently
+ * fixes its own money is a save that hides how much it invented.
+ */
+function ledgerProblems(candidate: Record<string, unknown>): readonly string[] {
+  const finance = candidate['finance'] as Record<string, unknown> | undefined;
+  if (typeof finance !== 'object' || finance === null) return ['expected finance to be present'];
+
+  const balance = finance['balance'];
+  const rows = finance['transactions'];
+  if (typeof balance !== 'number' || !Number.isFinite(balance)) {
+    return ['expected finance.balance to be a number'];
+  }
+  if (!Array.isArray(rows)) return ['expected finance.transactions to be an array'];
+
+  // Shape first, and stop if it is wrong: the arithmetic below would otherwise
+  // report a difference of NaN, which tells a player nothing and a developer
+  // less.
+  const malformed = rows.findIndex((row: unknown) => {
+    const entry = row as Record<string, unknown> | null;
+    return (
+      typeof entry !== 'object' ||
+      entry === null ||
+      typeof entry['amount'] !== 'number' ||
+      !Number.isFinite(entry['amount']) ||
+      typeof entry['year'] !== 'number' ||
+      typeof entry['id'] !== 'string'
+    );
+  });
+  if (malformed >= 0) return [`finance.transactions[${malformed}] is not a transaction`];
+
+  const ledger = finance as unknown as Ledger;
+  const problems: string[] = [];
+
+  // Spec 1678, made build-blocking by 0302.
+  const books = reconcile(ledger);
+  if (!books.ok) {
+    problems.push(
+      `finance does not balance: the balance says ${Number(books.balance) / 100} and the ` +
+        `transactions add up to ${Number(books.summed) / 100}`,
+    );
+  }
+
+  // The mirror. `player.cash` is written from the ledger and never computed,
+  // so on a save they are the same number twice or the save is wrong.
+  const player = candidate['player'] as Record<string, unknown> | undefined;
+  const cash = player?.['cash'];
+  if (typeof cash !== 'number') {
+    problems.push('expected player.cash to be a number');
+  } else if (cash !== Number(ledger.balance)) {
+    problems.push(
+      `player.cash (${cash / 100}) and finance.balance (${Number(ledger.balance) / 100}) disagree`,
+    );
+  }
+
+  const walk = reconcileByYear(ledger);
+  if (walk.firstBadYear !== undefined) {
+    problems.push(`finance went below zero in ${walk.firstBadYear}`);
+  }
+
+  // The span comes from the life, because the ledger's own years cannot say
+  // one of them is wrong. Skipped rather than guessed if the save has not got
+  // both ends — the shape checks above already report a missing world.year.
+  const birthYear = player?.['birthYear'];
+  const year = (candidate['world'] as Record<string, unknown> | undefined)?.['year'];
+  if (typeof birthYear === 'number' && typeof year === 'number') {
+    const strays = yearsOutside(ledger, birthYear, year);
+    if (strays.length > 0) {
+      problems.push(
+        `finance records money moving in ${strays.join(', ')}, outside a life that runs ` +
+          `${birthYear}–${year}`,
+      );
+    }
+  }
+
+  return problems;
+}
+
+/**
  * Structural validation of a current-version save. Deliberately checks shape,
  * not game balance — a save with odd numbers is still a save.
+ *
+ * The finance block is the exception, and it earns it: spec 1678 says a
+ * mismatch fails validation, so the books are not "odd numbers", they are the
+ * one thing in a save that can be provably wrong.
  */
 export function validateCurrentSave(
   candidate: Record<string, unknown>,
@@ -636,6 +738,13 @@ export function validateCurrentSave(
 
   if (problems.length > 0) {
     return err({ kind: 'corrupt', detail: problems.join('; ') });
+  }
+
+  // Runs only once the shape is known good, so a save missing half its fields
+  // reports the missing fields rather than an accounting complaint about them.
+  const books = ledgerProblems(candidate);
+  if (books.length > 0) {
+    return err({ kind: 'corrupt', detail: books.join('; ') });
   }
   return ok(candidate as unknown as CurrentSaveGame);
 }

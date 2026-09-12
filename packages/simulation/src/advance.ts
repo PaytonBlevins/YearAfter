@@ -41,6 +41,7 @@ import { runEvents } from './phases/events';
 import { partnerOf } from '@yearafter/social';
 import { runFamily } from './phases/family';
 import { postYear } from './money';
+import { reconcile, reconcileByYear, yearsOutside } from '@yearafter/finance';
 import { runKin } from './phases/kin';
 import { runSocial } from './phases/social';
 import { runHealth } from './phases/health';
@@ -117,12 +118,12 @@ export function advanceYear(state: GameState): AdvanceResult {
     stream: state.rng.stream(RngDomains.Relationships),
     age: nextAge,
     worldYear: nextYear,
-    nameFor: () => uniqueFirstName(kinNames, nameContext(
-      state.nameCultureId,
-      state.circle,
-      state.family,
-      state.player.firstName,
-    ), kinNames.chance(0.5) ? 'male' : 'female'),
+    nameFor: () =>
+      uniqueFirstName(
+        kinNames,
+        nameContext(state.nameCultureId, state.circle, state.family, state.player.firstName),
+        kinNames.chance(0.5) ? 'male' : 'female',
+      ),
   });
 
   // Education next: an event that fires this year should be able to read the
@@ -157,12 +158,7 @@ export function advanceYear(state: GameState): AdvanceResult {
   // so an event this year can name a child who already exists (Ticket 0208).
   const partner = partnerOf(social.circle.people);
   const familyStream = state.rng.stream(RngDomains.Family);
-  const names = nameContext(
-    state.nameCultureId,
-    social.circle,
-    kin.family,
-    state.player.firstName,
-  );
+  const names = nameContext(state.nameCultureId, social.circle, kin.family, state.player.firstName);
   const family = runFamily({
     family: kin.family,
     parenting: state.parenting,
@@ -269,7 +265,11 @@ export function advanceYear(state: GameState): AdvanceResult {
   let sequence = 0;
   const entries: TimelineEntry[] = [];
   const write = (
-    lines: readonly { readonly kind: TimelineKind; readonly text: string; readonly eventId?: string }[],
+    lines: readonly {
+      readonly kind: TimelineKind;
+      readonly text: string;
+      readonly eventId?: string;
+    }[],
     id: (index: number) => string | undefined,
   ) => {
     lines.forEach((line, index) => {
@@ -327,12 +327,10 @@ export function advanceYear(state: GameState): AdvanceResult {
     ...employment.transactions,
     ...events.transactions,
   ];
-  const money = postYear(
-    state.finance,
-    nextYear,
-    nextAge,
-    [...reported.filter((entry) => entry.amount > 0), ...reported.filter((entry) => entry.amount < 0)],
-  );
+  const money = postYear(state.finance, nextYear, nextAge, [
+    ...reported.filter((entry) => entry.amount > 0),
+    ...reported.filter((entry) => entry.amount < 0),
+  ]);
 
   // ---- the year's line budget --------------------------------------------
   //
@@ -352,6 +350,63 @@ export function advanceYear(state: GameState): AdvanceResult {
   // ---- validate ----------------------------------------------------------
   if (nextAge !== state.player.age + 1) {
     throw new Error('advanceYear: age advanced by an amount other than one year');
+  }
+  /*
+    Ticket 0302, and spec 1678 makes it build-blocking: "opening cash + cash in
+    − cash out = closing cash. Any mismatch fails validation."
+
+    Checked HERE, in the same block as the age invariant, because this is the
+    one function that commits a year and therefore the only place that can name
+    the year a drift started in. A mismatch means a producer moved money without
+    going through `post` — the single defect this design can suffer, and one
+    that is invisible by every other route: the balance would simply be wrong,
+    quietly, for the rest of the life.
+
+    A throw rather than a repair. A ledger that silently corrects itself is a
+    ledger that hides the bug that needed correcting, and spec 1043–1059 makes
+    financial reconciliation absolute.
+  */
+  const books = reconcile(money.finance);
+  if (!books.ok) {
+    throw new Error(
+      `advanceYear: the books do not balance in ${nextYear}. ` +
+        `The balance says ${Number(books.balance) / 100} and the transactions add up to ` +
+        `${Number(books.summed) / 100}, a difference of ${Number(books.difference) / 100}. ` +
+        `Something moved money without going through post().`,
+    );
+  }
+  /*
+    Two things the sum above cannot see, both of which leave it perfectly
+    balanced.
+
+    A year that closed below zero: `post` floors at zero and writes the
+    shortfall down, so no year should ever dip. A life that dipped and climbed
+    back out ends on a correct balance and hides the year it was wrong in — the
+    exact shape of the drift-then-clamp defect `ledger.test.ts` checks every
+    year for, caught here in one place instead.
+
+    A year outside the life: the ledger's own years cannot tell you one of them
+    is wrong, because they are whatever the rows say. The span has to come from
+    outside, and this is where it lives — a character born in 2000 who is
+    twenty-six cannot have been paid in 1970 or in 2050. `post` takes the year
+    as an argument, so the way this breaks is a producer passing the wrong
+    variable, which type-checks.
+  */
+  const walk = reconcileByYear(money.finance);
+  if (walk.firstBadYear !== undefined) {
+    throw new Error(
+      `advanceYear: the balance went below zero in ${walk.firstBadYear}. ` +
+        `post() floors at zero and records a shortfall, so nothing should be able to. ` +
+        `Something subtracted from the balance without going through it.`,
+    );
+  }
+  const strays = yearsOutside(money.finance, state.player.birthYear, nextYear);
+  if (strays.length > 0) {
+    throw new Error(
+      `advanceYear: the ledger records money moving in ${strays.join(', ')}, ` +
+        `outside a life that runs ${state.player.birthYear}–${nextYear}. ` +
+        `A transaction was stamped with the wrong year.`,
+    );
   }
   if (budgeted.length === 0 && events.decisions.length === 0) {
     // The catalog guarantees passive events are available to every character at
