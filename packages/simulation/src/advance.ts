@@ -40,7 +40,8 @@ import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
 import { runEvents } from './phases/events';
 import { partnerOf } from '@yearafter/social';
-import { livingChildren, livingParents } from '@yearafter/relationships';
+import { livingParents } from '@yearafter/relationships';
+import { childrenAtHome } from '@yearafter/parenting';
 import { runFamily } from './phases/family';
 import { postYear } from './money';
 import { reconcile, reconcileByYear, yearsOutside } from '@yearafter/finance';
@@ -212,7 +213,22 @@ export function advanceYear(state: GameState): AdvanceResult {
     age: nextAge,
     locationIndex: costIndexOf(state.player.currentLocation.cityId),
     partnered: partnerOf(social.circle.people) !== undefined,
-    children: livingChildren(family.family).length,
+    /*
+      Ticket 0304. The AGES, not the count — a teenager costs more than a
+      toddler, which is the one idea worth keeping out of `monthlyCostOf`.
+
+      And `childrenAtHome`, not `livingChildren`. 0303 used the latter, which
+      means "children who are alive" rather than "children you are supporting",
+      and the difference showed up the moment 0304 printed the numbers a screen
+      would render: a sixty-seven-year-old was being charged $1,117 a month for
+      a thirty-eight-year-old son. A household's costs never fell after the
+      children grew up, which is most of why a late career could not save.
+
+      `childrenAtHome` is the function that has meant the right thing since
+      0208 and draws the line at eighteen, the same place spec 61's kick-out
+      does — so there is one definition of a dependent rather than two.
+    */
+    childAges: childrenAtHome(family.family, nextYear).map((child) => nextYear - child.birthYear),
     // What the job left after tax. Zero for anybody not working, which is the
     // case this whole phase exists to make cost something.
     afterTaxIncome: employment.takeHome,

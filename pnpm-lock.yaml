@@ -47,6 +47,9 @@ importers:
       '@yearafter/events':
         specifier: workspace:*
         version: link:../../packages/events
+      '@yearafter/finance':
+        specifier: workspace:*
+        version: link:../../packages/finance
       '@yearafter/health':
         specifier: workspace:*
         version: link:../../packages/health

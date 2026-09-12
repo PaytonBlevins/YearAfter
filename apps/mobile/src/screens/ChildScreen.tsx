@@ -18,7 +18,9 @@
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { formatMoney } from '@yearafter/core';
-import { CHILD_ASKS, DISTANT, PARENT_AGE, monthlyCostOf } from '@yearafter/parenting';
+import { CHILD_ASKS, DISTANT, PARENT_AGE } from '@yearafter/parenting';
+import { childMonthlyCost, childShare } from '@yearafter/finance';
+import { costIndexOf } from '@yearafter/content';
 import { npcAge, type FamilyMember } from '@yearafter/relationships';
 import { openAskOf } from '@yearafter/simulation';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
@@ -68,13 +70,31 @@ export function ChildScreen() {
         />
       </Card>
 
-      {/* Spec 175. The number lives here and nowhere else. */}
+      {/*
+        Spec 175 — "open a child to see that child's monthly cost." The number
+        lives here and nowhere else, and spec 170 rules out ever collecting
+        these into an expense breakdown.
+
+        Ticket 0304 made it a REAL number. Until then it came from
+        `monthlyCostOf`, a placeholder from 0208 that predated any ledger, and
+        by 0303 it had become a second cost model: it said $420 while the
+        household was actually charged a share worth something else. What is
+        shown now is what the living phase bills, at this household's standard
+        and in this city — so a child in San Francisco costs more than one in
+        Memphis, which is both true and something no previous version could say.
+      */}
       {!grown ? (
         <>
           <SectionHeading>What they cost</SectionHeading>
           <Card>
             <ListRow
-              title={`${formatMoney(monthlyCostOf(age))} a month`}
+              title={`${formatMoney(
+                childMonthlyCost(
+                  state.household.standard,
+                  costIndexOf(state.player.currentLocation.cityId),
+                  childShare(age),
+                ),
+              )} a month`}
               subtitle={
                 age >= 13
                   ? 'Teenagers cost more. Everybody who has one knows this.'

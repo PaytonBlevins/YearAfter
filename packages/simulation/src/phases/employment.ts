@@ -26,6 +26,7 @@ import {
   findJob,
   firingChance,
   payBreakdown,
+  paysCommission,
   performanceTarget,
   performanceYear,
   promotionChance,
@@ -140,12 +141,28 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
     spec 1677 lists it as its own category precisely because for some jobs it is
     most of the money and for others it is noise.
   */
+  /*
+    Ticket 0304. Whether the commission half is posted SEPARATELY is a property
+    of the job, not of how the year went.
+
+    0301 guarded this on `commission > 0` and its comment said exactly what it
+    was for: a school administrator should not have "$1,400 of commission" in
+    their books every year. But every template in the catalog has some pay at
+    risk — a government clerk is at two per cent — so the guard was true for
+    every job that has ever existed, and the measurement found a commission row
+    in 5,270 of 5,270 working years. A guard that cannot fail is not a guard.
+
+    Below `COMMISSION_FROM` the variable part is a salary moving about, and it
+    goes in the salary row where a player would look for it. The gross is the
+    same either way; only the description changes, which is the whole point.
+  */
+  const commissioned = paysCommission(job) && parts.commission > 0;
   transactions.push({
     category: 'salary',
-    amount: dollars(parts.steady),
+    amount: dollars(commissioned ? parts.steady : parts.steady + parts.commission),
     source: `${job.title} — pay`,
   });
-  if (parts.commission > 0) {
+  if (commissioned) {
     transactions.push({
       category: 'commission',
       amount: dollars(parts.commission),

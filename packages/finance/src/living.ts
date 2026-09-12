@@ -71,15 +71,23 @@ export const SUBSISTENCE = 18_600;
  * anything, which makes every price in the game unreachable; too low and a
  * median career ends in a fortune, which makes every price free. Both failures
  * have already happened once in this build.
+ *
+ * RE-TUNED IN 0304, and the reason is worth keeping. 0303 set this to 0.84
+ * against a model that was charging households for children who had long since
+ * grown up — `livingChildren` where `childrenAtHome` was meant — so every
+ * measurement it was tuned against was taken on a game that overcharged. Fixing
+ * that lifted the median balance at forty from $101,000 to $171,000 in one
+ * commit. A constant tuned against a bug is a constant that has to be tuned
+ * again when the bug goes.
  */
-export const MARGINAL_SPEND = 0.84;
+export const MARGINAL_SPEND = 0.92;
 
 /**
  * After-tax income past which each extra dollar is much less likely to be
  * spent. A high earner's life gets better, not proportionally more expensive.
  */
 export const TAPER_FROM = 120_000;
-export const TAPER_SPEND = 0.6;
+export const TAPER_SPEND = 0.74;
 
 /**
  * What holding money does to what you are used to.
@@ -159,8 +167,31 @@ export const AT_HOME_SHARE = 0.34;
 export const PARTNER_SHARE = 0.5;
 export const CHILD_SHARE = 0.3;
 
-export const householdScale = (partnered: boolean, children: number): number =>
-  1 + (partnered ? PARTNER_SHARE : 0) + CHILD_SHARE * Math.max(0, children);
+/**
+ * A child's share, which RISES WITH THEIR AGE.
+ *
+ * Ticket 0304 inherited this idea rather than inventing it. `monthlyCostOf` in
+ * `@yearafter/parenting` had carried the same curve since 0208 with a comment
+ * saying *"a teenager costs more than a toddler, which every parent knows and
+ * no game ever says"* — and that was right. What was wrong was that it was a
+ * SECOND cost model: it told the player a child cost $420 a month while 0303
+ * charged the household a flat share worth something else entirely, so the
+ * number on the child's page was a number the game did not take.
+ *
+ * The curve lives here now, the placeholder is deleted (CORE_RULES 13.23), and
+ * the figure the child's page shows is the figure the household is charged.
+ */
+export const TEEN_FROM = 13;
+export const SCHOOL_FROM = 5;
+export const SCHOOL_MULTIPLIER = 1.2;
+export const TEEN_MULTIPLIER = 1.55;
+
+export const childShare = (childAge: number): number =>
+  CHILD_SHARE *
+  (childAge >= TEEN_FROM ? TEEN_MULTIPLIER : childAge >= SCHOOL_FROM ? SCHOOL_MULTIPLIER : 1);
+
+export const householdScale = (partnered: boolean, childAges: readonly number[]): number =>
+  1 + (partnered ? PARTNER_SHARE : 0) + childAges.reduce((sum, age) => sum + childShare(age), 0);
 
 /* -------------------------------------------------------------------------- */
 /* The year                                                                    */
@@ -172,8 +203,8 @@ export interface LivingInput {
   /** The city's cost index. 1.00 is an average American city. */
   readonly locationIndex: number;
   readonly partnered: boolean;
-  /** Dependent children at home. */
-  readonly children: number;
+  /** The ages of the dependent children at home. A teenager costs more. */
+  readonly childAges: readonly number[];
   readonly housing: Housing;
 }
 
@@ -188,7 +219,7 @@ export function livingCostFor(input: LivingInput): LivingCost {
   const standard = Math.max(SUBSISTENCE, Math.round(input.standard));
   const housing = input.housing === 'withFamily' ? AT_HOME_SHARE : 1;
   const total = Math.round(
-    standard * input.locationIndex * householdScale(input.partnered, input.children) * housing,
+    standard * input.locationIndex * householdScale(input.partnered, input.childAges) * housing,
   );
   return { total: Math.max(0, total), standard };
 }

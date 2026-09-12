@@ -24,7 +24,7 @@
  */
 
 import type { Personality, Sex } from '@yearafter/character';
-import { clampStat, dollars, type Money, type StatValue } from '@yearafter/core';
+import { clampStat, type StatValue } from '@yearafter/core';
 import type { FamilyMember, Household } from '@yearafter/relationships';
 import { livingChildren } from '@yearafter/relationships';
 
@@ -153,24 +153,22 @@ export const isDue = (pregnancy: Pregnancy, age: number): boolean =>
 /* What a child costs                                                          */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Spec 175: "open a child to see that child's monthly cost." Contextual, never
- * a line in an expense breakdown — spec 170 rules that out explicitly.
- *
- * There is no ledger until Ticket 0301, so this is what the number will be
- * when there is one, and what the child's page shows now. It rises with the
- * child's age because a teenager costs more than a toddler, which every parent
- * knows and no game ever says.
- */
-export const BASE_CHILD_COST = 42_000; // cents a month
+/*
+  `BASE_CHILD_COST`, `monthlyCostOf` and `yearlyCostOf` used to live here.
 
-export function monthlyCostOf(childAge: number): Money {
-  const teen = childAge >= 13 ? 1.55 : childAge >= 5 ? 1.2 : 1;
-  return dollars(Math.round((BASE_CHILD_COST * teen) / 100));
-}
+  They were a labelled placeholder with a replacement date — the comment said
+  *"there is no ledger until Ticket 0301, so this is what the number will be
+  when there is one"* — and by 0304 that had quietly become something worse than
+  a placeholder: a SECOND cost model. The child's page told a player their
+  daughter cost $420 a month while 0303's living phase charged the household a
+  share worth something else entirely, so the one number spec 175 asks this
+  screen to show was the one number the game did not take.
 
-export const yearlyCostOf = (childAge: number): Money =>
-  dollars(Math.round((Number(monthlyCostOf(childAge)) * 12) / 100));
+  Deleted rather than kept alongside, the same way `livingCostOf` was in 0303
+  and for the same rule (CORE_RULES 13.23). The good half — a teenager costs
+  more than a toddler — moved to `childShare` in `@yearafter/finance`, where it
+  now changes what the household is actually billed.
+*/
 
 /* -------------------------------------------------------------------------- */
 /* How a child is doing                                                        */

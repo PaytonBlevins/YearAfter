@@ -189,6 +189,25 @@ export const BENEFITS: Readonly<Record<JobTemplate, string>> = {
   management: 'Bonus tied to what the team does.',
 };
 
+/**
+ * The share of pay at risk above which a job genuinely pays COMMISSION.
+ *
+ * Ticket 0304, fixing a guard 0301 wrote that could never fail. The employment
+ * phase posted a separate `commission` row whenever `commission > 0`, and its
+ * comment said why: *"a ledger that wrote '$1,400 of commission' for a school
+ * administrator every year would be technically true and misleading"*. Every
+ * template in this table has a non-zero `atRisk`, so the guard was true for
+ * every job in the catalog — measured across 5,270 working years, a commission
+ * row was written in 5,270 of them, including for government clerks at two per
+ * cent. The intent was right and the test was of the wrong quantity.
+ *
+ * A job pays commission when the at-risk share is most of the point of the job,
+ * not when this year's variation happens to be positive. Below the line it is a
+ * salary that moves about a bit, and it belongs in the `salary` row where a
+ * player would look for it.
+ */
+export const COMMISSION_FROM = 0.2;
+
 export const TEMPLATES: Readonly<Record<JobTemplate, TemplateRules>> = {
   salary: { atRisk: 0.06, promotes: 0.11, fires: 0.05, raise: 0.02 },
   // The one the spec singles out twice. Half the money is on the table.
@@ -244,6 +263,17 @@ export const ALL_JOBS: readonly Job[] = CATALOG.map(widen).filter(
 const JOBS_BY_ID = new Map(ALL_JOBS.map((job) => [String(job.id), job]));
 
 export const findJob = (id: string): Job | undefined => JOBS_BY_ID.get(id);
+
+/**
+ * Does this job pay commission, in the sense spec 1677 gives the word?
+ *
+ * A property of the TEMPLATE, not of how a particular year went. Asked once,
+ * here, so the ledger and any screen that reads it give the same answer — the
+ * alternative is two places deciding what counts as commission, which is
+ * CORE_RULES 13.23 with a category name attached.
+ */
+export const paysCommission = (job: Job): boolean =>
+  TEMPLATES[job.template].atRisk >= COMMISSION_FROM;
 
 export const jobsIn = (track: CareerTrack): readonly Job[] =>
   jobsOnTrack(track)

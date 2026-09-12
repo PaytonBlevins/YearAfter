@@ -1160,3 +1160,35 @@ Two fixes, and the first is the general one:
 **Every green test passed throughout.** The suite asserts the rules; the rules
 were each individually right. Reading sixty years of one character's feed took
 four minutes and found all of it.
+
+### 13.45 A roster helper is not a definition — ask what the list is FOR
+
+Ticket 0304, found by printing the numbers a screen was about to render.
+
+0303 charged a household for its children, and reached for the obvious function:
+`livingChildren(family)`. It returns the children who are alive. What the cost
+model needed was the children being SUPPORTED, which is `childrenAtHome` — a
+function that has existed since 0208, draws the line at eighteen, and says so in
+its one-line comment.
+
+Nothing failed. Every test passed, the books reconciled, and the defect was
+invisible in aggregate. It became obvious the moment a screen printed a sentence
+a person would read:
+
+> child Tyler (38) costs $1,117 a month
+
+A sixty-seven-year-old was being billed for a thirty-eight-year-old son, and had
+been since the year he was born. A household's costs never fell after the
+children grew up, which is most of the reason a late career could not save.
+
+- **Two functions over the same collection are two DEFINITIONS.** `livingChildren`
+  and `childrenAtHome` differ by one predicate and by the entire question they
+  answer. Picking one by name-similarity is picking a definition by accident.
+- **Print a sentence, not a total.** The aggregate said "outflow is a bit high";
+  the sentence said a specific wrong thing about a specific person. The same
+  measurement, rendered for a reader, is a different instrument.
+- **And it invalidated a tuning pass.** 0303's `MARGINAL_SPEND` was fitted
+  against a game that overcharged, so fixing the bug lifted the median balance
+  at forty from $101,000 to $171,000 and the constant had to be set again. A
+  number tuned against a defect is a number that comes back for a second visit
+  when the defect goes.

@@ -38,9 +38,7 @@ import {
   isDue,
   isWaiting,
   milestoneFor,
-  monthlyCostOf,
   placementChance,
-  yearlyCostOf,
 } from './index';
 
 const kid = (id: string, birthYear: number, alive = true): FamilyMember => ({
@@ -172,16 +170,15 @@ describe('a pregnancy takes a year', () => {
 /* What a child costs and how they do                                          */
 /* -------------------------------------------------------------------------- */
 
-describe('a child costs money (spec 175)', () => {
-  it('costs more as they get older', () => {
-    expect(Number(monthlyCostOf(14))).toBeGreaterThan(Number(monthlyCostOf(8)));
-    expect(Number(monthlyCostOf(8))).toBeGreaterThan(Number(monthlyCostOf(2)));
-  });
+/*
+  What a child costs moved to `@yearafter/finance` in Ticket 0304, and the tests
+  went with it (`living.test.ts`, "a teenager costs more than a toddler").
 
-  it('states a year as twelve months of it', () => {
-    expect(Number(yearlyCostOf(10))).toBe(Number(monthlyCostOf(10)) * 12);
-  });
-});
+  It was here because 0208 needed a number for the child's page before any
+  ledger existed. By 0304 it had become a second cost model disagreeing with the
+  one that actually bills the household, which is the thing CORE_RULES 13.23 is
+  about — so it is gone rather than kept alongside.
+*/
 
 describe('closeness', () => {
   it('rises when the player says yes and falls when they say no', () => {

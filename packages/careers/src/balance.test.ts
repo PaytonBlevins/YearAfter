@@ -25,6 +25,7 @@ import {
   promotionChance,
   promotionFrom,
   takeHome,
+  paysCommission,
   TEMPLATES,
   taxRate,
   topOfLadder,
@@ -314,6 +315,51 @@ describe('Ticket 0301 — the breakdown is the same year, itemised', () => {
         expect(parts.steady, `${job.id} steady`).toBeGreaterThanOrEqual(0);
         expect(parts.commission, `${job.id} commission`).toBeGreaterThanOrEqual(0);
       }
+    }
+  });
+});
+
+describe('Ticket 0304 — commission is a property of the job, not of the year', () => {
+  /*
+    0301 posted a separate `commission` ledger row whenever the variable part of
+    a year's pay came out positive, and its comment said exactly what that was
+    for: "a ledger that wrote '$1,400 of commission' for a school administrator
+    every year would be technically true and misleading."
+
+    Every template in the catalog has a non-zero `atRisk` — a government clerk
+    is at two per cent — so the guard was true for every job that has ever
+    existed. Measured across 5,270 working years: a commission row in 5,270 of
+    them. A guard that cannot fail is not a guard, which is CORE_RULES 13.7 read
+    from the other end.
+  */
+  it('says no to the jobs the spec does not mean by the word', () => {
+    const clerk = ALL_JOBS.find((job) => job.template === 'government');
+    const office = ALL_JOBS.find((job) => job.template === 'salary');
+    expect(clerk && paysCommission(clerk)).toBe(false);
+    expect(office && paysCommission(office)).toBe(false);
+  });
+
+  it('says yes to the ones it does', () => {
+    // Spec 1394 singles these out by name, and the template puts half the money
+    // on the table.
+    const seller = ALL_JOBS.find((job) => job.template === 'performance');
+    expect(seller && paysCommission(seller)).toBe(true);
+  });
+
+  it('is reachable, and is not most of the catalog', () => {
+    // CORE_RULES 13.7 in both directions: a category nobody can produce is not
+    // a category, and one everybody produces is not a distinction.
+    const commissioned = ALL_JOBS.filter(paysCommission).length;
+    expect(commissioned).toBeGreaterThan(0);
+    expect(commissioned).toBeLessThan(ALL_JOBS.length / 2);
+  });
+
+  it('does not change what anybody is paid, only what it is called', () => {
+    // The gross is `payFor` either way. A ticket that quietly moved everybody's
+    // income while claiming to relabel a ledger row would be unreviewable.
+    for (const job of ALL_JOBS) {
+      const parts = payBreakdown(job, 6, 70, 55);
+      expect(parts.steady + parts.commission).toBe(payFor(job, 6, 70, 55));
     }
   });
 });

@@ -26,7 +26,7 @@ const alone = (over: Partial<Parameters<typeof livingCostFor>[0]> = {}) =>
     standard: 40_000,
     locationIndex: 1,
     partnered: false,
-    children: 0,
+    childAges: [],
     housing: 'ownPlace',
     ...over,
   }).total;
@@ -44,17 +44,17 @@ describe('every input the spec names reaches the number', () => {
   it('household size, with each extra person costing less than the first', () => {
     const one = alone();
     const two = alone({ partnered: true });
-    const withKids = alone({ partnered: true, children: 3 });
+    const withKids = alone({ partnered: true, childAges: [8, 8, 8] });
     expect(two).toBeGreaterThan(one);
     expect(withKids).toBeGreaterThan(two);
     // Two people are cheaper than two singles. This is the whole point of an
     // equivalence scale, and the reason a couple is better off than a pair.
     expect(two).toBeLessThan(one * 2);
     // And a fourth child costs less than the first.
-    expect(alone({ children: 4 }) - alone({ children: 3 })).toBe(
-      alone({ children: 1 }) - alone({ children: 0 }),
+    expect(alone({ childAges: [8, 8, 8, 8] }) - alone({ childAges: [8, 8, 8] })).toBe(
+      alone({ childAges: [8] }) - alone({ childAges: [] }),
     );
-    expect(householdScale(true, 2)).toBeCloseTo(1 + 0.5 + 0.6, 6);
+    expect(householdScale(true, [8, 8])).toBeCloseTo(1 + 0.5 + 0.3 * 1.2 * 2, 6);
   });
 
   it('income, through the standard it drifts toward', () => {
@@ -68,6 +68,17 @@ describe('every input the spec names reaches the number', () => {
     // But it NUDGES. If wealth set the standard, a windfall would bankrupt
     // somebody inside three years, which is a worse model than not having it.
     expect(standardTargetFor(60_000, 500_000)).toBeLessThan(standardTargetFor(60_000, 0) * 1.4);
+  });
+
+  it('a teenager costs more than a toddler — Ticket 0304', () => {
+    /*
+      Inherited from `monthlyCostOf`, which carried this curve from 0208 and was
+      a SECOND cost model: it told a player a child cost $420 a month while the
+      household was charged a flat share worth something else. The curve was the
+      good half of that placeholder and it is the half that was kept.
+    */
+    expect(alone({ childAges: [15] })).toBeGreaterThan(alone({ childAges: [8] }));
+    expect(alone({ childAges: [8] })).toBeGreaterThan(alone({ childAges: [2] }));
   });
 
   it('housing, which is the largest single term there is', () => {
@@ -134,7 +145,7 @@ describe('what a year actually comes to', () => {
         standard: SUBSISTENCE,
         locationIndex: 1,
         partnered: false,
-        children: 0,
+        childAges: [],
         housing: 'ownPlace',
       }).total,
     ).toBeGreaterThan(0);
@@ -149,7 +160,7 @@ describe('what a year actually comes to', () => {
       standard,
       locationIndex: 1,
       partnered: false,
-      children: 0,
+      childAges: [],
       housing: 'ownPlace',
     }).total;
     expect(cost).toBeGreaterThan(30_000);
@@ -165,7 +176,7 @@ describe('what a year actually comes to', () => {
         standard: standardTargetFor(income, 0),
         locationIndex: 1,
         partnered: false,
-        children: 0,
+        childAges: [],
         housing: 'ownPlace',
       }).total;
     expect(left(rich.income)).toBeGreaterThan(left(poor.income));
@@ -183,7 +194,7 @@ describe('what a year actually comes to', () => {
       standard: standardTargetFor(income, 0),
       locationIndex: 1.1,
       partnered: true,
-      children: 4,
+      childAges: [8, 8, 8, 8],
       housing: 'ownPlace',
     }).total;
     expect(cost).toBeGreaterThan(income);

@@ -50,8 +50,8 @@ export interface LivingPhaseInput {
   /** The city's cost index, from the location catalog. */
   readonly locationIndex: number;
   readonly partnered: boolean;
-  /** Dependent children at home — the same count the employment phase uses. */
-  readonly children: number;
+  /** The ages of dependent children at home. A teenager costs more (0304). */
+  readonly childAges: readonly number[];
   /** After-tax income this year, whole dollars. Zero is an ordinary answer. */
   readonly afterTaxIncome: number;
   /** What they are holding, whole dollars. The wealth half of the creep. */
@@ -106,7 +106,7 @@ export function movesOut(input: LivingPhaseInput, ownPlaceCost: number): boolean
   if (input.age < MOVE_OUT_AGE) return false;
   if (input.toldToLeave) return true;
   if (!input.hasLivingParent) return true;
-  if (input.partnered || input.children > 0) return true;
+  if (input.partnered || input.childAges.length > 0) return true;
   const movedBack = input.household.movedBackAt;
   if (movedBack !== undefined && input.age < movedBack + SETTLE_AFTER_MOVING_BACK) return false;
   /*
@@ -192,7 +192,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     standard,
     locationIndex: input.locationIndex,
     partnered: input.partnered,
-    children: input.children,
+    childAges: input.childAges,
     housing: 'ownPlace',
   });
 
@@ -205,7 +205,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     standard,
     locationIndex: input.locationIndex,
     partnered: input.partnered,
-    children: input.children,
+    childAges: input.childAges,
     housing,
   });
 
@@ -253,7 +253,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
       standard,
       locationIndex: input.locationIndex,
       partnered: input.partnered,
-      children: input.children,
+      childAges: input.childAges,
       housing,
     });
     // Still short after all of that: they get by on what there is. A charge for
@@ -278,7 +278,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
   if (input.jobTitle !== undefined) {
     lines.push({
       kind: 'career',
-      text: payLine(input.jobTitle, input.earned, left, input.children > 0, input.age),
+      text: payLine(input.jobTitle, input.earned, left, input.childAges.length > 0, input.age),
     });
   } else if (cost.total > 0 && input.age >= CHARGED_FROM_AGE) {
     lines.push({ kind: 'career', text: noIncomeLine(cost.total, input.wealth, input.age) });
@@ -345,7 +345,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
  */
 function sourceFor(input: LivingPhaseInput, housing: Housing): string {
   if (housing === 'withFamily') return 'Living costs, at home';
-  const people = 1 + (input.partnered ? 1 : 0) + input.children;
+  const people = 1 + (input.partnered ? 1 : 0) + input.childAges.length;
   return people > 1 ? `Living costs, ${people} in the household` : 'Living costs';
 }
 

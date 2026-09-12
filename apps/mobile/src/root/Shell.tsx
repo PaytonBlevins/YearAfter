@@ -13,6 +13,7 @@ import type { FamilyMember } from '@yearafter/relationships';
 import { eulogyFor, heirsIn } from '@yearafter/simulation';
 import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
+import { FinancesScreen } from '../screens/FinancesScreen';
 import { DoctorScreen } from '../screens/DoctorScreen';
 import { DetailCard } from '../components/DetailCard';
 import { EndOfLifeCard } from '../components/EndOfLifeCard';
@@ -55,6 +56,7 @@ import { colors, layout, spacing, typography } from '../theme/theme';
 const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> = {
   mindBody: MindBodyScreen,
   doctor: DoctorScreen,
+  finances: FinancesScreen,
   relocate: RelocateScreen,
   family: FamilyScreen,
   friends: PeopleScreen,
@@ -309,6 +311,7 @@ function heirLine(heir: FamilyMember, worldYear: number): string {
   const age = worldYear - heir.birthYear;
   const life = heir.life as { jobTitle?: string; stage?: string } | undefined;
   const doing =
-    life?.jobTitle ?? (life?.stage === 'college' ? 'At college' : life?.stage === 'school' ? 'At school' : undefined);
+    life?.jobTitle ??
+    (life?.stage === 'college' ? 'At college' : life?.stage === 'school' ? 'At school' : undefined);
   return doing ? `${age} · ${doing}` : `${age}`;
 }

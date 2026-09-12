@@ -39,7 +39,7 @@ import {
 } from '@yearafter/education';
 import { isCurrent, partnerOf, stagesFor } from '@yearafter/social';
 import { livingCostFor } from '@yearafter/finance';
-import { livingChildren } from '@yearafter/relationships';
+import { childrenAtHome } from '@yearafter/parenting';
 import { TRACK_LABELS, afterTax, findJob, payFor } from '@yearafter/careers';
 import {
   canWork,
@@ -580,14 +580,17 @@ function payDetail(state: NonNullable<ReturnType<typeof useGame>['state']>): Det
   const standing = state.employment.standing[job.track] ?? 50;
   const gross = payFor(job, years, held.performance, standing);
   const tax = gross - afterTax(gross);
-  const dependents = livingChildren(state.family).length;
+  // 0304: the people this wage is actually supporting, not every child ever
+  // born — the same line `childrenAtHome` has drawn since 0208.
+  const kids = childrenAtHome(state.family, state.world.year);
+  const dependents = kids.length;
   // The household's own number, at this household's standard, in this city —
   // not a share of this wage. A character who loses this job goes on paying it.
   const living = livingCostFor({
     standard: state.household.standard,
     locationIndex: costIndexOf(state.player.currentLocation.cityId),
     partnered: partnerOf(state.circle.people) !== undefined,
-    children: dependents,
+    childAges: kids.map((child) => state.world.year - child.birthYear),
     housing: state.household.housing,
   }).total;
   const kept = afterTax(gross) - living;
@@ -673,7 +676,7 @@ export function AssetsScreen() {
             title: 'Finances',
             subtitle: 'Balance, income, outflow, net worth',
             value: formatMoney(state.player.cash),
-            ticket: '0304',
+            route: { screen: 'finances', title: 'Finances' },
           },
           { icon: 'invest', title: 'Investments', ticket: '0308' },
         ]}
