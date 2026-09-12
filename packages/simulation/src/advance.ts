@@ -50,6 +50,7 @@ import {
   reconcile,
   reconcileByYear,
   runCardYear,
+  runLoanYear,
   yearsOutside,
   type NewTransaction,
 } from '@yearafter/finance';
@@ -482,12 +483,30 @@ export function advanceYear(state: GameState): AdvanceResult {
   const leftForCards = Math.max(0, Math.round((coming + draw.drawn * 100 - owing) / 100));
   const cardYear = runCardYear(draw.cards, leftForCards);
 
+  /*
+    Ticket 0307. Loans are serviced AFTER cards, out of what is left again.
+
+    The order between the two is a real decision and this is the honest way
+    round: a card's minimum is small and its rate is punishing, so paying it
+    first is what a person does and what costs them least. A loan that goes
+    unpaid falls into arrears — the same consequence a card gets, for the same
+    spec 32 reason: no court, no collections, the account simply goes bad.
+  */
+  const cardCost = cardYear.charges.reduce((sum, charge) => sum - Number(charge.amount), 0);
+  const leftForLoans = Math.max(0, leftForCards - Math.round(cardCost / 100));
+  const loanYear = runLoanYear(state.loans, leftForLoans, isInSchool(education.education));
+
   const money = postYear(state.finance, nextYear, nextAge, [
     ...reported.filter((entry) => entry.amount > 0),
     ...advance,
     ...reported.filter((entry) => entry.amount < 0),
     ...living.transactions,
     ...cardYear.charges.map((charge) => ({
+      category: 'debt' as const,
+      amount: charge.amount,
+      source: charge.source,
+    })),
+    ...loanYear.charges.map((charge) => ({
       category: 'debt' as const,
       amount: charge.amount,
       source: charge.source,
@@ -656,6 +675,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       finance: money.finance,
       // Ticket 0306. Balances, interest and any freeze, carried forward.
       cards: cardYear.cards,
+      // Ticket 0307. Loans amortise, fall into arrears, or clear and vanish.
+      loans: loanYear.loans,
       // Ticket 0303. The standard of living and whether they pay for a roof —
       // both carried forward, because a standard with no memory is a share of
       // income by another name.

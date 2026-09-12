@@ -14,14 +14,14 @@ import type { EducationState } from '@yearafter/education';
 import type { SocialCircle } from '@yearafter/social';
 import type { ParentingState } from '@yearafter/parenting';
 import type { EmploymentState } from '@yearafter/careers';
-import type { HeldCard, HouseholdFinances, Ledger } from '@yearafter/finance';
+import type { HeldCard, HeldLoan, HouseholdFinances, Ledger } from '@yearafter/finance';
 import type { HealthState } from '@yearafter/health';
 import type { EventHistory, PendingDecision } from '@yearafter/events';
 import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 20;
+export const CURRENT_SAVE_VERSION = 21;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -77,7 +77,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 20;
+  readonly version: 21;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -123,6 +123,8 @@ export interface SaveGameV18 {
   readonly household: HouseholdFinances;
   /** Ticket 0306: cards held, and what is on them. */
   readonly cards: readonly HeldCard[];
+  /** Ticket 0307: loans taken, and what is left of them. */
+  readonly loans: readonly HeldLoan[];
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

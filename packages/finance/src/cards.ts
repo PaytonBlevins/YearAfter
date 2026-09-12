@@ -400,6 +400,31 @@ export const offersFor = (
 export const MINIMUM_SHARE = 0.22;
 export const MINIMUM_FLOOR = 300;
 
+/**
+ * The most a card can ever owe, as a multiple of its limit.
+ *
+ * A DEFECT 0306 SHIPPED AND 0307 FOUND, by running a population for a lifetime
+ * rather than a few years. Interest capitalises onto the balance, which is
+ * right and is what makes a card get away from somebody — but nothing stopped
+ * it. A $200 balance on a frozen secured card at 29%:
+ *
+ *     year  0   $308        year 30   $1,000,724
+ *     year 10   $5,973      year 40   $12,772,640
+ *     year 20   $78,259     year 59   $1,612,467,709
+ *
+ * One and a half billion dollars owed on a card with a $1,200 limit. Every
+ * individual step was correct; compounding for sixty years is the part nobody
+ * writes a test for.
+ *
+ * A lender does not let that happen either: past some point they stop accruing
+ * and write off what they are never getting back. Capping at a multiple of the
+ * limit is the simplest form of that, needs no new field — spec 28 forbids
+ * storing dates and history, so there is nowhere to record "frozen since" —
+ * and is not exploitable: a maxed card still ends up owing twice what it lent,
+ * frozen, with the debt sitting there.
+ */
+export const BALANCE_CEILING = 2;
+
 export function minimumOn(card: HeldCard): Money {
   const owed = Number(card.balance) / 100;
   if (owed <= 0) return cents(0);
@@ -457,6 +482,11 @@ export function runCardYear(cards: readonly HeldCard[], canPay: number): CardYea
     const charge = owed > 0 ? Math.round(owed * product.apr) : 0;
     owed += charge;
     interest += charge;
+
+    // Charged off past the ceiling: the lender stops accruing on a debt they
+    // are not getting back, and the balance stands where it is.
+    const ceiling = (Number(card.limit) / 100) * BALANCE_CEILING;
+    owed = Math.min(owed, Math.max(ceiling, Number(card.balance) / 100));
 
     const withCharges: HeldCard = { ...card, balance: dollars(Math.round(owed)) };
     const minimum = Number(minimumOn(withCharges)) / 100;

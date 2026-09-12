@@ -52,6 +52,8 @@ import {
   applyForNewCard,
   payCard,
   closeCard,
+  takeLoan,
+  payLoan,
   stopTreatment,
   continueAsChild,
 } from '@yearafter/simulation';
@@ -119,6 +121,9 @@ interface GameContextValue {
   readonly applyForCard: (productId: string) => void;
   readonly payCardOff: (productId: string, amount: number) => void;
   readonly closeCardOff: (productId: string) => void;
+  /** Ticket 0307. Borrow, and pay extra off. */
+  readonly borrow: (productId: string, amount: number) => void;
+  readonly payLoanOff: (productId: string, amount: number) => void;
   readonly stopTreatingFor: (conditionId: string) => void;
   /** Put the hours in at something. Three sessions an activity a year. */
   readonly practiseAt: (activityId: string) => void;
@@ -587,6 +592,48 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const borrowWith = useCallback(
+    (productId: string, amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = takeLoan(current, productId, amount);
+        if (!result.ok) {
+          setSaveError(`Cannot borrow that (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'bad',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const payLoanWith = useCallback(
+    (productId: string, amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = payLoan(current, productId, amount);
+        if (!result.ok) {
+          setSaveError(`Cannot pay that loan (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'neutral',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const stopTreatingFor = useCallback(
     (conditionId: string) => {
       setState((current) => {
@@ -882,6 +929,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       applyForCard: applyForCardWith,
       payCardOff: payCardWith,
       closeCardOff: closeCardWith,
+      borrow: borrowWith,
+      payLoanOff: payLoanWith,
       stopTreatingFor,
       practiseAt,
       takeAGig,
@@ -926,6 +975,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       applyForCardWith,
       payCardWith,
       closeCardWith,
+      borrowWith,
+      payLoanWith,
       stopTreatingFor,
       practiseAt,
       takeAGig,

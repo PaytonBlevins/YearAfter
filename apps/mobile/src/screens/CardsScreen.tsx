@@ -16,7 +16,13 @@
 
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
-import { CREDIT_FROM_AGE, REWARD_LABELS, availableOn, findProduct, minimumOn } from '@yearafter/finance';
+import {
+  CREDIT_FROM_AGE,
+  REWARD_LABELS,
+  availableOn,
+  findProduct,
+  minimumOn,
+} from '@yearafter/finance';
 import { cardOffers } from '@yearafter/simulation';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';

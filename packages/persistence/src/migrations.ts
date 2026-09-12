@@ -598,6 +598,15 @@ const migrations: Readonly<Record<number, Migration>> = {
    * utilisation" (0305, and 13.46).
    */
   19: (save) => ({ ...save, version: 20, cards: save['cards'] ?? [] }),
+
+  /**
+   * v20 -> v21: Ticket 0307 gives a character loans.
+   *
+   * None, for the same reason migration 19 gave nobody a card: a loan is a
+   * thing you applied for and were approved for, and inventing one would be
+   * inventing a lender's decision the game never made.
+   */
+  20: (save) => ({ ...save, version: 21, loans: save['loans'] ?? [] }),
 };
 
 /**

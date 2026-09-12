@@ -1285,3 +1285,75 @@ of a credit line is the line, not a number it buys you.
 - **Measure a greedy player, not an average one.** The average player would
   never have shown this. The test that finds an exploit is the one that tries
   to commit it.
+
+### 13.49 A gate that has never been the binding one has not been tested
+
+*Ticket 0307.* Loan underwriting has two gates: a credit standing and an income.
+Both were real rules, both were wired up, both had tests, and the tests passed.
+Then the population was asked which one was actually stopping anybody:
+
+| | rows refused |
+|---|---|
+| refused on standing | 26,550 |
+| ...that would also have failed the income gate behind it | **26,550** |
+
+Every one. Not most, not 95% — all of them, across 120 lives and roughly 5,000
+adult years. The credit gate had never once been the thing holding the door,
+because `creditReport` weights income heavily enough that anybody clearing
+$140,000 has earned an excellent band on the way past. It was the income gate
+wearing a different label, and the label was the harmful part: the player was
+told "your credit is not there yet" — a decade of work — when the true answer
+was "you do not earn enough", which they could fix next year.
+
+- **A passing test on a gate proves the gate computes, not that it discriminates.**
+  Unit tests construct the borrower who fails that specific check. They cannot
+  tell you that borrower never occurs.
+- **Count which gate fires FIRST against which gates would ALSO have fired.**
+  A gate whose refusals are a subset of the next gate's is dead weight, and
+  reporting it is reporting the wrong reason.
+- **Order the checks so the reported one is the actionable one.** Two true
+  refusals are not equally useful. Say the one the player can do something
+  about this year.
+
+Keeping the dead gate is fine when something scheduled will decouple it — 0308's
+portfolio gives somebody assets without income. But then say so, and know that
+until that ticket lands the gate is untested rather than tested.
+
+### 13.50 If waiting is free, no loan can ever be worth taking
+
+*Ticket 0307.* The student loan is the ticket's whole reason for existing:
+cash at eighteen is $0 at every percentile including the maximum, and a college
+place costs $7,436 a year. It was built, measured, bounded, and it works. Then
+the same 120 seeds were played twice — once with the loan available, once
+without — and scored only on the 112 lives where money was genuinely the thing
+in the way:
+
+| | any degree | postgraduate | cash at death | first enrolled |
+|---|---|---|---|---|
+| no loan available | 100 | 88 | $20,709 | age 21 |
+| loan available | **91** | **73** | **$10,801** | age 18 |
+
+Borrowing to go to college made people *less* educated and *half* as rich. It
+is not composition — same seeds, same people, paired.
+
+The mechanism is in the last column. Blocked at eighteen and offered nothing, a
+character waits three years, saves, and enrols at twenty-one — and this build
+charges them nothing for the delay. Enrolling at 28 costs exactly what enrolling
+at 18 costs: no lost earning years, no admissions penalty, no life stage in the
+way. So the loan sells three years that are worth nothing, at 6.1% for ten
+years, and the interest is pure loss.
+
+No amount of re-pricing fixes this. A loan cannot beat free, and waiting is
+free.
+
+- **A cost with no clock is not a cost.** Every instrument that buys TIME —
+  loans, financing, anything paid for in interest — is strictly dominated until
+  the thing it accelerates has a deadline.
+- **Test an instrument by paired runs on the same seeds, not by two
+  populations.** The first comparison here showed 68 → 56 and looked like the
+  same finding; it was mostly composition, because offering a loan changes who
+  goes to college. Only the paired run on the treated group was evidence.
+- **The failure was not in the ticket that found it.** The loan engine is
+  correct. What the measurement exposed is that education has no time cost, and
+  that belongs to education's ticket. Build the instrument, measure it honestly,
+  and file the upstream gap rather than tuning the instrument to hide it.

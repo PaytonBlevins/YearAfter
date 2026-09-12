@@ -29,6 +29,8 @@ export type ScreenKey =
   | 'credit'
   /** Ticket 0306. The cards you hold, and the ones you could get. */
   | 'cards'
+  /** Ticket 0307. What you owe, and what anybody would lend you. */
+  | 'loans'
   | 'investments'
   | 'homes'
   | 'vehicles'

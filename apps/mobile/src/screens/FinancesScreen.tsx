@@ -36,7 +36,7 @@
 
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { NOT_YET_OWNED, summariseFinances, totalOwed } from '@yearafter/finance';
+import { NOT_YET_OWNED, summariseFinances, totalBorrowed, totalOwed } from '@yearafter/finance';
 import { standingFor } from '@yearafter/simulation';
 import { Card, ListRow, RowDivider, SectionHeading } from '../components';
 import { useNavigation } from '../navigation/navigation';
@@ -53,6 +53,7 @@ export function FinancesScreen() {
   const books = summariseFinances(state.finance, state.world.year);
   const credit = standingFor(state);
   const owed = totalOwed(state.cards);
+  const borrowed = totalBorrowed(state.loans);
 
   /*
     A year in which nothing moved is most of a childhood, and the honest answer
@@ -137,6 +138,16 @@ export function FinancesScreen() {
           }
           value={state.cards.length > 0 ? `${state.cards.length} of 5` : 'Apply'}
           onPress={() => push({ screen: 'cards', title: 'Cards' })}
+        />
+        <RowDivider />
+        {/* Ticket 0307. Spec 19 lists liabilities; this is where they live. */}
+        <ListRow
+          title="Loans"
+          subtitle={
+            state.loans.length > 0 ? 'What you owe and what it costs' : 'See what you could borrow'
+          }
+          value={state.loans.length > 0 ? money(Number(borrowed)) : 'Borrow'}
+          onPress={() => push({ screen: 'loans', title: 'Loans' })}
         />
       </Card>
 

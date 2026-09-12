@@ -19,8 +19,10 @@ import { EMPTY_HEALTH, type HealthState } from '@yearafter/health';
 import {
   EMPTY_CARDS,
   EMPTY_LEDGER,
+  EMPTY_LOANS,
   NEW_HOUSEHOLD,
   type HeldCard,
+  type HeldLoan,
   type HouseholdFinances,
   type Ledger,
 } from '@yearafter/finance';
@@ -137,6 +139,15 @@ export interface GameState {
    */
   readonly cards: readonly HeldCard[];
   /**
+   * Ticket 0307: what has been borrowed and what is left of it.
+   *
+   * Separate from `cards` because the instruments genuinely differ — a loan is
+   * drawn once and amortises, a card revolves — and because spec 1857 treats
+   * them as different things a lender offers. What they share is the category
+   * they post to: everything owed is `debt` in the ledger.
+   */
+  readonly loans: readonly HeldLoan[];
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -158,6 +169,7 @@ export interface CreateGameStateOptions {
   readonly finance?: Ledger;
   readonly household?: HouseholdFinances;
   readonly cards?: readonly HeldCard[];
+  readonly loans?: readonly HeldLoan[];
   readonly family?: Household;
   readonly nameCultureId?: string;
   readonly events?: EventHistory;
@@ -187,6 +199,7 @@ export const createGameState = (
   finance: options.finance ?? EMPTY_LEDGER,
   household: options.household ?? NEW_HOUSEHOLD,
   cards: options.cards ?? EMPTY_CARDS,
+  loans: options.loans ?? EMPTY_LOANS,
   pending: options.pending ?? [],
   rng,
 });
