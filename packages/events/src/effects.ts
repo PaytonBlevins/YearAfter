@@ -12,10 +12,25 @@
 
 import { nudgeStats, type VisibleStats } from '@yearafter/character';
 import type { EventEffects } from '@yearafter/content';
-import { add, dollars, max, type Money, ZERO } from '@yearafter/core';
+import type { Money } from '@yearafter/core';
 import { clampStat } from '@yearafter/core';
 import { type FamilyMember, type Household } from '@yearafter/relationships';
 import { withFlags, type EventHistory } from './history';
+
+/**
+ * What an event wants to do to money, reported rather than done.
+ *
+ * Ticket 0301: `applyEffects` used to move cash and floor it at zero, and the
+ * catalog's `{ delta, source }` shape has carried the source since 0203b with
+ * nowhere for it to land. It lands in the ledger now, posted by the events
+ * phase, so the floor is applied once with the whole year in view.
+ */
+export interface ReportedCash {
+  /** Whole dollars, signed. */
+  readonly delta: number;
+  /** CORE_RULES 13.6, authored in the catalog since 0203b. */
+  readonly source: string;
+}
 
 export interface EffectTargets {
   readonly stats: VisibleStats;
@@ -48,7 +63,19 @@ function warmthDelta(member: FamilyMember, effects: EventEffects): number {
   return delta;
 }
 
-export function applyEffects(targets: EffectTargets, effects?: EventEffects): EffectTargets {
+/**
+ * What came back out, which is the targets plus what the event wants to move.
+ *
+ * A separate type rather than an optional field on `EffectTargets`, because
+ * the two are genuinely different things: targets are what you hand IN and the
+ * reported movement is only ever produced. Putting it on the input type would
+ * let a caller pass one, which nothing should ever do.
+ */
+export interface AppliedEffects extends EffectTargets {
+  readonly cashDelta?: ReportedCash;
+}
+
+export function applyEffects(targets: EffectTargets, effects?: EventEffects): AppliedEffects {
   if (!effects) return targets;
 
   // nudgeStats, not adjustStats: an event's numbers are a strength, not a
@@ -68,13 +95,19 @@ export function applyEffects(targets: EffectTargets, effects?: EventEffects): Ef
       }
     : targets.family;
 
-  // A child cannot go into debt from an event. Money owes its real rules to the
-  // ledger (Ticket 0301); until then the floor is zero rather than a negative
-  // balance nothing in the game yet knows how to resolve.
-  const cash =
-    effects.cash === undefined
-      ? targets.cash
-      : max(ZERO, add(targets.cash, dollars(effects.cash.delta)));
+  /*
+    Ticket 0301 took money away from this function.
+
+    It used to apply the delta itself and floor at zero, with a comment saying
+    money owed its real rules to the ledger "until then". The ledger exists now,
+    so this REPORTS what the event wants to move and the events phase posts it —
+    which means the floor is applied once, by `post`, with the whole year in
+    view, and the unpaid part is written down rather than silently vanishing.
+
+    `cash` is still returned, unchanged, so `EffectTargets` keeps its shape and
+    every caller still reads the balance it started with.
+  */
+  const cashDelta = effects.cash;
 
   const behaviour =
     effects.behaviour === undefined
@@ -88,5 +121,13 @@ export function applyEffects(targets: EffectTargets, effects?: EventEffects): Ef
       ? withFlags(targets.history, effects.setFlags, effects.clearFlags)
       : targets.history;
 
-  return { stats, family, cash, behaviour, stress, history };
+  return {
+    stats,
+    family,
+    cash: targets.cash,
+    ...(cashDelta ? { cashDelta } : {}),
+    behaviour,
+    stress,
+    history,
+  };
 }

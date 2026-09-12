@@ -16,6 +16,7 @@ import { EMPTY_CIRCLE, type SocialCircle } from '@yearafter/social';
 import { EMPTY_PARENTING, type ParentingState } from '@yearafter/parenting';
 import { EMPTY_EMPLOYMENT, type EmploymentState } from '@yearafter/careers';
 import { EMPTY_HEALTH, type HealthState } from '@yearafter/health';
+import { EMPTY_LEDGER, type Ledger } from '@yearafter/finance';
 import { Rng } from './rng/rng';
 
 /** World state that outlives any single character (spec 818–827 continuation). */
@@ -90,6 +91,19 @@ export interface GameState {
    */
   readonly health: HealthState;
   /**
+   * Ticket 0301: every movement of money, and the balance they add up to.
+   *
+   * `player.cash` is still where the UI reads the number from, and it is now a
+   * MIRROR of `finance.balance` rather than a value anybody computes. Exactly
+   * one function may move money — `post` in `@yearafter/finance` — and every
+   * writer of `cash` sets it from `cashFrom(finance)`.
+   *
+   * Beside the player rather than on them, like education, employment and
+   * health, and for the same reason: on dynasty continuation the player is
+   * replaced, and a ledger belongs to whoever earned it.
+   */
+  readonly finance: Ledger;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -108,6 +122,7 @@ export const createWorldState = (year: number, generation = 1): WorldState => ({
 
 export interface CreateGameStateOptions {
   readonly health?: HealthState;
+  readonly finance?: Ledger;
   readonly family?: Household;
   readonly nameCultureId?: string;
   readonly events?: EventHistory;
@@ -134,6 +149,7 @@ export const createGameState = (
   parenting: options.parenting ?? EMPTY_PARENTING,
   employment: options.employment ?? EMPTY_EMPLOYMENT,
   health: options.health ?? EMPTY_HEALTH,
+  finance: options.finance ?? EMPTY_LEDGER,
   pending: options.pending ?? [],
   rng,
 });

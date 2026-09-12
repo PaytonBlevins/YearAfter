@@ -39,6 +39,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     parenting: state.parenting,
     employment: state.employment,
     health: state.health,
+    finance: state.finance,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -55,6 +56,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     parenting: save.parenting,
     employment: save.employment,
     health: save.health ?? { conditions: [], vitality: save.player.stats.health, deficit: 0 },
+    finance: save.finance,
     pending: save.pending,
   });
 }

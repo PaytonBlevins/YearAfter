@@ -19,6 +19,7 @@
     "@yearafter/core": "workspace:*",
     "@yearafter/education": "workspace:*",
     "@yearafter/events": "workspace:*",
+    "@yearafter/finance": "workspace:*",
     "@yearafter/parenting": "workspace:*",
     "@yearafter/relationships": "workspace:*",
     "@yearafter/social": "workspace:*",

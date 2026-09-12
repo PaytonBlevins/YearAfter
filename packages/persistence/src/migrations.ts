@@ -464,6 +464,57 @@ const migrations: Readonly<Record<number, Migration>> = {
       player: { ...player, records: Array.isArray(player['records']) ? player['records'] : [] },
     };
   },
+
+  /**
+   * v17 → v18 (Ticket 0301) — the ledger.
+   *
+   * An existing save has a BALANCE and no transactions behind it, and the two
+   * have to agree from the first advance onwards or `reconcile` fails forever.
+   * Three ways to do that, and only one of them is honest.
+   *
+   *  - Invent a history. Read the timeline, find the lines that mention money,
+   *    and write transactions for them. This is wrong twice: `LifeRecord`'s own
+   *    contract says structured history is never derived by parsing feed text,
+   *    and 0211b rewrote a hundred and eighty of those sentences, so the same
+   *    save would migrate differently depending on which build last touched it.
+   *  - Start at zero and lose the money. A character who saved $40,000 opening
+   *    a migrated save to find nothing is the worst outcome available.
+   *  - Open the books with one entry that says exactly what is true: this is
+   *    what they had when the ledger started, and nobody knows where it came
+   *    from.
+   *
+   * The third. It reconciles by construction, it loses nothing, and it does not
+   * pretend to a history the save cannot support — which is the same choice
+   * migration 16 made about `records` and migration 15 about conditions.
+   */
+  17: (save) => {
+    const player = (save['player'] ?? {}) as Record<string, unknown>;
+    const world = (save['world'] ?? {}) as Record<string, unknown>;
+    const cash = typeof player['cash'] === 'number' ? player['cash'] : 0;
+    const year = typeof world['year'] === 'number' ? world['year'] : 0;
+    const age = typeof player['age'] === 'number' ? player['age'] : 0;
+    return {
+      ...save,
+      version: 18,
+      finance:
+        save['finance'] ??
+        (cash === 0
+          ? { transactions: [], balance: 0 }
+          : {
+              transactions: [
+                {
+                  id: `f:${year}:windfall:0`,
+                  year,
+                  age,
+                  category: 'windfall',
+                  amount: cash,
+                  source: 'What you had when the books were opened',
+                },
+              ],
+              balance: cash,
+            }),
+    };
+  },
 };
 
 /**

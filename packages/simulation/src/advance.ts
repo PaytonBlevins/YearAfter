@@ -31,7 +31,7 @@ import {
   type TimelineEntry,
   type TimelineKind,
 } from '@yearafter/character';
-import { asEventId, clampStat, dollars, type Money } from '@yearafter/core';
+import { asEventId, clampStat } from '@yearafter/core';
 import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
 import { occupationFor, runEducation } from './phases/education';
@@ -40,6 +40,7 @@ import { runEmployment } from './phases/employment';
 import { runEvents } from './phases/events';
 import { partnerOf } from '@yearafter/social';
 import { runFamily } from './phases/family';
+import { postYear } from './money';
 import { runKin } from './phases/kin';
 import { runSocial } from './phases/social';
 import { runHealth } from './phases/health';
@@ -61,19 +62,20 @@ export interface AdvanceResult {
  * shared by reference and does advance, which is intended — a turn consumes
  * randomness, and the save records the resulting stream state.
  */
-/**
- * Cash after the year's two movements, floored at zero.
- *
- * Separate function because the floor is a rule rather than an arithmetic
- * detail, and because a reader looking for "can this go negative" should find
- * one place that answers it.
- */
-function earnedThisYear(cash: Money, gifted: number, saved: number): Money {
-  const delta = gifted + saved;
-  if (delta === 0) return cash;
-  const next = Number(cash) + Math.round(delta * 100);
-  return (next < 0 ? dollars(0) : (next as unknown as Money)) as Money;
-}
+/*
+  `earnedThisYear` used to live here.
+
+  It took the year's gifts and the year's savings, added them to cash, and
+  floored the result at zero — and its own comment said the floor was "a rule
+  rather than an arithmetic detail" and that a reader looking for "can this go
+  negative" should find one place that answers it. That instinct was right and
+  the scope was too small: there were five OTHER places that moved money, each
+  with its own arithmetic and its own idea of the floor.
+
+  Ticket 0301 made the ledger that one place. `post` applies the floor, records
+  what could not be paid, and is the only function in the build that can change
+  a balance.
+*/
 
 const currentJobTitle = (state: GameState): string | undefined =>
   state.employment.job ? findJob(state.employment.job.jobId)?.title : undefined;
@@ -305,6 +307,33 @@ export function advanceYear(state: GameState): AdvanceResult {
   // Last in the year, because it is the line about the year as a whole.
   write(stress.lines, (index) => `t:${nextYear}:stress:${index}`);
 
+  /* ---- the year's money -------------------------------------------------
+    //
+    // Every phase REPORTED what it moved; this is the one place that moves it.
+    //
+    // Posting here rather than inside each phase is what makes the order of a
+    // year's transactions deterministic, and — more importantly — what lets the
+    // zero floor see the WHOLE year. Posted per phase, a character who was paid
+    // in March and billed in April would be treated differently from one billed
+    // first, purely by the order the phases happen to run in.
+    //
+    // Income before outgoings, for the same reason: a year's wages should be
+    // available to pay that year's costs. Anything else would make the floor
+    // bind on people who could in fact afford it.
+  */
+  const reported = [
+    ...education.transactions,
+    ...family.transactions,
+    ...employment.transactions,
+    ...events.transactions,
+  ];
+  const money = postYear(
+    state.finance,
+    nextYear,
+    nextAge,
+    [...reported.filter((entry) => entry.amount > 0), ...reported.filter((entry) => entry.amount < 0)],
+  );
+
   // ---- the year's line budget --------------------------------------------
   //
   // Spec 725-770: a busy character should not be bombarded. That was enforced
@@ -359,7 +388,9 @@ export function advanceYear(state: GameState): AdvanceResult {
     // nothing. Until 0301's ledger and 0307's loan engine exist there is no
     // debt to fall into, so the shortfall stops at zero and the feed line still
     // says honestly how far behind the year went.
-    cash: earnedThisYear(stress.player.cash, family.gifted, employment.saved),
+    // Ticket 0301: a MIRROR of `finance.balance`, never a computation. The
+    // year's postings happened above; this is the number they came to.
+    cash: money.cash,
     // Folded rather than spread, so the year's own lines are checked against
     // each other as well as against the life before them (0211a). Seven phases
     // write here and none of them can see what the others chose.
@@ -405,6 +436,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       // a question the character will never answer is not a question, and
       // `advanceYear` already refuses to run while one is open, so leaving it
       // would lock the app on a dead character forever.
+      finance: money.finance,
       health: {
         ...state.health,
         conditions: health.conditions,

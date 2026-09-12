@@ -21,7 +21,7 @@ import {
   type Character,
   type TimelineEntry,
 } from '@yearafter/character';
-import { cents, err, ok, subtract, type Result } from '@yearafter/core';
+import { cents, err, ok, type Result } from '@yearafter/core';
 import {
   feeFor,
   CHILD_ASKS,
@@ -37,6 +37,8 @@ import {
 import { livingChildren, updateMember, type Household } from '@yearafter/relationships';
 import { partnerOf } from '@yearafter/social';
 import type { GameState } from './game-state';
+import { moveMoney, withCash } from './money';
+import type { Ledger } from '@yearafter/finance';
 import { RngDomains } from './rng/rng';
 
 export type ParentingError =
@@ -57,12 +59,22 @@ export interface ParentingOutcome {
   readonly entry: TimelineEntry;
 }
 
+/**
+ * Ticket 0301 gave this a third return value.
+ *
+ * `spend` used to subtract from `state.player.cash` inline, which made this one
+ * of six places in the build that moved money by hand. It now posts to the
+ * ledger and hands back the new one, so `cash:` is written from
+ * `finance.balance` and nowhere else. The `source` is required by the type,
+ * which is how CORE_RULES 13.6 stops being a thing to remember.
+ */
 const write = (
   state: GameState,
   text: string,
   id: string,
   spend = 0,
-): { player: Character; entry: TimelineEntry } => {
+  spentOn = '',
+): { player: Character; entry: TimelineEntry; finance: Ledger } => {
   const sequence = state.player.timeline.filter((entry) => entry.age === state.player.age).length;
   const entry = createTimelineEntry({
     age: state.player.age,
@@ -72,13 +84,18 @@ const write = (
     id,
     sequence,
   });
+  const moved = moveMoney(state, {
+    category: 'spending',
+    amount: cents(-spend),
+    source: spentOn,
+  });
   return {
-    player: {
-      ...state.player,
-      timeline: appendToTimeline(state.player.timeline, entry),
-      cash: spend > 0 ? subtract(state.player.cash, cents(spend)) : state.player.cash,
-    },
+    player: withCash(
+      { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
+      moved,
+    ),
     entry,
+    finance: moved.finance,
   };
 };
 
@@ -158,17 +175,19 @@ export function applyToAdopt(state: GameState): Result<ParentingOutcome, Parenti
   const cash = Number(state.player.cash);
   if (!canApply(state.player.age, cash, state.parenting.adoption)) return err('cannot-afford');
 
-  const { player, entry } = write(
+  const { player, entry, finance } = write(
     state,
     'Started the adoption paperwork. There is a great deal of it, and then you wait.',
     `t:${state.world.year}:adopt`,
     feeFor(cash),
+    'Adoption fees',
   );
 
   return ok({
     state: {
       ...state,
       player,
+      finance,
       parenting: { ...state.parenting, adoption: { appliedAtAge: state.player.age } },
     },
     entry,
@@ -209,11 +228,12 @@ export function answerChild(
     ? `Said yes. ${child.firstName} got ${wanted.wants.replace(/^to /, 'to ')}, and it mattered more to ${them} than it cost you.`
     : `Told ${child.firstName} no. ${child.sex === 'female' ? 'She' : 'He'} took it better than you did.`;
 
-  const { player, entry } = write(
+  const { player, entry, finance } = write(
     state,
     text,
     `t:${state.world.year}:ask:${child.id}`,
     yes ? paying : 0,
+    `${child.firstName} asked, and you said yes`,
   );
 
   const family: Household = updateMember(state.family, child.id, (member) => ({
@@ -227,6 +247,7 @@ export function answerChild(
     state: {
       ...state,
       player,
+      finance,
       family,
       parenting: {
         ...state.parenting,

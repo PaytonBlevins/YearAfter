@@ -13,7 +13,7 @@
  */
 
 import { nudgeStats, type Character } from '@yearafter/character';
-import { add, dollars, subtract } from '@yearafter/core';
+import { dollars } from '@yearafter/core';
 import {
   MAJORS,
   isInSchool,
@@ -22,6 +22,7 @@ import {
   type EducationState,
 } from '@yearafter/education';
 import type { NewLifeRecord, TimelineKind } from '@yearafter/character';
+import type { NewTransaction } from '@yearafter/finance';
 import type { GameState } from '../game-state';
 import { RngDomains } from '../rng/rng';
 
@@ -34,6 +35,8 @@ export interface EducationPhaseOutput {
   readonly lines: readonly { readonly kind: TimelineKind; readonly text: string }[];
   /** Ticket 0212. Structured history, for the death screen. */
   readonly records: readonly NewLifeRecord[];
+  /** Ticket 0301. What this phase moved, for `advanceYear` to post. */
+  readonly transactions: readonly NewTransaction[];
 }
 
 /**
@@ -126,20 +129,38 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
       state.education.stage === 'postgrad' ? 0 : (state.parenting.collegeSupport ?? 0),
   });
 
-  // Money the character EARNED. Unlike an activity fee — which the household
-  // bears and this phase only reports — a paper round pays the child, and it is
-  // the first money in this game that is genuinely theirs.
-  const wages = result.earned.reduce((total, entry) => total + entry.dollars, 0);
+  /*
+    Ticket 0301. A phase REPORTS money; it does not move it.
 
-  // Ticket 0210b. Tuition actually LEAVES, unlike an activity fee, which the
-  // household bears and this phase only reports. A degree nobody pays for is a
-  // degree that costs nothing.
+    This used to do its own `add` and `subtract` against `state.player.cash`,
+    which made it one of six places that could change the balance. It now hands
+    `advanceYear` a list of transactions and lets the one committing function
+    post them — which is also what makes the ORDER of a year's postings
+    deterministic, and what lets the zero floor see the whole year rather than
+    whichever writer happened to run first.
+
+    An odd job is deliberately not `salary`: a fourteen-year-old with a paper
+    round does not have one, and it is the only money most childhoods ever see.
+  */
+  const transactions: NewTransaction[] = [];
+  for (const earned of result.earned) {
+    transactions.push({
+      category: 'oddJob',
+      amount: dollars(earned.dollars),
+      source: earned.source,
+    });
+  }
   const tuition = result.tuition ?? 0;
-  const afterWages = wages > 0 ? add(state.player.cash, dollars(wages)) : state.player.cash;
+  if (tuition > 0) {
+    transactions.push({
+      category: 'tuition',
+      amount: dollars(-tuition),
+      source: 'Tuition',
+    });
+  }
 
   const player: Character = {
     ...state.player,
-    cash: tuition > 0 ? subtract(afterWages, dollars(tuition)) : afterWages,
     stats: nudgeStats(state.player.stats, result.statDeltas),
     // Ticket 0205 turns hidden load into visible stress. 0204 only reports it.
     stress: { ...state.player.stress, hiddenLoad: result.hiddenLoad },
@@ -155,6 +176,7 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     hours: result.hours,
     capacity: result.capacity,
     lines: result.lines.map((line) => ({ kind: line.kind as TimelineKind, text: line.text })),
+    transactions,
     records: schoolRecords(
       state.education,
       result.state,

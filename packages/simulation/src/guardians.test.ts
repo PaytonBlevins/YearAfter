@@ -35,6 +35,8 @@ interface Life {
     readonly text: string;
   }[];
   readonly granted: readonly { readonly request: string; readonly age: number }[];
+  /** Ages at which the player answered a decision. See `playALife`. */
+  readonly answered: readonly number[];
 }
 
 /** A child who asks for everything they are allowed to, of whoever is around. */
@@ -42,6 +44,24 @@ function playALife(seed: string): Life {
   let state = createNewGame({ seed });
   const said: { age: number; request: string; yes: boolean; text: string }[] = [];
   const granted: { request: string; age: number }[] = [];
+  /*
+    Ticket 0301. Answering a decision writes a timeline line too, and the
+    budget invariant below never subtracted them — so it was really asserting
+    "seven engine lines PLUS however many decisions this seed happened not to
+    raise", and it passed for eight tickets because no seed in the set had both
+    a full year and a decision in it.
+
+    0301 changed which events fire in which year (money now moves at the end of
+    a year rather than mid-way through it), one seed landed a decision in a busy
+    year, and the test failed at 8. The budget was never exceeded: the year had
+    twelve entries, four asks and one answered decision, which is seven.
+
+    This is the same defect 0211 fixed in two other tests, by the same route.
+    A test that counts the PLAYER's actions inside the ENGINE's budget is
+    measuring the wrong thing, and only reports it when something unrelated
+    moves.
+  */
+  const answered: number[] = [];
 
   for (let year = 0; year < UNTIL; year += 1) {
     state = advanceYear(state).state;
@@ -53,6 +73,7 @@ function playALife(seed: string): Life {
       const result = decide(state, decision.eventId, choice.id);
       if (!result.ok) break;
       state = result.value.state;
+      answered.push(state.player.age);
     }
 
     for (const request of requestsAt(state.player.age)) {
@@ -74,7 +95,7 @@ function playALife(seed: string): Life {
       }
     }
   }
-  return { state, said, granted };
+  return { state, said, granted, answered };
 }
 
 const LIFETIMES: readonly Life[] = Array.from({ length: LIVES }, (_, index) =>
@@ -224,11 +245,13 @@ describe('invariants', () => {
       for (const entry of life.state.player.timeline) {
         byAge.set(entry.age, (byAge.get(entry.age) ?? 0) + 1);
       }
-      // Player-initiated asks sit on top of the phase budget, the same way
-      // studying and interacting do — this bounds what ADVANCE writes.
+      // EVERYTHING the player did sits on top of the phase budget — asks, and
+      // the decisions they answered. This bounds what ADVANCE writes, which is
+      // what `LINES_PER_YEAR` is a budget for.
       for (const [age, count] of byAge) {
         const asked = life.said.filter((entry) => entry.age === age).length;
-        expect(count - asked, `age ${age}`).toBeLessThanOrEqual(7);
+        const answered = life.answered.filter((entry) => entry === age).length;
+        expect(count - asked - answered, `age ${age}`).toBeLessThanOrEqual(7);
       }
     }
   });

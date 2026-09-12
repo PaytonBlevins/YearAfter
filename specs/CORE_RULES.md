@@ -923,3 +923,71 @@ came apart. **The eighth writer did not break the test. It revealed it.**
   is not itself a value — a cache, a cursor, a handle — makes "the same state"
   a lie, and the lie is invisible until something changes how much of it gets
   used.
+
+### 13.38 A number the game computes and discards is a number the game does not have
+
+Ticket 0301 opened by measuring money and found the thing it was built to fix
+already sitting in the code, computed correctly, every year, and thrown away.
+
+`savedFrom` takes a salary and works out the tax, then the cost of living, then
+returns the remainder. At $42,000 with two children it calculates $8,604 and
+$32,647 and hands back `$749`. Both of the first two numbers are correct. Both
+are discarded on the next line. Across a career — a lifetime gross measured at
+**$4.26 million** — the game could have told the player where every dollar went
+at any moment, and could not answer the question at all.
+
+That is not a missing feature. It is a **recording** failure, and the two are
+worth telling apart because they cost different things to fix and one of them
+looks like nothing is wrong:
+
+- A missing feature is visible. Nobody thinks the game models mortgages.
+- A discarded number is invisible and expensive. The model is right, the
+  behaviour is right, and the only symptom is that a later ticket asking an
+  obvious question — how much tax has this character paid? — discovers the
+  answer was available eighty times and kept zero times.
+
+So:
+
+- **A model that derives an intermediate worth naming returns it.** `payFor`
+  returning one number was correct in 0210 and wrong by 0301; `payBreakdown`
+  returns four and a test asserts they sum to what the old one gave. A ticket
+  that adds bookkeeping must not quietly rebalance anything, and the only way to
+  prove that is to keep both and compare them.
+- **"We can recompute it later" is usually false.** It is recomputable only
+  while every input is still around. The inputs to a year of tax are that year's
+  salary, seniority, performance and household — none of which the save keeps
+  once the year is over.
+- **The cheap version is a log, not a feature.** The ledger has no screen (spec
+  21 forbids one) and cost one package. Its first read found a pricing defect
+  that had been shipping since 0207: a forty-five-year-old earning $125,000
+  taking their spouse on a **$22** date, every year, because recurring prices are
+  a share of a balance that living costs keep near zero.
+
+### 13.39 A test that counts what the player did inside a budget the engine keeps is testing the wrong thing
+
+Three times now, and the third one was found by an unrelated ticket.
+
+`LINES_PER_YEAR` bounds what **`advanceYear`** writes. Player actions — studying,
+asking a parent, answering a decision — write on top of it, deliberately. A test
+of the budget therefore has to subtract everything the player did, and the ones
+that got this wrong did not fail: they passed, for tickets at a time, while
+asserting `7 + however many decisions this seed happened not to raise`.
+
+- 0211 found two: one counted the player's own decision answers inside the
+  year budget, one compared two already-clamped deltas.
+- 0301 found a third, in `guardians.test.ts`, which subtracted parent-asks and
+  not decisions. Moving when money is posted changed which events fired in which
+  year, one seed landed a decision in a busy year, and the test failed at 8. The
+  budget had not been exceeded: twelve entries, four asks, one answered
+  decision — seven.
+
+The shape is always the same and it is worth recognising directly: **a test
+whose subject is one producer must not measure another producer's output.** When
+such a test fails after an unrelated change, the first question is whether the
+invariant broke or whether the arithmetic was always wrong — and in all three
+cases here it was the arithmetic.
+
+The corollary is the useful part: **a test like this reports nothing until
+something else moves.** It is not protecting the invariant it names. Rewrite it
+so the thing it subtracts is explicit and complete, or it will be rewritten by
+whichever ticket it ambushes.

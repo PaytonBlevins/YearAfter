@@ -21,10 +21,12 @@ import {
   hireChance,
   oddsLabel,
   livingShare,
+  payBreakdown,
   payFor,
   promotionChance,
   promotionFrom,
   savedFrom,
+  TEMPLATES,
   taxRate,
   topOfLadder,
   type Applicant,
@@ -267,5 +269,63 @@ describe('moving up and being let go', () => {
     const clerk = findJob('job.public.clerk')!;
     const broker = findJob('job.sales.broker')!;
     expect(firingChance(broker, 35, 4)).toBeGreaterThan(firingChance(clerk, 35, 4) * 3);
+  });
+});
+
+describe('Ticket 0301 — the breakdown is the same year, itemised', () => {
+  it('adds up to savedFrom, exactly, for every job at every stage', () => {
+    /*
+      The property that makes 0301 reviewable: the ledger is bookkeeping, not a
+      rebalance. If `payBreakdown` and `savedFrom` ever disagree, somebody has
+      quietly changed everybody's income while claiming to add a record of it.
+    */
+    for (const job of ALL_JOBS) {
+      for (const years of [0, 4, 20]) {
+        for (const performance of [20, 50, 85]) {
+          for (const dependents of [0, 3]) {
+            const parts = payBreakdown(job, years, performance, 50, dependents);
+            const gross = payFor(job, years, performance, 50);
+            expect(parts.steady + parts.commission, `${job.id} gross`).toBe(gross);
+            expect(parts.saved, `${job.id} saved`).toBe(savedFrom(gross, dependents));
+            expect(gross - parts.tax - parts.living, `${job.id} identity`).toBe(parts.saved);
+          }
+        }
+      }
+    }
+  });
+
+  it('splits steady from commission the way the template says', () => {
+    // A salaried job is nearly all steady; a commissioned one is not. That
+    // difference is the performance template spec 1394 asks for by name, and
+    // this is the only place in the build that can see it.
+    const salaried = ALL_JOBS.filter((job) => TEMPLATES[job.template].atRisk <= 0.06);
+    const commissioned = ALL_JOBS.filter((job) => TEMPLATES[job.template].atRisk >= 0.3);
+    expect(salaried.length, 'no salaried jobs to test').toBeGreaterThan(0);
+    expect(commissioned.length, 'no commissioned jobs to test').toBeGreaterThan(0);
+
+    const shareOf = (job: (typeof ALL_JOBS)[number]) => {
+      const parts = payBreakdown(job, 5, 75, 60, 0);
+      return parts.commission / Math.max(1, parts.steady + parts.commission);
+    };
+    const salariedShare = salaried.map(shareOf).reduce((a, b) => a + b, 0) / salaried.length;
+    const commissionShare =
+      commissioned.map(shareOf).reduce((a, b) => a + b, 0) / commissioned.length;
+    expect(salariedShare).toBeLessThan(0.15);
+    expect(commissionShare).toBeGreaterThan(salariedShare * 2);
+  });
+
+  it('never reports a negative tax or a negative living cost', () => {
+    // Both are posted to the ledger as outgoings. A negative one would be
+    // income wearing the wrong category, which is the kind of thing that only
+    // shows up on a dashboard two tickets later.
+    for (const job of ALL_JOBS) {
+      for (const performance of [0, 50, 100]) {
+        const parts = payBreakdown(job, 0, performance, 0, 4);
+        expect(parts.tax, `${job.id} tax`).toBeGreaterThanOrEqual(0);
+        expect(parts.living, `${job.id} living`).toBeGreaterThanOrEqual(0);
+        expect(parts.steady, `${job.id} steady`).toBeGreaterThanOrEqual(0);
+        expect(parts.commission, `${job.id} commission`).toBeGreaterThanOrEqual(0);
+      }
+    }
   });
 });

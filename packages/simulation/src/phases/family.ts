@@ -19,7 +19,8 @@
  */
 
 import type { NewLifeRecord, Personality, Sex, TimelineKind } from '@yearafter/character';
-import { asNpcId, clampStat, type StatValue } from '@yearafter/core';
+import type { NewTransaction } from '@yearafter/finance';
+import { asNpcId, clampStat, dollars, type StatValue } from '@yearafter/core';
 import {
   ASK_CHANCE,
   PARENT_ACTS,
@@ -76,6 +77,8 @@ export interface FamilyPhaseOutput {
   readonly lines: readonly { readonly kind: TimelineKind; readonly text: string }[];
   /** Ticket 0212. Structured history, for the death screen. */
   readonly records: readonly NewLifeRecord[];
+  /** Ticket 0301. What this phase moved, for `advanceYear` to post. */
+  readonly transactions: readonly NewTransaction[];
   /** Ticket 0209. School standing a parent's discipline moved, signed. */
   readonly behaviourDelta: number;
   /** Whole dollars a parent handed the player unprompted. */
@@ -85,6 +88,7 @@ export interface FamilyPhaseOutput {
 export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
   const lines: { kind: TimelineKind; text: string }[] = [];
   const records: NewLifeRecord[] = [];
+  const transactions: NewTransaction[] = [];
   let members = [...input.family.members];
   let parenting = input.parenting;
   const taken = new Set(input.takenNames);
@@ -268,6 +272,16 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
       lines.push({ kind: 'relationship', text: result.text });
       behaviourDelta += result.behaviour;
       gifted += result.gift;
+      // Ticket 0301. A parent handing money over is spec 1677's `gift`, and the
+      // source names them, which is CORE_RULES 13.6 finally landing somewhere
+      // that keeps it rather than in a feed line that scrolls away.
+      if (result.gift !== 0) {
+        transactions.push({
+          category: 'gift',
+          amount: dollars(result.gift),
+          source: `${who} gave you money`,
+        });
+      }
       // Ticket 0210b. A parent who offers to cover college commits to a yearly
       // share of the household's income, exactly as the asked-for version does.
       if (result.offersCollege && !parenting.collegeSupport) {
@@ -294,6 +308,7 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
     parenting,
     lines,
     records,
+    transactions,
     behaviourDelta,
     gifted,
   };

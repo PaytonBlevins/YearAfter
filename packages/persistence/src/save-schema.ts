@@ -14,13 +14,14 @@ import type { EducationState } from '@yearafter/education';
 import type { SocialCircle } from '@yearafter/social';
 import type { ParentingState } from '@yearafter/parenting';
 import type { EmploymentState } from '@yearafter/careers';
+import type { Ledger } from '@yearafter/finance';
 import type { HealthState } from '@yearafter/health';
 import type { EventHistory, PendingDecision } from '@yearafter/events';
 import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 17;
+export const CURRENT_SAVE_VERSION = 18;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -75,8 +76,8 @@ export type { WorldState };
  *
  * Older saves migrate forward; see migrations.ts.
  */
-export interface SaveGameV17 {
-  readonly version: 17;
+export interface SaveGameV18 {
+  readonly version: 18;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -109,6 +110,15 @@ export interface SaveGameV17 {
   readonly employment: EmploymentState;
   /** Ticket 0211: conditions held, the age curve's running total, and the deficit. */
   readonly health: HealthState;
+  /**
+   * Ticket 0301: every movement of money, and the balance they add up to.
+   *
+   * `player.cash` is still here and is now a MIRROR of `finance.balance` rather
+   * than a number anybody computes. Spec 21 keeps the detail backend-only —
+   * "do not show month-by-month accounting to the player" — so this is stored
+   * for correctness and QA, and 0304's dashboard reads totals from it.
+   */
+  readonly finance: Ledger;
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and
@@ -123,8 +133,8 @@ export interface SaveGameV17 {
 }
 
 /** The union widens as versions are added; the app only ever handles the latest. */
-export type AnySaveGame = SaveGameV17;
-export type CurrentSaveGame = SaveGameV17;
+export type AnySaveGame = SaveGameV18;
+export type CurrentSaveGame = SaveGameV18;
 
 /** Lightweight row for the save-select list, without deserialising the whole save. */
 export interface SaveSummary {

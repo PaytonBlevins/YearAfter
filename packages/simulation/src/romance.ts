@@ -26,7 +26,7 @@ import {
   type Character,
   type TimelineEntry,
 } from '@yearafter/character';
-import { cents, err, ok, subtract, type Result } from '@yearafter/core';
+import { cents, err, ok, type Result } from '@yearafter/core';
 import {
   contactWith,
   displayName,
@@ -41,6 +41,7 @@ import {
   type Romance,
 } from '@yearafter/social';
 import type { GameState } from './game-state';
+import { moveMoney } from './money';
 import { RngDomains, stableUnit } from './rng/rng';
 
 export type RomanceError =
@@ -160,6 +161,18 @@ export function romanticMove(
     wedding would spend two of them on one relationship.
   */
   const married = updated.romance?.stage === 'married' && person.romance?.stage !== 'married';
+  /*
+    Ticket 0301. A date, a ring and a wedding are the three biggest things the
+    player ever chooses to spend money on, and until now they left `cash` with
+    no record of where they went. `spending` is the category; v0.05 turns most
+    of what it holds into `housing` and `vehicle`.
+  */
+  const moved = moveMoney(state, {
+    category: 'spending',
+    amount: cents(-result.spent),
+    source: `${move.label} — ${person.firstName}`,
+  });
+
   const player: Character = {
     ...state.player,
     timeline: appendToTimeline(state.player.timeline, entry),
@@ -176,13 +189,14 @@ export function romanticMove(
         }
       : {}),
     // Charged once, here, and only what `movesFor` already confirmed is there.
-    cash: result.spent > 0 ? subtract(state.player.cash, cents(result.spent)) : state.player.cash,
+    cash: moved.cash,
   };
 
   return ok({
     state: {
       ...state,
       player,
+      finance: moved.finance,
       circle: {
         people: state.circle.people.map((candidate) =>
           candidate.id === person.id ? updated : candidate,

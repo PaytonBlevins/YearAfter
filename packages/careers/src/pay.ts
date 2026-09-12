@@ -155,3 +155,61 @@ export function savedFrom(grossPay: number, dependents: number): number {
   const net = afterTax(grossPay);
   return net - livingCostOf(net, dependents);
 }
+
+/* -------------------------------------------------------------------------- */
+/* The breakdown — Ticket 0301                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The same year of pay, itemised instead of collapsed.
+ *
+ * `savedFrom` computes gross, then tax, then the cost of living, and returns
+ * ONE number — the remainder. Measured at the top of 0301: at $42,000 with two
+ * children it works out $8,604 of tax and $32,647 of living costs, hands back
+ * $749, and throws the other two away. Every year, for a whole career, across a
+ * lifetime gross of four and a quarter million dollars.
+ *
+ * So this returns all four. Nothing about the arithmetic changed — `saved` is
+ * still exactly `savedFrom` and a test asserts it — which is the point: 0301 is
+ * a ledger, not a rebalance, and a ticket that quietly moved everybody's income
+ * while claiming to add bookkeeping would be impossible to review.
+ *
+ * The steady/commission split is `atRisk`, which 0210's templates have carried
+ * since the day they were written: a salaried job is 5% at risk and a
+ * commissioned one is most of it, and that difference IS the performance
+ * template spec 1394 asks for. Spec 1677 lists `commission` as a category of
+ * its own, and this is the only place in the build that can tell them apart.
+ */
+export interface PayBreakdown {
+  /** The part that arrives whether or not the year went well. */
+  readonly steady: number;
+  /** The part that depended on performance and standing. Often zero. */
+  readonly commission: number;
+  /** Positive. What was withheld. */
+  readonly tax: number;
+  /** Positive. What a year of being alive cost this household. */
+  readonly living: number;
+  /** Signed. What is left, and can be negative — see `savedFrom`. */
+  readonly saved: number;
+}
+
+export function payBreakdown(
+  job: Job,
+  years: number,
+  performance: number,
+  standing: number,
+  dependents: number,
+): PayBreakdown {
+  const rules = TEMPLATES[job.template];
+  const gross = payFor(job, years, performance, standing);
+  const seniority = Math.min(1.9, (1 + rules.raise) ** Math.max(0, years));
+  // Recomputed rather than returned from `payFor` so that the two cannot drift:
+  // the steady half is defined by the template, and whatever gross is left over
+  // after it is by definition the at-risk half. A second formula for the
+  // variable part would be a second derivation (CORE_RULES 13.23).
+  const steady = Math.min(gross, Math.round(job.pay * seniority * (1 - rules.atRisk)));
+  const commission = gross - steady;
+  const net = afterTax(gross);
+  const living = livingCostOf(net, dependents);
+  return { steady, commission, tax: gross - net, living, saved: net - living };
+}

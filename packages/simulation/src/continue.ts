@@ -61,7 +61,8 @@ import {
   type LifeRecord,
   type TimelineEntry,
 } from '@yearafter/character';
-import { asCharacterId, asNpcId, clampStat, stableUnit, type StatValue } from '@yearafter/core';
+import { asCharacterId, asNpcId, cents, clampStat, stableUnit, type StatValue } from '@yearafter/core';
+import { EMPTY_LEDGER, post, type Ledger } from '@yearafter/finance';
 import { NOT_YET_ENROLLED, type EducationState } from '@yearafter/education';
 import { EMPTY_HISTORY } from '@yearafter/events';
 import { EMPTY_EMPLOYMENT } from '@yearafter/careers';
@@ -72,6 +73,26 @@ import type { FamilyMember, Household } from '@yearafter/relationships';
 import { createGameState, type GameState } from './game-state';
 import { RngDomains } from './rng/rng';
 import { nameContext, uniqueFirstName } from './social-generator';
+
+/**
+ * The heir's books, opened with one entry.
+ *
+ * The previous generation's ledger is NOT carried across — it belongs to
+ * whoever earned it, the same as their friends, their conditions and their
+ * cooldowns. What crosses is the money, and it crosses as a transaction so that
+ * the heir's own `reconcile` holds from the first year: a balance with no
+ * transaction behind it is exactly the state migration 17 had to repair for
+ * every save written before this ticket.
+ */
+function inheritedLedger(state: GameState, lastName: string, heirAge: number): Ledger {
+  const estate = Number(state.player.cash);
+  if (estate === 0) return EMPTY_LEDGER;
+  return post(EMPTY_LEDGER, state.world.year, heirAge, {
+    category: 'gift',
+    amount: cents(estate),
+    source: `What ${state.player.firstName} ${lastName} left`,
+  }).ledger;
+}
 
 /** Children of the player who are alive and could be carried on as. */
 export const heirsIn = (family: Household): readonly FamilyMember[] =>
@@ -217,8 +238,14 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
       birthLocation: state.player.birthLocation,
       personality: heir.personality,
       stats: createStats(statsFor(heir.id)),
-      // The estate, and all of it: there is no debt in this build to net off,
-      // and no will to divide it by. 0301 and 0303 give this a real shape.
+      /*
+        The estate. Ticket 0301 gave it a ledger entry rather than a shape.
+
+        Still all of it — there is no debt to net off and no will to divide it
+        by until 0307 — but it is now an opening transaction in the heir's own
+        books with a source that says where it came from, rather than a balance
+        that simply appears. `inheritedLedger` below builds it.
+      */
       cash: state.player.cash,
       occupation: life.jobTitle ?? 'Unemployed',
     }),
@@ -283,6 +310,7 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
     {
       family,
       nameCultureId: state.nameCultureId,
+      finance: inheritedLedger(state, heir.lastName, age),
       // Everything below starts empty ON PURPOSE. A cooldown belongs to the
       // person who used the event, a friend belongs to the person who made
       // them, and a body belongs to the person who lived in it.

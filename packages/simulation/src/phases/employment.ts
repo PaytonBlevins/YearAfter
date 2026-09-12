@@ -19,22 +19,22 @@
  */
 
 import type { NewLifeRecord, TimelineKind } from '@yearafter/character';
+import type { NewTransaction } from '@yearafter/finance';
 import {
   ALL_JOBS,
   START_STANDING,
   findJob,
   firingChance,
-  payFor,
+  payBreakdown,
   performanceTarget,
   performanceYear,
   promotionChance,
   promotionFrom,
-  savedFrom,
   standingYear,
   type EmploymentState,
   type Job,
 } from '@yearafter/careers';
-import { clampStat, type StatValue } from '@yearafter/core';
+import { clampStat, dollars, type StatValue } from '@yearafter/core';
 import { livingChildren, type Household } from '@yearafter/relationships';
 import type { RandomStream } from '../rng/rng';
 import { stableUnit } from '../rng/rng';
@@ -55,6 +55,14 @@ export interface EmploymentPhaseOutput {
   /** Ticket 0212. Structured history, for the death screen. See `timeline.ts`. */
   readonly records: readonly NewLifeRecord[];
   /**
+   * Ticket 0301. What this phase moved, for `advanceYear` to post.
+   *
+   * A phase REPORTS money and never moves it. `saved` below is still returned
+   * because the feed line quotes it, but it is no longer what changes the
+   * balance — these are.
+   */
+  readonly transactions: readonly NewTransaction[];
+  /**
    * Whole dollars the year left the character with, signed.
    *
    * Negative when a household costs more than it earns, which is a real thing
@@ -71,11 +79,12 @@ export interface EmploymentPhaseOutput {
 export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutput {
   const lines: { kind: TimelineKind; text: string }[] = [];
   const records: NewLifeRecord[] = [];
+  const transactions: NewTransaction[] = [];
   let employment = input.employment;
   const held = employment.job;
 
   if (!held) {
-    return { employment, lines, records, saved: 0, earned: 0, demand: 0 };
+    return { employment, lines, records, transactions, saved: 0, earned: 0, demand: 0 };
   }
 
   const job = findJob(held.jobId);
@@ -87,6 +96,7 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
       employment: { ...employment, job: undefined },
       lines,
       records,
+      transactions,
       saved: 0,
       earned: 0,
       demand: 0,
@@ -107,8 +117,44 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
   // partner is a person, not a cost, and modelling a spouse as a drain would be
   // both wrong and the kind of thing a player notices.
   const dependents = livingChildren(input.family).length;
-  const earned = payFor(job, years, performance, standing);
-  const saved = savedFrom(earned, dependents);
+  const parts = payBreakdown(job, years, performance, standing, dependents);
+  const earned = parts.steady + parts.commission;
+  const saved = parts.saved;
+
+  /*
+    Ticket 0301. Four transactions where there used to be one number.
+
+    `savedFrom` still decides what is left — the arithmetic is untouched and a
+    test in `@yearafter/careers` asserts the two agree job for job — but the
+    tax and the cost of living are now RECORDED rather than computed and
+    discarded. That is the whole ticket: at $42,000 with two children the game
+    has always known it withheld $8,604 and spent $32,647, and has never once
+    been able to say so.
+
+    Commission is posted separately only when there IS one. A salaried job is
+    five per cent at risk, and a ledger that wrote "$1,400 of commission" for a
+    school administrator every year would be technically true and misleading —
+    spec 1677 lists it as its own category precisely because for some jobs it is
+    most of the money and for others it is noise.
+  */
+  transactions.push({
+    category: 'salary',
+    amount: dollars(parts.steady),
+    source: `${job.title} — pay`,
+  });
+  if (parts.commission > 0) {
+    transactions.push({
+      category: 'commission',
+      amount: dollars(parts.commission),
+      source: `${job.title} — commission`,
+    });
+  }
+  transactions.push({ category: 'tax', amount: dollars(-parts.tax), source: 'Tax' });
+  transactions.push({
+    category: 'living',
+    amount: dollars(-parts.living),
+    source: dependents > 0 ? `Living costs, ${dependents + 1} at home` : 'Living costs',
+  });
 
   lines.push({ kind: 'career', text: payLine(job, earned, saved, dependents, input.age) });
 
@@ -178,7 +224,7 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
     };
   }
 
-  return { employment, lines, records, saved, earned, demand: job.demand };
+  return { employment, lines, records, transactions, saved, earned, demand: job.demand };
 }
 
 /* -------------------------------------------------------------------------- */

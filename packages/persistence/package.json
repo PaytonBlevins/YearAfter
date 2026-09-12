@@ -15,11 +15,12 @@
   },
   "dependencies": {
     "@yearafter/careers": "workspace:*",
-    "@yearafter/health": "workspace:*",
     "@yearafter/character": "workspace:*",
     "@yearafter/core": "workspace:*",
     "@yearafter/education": "workspace:*",
     "@yearafter/events": "workspace:*",
+    "@yearafter/finance": "workspace:*",
+    "@yearafter/health": "workspace:*",
     "@yearafter/parenting": "workspace:*",
     "@yearafter/relationships": "workspace:*",
     "@yearafter/simulation": "workspace:*",

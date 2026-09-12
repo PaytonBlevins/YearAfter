@@ -13,6 +13,8 @@
 
 import type { Character, TimelineKind } from '@yearafter/character';
 import { describeCity } from '@yearafter/content';
+import { dollars } from '@yearafter/core';
+import type { NewTransaction } from '@yearafter/finance';
 import {
   applyEffects,
   runEventPhase,
@@ -20,6 +22,7 @@ import {
   type EventHistory,
   type EventOutcome,
   type PendingDecision,
+  type ReportedCash,
 } from '@yearafter/events';
 import { livingChildren, type Household } from '@yearafter/relationships';
 import {
@@ -57,6 +60,14 @@ export interface EventPhaseOutput {
     readonly eventId: string;
   }[];
   readonly decisions: readonly PendingDecision[];
+  /**
+   * Ticket 0301. What the year's events wanted to move, for `advanceYear`.
+   *
+   * The catalog has authored `{ delta, source }` for every cash effect since
+   * 0203b, because CORE_RULES 13.6 says money names where it came from. Until
+   * this ticket the source was written into the feed line and then thrown away.
+   */
+  readonly transactions: readonly NewTransaction[];
 }
 
 /**
@@ -139,17 +150,21 @@ export function applyOutcome(
   history: EventHistory;
   behaviour: number;
   stress: number;
+  cashDelta?: ReportedCash;
 } {
   const applied = applyEffects(
     { stats: player.stats, family, cash: player.cash, behaviour, stress, history },
     outcome.effects,
   );
   return {
-    player: { ...player, stats: applied.stats, cash: applied.cash },
+    // Ticket 0301: `cash` is no longer touched here. `applied.cash` is the
+    // balance this started with, and the movement is reported instead.
+    player: { ...player, stats: applied.stats },
     family: applied.family,
     history: applied.history,
     behaviour: applied.behaviour,
     stress: applied.stress,
+    ...(applied.cashDelta ? { cashDelta: applied.cashDelta } : {}),
   };
 }
 
@@ -232,6 +247,7 @@ export function runEvents(
   // level is computed once, at the end of the year, from everything.
   let stress = 0;
   const lines: { kind: TimelineKind; text: string; eventId: string }[] = [];
+  const transactions: NewTransaction[] = [];
 
   for (const outcome of result.outcomes) {
     const applied = applyOutcome(player, family, history, outcome, behaviour, stress);
@@ -241,6 +257,13 @@ export function runEvents(
     behaviour = applied.behaviour;
     stress = applied.stress;
     circle = rememberOutcome(circle, outcome, age);
+    if (applied.cashDelta) {
+      transactions.push({
+        category: 'windfall',
+        amount: dollars(applied.cashDelta.delta),
+        source: applied.cashDelta.source,
+      });
+    }
     lines.push({ kind: timelineKindFor(outcome), text: outcome.text, eventId: outcome.eventId });
   }
 
@@ -252,6 +275,7 @@ export function runEvents(
     behaviour,
     stress,
     lines,
+    transactions,
     decisions: result.decisions,
   };
 }

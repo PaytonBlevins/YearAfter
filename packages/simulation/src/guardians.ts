@@ -16,7 +16,7 @@ import {
   type Character,
   type TimelineEntry,
 } from '@yearafter/character';
-import { add, dollars, err, ok, type Result } from '@yearafter/core';
+import { dollars, err, ok, type Result } from '@yearafter/core';
 import {
   alreadyAskedParent,
   alreadyGranted,
@@ -28,6 +28,7 @@ import {
 } from '@yearafter/parenting';
 import { livingParents, updateMember, type FamilyMember } from '@yearafter/relationships';
 import type { GameState } from './game-state';
+import { moveMoney, withCash } from './money';
 import { RngDomains, stableUnit } from './rng/rng';
 
 export type AskError =
@@ -131,11 +132,19 @@ export function askParent(
   // money that moves without saying how).
   const toPlayer = saidYes && request.id === 'pocket-money' ? given : 0;
 
-  const player: Character = {
-    ...state.player,
-    timeline: appendToTimeline(state.player.timeline, entry),
-    cash: toPlayer > 0 ? add(state.player.cash, dollars(toPlayer)) : state.player.cash,
-  };
+  // Ticket 0301: through the ledger, like everything else. `gift` is spec
+  // 1677's own category, and the source names the parent because that is what
+  // CORE_RULES 13.6 has been asking for by hand since 0203b.
+  const moved = moveMoney(state, {
+    category: 'gift',
+    amount: dollars(toPlayer),
+    source: `${nameFor(parent)} gave you money`,
+  });
+
+  const player: Character = withCash(
+    { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
+    moved,
+  );
 
   // Asking costs a little of the relationship when it lands badly, and a yes
   // is worth a little. Small either way: a parent is not a friendship meter.
@@ -152,6 +161,7 @@ export function askParent(
     state: {
       ...state,
       player,
+      finance: moved.finance,
       family,
       parenting: {
         ...state.parenting,

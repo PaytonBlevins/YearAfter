@@ -303,16 +303,36 @@ describe('effects', () => {
     expect(byRole['sibling']).toBe(60);
   });
 
-  it('never lets an event push a child into debt', () => {
-    const after = applyEffects(targets(), { cash: { delta: -900, source: 'a bad trade' } });
-    expect(after.cash).toBe(0);
+  /*
+    Ticket 0301 MOVED both of these properties rather than removing them.
+
+    `applyEffects` used to apply the delta and floor at zero itself, with a
+    comment saying money owed its real rules to the ledger "until then". The
+    ledger exists now, so this function reports and the events phase posts —
+    which means the floor is applied once, by `post`, with the whole year in
+    view, and the part that could not be paid is written down instead of
+    vanishing. The no-debt property now lives in
+    `@yearafter/finance`'s "the zero floor" tests, where it can also assert the
+    thing this version could not: that the books still balance afterwards.
+  */
+  it('reports what an event wants to move, and does not move it', () => {
+    const before = targets();
+    const after = applyEffects(before, { cash: { delta: -900, source: 'a bad trade' } });
+    expect(after.cash, 'applyEffects must not touch the balance').toBe(before.cash);
+    expect(after.cashDelta).toEqual({ delta: -900, source: 'a bad trade' });
   });
 
   it('carries a source with every movement of money', () => {
     // A bare number was the original shape and it produced cash arriving with no
-    // explanation anywhere in the feed.
+    // explanation anywhere in the feed. The source has been authored in the
+    // catalog since 0203b; 0301 is where it finally lands somewhere permanent.
     const after = applyEffects(targets(), { cash: { delta: 25, source: 'a found wallet' } });
-    expect(after.cash).toBe(dollars(125));
+    expect(after.cashDelta?.source).toBe('a found wallet');
+    expect(after.cashDelta?.delta).toBe(25);
+  });
+
+  it('reports nothing at all when an event does not touch money', () => {
+    expect(applyEffects(targets(), { stats: { happiness: 3 } }).cashDelta).toBeUndefined();
   });
 
   it('moves school standing, clamped', () => {
