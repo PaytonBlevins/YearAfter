@@ -69,6 +69,20 @@ export interface FamilyPhaseInput {
    * have to be cross about — the same field events already move.
    */
   readonly behaviour: number;
+  /**
+   * Ticket 0303. Whether the player still lives with their parents.
+   *
+   * Gates `kicked-you-out`, and it took reading a played life to notice it was
+   * needed: one character was put out of the house at eighteen, again at
+   * twenty-six and again at twenty-nine, having lived in their own place the
+   * whole time. Nobody can be evicted from a house they do not live in.
+   *
+   * It could not have been a bug before this ticket, because before this ticket
+   * there was nowhere for the answer to live — which is what CORE_RULES 13.36
+   * looks like from the other side: the act wrote no state, so nothing could
+   * read it, so nothing could contradict it either.
+   */
+  readonly livesWithParents: boolean;
 }
 
 export interface FamilyPhaseOutput {
@@ -83,6 +97,19 @@ export interface FamilyPhaseOutput {
   readonly behaviourDelta: number;
   /** Whole dollars a parent handed the player unprompted. */
   readonly gifted: number;
+  /**
+   * Ticket 0303. A parent told the player to go, this year.
+   *
+   * `kicked-you-out` has existed since 0209 and has never done anything. It
+   * wrote five sentences about being put out of the house and changed exactly
+   * one number — the parent's warmth — so a character was told to leave and
+   * then went on living at home for free, forever. CORE_RULES 13.36 in its
+   * other shape: not a field nothing writes, but an EVENT that writes nothing.
+   *
+   * Now it moves them out, and the living-cost phase starts charging them for
+   * a roof the same year.
+   */
+  readonly toldToLeave: boolean;
 }
 
 export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
@@ -244,12 +271,14 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
   // September, and reading 0206's output found exactly that failure.
   let behaviourDelta = 0;
   let gifted = 0;
+  let toldToLeave = false;
   const guardians = livingParents(household);
   if (guardians.length > 0) {
     const candidates: { act: (typeof PARENT_ACTS)[number]; parent: FamilyMember }[] = [];
     for (const act of PARENT_ACTS) {
       if (input.age < act.minAge) continue;
       if (act.maxAge !== undefined && input.age > act.maxAge) continue;
+      if (act.id === 'kicked-you-out' && !input.livesWithParents) continue;
       for (const parent of guardians) {
         if (input.stream.chance(actChance(act, parent, household, input.behaviour))) {
           candidates.push({ act, parent });
@@ -272,6 +301,7 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
       lines.push({ kind: 'relationship', text: result.text });
       behaviourDelta += result.behaviour;
       gifted += result.gift;
+      if (chosen.act.id === 'kicked-you-out') toldToLeave = true;
       // Ticket 0301. A parent handing money over is spec 1677's `gift`, and the
       // source names them, which is CORE_RULES 13.6 finally landing somewhere
       // that keeps it rather than in a feed line that scrolls away.
@@ -311,6 +341,7 @@ export function runFamily(input: FamilyPhaseInput): FamilyPhaseOutput {
     transactions,
     behaviourDelta,
     gifted,
+    toldToLeave,
   };
 }
 

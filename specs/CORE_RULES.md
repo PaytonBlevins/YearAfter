@@ -1097,3 +1097,66 @@ is to prove the other three are not passing vacuously.
 - **Fixed counts hide this.** "Play six years" was doing two jobs — reach a state,
   and reach an interesting one — and only announced when it failed at the first.
   "Play until money has moved and nothing is pending, or say why not" does one.
+
+### 13.43 A cost attached to income is not a cost, it is a deduction
+
+Ticket 0303, from the opening measurement, and it is 13.36 wearing different
+clothes.
+
+0210 needed to stop a salary compounding into a fortune, so it computed the cost
+of living as a SHARE of after-tax pay and subtracted it inside `payBreakdown`.
+That worked, and it had one consequence nobody looked for until this ticket
+measured for it, across 120 lives:
+
+> A character who never takes a job is charged **nothing**, for their whole
+> life. 6,357 adult years, none of them costed. They hold $100 at thirty, $100
+> at fifty and $100 the day they die.
+
+Unemployment was free. Retirement was free. Living off savings was free. And
+four of the five things spec 191–193 says living costs are inferred from —
+location, housing, wealth, family circumstances — could not possibly have
+mattered, because none of them can reach a number defined as a percentage of a
+wage. The model had one input wearing the name of five.
+
+- **Ask what the cost is a property OF.** Rent is a property of a household, not
+  of a job. Anything computed inside the thing that pays for it can only ever be
+  charged to people who are being paid.
+- **A placeholder's shape outlives its numbers.** 0210 labelled the constants
+  and gave them a replacement date, which was right and was not enough: the
+  thing that had to be replaced was `share × income`, and no amount of retuning
+  the share would have found the character holding $100 for sixty years.
+- **Measure the population the system will apply to, not the one it was built
+  from.** Every measurement 0210 took was of somebody with a job.
+
+### 13.44 A threshold with no hysteresis will oscillate, and the sim will not tell you
+
+Ticket 0303, found by reading a played life rather than by any test.
+
+A character moved out of their parents' house at eighteen, was told to leave
+again at twenty-six and again at twenty-nine, and moved out a total of four
+times. Measured across ninety lives: **86 of 154 housing changes happened one
+year after the previous one**, and one character moved house fifteen times.
+
+The loop is obvious once seen. They move out because savings cover a year; the
+standard of living creeps up toward their income; the year goes short; hardship
+moves them home and resets the standard to subsistence; subsistence is
+affordable, so they move straight back out. Every step is correct. The system
+made of them is nonsense.
+
+Two fixes, and the first is the general one:
+
+- **Test the sticky quantity, not the volatile one.** Affordability now asks
+  about INCOME, not income plus savings. Savings can pay for a move; they cannot
+  pay for a life. A threshold read against a number that moves every year is a
+  threshold that will be crossed every year.
+- **Give the state a memory of its own last change.** Somebody who has just
+  given up a place does not take another one the following spring, so
+  `movedBackAt` holds the door shut for two years regardless of the arithmetic.
+- **And the same bug had a cousin**: `kicked-you-out` had existed since 0209
+  writing five sentences and changing nothing, so it fired at people who had not
+  lived at home for a decade. An event that writes no state cannot be
+  contradicted by state, which is exactly why nothing had ever caught it.
+
+**Every green test passed throughout.** The suite asserts the rules; the rules
+were each individually right. Reading sixty years of one character's feed took
+four minutes and found all of it.

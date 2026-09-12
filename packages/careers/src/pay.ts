@@ -1,5 +1,5 @@
 /**
- * Ticket 0210 — what a job pays, and what is left of it.
+ * Ticket 0210 — what a job pays. Ticket 0303 — and no longer what it costs.
  *
  * THE PROBLEM THIS FILE EXISTS TO SOLVE.
  *
@@ -20,14 +20,21 @@
  * cost of living, which is savings — and savings is the honest thing for a bank
  * balance to be.
  *
- * THIS IS A PLACEHOLDER WITH A NAME AND A REPLACEMENT DATE (spec 1247–1263).
+ * TICKET 0303 CAME AND TOOK THE COST OF LIVING OUT OF THIS FILE.
  *
- * Ticket 0303 builds living expenses properly — "inferred from income, wealth,
- * family, location, circumstances; no lifestyle selector" — and 0301 builds the
- * ledger that records them as real transactions. When 0303 lands, `livingCostOf`
- * is DELETED rather than kept alongside, because CORE_RULES 13.8 says two
- * systems never bill the same account and a character charged rent twice is
- * exactly that bug.
+ * `livingCostOf`, `livingShare` and their five constants are GONE — deleted,
+ * not deprecated and not kept alongside, because 0210 promised exactly that and
+ * because CORE_RULES 13.8 says two systems never bill the same account. A
+ * character charged rent by this file and again by the living phase is that bug
+ * with a worked example.
+ *
+ * The reason they had to go is not tidiness. Expressing the cost of living as a
+ * SHARE of pay meant it could only ever be charged to somebody who was paid:
+ * measured across 120 lives, a character who never took a job was charged
+ * nothing for sixty years. `@yearafter/finance/living` charges the LIFE.
+ *
+ * What stays here is what a job actually pays and what tax takes, which is the
+ * only part of the arithmetic that belongs to employment.
  */
 
 import type { Job } from './jobs';
@@ -61,63 +68,6 @@ export const afterTax = (grossPay: number): number =>
   Math.max(0, Math.round(grossPay * (1 - taxRate(grossPay))));
 
 /* -------------------------------------------------------------------------- */
-/* The cost of being alive                                                     */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Share of after-tax income that goes on living, for somebody with nobody.
- *
- * MEASURED. At 0.93 with relief arriving by $120k, a character on a median
- * $58,000 salary finished at fifty holding $226,000 and a driven one $467,000,
- * which would have made every price in the game free — the exact failure this
- * file exists to prevent. Savings appear properly only well up the income
- * scale now, which is both truer and what keeps a wedding a decision.
- */
-export const BASE_SHARE = 0.965;
-/** How much of that share a large income buys back. */
-export const INCOME_RELIEF = 0.26;
-/** After-tax income at which the relief is fully earned. */
-export const RELIEF_FULL_AT = 200_000;
-/** What each dependent adds back. Three of them undo the relief entirely. */
-export const PER_DEPENDENT = 0.028;
-/**
- * The floor and the ceiling on that share.
- *
- * The ceiling is ABOVE ONE on purpose. At 0.985 every household on earth saved
- * at least a little, a small wage and four children still came out $307 ahead,
- * and `BEHIND_LINES` in the employment phase — four sentences about a year that
- * went backwards — could never be reached by anything. Writing copy for a state
- * the model cannot produce is CORE_RULES 13.16 in miniature, and the test that
- * asserts a year can end behind is what found it.
- */
-export const SHARE_FLOOR = 0.52;
-export const SHARE_CEILING = 1.06;
-
-/**
- * What a year of living costs this household, in whole dollars.
- *
- * Expressed as a SHARE of after-tax income rather than a price, for the reason
- * `costShare` gives in `@yearafter/parenting`: a fixed price divided by an
- * income that spans p10 $28k to p90 $253k answers "can they afford it" with
- * "no" for most of the population and "trivially" for the rest, and neither is
- * a decision. A share keeps working when the incomes change.
- *
- * The shape: most of a small income is spent, a large income buys some slack
- * back, and every dependent takes slack away again. Spec 191–193 — "living
- * costs are automatically calculated from location, household size,
- * wealth/income, housing circumstances, family circumstances" — with location
- * and housing missing because neither exists yet.
- */
-export function livingShare(afterTaxIncome: number, dependents: number): number {
-  const relief = INCOME_RELIEF * Math.min(1, Math.max(0, afterTaxIncome / RELIEF_FULL_AT));
-  const share = BASE_SHARE - relief + PER_DEPENDENT * Math.max(0, dependents);
-  return Math.min(SHARE_CEILING, Math.max(SHARE_FLOOR, share));
-}
-
-export const livingCostOf = (afterTaxIncome: number, dependents: number): number =>
-  Math.round(afterTaxIncome * livingShare(afterTaxIncome, dependents));
-
-/* -------------------------------------------------------------------------- */
 /* What this job pays this year                                                */
 /* -------------------------------------------------------------------------- */
 
@@ -144,35 +94,33 @@ export function payFor(job: Job, years: number, performance: number, standing: n
 }
 
 /**
- * What actually lands in the character's pocket after a year of this.
+ * What a year of this job puts in the bank before anything is spent.
  *
- * Can be NEGATIVE, and that is the point: a household whose costs outrun a
- * small wage loses ground, which is a thing that happens to people and is the
- * only reason the number on the Career screen means anything. The caller is
- * responsible for never taking cash below zero (CORE_RULES 13.13).
+ * `savedFrom` used to live here and returned pay minus tax MINUS THE COST OF
+ * LIVING, which is why it was called savings. 0303 moved the cost of living to
+ * the phase that charges everybody, so what employment hands over is take-home
+ * — and a year can still end behind, it just ends behind for a reason that is
+ * now recorded as its own transaction rather than folded into this number.
  */
-export function savedFrom(grossPay: number, dependents: number): number {
-  const net = afterTax(grossPay);
-  return net - livingCostOf(net, dependents);
-}
+export const takeHome = (grossPay: number): number => afterTax(grossPay);
 
 /* -------------------------------------------------------------------------- */
-/* The breakdown — Ticket 0301                                                 */
+/* The breakdown — Ticket 0301, narrowed by 0303                              */
 /* -------------------------------------------------------------------------- */
 
 /**
  * The same year of pay, itemised instead of collapsed.
  *
- * `savedFrom` computes gross, then tax, then the cost of living, and returns
- * ONE number — the remainder. Measured at the top of 0301: at $42,000 with two
- * children it works out $8,604 of tax and $32,647 of living costs, hands back
- * $749, and throws the other two away. Every year, for a whole career, across a
- * lifetime gross of four and a quarter million dollars.
+ * 0301 built this to stop the game throwing numbers away: `savedFrom` computed
+ * gross, then tax, then the cost of living, and returned only the remainder —
+ * at $42,000 with two children, $8,604 and $32,647 discarded to hand back $749,
+ * every year, across a lifetime gross of four and a quarter million dollars.
  *
- * So this returns all four. Nothing about the arithmetic changed — `saved` is
- * still exactly `savedFrom` and a test asserts it — which is the point: 0301 is
- * a ledger, not a rebalance, and a ticket that quietly moved everybody's income
- * while claiming to add bookkeeping would be impossible to review.
+ * 0303 TOOK `living` AND `saved` BACK OUT, and that is a narrowing rather than
+ * a reversal. The cost of living is not a property of a job — it is a property
+ * of a household, and a household has one whether or not anybody is employed.
+ * Leaving a `living` field here would have meant two places computing the cost
+ * of being alive, which is the exact bug 0210 labelled this file to prevent.
  *
  * The steady/commission split is `atRisk`, which 0210's templates have carried
  * since the day they were written: a salaried job is 5% at risk and a
@@ -187,10 +135,8 @@ export interface PayBreakdown {
   readonly commission: number;
   /** Positive. What was withheld. */
   readonly tax: number;
-  /** Positive. What a year of being alive cost this household. */
-  readonly living: number;
-  /** Signed. What is left, and can be negative — see `savedFrom`. */
-  readonly saved: number;
+  /** What reached the bank. Gross minus tax, and nothing else. */
+  readonly takeHome: number;
 }
 
 export function payBreakdown(
@@ -198,7 +144,6 @@ export function payBreakdown(
   years: number,
   performance: number,
   standing: number,
-  dependents: number,
 ): PayBreakdown {
   const rules = TEMPLATES[job.template];
   const gross = payFor(job, years, performance, standing);
@@ -210,6 +155,5 @@ export function payBreakdown(
   const steady = Math.min(gross, Math.round(job.pay * seniority * (1 - rules.atRisk)));
   const commission = gross - steady;
   const net = afterTax(gross);
-  const living = livingCostOf(net, dependents);
-  return { steady, commission, tax: gross - net, living, saved: net - living };
+  return { steady, commission, tax: gross - net, takeHome: net };
 }

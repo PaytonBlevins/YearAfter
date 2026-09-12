@@ -37,6 +37,17 @@ export interface CityEntry {
   readonly country: string;
   /** Birth-likelihood weight. Loosely population-shaped, not a population. */
   readonly weight: number;
+  /**
+   * Ticket 0303. What a year of ordinary life costs here, relative to 1.00.
+   *
+   * Spec 191–193 names location first among the things living costs are
+   * inferred from, and nothing in the build could act on it until this field
+   * existed. US cities carry real relative numbers; everywhere else sits in a
+   * narrower band, because every salary and price in this build is
+   * US-benchmarked and a true index would hand a character a US wage against a
+   * fifth of a US cost. `scripts/generate-catalogs.py` says it at length.
+   */
+  readonly costIndex: number;
   /** The naming traditions a character born here draws from. */
   readonly nameCultures: readonly CultureWeight[];
 }
@@ -52,6 +63,17 @@ export const findCity = (id: string): CityEntry | undefined => CITIES_BY_ID.get(
  * rather than concatenating fields itself, so that region-first countries can
  * be handled here later without touching screens.
  */
+/**
+ * The cost index of a city, or the national baseline for an id nothing knows.
+ *
+ * The fallback is 1.00 rather than a throw because a save can outlive a catalog
+ * entry — 0207c's whole lesson — and a character whose birth city was renamed
+ * between builds should keep playing at an average cost, not crash on load. The
+ * generator refuses to emit a city without one, so this never fires in a build
+ * that shipped its own catalog.
+ */
+export const costIndexOf = (id: string): number => CITIES_BY_ID.get(id)?.costIndex ?? 1;
+
 export function describeCity(id: string): string {
   const city = CITIES_BY_ID.get(id);
   if (!city) return 'Unknown';

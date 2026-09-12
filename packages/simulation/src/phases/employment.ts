@@ -35,7 +35,7 @@ import {
   type Job,
 } from '@yearafter/careers';
 import { clampStat, dollars, type StatValue } from '@yearafter/core';
-import { livingChildren, type Household } from '@yearafter/relationships';
+import type { Household } from '@yearafter/relationships';
 import type { RandomStream } from '../rng/rng';
 import { stableUnit } from '../rng/rng';
 
@@ -57,7 +57,7 @@ export interface EmploymentPhaseOutput {
   /**
    * Ticket 0301. What this phase moved, for `advanceYear` to post.
    *
-   * A phase REPORTS money and never moves it. `saved` below is still returned
+   * A phase REPORTS money and never moves it. `takeHome` below is still returned
    * because the feed line quotes it, but it is no longer what changes the
    * balance — these are.
    */
@@ -69,7 +69,15 @@ export interface EmploymentPhaseOutput {
    * and the only reason the salary means anything. `advanceYear` is responsible
    * for never taking cash below zero (CORE_RULES 13.13).
    */
-  readonly saved: number;
+  /**
+   * Ticket 0303. Pay minus tax, and nothing else.
+   *
+   * Was `saved`, and had the cost of living already netted off it. The living
+   * phase runs after this one and charges the household — so what employment
+   * knows is what arrived, and what is LEFT is a question only the year as a
+   * whole can answer.
+   */
+  readonly takeHome: number;
   /** Gross pay for the year, for the line that names it (CORE_RULES 13.6). */
   readonly earned: number;
   /** Hidden capacity the job consumed, for the stress phase (spec 661). */
@@ -84,7 +92,7 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
   const held = employment.job;
 
   if (!held) {
-    return { employment, lines, records, transactions, saved: 0, earned: 0, demand: 0 };
+    return { employment, lines, records, transactions, takeHome: 0, earned: 0, demand: 0 };
   }
 
   const job = findJob(held.jobId);
@@ -97,7 +105,7 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
       lines,
       records,
       transactions,
-      saved: 0,
+      takeHome: 0,
       earned: 0,
       demand: 0,
     };
@@ -113,13 +121,8 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
 
   /* ---- what it paid -------------------------------------------------------- */
   //
-  // Dependents are the household this wage has to cover. Children only: a
-  // partner is a person, not a cost, and modelling a spouse as a drain would be
-  // both wrong and the kind of thing a player notices.
-  const dependents = livingChildren(input.family).length;
-  const parts = payBreakdown(job, years, performance, standing, dependents);
+  const parts = payBreakdown(job, years, performance, standing);
   const earned = parts.steady + parts.commission;
-  const saved = parts.saved;
 
   /*
     Ticket 0301. Four transactions where there used to be one number.
@@ -150,13 +153,17 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
     });
   }
   transactions.push({ category: 'tax', amount: dollars(-parts.tax), source: 'Tax' });
-  transactions.push({
-    category: 'living',
-    amount: dollars(-parts.living),
-    source: dependents > 0 ? `Living costs, ${dependents + 1} at home` : 'Living costs',
-  });
 
-  lines.push({ kind: 'career', text: payLine(job, earned, saved, dependents, input.age) });
+  /*
+    Ticket 0303. The cost of living used to be posted HERE, out of the same
+    `payBreakdown` call, and the year's money line was written here too.
+
+    Both moved to `phases/living.ts`, and for one reason: a phase that charges
+    for being alive has to run for people who are not being paid. Measured
+    before this ticket, a character who never took a job was charged nothing
+    across 6,357 adult years. What employment knows is what the job paid and
+    what tax took; what a YEAR came to is the household's question.
+  */
 
   /* ---- and then somebody else decides -------------------------------------- */
   let stillThere = true;
@@ -224,7 +231,15 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
     };
   }
 
-  return { employment, lines, records, transactions, saved, earned, demand: job.demand };
+  return {
+    employment,
+    lines,
+    records,
+    transactions,
+    takeHome: parts.takeHome,
+    earned,
+    demand: job.demand,
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -244,63 +259,16 @@ function pick(lines: readonly string[], key: string, age: number): string {
   return lines[(base + age) % lines.length] as string;
 }
 
-const money = (amount: number): string => `$${Math.round(amount).toLocaleString('en-US')}`;
+/*
+  Ticket 0303. `payLine`, FINE_LINES, FAMILY_LINES, TIGHT_LINES and
+  BEHIND_LINES used to live here and now live in `phases/living.ts`.
 
-/**
- * The one line a working year always writes.
- *
- * CORE_RULES 13.6: any change to money names its source AND its amount. Both
- * numbers appear — what the job paid and what was left — because the gap
- * between them is the entire cost-of-living model and a player who is only told
- * one of them will think the other is a bug.
- */
-function payLine(job: Job, earned: number, saved: number, dependents: number, age: number): string {
-  if (saved < 0) {
-    return pick(BEHIND_LINES, `pay:${String(job.id)}:behind`, age)
-      .replace(/\{earned\}/g, money(earned))
-      .replace(/\{short\}/g, money(-saved))
-      .replace(/\{job\}/g, job.title.toLowerCase());
-  }
-  if (saved < earned * 0.04) {
-    return pick(TIGHT_LINES, `pay:${String(job.id)}:tight`, age)
-      .replace(/\{earned\}/g, money(earned))
-      .replace(/\{saved\}/g, money(saved))
-      .replace(/\{job\}/g, job.title.toLowerCase());
-  }
-  return pick(dependents > 0 ? FAMILY_LINES : FINE_LINES, `pay:${String(job.id)}`, age)
-    .replace(/\{earned\}/g, money(earned))
-    .replace(/\{saved\}/g, money(saved))
-    .replace(/\{job\}/g, job.title.toLowerCase());
-}
-
-const FINE_LINES: readonly string[] = [
-  'Earned {earned} and had {saved} of it left at the end.',
-  'Made {earned} this year and put {saved} away.',
-  '{earned} for the year. {saved} still there in December.',
-  'The job paid {earned}. You put {saved} aside without really trying.',
-  'Made {earned}. Living took most of it and left {saved}.',
-];
-
-const FAMILY_LINES: readonly string[] = [
-  'Earned {earned}. After everybody was fed and covered, {saved} was left.',
-  '{earned} for the year, and {saved} of it survived the household.',
-  'The job paid {earned}. {saved} of that was still yours by December.',
-  'Made {earned}. The family took what it takes; {saved} stayed put.',
-];
-
-const TIGHT_LINES: readonly string[] = [
-  "Earned {earned} and finished the year {saved} up, which isn't much.",
-  '{earned} came in and almost exactly {earned} went out. {saved} left.',
-  'A year of it for {earned}, and {saved} to show for it.',
-  'Made {earned}. Broke about even, and {saved} is what even looks like.',
-];
-
-const BEHIND_LINES: readonly string[] = [
-  'Earned {earned} and still went {short} backwards over the year.',
-  "{earned} wasn't enough. The year ended {short} down.",
-  'Worked all year for {earned} and finished {short} worse off.',
-  "The {job} money didn't cover it. Down {short} by December.",
-];
+  They were always about the year rather than about the job — "Made $43,297.
+  Living took most of it and left $2,737" names a wage and then a household —
+  and once the cost of living left this file, this file could no longer write
+  the second half of its own sentence. The phase that charges the household is
+  the one that knows both numbers, so it writes the line.
+*/
 
 const PROMOTED_LINES: readonly string[] = [
   'Promoted. {job}, starting Monday, and a raise that took a month to arrive.',

@@ -17,7 +17,8 @@
  *   0208  children                        -> DONE, phases/family.ts
  *   0210  employment                      -> DONE, phases/employment.ts
  *   0211  aging, health, mortality        -> DONE, phases/health.ts
- *   0301  financial ledger, monthly pass  -> finance phase
+ *   0301  financial ledger                -> DONE, money.ts + @yearafter/finance
+ *   0303  living expenses                 -> DONE, phases/living.ts
  * Do not grow this file with inline system logic — add a phase module.
  */
 
@@ -39,14 +40,16 @@ import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
 import { runEvents } from './phases/events';
 import { partnerOf } from '@yearafter/social';
+import { livingChildren, livingParents } from '@yearafter/relationships';
 import { runFamily } from './phases/family';
 import { postYear } from './money';
 import { reconcile, reconcileByYear, yearsOutside } from '@yearafter/finance';
 import { runKin } from './phases/kin';
+import { runLiving } from './phases/living';
 import { runSocial } from './phases/social';
 import { runHealth } from './phases/health';
 import { runStress } from './phases/stress';
-import { findActivity } from '@yearafter/content';
+import { costIndexOf, findActivity } from '@yearafter/content';
 import { nameContext, uniqueFirstName } from './social-generator';
 import { RngDomains } from './rng/rng';
 
@@ -169,6 +172,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     ...(partner ? { partnerPersonality: partner.personality, partnerId: partner.id } : {}),
     playerLastName: state.player.lastName,
     behaviour: education.education.behaviour,
+    // Ticket 0303. A parent can only put you out of a house you live in.
+    livesWithParents: state.household.housing === 'withFamily',
     takenNames: names.taken,
     nameFor: (sex) => uniqueFirstName(familyStream, names, sex),
   });
@@ -188,6 +193,38 @@ export function advanceYear(state: GameState): AdvanceResult {
     smarts: education.player.stats.smarts,
   });
 
+  /*
+    Ticket 0303 — the living phase. Ninth, and placed here on purpose.
+
+    AFTER employment, because the standard of living follows this year's income
+    and the raise should be the one that just happened. BEFORE events, because
+    an event that reads the player's cash should read it after the year's rent,
+    not before — a character is not briefly rich in the window between being
+    paid and paying for their life.
+
+    The cost of being alive used to be computed inside `payBreakdown` and posted
+    by the employment phase, which meant it could only ever be charged to
+    somebody who was employed. Measured before this ticket: 6,357 adult years
+    with no job, not one of them costed.
+  */
+  const living = runLiving({
+    household: state.household,
+    age: nextAge,
+    locationIndex: costIndexOf(state.player.currentLocation.cityId),
+    partnered: partnerOf(social.circle.people) !== undefined,
+    children: livingChildren(family.family).length,
+    // What the job left after tax. Zero for anybody not working, which is the
+    // case this whole phase exists to make cost something.
+    afterTaxIncome: employment.takeHome,
+    wealth: Math.floor(Number(state.player.cash) / 100),
+    earned: employment.earned,
+    ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
+      ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }
+      : {}),
+    toldToLeave: family.toldToLeave,
+    hasLivingParent: livingParents(family.family).length > 0,
+  });
+
   const events = runEvents(
     {
       ...state,
@@ -200,7 +237,11 @@ export function advanceYear(state: GameState): AdvanceResult {
     },
     nextAge,
     nextYear,
-    education.lines.length + social.lines.length + family.lines.length + employment.lines.length,
+    education.lines.length +
+      social.lines.length +
+      family.lines.length +
+      employment.lines.length +
+      living.lines.length,
   );
 
   // Stress last: it summarises the year rather than making things happen in it,
@@ -301,6 +342,9 @@ export function advanceYear(state: GameState): AdvanceResult {
   // the same duplicate-key class the player reported twice in 0207c, caught
   // here by its own invariant test.
   write(employment.lines, (index) => `t:${nextYear}:pay:${index}`);
+  // Ticket 0303. Straight after employment, because the year's money line lives
+  // here now and reads as the second half of the working year's news.
+  write(living.lines, (index) => `t:${nextYear}:living:${index}`);
   // Events carry their own id, assigned by the event engine.
   write(events.lines, () => undefined);
   write(health.lines, (index) => `t:${nextYear}:health:${index}`);
@@ -326,10 +370,31 @@ export function advanceYear(state: GameState): AdvanceResult {
     ...family.transactions,
     ...employment.transactions,
     ...events.transactions,
+    // Ticket 0303. A year of treatment, for anybody being treated.
+    ...health.transactions,
   ];
+  /*
+    Ticket 0303. The cost of living is charged LAST, after every other outgoing,
+    and the reason is a bug this ticket wrote and its own tests caught.
+
+    The living phase was originally spread into `reported` at the front, which
+    put rent ahead of tax among the negatives. A broke character therefore paid
+    their landlord out of money the government was going to take, tax was
+    floored to zero, and a measured life came out of forty years of work having
+    paid $1.6 million of salary and NO TAX AT ALL. The books still balanced —
+    every shortfall was recorded — which is precisely why it needed a test that
+    looked at what the categories came to rather than whether they added up.
+
+    Tax is not optional and rent is not paid first. Everything a household is
+    actually committed to comes out before the discretionary cost of its own
+    standard of living, and what cannot be covered becomes a `shortfall` row
+    against the living cost, which is the honest place for it and the thing
+    0307's loan engine will lend against.
+  */
   const money = postYear(state.finance, nextYear, nextAge, [
     ...reported.filter((entry) => entry.amount > 0),
     ...reported.filter((entry) => entry.amount < 0),
+    ...living.transactions,
   ]);
 
   // ---- the year's line budget --------------------------------------------
@@ -492,6 +557,10 @@ export function advanceYear(state: GameState): AdvanceResult {
       // `advanceYear` already refuses to run while one is open, so leaving it
       // would lock the app on a dead character forever.
       finance: money.finance,
+      // Ticket 0303. The standard of living and whether they pay for a roof —
+      // both carried forward, because a standard with no memory is a share of
+      // income by another name.
+      household: living.household,
       health: {
         ...state.health,
         conditions: health.conditions,

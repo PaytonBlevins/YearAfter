@@ -23,7 +23,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { findJob, savedFrom } from '@yearafter/careers';
+import { findJob } from '@yearafter/careers';
 import { feeFor } from '@yearafter/parenting';
 import { ROMANCE_MOVES, costOf } from '@yearafter/social';
 import { advanceYear } from './advance';
@@ -214,9 +214,11 @@ describe('what a working life is worth', () => {
 
   it('never lets a character hold less than nothing', () => {
     // CORE_RULES 13.13. A year CAN end behind — a small wage and four children
-    // does not break even — and cash still floors at zero until 0301's ledger
-    // and 0307's loans give a character somewhere to fall.
-    expect(savedFrom(25_000, 4)).toBeLessThan(0);
+    // does not break even — and cash still floors at zero until 0307's loans
+    // give a character somewhere to fall. The part that could not be paid is a
+    // `shortfall` row rather than a silent clamp (0301), and since 0303 the
+    // household's own costs are what push a year behind rather than a number
+    // netted off a wage.
     for (const life of LIFETIMES) {
       expect(Number(life.state.player.cash), life.state.player.firstName).toBeGreaterThanOrEqual(0);
     }

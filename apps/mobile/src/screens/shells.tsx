@@ -24,7 +24,7 @@ import {
   PERSONALITY_LABELS,
   TALENT_LABELS,
 } from '@yearafter/character';
-import { describeCity } from '@yearafter/content';
+import { costIndexOf, describeCity } from '@yearafter/content';
 import {
   gradePointAverage,
   isAtCollege,
@@ -37,16 +37,10 @@ import {
   letterGrade,
   schoolLabel,
 } from '@yearafter/education';
-import { isCurrent, stagesFor } from '@yearafter/social';
+import { isCurrent, partnerOf, stagesFor } from '@yearafter/social';
+import { livingCostFor } from '@yearafter/finance';
 import { livingChildren } from '@yearafter/relationships';
-import {
-  TRACK_LABELS,
-  afterTax,
-  findJob,
-  livingCostOf,
-  payFor,
-  savedFrom,
-} from '@yearafter/careers';
+import { TRACK_LABELS, afterTax, findJob, payFor } from '@yearafter/careers';
 import {
   canWork,
   nextDegreeFor,
@@ -564,9 +558,18 @@ function Elsewhere() {
  *
  * Spec 1323 puts income and tax rate on the finance overview and says "specific
  * expenses/income live on the entity that produces them" — the job produces the
- * salary, so this is where the arithmetic belongs. When 0301's ledger and 0303's
- * living expenses land, this reads from them and `livingCostOf` is deleted
- * rather than kept alongside (CORE_RULES 13.8).
+ * salary, so this is where the arithmetic belongs.
+ *
+ * TICKET 0303 CHANGED WHERE THE LAST ROW COMES FROM, and it is worth saying why
+ * the row survived. 0210b's complaint was *"I selected a job for $44k and only
+ * got paid a few grand"* — the gap between the salary and the bank balance, and
+ * tax is not most of that gap, living is. So the answer still has to name the
+ * cost of living or the question re-opens.
+ *
+ * What changed is that the number is now READ rather than recomputed. The job
+ * knows what it pays; the household knows what it costs; this screen puts the
+ * two beside each other and does no arithmetic of its own beyond the
+ * subtraction. `livingCostOf` is gone, as 0210 promised it would be.
  */
 function payDetail(state: NonNullable<ReturnType<typeof useGame>['state']>): Detail {
   const held = state.employment.job;
@@ -578,8 +581,16 @@ function payDetail(state: NonNullable<ReturnType<typeof useGame>['state']>): Det
   const gross = payFor(job, years, held.performance, standing);
   const tax = gross - afterTax(gross);
   const dependents = livingChildren(state.family).length;
-  const living = livingCostOf(afterTax(gross), dependents);
-  const kept = savedFrom(gross, dependents);
+  // The household's own number, at this household's standard, in this city —
+  // not a share of this wage. A character who loses this job goes on paying it.
+  const living = livingCostFor({
+    standard: state.household.standard,
+    locationIndex: costIndexOf(state.player.currentLocation.cityId),
+    partnered: partnerOf(state.circle.people) !== undefined,
+    children: dependents,
+    housing: state.household.housing,
+  }).total;
+  const kept = afterTax(gross) - living;
   const rate = Math.round((tax / Math.max(1, gross)) * 100);
 
   const money = (amount: number) => `$${Math.round(amount).toLocaleString('en-US')}`;
@@ -595,9 +606,11 @@ function payDetail(state: NonNullable<ReturnType<typeof useGame>['state']>): Det
         label: kept < 0 ? 'Short by' : 'What reaches your account',
         value: money(Math.abs(kept)),
         note:
-          dependents > 0
-            ? `after ${money(living)} of living, for ${dependents + 1} of you`
-            : `after ${money(living)} of rent, food and everything else`,
+          state.household.housing === 'withFamily'
+            ? `after ${money(living)} of living, at your parents'`
+            : dependents > 0
+              ? `after ${money(living)} of living, for ${dependents + 1} of you`
+              : `after ${money(living)} of rent, food and everything else`,
         accent: true,
       },
     ],

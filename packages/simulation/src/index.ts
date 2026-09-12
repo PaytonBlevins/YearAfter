@@ -18,6 +18,9 @@ export * from './social-generator';
 export * from './study';
 export * from './tryout';
 export * from './continue';
+// Ticket 0303. The one constant the save migration also needs: an age that is
+// defined in two places is 13.31 in miniature.
+export { CHARGED_FROM_AGE } from './phases/living';
 export * from './eulogy';
 export * from './family-generator';
 export * from './phases/education';

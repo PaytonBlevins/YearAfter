@@ -158,6 +158,77 @@ US_SOUTHEAST = ("us-en", 56), ("ng", 24), ("mx-es", 12), ("in", 4), ("cn", 4)
 US_PACIFIC   = ("us-en", 54), ("cn", 12), ("mx-es", 12), ("kr", 8), ("jp", 6), ("in", 8)
 US_NORTHEAST = ("us-en", 62), ("it", 10), ("ng", 10), ("mx-es", 6), ("in", 6), ("cn", 6)
 
+# ------------------------------------------------------------ cost index -----
+#
+# Ticket 0303. What a year of ordinary life costs here, relative to 1.00.
+#
+# Spec 191-193 names LOCATION first among the things living costs are inferred
+# from, and until this ticket the game had no way to know one city from another:
+# `currentLocation` was written once at birth and never read by anything that
+# cost money. Seventy distinct birth cities turn up in a hundred and twenty
+# lives, so this is the input that makes two characters on identical salaries
+# live different lives.
+#
+# THE NON-US NUMBERS ARE DELIBERATELY COMPRESSED, and it matters.
+#
+# Every salary, price and benefit in this build is US-benchmarked — the
+# locations comment above has said so since 0201. Give Lagos or Chennai their
+# true cost of living relative to New York and a character born there earns a
+# US wage against a fifth of a US cost, retires at thirty and makes every
+# decision in the game free. That is not realism, it is one half of a model
+# meeting the other half's assumptions. So non-US cities sit in a narrower band
+# around 1.00 that says "cheaper or dearer than average" without pretending the
+# incomes came from the same place. v0.04's job expansion is where per-country
+# pay could earn the wider spread.
+#
+# US cities get real relative numbers, because the incomes ARE US numbers.
+COST_INDEX = {
+    # --- United States: 1.00 is the national baseline ---------------------
+    'us-ca-san-francisco': 1.68, 'us-ca-san-jose': 1.64, 'us-ny-nyc': 1.55,
+    'us-ma-boston': 1.42, 'us-dc-washington': 1.38, 'us-ca-san-diego': 1.36,
+    'us-ca-los-angeles': 1.34, 'us-wa-seattle': 1.33, 'us-or-portland': 1.16,
+    'us-co-denver': 1.13, 'us-ca-sacramento': 1.12, 'us-ca-riverside': 1.10,
+    'us-il-chicago': 1.07, 'us-fl-miami': 1.12, 'us-md-baltimore': 1.05,
+    'us-pa-philadelphia': 1.03, 'us-nv-las-vegas': 1.02, 'us-mn-minneapolis': 1.02,
+    'us-ga-atlanta': 1.00, 'us-nc-charlotte': 0.98, 'us-az-phoenix': 0.99,
+    'us-tx-austin': 1.00, 'us-tx-dallas': 0.97, 'us-ut-salt-lake-city': 1.01,
+    'us-nm-albuquerque': 0.94, 'us-tx-houston': 0.93, 'us-wi-milwaukee': 0.93,
+    'us-fl-jacksonville': 0.94, 'us-tn-nashville': 0.96, 'us-la-new-orleans': 0.93,
+    'us-oh-columbus': 0.92, 'us-az-tucson': 0.92, 'us-mo-kansas-city': 0.91,
+    'us-in-indianapolis': 0.90, 'us-pa-pittsburgh': 0.92, 'us-tx-san-antonio': 0.90,
+    'us-ky-louisville': 0.89, 'us-oh-cleveland': 0.88, 'us-mi-detroit': 0.87,
+    'us-tn-memphis': 0.86,
+
+    # --- Everywhere else: a narrow band, for the reason above --------------
+    'gb-eng-london': 1.30, 'gb-eng-manchester': 1.02, 'gb-eng-birmingham': 1.00,
+    'gb-sct-edinburgh': 1.08, 'gb-sct-glasgow': 0.96,
+    'ca-bc-vancouver': 1.22, 'ca-on-toronto': 1.20, 'ca-qc-montreal': 1.02,
+    'au-nsw-sydney': 1.26, 'au-vic-melbourne': 1.16, 'au-qld-brisbane': 1.08,
+    'jp-13-tokyo': 1.20, 'jp-27-osaka': 1.04, 'jp-14-yokohama': 1.08,
+    'jp-23-nagoya': 1.00, 'jp-01-sapporo': 0.92,
+    'kr-11-seoul': 1.14, 'kr-28-incheon': 0.98, 'kr-26-busan': 0.96,
+    'fr-idf-paris': 1.22, 'fr-pac-nice': 1.06, 'fr-ara-lyon': 1.02,
+    'fr-occ-toulouse': 0.98, 'fr-pac-marseille': 0.96,
+    'de-by-munich': 1.18, 'de-he-frankfurt': 1.10, 'de-hh-hamburg': 1.06,
+    'de-be-berlin': 1.04, 'de-nw-cologne': 1.00,
+    'it-lom-milan': 1.10, 'it-laz-rome': 1.02, 'it-tos-florence': 1.00,
+    'it-pie-turin': 0.94, 'it-cam-naples': 0.88,
+    'es-md-madrid': 1.02, 'es-cat-barcelona': 1.00, 'es-vc-valencia': 0.90,
+    'mx-cmx-mexico-city': 0.90, 'mx-nle-monterrey': 0.88, 'mx-jal-guadalajara': 0.85,
+    'mx-bcn-tijuana': 0.85, 'mx-pue-puebla': 0.80,
+    'br-sp-sao-paulo': 0.92, 'br-rj-rio-de-janeiro': 0.90, 'br-df-brasilia': 0.90,
+    'br-mg-belo-horizonte': 0.84, 'br-ba-salvador': 0.80,
+    'ar-c-buenos-aires': 0.88, 'ar-x-cordoba': 0.80,
+    'in-mh-mumbai': 0.92, 'in-dl-delhi': 0.88, 'in-ka-bangalore': 0.88,
+    'in-tg-hyderabad': 0.83, 'in-tn-chennai': 0.83, 'in-wb-kolkata': 0.80,
+    'cn-sh-shanghai': 0.98, 'cn-bj-beijing': 0.96, 'cn-gd-shenzhen': 0.94,
+    'cn-gd-guangzhou': 0.90, 'cn-sc-chengdu': 0.83, 'cn-hb-wuhan': 0.82,
+    'ng-la-lagos': 0.90, 'ng-fc-abuja': 0.88, 'ng-oy-ibadan': 0.80,
+    'ng-kn-kano': 0.80,
+    'za-wc-cape-town': 0.90, 'za-gp-johannesburg': 0.86,
+}
+COST_INDEX_FLOOR, COST_INDEX_CEILING = 0.80, 1.70
+
 CITIES = [
  # --- United States -------------------------------------------------------
  ("us-ny-nyc","New York City","NY","New York","US","United States",90, mix(("us-en",50),("mx-es",12),("ng",9),("cn",9),("it",8),("in",7),("br-pt",5))),
@@ -339,9 +410,19 @@ for (cid, city, rc, region, cc, country, weight, m) in CITIES:
     seen.add(cid)
     for e in m:
         if e["culture"] not in CULTURES: problems.append(f"{cid} -> unknown culture {e['culture']}")
+    # 13.36 in advance: every city gets one, and a missing id is a build
+    # failure rather than a silent 1.00 that nobody would ever notice.
+    if cid not in COST_INDEX:
+        problems.append(f"{cid} has no cost index")
+    ci = COST_INDEX.get(cid, 1.0)
+    if not (COST_INDEX_FLOOR <= ci <= COST_INDEX_CEILING):
+        problems.append(f"{cid} cost index {ci} outside [{COST_INDEX_FLOOR}, {COST_INDEX_CEILING}]")
     locations["entries"].append({"id": cid, "city": city, "regionCode": rc, "region": region,
                                  "countryCode": cc, "country": country, "weight": weight,
-                                 "nameCultures": m})
+                                 "costIndex": ci, "nameCultures": m})
+
+for cid in COST_INDEX:
+    if cid not in seen: problems.append(f"cost index for unknown city {cid}")
 
 if problems:
     print("PROBLEMS:"); [print("  " + p) for p in problems]; raise SystemExit(1)

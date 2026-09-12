@@ -11,7 +11,15 @@
 
 import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
-import { reconcile, reconcileByYear, yearsOutside, type Ledger } from '@yearafter/finance';
+import {
+  SUBSISTENCE,
+  reconcile,
+  reconcileByYear,
+  standardTargetFor,
+  yearsOutside,
+  type Ledger,
+} from '@yearafter/finance';
+import { CHARGED_FROM_AGE } from '@yearafter/simulation';
 import { CURRENT_SAVE_VERSION, type CurrentSaveGame } from './save-schema';
 
 export type MigrationError =
@@ -514,6 +522,64 @@ const migrations: Readonly<Record<number, Migration>> = {
               ],
               balance: cash,
             }),
+    };
+  },
+
+  /**
+   * v18 -> v19: Ticket 0303 gives a household a standard of living and a roof.
+   *
+   * Two fields, and the interesting question is what an EXISTING save should
+   * get for them, because both have sixty years of history this migration
+   * cannot see.
+   *
+   * `housing` is the easy one and it is decided by age, not by a guess: a save
+   * whose character is grown is a character who lives somewhere. Anybody at or
+   * past `CHARGED_FROM_AGE` gets their own place; a save mid-childhood is still
+   * at home, which is where they actually are.
+   *
+   * `standard` is the one that could have gone wrong. The tempting move is to
+   * derive it from the balance — a rich save is a rich life — and it is exactly
+   * the wrong move: `standard` is what somebody is USED TO SPENDING, and a
+   * character who happens to be holding $400,000 because the old model never
+   * charged them for anything would be handed a standard of living to match and
+   * would go broke inside five years of the new one. A migration that makes an
+   * old save's character suddenly destitute is a migration that ate a save.
+   *
+   * So it is seeded from INCOME where there is one and from subsistence where
+   * there is not, and the creep does the rest within a few years of play. That
+   * is slower than the truth and it is recoverable, which is the trade every
+   * migration in this file has made.
+   */
+  18: (save) => {
+    const player = (save['player'] ?? {}) as Record<string, unknown>;
+    const age = typeof player['age'] === 'number' ? player['age'] : 0;
+    const finance = (save['finance'] ?? {}) as Record<string, unknown>;
+    const rows = Array.isArray(finance['transactions']) ? finance['transactions'] : [];
+
+    // Last year's take-home, if this save has ever recorded any pay. Purely a
+    // read of what is already written down — no RNG, no clock (spec 1108-1140).
+    let lastPayYear = -Infinity;
+    let lastPay = 0;
+    for (const raw of rows) {
+      const row = raw as Record<string, unknown>;
+      const category = row['category'];
+      const year = typeof row['year'] === 'number' ? row['year'] : -Infinity;
+      if (category !== 'salary' && category !== 'commission') continue;
+      if (year > lastPayYear) {
+        lastPayYear = year;
+        lastPay = 0;
+      }
+      if (year === lastPayYear && typeof row['amount'] === 'number') lastPay += row['amount'] / 100;
+    }
+
+    return {
+      ...save,
+      version: 19,
+      household: save['household'] ?? {
+        standard: Math.max(SUBSISTENCE, Math.round(standardTargetFor(lastPay, 0))),
+        housing: age >= CHARGED_FROM_AGE ? 'ownPlace' : 'withFamily',
+        ...(age >= CHARGED_FROM_AGE ? { leftHomeAt: CHARGED_FROM_AGE } : {}),
+      },
     };
   },
 };

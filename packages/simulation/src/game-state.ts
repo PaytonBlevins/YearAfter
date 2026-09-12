@@ -16,7 +16,7 @@ import { EMPTY_CIRCLE, type SocialCircle } from '@yearafter/social';
 import { EMPTY_PARENTING, type ParentingState } from '@yearafter/parenting';
 import { EMPTY_EMPLOYMENT, type EmploymentState } from '@yearafter/careers';
 import { EMPTY_HEALTH, type HealthState } from '@yearafter/health';
-import { EMPTY_LEDGER, type Ledger } from '@yearafter/finance';
+import { EMPTY_LEDGER, NEW_HOUSEHOLD, type HouseholdFinances, type Ledger } from '@yearafter/finance';
 import { Rng } from './rng/rng';
 
 /** World state that outlives any single character (spec 818–827 continuation). */
@@ -104,6 +104,20 @@ export interface GameState {
    */
   readonly finance: Ledger;
   /**
+   * Ticket 0303: the standard of living, and whether they pay for a roof.
+   *
+   * Two fields, and both had to exist for living costs to be anything other
+   * than a percentage of a wage. `standard` is what this character is used to
+   * spending, and it has MEMORY — it climbs quickly with income and falls back
+   * slowly, which is the whole reason losing a job costs something here.
+   * `housing` is the one bit of housing circumstance the build can honestly
+   * support until v0.05 brings property.
+   *
+   * Beside the player rather than on them, like the ledger and for the same
+   * reason: an heir starts their own life at their own standard.
+   */
+  readonly household: HouseholdFinances;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -123,6 +137,7 @@ export const createWorldState = (year: number, generation = 1): WorldState => ({
 export interface CreateGameStateOptions {
   readonly health?: HealthState;
   readonly finance?: Ledger;
+  readonly household?: HouseholdFinances;
   readonly family?: Household;
   readonly nameCultureId?: string;
   readonly events?: EventHistory;
@@ -150,6 +165,7 @@ export const createGameState = (
   employment: options.employment ?? EMPTY_EMPLOYMENT,
   health: options.health ?? EMPTY_HEALTH,
   finance: options.finance ?? EMPTY_LEDGER,
+  household: options.household ?? NEW_HOUSEHOLD,
   pending: options.pending ?? [],
   rng,
 });

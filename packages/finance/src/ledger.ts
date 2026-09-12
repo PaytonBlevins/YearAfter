@@ -203,16 +203,35 @@ export function post(ledger: Ledger, year: number, age: number, entry: NewTransa
   */
   const short = wanted - applied || 0;
 
-  const stamped: Transaction[] = [
-    {
-      id: idFor(ledger, year, entry.category),
-      year,
-      age,
-      category: entry.category,
-      amount: cents(applied),
-      source: entry.source,
-    },
-  ];
+  /*
+    A charge that moved NOTHING is not a transaction, and Ticket 0303 is what
+    found that out.
+
+    Until 0303 the floor almost never bound all the way to zero — living costs
+    were a share of pay, so there was always pay to take them out of. Charging a
+    household whether or not anybody is employed produces the case this branch
+    exists for: a character with nothing is billed $22,000 and $0 of it moves.
+    Without this, the ledger writes a $0 `living` row every year of a broke life
+    — 47 of them in one measured life — and 0301's own rule that an ordinary
+    year writes nothing at all becomes untrue for exactly the characters whose
+    books matter most.
+
+    Nothing is lost by leaving it out: the `shortfall` row below records the
+    whole amount and names it, which is strictly more than a zero would say.
+  */
+  const stamped: Transaction[] =
+    applied === 0
+      ? []
+      : [
+          {
+            id: idFor(ledger, year, entry.category),
+            year,
+            age,
+            category: entry.category,
+            amount: cents(applied),
+            source: entry.source,
+          },
+        ];
 
   /*
     The unpaid part is a transaction of its own, at zero effect on the balance.

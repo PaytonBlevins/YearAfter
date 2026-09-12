@@ -638,6 +638,57 @@ if (existsSync(locationsPath) && existsSync(namesPath)) {
           `City "${city.id}" needs a birth weight greater than zero.`,
         );
       }
+      /*
+        V19 — Ticket 0303. Every city carries a cost of living.
+
+        The generator refuses to emit a city without one, so this is the second
+        of the three enforcement points this build uses for content: the
+        generator self-check, this validator over the RENDERED catalog, and a
+        package test. That shape exists because 0211b found V16 running over
+        source files only and missing 593 strings — a rule that checks the
+        input and not the output is half a rule (CORE_RULES 13.23).
+
+        The band is checked as well as the presence. A missing index falls back
+        to 1.00 at runtime (a save can outlive a catalog entry), which is the
+        right behaviour and also the reason a wrong one would never announce
+        itself: an index of 16 instead of 1.6 would simply make one city's
+        characters destitute for a whole milestone.
+      */
+      if (typeof city.costIndex !== 'number' || !(city.costIndex >= 0.5 && city.costIndex <= 2)) {
+        fail(
+          'packages/content/data/locations.json',
+          `City "${city.id}" needs a costIndex between 0.5 and 2 (Ticket 0303). Found ${city.costIndex}.`,
+        );
+      }
+    }
+    /*
+      And the POPULATION has to vary, which presence cannot tell you.
+
+      A catalog where every city sits at 1.00 would pass every check above and
+      mean location does not exist — CORE_RULES 13.7, a system nobody can
+      trigger. Weighted by birth likelihood, because that is the spread a player
+      actually meets: seventy distinct cities turn up in a hundred and twenty
+      lives, and if they all cost the same then four of the five things spec
+      191-193 names are still doing nothing.
+    */
+    const totalWeight = cities.reduce((sum, city) => sum + (city.weight ?? 0), 0);
+    const meanIndex =
+      cities.reduce((sum, city) => sum + (city.weight ?? 0) * (city.costIndex ?? 1), 0) /
+      Math.max(1, totalWeight);
+    const spread =
+      Math.max(...cities.map((city) => city.costIndex ?? 1)) -
+      Math.min(...cities.map((city) => city.costIndex ?? 1));
+    if (!(spread >= 0.4)) {
+      fail(
+        'packages/content/data/locations.json',
+        `Cost of living barely varies across the catalog (spread ${spread.toFixed(2)}). Location is meant to be one of the five things living costs are inferred from.`,
+      );
+    }
+    if (!(meanIndex > 0.85 && meanIndex < 1.25)) {
+      fail(
+        'packages/content/data/locations.json',
+        `The birth-weighted mean cost index is ${meanIndex.toFixed(3)}; 1.00 is meant to be an average city, so the whole population is being charged the wrong baseline.`,
+      );
     }
   } catch (cause) {
     fail('packages/content/data', `Could not cross-check catalogs: ${cause.message}`);

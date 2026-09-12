@@ -20,12 +20,11 @@ import {
   firingChance,
   hireChance,
   oddsLabel,
-  livingShare,
   payBreakdown,
   payFor,
   promotionChance,
   promotionFrom,
-  savedFrom,
+  takeHome,
   TEMPLATES,
   taxRate,
   topOfLadder,
@@ -180,34 +179,25 @@ describe('pay', () => {
     expect(taxRate(2_000_000)).toBeLessThanOrEqual(0.34);
   });
 
-  it('leaves a small wage almost nothing and a large one something', () => {
-    // The shape the whole system depends on, and it was retuned once already:
-    // the first values put a character on a median salary at $226,000 by fifty
-    // and a driven one at $467,000, which would have made every price in the
-    // game free. Savings appear properly only well up the income scale.
-    const poor = savedFrom(27_000, 0);
-    const middling = savedFrom(58_000, 0);
-    const rich = savedFrom(130_000, 0);
-    expect(poor).toBeGreaterThan(0);
-    expect(poor).toBeLessThan(2_000);
-    expect(middling).toBeGreaterThan(poor);
-    expect(middling).toBeLessThan(6_000);
-    expect(rich).toBeGreaterThan(11_000);
-    // And nobody banks most of what they earn.
-    expect(rich / afterTax(130_000)).toBeLessThan(0.25);
-  });
+  it('hands over pay minus tax, and nothing else — Ticket 0303', () => {
+    /*
+      What this file used to assert was that a small wage saved almost nothing
+      and a large one saved something, because `savedFrom` netted off the cost
+      of living. It does not any more: the cost of living belongs to the
+      household and is charged by its own phase, whether or not there is a job.
 
-  it('makes a family cost something', () => {
-    const alone = savedFrom(46_000, 0);
-    const withThree = savedFrom(46_000, 3);
-    expect(withThree).toBeLessThan(alone);
-    expect(livingShare(afterTax(46_000), 3)).toBeGreaterThan(livingShare(afterTax(46_000), 0));
-  });
-
-  it('can leave a household going backwards', () => {
-    // A small wage and four dependents does not break even, and it should not.
-    // The employment phase is responsible for never taking cash below zero.
-    expect(savedFrom(25_000, 4)).toBeLessThan(savedFrom(25_000, 0));
+      The assertions that matter here now are the ones about employment: more
+      pay means more take-home, and nobody hands over more than they earned.
+      What is LEFT at the end of a year is `@yearafter/finance`'s question, and
+      the living-cost balance tests are the ones that answer it.
+    */
+    expect(takeHome(27_000)).toBe(afterTax(27_000));
+    expect(takeHome(58_000)).toBeGreaterThan(takeHome(27_000));
+    expect(takeHome(130_000)).toBeGreaterThan(takeHome(58_000));
+    for (const gross of [0, 12_000, 27_000, 58_000, 130_000, 900_000]) {
+      expect(takeHome(gross)).toBeLessThanOrEqual(gross);
+      expect(takeHome(gross)).toBeGreaterThanOrEqual(0);
+    }
   });
 
   it('pays a salaried job the same either way and a commissioned one very differently', () => {
@@ -273,22 +263,21 @@ describe('moving up and being let go', () => {
 });
 
 describe('Ticket 0301 — the breakdown is the same year, itemised', () => {
-  it('adds up to savedFrom, exactly, for every job at every stage', () => {
+  it('adds up, exactly, for every job at every stage', () => {
     /*
-      The property that makes 0301 reviewable: the ledger is bookkeeping, not a
-      rebalance. If `payBreakdown` and `savedFrom` ever disagree, somebody has
-      quietly changed everybody's income while claiming to add a record of it.
+      The property that makes the breakdown reviewable: it is bookkeeping, not a
+      rebalance. Steady plus commission is the gross `payFor` computes, and what
+      is left after tax is the take-home — so a ticket cannot quietly move
+      everybody's income while claiming to add a record of it.
     */
     for (const job of ALL_JOBS) {
       for (const years of [0, 4, 20]) {
         for (const performance of [20, 50, 85]) {
-          for (const dependents of [0, 3]) {
-            const parts = payBreakdown(job, years, performance, 50, dependents);
-            const gross = payFor(job, years, performance, 50);
-            expect(parts.steady + parts.commission, `${job.id} gross`).toBe(gross);
-            expect(parts.saved, `${job.id} saved`).toBe(savedFrom(gross, dependents));
-            expect(gross - parts.tax - parts.living, `${job.id} identity`).toBe(parts.saved);
-          }
+          const parts = payBreakdown(job, years, performance, 50);
+          const gross = payFor(job, years, performance, 50);
+          expect(parts.steady + parts.commission, `${job.id} gross`).toBe(gross);
+          expect(parts.takeHome, `${job.id} take-home`).toBe(takeHome(gross));
+          expect(gross - parts.tax, `${job.id} identity`).toBe(parts.takeHome);
         }
       }
     }
@@ -304,7 +293,7 @@ describe('Ticket 0301 — the breakdown is the same year, itemised', () => {
     expect(commissioned.length, 'no commissioned jobs to test').toBeGreaterThan(0);
 
     const shareOf = (job: (typeof ALL_JOBS)[number]) => {
-      const parts = payBreakdown(job, 5, 75, 60, 0);
+      const parts = payBreakdown(job, 5, 75, 60);
       return parts.commission / Math.max(1, parts.steady + parts.commission);
     };
     const salariedShare = salaried.map(shareOf).reduce((a, b) => a + b, 0) / salaried.length;
@@ -314,15 +303,14 @@ describe('Ticket 0301 — the breakdown is the same year, itemised', () => {
     expect(commissionShare).toBeGreaterThan(salariedShare * 2);
   });
 
-  it('never reports a negative tax or a negative living cost', () => {
-    // Both are posted to the ledger as outgoings. A negative one would be
+  it('never reports a negative tax', () => {
+    // Tax is posted to the ledger as an outgoing. A negative one would be
     // income wearing the wrong category, which is the kind of thing that only
     // shows up on a dashboard two tickets later.
     for (const job of ALL_JOBS) {
       for (const performance of [0, 50, 100]) {
-        const parts = payBreakdown(job, 0, performance, 0, 4);
+        const parts = payBreakdown(job, 0, performance, 0);
         expect(parts.tax, `${job.id} tax`).toBeGreaterThanOrEqual(0);
-        expect(parts.living, `${job.id} living`).toBeGreaterThanOrEqual(0);
         expect(parts.steady, `${job.id} steady`).toBeGreaterThanOrEqual(0);
         expect(parts.commission, `${job.id} commission`).toBeGreaterThanOrEqual(0);
       }

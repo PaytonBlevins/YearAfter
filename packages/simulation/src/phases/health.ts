@@ -33,6 +33,9 @@ import {
   type YearEvent,
 } from '@yearafter/health';
 import type { RandomStream } from '../rng/rng';
+import { dollars } from '@yearafter/core';
+import type { NewTransaction } from '@yearafter/finance';
+import { treatmentCostFor } from '../doctor';
 
 /**
  * How much health comes back on its own in an ordinary year.
@@ -73,6 +76,20 @@ export interface HealthPhaseOutput {
   readonly lines: readonly { readonly kind: TimelineKind; readonly text: string }[];
   /** Ticket 0212. Structured history, for the death screen. */
   readonly records: readonly NewLifeRecord[];
+  /**
+   * Ticket 0303. What treatment cost this year.
+   *
+   * 0211 shipped treatment free and said why: there was no cost model to price
+   * it against. 0303 built one, so this is where the bill goes — charged for
+   * every year treatment is running, on the conditions the player is ACTUALLY
+   * being treated for, because a chronic illness is an ongoing commitment
+   * rather than a fee at a counter. Stopping is a button they already have.
+   *
+   * Charged against the conditions held at the START of the year. Something
+   * diagnosed in December is paid for by `treatCondition` when the player
+   * presses, not retroactively by the year it turned up in.
+   */
+  readonly transactions: readonly NewTransaction[];
 }
 
 export function runHealth(input: HealthPhaseInput): HealthPhaseOutput {
@@ -117,6 +134,7 @@ export function runHealth(input: HealthPhaseInput): HealthPhaseOutput {
     alive: result.alive,
     ...(died && died.kind === 'died' ? { cause: died.cause } : {}),
     lines: capped(result.events.flatMap((event) => lineFor(event, input.age))),
+    transactions: treatmentBill(input.conditions),
     /*
       Only GRAVE diagnoses, and deliberately not the year's colds.
 
@@ -268,3 +286,35 @@ const HURT_LINES: readonly string[] = [
   'A bad fall. You knew right away it was serious.',
   'Something gave out that was never supposed to give out.',
 ];
+
+/* -------------------------------------------------------------------------- */
+/* What being treated costs — Ticket 0303                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One row, not one per condition.
+ *
+ * A character being treated for three things would otherwise produce three
+ * ledger rows a year for thirty years, and spec 21 keeps this ledger for
+ * correctness and QA rather than for volume. The source names the count, which
+ * is what a reader of the books actually needs (CORE_RULES 13.6).
+ */
+function treatmentBill(conditions: readonly HeldCondition[]): readonly NewTransaction[] {
+  let total = 0;
+  let count = 0;
+  for (const held of conditions) {
+    if (!held.treated) continue;
+    const kind = findCondition(held.conditionId);
+    if (!kind) continue;
+    total += treatmentCostFor(kind);
+    count += 1;
+  }
+  if (total <= 0) return [];
+  return [
+    {
+      category: 'spending',
+      amount: dollars(-total),
+      source: count > 1 ? `Treatment for ${count} conditions` : 'Treatment',
+    },
+  ];
+}
