@@ -62,7 +62,14 @@ export type TransactionCategory =
   | 'vehicle'
   /** A parent handing money over (0209), or anybody else. */
   | 'gift'
-  /** NO PRODUCER YET — 0307 Loan Engine. */
+  /**
+   * Money borrowed, paid back, or charged for borrowing.
+   *
+   * Ticket 0306 gave this a producer at last: a card advance is a positive
+   * `debt` row, and a card payment, its interest and its annual fee are
+   * negative ones. 0307's loans use the same category — what a player wants
+   * from a dashboard is what they owe, not which instrument it came from.
+   */
   | 'debt'
   /** NO PRODUCER YET — v0.05 property and 0308 investments. */
   | 'assetIncome'
@@ -112,7 +119,7 @@ export type TransactionCategory =
 export const UNWRITTEN_CATEGORIES: readonly TransactionCategory[] = [
   'housing',
   'vehicle',
-  'debt',
+  // `debt` came off this list in Ticket 0306. Two down, three to go.
   'assetIncome',
   'investment',
 ];

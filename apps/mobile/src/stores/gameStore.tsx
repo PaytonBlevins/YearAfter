@@ -49,8 +49,12 @@ import {
   leaveCollege,
   seeDoctor,
   treatCondition,
+  applyForNewCard,
+  payCard,
+  closeCard,
   stopTreatment,
-  continueAsChild,} from '@yearafter/simulation';
+  continueAsChild,
+} from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
@@ -111,6 +115,10 @@ interface GameContextValue {
   readonly visitDoctor: () => void;
   /** Ticket 0211. Put a doctor on a condition, or take them off it. */
   readonly treatFor: (conditionId: string) => void;
+  /** Ticket 0306. Apply for a card, pay one down, or close it. */
+  readonly applyForCard: (productId: string) => void;
+  readonly payCardOff: (productId: string, amount: number) => void;
+  readonly closeCardOff: (productId: string) => void;
   readonly stopTreatingFor: (conditionId: string) => void;
   /** Put the hours in at something. Three sessions an activity a year. */
   readonly practiseAt: (activityId: string) => void;
@@ -509,6 +517,76 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  /*
+    Ticket 0306. All three card verbs land here in the same shape as every other
+    action since 0210b: the player pressed something and gets an answer where
+    they pressed (CORE_RULES 13.27). A refusal is an OUTCOME with a reason, not
+    a `saveError` — "Declined, your credit is not there yet" is the game
+    answering, and a red toast about an error code is the game failing.
+  */
+  const applyForCardWith = useCallback(
+    (productId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = applyForNewCard(current, productId);
+        if (!result.ok) {
+          setSaveError(`Cannot apply for that card (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'bad',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const payCardWith = useCallback(
+    (productId: string, amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = payCard(current, productId, amount);
+        if (!result.ok) {
+          setSaveError(`Cannot pay that card (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'neutral',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const closeCardWith = useCallback(
+    (productId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = closeCard(current, productId);
+        if (!result.ok) {
+          setSaveError(`Cannot close that card (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'neutral',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const stopTreatingFor = useCallback(
     (conditionId: string) => {
       setState((current) => {
@@ -801,6 +879,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       leaveStudies,
       visitDoctor,
       treatFor,
+      applyForCard: applyForCardWith,
+      payCardOff: payCardWith,
+      closeCardOff: closeCardWith,
       stopTreatingFor,
       practiseAt,
       takeAGig,
@@ -842,6 +923,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       leaveStudies,
       visitDoctor,
       treatFor,
+      applyForCardWith,
+      payCardWith,
+      closeCardWith,
       stopTreatingFor,
       practiseAt,
       takeAGig,

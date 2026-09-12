@@ -36,7 +36,8 @@
 
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { NOT_YET_OWNED, creditReport, summariseFinances } from '@yearafter/finance';
+import { NOT_YET_OWNED, summariseFinances, totalOwed } from '@yearafter/finance';
+import { standingFor } from '@yearafter/simulation';
 import { Card, ListRow, RowDivider, SectionHeading } from '../components';
 import { useNavigation } from '../navigation/navigation';
 import { useGame } from '../stores/gameStore';
@@ -50,7 +51,8 @@ export function FinancesScreen() {
   if (!state) return null;
 
   const books = summariseFinances(state.finance, state.world.year);
-  const credit = creditReport(state.finance, state.world.year, state.player.age);
+  const credit = standingFor(state);
+  const owed = totalOwed(state.cards);
 
   /*
     A year in which nothing moved is most of a childhood, and the honest answer
@@ -120,6 +122,21 @@ export function FinancesScreen() {
           subtitle="What a lender would see"
           value={credit.label}
           onPress={() => push({ screen: 'credit', title: 'Credit' })}
+        />
+        <RowDivider />
+        {/*
+          Ticket 0306. Spec 19 lists credit/cards on this dashboard, and cards
+          belong beside the standing that decides which ones you can have.
+        */}
+        <ListRow
+          title="Cards"
+          subtitle={
+            state.cards.length > 0
+              ? `${money(Number(owed))} owed`
+              : 'None — see what you qualify for'
+          }
+          value={state.cards.length > 0 ? `${state.cards.length} of 5` : 'Apply'}
+          onPress={() => push({ screen: 'cards', title: 'Cards' })}
         />
       </Card>
 

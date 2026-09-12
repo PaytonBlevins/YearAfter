@@ -1252,3 +1252,36 @@ shows both sides in 48% of years.
 - **A thin record is one fact, not four.** Somebody who has barely earned
   anything does not also need telling they do not earn much and have nothing put
   by. Saying it three ways is piling on.
+
+### 13.48 A stat you can raise by tapping is a stat the player will tap for
+
+Ticket 0306, found by measuring a deliberately greedy player.
+
+Credit standing gained a utilisation term the moment cards existed, weighted at
+22% of quality and scoring full marks at zero utilisation. That reads fine: an
+unused card is a well-managed card. Then a population that applied for every
+card on offer, every year, was measured against one that never applied at all:
+
+|  | Excellent | Good | Fair |
+|---|---|---|---|
+| never applies | 31% | 43% | 21% |
+| takes every card | **44%** | 46% | **5%** |
+
+Holding cards you never use made you creditworthy. No money changed hands, no
+decision was made, and a fifth of a credit standing was available for pressing a
+button eight times. That is spec 1381's circular credit exploit in its purest
+form and CORE_RULES 13.28 besides — a tap is not a decision, and a free stat for
+tapping is worse than either.
+
+The fix is to make the term a PENALTY ONLY: running a card near its limit costs
+you, and not running one is worth nothing. A character with no cards and one
+with five empty ones now score identically — 30/43/21 either way — and the value
+of a credit line is the line, not a number it buys you.
+
+- **Ask what a zero input scores.** If "absent" and "perfect" are the same value,
+  the term rewards acquiring the thing rather than using it well. This is 13.46
+  from the other side: that rule was about a term rewarding the absence of
+  activity; this one is about a term rewarding the presence of an unused asset.
+- **Measure a greedy player, not an average one.** The average player would
+  never have shown this. The test that finds an exploit is the one that tries
+  to commit it.

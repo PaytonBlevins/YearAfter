@@ -165,13 +165,15 @@ describe('the contract 0306 and 0307 get', () => {
 
   it('names the inputs that do not exist yet, so they are not silent zeroes', () => {
     /*
-      Spec 25 lists six inputs. Utilisation needs a card to be using and debt
-      load needs a debt, so two of the six cannot exist before 0306 and 0307 —
-      and a model that folded them in as zero would be quietly asserting that
-      every character has perfect utilisation and no debts. Same device as
+      Spec 25 lists six inputs. Debt load needs a debt, so it cannot exist
+      before 0307, and a model that folded it in as zero would be quietly
+      asserting that every character owes nothing. Same device as
       `UNWRITTEN_CATEGORIES` and `NOT_YET_OWNED`; this test is the note to the
-      tickets that retire them.
+      ticket that retires it.
+
+      `utilization` was here too until 0306 gave the game cards to utilise —
+      which is the list doing exactly what it is for.
     */
-    expect(CREDIT_INPUTS_NOT_YET_BUILT.map((row) => row.key)).toEqual(['utilization', 'debtLoad']);
+    expect(CREDIT_INPUTS_NOT_YET_BUILT.map((row) => row.key)).toEqual(['debtLoad']);
   });
 });

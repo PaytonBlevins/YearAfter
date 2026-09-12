@@ -63,7 +63,7 @@ import { flows, transactionsIn } from './ledger';
  * list, so 0306 and 0307 each have to come here and delete a line.
  */
 export const CREDIT_INPUTS_NOT_YET_BUILT = [
-  { key: 'utilization', arrives: '0306' },
+  // `utilization` was here until Ticket 0306 gave the game cards to utilise.
   { key: 'debtLoad', arrives: '0307' },
 ] as const;
 
@@ -96,6 +96,11 @@ export const SAVINGS_STRONG = 150_000;
 /** Committed outgoings as a share of income: comfortable, and stretched. */
 export const OBLIGATIONS_EASY = 0.7;
 export const OBLIGATIONS_TIGHT = 1.05;
+/** Utilisation below this costs nothing; at the upper bound it costs the most. */
+export const USAGE_FREE_UNDER = 0.3;
+export const USAGE_FULL_AT = 0.9;
+/** The most a maxed-out set of cards can take off a standing. */
+export const USAGE_COST = 0.35;
 
 const span = (value: number, low: number, high: number): number =>
   high === low ? 0 : Math.max(0, Math.min(1, (value - low) / (high - low)));
@@ -145,7 +150,22 @@ export const CREDIT_FROM_AGE = 18;
  * character's income is mostly their job, but whether they covered the year is
  * the consequence of choices they made.
  */
-export function creditReport(ledger: Ledger, year: number, age: number): CreditReport {
+export function creditReport(
+  ledger: Ledger,
+  year: number,
+  age: number,
+  /**
+   * Ticket 0306. What share of their card limits is in use, or undefined for
+   * somebody with no cards.
+   *
+   * UNDEFINED RATHER THAN ZERO, and the distinction is the whole point. Zero
+   * utilisation is the best possible value, so passing zero for a character
+   * with no cards would quietly award everybody in the game a flawless credit
+   * behaviour they have not demonstrated — which is 13.46 exactly, the defect
+   * this file already had once with payment behaviour.
+   */
+  utilisation?: number,
+): CreditReport {
   if (age < CREDIT_FROM_AGE) {
     return {
       standing: 'none',
@@ -234,7 +254,33 @@ export function creditReport(ledger: Ledger, year: number, age: number): CreditR
     };
   }
 
-  const quality = record * 0.4 + incomeTerm * 0.24 + roomTerm * 0.22 + assetsTerm * 0.14;
+  const base = record * 0.4 + incomeTerm * 0.24 + roomTerm * 0.22 + assetsTerm * 0.14;
+
+  /*
+    Utilisation, and it is a PENALTY ONLY. Spec 25 names it first among the six.
+
+    The first version made it a term worth 22% of quality, scoring 1.0 at zero
+    utilisation — so an unused card was worth a fifth of a standing, and
+    measuring a player who applied for every card on offer every year showed
+    exactly what that buys: Excellent went from 31% of adult years to 44%, and
+    Fair collapsed from 21% to 5%. Holding cards you never use made you
+    creditworthy. That is the circular exploit spec 1381 asks to be prevented
+    internally, and it is CORE_RULES 13.28 as well — a tap is not a decision,
+    and a free stat for tapping is worse than either.
+
+    So running a card near its limit costs you, and not running one is worth
+    nothing at all. A character with no cards and a character with five empty
+    ones score the same, which is right: the value of a credit line is the line,
+    not a number it buys you.
+  */
+  const usagePenalty =
+    utilisation === undefined
+      ? 0
+      : Math.min(
+          1,
+          Math.max(0, (utilisation - USAGE_FREE_UNDER) / (USAGE_FULL_AT - USAGE_FREE_UNDER)),
+        );
+  const quality = base * (1 - USAGE_COST * usagePenalty);
 
   const standing: CreditStanding =
     quality >= 0.8 ? 'excellent' : quality >= 0.58 ? 'good' : quality >= 0.36 ? 'fair' : 'poor';
@@ -295,6 +341,17 @@ export function creditReport(ledger: Ledger, year: number, age: number): CreditR
       reasons.push({
         text: 'Your costs take nearly everything',
         weight: 0.22 * (1 - roomTerm),
+        good: false,
+      });
+    }
+
+    // No positive counterpart, deliberately: not being near your limit is the
+    // ordinary state of affairs, and a screen congratulating somebody for it
+    // would be the same flattery the penalty-only model exists to avoid.
+    if (usagePenalty > 0.25) {
+      reasons.push({
+        text: 'Your cards are close to their limits',
+        weight: 0.35 * usagePenalty,
         good: false,
       });
     }

@@ -32,7 +32,7 @@ import {
   type TimelineEntry,
   type TimelineKind,
 } from '@yearafter/character';
-import { asEventId, clampStat } from '@yearafter/core';
+import { asEventId, clampStat, dollars } from '@yearafter/core';
 import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
 import { occupationFor, runEducation } from './phases/education';
@@ -44,7 +44,15 @@ import { livingParents } from '@yearafter/relationships';
 import { childrenAtHome } from '@yearafter/parenting';
 import { runFamily } from './phases/family';
 import { postYear } from './money';
-import { reconcile, reconcileByYear, yearsOutside } from '@yearafter/finance';
+import {
+  drawFrom,
+  findProduct,
+  reconcile,
+  reconcileByYear,
+  runCardYear,
+  yearsOutside,
+  type NewTransaction,
+} from '@yearafter/finance';
 import { runKin } from './phases/kin';
 import { runLiving } from './phases/living';
 import { runSocial } from './phases/social';
@@ -81,6 +89,20 @@ export interface AdvanceResult {
   what could not be paid, and is the only function in the build that can change
   a balance.
 */
+
+/**
+ * What the ledger row for a card advance says.
+ *
+ * CORE_RULES 13.6 — every movement names its source — and "Put on the Everyday
+ * Cash card" is a sentence a player recognises where "debt" is not. Two or more
+ * cards say so by count rather than by list, because a row naming four products
+ * is a paragraph in a column.
+ */
+function cardSource(onto: readonly string[]): string {
+  const names = [...new Set(onto)].map((id) => findProduct(id)?.name ?? 'a card');
+  if (names.length === 1) return `Put on the ${names[0]} card`;
+  return `Put on ${names.length} cards`;
+}
 
 const currentJobTitle = (state: GameState): string | undefined =>
   state.employment.job ? findJob(state.employment.job.jobId)?.title : undefined;
@@ -407,10 +429,69 @@ export function advanceYear(state: GameState): AdvanceResult {
     against the living cost, which is the honest place for it and the thing
     0307's loan engine will lend against.
   */
+  /*
+    Ticket 0306 — the cards, and WHERE the draw happens is the whole design.
+
+    The obvious place is after posting: let the year fall short, see the
+    `shortfall` rows, then advance the money. That produces a ledger that says a
+    character both failed to pay for something and paid for it, in the same
+    year, and leaves 0302's reconciliation reading two contradictory stories.
+
+    So the draw happens FIRST, against the shortfall the year is ABOUT to have.
+    Every phase has already reported what it moves, so the arithmetic is
+    available before a single row is posted: what is owed, less what is held and
+    what is coming in, is what the cards are asked for. The advance is then just
+    another positive row, posted with the rest, and the ledger reads the way the
+    year actually went — money in, card advance in, costs out.
+
+    The card year runs after, on the balance the draw produced, so this year's
+    spending is charged interest next year rather than the same afternoon.
+  */
+  const owing = reported
+    .concat(living.transactions)
+    .filter((entry) => entry.amount < 0)
+    .reduce((sum, entry) => sum - Number(entry.amount), 0);
+  const coming =
+    Number(state.finance.balance) +
+    reported
+      .filter((entry) => entry.amount > 0)
+      .reduce((sum, entry) => sum + Number(entry.amount), 0);
+  const wanted = Math.max(0, Math.round((owing - coming) / 100));
+  const draw =
+    wanted > 0 ? drawFrom(state.cards, wanted) : { cards: state.cards, drawn: 0, onto: [] };
+
+  const advance: readonly NewTransaction[] =
+    draw.drawn > 0
+      ? [
+          {
+            category: 'debt' as const,
+            amount: dollars(draw.drawn),
+            source: cardSource(draw.onto),
+          },
+        ]
+      : [];
+
+  /*
+    And then the year of holding them: the annual fee, a year's interest
+    capitalised onto the balance, and the minimum payment taken out of whatever
+    is left after everything else. Last in the queue on purpose — a card company
+    is not paid before the rent (spec 32 makes the consequence of missing it a
+    frozen card, not a court), and paying the minimum out of money the household
+    needed would be the game choosing the lender over the character.
+  */
+  const leftForCards = Math.max(0, Math.round((coming + draw.drawn * 100 - owing) / 100));
+  const cardYear = runCardYear(draw.cards, leftForCards);
+
   const money = postYear(state.finance, nextYear, nextAge, [
     ...reported.filter((entry) => entry.amount > 0),
+    ...advance,
     ...reported.filter((entry) => entry.amount < 0),
     ...living.transactions,
+    ...cardYear.charges.map((charge) => ({
+      category: 'debt' as const,
+      amount: charge.amount,
+      source: charge.source,
+    })),
   ]);
 
   // ---- the year's line budget --------------------------------------------
@@ -573,6 +654,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       // `advanceYear` already refuses to run while one is open, so leaving it
       // would lock the app on a dead character forever.
       finance: money.finance,
+      // Ticket 0306. Balances, interest and any freeze, carried forward.
+      cards: cardYear.cards,
       // Ticket 0303. The standard of living and whether they pay for a roof —
       // both carried forward, because a standard with no memory is a share of
       // income by another name.

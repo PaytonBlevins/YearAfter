@@ -582,6 +582,22 @@ const migrations: Readonly<Record<number, Migration>> = {
       },
     };
   },
+
+  /**
+   * v19 -> v20: Ticket 0306 gives a character credit cards.
+   *
+   * An existing save gets NONE, and this is the shortest migration in the file
+   * for the best reason: there is nothing to reconstruct. A card is a thing you
+   * applied for, and nobody in any existing save ever applied for one. Issuing
+   * them a card retroactively would be inventing an application, a limit and a
+   * lender's decision the game never made — which is the same choice migration
+   * 2 made about families and migration 4 about school records.
+   *
+   * They can apply on their next turn like anybody else, and their credit
+   * standing already knows how to say "no cards" rather than "perfect
+   * utilisation" (0305, and 13.46).
+   */
+  19: (save) => ({ ...save, version: 20, cards: save['cards'] ?? [] }),
 };
 
 /**

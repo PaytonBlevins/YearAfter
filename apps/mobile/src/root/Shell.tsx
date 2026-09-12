@@ -15,6 +15,7 @@ import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
 import { FinancesScreen } from '../screens/FinancesScreen';
 import { CreditScreen } from '../screens/CreditScreen';
+import { CardsScreen } from '../screens/CardsScreen';
 import { DoctorScreen } from '../screens/DoctorScreen';
 import { DetailCard } from '../components/DetailCard';
 import { EndOfLifeCard } from '../components/EndOfLifeCard';
@@ -59,6 +60,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   doctor: DoctorScreen,
   finances: FinancesScreen,
   credit: CreditScreen,
+  cards: CardsScreen,
   relocate: RelocateScreen,
   family: FamilyScreen,
   friends: PeopleScreen,

@@ -24,7 +24,7 @@
 
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
-import { creditReport } from '@yearafter/finance';
+import { standingFor } from '@yearafter/simulation';
 import { Card, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
 import { colors, spacing, typography } from '../theme/theme';
@@ -33,7 +33,7 @@ export function CreditScreen() {
   const { state } = useGame();
   if (!state) return null;
 
-  const report = creditReport(state.finance, state.world.year, state.player.age);
+  const report = standingFor(state);
 
   return (
     <ScrollView contentContainerStyle={styles.content}>

@@ -173,12 +173,8 @@ describe('the categories nothing writes yet', () => {
       categories, so the type should carry them, but nobody should be able to
       believe the game already tracks a mortgage.
     */
-    expect(UNWRITTEN_CATEGORIES).toEqual([
-      'housing',
-      'vehicle',
-      'debt',
-      'assetIncome',
-      'investment',
-    ]);
+    // `debt` came off this list in 0306: a card advance is a positive `debt`
+    // row, and its payments, interest and annual fee are negative ones.
+    expect(UNWRITTEN_CATEGORIES).toEqual(['housing', 'vehicle', 'assetIncome', 'investment']);
   });
 });

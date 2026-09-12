@@ -27,6 +27,8 @@ export type ScreenKey =
   | 'finances'
   /** Ticket 0305. Where you stand with a lender, and why. */
   | 'credit'
+  /** Ticket 0306. The cards you hold, and the ones you could get. */
+  | 'cards'
   | 'investments'
   | 'homes'
   | 'vehicles'
