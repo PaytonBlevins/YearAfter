@@ -45,7 +45,8 @@ export const NOT_YET_OWNED = [
   { key: 'assets', label: 'Assets', arrives: 'v0.05' },
   { key: 'liabilities', label: 'Liabilities', arrives: '0307' },
   { key: 'investments', label: 'Investments', arrives: '0308' },
-  { key: 'credit', label: 'Credit', arrives: '0305' },
+  // `credit` was here until Ticket 0305 built it. The list is meant to shrink,
+  // and this is what shrinking looks like.
 ] as const;
 
 export interface FinanceSummary {

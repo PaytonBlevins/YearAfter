@@ -14,6 +14,7 @@ import { eulogyFor, heirsIn } from '@yearafter/simulation';
 import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
 import { FinancesScreen } from '../screens/FinancesScreen';
+import { CreditScreen } from '../screens/CreditScreen';
 import { DoctorScreen } from '../screens/DoctorScreen';
 import { DetailCard } from '../components/DetailCard';
 import { EndOfLifeCard } from '../components/EndOfLifeCard';
@@ -57,6 +58,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   mindBody: MindBodyScreen,
   doctor: DoctorScreen,
   finances: FinancesScreen,
+  credit: CreditScreen,
   relocate: RelocateScreen,
   family: FamilyScreen,
   friends: PeopleScreen,

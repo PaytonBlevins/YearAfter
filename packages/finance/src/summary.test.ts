@@ -106,12 +106,8 @@ describe('what is not built yet', () => {
       the note to 0305, 0307, 0308 and v0.05 — the ticket that builds one has to
       come here and delete a line.
     */
-    expect(NOT_YET_OWNED.map((row) => row.key)).toEqual([
-      'assets',
-      'liabilities',
-      'investments',
-      'credit',
-    ]);
+    // `credit` came off this list in 0305, which is the list doing its job.
+    expect(NOT_YET_OWNED.map((row) => row.key)).toEqual(['assets', 'liabilities', 'investments']);
     for (const row of NOT_YET_OWNED) {
       expect(row.arrives, `${row.key} does not say when it arrives`).toMatch(/^(\d{4}|v\d\.\d\d)$/);
     }

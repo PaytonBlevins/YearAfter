@@ -36,8 +36,9 @@
 
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { NOT_YET_OWNED, summariseFinances } from '@yearafter/finance';
+import { NOT_YET_OWNED, creditReport, summariseFinances } from '@yearafter/finance';
 import { Card, ListRow, RowDivider, SectionHeading } from '../components';
+import { useNavigation } from '../navigation/navigation';
 import { useGame } from '../stores/gameStore';
 import { colors, spacing } from '../theme/theme';
 
@@ -45,9 +46,11 @@ const money = (amount: number): string => `$${Math.round(amount / 100).toLocaleS
 
 export function FinancesScreen() {
   const { state } = useGame();
+  const { push } = useNavigation();
   if (!state) return null;
 
   const books = summariseFinances(state.finance, state.world.year);
+  const credit = creditReport(state.finance, state.world.year, state.player.age);
 
   /*
     A year in which nothing moved is most of a childhood, and the honest answer
@@ -92,6 +95,31 @@ export function FinancesScreen() {
           }
           value={money(Number(books.netWorth))}
           affordance="none"
+        />
+        <RowDivider />
+        {/*
+          Ticket 0305. Spec 19 puts credit on this dashboard, and until 0305
+          this was a "Not built yet" row with the other three.
+
+          A WORD, NOT A NUMBER — spec 1867 rules out a generic risk score and
+          spec 1685 a credit-bureau simulation. It opens a screen because a band
+          on its own is the opaque score the spec dislikes; the reasons are what
+          a player can act on, and they do not fit in a subtitle.
+
+          IN THIS CARD RATHER THAN A SECTION OF ITS OWN, which reading the built
+          screen decided. It first had a "Credit" heading and a row titled
+          "Where you stand" — directly under a section heading reading WHERE YOU
+          STAND — and carried the full summary sentence as its subtitle, which
+          clipped to "Nobody lends to somebody your a…". That is the clipped
+          subtitle for the fourth time in this build and the second time in two
+          tickets, both mine. Balance, net worth and credit are three answers to
+          one question, so they are three rows of one card.
+        */}
+        <ListRow
+          title="Credit"
+          subtitle="What a lender would see"
+          value={credit.label}
+          onPress={() => push({ screen: 'credit', title: 'Credit' })}
         />
       </Card>
 

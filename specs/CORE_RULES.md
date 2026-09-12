@@ -1192,3 +1192,63 @@ children grew up, which is most of the reason a late career could not save.
   at forty from $101,000 to $171,000 and the constant had to be set again. A
   number tuned against a defect is a number that comes back for a second visit
   when the defect goes.
+
+### 13.46 A term that rewards the absence of activity is not a measurement
+
+Ticket 0305, caught by measuring the population rather than by any assertion.
+
+Credit standing weights "keeping up" most heavily, which is right: whether
+somebody covered what they owed is the thing credit is actually about. Then the
+distribution came back and a character who **never takes a job** was landing on
+**Fair** — holding nothing, earning nothing, owing nothing.
+
+They had never come up short. They had never come up short because 0303's living
+phase contracts a household rather than letting a bill go unpaid, so there was
+nothing to fail at. The heaviest term in the model was handing out full marks
+for having no financial life at all.
+
+The fix is one line and it is the real-world rule too: the record counts only to
+the extent there was something to keep up with. A lender calls that a thin file,
+and a thin file is not a good file. Measured after: a life that never works is
+95% "none" and 5% "poor", and nothing else.
+
+- **Ask what a perfect score means.** If somebody can top a term by doing
+  nothing, the term is measuring absence and calling it virtue.
+- **The population finds this; a unit test cannot.** Every assertion about the
+  term was true. It was the shape of the distribution that was wrong, and only
+  playing a hundred lives showed it.
+
+### 13.47 Four reasons is a wall; two is an explanation
+
+Ticket 0305, from reading the built screen.
+
+The credit screen lists what is helping and what is hurting, which is the whole
+point of a standing with no number behind it — a band the player cannot act on
+is the opaque score the spec rules out. The first version pushed every reason
+that crossed a threshold, and a real played life read:
+
+```
+Poor
+- You have no record to go on
+- You do not earn much
+- Your costs take nearly everything
+- You have nothing put by
+```
+
+Four negatives, no positives, for the crime of being nineteen. Every line was
+true and the screen was still wrong: a player cannot tell which of the four to
+do something about, so they do nothing about any of them. Spec 1381 asks for
+credit that is "useful, not universally punitive", and that is a presentation
+requirement as much as a model one.
+
+Capped at two a side, ordered by how much each term actually moved the standing.
+Nothing is hidden, because the two shown are the two that mattered. Across 4,638
+adult years the screen now averages 1.7 reasons in favour and 0.65 against, and
+shows both sides in 48% of years.
+
+- **Thresholds for REASONS drift when the model's bars move.** Two of those four
+  lines fired for nearly everybody, because they were tuned against the old bars
+  and never revisited — 13.26 arriving through the back door.
+- **A thin record is one fact, not four.** Somebody who has barely earned
+  anything does not also need telling they do not earn much and have nothing put
+  by. Saying it three ways is piling on.

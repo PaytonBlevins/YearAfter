@@ -25,6 +25,8 @@ export type ScreenKey =
   | 'doctor'
   | 'relocate'
   | 'finances'
+  /** Ticket 0305. Where you stand with a lender, and why. */
+  | 'credit'
   | 'investments'
   | 'homes'
   | 'vehicles'
