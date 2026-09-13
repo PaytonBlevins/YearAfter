@@ -48,6 +48,7 @@ import {
   drawFrom,
   drawableOn,
   findProduct,
+  holdingValue,
   reconcile,
   reconcileByYear,
   runCardYear,
@@ -265,6 +266,9 @@ export function advanceYear(state: GameState): AdvanceResult {
       nothing, which `drawableOn` already knows.
     */
     credit: state.cards.reduce((sum, card) => sum + Math.floor(Number(drawableOn(card)) / 100), 0),
+    // Ticket 0308b. What they hold in the market — see `portfolio` on the
+    // input. Being illiquid is not the same as being destitute.
+    portfolio: Math.floor(Number(holdingValue(state.portfolio)) / 100),
     earned: employment.earned,
     ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
       ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }
@@ -478,8 +482,15 @@ export function advanceYear(state: GameState): AdvanceResult {
     market,
     state.portfolio.map(() => marketRoll.next()),
   );
+  /*
+    Ticket 0308b. A matured bond's principal is an `investment` row, not
+    `assetIncome` — it is the money coming back across the same line it went
+    out on (spec 44-46), and calling it income would tell the dashboard a
+    character earned $80,000 the year their bond came due. A coupon IS income
+    and stays where it was.
+  */
   const payouts: readonly NewTransaction[] = marketYear.income.map((row) => ({
-    category: 'assetIncome' as const,
+    category: row.source.endsWith('— matured') ? ('investment' as const) : ('assetIncome' as const),
     amount: row.amount,
     source: row.source,
   }));

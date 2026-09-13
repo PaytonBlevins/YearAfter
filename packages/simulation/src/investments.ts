@@ -141,13 +141,21 @@ export function divest(
       finance: moved.finance,
       portfolio: sale.holdings,
     },
-    title: 'Sold',
+    title: sale.penalty > 0 ? 'Sold early' : 'Sold',
+    /*
+      THE PENALTY GETS ITS OWN SENTENCE when there is one. A player who sells a
+      bond four years early and reads only "$8,800 back in the bank" has been
+      charged $1,200 by a screen that did not mention it — which is the shape of
+      every quiet-cost defect this build has fixed.
+    */
     body:
-      sale.realized === 0
-        ? `${money(sale.raised)} back in the bank, for what you put in.`
-        : sale.realized > 0
-          ? `${money(sale.raised)} back in the bank — ${money(sale.realized)} more than you put in.`
-          : `${money(sale.raised)} back in the bank, ${money(-sale.realized)} less than you put in.`,
+      sale.penalty > 0
+        ? `${money(sale.raised)} back in the bank. Leaving early cost you ${money(sale.penalty)}.`
+        : sale.realized === 0
+          ? `${money(sale.raised)} back in the bank, for what you put in.`
+          : sale.realized > 0
+            ? `${money(sale.raised)} back in the bank — ${money(sale.realized)} more than you put in.`
+            : `${money(sale.raised)} back in the bank, ${money(-sale.realized)} less than you put in.`,
     good: sale.realized >= 0,
   });
 }

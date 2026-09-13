@@ -16,6 +16,7 @@ import {
   INVESTMENTS_NOT_YET_BUILT,
   INVESTMENT_PRODUCTS,
   MARKET_STATES,
+  EARLY_EXIT,
   MAX_HOLDINGS,
   PLEDGEABLE_FROM,
   PLEDGE_SHARE,
@@ -272,5 +273,93 @@ describe('what a private bank will lend against — Ticket 0308', () => {
     const mixed = [hold('inv.indexfund', 100_000), hold('inv.crypto', 100_000)];
     expect(pledgeableAgainst(mixed)).toBeCloseTo(100_000 * PLEDGE_SHARE, -2);
     expect(pledgeableAgainst([hold('inv.crypto', 200_000)])).toBe(0);
+  });
+});
+
+describe('a bond has a date, which is the first time in this build that time is real', () => {
+  it('gives a bond a clock and leaves everything else without one', () => {
+    const bond = buyInto([], 'inv.govbonds', 10_000);
+    expect(bond[0]?.maturesIn).toBe(findInvestment('inv.govbonds')!.termYears);
+    const fund = buyInto([], 'inv.indexfund', 10_000);
+    expect(fund[0]?.maturesIn).toBeUndefined();
+  });
+
+  it('counts the clock down and pays the principal back on the date', () => {
+    let holdings: readonly Holding[] = buyInto([], 'inv.corpbonds', 10_000);
+    const term = findInvestment('inv.corpbonds')!.termYears;
+    let paidBack = 0;
+    for (let year = 0; year < term; year += 1) {
+      const run = runMarketYear(holdings, 'normal', [0.5]);
+      holdings = run.holdings;
+      const back = run.income.find((row) => row.source.endsWith('matured'));
+      if (back) paidBack = Number(back.amount) / 100;
+    }
+    // Gone from the portfolio, and the money is back.
+    expect(holdings).toHaveLength(0);
+    expect(paidBack).toBeGreaterThan(0);
+  });
+
+  it('pays back what it is WORTH, not what was put in', () => {
+    /*
+      A bond redeemed for its original principal after eight years would quietly
+      delete every coupon and every point of market movement it earned on the
+      way. The date is when you get the money, not a reset.
+    */
+    let holdings: readonly Holding[] = buyInto([], 'inv.govbonds', 10_000);
+    const term = findInvestment('inv.govbonds')!.termYears;
+    let paidBack = 0;
+    for (let year = 0; year < term; year += 1) {
+      const run = runMarketYear(holdings, 'growth', [0.8]);
+      holdings = run.holdings;
+      const back = run.income.find((row) => row.source.endsWith('matured'));
+      if (back) paidBack = Number(back.amount) / 100;
+    }
+    expect(paidBack).toBeGreaterThan(10_000);
+  });
+
+  it('charges for leaving before the date, and nothing for leaving a fund', () => {
+    const bond = buyInto([], 'inv.govbonds', 10_000);
+    const early = sellFrom(bond, 'inv.govbonds', 10_000);
+    expect(early.penalty).toBeCloseTo(10_000 * EARLY_EXIT, 0);
+    expect(early.raised).toBeCloseTo(10_000 * (1 - EARLY_EXIT), 0);
+
+    const fund = buyInto([], 'inv.indexfund', 10_000);
+    const free = sellFrom(fund, 'inv.indexfund', 10_000);
+    expect(free.penalty).toBe(0);
+    expect(free.raised).toBe(10_000);
+  });
+
+  it('charges the penalty once, not twice', () => {
+    // The position loses the full amount sold; the player just receives less
+    // for it. Taking the penalty out of the holding as well would be billing
+    // them for the same discount at both ends.
+    const bond = buyInto([], 'inv.corpbonds', 10_000);
+    const half = sellFrom(bond, 'inv.corpbonds', 5_000);
+    expect(Number(holdingValue(half.holdings)) / 100).toBeCloseTo(5_000, 0);
+    expect(half.raised).toBeCloseTo(5_000 * (1 - EARLY_EXIT), 0);
+  });
+
+  it('resets the clock when a bond is topped up', () => {
+    /*
+      Adding to a bond you hold is buying a new one. Keeping the earlier date
+      would let a player run a permanent eight-year bond that matures next year
+      — a free lunch dressed up as an accounting convenience.
+    */
+    let holdings: readonly Holding[] = buyInto([], 'inv.govbonds', 10_000);
+    holdings = runMarketYear(holdings, 'normal', [0.5]).holdings;
+    const term = findInvestment('inv.govbonds')!.termYears;
+    expect(holdings[0]?.maturesIn).toBe(term - 1);
+    holdings = buyInto(holdings, 'inv.govbonds', 5_000);
+    expect(holdings[0]?.maturesIn).toBe(term);
+  });
+
+  it('never matures anything that has no date', () => {
+    let holdings: readonly Holding[] = buyInto([], 'inv.crypto', 10_000);
+    for (let year = 0; year < 40; year += 1) {
+      const run = runMarketYear(holdings, 'normal', [0.5]);
+      holdings = run.holdings;
+      expect(run.matured).toEqual([]);
+    }
+    expect(holdings).toHaveLength(1);
   });
 });

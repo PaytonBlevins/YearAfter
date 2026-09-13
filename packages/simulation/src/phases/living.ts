@@ -69,6 +69,25 @@ export interface LivingPhaseInput {
    * rather than one already reduced to fit.
    */
   readonly credit: number;
+  /**
+   * Ticket 0308b. The portfolio, whole dollars.
+   *
+   * ILLIQUID IS NOT DESTITUTE, and telling them apart is the whole of
+   * CORE_RULES 13.53's fix. The hardship cliff below caps a household's charge
+   * at what it can pay, which is right for somebody who has nothing and was a
+   * $430,000 subsidy for somebody with two million in an index fund and an
+   * empty current account. Counting the portfolio means the second one is
+   * charged in full, cannot cover it in cash, and meets the card draw and the
+   * shortfall row like anybody else — and the way out is to SELL, which is the
+   * liquidity decision this system was supposed to have all along.
+   *
+   * The genuinely broke character has a zero here and 0303's cliff is
+   * untouched for them. That matters: the cliff exists because the first
+   * version of this phase left a jobless character carrying unpayable bills
+   * for 5,789 of 5,789 adult years, and widening it back to everybody would
+   * rebuild exactly that.
+   */
+  readonly portfolio: number;
   /** What the job paid before tax this year, whole dollars. Zero if none. */
   readonly earned: number;
   /** The job's title, for the year's money line. Absent if not working. */
@@ -208,9 +227,23 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     year they are charged least. The lag that makes unemployment hurt is in
     `CREEP_DOWN`, not in the ordering.
   */
+  /*
+    Ticket 0308b: THE STANDARD TRACKS WHAT YOU ARE WORTH, NOT YOUR CURRENT
+    ACCOUNT.
+
+    Same bug as the affordability test below, in a second place, and it is what
+    was left of CORE_RULES 13.53 after that one was fixed: the gap between an
+    all-in investor's lifetime living cost and a saver's fell from $430,000 to
+    $189,000 and stopped there, because `standardTargetFor` was still reading
+    cash alone. A character with two million in an index fund was drifting
+    toward the standard of somebody with nothing — living cheaply not because
+    they were poor but because their money was in the wrong account.
+
+    A millionaire lives like a millionaire wherever they keep it.
+  */
   let standard = creep(
     input.household.standard,
-    standardTargetFor(input.afterTaxIncome, input.wealth),
+    standardTargetFor(input.afterTaxIncome, input.wealth + input.portfolio),
   );
 
   const asIfAlone = livingCostFor({
@@ -267,7 +300,10 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     this model where something happens fast. `CREEP_DOWN` is slow because a
     comfortable life is sticky; this is not that. This is the lease ending.
   */
-  const affordable = Math.max(0, input.afterTaxIncome + input.wealth + input.credit);
+  const affordable = Math.max(
+    0,
+    input.afterTaxIncome + input.wealth + input.credit + input.portfolio,
+  );
   const inHardship = cost.total > affordable;
   let movedHome = false;
   let unmet = 0;

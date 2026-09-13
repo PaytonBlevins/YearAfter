@@ -1416,6 +1416,16 @@ for (const row of NOT_YET_OWNED) expect(stillAhead(row.arrives)).toBe(true);
 > The half of this rule that survives is the DEADLINE half: waiting is still
 > free, education still has no clock, and no instrument that buys time is worth
 > its interest. The liquidity half was wrong.
+>
+> **What the floor is actually made of, found in 0308b:** `cashAtLeast` gates
+> events, and 34 of the gated ones RELIEVE stress — the arcade, going out,
+> small treats. A character with an empty account is locked out of all of them,
+> stress accumulates unrelieved, and stress costs happiness. Median happiness
+> runs 78 for a character who keeps a buffer against 20 for one who does not.
+> Nobody designed that as a floor and it is a good one: being broke does not
+> bill you, it shuts you out of the things that make a life bearable. 0308b
+> also gave bonds a maturity date, which is the first instrument in this build
+> where money is genuinely away until a date.
 
 *Ticket 0308, and the other half of 13.50.*
 
@@ -1502,3 +1512,38 @@ disconfirmed.
   got counted was two downstream signals the branch suppresses.
 - **A large sample makes a broken metric more convincing, not less.** 800 lives
   made the wrong answer feel settled. Sample size tests noise, never validity.
+
+### 13.54 Ask which account a rule reads, not just which number
+
+*Ticket 0308b.* 13.53's subsidy — invest everything, live $430,000 cheaper —
+turned out to be one mistake made twice, in two functions, three lines apart.
+Both read `wealth`, and `wealth` was the cash balance:
+
+```ts
+standardTargetFor(input.afterTaxIncome, input.wealth)   // what life you drift toward
+const affordable = input.afterTaxIncome + input.wealth  // what you can pay for it
+```
+
+Fixing only the second took the gap from $430,000 to $189,251 and stopped,
+because the first was still quietly deciding that a character with two million
+in an index fund should drift toward the standard of living of somebody with
+nothing. Fixing both took it to **-$183,925** — the all-in player now spends
+*more*, which is correct, because a millionaire lives like a millionaire
+wherever they keep it.
+
+| | lifetime living | net worth (med) | happiness |
+|---|---|---|---|
+| never invests | $2,546,159 | $201,238 | 78 |
+| keeps a buffer | $2,604,554 | $705,403 | 78 |
+| invests every dollar | $2,730,084 | $1,418,485 | 23 |
+| all into bonds | $2,556,281 | $597,716 | 20 |
+
+- **A variable named for a quantity hides which account it came from.**
+  `wealth` sounds like everything somebody is worth and held only their current
+  account. The name is why it survived two milestones and two readings.
+- **When a fix moves a number partway, the rest is usually the same bug
+  elsewhere.** $430,000 → $189,251 was not "mostly fixed", it was a second
+  call site. Partial movement is a signal, not a result.
+- **Grep the field, not the concept.** Every reader of `wealth` had to be
+  looked at. Reasoning about "does the game know how rich they are" would have
+  found the one already in mind and missed the other.

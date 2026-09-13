@@ -214,6 +214,11 @@ export interface InvestmentProduct {
   readonly yield: number;
   /** The least anybody will take. A broker does not open an account for $20. */
   readonly minimum: number;
+  /**
+   * Ticket 0308b. Years until the principal comes back, for bonds. Zero means
+   * the holding has no term and can be sold at value whenever.
+   */
+  readonly termYears: number;
   /** One line, in the player's terms, about what they are actually buying. */
   readonly blurb: string;
   /**
@@ -237,6 +242,7 @@ export interface InvestmentProduct {
 export const INVESTMENT_PRODUCTS: readonly InvestmentProduct[] = [
   {
     id: 'inv.govbonds',
+    termYears: 8,
     name: 'Government Bonds',
     assetClass: 'bonds',
     drift: 0.005,
@@ -249,6 +255,7 @@ export const INVESTMENT_PRODUCTS: readonly InvestmentProduct[] = [
   },
   {
     id: 'inv.corpbonds',
+    termYears: 5,
     name: 'Corporate Bonds',
     assetClass: 'bonds',
     drift: 0.009,
@@ -261,6 +268,7 @@ export const INVESTMENT_PRODUCTS: readonly InvestmentProduct[] = [
   },
   {
     id: 'inv.indexfund',
+    termYears: 0,
     name: 'Index Fund',
     assetClass: 'funds',
     drift: 0.058,
@@ -273,6 +281,7 @@ export const INVESTMENT_PRODUCTS: readonly InvestmentProduct[] = [
   },
   {
     id: 'inv.managedfund',
+    termYears: 0,
     name: 'Managed Fund',
     assetClass: 'funds',
     drift: 0.049,
@@ -285,6 +294,7 @@ export const INVESTMENT_PRODUCTS: readonly InvestmentProduct[] = [
   },
   {
     id: 'inv.bluechip',
+    termYears: 0,
     name: 'Blue Chip Shares',
     assetClass: 'stocks',
     drift: 0.053,
@@ -297,6 +307,7 @@ export const INVESTMENT_PRODUCTS: readonly InvestmentProduct[] = [
   },
   {
     id: 'inv.growth',
+    termYears: 0,
     name: 'Growth Shares',
     assetClass: 'stocks',
     drift: 0.067,
@@ -309,6 +320,7 @@ export const INVESTMENT_PRODUCTS: readonly InvestmentProduct[] = [
   },
   {
     id: 'inv.crypto',
+    termYears: 0,
     name: 'Crypto',
     assetClass: 'crypto',
     drift: 0.072,
@@ -345,6 +357,19 @@ export interface Holding {
    */
   readonly contributed: Money;
   readonly value: Money;
+  /**
+   * Ticket 0308b. Years until a bond returns its principal, for products that
+   * have a term. Undefined for everything else.
+   *
+   * THE FIRST THING IN THIS BUILD WHERE TIME IS REAL. CORE_RULES 13.50 found
+   * that waiting is free here — a character blocked out of college at eighteen
+   * saves up and enrols at twenty-one at no cost, which is why no loan can ever
+   * be worth its interest. A bond is the other side of that: money handed over
+   * now against a date, and the date is the point. Selling before it arrives
+   * costs you (`EARLY_EXIT`), because a buyer in the secondary market does not
+   * pay face value for somebody else's hurry.
+   */
+  readonly maturesIn?: number;
 }
 
 export const holdingValue = (holdings: readonly Holding[]): Money =>
@@ -364,6 +389,16 @@ export const portfolioGain = (holdings: readonly Holding[]): number =>
  * their INCOME would not have earned them — which is what finally makes the
  * underwriting gate of CORE_RULES 13.49 a real check rather than a label.
  */
+/**
+ * What it costs to get out of a bond before its date, as a share of value.
+ *
+ * Not a fee the game invents to punish you — it is the discount a secondary
+ * buyer demands, and it is why "how long until I need this" is a question worth
+ * asking before buying a ten-year bond. Deliberately big enough to notice and
+ * small enough to take when a year has genuinely gone wrong.
+ */
+export const EARLY_EXIT = 0.12;
+
 export const PLEDGEABLE_FROM = 75_000;
 
 /** How much of a portfolio a private bank will actually lend against. */
@@ -396,6 +431,11 @@ export interface MarketYear {
   readonly income: readonly MarketIncome[];
   /** What the whole portfolio did, as a fraction. For the screen's one line. */
   readonly moved: number;
+  /**
+   * Ticket 0308b. Bonds that reached their date this year and paid back. The
+   * cash is in `income`; this is the list for the feed to name.
+   */
+  readonly matured: readonly string[];
 }
 
 /**
@@ -414,6 +454,7 @@ export function runMarketYear(
   const before = Number(holdingValue(holdings));
   const income: MarketIncome[] = [];
   const after: Holding[] = [];
+  const matured: string[] = [];
 
   holdings.forEach((holding, index) => {
     const product = findInvestment(holding.productId);
@@ -463,6 +504,29 @@ export function runMarketYear(
         income.push({ amount: dollars(paid), source: `${product.name} — paid out` });
       }
     }
+
+    /*
+      THE DATE ARRIVES. A bond a year closer, and if the clock has run out the
+      principal comes back as cash and the holding is gone.
+
+      Paid at VALUE rather than at what was put in, because the value is what
+      the coupon and the market have already made of it — a bond redeemed for
+      its original principal after eight years would quietly delete every
+      return it earned.
+    */
+    if (holding.maturesIn !== undefined) {
+      const left = holding.maturesIn - 1;
+      if (left <= 0) {
+        income.push({
+          amount: dollars(Math.round(grown)),
+          source: `${product.name} — matured`,
+        });
+        matured.push(holding.productId);
+        return;
+      }
+      after.push({ ...holding, value: dollars(Math.round(grown)), maturesIn: left });
+      return;
+    }
     after.push({ ...holding, value: dollars(Math.round(grown)) });
   });
 
@@ -472,6 +536,7 @@ export function runMarketYear(
     state,
     income,
     moved: before > 0 ? (now - before) / before : 0,
+    matured,
   };
 }
 
@@ -508,16 +573,33 @@ export function buyInto(
   productId: string,
   amount: number,
 ): readonly Holding[] {
+  const term = findInvestment(productId)?.termYears ?? 0;
   const existing = holdings.find((holding) => holding.productId === productId);
   if (!existing) {
-    return [...holdings, { productId, contributed: dollars(amount), value: dollars(amount) }];
+    return [
+      ...holdings,
+      {
+        productId,
+        contributed: dollars(amount),
+        value: dollars(amount),
+        ...(term > 0 ? { maturesIn: term } : {}),
+      },
+    ];
   }
+  /*
+    TOPPING UP A BOND RESETS ITS CLOCK TO THE FULL TERM, and that is a real
+    cost rather than an oversight. Adding to a bond you already hold is buying
+    a new one; the alternative — keeping the earlier date — would let a player
+    hold a permanent eight-year bond that matures next year, which is a free
+    lunch dressed as an accounting convenience.
+  */
   return holdings.map((holding) =>
     holding.productId === productId
       ? {
           ...holding,
           contributed: cents(Number(holding.contributed) + amount * 100),
           value: cents(Number(holding.value) + amount * 100),
+          ...(term > 0 ? { maturesIn: term } : {}),
         }
       : holding,
   );
@@ -525,10 +607,12 @@ export function buyInto(
 
 export interface Sale {
   readonly holdings: readonly Holding[];
-  /** Cash raised, in whole dollars. */
+  /** Cash raised, in whole dollars, AFTER any early-exit discount. */
   readonly raised: number;
   /** The part of it that is gain rather than the money they put in. */
   readonly realized: number;
+  /** Ticket 0308b. What getting out early cost, in whole dollars. */
+  readonly penalty: number;
 }
 
 /**
@@ -541,11 +625,26 @@ export interface Sale {
  */
 export function sellFrom(holdings: readonly Holding[], productId: string, amount: number): Sale {
   const existing = holdings.find((holding) => holding.productId === productId);
-  if (!existing) return { holdings, raised: 0, realized: 0 };
+  if (!existing) return { holdings, raised: 0, realized: 0, penalty: 0 };
 
   const value = Number(existing.value);
   const wanted = Math.min(Math.max(0, Math.round(amount) * 100), value);
-  if (wanted <= 0) return { holdings, raised: 0, realized: 0 };
+  if (wanted <= 0) return { holdings, raised: 0, realized: 0, penalty: 0 };
+
+  /*
+    GETTING OUT OF A BOND BEFORE ITS DATE COSTS YOU.
+
+    Not a fee the game invents to be annoying — it is the discount a secondary
+    buyer demands for taking on somebody else's hurry. It is also the entire
+    reason a term is a decision rather than a label: without it, a ten-year bond
+    is an eight-year bond you can leave whenever, which is not a commitment.
+
+    The position still LOSES the full amount sold; the player just receives less
+    for it. Taking the penalty off the proceeds and out of the holding would be
+    charging them twice.
+  */
+  const early = existing.maturesIn !== undefined && existing.maturesIn > 0;
+  const penalty = early ? Math.round(wanted * EARLY_EXIT) : 0;
 
   const share = value > 0 ? wanted / value : 1;
   const contributed = Number(existing.contributed);
@@ -566,7 +665,12 @@ export function sellFrom(holdings: readonly Holding[], productId: string, amount
             : holding,
         );
 
-  return { holdings: remaining, raised: Math.round(wanted / 100), realized };
+  return {
+    holdings: remaining,
+    raised: Math.round((wanted - penalty) / 100),
+    realized: realized - Math.round(penalty / 100),
+    penalty: Math.round(penalty / 100),
+  };
 }
 
 /** A life starts owning nothing. */
