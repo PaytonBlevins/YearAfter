@@ -46,6 +46,7 @@ import { runFamily } from './phases/family';
 import { postYear } from './money';
 import {
   drawFrom,
+  drawableOn,
   findProduct,
   reconcile,
   reconcileByYear,
@@ -258,6 +259,12 @@ export function advanceYear(state: GameState): AdvanceResult {
     // case this whole phase exists to make cost something.
     afterTaxIncome: employment.takeHome,
     wealth: Math.floor(Number(state.player.cash) / 100),
+    /*
+      Ticket 0308b. What the cards would actually lend, which is part of what a
+      household can afford — see `credit` on the input. Frozen cards lend
+      nothing, which `drawableOn` already knows.
+    */
+    credit: state.cards.reduce((sum, card) => sum + Math.floor(Number(drawableOn(card)) / 100), 0),
     earned: employment.earned,
     ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
       ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }

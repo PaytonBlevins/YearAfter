@@ -1401,6 +1401,22 @@ for (const row of NOT_YET_OWNED) expect(stillAhead(row.arrives)).toBe(true);
 
 ### 13.52 Nothing in this build ever needs cash by a date, and that breaks both sides of finance
 
+> **CORRECTED IN 0308b, AND THE CORRECTION IS THE LESSON.** The measurement
+> below watched `shortfall` rows and card debt, found both at 0%, and concluded
+> that being broke is free. Both signals are zero BY CONSTRUCTION: 0303's
+> hardship branch caps the year's charge at whatever the household actually
+> has, so a shortfall can never be recorded and a card is never asked for. The
+> conclusion was drawn from two numbers that could not have been anything else.
+>
+> Being broke is not free. It costs about sixty points of happiness (median 78
+> against 17) through stress. What it also does is hand out a $430,000 discount
+> on a lifetime of living — see 13.53, which is the defect this rule was
+> looking at and mis-described.
+>
+> The half of this rule that survives is the DEADLINE half: waiting is still
+> free, education still has no clock, and no instrument that buys time is worth
+> its interest. The liquidity half was wrong.
+
 *Ticket 0308, and the other half of 13.50.*
 
 That rule found that a student loan makes its own target worse off, because
@@ -1442,3 +1458,47 @@ Both were designed around a pressure the build does not apply.
 - **This is one fix, not two.** Deadlines and a floor — something that must be
   paid by a date, and a consequence for having nothing — would make loans and
   liquidity both matter at once. It belongs upstream of either ticket.
+
+### 13.53 Running out of money is a discount, and a zero you did not derive is not a measurement
+
+*Ticket 0308b.* Two findings, and the second one is about how the first was
+missed for two milestones.
+
+**Hardship pays.** 0303 gives a household that cannot afford its life a cliff:
+the standard of living drops to subsistence at once, they move back to family if
+there is family, and the year's charge is capped at what they actually have.
+Every part of that is right on its own. Together they mean that running out of
+money makes life CHEAPER and nothing else. Measured over 80 paired seeds:
+
+| | lifetime living cost | standard (med) | net worth (med) | happiness (med) |
+|---|---|---|---|---|
+| never invests | $2,541,128 | $43,388 | $203,110 | 78 |
+| keeps a buffer | $2,383,415 | $40,092 | $1,049,193 | 78 |
+| invests every dollar | **$2,111,197** | $36,404 | **$2,330,577** | **17** |
+
+The player who empties their current account every year spends **$430,000 less
+on living across a lifetime** and ends up twelve times richer. Hardship is a
+subsidy for the behaviour it should be discouraging, and the loop closes: a
+cheaper life frees more cash, which gets invested, which keeps them in hardship.
+
+It is not unpunished — happiness collapses from 78 to 17 through stress, which
+is a real cost and the reason this is a trade-off rather than a pure exploit.
+But the trade should be *"a cheap miserable life against a comfortable one"*,
+not *"a cheap miserable life that also makes you rich"*.
+
+**And the measurement that missed it.** 13.52 concluded being broke was free
+from two numbers: `shortfall` years at 0% and card-debt years at 0%, across 800
+lives. Both are zero by construction. The hardship branch caps the charge at
+what the household has, so a shortfall can never be written; the card draw is
+computed from that already-capped figure, so a card is never asked for. Eight
+hundred lives of evidence for a proposition that no number of lives could have
+disconfirmed.
+
+- **A zero is only evidence if the code could have produced something else.**
+  Before believing one, find the line that would have written a non-zero and
+  check it is reachable. Both of these were unreachable.
+- **Instrument the branch, not its side effects.** `inHardship` was a local
+  variable for two milestones. The thing to count was the branch firing; what
+  got counted was two downstream signals the branch suppresses.
+- **A large sample makes a broken metric more convincing, not less.** 800 lives
+  made the wrong answer feel settled. Sample size tests noise, never validity.

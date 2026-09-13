@@ -56,6 +56,19 @@ export interface LivingPhaseInput {
   readonly afterTaxIncome: number;
   /** What they are holding, whole dollars. The wealth half of the creep. */
   readonly wealth: number;
+  /**
+   * Ticket 0308b. Credit the household could actually draw on, whole dollars.
+   *
+   * PART OF WHAT IS AFFORDABLE, and leaving it out was the bug behind
+   * CORE_RULES 13.53. Hardship was tested against income plus CASH alone, so a
+   * character with $200,000 of unused credit limit and an empty current account
+   * was declared unable to pay the rent — the standard collapsed to
+   * subsistence, the charge was capped at what they had, and they got a
+   * discount on their own life. Real people put the rent on a card. Doing that
+   * here also means the card draw in `advanceYear` finally sees the real number
+   * rather than one already reduced to fit.
+   */
+  readonly credit: number;
   /** What the job paid before tax this year, whole dollars. Zero if none. */
   readonly earned: number;
   /** The job's title, for the year's money line. Absent if not working. */
@@ -72,6 +85,18 @@ export interface LivingPhaseOutput {
   readonly transactions: readonly NewTransaction[];
   /** Whole dollars charged this year. Zero before 18. */
   readonly cost: number;
+  /**
+   * Ticket 0308b. The household could not pay for the life it was living.
+   *
+   * REPORTED, because for two milestones it was not. 0303 built the hardship
+   * cliff as a local variable: the standard collapsed to subsistence, the
+   * charge was capped at what there was, and nothing outside this function
+   * ever found out. That made running out of money a way to make life CHEAPER
+   * and nothing else — see CORE_RULES 13.53.
+   */
+  readonly hardship: boolean;
+  /** How much of the year's cost could not be met, in whole dollars. */
+  readonly unmet: number;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -171,7 +196,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
   const transactions: NewTransaction[] = [];
 
   if (input.age < CHARGED_FROM_AGE) {
-    return { household: input.household, lines, transactions, cost: 0 };
+    return { household: input.household, lines, transactions, cost: 0, hardship: false, unmet: 0 };
   }
 
   /*
@@ -213,6 +238,18 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     HARDSHIP. A household that cannot pay CONTRACTS — it does not run up sixty
     years of unpayable bills.
 
+    TICKET 0308b WIDENED WHAT "CANNOT PAY" MEANS. It used to be tested against
+    income plus cash, which made this branch fire for anybody who had moved
+    their money somewhere that was not a current account — and firing it was a
+    REWARD, because the charge is capped at what there is. Measured over 80
+    paired lives: a character who invested every spare dollar spent $2,111,197
+    on living across a lifetime against $2,541,128 for one who invested
+    nothing. Being broke saved them $430,000 (CORE_RULES 13.53).
+
+    Credit now counts. A household with an unused card is not destitute, it is
+    about to be in debt, and the card draw in `advanceYear` charges them for it
+    at up to 29%.
+
     This branch is here because the first version of this phase did exactly
     that. Measured across 110 lives: a player who never took a job was in
     shortfall in 5,789 of 5,789 adult years, and a player who worked at it was
@@ -230,9 +267,10 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     this model where something happens fast. `CREEP_DOWN` is slow because a
     comfortable life is sticky; this is not that. This is the lease ending.
   */
-  const affordable = Math.max(0, input.afterTaxIncome + input.wealth);
+  const affordable = Math.max(0, input.afterTaxIncome + input.wealth + input.credit);
   const inHardship = cost.total > affordable;
   let movedHome = false;
+  let unmet = 0;
   if (inHardship) {
     standard = SUBSISTENCE;
     /*
@@ -259,7 +297,10 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     // Still short after all of that: they get by on what there is. A charge for
     // money that does not exist is not a charge, it is a number the ledger
     // would have to carry forever with nothing behind it.
-    if (cost.total > affordable) cost = { ...cost, total: affordable };
+    if (cost.total > affordable) {
+      unmet = cost.total - affordable;
+      cost = { ...cost, total: affordable };
+    }
   }
 
   /*
@@ -333,6 +374,8 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     lines,
     transactions,
     cost: cost.total,
+    hardship: inHardship,
+    unmet,
   };
 }
 
