@@ -26,12 +26,16 @@
 
 import { dollars, err, ok, type Result } from '@yearafter/core';
 import {
+  holdingValue,
   applyForCard,
   creditReport,
   findProduct,
   limitFor,
+  debtLoad,
   offersFor,
   payTowards,
+  totalBorrowed,
+  totalOwed,
   utilisation,
   type Applicant,
   type CreditReport,
@@ -54,8 +58,37 @@ import type { GameState } from './game-state';
  * An invariant kept at three call sites is three promises (CORE_RULES 13.31).
  * This is the door.
  */
-export const standingFor = (state: GameState): CreditReport =>
-  creditReport(state.finance, state.world.year, state.player.age, utilisation(state.cards));
+export const standingFor = (state: GameState): CreditReport => {
+  const owed = Number(totalOwed(state.cards)) / 100 + Number(totalBorrowed(state.loans)) / 100;
+  const income = incomeOf(state);
+  return creditReport(
+    state.finance,
+    state.world.year,
+    state.player.age,
+    utilisation(state.cards),
+    // Ticket 0307. Everything owed, cards and loans together, against what it
+    // would take to carry it. Undefined for somebody who owes nothing.
+    owed > 0 ? debtLoad(owed, income) : undefined,
+    // Ticket 0308. The portfolio counts towards what they are worth, which is
+    // what finally lets a credit standing be earned on something other than a
+    // salary (CORE_RULES 13.49).
+    Number(holdingValue(state.portfolio)) / 100,
+  );
+};
+
+/**
+ * Last year's money in, in whole dollars.
+ *
+ * What a lender asks for and what the ledger can prove. One function because
+ * three callers wanted it and three derivations of an income is how two screens
+ * end up disagreeing about whether somebody qualifies (CORE_RULES 13.23).
+ */
+export function incomeOf(state: GameState): number {
+  const lastYear = state.finance.transactions.filter(
+    (entry) => entry.year === state.world.year && entry.amount > 0 && entry.category !== 'debt',
+  );
+  return Math.round(lastYear.reduce((sum, entry) => sum + Number(entry.amount), 0) / 100);
+}
 
 /**
  * What a lender sees when this character asks.
@@ -67,16 +100,9 @@ export const standingFor = (state: GameState): CreditReport =>
  */
 export function applicantFrom(state: GameState): Applicant {
   const report = standingFor(state);
-  // Spec 26 says availability varies by income among other things. Last year's
-  // actual take-home, because that is what a lender asks for and what the
-  // ledger can prove.
-  const lastYear = state.finance.transactions.filter(
-    (entry) => entry.year === state.world.year && entry.amount > 0,
-  );
-  const income = Math.round(lastYear.reduce((sum, entry) => sum + Number(entry.amount), 0) / 100);
   return {
     standing: report.standing,
-    income,
+    income: incomeOf(state),
     savings: Math.round(Number(state.player.cash) / 100),
     employed: state.employment.job !== undefined,
     cards: state.cards,

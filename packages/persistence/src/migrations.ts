@@ -607,6 +607,23 @@ const migrations: Readonly<Record<number, Migration>> = {
    * inventing a lender's decision the game never made.
    */
   20: (save) => ({ ...save, version: 21, loans: save['loans'] ?? [] }),
+
+  /**
+   * v21 -> v22: Ticket 0308 gives a character a portfolio and a market.
+   *
+   * An EMPTY portfolio, for the third time in three tickets and the same
+   * reason: buying something is a decision, and a migration that handed an
+   * existing character $20,000 of index fund would be inventing a choice they
+   * never made. The market, though, has to start SOMEWHERE, and every save
+   * starts it at `normal` — not at a random state, because a migration that
+   * rolled a die would make loading a save twice produce two different worlds.
+   */
+  21: (save) => ({
+    ...save,
+    version: 22,
+    portfolio: save['portfolio'] ?? [],
+    market: save['market'] ?? 'normal',
+  }),
 };
 
 /**

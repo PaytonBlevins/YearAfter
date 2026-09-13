@@ -53,6 +53,8 @@ import {
   payCard,
   closeCard,
   takeLoan,
+  invest,
+  divest,
   payLoan,
   stopTreatment,
   continueAsChild,
@@ -124,6 +126,9 @@ interface GameContextValue {
   /** Ticket 0307. Borrow, and pay extra off. */
   readonly borrow: (productId: string, amount: number) => void;
   readonly payLoanOff: (productId: string, amount: number) => void;
+  /** Ticket 0308. */
+  readonly buyInvestment: (productId: string, amount: number) => void;
+  readonly sellInvestment: (productId: string, amount: number) => void;
   readonly stopTreatingFor: (conditionId: string) => void;
   /** Put the hours in at something. Three sessions an activity a year. */
   readonly practiseAt: (activityId: string) => void;
@@ -613,6 +618,48 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const buyInvestmentWith = useCallback(
+    (productId: string, amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = invest(current, productId, amount);
+        if (!result.ok) {
+          setSaveError(`Cannot buy that (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'bad',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const sellInvestmentWith = useCallback(
+    (productId: string, amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = divest(current, productId, amount);
+        if (!result.ok) {
+          setSaveError(`Cannot sell that (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'bad',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const payLoanWith = useCallback(
     (productId: string, amount: number) => {
       setState((current) => {
@@ -931,6 +978,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       closeCardOff: closeCardWith,
       borrow: borrowWith,
       payLoanOff: payLoanWith,
+      buyInvestment: buyInvestmentWith,
+      sellInvestment: sellInvestmentWith,
       stopTreatingFor,
       practiseAt,
       takeAGig,
@@ -976,6 +1025,8 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       payCardWith,
       closeCardWith,
       borrowWith,
+      buyInvestmentWith,
+      sellInvestmentWith,
       payLoanWith,
       stopTreatingFor,
       practiseAt,

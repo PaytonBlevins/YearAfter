@@ -26,6 +26,7 @@ import {
   findLoanProduct,
   loanOffersFor,
   payTowardsLoan,
+  pledgeableAgainst,
   totalOwed,
   yearlyPaymentFor,
   type Borrower,
@@ -61,6 +62,8 @@ export function borrowerFrom(state: GameState): Borrower {
     // Spec 1381: underwriting considers obligations. Card balances are an
     // obligation, and counting them is what stops the borrow-to-pay-a-card loop.
     cardDebt: Math.round(Number(totalOwed(state.cards)) / 100),
+    // Ticket 0308. What a private bank would lend against the portfolio.
+    pledgeable: pledgeableAgainst(state.portfolio),
     // What a whole degree would still cost them, after whoever is helping.
     // Zero for anybody with nothing left to study, which is what stops a
     // student loan being cheap money for everybody.
@@ -177,6 +180,8 @@ function refusalFor(because: LoanRefusal | undefined, product: LoanProduct): str
       return "This one is for students, and you aren't one.";
     case 'tooMuchOwed':
       return 'You already owe as much as they think you can carry.';
+    case 'noCollateral':
+      return "This one is secured on a portfolio, and you haven't got one.";
     case 'fullyDrawn':
       return 'You have already borrowed what the degree costs.';
     default:

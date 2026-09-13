@@ -51,6 +51,8 @@ import {
   reconcileByYear,
   runCardYear,
   runLoanYear,
+  nextMarketState,
+  runMarketYear,
   yearsOutside,
   type NewTransaction,
 } from '@yearafter/finance';
@@ -448,6 +450,33 @@ export function advanceYear(state: GameState): AdvanceResult {
     The card year runs after, on the balance the draw produced, so this year's
     spending is charged interest next year rather than the same afternoon.
   */
+  /*
+    Ticket 0308 — the market moves BEFORE the year is paid for, because the
+    dividends it pays are cash the household can actually use.
+
+    Ordering it after would produce a character who took a credit-card advance
+    in March to cover rent and received a bond coupon in December that would
+    have covered it, which is the kind of thing a ledger records faithfully and
+    a player reads as the game being broken.
+
+    What the market does NOT do is cover the shortfall itself. Holdings are
+    never sold automatically — see `simulation/investments.ts`. A portfolio is
+    not an overdraft, and the moment it becomes one, deciding how much to put
+    in stops being a decision.
+  */
+  const marketRoll = state.rng.stream(RngDomains.Economy);
+  const market = nextMarketState(state.market, marketRoll.next());
+  const marketYear = runMarketYear(
+    state.portfolio,
+    market,
+    state.portfolio.map(() => marketRoll.next()),
+  );
+  const payouts: readonly NewTransaction[] = marketYear.income.map((row) => ({
+    category: 'assetIncome' as const,
+    amount: row.amount,
+    source: row.source,
+  }));
+
   const owing = reported
     .concat(living.transactions)
     .filter((entry) => entry.amount < 0)
@@ -455,6 +484,7 @@ export function advanceYear(state: GameState): AdvanceResult {
   const coming =
     Number(state.finance.balance) +
     reported
+      .concat(payouts)
       .filter((entry) => entry.amount > 0)
       .reduce((sum, entry) => sum + Number(entry.amount), 0);
   const wanted = Math.max(0, Math.round((owing - coming) / 100));
@@ -498,6 +528,7 @@ export function advanceYear(state: GameState): AdvanceResult {
 
   const money = postYear(state.finance, nextYear, nextAge, [
     ...reported.filter((entry) => entry.amount > 0),
+    ...payouts,
     ...advance,
     ...reported.filter((entry) => entry.amount < 0),
     ...living.transactions,
@@ -677,6 +708,10 @@ export function advanceYear(state: GameState): AdvanceResult {
       cards: cardYear.cards,
       // Ticket 0307. Loans amortise, fall into arrears, or clear and vanish.
       loans: loanYear.loans,
+      // Ticket 0308. What the holdings are worth after the year, and the market
+      // they will face next year.
+      portfolio: marketYear.holdings,
+      market,
       // Ticket 0303. The standard of living and whether they pay for a roof —
       // both carried forward, because a standard with no memory is a share of
       // income by another name.

@@ -1357,3 +1357,88 @@ free.
   correct. What the measurement exposed is that education has no time cost, and
   that belongs to education's ticket. Build the instrument, measure it honestly,
   and file the upstream gap rather than tuning the instrument to hide it.
+
+### 13.51 A test that pins a list catches a wrong deletion and never a missing one
+
+*Ticket 0308.* This build guards its unfinished edges with declared lists —
+`UNWRITTEN_CATEGORIES`, `NOT_YET_OWNED`, `LOAN_TYPES_NOT_YET_BUILT`,
+`CREDIT_INPUTS_NOT_YET_BUILT` — each naming the ticket that retires it, each
+with a test asserting its contents so that "the ticket which finally writes one
+has to come here and delete a line".
+
+The device has been described that way four times and it does not work. The
+test asserts what the list currently holds, so:
+
+| | |
+|---|---|
+| a line deleted when it should not have been | **red** |
+| a line left behind that should have gone | **green** |
+
+Ticket 0307 built cards and loans and left `{ key: 'liabilities', arrives:
+'0307' }` in `NOT_YET_OWNED`. For a whole ticket the dashboard told players
+liabilities had not been built while showing their card balance two rows below,
+and `netWorth` returned the bare cash balance with `onlyCash` hard-coded true —
+so a character with $40,000 of cash and $30,000 of card debt was shown a net
+worth of $40,000 and told underneath that they owned nothing and owed nothing.
+Every test passed the entire time.
+
+The fix is a second assertion running the other way. Each entry already names
+its arrival; a constant names the ticket that has shipped; nothing may still be
+waiting on a ticket that is already past:
+
+```ts
+for (const row of NOT_YET_OWNED) expect(stillAhead(row.arrives)).toBe(true);
+```
+
+- **Ask what a green test would look like if the work had been forgotten.** If
+  the answer is "the same", the test is documentation, not a guard.
+- **A promise with a date can be checked against the date.** Every not-built
+  list in this build already carried one and none of them compared it to
+  anything.
+- **The bug is invisible from inside the ticket that causes it.** 0307 had no
+  reason to open `summary.ts`. Only a rule that fires without being visited
+  would have caught it — which is what this now is.
+
+### 13.52 Nothing in this build ever needs cash by a date, and that breaks both sides of finance
+
+*Ticket 0308, and the other half of 13.50.*
+
+That rule found that a student loan makes its own target worse off, because
+waiting is free: blocked at eighteen, a character saves and enrols at
+twenty-one at no cost, so buying three years at 6.1% is pure loss. This ticket
+looked for the mirror — the liquidity trap that was supposed to make "how much
+to invest" a real question — and found it does not exist either.
+
+Measured across 800 lives, five strategies, two player types, two of which hold
+literally zero cash by construction:
+
+| | shortfall years | card-debt years | years at $0 cash |
+|---|---|---|---|
+| every strategy, careerist | **0%** | **0%** | 3% |
+| every strategy, drifter | **0%** | **0%** | 8% |
+
+Characters do run out of money. It costs them nothing, because a year's income
+is posted before that year's costs are paid. Being broke on the first of
+January is free.
+
+One missing thing, two broken halves of the same system:
+
+- **because waiting is free**, no instrument that buys TIME can be worth its
+  interest — every loan is dominated;
+- **because being broke is free**, no instrument that keeps money LIQUID can be
+  worth its lower return — the safe asset is dominated, and holding cash for
+  safety is a cost with no benefit.
+
+Both were designed around a pressure the build does not apply.
+
+- **A tension you wrote a comment about is not a tension you measured.** The
+  module header for this engine asserted the liquidity trap in confident prose
+  for several hours before the measurement contradicted it. The comment was
+  rewritten to say what was actually found, including what it used to claim —
+  a design note that quietly becomes false is worse than no note.
+- **Before building a cost, find the thing it bites.** Name the state the
+  player ends up in and check the build punishes it. If nothing does, the
+  instrument is decoration however carefully it is modelled.
+- **This is one fix, not two.** Deadlines and a floor — something that must be
+  paid by a date, and a consequence for having nothing — would make loans and
+  liquidity both matter at once. It belongs upstream of either ticket.

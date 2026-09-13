@@ -63,8 +63,15 @@ import { flows, transactionsIn } from './ledger';
  * list, so 0306 and 0307 each have to come here and delete a line.
  */
 export const CREDIT_INPUTS_NOT_YET_BUILT = [
-  // `utilization` was here until Ticket 0306 gave the game cards to utilise.
-  { key: 'debtLoad', arrives: '0307' },
+  /*
+    EMPTY, as of Ticket 0307. All six of spec 25's inputs now have producers:
+    utilisation arrived with 0306's cards and debt load with 0307's loans.
+
+    The list stays rather than being deleted, because it is the thing that made
+    each gap deliberate rather than forgotten, and because an empty list is a
+    statement: there is nothing left that this model pretends to know and does
+    not. The test on it goes on asserting that.
+  */
 ] as const;
 
 /** How many years back payment trouble is still visible. */
@@ -101,6 +108,10 @@ export const USAGE_FREE_UNDER = 0.3;
 export const USAGE_FULL_AT = 0.9;
 /** The most a maxed-out set of cards can take off a standing. */
 export const USAGE_COST = 0.35;
+/** Debt against carrying capacity: free below, fully counted at. */
+export const LOAD_FREE_UNDER = 0.35;
+export const LOAD_FULL_AT = 1;
+export const LOAD_COST = 0.3;
 
 const span = (value: number, low: number, high: number): number =>
   high === low ? 0 : Math.max(0, Math.min(1, (value - low) / (high - low)));
@@ -165,6 +176,17 @@ export function creditReport(
    * this file already had once with payment behaviour.
    */
   utilisation?: number,
+  /**
+   * Ticket 0307. Everything owed, against what it would take to carry it —
+   * spec 25's last unbuilt input. Undefined for somebody who owes nothing, for
+   * the same reason utilisation is: no debt is not a demonstrated virtue.
+   */
+  debtLoad?: number,
+  /**
+   * Ticket 0308. What the portfolio is worth, added to the cash balance for the
+   * assets term. Defaults to zero so every existing caller keeps its behaviour.
+   */
+  assets = 0,
 ): CreditReport {
   if (age < CREDIT_FROM_AGE) {
     return {
@@ -194,7 +216,19 @@ export function creditReport(
 
   const income = earned / 3 / 100;
   const obligations = spent / 3 / 100;
-  const savings = Math.max(0, Number(ledger.balance) / 100);
+  /*
+    Ticket 0308: SAVINGS MEANS CASH PLUS PORTFOLIO, not cash alone.
+
+    Before this it was the bare balance, which had a perverse consequence the
+    moment investments existed: a character who moved $200,000 from the bank
+    into an index fund lost every point of their assets term for doing the
+    prudent thing. Worse, it kept the credit standing a pure function of income
+    and cash flow — which is why 0307 measured the standing gate as never once
+    being the binding constraint on a loan (CORE_RULES 13.49). A portfolio is
+    the first thing in this build that can make somebody creditworthy on
+    something other than their salary.
+  */
+  const savings = Math.max(0, Number(ledger.balance) / 100) + Math.max(0, assets);
 
   /*
     Payment behaviour, and the shape of it is the spec's rule rather than mine.
@@ -280,7 +314,17 @@ export function creditReport(
           1,
           Math.max(0, (utilisation - USAGE_FREE_UNDER) / (USAGE_FULL_AT - USAGE_FREE_UNDER)),
         );
-  const quality = base * (1 - USAGE_COST * usagePenalty);
+  /*
+    Debt load, and a PENALTY ONLY for the same reason utilisation is (13.48):
+    owing nothing is the ordinary state of affairs, not an achievement, and a
+    term that paid for it would make never borrowing a way to farm a standing.
+  */
+  const loadPenalty =
+    debtLoad === undefined
+      ? 0
+      : Math.min(1, Math.max(0, (debtLoad - LOAD_FREE_UNDER) / (LOAD_FULL_AT - LOAD_FREE_UNDER)));
+
+  const quality = base * (1 - USAGE_COST * usagePenalty) * (1 - LOAD_COST * loadPenalty);
 
   const standing: CreditStanding =
     quality >= 0.8 ? 'excellent' : quality >= 0.58 ? 'good' : quality >= 0.36 ? 'fair' : 'poor';
@@ -352,6 +396,14 @@ export function creditReport(
       reasons.push({
         text: 'Your cards are close to their limits',
         weight: 0.35 * usagePenalty,
+        good: false,
+      });
+    }
+
+    if (loadPenalty > 0.25) {
+      reasons.push({
+        text: 'You owe a lot against what you earn',
+        weight: 0.3 * loadPenalty,
         good: false,
       });
     }

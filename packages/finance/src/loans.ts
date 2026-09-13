@@ -20,11 +20,12 @@
  *
  *   personal        BUILT — a student loan and a personal loan.
  *   lineOfCredit    BUILT — revolving, cheaper than a card, harder to get.
+ *   wealthPrivate   BUILT IN 0308 — a private line secured on the portfolio,
+ *                   and the first product here that anybody can reach without
+ *                   a large salary.
  *   secured         NOT YET. Needs something to secure it against, which is
  *                   v0.05's property and vehicles.
  *   business        NOT YET. Needs a business, which is v0.06.
- *   wealthPrivate   NOT YET. Borrowing against a portfolio needs 0308's
- *                   portfolio.
  *
  * Declared in `LOAN_TYPES_NOT_YET_BUILT` rather than shipped empty, the same
  * device as `UNWRITTEN_CATEGORIES`, `NOT_YET_OWNED` and
@@ -55,7 +56,8 @@ export type LoanType = 'personal' | 'secured' | 'business' | 'lineOfCredit' | 'w
 export const LOAN_TYPES_NOT_YET_BUILT = [
   { type: 'secured', needs: 'something to secure it against', arrives: 'v0.05' },
   { type: 'business', needs: 'a business', arrives: 'v0.06' },
-  { type: 'wealthPrivate', needs: 'a portfolio to borrow against', arrives: '0308' },
+  // `wealthPrivate` came off this list in Ticket 0308, which built the
+  // portfolio it had been waiting for. Two down, two to go.
 ] as const;
 
 export interface LoanProduct {
@@ -72,6 +74,11 @@ export interface LoanProduct {
   readonly maxPrincipal: number;
   /** Only while enrolled in education. */
   readonly needsStudying: boolean;
+  /**
+   * Ticket 0308. Bounded by the portfolio rather than by income, and refused
+   * outright to anybody with nothing to pledge.
+   */
+  readonly needsCollateral?: boolean;
   /**
    * Nothing is repaid while the character is studying.
    *
@@ -169,19 +176,39 @@ export const LOAN_PRODUCTS: readonly LoanProduct[] = [
     defersWhileStudying: false,
     blurb: 'Take what you need, pay what you use. Cheaper than any card.',
   },
+  /*
+    Ticket 0308 — SECURED ON THE PORTFOLIO, and that is what makes it the first
+    product in the game somebody can qualify for without a large salary.
+
+    It shipped in 0307 as a `lineOfCredit` wanting $140,000 a year, which made
+    it the top rung of an income ladder and nothing more. Spec 1857 calls this
+    type `wealthPrivate` and the distinction is real: a private bank lends
+    against what you HAVE. So the income test comes down to something a retired
+    or self-employed character can meet, and the ceiling is the collateral —
+    `pledgeableAgainst` in `investments.ts`, which is 40% of the non-crypto
+    portfolio and nothing at all below $75,000.
+
+    This is also the fix CORE_RULES 13.49 asked for. That rule recorded a credit
+    gate which had never once been the binding constraint, because everybody who
+    cleared the income bar had already earned the standing on the way past. A
+    borrower with $300,000 invested and a $45,000 salary now passes on assets
+    and is bounded by collateral, which is a different answer from the income
+    gate for the first time in the build.
+  */
   {
     id: 'loan.privateline',
     name: 'Private Line',
     lender: 'Ashcroft Private',
-    type: 'lineOfCredit',
+    type: 'wealthPrivate',
     apr: 0.089,
     termYears: 0,
-    needs: 'excellent',
-    needsIncome: 140_000,
-    maxPrincipal: 90_000,
+    needs: 'good',
+    needsIncome: 25_000,
+    maxPrincipal: 400_000,
     needsStudying: false,
     defersWhileStudying: false,
-    blurb: 'The cheapest money in the game, and the hardest to be offered.',
+    needsCollateral: true,
+    blurb: 'Borrows against what you hold instead of what you earn.',
   },
 ];
 
@@ -237,6 +264,12 @@ export interface Borrower {
   /** What is already owed on cards — spec 1381's "obligations". */
   readonly cardDebt: number;
   /**
+   * Ticket 0308. What a private bank would lend against the portfolio, in whole
+   * dollars — 40% of everything held that is not crypto, and zero below
+   * $75,000. See `pledgeableAgainst`.
+   */
+  readonly pledgeable: number;
+  /**
    * Tuition still ahead of them, in whole dollars, or zero for somebody with
    * no degree left to take.
    *
@@ -276,6 +309,8 @@ export type LoanRefusal =
     is not a reason).
   */
   | 'fullyDrawn'
+  /** Ticket 0308: nothing to secure it against. */
+  | 'noCollateral'
   | 'tooYoung';
 
 export interface LoanDecision {
@@ -322,6 +357,15 @@ export function borrowingRoom(product: LoanProduct, borrower: Borrower): number 
       .filter((loan) => findLoanProduct(loan.productId)?.needsStudying)
       .reduce((sum, loan) => sum + Number(loan.balance) / 100, 0);
     return Math.max(0, Math.min(product.maxPrincipal, borrower.tuitionAhead) - already);
+  }
+  /*
+    A SECURED LINE IS BOUNDED BY THE COLLATERAL, not by the income multiple.
+    That is the whole difference between this product and every other one here,
+    and it is why a character with a modest salary and a large portfolio can
+    reach it.
+  */
+  if (product.needsCollateral) {
+    return Math.max(0, Math.min(product.maxPrincipal, borrower.pledgeable - owed));
   }
   return Math.max(0, Math.min(product.maxPrincipal, borrower.income * DEBT_CEILING - owed));
 }
@@ -384,6 +428,9 @@ export function applyForLoan(product: LoanProduct, borrower: Borrower): LoanDeci
     with assets and a modest income will eventually fail income while passing
     standing. Until then it is a gate nobody has tested (CORE_RULES 13.49).
   */
+  if (product.needsCollateral && borrower.pledgeable <= 0) {
+    return { ...none, because: 'noCollateral' };
+  }
   if (!product.needsStudying && borrower.income < product.needsIncome) {
     return { ...none, because: 'income' };
   }

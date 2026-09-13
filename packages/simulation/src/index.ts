@@ -9,6 +9,7 @@ export * from './interact';
 export * from './gigs';
 export * from './cards';
 export * from './loans';
+export * from './investments';
 export * from './careers';
 export * from './college';
 export * from './guardians';

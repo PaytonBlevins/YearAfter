@@ -43,6 +43,8 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     household: state.household,
     cards: state.cards,
     loans: state.loans,
+    portfolio: state.portfolio,
+    market: state.market,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -63,6 +65,8 @@ export function fromSave(save: CurrentSaveGame): GameState {
     household: save.household,
     cards: save.cards,
     loans: save.loans,
+    portfolio: save.portfolio,
+    market: save.market,
     pending: save.pending,
   });
 }

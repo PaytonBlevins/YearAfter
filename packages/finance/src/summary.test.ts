@@ -10,7 +10,7 @@
 import { describe, expect, it } from 'vitest';
 import { dollars } from '@yearafter/core';
 import { EMPTY_LEDGER, postAll, type Ledger } from './ledger';
-import { NOT_YET_OWNED, childMonthlyCost, summariseFinances } from './summary';
+import { NOT_YET_OWNED, TICKET, childMonthlyCost, stillAhead, summariseFinances } from './summary';
 import { CHILD_SHARE, childShare } from './living';
 
 const workingYear = (): Ledger =>
@@ -106,11 +106,52 @@ describe('what is not built yet', () => {
       the note to 0305, 0307, 0308 and v0.05 — the ticket that builds one has to
       come here and delete a line.
     */
-    // `credit` came off this list in 0305, which is the list doing its job.
-    expect(NOT_YET_OWNED.map((row) => row.key)).toEqual(['assets', 'liabilities', 'investments']);
+    // `credit` came off in 0305. `liabilities` and `investments` came off in
+    // 0308, which is the list doing its job — late, in the case of liabilities.
+    expect(NOT_YET_OWNED.map((row) => row.key)).toEqual(['assets']);
     for (const row of NOT_YET_OWNED) {
       expect(row.arrives, `${row.key} does not say when it arrives`).toMatch(/^(\d{4}|v\d\.\d\d)$/);
     }
+  });
+
+  it('fails when an entry names a ticket that has already shipped', () => {
+    /*
+      THE ASSERTION ABOVE CANNOT CATCH THE BUG THAT ACTUALLY HAPPENED.
+
+      It pins the list's current contents, so it goes red when a line is deleted
+      wrongly and stays GREEN when a line that should have been deleted is left
+      behind. 0307 built cards and loans and left `liabilities — arrives 0307`
+      in this list for a whole ticket; the dashboard showed a character their
+      card balance and told them two rows above that liabilities had not been
+      built yet. Every test passed the entire time.
+
+      This one is the other direction: nothing may still be waiting on a ticket
+      that has already shipped (CORE_RULES 13.51).
+    */
+    for (const row of NOT_YET_OWNED) {
+      expect(
+        stillAhead(row.arrives),
+        `${row.key} claims to arrive in ${row.arrives}, which is not ahead of ${TICKET}`,
+      ).toBe(true);
+    }
+  });
+
+  it('knows which arrivals are ahead and which have been and gone', () => {
+    // The comparator itself, because the test above is only as good as this is.
+    expect(stillAhead('v0.05', '0308')).toBe(true);
+    expect(stillAhead('0310', '0308')).toBe(true);
+    expect(stillAhead('0307', '0308')).toBe(false);
+    expect(stillAhead('0308', '0308')).toBe(false);
+    /*
+      A MILESTONE IS ONLY OVERDUE ONCE IT IS OVER, and getting this backwards
+      was the first version of this test. `v0.03` is still ahead at ticket 0308
+      because 0309 and 0310 are inside it — a milestone-level promise is not
+      broken until the milestone is. It compares as the last ticket it could
+      contain, which is what makes v0.04 ahead of every 03xx ticket.
+    */
+    expect(stillAhead('v0.03', '0308')).toBe(true);
+    expect(stillAhead('v0.03', '0399')).toBe(false);
+    expect(stillAhead('v0.04', '0399')).toBe(true);
   });
 });
 

@@ -16,3 +16,4 @@ export * from './summary';
 export * from './credit';
 export * from './cards';
 export * from './loans';
+export * from './investments';

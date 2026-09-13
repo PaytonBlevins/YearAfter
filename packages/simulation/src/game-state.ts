@@ -20,11 +20,15 @@ import {
   EMPTY_CARDS,
   EMPTY_LEDGER,
   EMPTY_LOANS,
+  EMPTY_PORTFOLIO,
   NEW_HOUSEHOLD,
+  OPENING_MARKET,
   type HeldCard,
   type HeldLoan,
+  type Holding,
   type HouseholdFinances,
   type Ledger,
+  type MarketState,
 } from '@yearafter/finance';
 import { Rng } from './rng/rng';
 
@@ -148,6 +152,20 @@ export interface GameState {
    */
   readonly loans: readonly HeldLoan[];
   /**
+   * Ticket 0308: the portfolio, and the market it sits in.
+   *
+   * `market` is beside the holdings rather than inside `world` on purpose. Spec
+   * 706-724 wants a backend economy influencing employment, property, business
+   * AND investments, and that economy is unticketed — when it lands it owns a
+   * broader state than this and will move this field up to the world. Putting
+   * it in `world` NOW would be claiming a scope this ticket does not have and
+   * inviting the employment phase to start reading it (CORE_RULES 13.36: a
+   * field nothing writes is a promise, and a field the wrong thing writes is
+   * worse).
+   */
+  readonly portfolio: readonly Holding[];
+  readonly market: MarketState;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -170,6 +188,8 @@ export interface CreateGameStateOptions {
   readonly household?: HouseholdFinances;
   readonly cards?: readonly HeldCard[];
   readonly loans?: readonly HeldLoan[];
+  readonly portfolio?: readonly Holding[];
+  readonly market?: MarketState;
   readonly family?: Household;
   readonly nameCultureId?: string;
   readonly events?: EventHistory;
@@ -200,6 +220,8 @@ export const createGameState = (
   household: options.household ?? NEW_HOUSEHOLD,
   cards: options.cards ?? EMPTY_CARDS,
   loans: options.loans ?? EMPTY_LOANS,
+  portfolio: options.portfolio ?? EMPTY_PORTFOLIO,
+  market: options.market ?? OPENING_MARKET,
   pending: options.pending ?? [],
   rng,
 });

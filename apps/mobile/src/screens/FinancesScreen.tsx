@@ -36,8 +36,14 @@
 
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { NOT_YET_OWNED, summariseFinances, totalBorrowed, totalOwed } from '@yearafter/finance';
-import { standingFor } from '@yearafter/simulation';
+import {
+  NOT_YET_OWNED,
+  portfolioGain,
+  summariseFinances,
+  totalBorrowed,
+  totalOwed,
+} from '@yearafter/finance';
+import { estateOf, standingFor } from '@yearafter/simulation';
 import { Card, ListRow, RowDivider, SectionHeading } from '../components';
 import { useNavigation } from '../navigation/navigation';
 import { useGame } from '../stores/gameStore';
@@ -50,10 +56,18 @@ export function FinancesScreen() {
   const { push } = useNavigation();
   if (!state) return null;
 
-  const books = summariseFinances(state.finance, state.world.year);
+  /*
+    Ticket 0308. `estateOf` is the one place that says what a character owns and
+    owes, and passing it here is what finally makes the net-worth row true —
+    it returned the bare cash balance for two tickets after cards and loans
+    shipped (CORE_RULES 13.51).
+  */
+  const books = summariseFinances(state.finance, state.world.year, estateOf(state));
   const credit = standingFor(state);
   const owed = totalOwed(state.cards);
   const borrowed = totalBorrowed(state.loans);
+  const invested = Number(books.investments);
+  const gain = portfolioGain(state.portfolio);
 
   /*
     A year in which nothing moved is most of a childhood, and the honest answer
@@ -140,6 +154,25 @@ export function FinancesScreen() {
           onPress={() => push({ screen: 'cards', title: 'Cards' })}
         />
         <RowDivider />
+        {/*
+          Ticket 0308. Spec 19 lists the investment portfolio, and this is the
+          row that retires it from the not-built list.
+        */}
+        <RowDivider />
+        <ListRow
+          title="Investments"
+          subtitle={
+            invested > 0
+              ? gain === 0
+                ? 'What you hold, at what you paid'
+                : gain > 0
+                  ? `Up ${money(gain * 100)} on what you put in`
+                  : `Down ${money(-gain * 100)} on what you put in`
+              : 'Nothing in the market yet'
+          }
+          value={invested > 0 ? money(invested) : 'Start'}
+          onPress={() => push({ screen: 'investments', title: 'Investments' })}
+        />
         {/* Ticket 0307. Spec 19 lists liabilities; this is where they live. */}
         <ListRow
           title="Loans"

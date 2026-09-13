@@ -26,6 +26,8 @@ import {
   type Borrower,
   type HeldLoan,
 } from './loans';
+import { TICKET, stillAhead } from './summary';
+import { PLEDGEABLE_FROM, PLEDGE_SHARE } from './investments';
 
 const loan = (
   productId: string,
@@ -48,6 +50,7 @@ const borrower = (over: Partial<Borrower> = {}): Borrower => ({
   age: 30,
   loans: [],
   cardDebt: 0,
+  pledgeable: 0,
   tuitionAhead: 0,
   ...over,
 });
@@ -139,8 +142,16 @@ describe('reachability — who can actually borrow', () => {
       the one actually holding the door (CORE_RULES 13.49).
     */
     const broke = borrower({ standing: 'none', income: 0, employed: false });
-    for (const product of LOAN_PRODUCTS.filter((row) => !row.needsStudying)) {
+    for (const product of LOAN_PRODUCTS.filter(
+      (row) => !row.needsStudying && !row.needsCollateral,
+    )) {
       expect(applyForLoan(product, broke).because, product.id).toBe('income');
+    }
+    // A secured product blames the COLLATERAL, which is both true and the more
+    // specific answer: somebody with nothing to pledge could triple their
+    // salary and still not qualify. Ticket 0308.
+    for (const product of LOAN_PRODUCTS.filter((row) => row.needsCollateral)) {
+      expect(applyForLoan(product, broke).because, product.id).toBe('noCollateral');
     }
   });
 
@@ -152,7 +163,16 @@ describe('reachability — who can actually borrow', () => {
       sentence in place of another, so what the screen shows is the THRESHOLD,
       and this asserts there is more than one of them to show.
     */
-    const bars = LOAN_PRODUCTS.filter((row) => !row.needsStudying).map((row) => row.needsIncome);
+    /*
+      Collateral products are not on this ladder and 0308 proved it by breaking
+      the test: the private line asks for $25,000 of income and sits LAST,
+      because what gates it is a $75,000 portfolio rather than a salary. Sorting
+      it into the income sequence would put the hardest product in the middle of
+      the list and describe it by the one number that is not its bar.
+    */
+    const bars = LOAN_PRODUCTS.filter((row) => !row.needsStudying && !row.needsCollateral).map(
+      (row) => row.needsIncome,
+    );
     expect(new Set(bars).size).toBeGreaterThan(2);
     expect(bars.every((bar) => bar > 0)).toBe(true);
     // And in order, because the column is read top to bottom and a rung out of
@@ -266,21 +286,33 @@ describe('what is not built yet', () => {
       v0.06 and 0308. Same device as `UNWRITTEN_CATEGORIES` and `NOT_YET_OWNED`;
       this test is the note to the tickets that retire them.
     */
-    expect(LOAN_TYPES_NOT_YET_BUILT.map((row) => row.type)).toEqual([
-      'secured',
-      'business',
-      'wealthPrivate',
-    ]);
+    expect(LOAN_TYPES_NOT_YET_BUILT.map((row) => row.type)).toEqual(['secured', 'business']);
     for (const row of LOAN_TYPES_NOT_YET_BUILT) {
       expect(row.arrives, `${row.type} does not say when it arrives`).toMatch(
         /^(\d{4}|v\d\.\d\d)$/,
       );
+      // And nothing may still be waiting on a ticket that has shipped. The
+      // assertion above pins the list and therefore cannot catch a line that
+      // SHOULD have gone — which is exactly how 0307 left a stale entry in
+      // `NOT_YET_OWNED` for a whole ticket (CORE_RULES 13.51).
+      expect(
+        stillAhead(row.arrives),
+        `${row.type} claims to arrive in ${row.arrives}, which is not ahead of ${TICKET}`,
+      ).toBe(true);
     }
   });
 
   it('ships products only for the two types that can', () => {
     const built = new Set(LOAN_PRODUCTS.map((product) => product.type));
-    expect([...built].sort()).toEqual(['lineOfCredit', 'personal']);
+    expect([...built].sort()).toEqual(['lineOfCredit', 'personal', 'wealthPrivate']);
+    // Nothing is shipped for a type still on the not-built list, which is the
+    // other half of the same promise.
+    const waiting: readonly string[] = LOAN_TYPES_NOT_YET_BUILT.map((row) => row.type);
+    for (const product of LOAN_PRODUCTS) {
+      expect(waiting.includes(product.type), `${product.id} is a type that is not built`).toBe(
+        false,
+      );
+    }
   });
 });
 
@@ -300,5 +332,62 @@ describe('debt load, which spec 25 has been waiting for since 0305', () => {
 
   it('is fully loaded for somebody who owes with no income at all', () => {
     expect(debtLoad(5_000, 0)).toBe(1);
+  });
+});
+
+describe('the private line, which is secured on a portfolio — Ticket 0308', () => {
+  it('refuses somebody with a big salary and nothing invested', () => {
+    /*
+      The point of the product. It shipped in 0307 as the top rung of an income
+      ladder wanting $140,000 a year, which made it a reward for earning rather
+      than a different KIND of lending. Spec 1857 calls the type `wealthPrivate`
+      and a private bank lends against what you hold.
+    */
+    const earner = borrower({ income: 400_000, standing: 'excellent', pledgeable: 0 });
+    const decision = applyForLoan(findLoanProduct('loan.privateline')!, earner);
+    expect(decision.approved).toBe(false);
+    expect(decision.because).toBe('noCollateral');
+  });
+
+  it('lends to somebody with a modest salary and a real portfolio', () => {
+    /*
+      CORE_RULES 13.49 ASKED FOR EXACTLY THIS CASE. That rule recorded a credit
+      gate that had never once been the binding constraint on a loan, because
+      everybody who cleared an income bar had already earned the standing on the
+      way past — and noted that it would stay untested until something decoupled
+      assets from income. This is that something.
+    */
+    const holder = borrower({
+      income: 45_000,
+      standing: 'good',
+      pledgeable: Math.round(200_000 * PLEDGE_SHARE),
+    });
+    const decision = applyForLoan(findLoanProduct('loan.privateline')!, holder);
+    expect(decision.approved).toBe(true);
+    // Bounded by the COLLATERAL, not by the income multiple — which for a
+    // $45,000 salary would have been $72,000 and is not what came back.
+    expect(Number(decision.offered) / 100).toBeCloseTo(200_000 * PLEDGE_SHARE, -2);
+    expect(Number(decision.offered) / 100).toBeGreaterThan(45_000 * DEBT_CEILING);
+  });
+
+  it('counts what is already owed against the collateral', () => {
+    const pledged = Math.round(300_000 * PLEDGE_SHARE);
+    const clear = borrowingRoom(
+      findLoanProduct('loan.privateline')!,
+      borrower({ pledgeable: pledged }),
+    );
+    const loaded = borrowingRoom(
+      findLoanProduct('loan.privateline')!,
+      borrower({ pledgeable: pledged, cardDebt: 20_000 }),
+    );
+    expect(loaded).toBeCloseTo(clear - 20_000, 0);
+  });
+
+  it('wants a portfolio worth having before it will look at one', () => {
+    // `PLEDGEABLE_FROM` is a floor on the portfolio, not on the loan: a private
+    // bank does not open a facility against $4,000 of index fund.
+    expect(PLEDGEABLE_FROM).toBeGreaterThan(0);
+    expect(PLEDGE_SHARE).toBeGreaterThan(0);
+    expect(PLEDGE_SHARE).toBeLessThan(1);
   });
 });

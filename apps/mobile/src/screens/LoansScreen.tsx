@@ -1,9 +1,9 @@
 /**
  * Ticket 0307 — what you owe, and what anybody would lend you.
  *
- * Spec 1857's five loan types, of which two can exist today. The other three
- * need something that is not built — collateral (v0.05), a business (v0.06), a
- * portfolio (0308) — and are named at the bottom rather than left out, so the
+ * Spec 1857's five loan types, of which three can exist as of Ticket 0308. The
+ * other two need something that is not built — collateral (v0.05) and a
+ * business (v0.06) — and are named at the bottom rather than left out, so the
  * screen is also the map of what is coming.
  *
  * THE AMOUNT IS THE DECISION, which is why borrowing opens a sheet rather than
@@ -257,6 +257,8 @@ function whyNot(because: string | undefined, product: LoanProduct): string {
       return 'You owe as much as they think you can carry';
     case 'fullyDrawn':
       return 'You have borrowed what the degree costs';
+    case 'noCollateral':
+      return 'Wants a portfolio to secure it on';
     default:
       return 'Not available to you';
   }

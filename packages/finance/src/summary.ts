@@ -43,10 +43,13 @@ import { flows, totalFor, transactionsIn, type Ledger } from './ledger';
  */
 export const NOT_YET_OWNED = [
   { key: 'assets', label: 'Assets', arrives: 'v0.05' },
-  { key: 'liabilities', label: 'Liabilities', arrives: '0307' },
-  { key: 'investments', label: 'Investments', arrives: '0308' },
-  // `credit` was here until Ticket 0305 built it. The list is meant to shrink,
-  // and this is what shrinking looks like.
+  // `credit` came off in 0305. `liabilities` and `investments` came off in
+  // 0308 — but `liabilities` should have come off in 0307, which built cards
+  // and loans and left this line here claiming they had not arrived. See
+  // CORE_RULES 13.51: a test asserting a list's CURRENT contents goes green
+  // whether or not the list should have shrunk, so this device catches a
+  // wrongful deletion and never catches a missing one. The test below now
+  // checks each remaining entry against the tickets already built.
 ] as const;
 
 export interface FinanceSummary {
@@ -75,27 +78,77 @@ export interface FinanceSummary {
   /** Spec 20: total monthly outflow. One number, and no breakdown. */
   readonly monthlyOutflow: Money;
   /**
-   * Spec 19: net worth.
+   * Spec 19: net worth. Everything owned less everything owed.
    *
-   * Everything owned less everything owed — which today is the balance and
-   * nothing else, because nothing in the build can be owned or owed yet. It is
-   * reported anyway, with `onlyCash` set, so the screen can say WHY it equals
-   * the balance instead of printing the same number twice with no explanation
-   * (CORE_RULES 13.26).
+   * TICKET 0308 MADE THIS TRUE, ONE TICKET LATE. It returned the bare cash
+   * balance until now, with `onlyCash` permanently set, because when it was
+   * written nothing could be owned or owed. 0306 and 0307 then shipped cards
+   * and loans and never came back — so for two tickets the dashboard showed a
+   * character with $40,000 of cash and $30,000 of card debt a net worth of
+   * $40,000, and told them underneath that they owned nothing and owed nothing.
+   *
+   * See CORE_RULES 13.51 for why the not-yet-built list did not catch it.
    */
   readonly netWorth: Money;
-  /** True while net worth is just the balance. Goes false in 0307 and v0.05. */
+  /**
+   * True while net worth really is just the balance — nothing invested, no
+   * cards, no loans. Now a fact about this character rather than about the
+   * build, so it is computed from what they hold rather than hard-coded, and
+   * it goes false the moment somebody borrows or buys anything.
+   */
   readonly onlyCash: boolean;
+  /** What the portfolio is worth. Zero until somebody buys something. */
+  readonly investments: Money;
+  /** Cards plus loans. Positive means owed. */
+  readonly liabilities: Money;
   /** The year this describes. */
   readonly year: number;
   /** Whether anything at all moved this year. */
   readonly quiet: boolean;
 }
 
-export function summariseFinances(ledger: Ledger, year: number): FinanceSummary {
+/** What the character owns and owes beyond their cash, for the net-worth line. */
+export interface Estate {
+  /** Portfolio value. */
+  readonly investments: Money;
+  /** Everything owed — card balances and loan balances. */
+  readonly liabilities: Money;
+}
+
+const NOTHING: Estate = { investments: cents(0), liabilities: cents(0) };
+
+export function summariseFinances(
+  ledger: Ledger,
+  year: number,
+  estate: Estate = NOTHING,
+): FinanceSummary {
   const year_ = flows(ledger, year);
-  const income = Number(year_.in);
-  const out = Number(year_.out);
+
+  /*
+    SPEC 44-46: INVESTMENTS ARE TRANSFERS, NOT FLOWS.
+
+    Buying $10,000 of shares moves $10,000 of real cash and the row belongs in
+    the ledger — 0302's reconciliation would break on the spot without it. What
+    it is not is an EXPENSE: the money still exists, it is just no longer cash,
+    and a monthly-outflow figure that counted it would tell a player who saved
+    hard that their cost of living had tripled. A SALE is the same thing upside
+    down: money coming back across the same line, and not income.
+
+    Both sides come out, and they come out SEPARATELY rather than netted. A
+    character who bought $10,000 and sold $3,000 has $10,000 of buying in the
+    outflow and $3,000 of selling in the inflow; subtracting the $7,000 net from
+    the outflow alone would leave $3,000 of purchase still counted as a cost.
+  */
+  let bought = 0;
+  let sold = 0;
+  for (const entry of transactionsIn(ledger, year)) {
+    if (entry.category !== 'investment') continue;
+    const amount = Number(entry.amount);
+    if (amount < 0) bought -= amount;
+    else sold += amount;
+  }
+  const income = Math.max(0, Number(year_.in) - sold);
+  const out = Math.max(0, Number(year_.out) - bought);
 
   /*
     Tax is measured against EARNED income, not against everything that came in.
@@ -118,8 +171,14 @@ export function summariseFinances(ledger: Ledger, year: number): FinanceSummary 
     // into a month that is not a round number, and rounding it up here would
     // make twelve months come to more than the year.
     monthlyOutflow: cents(Math.round(out / 12)),
-    netWorth: ledger.balance,
-    onlyCash: true,
+    // Everything owned, less everything owed. The `onlyCash` flag is now a
+    // statement about this character rather than about the build.
+    netWorth: cents(
+      Number(ledger.balance) + Number(estate.investments) - Number(estate.liabilities),
+    ),
+    onlyCash: Number(estate.investments) === 0 && Number(estate.liabilities) === 0,
+    investments: estate.investments,
+    liabilities: estate.liabilities,
     year,
     quiet: transactionsIn(ledger, year).length === 0,
   };
@@ -142,3 +201,40 @@ export function summariseFinances(ledger: Ledger, year: number): FinanceSummary 
  */
 export const childMonthlyCost = (standard: number, locationIndex: number, share: number): Money =>
   cents(Math.round((standard * locationIndex * share * 100) / 12));
+
+/* -------------------------------------------------------------------------- */
+/* Making the not-yet-built device actually work                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The most recent ticket that has shipped. Bumped by each ticket as it lands.
+ *
+ * THIS EXISTS BECAUSE THE DEVICE FAILED ONCE. `NOT_YET_OWNED`, like
+ * `UNWRITTEN_CATEGORIES` and `LOAN_TYPES_NOT_YET_BUILT`, is guarded by a test
+ * asserting the list's contents — and that test can only ever catch a WRONGFUL
+ * deletion. A line that should have been removed and was not keeps the test
+ * green, which is precisely what happened: 0307 built cards and loans and left
+ * `{ key: 'liabilities', arrives: '0307' }` sitting in the list for a whole
+ * ticket, telling every player that liabilities had not arrived while the
+ * screen showed their card balance two rows below.
+ *
+ * With this, a stale entry fails: see `stillAhead`. CORE_RULES 13.51.
+ */
+export const TICKET = '0308';
+
+/**
+ * Whether a promised arrival is still in the future.
+ *
+ * Accepts both spellings the build uses — a four-digit ticket like `0308`, and
+ * a milestone like `v0.05`. A ticket belongs to the milestone its first two
+ * digits name, so `0308` is inside `v0.03` and sorts before `v0.05`.
+ */
+export function stillAhead(arrives: string, now: string = TICKET): boolean {
+  const rank = (value: string): number =>
+    /^\d{4}$/.test(value)
+      ? Number(value)
+      : // A milestone with no ticket number is everything in it, so it compares
+        // as the LAST ticket that milestone could contain.
+        Number(value.replace(/^v(\d)\.(\d\d)$/, '$1$2')) * 100 + 99;
+  return rank(arrives) > rank(now);
+}
