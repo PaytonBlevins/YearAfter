@@ -33,20 +33,39 @@ function roller(seed: number) {
   };
 }
 
-/** Six technology names — one sector, one fate. */
-const CONCENTRATED = INSTRUMENTS.filter(
-  (row) => row.kind === 'stock' && row.sector === 'technology',
-)
-  .slice(0, 6)
-  .map((row) => row.id);
+const stocksIn = (sector: Sector): string[] =>
+  INSTRUMENTS.filter((row) => row.kind === 'stock' && row.sector === sector).map((row) => row.id);
 
-/** One name from each of six sectors. */
-const SPREAD = SECTORS.slice(0, 6)
-  .map(
-    (sector: Sector) =>
-      INSTRUMENTS.filter((row) => row.kind === 'stock' && row.sector === sector)[0]?.id,
-  )
-  .filter((id): id is string => id !== undefined);
+/**
+ * EVERY SECTOR GETS A TURN, and that is a correction rather than thoroughness.
+ *
+ * The first version of this test concentrated in TECHNOLOGY and compared it
+ * against a six-sector mix. Technology has the highest drift in the catalog, so
+ * the comparison was never about correlation: it was tech against the average,
+ * with the correlation somewhere underneath. It passed anyway, because variance
+ * drag on the wider portfolio ate the drift advantage and the two medians
+ * happened to land close together — two errors cancelling.
+ *
+ * `REVERSION` reduced the drag, the cancellation stopped, and the median gap
+ * went to 24%. Nothing about diversification had changed; the confound had
+ * simply stopped being hidden. **CORE_RULES 13.55.**
+ *
+ * Pooling over all seven sectors makes the concentrated basket's average drift
+ * the catalog's average drift, which is what the spread basket already was. Now
+ * the only difference between the two sides is whether the six names share a
+ * shock.
+ */
+const CONCENTRATED: readonly string[][] = SECTORS.map((sector) => stocksIn(sector).slice(0, 6));
+
+/**
+ * One name per sector, rotated, so the spread side is pooled over as many
+ * different baskets as the concentrated side is.
+ */
+const SPREAD: readonly string[][] = SECTORS.map((_, offset) =>
+  SECTORS.slice(0, 6)
+    .map((sector: Sector) => stocksIn(sector)[offset % stocksIn(sector).length])
+    .filter((id): id is string => id !== undefined),
+);
 
 /**
  * Put equal money into each name, run `years` of market, and return what the
@@ -77,20 +96,24 @@ function outcome(ids: readonly string[], years: number, seed: number): number {
 
 describe('sectors are a correlation, not a heading', () => {
   it('has six names to spread across and six to concentrate in', () => {
-    expect(CONCENTRATED).toHaveLength(6);
-    expect(SPREAD).toHaveLength(6);
-    // And the concentrated set really is one sector, or the test proves nothing.
-    const sectors = new Set(
-      CONCENTRATED.map((id) => INSTRUMENTS.find((row) => row.id === id)?.sector),
-    );
-    expect(sectors.size).toBe(1);
-    expect(new Set(SPREAD.map((id) => INSTRUMENTS.find((row) => row.id === id)?.sector)).size).toBe(
-      6,
-    );
+    for (const basket of CONCENTRATED) {
+      expect(basket).toHaveLength(6);
+      // Each concentrated basket really is ONE sector, or the test proves nothing.
+      const sectors = new Set(basket.map((id) => INSTRUMENTS.find((row) => row.id === id)?.sector));
+      expect(sectors.size).toBe(1);
+    }
+    for (const basket of SPREAD) {
+      expect(basket).toHaveLength(6);
+      expect(new Set(basket.map((id) => INSTRUMENTS.find((row) => row.id === id)?.sector)).size).toBe(
+        6,
+      );
+    }
+    // And every basket is a distinct set of names, or pooling proves nothing.
+    expect(new Set(CONCENTRATED.flat()).size).toBe(CONCENTRATED.flat().length);
   });
 
   it('makes a concentrated portfolio visibly wider than a spread one', () => {
-    const RUNS = 1_500;
+    const RUNS = 300;
     const YEARS = 20;
     const narrow: number[] = [];
     const wide: number[] = [];
@@ -99,8 +122,10 @@ describe('sectors are a correlation, not a heading', () => {
       // are identical between the two portfolios. The only difference is which
       // names are held, which is the only thing this is measuring.
       const seed = run * 2654435761 + 991;
-      wide.push(outcome(CONCENTRATED, YEARS, seed));
-      narrow.push(outcome(SPREAD, YEARS, seed));
+      // Pooled over every sector, so the two sides hold the same average drift
+      // and the only thing left between them is the shared shock.
+      for (const basket of CONCENTRATED) wide.push(outcome(basket, YEARS, seed));
+      for (const basket of SPREAD) narrow.push(outcome(basket, YEARS, seed));
     }
 
     const band = (xs: number[]) => q(xs, 0.9) - q(xs, 0.1);
@@ -129,13 +154,13 @@ describe('sectors are a correlation, not a heading', () => {
   });
 
   it('gives the spread portfolio the better floor', () => {
-    const RUNS = 1_500;
+    const RUNS = 300;
     const narrow: number[] = [];
     const wide: number[] = [];
     for (let run = 0; run < RUNS; run += 1) {
       const seed = run * 40503 + 17;
-      wide.push(outcome(CONCENTRATED, 20, seed));
-      narrow.push(outcome(SPREAD, 20, seed));
+      for (const basket of CONCENTRATED) wide.push(outcome(basket, 20, seed));
+      for (const basket of SPREAD) narrow.push(outcome(basket, 20, seed));
     }
     // What diversification is actually FOR: the bad case is less bad.
     expect(q(narrow, 0.1)).toBeGreaterThan(q(wide, 0.1));

@@ -1547,3 +1547,40 @@ wherever they keep it.
 - **Grep the field, not the concept.** Every reader of `wealth` had to be
   looked at. Reasoning about "does the game know how rich they are" would have
   found the one already in mind and missed the other.
+
+### 13.55 A model with no memory of a peak can never give one back
+
+*Ticket 0308d.* The market shipped in 0308c destroyed value permanently. An
+index of every stock, rebased to 100 the year before a severe recession begins:
+
+```
+100 → 58 → 53 → 52 → 51 → 53 → 55 → 57 → 59 → 62 → 64 → 67 → 69
+```
+
+**Twelve years on it is still at 69.** The cause is one line: the market state
+moved the growth RATE for a year, and the following year carried on from the
+lower base. Nothing in the model knew the price had ever been higher, so nothing
+could return it.
+
+- **A shock to a rate is permanent; a shock to a level is temporary.** Which one
+  a system applies decides whether its bad years are weather or amputation, and
+  the two are indistinguishable in a single year's output. Only a multi-year
+  path shows it, and nothing in the suite was drawing one.
+- **The tell was in the player's incentives, not the numbers.** Buying during a
+  crash returned 1.44x over ten years against 2.02x for buying in a boom. When
+  the screen tells a player what kind of year it is and the correct play is to
+  ignore it, the information is not flavour — the model underneath is wrong.
+- **Fixing it broke a passing test, and the test had been passing for the wrong
+  reason.** `diversification.test.ts` concentrated in TECHNOLOGY, the
+  highest-drift sector, and compared it against a six-sector mix. Two errors
+  were cancelling: the drift advantage was being eaten by variance drag.
+  Reversion reduced the drag, the cancellation stopped, and the median gap went
+  to 24%. **A test whose two confounds cancel reports a pass and a number that
+  means nothing.** Pooling over all seven sectors removed the confound rather
+  than loosening the bound.
+- **A tuning constant that changes an incentive needs the incentive measured,
+  not the variance.** `REVERSION` was set at 0.14 because that is where buying
+  after a crash pays 29% more than buying after a boom (2.32x against 1.80x)
+  while a ten-year hold still loses money 5% of the time. At 0.18 the dip becomes
+  a cheat code; at 0.10 it barely registers. Neither shows up in a return
+  distribution.

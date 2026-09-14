@@ -27,7 +27,7 @@
       "beta": 1.45,
       "payout": 0.0,
       "termYears": 0,
-      "blurb": "Data centres, and the electricity bill to match."
+      "blurb": "Data centers, and the electricity bill to match."
     },
     {
       "id": "eq.aldermere",
@@ -125,7 +125,7 @@
       "beta": 0.88,
       "payout": 0.012,
       "termYears": 0,
-      "blurb": "Pacemakers, pumps, and a very long approval queue."
+      "blurb": "Pacemakers, pumps, and a very long wait for approval."
     },
     {
       "id": "eq.marchbank",
@@ -601,7 +601,7 @@
       "beta": 1.6,
       "payout": 0.0,
       "termYears": 0,
-      "blurb": "A licence, a hole, and a great deal of hope."
+      "blurb": "A license, a hole, and a great deal of hope."
     },
     {
       "id": "pny.stannard",
@@ -1057,7 +1057,7 @@
       "beta": 0.086,
       "payout": 0.031,
       "termYears": 3,
-      "blurb": "Home paper, and the safest thing here. Money back in 3."
+      "blurb": "Home paper, and the safest thing here. Money back in 3 years."
     },
     {
       "id": "bd.cald5",
@@ -1071,7 +1071,7 @@
       "beta": 0.11,
       "payout": 0.038,
       "termYears": 5,
-      "blurb": "Home paper, and the safest thing here. Money back in 5."
+      "blurb": "Home paper, and the safest thing here. Money back in 5 years."
     },
     {
       "id": "bd.cald10",
@@ -1085,7 +1085,7 @@
       "beta": 0.17,
       "payout": 0.046,
       "termYears": 10,
-      "blurb": "Home paper, and the safest thing here. Money back in 10."
+      "blurb": "Home paper, and the safest thing here. Money back in 10 years."
     },
     {
       "id": "bd.rhen3",
@@ -1099,7 +1099,7 @@
       "beta": 0.086,
       "payout": 0.034,
       "termYears": 3,
-      "blurb": "A large, boring, solvent neighbour. Money back in 3."
+      "blurb": "A large, boring, solvent neighbor. Money back in 3 years."
     },
     {
       "id": "bd.rhen7",
@@ -1113,7 +1113,7 @@
       "beta": 0.134,
       "payout": 0.044,
       "termYears": 7,
-      "blurb": "A large, boring, solvent neighbour. Money back in 7."
+      "blurb": "A large, boring, solvent neighbor. Money back in 7 years."
     },
     {
       "id": "bd.rhen10",
@@ -1127,7 +1127,7 @@
       "beta": 0.17,
       "payout": 0.051,
       "termYears": 10,
-      "blurb": "A large, boring, solvent neighbour. Money back in 10."
+      "blurb": "A large, boring, solvent neighbor. Money back in 10 years."
     },
     {
       "id": "bd.vast5",
@@ -1141,7 +1141,7 @@
       "beta": 0.11,
       "payout": 0.049,
       "termYears": 5,
-      "blurb": "Small, rich, pays more than it needs to. Money back in 5."
+      "blurb": "Small, rich, pays more than it needs to. Money back in 5 years."
     },
     {
       "id": "bd.vast8",
@@ -1155,7 +1155,7 @@
       "beta": 0.146,
       "payout": 0.058,
       "termYears": 8,
-      "blurb": "Small, rich, pays more than it needs to. Money back in 8."
+      "blurb": "Small, rich, pays more than it needs to. Money back in 8 years."
     },
     {
       "id": "bd.aura3",
@@ -1169,7 +1169,7 @@
       "beta": 0.086,
       "payout": 0.062,
       "termYears": 3,
-      "blurb": "Pays well. There is a reason it pays well. Money back in 3."
+      "blurb": "Pays well. There's a reason for that. Money back in 3 years."
     },
     {
       "id": "bd.aura5",
@@ -1183,7 +1183,7 @@
       "beta": 0.11,
       "payout": 0.071,
       "termYears": 5,
-      "blurb": "Pays well. There is a reason it pays well. Money back in 5."
+      "blurb": "Pays well. There's a reason for that. Money back in 5 years."
     },
     {
       "id": "bd.aura10",
@@ -1197,7 +1197,7 @@
       "beta": 0.17,
       "payout": 0.084,
       "termYears": 10,
-      "blurb": "Pays well. There is a reason it pays well. Money back in 10."
+      "blurb": "Pays well. There's a reason for that. Money back in 10 years."
     },
     {
       "id": "bd.sorr5",
@@ -1211,7 +1211,7 @@
       "beta": 0.11,
       "payout": 0.055,
       "termYears": 5,
-      "blurb": "Sound enough, if you read the politics pages. Money back in 5."
+      "blurb": "Fine, if you read the politics pages. Money back in 5 years."
     },
     {
       "id": "bd.sorr8",
@@ -1225,7 +1225,7 @@
       "beta": 0.146,
       "payout": 0.064,
       "termYears": 8,
-      "blurb": "Sound enough, if you read the politics pages. Money back in 8."
+      "blurb": "Fine, if you read the politics pages. Money back in 8 years."
     }
   ]
 }

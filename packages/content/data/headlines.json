@@ -1,0 +1,913 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "hl.lead.severeRecession.1",
+      "slot": "lead",
+      "when": "severeRecession",
+      "tone": "bad",
+      "text": "Markets Post Worst Year In Living Memory"
+    },
+    {
+      "id": "hl.lead.severeRecession.2",
+      "slot": "lead",
+      "when": "severeRecession",
+      "tone": "bad",
+      "text": "Panic Selling Wipes Out A Decade Of Gains"
+    },
+    {
+      "id": "hl.lead.severeRecession.3",
+      "slot": "lead",
+      "when": "severeRecession",
+      "tone": "bad",
+      "text": "The Crash Nobody Wanted To Name Has A Name Now"
+    },
+    {
+      "id": "hl.lead.severeRecession.4",
+      "slot": "lead",
+      "when": "severeRecession",
+      "tone": "bad",
+      "text": "Savers Wake Up To Half The Money They Went To Bed With"
+    },
+    {
+      "id": "hl.lead.severeRecession.5",
+      "slot": "lead",
+      "when": "severeRecession",
+      "tone": "bad",
+      "text": "Trading Floors Empty As The Bottom Keeps Moving"
+    },
+    {
+      "id": "hl.lead.severeRecession.6",
+      "slot": "lead",
+      "when": "severeRecession",
+      "tone": "bad",
+      "text": "A Generation Learns What A Real Crash Looks Like"
+    },
+    {
+      "id": "hl.lead.severeRecession.7",
+      "slot": "lead",
+      "when": "severeRecession",
+      "tone": "bad",
+      "text": "Every Sector Red, And No Floor In Sight"
+    },
+    {
+      "id": "hl.lead.severeRecession.8",
+      "slot": "lead",
+      "when": "severeRecession",
+      "tone": "bad",
+      "text": "The Year The Market Stopped Pretending"
+    },
+    {
+      "id": "hl.lead.recession.1",
+      "slot": "lead",
+      "when": "recession",
+      "tone": "bad",
+      "text": "Markets Slide As The Downturn Takes Hold"
+    },
+    {
+      "id": "hl.lead.recession.2",
+      "slot": "lead",
+      "when": "recession",
+      "tone": "bad",
+      "text": "Investors Head For The Exits"
+    },
+    {
+      "id": "hl.lead.recession.3",
+      "slot": "lead",
+      "when": "recession",
+      "tone": "bad",
+      "text": "A Bruising Year Ends With Little Cheer"
+    },
+    {
+      "id": "hl.lead.recession.4",
+      "slot": "lead",
+      "when": "recession",
+      "tone": "bad",
+      "text": "Recession Bites, And Portfolios Feel It"
+    },
+    {
+      "id": "hl.lead.recession.5",
+      "slot": "lead",
+      "when": "recession",
+      "tone": "bad",
+      "text": "Losses Mount As Buyers Stay Home"
+    },
+    {
+      "id": "hl.lead.recession.6",
+      "slot": "lead",
+      "when": "recession",
+      "tone": "bad",
+      "text": "The Market Gives Back What It Spent Two Years Earning"
+    },
+    {
+      "id": "hl.lead.recession.7",
+      "slot": "lead",
+      "when": "recession",
+      "tone": "bad",
+      "text": "Bad News Keeps Arriving On Schedule"
+    },
+    {
+      "id": "hl.lead.recession.8",
+      "slot": "lead",
+      "when": "recession",
+      "tone": "bad",
+      "text": "Nobody Is Calling The Bottom Yet"
+    },
+    {
+      "id": "hl.lead.slowdown.1",
+      "slot": "lead",
+      "when": "slowdown",
+      "tone": "bad",
+      "text": "Growth Cools And Markets Drift Lower"
+    },
+    {
+      "id": "hl.lead.slowdown.2",
+      "slot": "lead",
+      "when": "slowdown",
+      "tone": "bad",
+      "text": "A Flat Year With A Downward Lean"
+    },
+    {
+      "id": "hl.lead.slowdown.3",
+      "slot": "lead",
+      "when": "slowdown",
+      "tone": "bad",
+      "text": "Momentum Stalls Across The Board"
+    },
+    {
+      "id": "hl.lead.slowdown.4",
+      "slot": "lead",
+      "when": "slowdown",
+      "tone": "bad",
+      "text": "Traders Call It A Pause. Others Call It Worse"
+    },
+    {
+      "id": "hl.lead.slowdown.5",
+      "slot": "lead",
+      "when": "slowdown",
+      "tone": "bad",
+      "text": "The Rally Runs Out Of Road"
+    },
+    {
+      "id": "hl.lead.slowdown.6",
+      "slot": "lead",
+      "when": "slowdown",
+      "tone": "bad",
+      "text": "Slower Everywhere, Broken Nowhere"
+    },
+    {
+      "id": "hl.lead.slowdown.7",
+      "slot": "lead",
+      "when": "slowdown",
+      "tone": "bad",
+      "text": "A Year Of Small Disappointments"
+    },
+    {
+      "id": "hl.lead.slowdown.8",
+      "slot": "lead",
+      "when": "slowdown",
+      "tone": "bad",
+      "text": "Confidence Thins Without Quite Breaking"
+    },
+    {
+      "id": "hl.lead.normal.1",
+      "slot": "lead",
+      "when": "normal",
+      "tone": "flat",
+      "text": "An Ordinary Year, And Nobody Complains"
+    },
+    {
+      "id": "hl.lead.normal.2",
+      "slot": "lead",
+      "when": "normal",
+      "tone": "flat",
+      "text": "Markets Grind Higher Without Much Drama"
+    },
+    {
+      "id": "hl.lead.normal.3",
+      "slot": "lead",
+      "when": "normal",
+      "tone": "flat",
+      "text": "A Quiet Year On The Exchange"
+    },
+    {
+      "id": "hl.lead.normal.4",
+      "slot": "lead",
+      "when": "normal",
+      "tone": "flat",
+      "text": "No Crisis, No Boom, No Headlines"
+    },
+    {
+      "id": "hl.lead.normal.5",
+      "slot": "lead",
+      "when": "normal",
+      "tone": "flat",
+      "text": "Steady As She Goes, Say The Optimists"
+    },
+    {
+      "id": "hl.lead.normal.6",
+      "slot": "lead",
+      "when": "normal",
+      "tone": "flat",
+      "text": "The Market Ends Roughly Where It Started"
+    },
+    {
+      "id": "hl.lead.normal.7",
+      "slot": "lead",
+      "when": "normal",
+      "tone": "flat",
+      "text": "A Year That Won't Make The History Books"
+    },
+    {
+      "id": "hl.lead.normal.8",
+      "slot": "lead",
+      "when": "normal",
+      "tone": "flat",
+      "text": "Dull Isn't The Same As Bad"
+    },
+    {
+      "id": "hl.lead.growth.1",
+      "slot": "lead",
+      "when": "growth",
+      "tone": "good",
+      "text": "Markets Climb Through A Confident Year"
+    },
+    {
+      "id": "hl.lead.growth.2",
+      "slot": "lead",
+      "when": "growth",
+      "tone": "good",
+      "text": "Gains Broaden Out Across The Exchange"
+    },
+    {
+      "id": "hl.lead.growth.3",
+      "slot": "lead",
+      "when": "growth",
+      "tone": "good",
+      "text": "A Good Year, And Most Of It Earned"
+    },
+    {
+      "id": "hl.lead.growth.4",
+      "slot": "lead",
+      "when": "growth",
+      "tone": "good",
+      "text": "Buyers Return And Prices Follow"
+    },
+    {
+      "id": "hl.lead.growth.5",
+      "slot": "lead",
+      "when": "growth",
+      "tone": "good",
+      "text": "Optimism Is Back, And So Are The Numbers"
+    },
+    {
+      "id": "hl.lead.growth.6",
+      "slot": "lead",
+      "when": "growth",
+      "tone": "good",
+      "text": "A Solid Year Nobody Wants To Jinx"
+    },
+    {
+      "id": "hl.lead.growth.7",
+      "slot": "lead",
+      "when": "growth",
+      "tone": "good",
+      "text": "Growth Shows Up In The Places It Should"
+    },
+    {
+      "id": "hl.lead.growth.8",
+      "slot": "lead",
+      "when": "growth",
+      "tone": "good",
+      "text": "Portfolios End The Year Fatter"
+    },
+    {
+      "id": "hl.lead.strongExpansion.1",
+      "slot": "lead",
+      "when": "strongExpansion",
+      "tone": "good",
+      "text": "Markets Roar Through A Record Year"
+    },
+    {
+      "id": "hl.lead.strongExpansion.2",
+      "slot": "lead",
+      "when": "strongExpansion",
+      "tone": "good",
+      "text": "The Boom Arrives, And Everyone Is Early"
+    },
+    {
+      "id": "hl.lead.strongExpansion.3",
+      "slot": "lead",
+      "when": "strongExpansion",
+      "tone": "good",
+      "text": "Record Highs, And The Champagne To Match"
+    },
+    {
+      "id": "hl.lead.strongExpansion.4",
+      "slot": "lead",
+      "when": "strongExpansion",
+      "tone": "good",
+      "text": "A Year Of Fortunes Made In Twelve Months"
+    },
+    {
+      "id": "hl.lead.strongExpansion.5",
+      "slot": "lead",
+      "when": "strongExpansion",
+      "tone": "good",
+      "text": "Everything Is Up, Which Worries The Careful"
+    },
+    {
+      "id": "hl.lead.strongExpansion.6",
+      "slot": "lead",
+      "when": "strongExpansion",
+      "tone": "good",
+      "text": "The Best Year On The Exchange In Decades"
+    },
+    {
+      "id": "hl.lead.strongExpansion.7",
+      "slot": "lead",
+      "when": "strongExpansion",
+      "tone": "good",
+      "text": "Money Pours In And Prices Cannot Keep Up"
+    },
+    {
+      "id": "hl.lead.strongExpansion.8",
+      "slot": "lead",
+      "when": "strongExpansion",
+      "tone": "good",
+      "text": "Nobody Wants To Be The One Who Sold"
+    },
+    {
+      "id": "hl.sector.up.1",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "{sector} Leads The Market Higher"
+    },
+    {
+      "id": "hl.sector.up.2",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "Money Floods Into {sector}"
+    },
+    {
+      "id": "hl.sector.up.3",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "A Banner Year For {sector}"
+    },
+    {
+      "id": "hl.sector.up.4",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "{sector} Outruns Everything Else On The Board"
+    },
+    {
+      "id": "hl.sector.up.5",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "Analysts Fall In Love With {sector} All Over Again"
+    },
+    {
+      "id": "hl.sector.up.6",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "{sector} Posts The Year's Biggest Gains"
+    },
+    {
+      "id": "hl.sector.up.7",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "Everyone Suddenly Owns {sector}"
+    },
+    {
+      "id": "hl.sector.up.8",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "{sector} Rewards The Patient"
+    },
+    {
+      "id": "hl.sector.up.9",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "The {sector} Trade Works, For Once"
+    },
+    {
+      "id": "hl.sector.up.10",
+      "slot": "sector",
+      "when": "up",
+      "tone": "good",
+      "text": "{sector} Ends The Year On Top"
+    },
+    {
+      "id": "hl.sector.down.1",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "{sector} Takes The Year's Heaviest Losses"
+    },
+    {
+      "id": "hl.sector.down.2",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "The Bottom Falls Out Of {sector}"
+    },
+    {
+      "id": "hl.sector.down.3",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "{sector} Investors Count The Damage"
+    },
+    {
+      "id": "hl.sector.down.4",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "Nobody Wants {sector} At Any Price"
+    },
+    {
+      "id": "hl.sector.down.5",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "{sector} Drags The Whole Market Down With It"
+    },
+    {
+      "id": "hl.sector.down.6",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "A Miserable Year For Anyone Holding {sector}"
+    },
+    {
+      "id": "hl.sector.down.7",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "{sector} Gives Back Everything And More"
+    },
+    {
+      "id": "hl.sector.down.8",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "The {sector} Story Falls Apart"
+    },
+    {
+      "id": "hl.sector.down.9",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "{sector} Ends The Year At The Bottom Of The Table"
+    },
+    {
+      "id": "hl.sector.down.10",
+      "slot": "sector",
+      "when": "down",
+      "tone": "bad",
+      "text": "Hard Lessons For The {sector} Faithful"
+    },
+    {
+      "id": "hl.mover.up.1",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "{firm} Climbs {pct} And Nobody Saw It Coming"
+    },
+    {
+      "id": "hl.mover.up.2",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "{firm} Is The Year's Biggest Winner, Up {pct}"
+    },
+    {
+      "id": "hl.mover.up.3",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "A {pct} Year For {firm}"
+    },
+    {
+      "id": "hl.mover.up.4",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "{firm} Shareholders Have A Very Good Year"
+    },
+    {
+      "id": "hl.mover.up.5",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "{firm} Up {pct}, And The Analysts Are Scrambling"
+    },
+    {
+      "id": "hl.mover.up.6",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "The {firm} Story Everyone Wants A Piece Of"
+    },
+    {
+      "id": "hl.mover.up.7",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "{firm} Rewrites Its Own Ceiling, Up {pct}"
+    },
+    {
+      "id": "hl.mover.up.8",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "Late To {firm}? So Was Almost Everyone"
+    },
+    {
+      "id": "hl.mover.up.9",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "{firm} Adds {pct} And Keeps Going"
+    },
+    {
+      "id": "hl.mover.up.10",
+      "slot": "mover",
+      "when": "up",
+      "tone": "good",
+      "text": "Quiet Until Now: {firm} Gains {pct}"
+    },
+    {
+      "id": "hl.mover.down.1",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "{firm} Falls {pct} In A Brutal Twelve Months"
+    },
+    {
+      "id": "hl.mover.down.2",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "The Wheels Come Off At {firm}"
+    },
+    {
+      "id": "hl.mover.down.3",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "{firm} Down {pct}, And The Questions Start"
+    },
+    {
+      "id": "hl.mover.down.4",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "A {pct} Fall Leaves {firm} Fighting"
+    },
+    {
+      "id": "hl.mover.down.5",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "{firm} Is The Year's Biggest Loser"
+    },
+    {
+      "id": "hl.mover.down.6",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "Financial Rebound Not In The Cards For {firm}"
+    },
+    {
+      "id": "hl.mover.down.7",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "{firm} Sheds {pct} And Its Chief Executive"
+    },
+    {
+      "id": "hl.mover.down.8",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "What Went Wrong At {firm}"
+    },
+    {
+      "id": "hl.mover.down.9",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "{firm} Holders Learn A Hard Lesson, Down {pct}"
+    },
+    {
+      "id": "hl.mover.down.10",
+      "slot": "mover",
+      "when": "down",
+      "tone": "bad",
+      "text": "Nobody Is Buying The {firm} Turnaround"
+    },
+    {
+      "id": "hl.tier.crypto.up.1",
+      "slot": "tier",
+      "when": "crypto.up",
+      "tone": "good",
+      "text": "Coins Go Vertical, And So Do The Arguments"
+    },
+    {
+      "id": "hl.tier.crypto.up.2",
+      "slot": "tier",
+      "when": "crypto.up",
+      "tone": "good",
+      "text": "Crypto Has Another One Of Those Years"
+    },
+    {
+      "id": "hl.tier.crypto.up.3",
+      "slot": "tier",
+      "when": "crypto.up",
+      "tone": "good",
+      "text": "The Coin Crowd Is Insufferable Again"
+    },
+    {
+      "id": "hl.tier.crypto.up.4",
+      "slot": "tier",
+      "when": "crypto.up",
+      "tone": "good",
+      "text": "Digital Money Doubles, Skeptics Regroup"
+    },
+    {
+      "id": "hl.tier.crypto.down.1",
+      "slot": "tier",
+      "when": "crypto.down",
+      "tone": "bad",
+      "text": "The Coin Market Folds In On Itself"
+    },
+    {
+      "id": "hl.tier.crypto.down.2",
+      "slot": "tier",
+      "when": "crypto.down",
+      "tone": "bad",
+      "text": "Crypto Gives It All Back, Again"
+    },
+    {
+      "id": "hl.tier.crypto.down.3",
+      "slot": "tier",
+      "when": "crypto.down",
+      "tone": "bad",
+      "text": "A Long Quiet Winter For Digital Money"
+    },
+    {
+      "id": "hl.tier.crypto.down.4",
+      "slot": "tier",
+      "when": "crypto.down",
+      "tone": "bad",
+      "text": "The Coins Nobody Mentions At Dinner Anymore"
+    },
+    {
+      "id": "hl.tier.penny.up.1",
+      "slot": "tier",
+      "when": "penny.up",
+      "tone": "good",
+      "text": "Small Companies Have Their Moment"
+    },
+    {
+      "id": "hl.tier.penny.up.2",
+      "slot": "tier",
+      "when": "penny.up",
+      "tone": "good",
+      "text": "The Cheap End Of The Market Catches Fire"
+    },
+    {
+      "id": "hl.tier.penny.up.3",
+      "slot": "tier",
+      "when": "penny.up",
+      "tone": "good",
+      "text": "Penny Stocks Pay Off For The Reckless"
+    },
+    {
+      "id": "hl.tier.penny.up.4",
+      "slot": "tier",
+      "when": "penny.up",
+      "tone": "good",
+      "text": "Small Names, Big Numbers, For Now"
+    },
+    {
+      "id": "hl.tier.penny.down.1",
+      "slot": "tier",
+      "when": "penny.down",
+      "tone": "bad",
+      "text": "Another Year Of Failures At The Cheap End"
+    },
+    {
+      "id": "hl.tier.penny.down.2",
+      "slot": "tier",
+      "when": "penny.down",
+      "tone": "bad",
+      "text": "Small Companies Fold In Numbers"
+    },
+    {
+      "id": "hl.tier.penny.down.3",
+      "slot": "tier",
+      "when": "penny.down",
+      "tone": "bad",
+      "text": "Penny Stocks Do What Penny Stocks Do"
+    },
+    {
+      "id": "hl.tier.penny.down.4",
+      "slot": "tier",
+      "when": "penny.down",
+      "tone": "bad",
+      "text": "The Small End Of The Market Thins Out"
+    },
+    {
+      "id": "hl.tier.bond.up.1",
+      "slot": "tier",
+      "when": "bond.up",
+      "tone": "good",
+      "text": "Bondholders Collect And Sleep Soundly"
+    },
+    {
+      "id": "hl.tier.bond.up.2",
+      "slot": "tier",
+      "when": "bond.up",
+      "tone": "good",
+      "text": "Government Debt Has A Comfortable Year"
+    },
+    {
+      "id": "hl.tier.bond.up.3",
+      "slot": "tier",
+      "when": "bond.up",
+      "tone": "good",
+      "text": "Boring Money Beats Clever Money"
+    },
+    {
+      "id": "hl.tier.bond.up.4",
+      "slot": "tier",
+      "when": "bond.up",
+      "tone": "good",
+      "text": "The Safe End Of The Market Earns Its Keep"
+    },
+    {
+      "id": "hl.tier.bond.down.1",
+      "slot": "tier",
+      "when": "bond.down",
+      "tone": "bad",
+      "text": "Even The Bond Market Has A Bad Year"
+    },
+    {
+      "id": "hl.tier.bond.down.2",
+      "slot": "tier",
+      "when": "bond.down",
+      "tone": "bad",
+      "text": "Rates Move And Bondholders Pay For It"
+    },
+    {
+      "id": "hl.tier.bond.down.3",
+      "slot": "tier",
+      "when": "bond.down",
+      "tone": "bad",
+      "text": "The Safe End Of The Market Isn't Safe This Year"
+    },
+    {
+      "id": "hl.tier.bond.down.4",
+      "slot": "tier",
+      "when": "bond.down",
+      "tone": "bad",
+      "text": "Government Debt Loses Its Shine"
+    },
+    {
+      "id": "hl.tier.fund.up.1",
+      "slot": "tier",
+      "when": "fund.up",
+      "tone": "good",
+      "text": "Funds Post Their Best Year In A Decade"
+    },
+    {
+      "id": "hl.tier.fund.up.2",
+      "slot": "tier",
+      "when": "fund.up",
+      "tone": "good",
+      "text": "Owning A Bit Of Everything Works Out"
+    },
+    {
+      "id": "hl.tier.fund.up.3",
+      "slot": "tier",
+      "when": "fund.up",
+      "tone": "good",
+      "text": "The Patient Money Comes Out Ahead"
+    },
+    {
+      "id": "hl.tier.fund.up.4",
+      "slot": "tier",
+      "when": "fund.up",
+      "tone": "good",
+      "text": "A Good Year To Have Owned The Whole Market"
+    },
+    {
+      "id": "hl.tier.fund.down.1",
+      "slot": "tier",
+      "when": "fund.down",
+      "tone": "bad",
+      "text": "Funds Cannot Hide From A Year Like This"
+    },
+    {
+      "id": "hl.tier.fund.down.2",
+      "slot": "tier",
+      "when": "fund.down",
+      "tone": "bad",
+      "text": "Spreading The Money Only Helped So Much"
+    },
+    {
+      "id": "hl.tier.fund.down.3",
+      "slot": "tier",
+      "when": "fund.down",
+      "tone": "bad",
+      "text": "Even The Broad Funds End The Year Down"
+    },
+    {
+      "id": "hl.tier.fund.down.4",
+      "slot": "tier",
+      "when": "fund.down",
+      "tone": "bad",
+      "text": "A Year Where Diversifying Softened The Blow"
+    },
+    {
+      "id": "hl.tier.stock.up.1",
+      "slot": "tier",
+      "when": "stock.up",
+      "tone": "good",
+      "text": "Shares Are Where The Money Was This Year"
+    },
+    {
+      "id": "hl.tier.stock.up.2",
+      "slot": "tier",
+      "when": "stock.up",
+      "tone": "good",
+      "text": "A Strong Year For Anyone Who Owned Companies"
+    },
+    {
+      "id": "hl.tier.stock.up.3",
+      "slot": "tier",
+      "when": "stock.up",
+      "tone": "good",
+      "text": "The Exchange Has A Year Worth Framing"
+    },
+    {
+      "id": "hl.tier.stock.up.4",
+      "slot": "tier",
+      "when": "stock.up",
+      "tone": "good",
+      "text": "Company Shares Outrun Everything Safer"
+    },
+    {
+      "id": "hl.tier.stock.down.1",
+      "slot": "tier",
+      "when": "stock.down",
+      "tone": "bad",
+      "text": "A Hard Year To Have Owned Shares"
+    },
+    {
+      "id": "hl.tier.stock.down.2",
+      "slot": "tier",
+      "when": "stock.down",
+      "tone": "bad",
+      "text": "Companies Struggle And Shareholders Pay"
+    },
+    {
+      "id": "hl.tier.stock.down.3",
+      "slot": "tier",
+      "when": "stock.down",
+      "tone": "bad",
+      "text": "The Exchange Would Rather Forget This One"
+    },
+    {
+      "id": "hl.tier.stock.down.4",
+      "slot": "tier",
+      "when": "stock.down",
+      "tone": "bad",
+      "text": "Shares Lose Ground Almost Everywhere"
+    }
+  ],
+  "mastheads": [
+    "The {city} Journal",
+    "The {city} Ledger",
+    "The {city} Chronicle",
+    "The {city} Herald",
+    "The {city} Observer",
+    "The {city} Gazette",
+    "The {city} Tribune",
+    "The {city} Record",
+    "The {city} Post",
+    "The {city} Sentinel"
+  ]
+}

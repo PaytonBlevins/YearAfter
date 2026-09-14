@@ -14,12 +14,12 @@
       "stat": "charisma",
       "lines": [
         "Ran a lemonade stand all summer and took ${amount}. Overheads were somebody else's problem.",
-        "The lemonade stand cleared ${amount}, most of it from one very generous neighbour."
+        "The lemonade stand cleared ${amount}, most of it from one very generous neighbor."
       ]
     },
     {
       "id": "gig.dog-walking",
-      "name": "Walking a neighbour's dog",
+      "name": "Walking a neighbor's dog",
       "blurb": "Every day after school, in all weathers.",
       "ageMin": 9,
       "ageMax": 15,
@@ -29,7 +29,7 @@
       "source": "walking the Hallidays' dog",
       "stat": "discipline",
       "lines": [
-        "Walked the neighbour's dog every day after school and made ${amount} doing it.",
+        "Walked the neighbor's dog every day after school and made ${amount} doing it.",
         "The dog-walking money came to ${amount} over the year, and the dog liked you best."
       ]
     },

@@ -118,5 +118,9 @@ export * from './gigs';
 /* Investable instruments (Ticket 0308c)                                       */
 export * from './instruments';
 
+/* -------------------------------------------------------------------------- */
+/* Financial headlines (Ticket 0308d)                                          */
+export * from './headlines';
+
 /** Ticket 0210 — real jobs, with salaries and ladders. */
 export * from './jobs';

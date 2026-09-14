@@ -141,6 +141,43 @@ export const SECTOR_WEIGHT = 0.85;
 /** What is left for an instrument's own luck once the sector has had its share. */
 export const IDIOSYNCRATIC = 0.62;
 
+/**
+ * HOW HARD A PRICE IS PULLED BACK TOWARD ITS OWN TREND — and the reason this
+ * number exists at all is the worst defect 0308c shipped.
+ *
+ * Measured on the shipped model: an index of every stock, rebased to 100 the
+ * year before a crash starts, went
+ *
+ *     100 → 58 → 53 → 52 → 51 → 53 → 55 → 57 → 59 → 62 → 64 → 67 → 69
+ *
+ * TWELVE YEARS LATER IT IS STILL AT 69. A crash in that model was permanent
+ * destruction, because `MARKET_EFFECT` moved the growth RATE for a year and the
+ * next year simply carried on from the lower base. Nothing anywhere remembered
+ * that the price used to be higher, so nothing could ever give it back.
+ *
+ * Two things wrong with that, and the second is the one that matters more.
+ *
+ * IT IS NOT WHAT MARKETS DO. A fall of that size is followed by a recovery; the
+ * 2008 low was back above the 2007 peak inside five years. A permanent 45% haircut
+ * is not a recession, it is a war.
+ *
+ * AND IT MADE THE MARKET STATE UNPLAYABLE. Buying during a crash returned 1.44x
+ * over ten years against 2.02x for buying in a boom — so the single most famous
+ * decision in investing, buying when everything is cheap, was PUNISHED. The
+ * screen told the player what kind of year it was and the only correct use of
+ * that information was to ignore it.
+ *
+ * THE ANCHOR COSTS NOTHING TO STORE, which is why it is shaped this way. The
+ * price history is already in the save, so "what this should be worth" is the
+ * OLDEST price on record grown at the instrument's own drift. A fresh save has
+ * one point, the anchor equals the price, and the pull is zero — no migration,
+ * no new field, and a life still replays from its seed.
+ */
+export const REVERSION = 0.14;
+
+/** The most one year's pull can be, before `REVERSION` scales it. */
+const REVERSION_CAP = 0.4;
+
 /** A cheap symmetric shock from a flat roll: tails exist, middle is likelier. */
 function bell(roll: number): number {
   const clamped = Math.max(0.0001, Math.min(0.9999, roll));
@@ -195,7 +232,29 @@ export function runPriceYear(
     const sector =
       instrument.sector !== undefined ? (sectorMoves[instrument.sector] ?? 0) * SECTOR_WEIGHT : 0;
 
-    const raw = instrument.drift + MARKET_EFFECT[state] * instrument.beta + own + sector;
+    /*
+      THE PULL BACK TOWARD TREND, and the two tiers it deliberately skips.
+
+      Reversion is a claim that a thing has a value to come back TO — earnings,
+      a coupon, a building. A coin has none, and the catalog says so on the
+      screen: "No earnings and no floor." A penny stock that has fallen 90% has
+      usually fallen 90% because it is dying, and this tier's whole character is
+      that it can go to nothing (the floor below is a single cent for exactly
+      that reason). Giving either of them a recovery term would hand back the
+      one thing that makes them different from a fund.
+
+      So crypto and penny stocks keep the old behaviour: what happens, happened.
+    */
+    const reverting = instrument.kind !== 'crypto' && instrument.kind !== 'penny';
+    let pull = 0;
+    if (reverting) {
+      const line = priceLine(book, instrument.id);
+      const anchor = line[0]! * (1 + instrument.drift) ** (line.length - 1);
+      const gap = current > 0 ? (anchor - current) / current : 0;
+      pull = Math.max(-REVERSION_CAP, Math.min(REVERSION_CAP, gap)) * REVERSION;
+    }
+
+    const raw = instrument.drift + MARKET_EFFECT[state] * instrument.beta + own + sector + pull;
     /*
       One year can only do so much, in either direction — the bound 0308 put on
       the old engine after 0306 compounded $200 into $1.28bn unnoticed. The band

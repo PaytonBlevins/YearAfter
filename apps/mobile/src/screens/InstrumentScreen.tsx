@@ -24,7 +24,9 @@ import {
   priceOf,
   yearChange,
 } from '@yearafter/finance';
-import { ActionButton, Card, ListRow, RowDivider, SectionHeading } from '../components';
+import { previewBuy, previewSell } from '@yearafter/simulation';
+import { Card, ListRow, RowDivider, SectionHeading } from '../components';
+import { AmountField } from '../components/AmountField';
 import { PriceChart } from '../components/PriceChart';
 import { useGame } from '../stores/gameStore';
 import { useNavigation } from '../navigation/navigation';
@@ -35,6 +37,10 @@ export function InstrumentScreen() {
   const { current } = useNavigation();
   const [buying, setBuying] = useState(false);
   const [selling, setSelling] = useState(false);
+  // Typed digits, as a string, because "" and "0" are different states — one is
+  // an untouched field and the other is a player who typed a zero.
+  const [buyAmount, setBuyAmount] = useState('');
+  const [sellAmount, setSellAmount] = useState('');
   const instrumentId = current?.instrumentId;
   if (!state || !instrumentId) return null;
 
@@ -56,6 +62,40 @@ export function InstrumentScreen() {
   const most = Math.min(cash, 1_000_000);
   const smallest = instrument.kind === 'bond' ? Math.ceil(priceNow / 100) : 1;
   const canAfford = cash >= smallest;
+
+  /*
+    THE LIVE READOUT, recomputed every keystroke from the engine's own functions.
+
+    Both halves answer the question the old three-button menu could not raise:
+    the amount typed is not always the amount that moves. Buying rounds DOWN to
+    whole units, hard on a bond; selling a bond early arrives smaller than it
+    left. A screen that only says so in the receipt has charged the player for
+    something it declined to mention.
+  */
+  const buyPreview = previewBuy(state, instrumentId, Number(buyAmount || 0));
+  const buyNote =
+    buyPreview.units > 0
+      ? buyPreview.cash < Number(buyAmount)
+        ? `Buys ${units(buyPreview.units)} at ${price(priceNow)} and spends ${money(
+            buyPreview.cash * 100,
+          )} — whole ${instrument.kind === 'bond' ? 'bonds' : 'units'} only.`
+        : `Buys ${units(buyPreview.units)} at ${price(priceNow)}.`
+      : undefined;
+  const buyProblem = buyAmount === '' ? undefined : refusalFor(buyPreview.refusal, cash, smallest);
+
+  const sellPreview = previewSell(state, instrumentId, Number(sellAmount || 0));
+  const sellNote =
+    sellPreview.units > 0
+      ? sellPreview.penalty > 0
+        ? `Sells ${units(sellPreview.units)}. ${money(
+            sellPreview.cash * 100,
+          )} reaches the bank — leaving early costs ${money(sellPreview.penalty * 100)}.`
+        : `Sells ${units(sellPreview.units)} and puts ${money(sellPreview.cash * 100)} in the bank.`
+      : undefined;
+  const sellProblem =
+    sellAmount === '' || sellPreview.units > 0
+      ? undefined
+      : 'Too small to sell any of it. Try a larger amount.';
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -106,29 +146,27 @@ export function InstrumentScreen() {
             />
             <RowDivider />
             {selling ? (
-              <>
-                <ActionButton
-                  label={`Sell a quarter — ${units(round4(holding.units / 4))}`}
-                  onPress={() => {
-                    sellInvestment(instrumentId, round4(holding.units / 4));
-                    setSelling(false);
-                  }}
-                />
-                <ActionButton
-                  label={`Sell half — ${units(round4(holding.units / 2))}`}
-                  onPress={() => {
-                    sellInvestment(instrumentId, round4(holding.units / 2));
-                    setSelling(false);
-                  }}
-                />
-                <ActionButton
-                  label={`Sell all ${units(holding.units)} — about ${money(worth)}`}
-                  onPress={() => {
-                    sellInvestment(instrumentId, holding.units);
-                    setSelling(false);
-                  }}
-                />
-              </>
+              <AmountField
+                label={`How much do you want to take out? You hold ${money(worth)}.`}
+                value={sellAmount}
+                onChange={setSellAmount}
+                max={{
+                  label: 'All of it',
+                  onPress: () => setSellAmount(String(Math.round(worth / 100))),
+                }}
+                note={sellNote}
+                problem={sellProblem}
+                confirmLabel="Sell"
+                onConfirm={() => {
+                  if (sellPreview.units > 0) sellInvestment(instrumentId, sellPreview.units);
+                  setSellAmount('');
+                  setSelling(false);
+                }}
+                onCancel={() => {
+                  setSellAmount('');
+                  setSelling(false);
+                }}
+              />
             ) : (
               <ListRow
                 title="Sell some"
@@ -162,29 +200,24 @@ export function InstrumentScreen() {
             wrap
           />
         ) : buying ? (
-          <>
-            <ActionButton
-              label={`Put in ${money(Math.max(smallest, Math.round(most / 4)) * 100)}`}
-              onPress={() => {
-                buyInvestment(instrumentId, Math.max(smallest, Math.round(most / 4)));
-                setBuying(false);
-              }}
-            />
-            <ActionButton
-              label={`Put in ${money(Math.max(smallest, Math.round(most / 2)) * 100)}`}
-              onPress={() => {
-                buyInvestment(instrumentId, Math.max(smallest, Math.round(most / 2)));
-                setBuying(false);
-              }}
-            />
-            <ActionButton
-              label={`Put in all ${money(most * 100)}`}
-              onPress={() => {
-                buyInvestment(instrumentId, most);
-                setBuying(false);
-              }}
-            />
-          </>
+          <AmountField
+            label={`How much do you want to put in? You have ${money(cash * 100)}.`}
+            value={buyAmount}
+            onChange={setBuyAmount}
+            max={{ label: 'All of it', onPress: () => setBuyAmount(String(most)) }}
+            note={buyNote}
+            problem={buyProblem}
+            confirmLabel="Buy"
+            onConfirm={() => {
+              buyInvestment(instrumentId, Number(buyAmount));
+              setBuyAmount('');
+              setBuying(false);
+            }}
+            onCancel={() => {
+              setBuyAmount('');
+              setBuying(false);
+            }}
+          />
         ) : (
           <ListRow
             title="Put money in"
@@ -209,7 +242,31 @@ export function InstrumentScreen() {
   );
 }
 
-const round4 = (units: number): number => Math.round(units * 10_000) / 10_000;
+/**
+ * A refusal in words, with its own threshold in it.
+ *
+ * CORE_RULES 13.15 and the 0307 loans lesson: five refusals that all read the
+ * same sentence tell a player nothing about what to change. Every line here
+ * names the number that has to move.
+ */
+function refusalFor(
+  code: string | undefined,
+  cash: number,
+  smallest: number,
+): string | undefined {
+  switch (code) {
+    case undefined:
+      return undefined;
+    case 'noCash':
+      return `You only have ${money(cash * 100)}.`;
+    case 'notEnoughForOneUnit':
+      return `That doesn't reach one of them. The smallest is ${money(smallest * 100)}.`;
+    case 'tooManyHoldings':
+      return 'You already hold fourteen different things. Sell one first.';
+    default:
+      return 'You cannot buy that one.';
+  }
+}
 
 const money = (inCents: number): string => `$${Math.round(inCents / 100).toLocaleString('en-US')}`;
 

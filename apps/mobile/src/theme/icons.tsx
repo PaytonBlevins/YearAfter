@@ -38,6 +38,7 @@ export type IconName =
   | 'collection'
   | 'shopping'
   | 'invest'
+  | 'news'
   | 'family'
   | 'friends'
   | 'love'
@@ -194,6 +195,22 @@ const DRAWINGS: Record<IconName, Drawing> = {
     <>
       <Path d="M3.4 17.2 9 11.6l3.6 3.6 7.4-7.4" strokeWidth={strokeWidth} />
       <Path d="M15.6 7.8h4.8v4.8" strokeWidth={strokeWidth} />
+    </>
+  ),
+
+  /*
+    News — a folded paper. The fold on the left is what makes it a NEWSPAPER
+    rather than a document at 20px; without it this is the same rectangle as
+    half a dozen other glyphs. Two column rules and a masthead bar, and nothing
+    else fits at this size.
+  */
+  news: ({ strokeWidth }) => (
+    <>
+      <Path d="M6.4 5.2h13.2v13.6a1.8 1.8 0 0 1-1.8 1.8H6.4Z" strokeWidth={strokeWidth} />
+      <Path d="M6.4 7.6H4.2v10.6a2.2 2.2 0 0 0 2.2 2.2" strokeWidth={strokeWidth} />
+      <Path d="M9 8.4h8" strokeWidth={strokeWidth} />
+      <Path d="M9 12h8" strokeWidth={strokeWidth} />
+      <Path d="M9 15.4h4.6" strokeWidth={strokeWidth} />
     </>
   ),
 

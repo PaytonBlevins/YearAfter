@@ -8,14 +8,17 @@
       "blurb": "Six miles before most people are awake.",
       "hoursPerWeek": 6,
       "requires": {
-        "stages": ["middle", "high"]
+        "stages": [
+          "middle",
+          "high"
+        ]
       },
       "tryout": {
         "label": "Try out",
         "stat": "health"
       },
       "tryoutText": "Made the cross-country team. First practice was at six in the morning.",
-      "cutText": "Did not make the cross-country squad by about ninety seconds.",
+      "cutText": "Didn't make the cross-country squad by about ninety seconds.",
       "effects": {
         "health": 5,
         "discipline": 3,
@@ -31,7 +34,10 @@
       "blurb": "Practice every night, games on Fridays.",
       "hoursPerWeek": 8,
       "requires": {
-        "stages": ["middle", "high"],
+        "stages": [
+          "middle",
+          "high"
+        ],
         "needsParent": true
       },
       "tryout": {
@@ -55,7 +61,9 @@
       "blurb": "Two-a-days in August. Everyone knows you by October.",
       "hoursPerWeek": 10,
       "requires": {
-        "stages": ["high"],
+        "stages": [
+          "high"
+        ],
         "needsParent": true
       },
       "tryout": {
@@ -70,7 +78,7 @@
         "willpower": 3
       },
       "joinText": "Made the football team. Two-a-days started in August.",
-      "leaveText": "Quit football. The coach did not take it well."
+      "leaveText": "Quit football. The coach didn't take it well."
     },
     {
       "id": "act.swimming",
@@ -81,8 +89,17 @@
       "annualCost": 180,
       "costSource": "swim team fees and a season of goggles",
       "requires": {
-        "stages": ["elementary", "middle", "high"],
-        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
+        "stages": [
+          "elementary",
+          "middle",
+          "high"
+        ],
+        "wealthAny": [
+          "modest",
+          "comfortable",
+          "affluent",
+          "wealthy"
+        ]
       },
       "tryout": {
         "label": "Try out",
@@ -106,7 +123,11 @@
       "annualCost": 95,
       "costSource": "league registration and a pair of cleats",
       "requires": {
-        "stages": ["elementary", "middle", "high"],
+        "stages": [
+          "elementary",
+          "middle",
+          "high"
+        ],
         "needsParent": true
       },
       "tryout": {
@@ -114,7 +135,7 @@
         "stat": "health"
       },
       "tryoutText": "Made the soccer team. Games are Saturday mornings, every Saturday.",
-      "cutText": "Did not make the soccer team. Somebody's dad read the list out.",
+      "cutText": "Didn't make the soccer team. Somebody's dad read the list out.",
       "effects": {
         "health": 5,
         "charisma": 2
@@ -129,14 +150,16 @@
       "blurb": "Cutting weight is a normal Tuesday.",
       "hoursPerWeek": 9,
       "requires": {
-        "stages": ["high"]
+        "stages": [
+          "high"
+        ]
       },
       "tryout": {
         "label": "Try out",
         "stat": "health"
       },
       "tryoutText": "Made the wrestling team. Cutting weight turned out to be most of it.",
-      "cutText": "Did not make weight for wrestling, and that was that.",
+      "cutText": "Didn't make weight for wrestling, and that was that.",
       "effects": {
         "health": 2,
         "willpower": 6,
@@ -152,14 +175,17 @@
       "blurb": "Spring season. Bus rides and a stopwatch.",
       "hoursPerWeek": 6,
       "requires": {
-        "stages": ["middle", "high"]
+        "stages": [
+          "middle",
+          "high"
+        ]
       },
       "tryout": {
         "label": "Try out",
         "stat": "health"
       },
       "tryoutText": "Made the track team. Spring meets, long bus rides, one stopwatch.",
-      "cutText": "Did not make the track team. The times were posted in the corridor.",
+      "cutText": "Didn't make the track team. The times were posted in the hallway.",
       "effects": {
         "health": 4,
         "discipline": 2,
@@ -177,8 +203,16 @@
       "annualCost": 216,
       "costSource": "a rented clarinet at $18 a month",
       "requires": {
-        "stages": ["middle", "high"],
-        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"],
+        "stages": [
+          "middle",
+          "high"
+        ],
+        "wealthAny": [
+          "modest",
+          "comfortable",
+          "affluent",
+          "wealthy"
+        ],
         "needsParent": true
       },
       "effects": {
@@ -196,7 +230,11 @@
       "blurb": "Six quiet weeks, then three of everything at once.",
       "hoursPerWeek": 8,
       "requires": {
-        "stages": ["elementary", "middle", "high"],
+        "stages": [
+          "elementary",
+          "middle",
+          "high"
+        ],
         "needsParent": true
       },
       "tryout": {
@@ -219,7 +257,11 @@
       "blurb": "Two concerts a year and a lot of standing on risers.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": ["elementary", "middle", "high"]
+        "stages": [
+          "elementary",
+          "middle",
+          "high"
+        ]
       },
       "effects": {
         "charisma": 3,
@@ -235,7 +277,10 @@
       "blurb": "Turpentine, and nobody hurrying you along.",
       "hoursPerWeek": 3,
       "requires": {
-        "stages": ["middle", "high"]
+        "stages": [
+          "middle",
+          "high"
+        ]
       },
       "effects": {
         "happiness": 4,
@@ -251,8 +296,12 @@
       "blurb": "Before school, for people who already play.",
       "hoursPerWeek": 6,
       "requires": {
-        "stages": ["high"],
-        "talentsAny": ["music"]
+        "stages": [
+          "high"
+        ],
+        "talentsAny": [
+          "music"
+        ]
       },
       "tryout": {
         "label": "Audition",
@@ -275,7 +324,11 @@
       "blurb": "Two hours a week and a slow, permanent improvement.",
       "hoursPerWeek": 2,
       "requires": {
-        "stages": ["elementary", "middle", "high"]
+        "stages": [
+          "elementary",
+          "middle",
+          "high"
+        ]
       },
       "effects": {
         "smarts": 4,
@@ -293,7 +346,10 @@
       "annualCost": 25,
       "costSource": "Science Olympiad registration, covered by the booster club",
       "requires": {
-        "stages": ["middle", "high"],
+        "stages": [
+          "middle",
+          "high"
+        ],
         "statAtLeast": {
           "smarts": 55
         }
@@ -312,7 +368,9 @@
       "blurb": "Weekend tournaments in other schools' cafeterias.",
       "hoursPerWeek": 6,
       "requires": {
-        "stages": ["high"],
+        "stages": [
+          "high"
+        ],
         "statAtLeast": {
           "charisma": 50
         },
@@ -323,7 +381,7 @@
         "stat": "charisma"
       },
       "tryoutText": "Made the debate team. Tournaments are weekends, in other schools' cafeterias.",
-      "cutText": "Did not make the debate team. You were told your rebuttals were thin.",
+      "cutText": "Didn't make the debate team. You were told your rebuttals were thin.",
       "effects": {
         "charisma": 5,
         "smarts": 3,
@@ -341,8 +399,16 @@
       "annualCost": 140,
       "costSource": "robotics team parts and entry fees",
       "requires": {
-        "stages": ["middle", "high"],
-        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
+        "stages": [
+          "middle",
+          "high"
+        ],
+        "wealthAny": [
+          "modest",
+          "comfortable",
+          "affluent",
+          "wealthy"
+        ]
       },
       "effects": {
         "smarts": 5,
@@ -358,7 +424,10 @@
       "blurb": "Before school. Nobody knows it exists.",
       "hoursPerWeek": 3,
       "requires": {
-        "stages": ["middle", "high"],
+        "stages": [
+          "middle",
+          "high"
+        ],
         "statAtLeast": {
           "smarts": 60
         }
@@ -376,7 +445,10 @@
       "blurb": "Deadlines in February that nobody warned you about.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": ["middle", "high"]
+        "stages": [
+          "middle",
+          "high"
+        ]
       },
       "effects": {
         "discipline": 3,
@@ -392,7 +464,10 @@
       "blurb": "You have to be elected. You can lose.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": ["middle", "high"],
+        "stages": [
+          "middle",
+          "high"
+        ],
         "statAtLeast": {
           "charisma": 58
         }
@@ -417,7 +492,9 @@
       "blurb": "A deadline every two weeks, forever.",
       "hoursPerWeek": 5,
       "requires": {
-        "stages": ["high"]
+        "stages": [
+          "high"
+        ]
       },
       "effects": {
         "smarts": 3,
@@ -434,7 +511,10 @@
       "blurb": "Saturday mornings at the food bank.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": ["middle", "high"]
+        "stages": [
+          "middle",
+          "high"
+        ]
       },
       "effects": {
         "happiness": 4,
@@ -453,7 +533,10 @@
       "annualCost": 70,
       "costSource": "scout dues and a uniform shirt",
       "requires": {
-        "stages": ["elementary", "middle"],
+        "stages": [
+          "elementary",
+          "middle"
+        ],
         "needsParent": true
       },
       "effects": {
@@ -471,7 +554,10 @@
       "blurb": "Improv games in a carpeted room, twice a week.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": ["middle", "high"]
+        "stages": [
+          "middle",
+          "high"
+        ]
       },
       "effects": {
         "charisma": 4,
@@ -487,7 +573,10 @@
       "blurb": "Tuesdays in the library, one box of paperbacks.",
       "hoursPerWeek": 2,
       "requires": {
-        "stages": ["elementary", "middle"]
+        "stages": [
+          "elementary",
+          "middle"
+        ]
       },
       "effects": {
         "smarts": 4,
@@ -503,7 +592,10 @@
       "blurb": "A room at lunch, no explaining required.",
       "hoursPerWeek": 2,
       "requires": {
-        "stages": ["middle", "high"]
+        "stages": [
+          "middle",
+          "high"
+        ]
       },
       "effects": {
         "happiness": 4,

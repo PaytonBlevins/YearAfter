@@ -22,12 +22,14 @@ import {
   INVESTMENTS_NOT_YET_BUILT,
   KIND_LABELS,
   MARKET_LABELS,
+  briefingFor,
   kindHealth,
   portfolioWorth,
   priceLine,
   priceOf,
   type InstrumentKind,
 } from '@yearafter/finance';
+import { describeCity } from '@yearafter/content';
 import { holdingsOf } from '@yearafter/simulation';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { PriceChart } from '../components/PriceChart';
@@ -83,6 +85,14 @@ export function InvestmentsScreen() {
           }, 0),
         )
       : [];
+
+  const briefing = briefingFor({
+    prices: state.prices,
+    market: state.market,
+    year: state.world.year,
+    city: describeCity(state.player.currentLocation.cityId).split(',')[0]!.trim(),
+    holdings: state.portfolio,
+  });
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -150,6 +160,25 @@ export function InvestmentsScreen() {
           body={`Last year was ${MARKET_LABELS[state.market]}. Pick a market below and see what things cost.`}
         />
       )}
+
+      {/*
+        THE FINANCIAL PAGES, and the row previews its own lead story rather than
+        describing itself. "Read the news" is a label; "Chemworth Falls 38% In A
+        Brutal Twelve Months" is a reason to tap. CORE_RULES 13.29 — a row that
+        OPENS something uses its subtitle to say what is behind it, and what is
+        behind this one changes every year.
+      */}
+      <SectionHeading>The news</SectionHeading>
+      <Card>
+        <ListRow
+          icon="news"
+          title={briefing.masthead}
+          subtitle={briefing.stories[0]?.text ?? 'A quiet year on the exchange'}
+          meta={`${briefing.stories.length} ${briefing.stories.length === 1 ? 'story' : 'stories'} · and what each market actually is`}
+          onPress={() => push({ screen: 'magazine', title: 'Financial news' })}
+          wrap
+        />
+      </Card>
 
       <SectionHeading>Markets</SectionHeading>
       <Card>

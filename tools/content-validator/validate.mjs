@@ -11,7 +11,8 @@
  *     save reproducibility and every golden-life test.
  */
 
-import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join, relative, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -1291,6 +1292,177 @@ if (existsSync(activitiesPath)) {
         fail(
           rel,
           `a "coming soon" note still starts at ${first}, which has already shipped (current: ${TICKET}).`,
+        );
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 8. The voice rules, on EVERY catalog (Ticket 0308d)
+// ---------------------------------------------------------------------------
+//
+// CORE_RULES 13.23 for the FIFTH time, and this one is the worst shape of it:
+// V10, V15 and V16 all live INSIDE the events-catalog block, bound to
+// `event.text` and `choice.label`. Every other catalog in the build — jobs,
+// activities, gigs, employers, instruments, and 0308d's headlines — has never
+// had a single line of its copy checked, in either form. The source sweep does
+// not cover them either: it walks `.ts` and `.tsx`, and all of those catalogs
+// are authored in PYTHON.
+//
+// Found by planting "The market does not care about the corridor" in
+// headlines.json and watching the validator report a clean pass. Nine catalogs,
+// 797 ids, and it was reading the ids of four of them and none of the words.
+//
+// It caught twenty real defects on its first run: six spelled-out "did not"s
+// and a "corridor" in activities, three "neighbour"s in gigs, three stiff
+// headlines, and "Data centres", "approval queue" and "A licence" in the
+// instrument blurbs — the last three shipping since 0308c.
+//
+// AND ONE FALSE POSITIVE THAT IS THE REASON FOR `inflected` BELOW: it wanted to
+// rename the company "Caltrow PETROLeum". That is CORE_RULES 13.35 exactly — a
+// rule scoped to a stem instead of a sense — so a stem now only matches when
+// what follows it is an actual inflection. `apologise`/`apologising` still
+// fire, which is why the prefix match existed; `petrol`/`petroleum` no longer
+// does.
+{
+  const INFLECTION = /^(s|d|r|rs|ed|es|ing|ment|ments)$/i;
+  const inflected = (stem, text) => {
+    const hit = new RegExp(`\\b(${stem})([a-z]*)`, 'gi');
+    for (const match of text.matchAll(hit)) {
+      if (match[2] === '' || INFLECTION.test(match[2])) return true;
+    }
+    return false;
+  };
+
+  // The events catalog already gets all of this, with better error messages.
+  const ALREADY_CHECKED = new Set(['packages/content/data/events-childhood.json']);
+
+  walk(contentDir, (file) => {
+    if (extname(file) !== '.json') return;
+    const rel = relative(ROOT, file);
+    if (ALREADY_CHECKED.has(rel)) return;
+
+    let data;
+    try {
+      data = JSON.parse(readFileSync(file, 'utf8'));
+    } catch {
+      return; // Section 3 already reported it.
+    }
+
+    // Every string in the file EXCEPT ids and other machine keys. An id is not
+    // copy, and 0207d proved that sweeping ids is how you break saved games.
+    const MACHINE = new Set(['id', 'ids', 'key', 'slug', 'ticker', 'kind', 'slot', 'when', 'tone', 'sector', 'cityId', 'countryCode', 'regionCode']);
+    const copy = [];
+    const collect = (value, key) => {
+      if (typeof value === 'string') {
+        if (!MACHINE.has(key)) copy.push(value);
+      } else if (Array.isArray(value)) {
+        for (const item of value) collect(item, key);
+      } else if (value && typeof value === 'object') {
+        for (const [k, v] of Object.entries(value)) collect(v, k);
+      }
+    };
+    collect(data, '');
+
+    for (const line of new Set(copy)) {
+      // Prose only, same test the source sweep uses: a capital at the front. A
+      // proper noun on its own ("Marlow & Pine") is a name, not a sentence.
+      if (!/^[A-Z{$]/.test(line) || line.length < 12) continue;
+
+      for (const [british, american] of BRITISH) {
+        if (inflected(british, line)) {
+          fail(rel, `"${british}" is British — use "${american}" — in: ${line.slice(0, 70)}`);
+        }
+      }
+      for (const [expanded, contracted] of EXPANDED) {
+        if (new RegExp(`\\b${expanded}\\b`, 'i').test(line)) {
+          fail(
+            rel,
+            `"${expanded}" reads as written rather than spoken — use "${contracted}" — ` +
+              `in: ${line.slice(0, 70)}`,
+          );
+        }
+      }
+      for (const vague of VAGUE) {
+        if (vague.test(line)) {
+          fail(
+            rel,
+            `"${line.match(vague)?.[0]}" is a summary rather than a thing that happened — ` +
+              `name a real detail — in: ${line.slice(0, 70)}`,
+          );
+        }
+      }
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// 9. A catalog has to match the generator that claims to author it (0308d)
+// ---------------------------------------------------------------------------
+//
+// `generate-instruments.py` could not reproduce `instruments.json`. Its bond
+// suffix had been changed from "Money back in 10." to "Money back in 10 years."
+// and nobody re-ran it, so the script's OWN self-check — which would have
+// failed on five over-length blurbs — never got the chance to fire. The catalog
+// on disk and the source of truth for it had been quietly different since
+// 0308c.
+//
+// Nothing could have caught that, because nothing ran the generators. Every
+// catalog in this build has a self-check and a validator section and a package
+// test — triple enforcement — and all three of those check the OUTPUT. None of
+// them check that the output is what the input produces.
+//
+// So: run each generator, compare, put the file back. If they match this costs
+// a few hundred milliseconds and changes nothing.
+{
+  const scriptsDir = join(ROOT, 'scripts');
+  let python = 'python3';
+  try {
+    execFileSync(python, ['--version'], { stdio: 'ignore' });
+  } catch {
+    notes.push('no python3 on this machine — generator reproducibility not checked');
+    python = '';
+  }
+
+  if (python && existsSync(scriptsDir)) {
+    for (const name of readdirSync(scriptsDir).sort()) {
+      if (!/^generate-.*\.py$/.test(name)) continue;
+      const script = join(scriptsDir, name);
+
+      // Which file does it write? Asking the script beats maintaining a table
+      // that goes stale the first time somebody adds a catalog.
+      // Two spellings in this repo: ROOT / "a/b/c.json" and
+      // ROOT / "a" / "b" / "c.json". Taking only the FIRST quoted piece turned
+      // the second shape into ROOT/packages — a directory — and the check blew
+      // up on its own first run.
+      const declared = /OUT_PATH = ROOT((?:\s*\/\s*"[^"]+")+)/.exec(readFileSync(script, 'utf8'));
+      if (!declared) continue;
+      const segments = [...declared[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+      const target = join(ROOT, ...segments);
+      const shown = segments.join('/');
+      if (!statSync(target, { throwIfNoEntry: false })?.isFile()) continue;
+      if (!existsSync(target)) continue;
+
+      const before = readFileSync(target);
+      try {
+        execFileSync(python, [script], { cwd: ROOT, stdio: 'ignore' });
+      } catch {
+        writeFileSync(target, before);
+        fail(
+          `scripts/${name}`,
+          `the generator fails its own self-check, so ${shown} cannot be reproduced. ` +
+            `Run it and read what it says.`,
+        );
+        continue;
+      }
+      const after = readFileSync(target);
+      if (!before.equals(after)) {
+        writeFileSync(target, before);
+        fail(
+          `scripts/${name}`,
+          `${shown} is not what this generator produces. Somebody edited the ` +
+            `script without re-running it, or edited the catalog by hand.`,
         );
       }
     }

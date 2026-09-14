@@ -75,12 +75,12 @@ def G(
 G("gig.lemonade", "Lemonade stand", "A table, a jug, and an inflated sense of business.",
   7, 11, 12, 45, 1, "the lemonade stand",
   ["Ran a lemonade stand all summer and took ${amount}. Overheads were somebody else's problem.",
-   "The lemonade stand cleared ${amount}, most of it from one very generous neighbour."],
+   "The lemonade stand cleared ${amount}, most of it from one very generous neighbor."],
   stat="charisma")
 
-G("gig.dog-walking", "Walking a neighbour's dog", "Every day after school, in all weathers.",
+G("gig.dog-walking", "Walking a neighbor's dog", "Every day after school, in all weathers.",
   9, 15, 60, 220, 2, "walking the Hallidays' dog",
-  ["Walked the neighbour's dog every day after school and made ${amount} doing it.",
+  ["Walked the neighbor's dog every day after school and made ${amount} doing it.",
    "The dog-walking money came to ${amount} over the year, and the dog liked you best."],
   stat="discipline")
 

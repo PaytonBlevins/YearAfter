@@ -38,6 +38,8 @@ export type ScreenKey =
   | 'market'
   /** Ticket 0308c. One instrument: its price, its past, and your position. */
   | 'instrument'
+  /** Ticket 0308d. The year's financial pages, and what the tiers actually are. */
+  | 'magazine'
   | 'homes'
   | 'vehicles'
   | 'businesses'

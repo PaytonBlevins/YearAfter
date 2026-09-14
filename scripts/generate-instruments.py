@@ -190,7 +190,7 @@ def bond(issuer: str, ident: str, term: int, coupon: float, blurb: str) -> None:
 stock("halcyonsys", "Halcyon Systems", "HLC", "technology", 214.40, 0.071, 0.24, 1.30, 0.004,
       "Sells the software everything else is quietly built on.")
 stock("verrell", "Verrell Compute", "VRL", "technology", 88.15, 0.082, 0.31, 1.45, 0.0,
-      "Data centres, and the electricity bill to match.")
+      "Data centers, and the electricity bill to match.")
 stock("aldermere", "Aldermere Labs", "ALD", "technology", 41.02, 0.064, 0.28, 1.38, 0.0,
       "Chip design. Brilliant, expensive, three years from revenue.")
 stock("pellowsoft", "Pellow & Co", "PLW", "technology", 132.77, 0.055, 0.19, 1.12, 0.011,
@@ -205,7 +205,7 @@ stock("cadmoor", "Cadmoor Health", "CDM", "health", 96.30, 0.049, 0.17, 0.82, 0.
 stock("lindorne", "Lindorne Pharma", "LDP", "health", 178.55, 0.058, 0.26, 0.95, 0.014,
       "One drug carrying the whole company on its back.")
 stock("prescott", "Prescott Devices", "PSD", "health", 64.20, 0.052, 0.21, 0.88, 0.012,
-      "Pacemakers, pumps, and a very long approval queue.")
+      "Pacemakers, pumps, and a very long wait for approval.")
 stock("marchbank", "Marchbank Clinics", "MBC", "health", 38.75, 0.041, 0.19, 0.79, 0.024,
       "Runs the clinics your insurer has heard of.")
 stock("windover", "Windover Genomics", "WNG", "health", 19.85, 0.069, 0.38, 1.41, 0.0,
@@ -282,7 +282,7 @@ stock("vaneflight", "Vane Networks", "VNE", "communication", 88.45, 0.054, 0.25,
 # Penny stocks — "invest in local companies"
 # ---------------------------------------------------------------------------
 
-penny("cobbet", "Cobbet Mining", "CBB", "energy", 0.62, "A licence, a hole, and a great deal of hope.")
+penny("cobbet", "Cobbet Mining", "CBB", "energy", 0.62, "A license, a hole, and a great deal of hope.")
 penny("stannard", "Stannard Timber", "STD", "industrial", 1.85, "Sawmill. One contract from either outcome.")
 penny("drumlin", "Drumlin Brewing", "DRB", "consumer", 3.40, "Four pubs and a rented brewery.")
 penny("westerby", "Westerby Diagnostics", "WBD", "health", 0.94, "One test, one patent, one customer.")
@@ -341,10 +341,10 @@ fund("smallcap", "Ninth Street Small Cap", "NSC", 45.75, 0.064, 0.19, 1.27, 0.00
 
 BOND_BLURB = {
     "Caldonian Government": "Home paper, and the safest thing here.",
-    "Rhenish Federal": "A large, boring, solvent neighbour.",
+    "Rhenish Federal": "A large, boring, solvent neighbor.",
     "Vasterby Kingdom": "Small, rich, pays more than it needs to.",
-    "Auralia Republic": "Pays well. There is a reason it pays well.",
-    "Sorrento States": "Sound enough, if you read the politics pages.",
+    "Auralia Republic": "Pays well. There's a reason for that.",
+    "Sorrento States": "Fine, if you read the politics pages.",
 }
 
 BONDS = [

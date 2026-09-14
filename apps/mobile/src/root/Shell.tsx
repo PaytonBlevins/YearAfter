@@ -20,6 +20,7 @@ import { LoansScreen } from '../screens/LoansScreen';
 import { InvestmentsScreen } from '../screens/InvestmentsScreen';
 import { MarketScreen } from '../screens/MarketScreen';
 import { InstrumentScreen } from '../screens/InstrumentScreen';
+import { MagazineScreen } from '../screens/MagazineScreen';
 import { DoctorScreen } from '../screens/DoctorScreen';
 import { DetailCard } from '../components/DetailCard';
 import { EndOfLifeCard } from '../components/EndOfLifeCard';
@@ -69,6 +70,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   investments: InvestmentsScreen,
   market: MarketScreen,
   instrument: InstrumentScreen,
+  magazine: MagazineScreen,
   relocate: RelocateScreen,
   family: FamilyScreen,
   friends: PeopleScreen,

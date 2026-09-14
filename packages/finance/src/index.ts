@@ -19,3 +19,6 @@ export * from './loans';
 export * from './investments';
 export * from './market';
 export * from './portfolio';
+
+/* The financial pages (Ticket 0308d). */
+export * from './briefing';

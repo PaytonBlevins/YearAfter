@@ -170,6 +170,103 @@ export function divest(
 }
 
 /* -------------------------------------------------------------------------- */
+/* What an amount would do, before it does it                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The answer to "what happens if I press this", computed by the same functions
+ * that press it.
+ *
+ * 0308d let the player type any amount instead of picking from three I chose,
+ * and the moment they can type $4,137 the screen owes them an answer about what
+ * $4,137 actually buys. The rounding is real and invisible: $5,000 into a
+ * $1,040 bond buys FOUR bonds and spends $4,160, not five and $5,000.
+ *
+ * THE PREVIEW GOES THROUGH `buyUnits` AND `sellUnits`, not through a second
+ * copy of the arithmetic on the screen. CORE_RULES 13.23: two derivations of
+ * the same number disagree eventually, and the one place they must never
+ * disagree is between what a button promises and what it does. This costs one
+ * throwaway holdings array per keystroke, which is nothing, and it means a
+ * change to the rounding rule cannot leave the label behind.
+ */
+export interface TradePreview {
+  /** Units this amount would move. Zero when it would do nothing. */
+  readonly units: number;
+  /** Whole dollars actually leaving (buy) or arriving (sell). */
+  readonly cash: number;
+  /** What leaving a bond early would cost, in whole dollars. */
+  readonly penalty: number;
+  readonly refusal: TradeRefusal | undefined;
+}
+
+const NOTHING_DOING: TradePreview = {
+  units: 0,
+  cash: 0,
+  penalty: 0,
+  refusal: 'notEnoughForOneUnit',
+};
+
+export function previewBuy(
+  state: GameState,
+  instrumentId: string,
+  dollars: number,
+): TradePreview {
+  const instrument = findInstrument(instrumentId);
+  if (!instrument) return { ...NOTHING_DOING, refusal: 'noSuchInstrument' };
+  const cash = Math.round(Number(state.player.cash) / 100);
+  const wanted = Math.max(0, Math.round(dollars));
+  if (wanted <= 0) return NOTHING_DOING;
+
+  const refusal = canBuy(state.prices, state.portfolio, instrument, wanted, cash);
+  if (refusal) return { ...NOTHING_DOING, refusal };
+
+  const bought = buyUnits(state.prices, state.portfolio, instrumentId, wanted);
+  if (bought.units <= 0) return NOTHING_DOING;
+  return { units: bought.units, cash: bought.spent, penalty: 0, refusal: undefined };
+}
+
+/**
+ * Selling, asked in MONEY rather than units.
+ *
+ * A player thinks "take out three thousand", not "sell 29.0698 shares", and the
+ * symmetry with buying is worth more than the literal truth that a sale is
+ * denominated in units. The units are derived here and shown in the preview, so
+ * nothing is hidden — only reordered.
+ *
+ * THE AMOUNT ASKED FOR IS NOT ALWAYS THE AMOUNT THAT ARRIVES, and the preview
+ * says which. Asking for $3,000 of a bond four years early sells $3,000 of bond
+ * and puts $2,640 in the bank. Selling more units to make the arrival land on
+ * $3,000 would be the tidier number and the worse behaviour: it spends more of
+ * the player's position than they asked for, to hit a figure they would not
+ * have known to check.
+ */
+export function previewSell(
+  state: GameState,
+  instrumentId: string,
+  dollars: number,
+): TradePreview {
+  const holding = state.portfolio.find((row) => row.instrumentId === instrumentId);
+  if (!holding) return { ...NOTHING_DOING, refusal: 'nothingHeld' };
+  const price = priceOf(state.prices, instrumentId);
+  if (price <= 0) return { ...NOTHING_DOING, refusal: 'noSuchInstrument' };
+
+  const wanted = Math.max(0, Math.round(dollars));
+  if (wanted <= 0) return NOTHING_DOING;
+
+  // Capped at the position, so "sell $1,000,000" of a $400 holding sells the
+  // holding rather than refusing over a number the player meant as "all of it".
+  const units = Math.min(holding.units, (wanted * 100) / price);
+  const sale = sellUnits(state.prices, state.portfolio, instrumentId, units);
+  if (sale.units <= 0 || sale.raised <= 0) return NOTHING_DOING;
+  return {
+    units: sale.units,
+    cash: sale.raised,
+    penalty: sale.penalty,
+    refusal: undefined,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
 /* What the screens read                                                       */
 /* -------------------------------------------------------------------------- */
 

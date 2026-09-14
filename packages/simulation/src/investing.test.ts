@@ -31,7 +31,15 @@ import { createNewGame } from './new-game';
 import { advanceYear } from './advance';
 import { decide } from './decide';
 import { applyFor, openings, workHarder } from './careers';
-import { divest, estateOf, holdingsOf, invest, marketFor } from './investments';
+import {
+  divest,
+  estateOf,
+  holdingsOf,
+  invest,
+  marketFor,
+  previewBuy,
+  previewSell,
+} from './investments';
 import type { GameState } from './game-state';
 
 /** A character who worked, earned, and has money in the bank. */
@@ -371,5 +379,129 @@ describe('every id this code names actually exists', () => {
       expect(priceOf(state.prices, instrument.id), instrument.id).toBeGreaterThan(0);
     }
     expect(money(1_234)).toBe('$1,234');
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0308d — the typed amount, and the promise the screen makes about it  */
+/* -------------------------------------------------------------------------- */
+
+describe('what a typed amount would do', () => {
+  /*
+    The preview exists because the player can now type any number, and the
+    number they type is not always the number that moves: buying rounds down to
+    whole units, hard on a bond, and selling a bond early arrives smaller than
+    it left.
+
+    So the thing worth asserting is NOT that the preview returns a figure. It is
+    that the figure is the one the trade then moves. A preview that drifts from
+    its trade is worse than no preview at all, because the player believed it.
+  */
+  const richEnough = (): GameState => {
+    const state = working('preview-1', 45);
+    return state;
+  };
+
+  it('promises exactly what a buy then spends, at every amount', () => {
+    const state = richEnough();
+    const cash = Math.round(Number(state.player.cash) / 100);
+    expect(cash, 'the test character needs money to be a test').toBeGreaterThan(5_000);
+
+    const bond = INSTRUMENTS.find((row) => row.kind === 'bond')!;
+    const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
+
+    for (const instrument of [bond, share]) {
+      for (const amount of [1, 137, 1_009, 4_137, Math.floor(cash / 2)]) {
+        const preview = previewBuy(state, instrument.id, amount);
+        const done = invest(state, instrument.id, amount);
+
+        if (preview.refusal !== undefined || preview.units === 0) {
+          expect(done.ok, `${instrument.id} at ${amount} previewed a refusal`).toBe(false);
+          continue;
+        }
+        expect(done.ok, `${instrument.id} at ${amount}`).toBe(true);
+        if (!done.ok) continue;
+
+        const spent = cash - Math.round(Number(done.value.state.player.cash) / 100);
+        expect(spent, `${instrument.id} at ${amount}: spent vs promised`).toBe(preview.cash);
+        const holding = done.value.state.portfolio.find(
+          (row) => row.instrumentId === instrument.id,
+        );
+        expect(holding?.units, `${instrument.id} at ${amount}: units`).toBe(preview.units);
+      }
+    }
+  });
+
+  it('rounds a bond down rather than charging what was asked', () => {
+    const state = richEnough();
+    const bond = INSTRUMENTS.find((row) => row.kind === 'bond')!;
+    const unit = priceOf(state.prices, bond.id) / 100;
+    const asked = Math.round(unit * 4.6);
+    if (asked > Math.round(Number(state.player.cash) / 100)) return;
+
+    const preview = previewBuy(state, bond.id, asked);
+    expect(preview.units).toBe(4);
+    expect(preview.cash).toBeLessThan(asked);
+  });
+
+  it('names WHICH wall an amount hit, not just that there was one', () => {
+    const state = richEnough();
+    const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
+    const cash = Math.round(Number(state.player.cash) / 100);
+
+    // Three different problems have to give three different answers, or the
+    // player cannot tell which number to change (CORE_RULES 13.49).
+    expect(previewBuy(state, share.id, cash * 10).refusal).toBe('noCash');
+    expect(previewBuy(state, 'no.such.thing', 100).refusal).toBe('noSuchInstrument');
+    const bond = INSTRUMENTS.find((row) => row.kind === 'bond')!;
+    expect(previewBuy(state, bond.id, 1).refusal).toBe('notEnoughForOneUnit');
+  });
+
+  it('says nothing at all about an empty field', () => {
+    const state = richEnough();
+    const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
+    expect(previewBuy(state, share.id, 0).units).toBe(0);
+  });
+
+  it('promises exactly what a sell then raises', () => {
+    let state = richEnough();
+    const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
+    const cash = Math.round(Number(state.player.cash) / 100);
+    const bought = invest(state, share.id, Math.floor(cash / 2));
+    expect(bought.ok).toBe(true);
+    if (!bought.ok) return;
+    state = bought.value.state;
+
+    const held = state.portfolio.find((row) => row.instrumentId === share.id)!;
+    const worth = Math.round((held.units * priceOf(state.prices, share.id)) / 100);
+    const before = Math.round(Number(state.player.cash) / 100);
+
+    for (const amount of [50, Math.round(worth / 3), worth]) {
+      const preview = previewSell(state, share.id, amount);
+      if (preview.units === 0) continue;
+      const done = divest(state, share.id, preview.units);
+      expect(done.ok, `selling ${amount}`).toBe(true);
+      if (!done.ok) continue;
+      const raised = Math.round(Number(done.value.state.player.cash) / 100) - before;
+      expect(raised, `selling ${amount}: raised vs promised`).toBe(preview.cash);
+    }
+  });
+
+  it('treats an absurd sell amount as "everything" rather than refusing it', () => {
+    let state = richEnough();
+    const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
+    const cash = Math.round(Number(state.player.cash) / 100);
+    const bought = invest(state, share.id, Math.floor(cash / 2));
+    if (!bought.ok) return;
+    state = bought.value.state;
+    const held = state.portfolio.find((row) => row.instrumentId === share.id)!;
+
+    expect(previewSell(state, share.id, 999_999_999).units).toBeCloseTo(held.units, 4);
+  });
+
+  it('has nothing to say about something the character does not hold', () => {
+    const state = richEnough();
+    const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
+    expect(previewSell(state, share.id, 100).refusal).toBe('nothingHeld');
   });
 });
