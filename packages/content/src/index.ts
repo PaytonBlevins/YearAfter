@@ -115,5 +115,8 @@ export * from './activities';
 /** Ticket 0206b — odd jobs a child can actually do for money. */
 export * from './gigs';
 
+/* Investable instruments (Ticket 0308c)                                       */
+export * from './instruments';
+
 /** Ticket 0210 — real jobs, with salaries and ladders. */
 export * from './jobs';

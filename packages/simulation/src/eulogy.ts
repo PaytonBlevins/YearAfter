@@ -333,5 +333,4 @@ export const RITES: readonly Rite[] = [
 export const findRite = (id: string): Rite | undefined => RITES.find((rite) => rite.id === id);
 
 /** Whether anybody is eligible to be continued as. Ticket 0212's other half. */
-export const heirsOf = (state: GameState): readonly FamilyMember[] =>
-  livingChildren(state.family);
+export const heirsOf = (state: GameState): readonly FamilyMember[] => livingChildren(state.family);

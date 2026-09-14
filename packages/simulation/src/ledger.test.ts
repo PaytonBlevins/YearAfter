@@ -64,7 +64,9 @@ function playHard(seed: string, years = 70): GameState {
       const app = useDatingApp(state);
       if (app.ok) state = app.value.state;
       const candidates = [...state.circle.people]
-        .filter((person) => person.kind === 'peer' && person.endedAtAge === undefined && person.alive)
+        .filter(
+          (person) => person.kind === 'peer' && person.endedAtAge === undefined && person.alive,
+        )
         .sort((left, right) => right.relationship - left.relationship);
       for (const person of candidates.slice(0, 3)) {
         const moves = movesFor(person, state.player.age, Number(state.player.cash)).filter(
@@ -210,7 +212,11 @@ describe('what the ledger now knows that nothing knew before', () => {
     // mostly noise, and spec 21 keeps this backend precisely so it can be
     // complete rather than readable.
     for (const state of LIVES) {
-      expect(state.finance.transactions.every((entry) => Number(entry.amount) !== 0 || entry.category === 'shortfall')).toBe(true);
+      expect(
+        state.finance.transactions.every(
+          (entry) => Number(entry.amount) !== 0 || entry.category === 'shortfall',
+        ),
+      ).toBe(true);
     }
   });
 

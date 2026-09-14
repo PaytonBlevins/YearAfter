@@ -212,6 +212,9 @@ importers:
 
   packages/finance:
     dependencies:
+      '@yearafter/content':
+        specifier: workspace:*
+        version: link:../content
       '@yearafter/core':
         specifier: workspace:*
         version: link:../core

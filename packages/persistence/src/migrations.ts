@@ -20,6 +20,7 @@ import {
   type Ledger,
 } from '@yearafter/finance';
 import { CHARGED_FROM_AGE } from '@yearafter/simulation';
+import { findInstrument } from '@yearafter/finance';
 import { CURRENT_SAVE_VERSION, type CurrentSaveGame } from './save-schema';
 
 export type MigrationError =
@@ -624,6 +625,83 @@ const migrations: Readonly<Record<number, Migration>> = {
     portfolio: save['portfolio'] ?? [],
     market: save['market'] ?? 'normal',
   }),
+
+  /**
+   * v22 -> v23: Ticket 0308c replaces seven category products with a catalog of
+   * eighty-nine named instruments, and holdings become UNITS at a price.
+   *
+   * NOBODY LOSES A PENNY. A v22 holding is `{ productId, contributed, value }` —
+   * a dollar blob. Each old product maps to the instrument that best stands for
+   * it, and the units are whatever that instrument's opening price buys with
+   * the blob's CURRENT VALUE, so a portfolio worth $84,210 before the migration
+   * is worth $84,210 after it. What was paid carries across untouched, so a
+   * holding that was up stays up by the same amount.
+   *
+   * The alternative — clear the portfolio and refund the cash — was rejected
+   * because it turns a market position into a bank balance behind the player's
+   * back, which is a decision the game would be making for them.
+   */
+  22: (save) => {
+    /*
+      Each old category becomes the named instrument that best stands for it.
+      Bonds keep a term, so they keep `maturesIn` too.
+    */
+    const becomes: Record<string, string> = {
+      'inv.govbonds': 'bd.cald10',
+      'inv.corpbonds': 'bd.rhen7',
+      'inv.indexfund': 'fd.broadindex',
+      'inv.managedfund': 'fd.keelworthactive',
+      // The old blue-chip and growth buckets become the names closest to what
+      // they described: a large dull payer, and a volatile technology one.
+      'inv.bluechip': 'eq.bramble',
+      'inv.growth': 'eq.verrell',
+      'inv.crypto': 'cx.meridiancoin',
+    };
+
+    const old = (save['portfolio'] as readonly Record<string, unknown>[] | undefined) ?? [];
+    const portfolio = old
+      .map((holding) => {
+        const instrumentId = becomes[String(holding['productId'] ?? '')];
+        const instrument = instrumentId ? findInstrument(instrumentId) : undefined;
+        if (!instrument) return undefined;
+
+        /*
+          UNITS COME FROM THE TARGET'S PRICE, which sounds obvious and was wrong
+          in the first version: the table held the OLD product's notional price,
+          so a $21,000 crypto holding was divided by $1,240 instead of $18,400
+          and came out fifteen times too valuable. A migration test caught it,
+          and only because it checked the MONEY rather than the shape.
+
+          Reading the live catalog rather than freezing the prices here is
+          deliberate. If a price is ever retuned, a save migrating afterwards
+          gets a different unit count and the SAME VALUE — and value is the
+          invariant that matters to the person who owns it.
+        */
+        const value = Number(holding['value'] ?? 0);
+        const units = Math.round((value / instrument.priceCents) * 10_000) / 10_000;
+        if (units <= 0) return undefined;
+
+        const maturesIn = holding['maturesIn'];
+        return {
+          instrumentId,
+          units,
+          // What they paid carries across untouched, so a holding that was up
+          // stays up by the same amount.
+          paid: Number(holding['contributed'] ?? value),
+          ...(typeof maturesIn === 'number' && maturesIn > 0 ? { maturesIn } : {}),
+        };
+      })
+      .filter((row) => row !== undefined);
+
+    return {
+      ...save,
+      version: 23,
+      portfolio,
+      // An empty price book reads as "every instrument at its opening price",
+      // which is exactly right for a save that has never seen a market.
+      prices: save['prices'] ?? { history: {} },
+    };
+  },
 };
 
 /**

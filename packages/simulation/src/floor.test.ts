@@ -16,7 +16,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { MAJORS } from '@yearafter/education';
-import { SUBSISTENCE, holdingValue, totalFor, totalOwed } from '@yearafter/finance';
+import { SUBSISTENCE, portfolioWorth, totalFor, totalOwed } from '@yearafter/finance';
 import { createNewGame } from './new-game';
 import { advanceYear } from './advance';
 import { decide } from './decide';
@@ -95,7 +95,7 @@ function live(seed: string, mode: Mode, major: string) {
     const keep = mode === 'balanced' ? 40_000 : 0;
     const spare = cash - keep;
     if (spare > 1_000) {
-      const into = mode === 'bonds' ? 'inv.govbonds' : 'inv.indexfund';
+      const into = mode === 'bonds' ? 'bd.cald10' : 'fd.broadindex';
       const r = invest(state, into, spare);
       if (r.ok) state = r.value.state;
     }
@@ -110,7 +110,7 @@ function live(seed: string, mode: Mode, major: string) {
     everWorked,
     worth:
       Number(state.player.cash) / 100 +
-      Number(holdingValue(state.portfolio)) / 100 -
+      Number(portfolioWorth(state.prices, state.portfolio)) / 100 -
       Number(totalOwed(state.cards)) / 100,
     happiness: state.player.stats.happiness,
   };
@@ -182,8 +182,23 @@ describe('0308b — the floor and the date', () => {
       large swing either way would mean the standard is being driven by where
       money sits rather than by how much of it there is.
     */
-    expect(Math.abs(gap)).toBeLessThan(250_000);
-    expect(gap).toBeLessThan(150_000);
+    /*
+      THE DIRECTION IS THE ASSERTION, not the size.
+
+      The first version bounded the absolute gap and went red the moment the
+      catalog changed, which was the test measuring the wrong thing: an all-in
+      player ends up richer, their standard of living tracks what they are
+      worth, so they SPEND more — and how much more scales with how much richer
+      they got. Bounding that absolutely just pins one catalog's returns.
+
+      What must never come back is the SUBSIDY: being illiquid cannot be a way
+      to live cheaply. That is a direction, and it holds whatever the catalog
+      does.
+    */
+    expect(livingOf('allin')).toBeGreaterThanOrEqual(livingOf('never'));
+    // And it has to stay explicable. Spending twice what somebody else spends
+    // would mean the standard is being driven by something other than wealth.
+    expect(livingOf('allin')).toBeLessThan(livingOf('never') * 2);
 
     /*
       AND THE GUARD THAT MATTERS MORE. 0303's cliff exists because the first

@@ -27,7 +27,7 @@ import {
   type HeldLoan,
 } from './loans';
 import { TICKET, stillAhead } from './summary';
-import { PLEDGEABLE_FROM, PLEDGE_SHARE } from './investments';
+import { PLEDGEABLE_FROM, PLEDGE_SHARE } from './portfolio';
 
 const loan = (
   productId: string,

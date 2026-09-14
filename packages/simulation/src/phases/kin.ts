@@ -301,7 +301,12 @@ export function lineFor(death: KinDeath): string {
  */
 function liveAYear(member: FamilyMember, theirAge: number, input: KinPhaseInput): FamilyMember {
   if (theirAge < SCHOOL_STARTS) return member;
-  const rolls = [input.stream.next(), input.stream.next(), input.stream.next(), input.stream.next()];
+  const rolls = [
+    input.stream.next(),
+    input.stream.next(),
+    input.stream.next(),
+    input.stream.next(),
+  ];
   const life = (member.life as OffspringLife | undefined) ?? NEW_OFFSPRING_LIFE;
   const next = runOffspringYear(life, {
     age: theirAge,

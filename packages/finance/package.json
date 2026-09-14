@@ -13,7 +13,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@yearafter/core": "workspace:*"
+    "@yearafter/core": "workspace:*",
+    "@yearafter/content": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3",

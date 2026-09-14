@@ -38,7 +38,9 @@ function playToDeath(seed: string): GameState {
       const app = useDatingApp(state);
       if (app.ok) state = app.value.state;
       const candidates = [...state.circle.people]
-        .filter((person) => person.kind === 'peer' && person.endedAtAge === undefined && person.alive)
+        .filter(
+          (person) => person.kind === 'peer' && person.endedAtAge === undefined && person.alive,
+        )
         .sort((left, right) => right.relationship - left.relationship);
       for (const person of candidates.slice(0, 3)) {
         const moves = movesFor(person, state.player.age, Number(state.player.cash)).filter(
@@ -101,7 +103,13 @@ describe('the end of a life', () => {
       { id: 'd', category: 'family' as const, age: 70, year: 2070, label: 'Lost Kit' },
       { id: 'e', category: 'family' as const, age: 75, year: 2075, label: 'Lost Ray' },
       { id: 'f', category: 'career' as const, age: 19, year: 2019, label: 'First job — Server' },
-      { id: 'g', category: 'education' as const, age: 18, year: 2018, label: 'Graduated high school' },
+      {
+        id: 'g',
+        category: 'education' as const,
+        age: 18,
+        year: 2018,
+        label: 'Graduated high school',
+      },
     ];
     const picked = highlightsOf(records).map((record) => record.label);
     expect(picked).toContain('First job — Server');

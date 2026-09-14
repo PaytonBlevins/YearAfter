@@ -26,7 +26,7 @@
 
 import { dollars, err, ok, type Result } from '@yearafter/core';
 import {
-  holdingValue,
+  portfolioWorth,
   applyForCard,
   creditReport,
   findProduct,
@@ -72,7 +72,7 @@ export const standingFor = (state: GameState): CreditReport => {
     // Ticket 0308. The portfolio counts towards what they are worth, which is
     // what finally lets a credit standing be earned on something other than a
     // salary (CORE_RULES 13.49).
-    Number(holdingValue(state.portfolio)) / 100,
+    Number(portfolioWorth(state.prices, state.portfolio)) / 100,
   );
 };
 

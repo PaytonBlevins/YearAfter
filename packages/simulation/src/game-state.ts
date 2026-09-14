@@ -23,12 +23,14 @@ import {
   EMPTY_PORTFOLIO,
   NEW_HOUSEHOLD,
   OPENING_MARKET,
+  openingPrices,
   type HeldCard,
   type HeldLoan,
   type Holding,
   type HouseholdFinances,
   type Ledger,
   type MarketState,
+  type PriceBook,
 } from '@yearafter/finance';
 import { Rng } from './rng/rng';
 
@@ -166,6 +168,15 @@ export interface GameState {
   readonly portfolio: readonly Holding[];
   readonly market: MarketState;
   /**
+   * Ticket 0308c. Every instrument's price history, oldest first.
+   *
+   * Beside the portfolio rather than inside it, because prices exist whether or
+   * not this character owns anything — the market list shows all eighty-nine
+   * with or without a holding, and a price book that only tracked what somebody
+   * held would have nothing to draw a chart from the moment they sold.
+   */
+  readonly prices: PriceBook;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -190,6 +201,7 @@ export interface CreateGameStateOptions {
   readonly loans?: readonly HeldLoan[];
   readonly portfolio?: readonly Holding[];
   readonly market?: MarketState;
+  readonly prices?: PriceBook;
   readonly family?: Household;
   readonly nameCultureId?: string;
   readonly events?: EventHistory;
@@ -222,6 +234,7 @@ export const createGameState = (
   loans: options.loans ?? EMPTY_LOANS,
   portfolio: options.portfolio ?? EMPTY_PORTFOLIO,
   market: options.market ?? OPENING_MARKET,
+  prices: options.prices ?? openingPrices(),
   pending: options.pending ?? [],
   rng,
 });

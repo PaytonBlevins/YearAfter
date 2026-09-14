@@ -165,15 +165,14 @@ describe('the contract 0306 and 0307 get', () => {
 
   it('names the inputs that do not exist yet, so they are not silent zeroes', () => {
     /*
-      Spec 25 lists six inputs. Debt load needs a debt, so it cannot exist
-      before 0307, and a model that folded it in as zero would be quietly
-      asserting that every character owes nothing. Same device as
-      `UNWRITTEN_CATEGORIES` and `NOT_YET_OWNED`; this test is the note to the
-      ticket that retires it.
+      EMPTY, and it took three tickets to get there. Spec 25 lists six inputs;
+      four had producers in 0305, utilisation arrived with 0306's cards and debt
+      load with 0307's loans.
 
-      `utilization` was here too until 0306 gave the game cards to utilise —
-      which is the list doing exactly what it is for.
+      The list stays rather than being deleted, because it is what made each gap
+      deliberate rather than forgotten — and because an empty one is a
+      statement: there is nothing left this model pretends to know and does not.
     */
-    expect(CREDIT_INPUTS_NOT_YET_BUILT.map((row) => row.key)).toEqual(['debtLoad']);
+    expect(CREDIT_INPUTS_NOT_YET_BUILT).toHaveLength(0);
   });
 });

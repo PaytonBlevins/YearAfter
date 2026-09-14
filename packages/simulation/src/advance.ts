@@ -48,13 +48,14 @@ import {
   drawFrom,
   drawableOn,
   findProduct,
-  holdingValue,
+  portfolioWorth,
   reconcile,
   reconcileByYear,
   runCardYear,
   runLoanYear,
   nextMarketState,
-  runMarketYear,
+  runHoldingYear,
+  runPriceYear,
   yearsOutside,
   type NewTransaction,
 } from '@yearafter/finance';
@@ -63,7 +64,7 @@ import { runLiving } from './phases/living';
 import { runSocial } from './phases/social';
 import { runHealth } from './phases/health';
 import { runStress } from './phases/stress';
-import { costIndexOf, findActivity } from '@yearafter/content';
+import { INSTRUMENTS, SECTORS, costIndexOf, findActivity } from '@yearafter/content';
 import { nameContext, uniqueFirstName } from './social-generator';
 import { RngDomains } from './rng/rng';
 
@@ -268,7 +269,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     credit: state.cards.reduce((sum, card) => sum + Math.floor(Number(drawableOn(card)) / 100), 0),
     // Ticket 0308b. What they hold in the market — see `portfolio` on the
     // input. Being illiquid is not the same as being destitute.
-    portfolio: Math.floor(Number(holdingValue(state.portfolio)) / 100),
+    portfolio: Math.floor(Number(portfolioWorth(state.prices, state.portfolio)) / 100),
     earned: employment.earned,
     ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
       ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }
@@ -477,11 +478,25 @@ export function advanceYear(state: GameState): AdvanceResult {
   */
   const marketRoll = state.rng.stream(RngDomains.Economy);
   const market = nextMarketState(state.market, marketRoll.next());
-  const marketYear = runMarketYear(
-    state.portfolio,
+  /*
+    Ticket 0308c. EVERY instrument's price moves, not only the ones held — the
+    market list shows all eighty-nine whether or not this character owns
+    anything, and a price chart needs a past that exists regardless of who was
+    holding at the time.
+
+    Sector rolls first, then one per instrument in catalog order. The order
+    matters: a life has to replay identically from its seed, and the stream is
+    consumed positionally.
+  */
+  const prices = runPriceYear(
+    state.prices,
     market,
-    state.portfolio.map(() => marketRoll.next()),
-  );
+    SECTORS.map(() => marketRoll.next()),
+    INSTRUMENTS.map(() => marketRoll.next()),
+  ).prices;
+  // Then what the holdings themselves did: coupons, dividends, and any bond
+  // that reached its date. Against prices that have ALREADY moved.
+  const marketYear = runHoldingYear(prices, state.portfolio);
   /*
     Ticket 0308b. A matured bond's principal is an `investment` row, not
     `assetIncome` — it is the money coming back across the same line it went
@@ -490,7 +505,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     and stays where it was.
   */
   const payouts: readonly NewTransaction[] = marketYear.income.map((row) => ({
-    category: row.source.endsWith('— matured') ? ('investment' as const) : ('assetIncome' as const),
+    category: row.matured ? ('investment' as const) : ('assetIncome' as const),
     amount: row.amount,
     source: row.source,
   }));
@@ -730,6 +745,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       // they will face next year.
       portfolio: marketYear.holdings,
       market,
+      prices,
       // Ticket 0303. The standard of living and whether they pay for a roof —
       // both carried forward, because a standard with no memory is a share of
       // income by another name.

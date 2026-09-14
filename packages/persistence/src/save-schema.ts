@@ -21,6 +21,7 @@ import type {
   HouseholdFinances,
   Ledger,
   MarketState,
+  PriceBook,
 } from '@yearafter/finance';
 import type { HealthState } from '@yearafter/health';
 import type { EventHistory, PendingDecision } from '@yearafter/events';
@@ -28,7 +29,7 @@ import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 22;
+export const CURRENT_SAVE_VERSION = 23;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -84,7 +85,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 22;
+  readonly version: 23;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -135,6 +136,8 @@ export interface SaveGameV18 {
   /** Ticket 0308: what is invested, and the market it is invested in. */
   readonly portfolio: readonly Holding[];
   readonly market: MarketState;
+  /** Ticket 0308c: every instrument's price history. */
+  readonly prices: PriceBook;
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

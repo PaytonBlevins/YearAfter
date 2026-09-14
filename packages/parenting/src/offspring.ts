@@ -160,10 +160,7 @@ export const MAX_RUNG = 5;
  * block of draws, and returns what is true now. It knows nothing about
  * GameState, households or the RNG registry.
  */
-export function runOffspringYear(
-  life: OffspringLife,
-  input: OffspringYearInput,
-): OffspringLife {
+export function runOffspringYear(life: OffspringLife, input: OffspringYearInput): OffspringLife {
   const { age, year } = input;
   const roll = (index: number): number => input.rolls[index] ?? 0.5;
   let next = life;
@@ -279,7 +276,8 @@ export function offspringStatus(life: OffspringLife, age: number): string | unde
   if (life.stage === 'child') return undefined;
   if (life.stage === 'school') return age >= 12 ? 'At school' : undefined;
   if (life.stage === 'college') return 'At college';
-  if (life.stage === 'retired') return life.jobTitle ? `Retired — was a ${life.jobTitle.toLowerCase()}` : 'Retired';
+  if (life.stage === 'retired')
+    return life.jobTitle ? `Retired — was a ${life.jobTitle.toLowerCase()}` : 'Retired';
   if (life.jobTitle) return life.jobTitle;
   return life.leftSchoolEarly ? 'Left school early' : 'Looking for work';
 }

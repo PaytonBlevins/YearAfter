@@ -61,7 +61,14 @@ import {
   type LifeRecord,
   type TimelineEntry,
 } from '@yearafter/character';
-import { asCharacterId, asNpcId, cents, clampStat, stableUnit, type StatValue } from '@yearafter/core';
+import {
+  asCharacterId,
+  asNpcId,
+  cents,
+  clampStat,
+  stableUnit,
+  type StatValue,
+} from '@yearafter/core';
 import { EMPTY_LEDGER, cashFrom, post, type Ledger } from '@yearafter/finance';
 import { NOT_YET_ENROLLED, type EducationState } from '@yearafter/education';
 import { EMPTY_HISTORY } from '@yearafter/events';
@@ -303,7 +310,8 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
     // Stable on the child's own id rather than drawn, for the same reason the
     // heir's stats are: backing out of the continuation and trying again must
     // not produce a different family.
-    sex: stableUnit(`${heir.id}:child:${index}:sex`) < 0.5 ? ('male' as const) : ('female' as const),
+    sex:
+      stableUnit(`${heir.id}:child:${index}:sex`) < 0.5 ? ('male' as const) : ('female' as const),
     birthYear: year,
     alive: true,
     tier: 2,

@@ -1247,6 +1247,57 @@ if (existsSync(activitiesPath)) {
 }
 
 // ---------------------------------------------------------------------------
+// 7. Placeholders that outlived their ticket (Ticket 0308c, CORE_RULES 13.51)
+//
+// The shells label every unbuilt row with the ticket that builds it, which is
+// good practice and has now gone stale four separate times — most recently the
+// Assets tab, which said "Investments — Not built yet" for three tickets after
+// investments shipped, because the only route in was through Finances and
+// nobody came back.
+//
+// The pattern is always the same: a promise naming a ticket is invisible once
+// that ticket lands, because nothing compares the name to what has been built.
+// `NOT_YET_OWNED` got a `stillAhead` guard in 0308; this is the same guard for
+// the placeholders that live in TSX, where there is no test runner to hold it.
+//
+// `TICKET` is the most recent ticket to ship. Bump it when one does.
+// ---------------------------------------------------------------------------
+{
+  const TICKET = '0308';
+  const rank = (value) =>
+    /^\d{4}$/.test(value)
+      ? Number(value)
+      : Number(value.replace(/^v(\d)\.(\d\d)$/, '$1$2')) * 100 + 99;
+  const now = rank(TICKET);
+
+  const shells = ['apps/mobile/src/screens/shells.tsx'];
+  for (const rel of shells) {
+    const full = join(ROOT, rel);
+    if (!existsSync(full)) continue;
+    const text = readFileSync(full, 'utf8');
+    for (const match of text.matchAll(/ticket:\s*'(\d{4}|v\d\.\d\d)'/g)) {
+      const named = match[1];
+      if (rank(named) <= now) {
+        fail(
+          rel,
+          `a row is still labelled "Not built yet" for ticket ${named}, which has already shipped (current: ${TICKET}). Wire the row up or move the label.`,
+        );
+      }
+    }
+    for (const match of text.matchAll(/<ComingSoon ticket="([^"]+)"/g)) {
+      // A range like "0309–0310" is fine as long as its FIRST ticket is ahead.
+      const first = match[1].split(/[–-]/)[0].trim();
+      if (/^(\d{4}|v\d\.\d\d)$/.test(first) && rank(first) <= now) {
+        fail(
+          rel,
+          `a "coming soon" note still starts at ${first}, which has already shipped (current: ${TICKET}).`,
+        );
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 for (const note of notes) console.log(`note  ${note}`);
 

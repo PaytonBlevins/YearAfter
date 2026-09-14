@@ -38,7 +38,7 @@ import {
   schoolLabel,
 } from '@yearafter/education';
 import { isCurrent, partnerOf, stagesFor } from '@yearafter/social';
-import { livingCostFor } from '@yearafter/finance';
+import { livingCostFor, portfolioWorth } from '@yearafter/finance';
 import { childrenAtHome } from '@yearafter/parenting';
 import { TRACK_LABELS, afterTax, findJob, payFor } from '@yearafter/careers';
 import {
@@ -678,7 +678,26 @@ export function AssetsScreen() {
             value: formatMoney(state.player.cash),
             route: { screen: 'finances', title: 'Finances' },
           },
-          { icon: 'invest', title: 'Investments', ticket: '0308' },
+          /*
+            Ticket 0308c. This row said "Not built yet" for three tickets after
+            investments shipped — 0308, 0308b and 0308c — because the only route
+            in was Finances → Investments and nobody came back here.
+
+            CORE_RULES 13.51, for the fourth time and in a fourth place: a
+            placeholder naming a ticket is invisible once that ticket ships,
+            because nothing compares the name to what has been built. The test
+            in `shells.test.tsx` now does.
+          */
+          {
+            icon: 'invest',
+            title: 'Investments',
+            subtitle: 'Stocks, funds, bonds, crypto',
+            value:
+              Number(portfolioWorth(state.prices, state.portfolio)) > 0
+                ? formatMoney(portfolioWorth(state.prices, state.portfolio))
+                : 'Start',
+            route: { screen: 'investments', title: 'Investments' },
+          },
         ]}
       />
 
@@ -694,7 +713,10 @@ export function AssetsScreen() {
 
       <SectionHeading>Buy</SectionHeading>
       <RowGroup rows={[{ icon: 'shopping', title: 'Shopping', ticket: '0505' }]} />
-      <ComingSoon ticket="0301–0310" what="Financial life" />
+      {/* 0301–0308 have shipped. What is left of the milestone is advisors and
+          retirement, and naming the range that is actually outstanding is the
+          difference between a note and a stale label. */}
+      <ComingSoon ticket="0309–0310" what="Advisors and retirement" />
     </Screen>
   );
 }
@@ -797,7 +819,14 @@ export function ActivitiesScreen() {
             route: { screen: 'family' as const, title: 'Family' },
           },
           { icon: 'lawsuit', title: 'Lawsuit', affordance: 'action', ticket: '1005' },
-          { icon: 'estate', title: 'Will & Estate', affordance: 'action', ticket: '0212' },
+          /*
+            Was labelled 0212, which shipped. That ticket's own write-up says
+            why it did not build this: "Inheritance is the cash that was left,
+            because there is no debt, no will and no trust in the build to net
+            it against." An estate needs something to settle against, which is
+            v0.05's property.
+          */
+          { icon: 'estate', title: 'Will & Estate', affordance: 'action', ticket: 'v0.05' },
         ]}
       />
       {/* 15 rows — within the 10–16 target (spec 879–943). A note to us, so it
@@ -814,15 +843,28 @@ export function MindBodyScreen() {
   return (
     <Screen>
       <RowGroup
+        /*
+          THESE FIVE NAMED 0205 UNTIL 0308c, AND 0205 SHIPPED LONG AGO.
+
+          The label was wrong from the start rather than merely stale: 0205 was
+          the hidden stress model, and it was never going to build a gym. What
+          these rows actually are is the roadmap's unticketed finding #2 —
+          "Smarts and Discipline never move after eighteen; an adult character
+          does not develop" — and nothing in the numbered plan owns that yet.
+
+          Pointed at v0.04 as the next milestone that plausibly could. That is a
+          guess at a schedule rather than a decision, and it is written here
+          instead of left implied so it can be corrected in one place.
+        */
         rows={[
-          { title: 'Gym', affordance: 'action', ticket: '0205' },
-          { title: 'Meditation', affordance: 'action', ticket: '0205' },
+          { title: 'Gym', affordance: 'action', ticket: 'v0.04' },
+          { title: 'Meditation', affordance: 'action', ticket: 'v0.04' },
           { title: 'Martial Arts', ticket: '0808' },
           { title: 'Instruments', ticket: '0803' },
           { title: 'Acting Lessons', affordance: 'action', ticket: '0801' },
-          { title: 'Books / Library', affordance: 'action', ticket: '0205' },
-          { title: 'Diet', affordance: 'action', ticket: '0205' },
-          { title: 'Walk', affordance: 'action', ticket: '0205' },
+          { title: 'Books / Library', affordance: 'action', ticket: 'v0.04' },
+          { title: 'Diet', affordance: 'action', ticket: 'v0.04' },
+          { title: 'Walk', affordance: 'action', ticket: 'v0.04' },
         ]}
       />
       {/* Martial Arts lives here, not as a top-level activity (spec 879–943). */}

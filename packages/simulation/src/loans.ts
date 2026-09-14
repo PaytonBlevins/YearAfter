@@ -63,7 +63,7 @@ export function borrowerFrom(state: GameState): Borrower {
     // obligation, and counting them is what stops the borrow-to-pay-a-card loop.
     cardDebt: Math.round(Number(totalOwed(state.cards)) / 100),
     // Ticket 0308. What a private bank would lend against the portfolio.
-    pledgeable: pledgeableAgainst(state.portfolio),
+    pledgeable: pledgeableAgainst(state.prices, state.portfolio),
     // What a whole degree would still cost them, after whoever is helping.
     // Zero for anybody with nothing left to study, which is what stops a
     // student loan being cheap money for everybody.

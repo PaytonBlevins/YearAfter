@@ -14,6 +14,7 @@
  * you where you were.
  */
 
+import type { InstrumentKind } from '@yearafter/finance';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 export const WORLDS = ['career', 'assets', 'life', 'relationships', 'activities'] as const;
@@ -31,9 +32,12 @@ export type ScreenKey =
   | 'cards'
   /** Ticket 0307. What you owe, and what anybody would lend you. */
   | 'loans'
-  /** Ticket 0308. The portfolio, and the four things anybody can buy. */
+  /** Ticket 0308c. The portfolio, the markets, and what each is doing. */
   | 'investments'
-  | 'investments'
+  /** Ticket 0308c. One tier of the market, grouped by sector or issuer. */
+  | 'market'
+  /** Ticket 0308c. One instrument: its price, its past, and your position. */
+  | 'instrument'
   | 'homes'
   | 'vehicles'
   | 'businesses'
@@ -89,6 +93,10 @@ export interface Route {
   readonly personId?: string;
   /** Which activity this screen is about (0206b). Same reasoning as personId. */
   readonly activityId?: string;
+  /** Which instrument this screen is about (0308c). Same reasoning again. */
+  readonly instrumentId?: string;
+  /** Which market tier this screen lists (0308c). */
+  readonly kind?: InstrumentKind;
   /** Which job this screen is about (0210b). Same reasoning again. */
   readonly jobId?: string;
 }

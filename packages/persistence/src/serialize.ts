@@ -45,6 +45,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     loans: state.loans,
     portfolio: state.portfolio,
     market: state.market,
+    prices: state.prices,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -67,6 +68,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     loans: save.loans,
     portfolio: save.portfolio,
     market: save.market,
+    prices: save.prices,
     pending: save.pending,
   });
 }

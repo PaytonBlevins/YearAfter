@@ -1,45 +1,41 @@
 /**
- * Ticket 0308 — what a player can DO with a portfolio.
+ * Ticket 0308c — what a player can DO with a portfolio.
  *
- *   BUY    how much, into which of the four classes.
- *   SELL   part or all, whenever they want it back as cash.
+ *   BUY    which instrument, and how much money into it.
+ *   SELL   how many units back to cash.
  *   HOLD   the default, and the one that costs nothing to choose.
  *
- * Spec 1691's three verbs exactly. "Hold" is not a button — it is what happens
- * when the player does nothing, which is the correct shape for it: a verb whose
- * meaning is "leave it alone" should not need pressing, and a screen that made
- * you confirm inaction every year would be spec 1126-1136's chore by another
- * name.
+ * Spec 1691's three verbs. Two are buttons; HOLD IS NOT, and that is deliberate
+ * rather than missing — a verb meaning "leave it alone" should not need
+ * pressing, and a screen that asked a player to confirm inaction every year
+ * would be exactly the chore spec 1126-1136 removes.
  *
  * NOTHING HERE AUTO-LIQUIDATES. When cash runs short `advanceYear` draws on a
- * credit card — it does not reach into the portfolio — and selling to cover a
- * year is a thing the PLAYER does.
- *
- * That is the right shape, but it is worth being precise about why, because the
- * first version of this comment claimed it created a liquidity trap and the
- * measurement said otherwise: across 800 lives, including strategies holding
- * zero cash by construction, shortfall years came out at 0% and card-debt years
- * at 0%. Running out of cash in this build costs nothing, because the year's
- * income is posted before the year's costs are paid (CORE_RULES 13.52).
- *
- * So automatic liquidation is refused on the grounds that a portfolio is not an
- * overdraft and selling is a decision — NOT on the grounds that it punishes
- * anybody today. When something in this build finally needs money by a date,
- * this is already the right way round.
+ * credit card; it does not reach into the portfolio. Selling to cover a year is
+ * a thing the PLAYER does, and since 0308b made the portfolio count toward what
+ * a household can afford, choosing not to sell is a decision with a consequence
+ * rather than a free pass (CORE_RULES 13.53).
  */
 
 import { dollars, err, ok, type Result } from '@yearafter/core';
 import {
-  INVESTMENT_PRODUCTS,
-  buyInto,
+  INSTRUMENTS,
+  findInstrument,
+  instrumentsOfKind,
+  type Instrument,
+  type InstrumentKind,
+} from '@yearafter/content';
+import {
+  buyUnits,
   canBuy,
-  findInvestment,
-  holdingValue,
-  sellFrom,
+  pledgeableAgainst,
+  portfolioWorth,
+  priceOf,
+  sellUnits,
   totalBorrowed,
   totalOwed,
   type Estate,
-  type InvestRefusal,
+  type TradeRefusal,
 } from '@yearafter/finance';
 import { moveMoney, withCash } from './money';
 import type { GameState } from './game-state';
@@ -54,14 +50,18 @@ import type { GameState } from './game-state';
  * all come through here.
  */
 export const estateOf = (state: GameState): Estate => ({
-  investments: holdingValue(state.portfolio),
+  investments: portfolioWorth(state.prices, state.portfolio),
   liabilities: dollars(
     Math.round(Number(totalOwed(state.cards)) / 100) +
       Math.round(Number(totalBorrowed(state.loans)) / 100),
   ),
 });
 
-export type InvestError = InvestRefusal | 'nothingHeld';
+/** What a private bank would lend against this character's holdings. */
+export const pledgeableOf = (state: GameState): number =>
+  pledgeableAgainst(state.prices, state.portfolio);
+
+export type InvestError = TradeRefusal;
 
 export interface InvestOutcome {
   readonly state: GameState;
@@ -70,34 +70,42 @@ export interface InvestOutcome {
   readonly good: boolean;
 }
 
-/** Buy into a product, opening the position if they do not hold it yet. */
+/** Buy into an instrument with a sum of money. */
 export function invest(
   state: GameState,
-  productId: string,
+  instrumentId: string,
   amount: number,
 ): Result<InvestOutcome, InvestError> {
-  const product = findInvestment(productId);
-  if (!product) return err('noSuchProduct');
+  const instrument = findInstrument(instrumentId);
+  if (!instrument) return err('noSuchInstrument');
 
   const cash = Math.round(Number(state.player.cash) / 100);
   const wanted = Math.round(amount);
-  const refusal = canBuy(state.portfolio, product, wanted, cash);
+  const refusal = canBuy(state.prices, state.portfolio, instrument, wanted, cash);
   if (refusal) return err(refusal);
 
-  /*
-    A NEGATIVE `investment` ROW, and the category matters more than usual here.
+  const bought = buyUnits(state.prices, state.portfolio, instrumentId, wanted);
+  if (bought.units <= 0) return err('notEnoughForOneUnit');
 
-    Spec 44-46 says investments are not outflow — but the money genuinely
-    leaves the bank account, so the row has to exist or 0302's reconciliation
-    breaks. The rule is honoured one layer up, in `summariseFinances`, which
-    takes `investment` rows out of the outflow figure and adds the portfolio
-    back into net worth. Posting this as `spending` would be the easy mistake
-    and would tell the player their cost of living had tripled.
+  /*
+    A NEGATIVE `investment` ROW, and the category matters more than usual.
+
+    Spec 44-46 says investments are not outflow — but the money genuinely leaves
+    the account, so the row has to exist or 0302's reconciliation breaks. The
+    rule is honoured one layer up in `summariseFinances`, which takes
+    `investment` rows out of the outflow figure and adds the portfolio back into
+    net worth. Posting this as `spending` would be the easy mistake and would
+    tell the player their cost of living had tripled.
+
+    NOTE `bought.spent`, not `wanted`. Units round down, and a bond rounds down
+    hard — $5,000 into a $1,000 bond buys five and must not take $5,000 from the
+    account. Charging what was asked and keeping the difference is the same
+    defect as the card row that said "some" and spent everything.
   */
   const moved = moveMoney(state, {
     category: 'investment',
-    amount: dollars(-wanted),
-    source: `${product.name} — bought`,
+    amount: dollars(-bought.spent),
+    source: `${instrument.name} — bought`,
   });
 
   return ok({
@@ -105,33 +113,35 @@ export function invest(
       ...state,
       player: withCash(state.player, moved),
       finance: moved.finance,
-      portfolio: buyInto(state.portfolio, product.id, wanted),
+      portfolio: bought.holdings,
     },
     title: 'Bought',
-    body: `${money(wanted)} into ${product.name}. ${product.character}`,
+    body: `${units(bought.units)} of ${instrument.name} at ${price(
+      priceOf(state.prices, instrumentId),
+    )}, for ${money(bought.spent)}.`,
     good: true,
   });
 }
 
-/** Sell part or all of a holding back to cash. */
+/** Sell units back to cash. */
 export function divest(
   state: GameState,
-  productId: string,
-  amount: number,
+  instrumentId: string,
+  wantedUnits: number,
 ): Result<InvestOutcome, InvestError> {
-  const product = findInvestment(productId);
-  if (!product) return err('noSuchProduct');
-  if (!state.portfolio.some((holding) => holding.productId === productId)) {
+  const instrument = findInstrument(instrumentId);
+  if (!instrument) return err('noSuchInstrument');
+  if (!state.portfolio.some((holding) => holding.instrumentId === instrumentId)) {
     return err('nothingHeld');
   }
 
-  const sale = sellFrom(state.portfolio, productId, amount);
+  const sale = sellUnits(state.prices, state.portfolio, instrumentId, wantedUnits);
   if (sale.raised <= 0) return err('nothingHeld');
 
   const moved = moveMoney(state, {
     category: 'investment',
     amount: dollars(sale.raised),
-    source: `${product.name} — sold`,
+    source: `${instrument.name} — sold`,
   });
 
   return ok({
@@ -145,30 +155,108 @@ export function divest(
     /*
       THE PENALTY GETS ITS OWN SENTENCE when there is one. A player who sells a
       bond four years early and reads only "$8,800 back in the bank" has been
-      charged $1,200 by a screen that did not mention it — which is the shape of
-      every quiet-cost defect this build has fixed.
+      charged $1,200 by a screen that never mentioned it.
     */
     body:
       sale.penalty > 0
-        ? `${money(sale.raised)} back in the bank. Leaving early cost you ${money(sale.penalty)}.`
+        ? `${units(sale.units)} sold. ${money(sale.raised)} in the bank — leaving early cost ${money(sale.penalty)}.`
         : sale.realized === 0
-          ? `${money(sale.raised)} back in the bank, for what you put in.`
+          ? `${units(sale.units)} sold for ${money(sale.raised)}, level on what you paid.`
           : sale.realized > 0
-            ? `${money(sale.raised)} back in the bank — ${money(sale.realized)} more than you put in.`
-            : `${money(sale.raised)} back in the bank, ${money(-sale.realized)} less than you put in.`,
+            ? `${units(sale.units)} sold for ${money(sale.raised)} — ${money(sale.realized)} more than you paid.`
+            : `${units(sale.units)} sold for ${money(sale.raised)}, ${money(-sale.realized)} less than you paid.`,
     good: sale.realized >= 0,
   });
 }
 
-/** What the screen offers, with the reason attached to anything it cannot. */
-export const investmentOffers = (state: GameState) => {
+/* -------------------------------------------------------------------------- */
+/* What the screens read                                                       */
+/* -------------------------------------------------------------------------- */
+
+export interface Offer {
+  readonly instrument: Instrument;
+  /** Cents. */
+  readonly price: number;
+  /** Change since last year, as a fraction. */
+  readonly change: number;
+  /** Units already held, or zero. */
+  readonly held: number;
+  readonly refusal: TradeRefusal | undefined;
+}
+
+/**
+ * One tier of the market, priced and with the player's own position attached.
+ *
+ * HOLDING IS SHOWN WHILE BROWSING, which the reference app does not do: its
+ * market list tells you what everything costs and never what you already own,
+ * so the one number you need to decide with is on a different screen.
+ */
+export function marketFor(state: GameState, kind: InstrumentKind): readonly Offer[] {
   const cash = Math.round(Number(state.player.cash) / 100);
-  return INVESTMENT_PRODUCTS.map((product) => ({
-    product,
-    // Priced against the MINIMUM rather than against what they typed, because
-    // the row has to say yes or no before a number exists.
-    refusal: canBuy(state.portfolio, product, Math.min(product.minimum, cash), cash),
-  }));
-};
+  return instrumentsOfKind(kind).map((instrument) => offerFor(state, instrument, cash));
+}
+
+export function offersFor(state: GameState, ids: readonly string[]): readonly Offer[] {
+  const cash = Math.round(Number(state.player.cash) / 100);
+  return ids
+    .map((id) => findInstrument(id))
+    .filter((row): row is Instrument => row !== undefined)
+    .map((instrument) => offerFor(state, instrument, cash));
+}
+
+function offerFor(state: GameState, instrument: Instrument, cash: number): Offer {
+  const priceNow = priceOf(state.prices, instrument.id);
+  const before = state.prices.history[instrument.id]?.slice(-2)[0] ?? priceNow;
+  return {
+    instrument,
+    price: priceNow,
+    change: before > 0 ? (priceNow - before) / before : 0,
+    held: state.portfolio.find((holding) => holding.instrumentId === instrument.id)?.units ?? 0,
+    // Priced against the smallest buyable amount, because a row has to say yes
+    // or no before a number exists.
+    refusal: canBuy(
+      state.prices,
+      state.portfolio,
+      instrument,
+      Math.min(Math.ceil(priceNow / 100), Math.max(1, cash)),
+      cash,
+    ),
+  };
+}
+
+/** Everything held, with today's price and what it has done. */
+export const holdingsOf = (state: GameState) =>
+  state.portfolio
+    .map((holding) => {
+      const instrument = findInstrument(holding.instrumentId);
+      if (!instrument) return undefined;
+      const worth = Math.round(holding.units * priceOf(state.prices, holding.instrumentId));
+      return {
+        holding,
+        instrument,
+        worth,
+        paid: Number(holding.paid),
+        gain: worth - Number(holding.paid),
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== undefined);
+
+/** The whole catalog, for a search or an "everything" view. */
+export const allInstruments = (): readonly Instrument[] => INSTRUMENTS;
 
 const money = (amount: number): string => `$${Math.round(amount).toLocaleString('en-US')}`;
+
+/** Prices are shown to the cent, because that is what makes them memorable. */
+const price = (inCents: number): string =>
+  `$${(inCents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/**
+ * Units, without four decimal places of noise on a whole-unit holding.
+ *
+ * "412 shares" and "0.5431 of a coin" are both sentences; "412.0000 shares" is
+ * a spreadsheet leaking into the copy.
+ */
+const units = (count: number): string =>
+  Number.isInteger(count)
+    ? count.toLocaleString('en-US')
+    : count.toLocaleString('en-US', { maximumFractionDigits: 4 });

@@ -67,7 +67,7 @@ export function FinancesScreen() {
   const owed = totalOwed(state.cards);
   const borrowed = totalBorrowed(state.loans);
   const invested = Number(books.investments);
-  const gain = portfolioGain(state.portfolio);
+  const gain = portfolioGain(state.prices, state.portfolio);
 
   /*
     A year in which nothing moved is most of a childhood, and the honest answer

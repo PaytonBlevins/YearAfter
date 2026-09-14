@@ -63,12 +63,7 @@ export interface EndOfLifeCardProps {
  * spec 818–827 removes by name.
  */
 
-export function EndOfLifeCard({
-  eulogy,
-  heirs,
-  onContinueAs,
-  onStartAgain,
-}: EndOfLifeCardProps) {
+export function EndOfLifeCard({ eulogy, heirs, onContinueAs, onStartAgain }: EndOfLifeCardProps) {
   const [rite, setRite] = useState<string | undefined>(undefined);
   return (
     <View style={styles.overlay}>
@@ -89,7 +84,9 @@ export function EndOfLifeCard({
 
           <View style={styles.rule} />
 
-          <Text style={styles.cause}>{`Died at ${eulogy.age}, of ${lowerFirst(eulogy.cause)}.`}</Text>
+          <Text
+            style={styles.cause}
+          >{`Died at ${eulogy.age}, of ${lowerFirst(eulogy.cause)}.`}</Text>
           <Text style={styles.summary}>{eulogy.summary}</Text>
 
           {eulogy.highlights.length > 0 ? (

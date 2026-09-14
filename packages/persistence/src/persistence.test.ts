@@ -6,6 +6,7 @@ import { MemorySaveRepository } from './adapters/memory';
 import { migrateSave } from './migrations';
 import { fromSave, toSave } from './serialize';
 import { CURRENT_SAVE_VERSION, summarise } from './save-schema';
+import { findInstrument } from '@yearafter/finance';
 
 /**
  * Play forward, answering every decision with its first option.
@@ -978,5 +979,112 @@ describe('Ticket 0302 — a save whose books are wrong does not load', () => {
     const save = honest();
     delete save['world'];
     expect(reason(save)).toMatch(/world\.year/);
+  });
+});
+
+describe('v22 -> v23 migration (Ticket 0308c — products become instruments)', () => {
+  /**
+   * A real v22 save, downgraded, holding one of each of the seven old products.
+   *
+   * Built from a live save rather than a literal, because `migrateSave` runs
+   * the whole chain and validates what comes out — a stub with seven holdings
+   * and nothing else is not a save, and a test that fails on a missing ledger
+   * is not testing the migration.
+   */
+  const v22 = () => ({
+    ...newSave('MIG-0308C').save,
+    version: 22,
+    prices: undefined,
+    portfolio: [
+      { productId: 'inv.govbonds', contributed: 1_000_000, value: 1_240_000, maturesIn: 5 },
+      { productId: 'inv.corpbonds', contributed: 500_000, value: 512_000, maturesIn: 3 },
+      { productId: 'inv.indexfund', contributed: 2_000_000, value: 3_180_000 },
+      { productId: 'inv.managedfund', contributed: 800_000, value: 742_000 },
+      { productId: 'inv.bluechip', contributed: 1_500_000, value: 1_905_000 },
+      { productId: 'inv.growth', contributed: 600_000, value: 410_000 },
+      { productId: 'inv.crypto', contributed: 300_000, value: 2_100_000 },
+    ],
+    market: 'growth',
+  });
+
+  it('turns every old product into an instrument that actually exists', () => {
+    /*
+      THE BUG THIS TEST WAS WRITTEN FOR. The first version of the migration
+      mapped `inv.govbonds` to `bd.cald8` — a Caldonian eight-year bond, which
+      the catalog does not contain. Caldonian issues three, five and ten. The
+      migration ran green, the save loaded, and every government bond holding a
+      player owned silently became worth nothing, because a holding whose
+      instrument cannot be found has no price.
+
+      A dangling id inside a migration is invisible to every other check in the
+      build: the content validator walks catalogs, not migrations.
+    */
+    const out = migrateSave(v22() as never);
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    const holdings = (out.value as unknown as { portfolio: { instrumentId: string }[] }).portfolio;
+    expect(holdings).toHaveLength(7);
+    for (const holding of holdings) {
+      expect(
+        findInstrument(holding.instrumentId),
+        `${holding.instrumentId} is not in the catalog`,
+      ).toBeDefined();
+    }
+  });
+
+  it('is worth the same money on both sides of the migration', () => {
+    /*
+      Nobody loses a penny. The old holding was a dollar blob; the new one is
+      units at a price, and the units are whatever that instrument's opening
+      price buys with the blob's current value. Rounding to four decimal places
+      is the only permitted difference.
+    */
+    const before = v22();
+    const worthBefore = before.portfolio.reduce((sum, row) => sum + row.value, 0);
+    const out = migrateSave(before as never);
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+
+    const holdings = (
+      out.value as unknown as { portfolio: { instrumentId: string; units: number }[] }
+    ).portfolio;
+    const worthAfter = holdings.reduce((sum, row) => {
+      const instrument = findInstrument(row.instrumentId)!;
+      return sum + row.units * instrument.priceCents;
+    }, 0);
+    // Within a dollar across a $10,000,000 portfolio.
+    expect(Math.abs(worthAfter - worthBefore)).toBeLessThan(100);
+  });
+
+  it('keeps what was paid, so a winner is still a winner', () => {
+    const out = migrateSave(v22() as never);
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    const holdings = (
+      out.value as unknown as { portfolio: { instrumentId: string; units: number; paid: number }[] }
+    ).portfolio;
+
+    const crypto = holdings.find((row) => row.instrumentId.startsWith('cx.'));
+    expect(crypto).toBeDefined();
+    // $3,000 paid, $21,000 now: still up $18,000 afterwards.
+    expect(crypto!.paid).toBe(300_000);
+    const worth = crypto!.units * findInstrument(crypto!.instrumentId)!.priceCents;
+    expect(worth - crypto!.paid).toBeCloseTo(1_800_000, -2);
+  });
+
+  it('carries a bond’s remaining term across', () => {
+    const out = migrateSave(v22() as never);
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    const holdings = (
+      out.value as unknown as { portfolio: { instrumentId: string; maturesIn?: number }[] }
+    ).portfolio;
+    const bonds = holdings.filter((row) => row.instrumentId.startsWith('bd.'));
+    expect(bonds).toHaveLength(2);
+    expect(bonds.map((row) => row.maturesIn).sort()).toEqual([3, 5]);
+    // And nothing that is not a bond picked one up.
+    for (const row of holdings.filter((h) => !h.instrumentId.startsWith('bd.'))) {
+      expect(row.maturesIn).toBeUndefined();
+    }
   });
 });
