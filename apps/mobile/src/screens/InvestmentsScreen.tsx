@@ -21,6 +21,7 @@ import { ScrollView, StyleSheet, Text } from 'react-native';
 import {
   INVESTMENTS_NOT_YET_BUILT,
   KIND_LABELS,
+  findAdvisor,
   MARKET_LABELS,
   briefingFor,
   kindHealth,
@@ -30,7 +31,7 @@ import {
   type InstrumentKind,
 } from '@yearafter/finance';
 import { describeCity } from '@yearafter/content';
-import { holdingsOf } from '@yearafter/simulation';
+import { adviceFor, feeThisYear, holdingsOf } from '@yearafter/simulation';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { PriceChart } from '../components/PriceChart';
 import { useGame } from '../stores/gameStore';
@@ -85,6 +86,10 @@ export function InvestmentsScreen() {
           }, 0),
         )
       : [];
+
+  const advisor = state.advisorId ? findAdvisor(state.advisorId) : undefined;
+  const advice = adviceFor(state);
+  const fee = feeThisYear(state);
 
   const briefing = briefingFor({
     prices: state.prices,
@@ -168,6 +173,34 @@ export function InvestmentsScreen() {
         OPENS something uses its subtitle to say what is behind it, and what is
         behind this one changes every year.
       */}
+      {/*
+        THE ADVISOR ROW, and its subtitle is this year's actual first
+        recommendation rather than a label. Same rule as the newspaper row above
+        it: a row that OPENS something says what is behind it, and what is
+        behind this one changes every year (CORE_RULES 13.29).
+      */}
+      <SectionHeading>Advice</SectionHeading>
+      <Card>
+        <ListRow
+          icon="advisor"
+          title={advisor ? advisor.name : 'Nobody is advising you'}
+          subtitle={
+            advice[0]?.text ??
+            (advisor
+              ? 'Nothing from them this year'
+              : 'Somebody to tell you what you are holding wrong')
+          }
+          value={advisor && fee > 0 ? `${money(fee * 100)}/yr` : undefined}
+          meta={
+            advisor
+              ? `${advice.length} ${advice.length === 1 ? 'thing' : 'things'} to say this year`
+              : 'Free to start with'
+          }
+          onPress={() => push({ screen: 'advisor', title: 'Advice' })}
+          wrap
+        />
+      </Card>
+
       <SectionHeading>The news</SectionHeading>
       <Card>
         <ListRow

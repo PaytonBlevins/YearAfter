@@ -122,5 +122,9 @@ export * from './instruments';
 /* Financial headlines (Ticket 0308d)                                          */
 export * from './headlines';
 
+/* -------------------------------------------------------------------------- */
+/* Advisors and what they say (Ticket 0309)                                    */
+export * from './advice';
+
 /** Ticket 0210 — real jobs, with salaries and ladders. */
 export * from './jobs';

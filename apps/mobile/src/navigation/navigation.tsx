@@ -40,6 +40,8 @@ export type ScreenKey =
   | 'instrument'
   /** Ticket 0308d. The year's financial pages, and what the tiers actually are. */
   | 'magazine'
+  /** Ticket 0309. Who you pay for advice, and what they think this year. */
+  | 'advisor'
   | 'homes'
   | 'vehicles'
   | 'businesses'

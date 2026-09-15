@@ -54,6 +54,8 @@ import {
   runCardYear,
   runLoanYear,
   nextMarketState,
+  advisorFee,
+  findAdvisor,
   runHoldingYear,
   runPriceYear,
   yearsOutside,
@@ -510,8 +512,47 @@ export function advanceYear(state: GameState): AdvanceResult {
     source: row.source,
   }));
 
+  /*
+    Ticket 0309. THE ADVISOR'S FEE, and it is charged here so that it is charged
+    AT ALL.
+
+    An advisor whose fee is deducted somewhere the player never sees is free, and
+    a free advisor is the "system nobody should ever decline" mirror of
+    CORE_RULES 13.7 — measured, following one adds 31% to a stock-picking
+    character's median and the fee is the entire thing standing against that.
+    It goes in the ledger as an ordinary negative row with the advisor's name on
+    it (13.6: any change to money names its source AND its amount), so it turns
+    up in the year's summary beside everything else that was paid for.
+
+    CHARGED ON THE PORTFOLIO, AFTER THE MARKET HAS MOVED, which is how a real
+    fee works and also the only honest order: billing on the opening value would
+    quietly charge for a year the money had not yet earned.
+
+    `spending` rather than a new category, deliberately. An advisory fee is
+    buying a service, which is what `spending` already means, and a fourteenth
+    category that only one system writes would be a line on the dashboard for a
+    thing most characters never have.
+  */
+  const advisor = state.advisorId ? findAdvisor(state.advisorId) : undefined;
+  const advisorCharge: readonly NewTransaction[] = (() => {
+    if (!advisor) return [];
+    const held = Math.round(Number(portfolioWorth(prices, marketYear.holdings)) / 100);
+    const fee = advisorFee(advisor, held);
+    if (fee <= 0) return [];
+    return [
+      {
+        category: 'spending' as const,
+        amount: dollars(-fee),
+        source: `${advisor.name} — yearly fee`,
+      },
+    ];
+  })();
+
   const owing = reported
     .concat(living.transactions)
+    // The fee is an ordinary bill: it counts toward what the year owes, so a
+    // character who cannot cover it draws on a card like they would for rent.
+    .concat(advisorCharge)
     .filter((entry) => entry.amount < 0)
     .reduce((sum, entry) => sum - Number(entry.amount), 0);
   const coming =
@@ -565,6 +606,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     ...advance,
     ...reported.filter((entry) => entry.amount < 0),
     ...living.transactions,
+    ...advisorCharge,
     ...cardYear.charges.map((charge) => ({
       category: 'debt' as const,
       amount: charge.amount,

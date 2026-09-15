@@ -18,8 +18,10 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  ADVISORS,
   INSTRUMENTS,
   KIND_LABELS,
+  UNWRITTEN_CATEGORIES,
   SECTORS,
   findInstrument,
   portfolioWorth,
@@ -32,8 +34,13 @@ import { advanceYear } from './advance';
 import { decide } from './decide';
 import { applyFor, openings, workHarder } from './careers';
 import {
+  actOnAdvice,
+  adviceFor,
+  dismissAdvisor,
   divest,
   estateOf,
+  feeThisYear,
+  hireAdvisor,
   holdingsOf,
   invest,
   marketFor,
@@ -503,5 +510,167 @@ describe('what a typed amount would do', () => {
     const state = richEnough();
     const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
     expect(previewSell(state, share.id, 100).refusal).toBe('nothingHeld');
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0309 — the categories an investing life actually writes              */
+/* -------------------------------------------------------------------------- */
+
+describe('what investing puts in the ledger', () => {
+  it('produces the categories the ledger claims nobody produces', () => {
+    /*
+      THE GUARD THAT HAD TO LIVE HERE.
+
+      `UNWRITTEN_CATEGORIES` still listed `assetIncome` and `investment` two
+      milestones after 0308 gave them producers, and the test watching that list
+      asserted it EQUALLED four names — so it passed the whole time (CORE_RULES
+      13.51). The obvious fix, a derived check in `ledger.test.ts`, turned out to
+      be VACUOUS: none of those lives ever buys anything, so no investment
+      category can appear there no matter how wrong the list is. Verified by
+      putting `assetIncome` back and watching the suite stay green.
+
+      A category is only reachable where somebody reaches it. This is that place.
+    */
+    let state = working('ledger-cat', 45);
+    const cash = Math.round(Number(state.player.cash) / 100);
+    expect(cash, 'the test character needs money to invest').toBeGreaterThan(5_000);
+
+    // Something that PAYS, so a coupon lands, and a bond so a maturity can.
+    const payer = INSTRUMENTS.filter((row) => row.payout > 0.02 && row.kind !== 'bond')[0]!;
+    const bought = invest(state, payer.id, Math.floor(cash / 2));
+    expect(bought.ok).toBe(true);
+    if (!bought.ok) return;
+    state = bought.value.state;
+
+    // The purchase itself is an `investment` row (spec 44-46: a transfer).
+    expect(state.finance.transactions.some((row) => row.category === 'investment')).toBe(true);
+
+    // And a year of holding it produces the payout.
+    state = advanceYear(state).state;
+    expect(
+      state.finance.transactions.some((row) => row.category === 'assetIncome'),
+      'a year of holding something that pays produced no assetIncome',
+    ).toBe(true);
+
+    for (const category of ['investment', 'assetIncome'] as const) {
+      expect(
+        UNWRITTEN_CATEGORIES.includes(category),
+        `${category} is listed as having no producer, and this test just produced one`,
+      ).toBe(false);
+    }
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0309 — advisors, through the engine                                  */
+/* -------------------------------------------------------------------------- */
+
+describe('paying somebody for advice', () => {
+  it('charges the fee, and the money actually leaves', () => {
+    /*
+      THE TEST THE WHOLE TICKET RESTS ON. An advisor whose fee is deducted
+      somewhere nobody can see is FREE, and a free paid advisor makes hiring one
+      a non-decision — the mirror of CORE_RULES 13.7. Measured, following an
+      advisor adds 31% to a stock-picking character's median outcome, and the
+      fee is the only thing standing against that.
+    */
+    let state = working('advice-fee', 45);
+    const cash = Math.round(Number(state.player.cash) / 100);
+    expect(cash).toBeGreaterThan(5_000);
+
+    // Buy enough that a percentage fee is a real number.
+    const fund = INSTRUMENTS.find((row) => row.kind === 'fund')!;
+    const bought = invest(state, fund.id, Math.floor(cash * 0.8));
+    expect(bought.ok).toBe(true);
+    if (!bought.ok) return;
+    state = bought.value.state;
+
+    const paid = ADVISORS.find((row) => row.feeBasis > 0)!;
+    const hired = hireAdvisor(state, paid.id);
+    // A character under the minimum is refused, which is itself the right
+    // behaviour — the test only proceeds when they are over it.
+    if (!hired.ok) {
+      expect(hired.error).toBe('notEnoughForOneUnit');
+      return;
+    }
+    state = hired.value;
+    expect(state.advisorId).toBe(paid.id);
+
+    const expected = feeThisYear(state);
+    expect(expected).toBeGreaterThan(0);
+
+    const after = advanceYear(state).state;
+    const charged = after.finance.transactions.filter((row) =>
+      row.source.includes(paid.name),
+    );
+    /*
+      Verified once by printing it: this character hires adv.independent with a
+      $90,471 portfolio and pays $181. The early return above is a real branch —
+      a poorer character genuinely is refused — so without checking that, this
+      test could have been passing by never charging anybody.
+    */
+    expect(charged.length, 'the advisor was never billed for').toBe(1);
+    expect(Number(charged[0]!.amount)).toBeLessThan(0);
+  });
+
+  it('charges nothing at all when nobody is hired', () => {
+    const state = working('advice-none', 40);
+    expect(state.advisorId).toBeUndefined();
+    expect(feeThisYear(state)).toBe(0);
+    const after = advanceYear(state).state;
+    for (const advisor of ADVISORS) {
+      expect(after.finance.transactions.some((row) => row.source.includes(advisor.name))).toBe(
+        false,
+      );
+    }
+  });
+
+  it('lets somebody go, and the fee stops', () => {
+    let state = working('advice-fire', 45);
+    const free = ADVISORS.find((row) => row.feeBasis === 0)!;
+    const hired = hireAdvisor(state, free.id);
+    expect(hired.ok).toBe(true);
+    if (!hired.ok) return;
+    state = hired.value;
+    expect(adviceFor(state).length).toBeGreaterThan(0);
+
+    const gone = dismissAdvisor(state);
+    expect(gone.advisorId).toBeUndefined();
+    expect(adviceFor(gone)).toEqual([]);
+    expect(feeThisYear(gone)).toBe(0);
+  });
+
+  it('acts on what it was told, or says why it cannot', () => {
+    let state = working('advice-act', 45);
+    const cash = Math.round(Number(state.player.cash) / 100);
+    const free = ADVISORS.find((row) => row.feeBasis === 0)!;
+    const hired = hireAdvisor(state, free.id);
+    if (!hired.ok) return;
+    state = hired.value;
+
+    const recs = adviceFor(state);
+    expect(recs.length).toBeGreaterThan(0);
+
+    for (const rec of recs) {
+      const done = actOnAdvice(state, rec.id);
+      if (rec.verb === 'hold') {
+        // The one with nothing to press, which is deliberate rather than
+        // missing — the same shape as 0308's absent HOLD button.
+        expect(done.ok).toBe(false);
+        continue;
+      }
+      if (!done.ok) continue;
+      // Whatever it did, the money moved and the ledger knows about it.
+      expect(done.value.state.finance.transactions.length).toBeGreaterThan(
+        state.finance.transactions.length,
+      );
+    }
+    void cash;
+  });
+
+  it('refuses a recommendation that is not on the table', () => {
+    const state = working('advice-bogus', 40);
+    expect(actOnAdvice(state, 'rec.9999.nonsense').ok).toBe(false);
   });
 });

@@ -32,9 +32,14 @@ import {
   portfolioWorth,
   priceOf,
   sellUnits,
+  advisorFee,
+  findAdvisor,
+  recommendationsFor,
   totalBorrowed,
   totalOwed,
+  willTakeYou,
   type Estate,
+  type Recommendation,
   type TradeRefusal,
 } from '@yearafter/finance';
 import { moveMoney, withCash } from './money';
@@ -357,3 +362,108 @@ const units = (count: number): string =>
   Number.isInteger(count)
     ? count.toLocaleString('en-US')
     : count.toLocaleString('en-US', { maximumFractionDigits: 4 });
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0309 — advisors                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Hire somebody, or let them go.
+ *
+ * TWO VERBS AND NO CONTRACT. Spec 1860 puts no lock-in on advisors, and adding
+ * one would turn a yearly judgement into a trap — the player is already paying
+ * a fee they can watch, which is enough of a cost to make hiring a decision.
+ *
+ * The minimum is checked HERE rather than on the screen, for the reason every
+ * gate in this build is checked in the engine: a rule enforced only by a
+ * disabled button is a rule until somebody reaches it another way (13.15).
+ */
+export function hireAdvisor(state: GameState, advisorId: string): Result<GameState, InvestError> {
+  const advisor = findAdvisor(advisorId);
+  if (!advisor) return err('noSuchInstrument');
+  const held = Math.round(Number(portfolioWorth(state.prices, state.portfolio)) / 100);
+  if (!willTakeYou(advisor, held)) return err('notEnoughForOneUnit');
+  return ok({ ...state, advisorId });
+}
+
+export function dismissAdvisor(state: GameState): GameState {
+  const { advisorId, ...rest } = state;
+  void advisorId;
+  return rest as GameState;
+}
+
+/** This year's advice, or nothing when nobody is hired. */
+export function adviceFor(state: GameState): readonly Recommendation[] {
+  if (!state.advisorId) return [];
+  return recommendationsFor({
+    prices: state.prices,
+    portfolio: state.portfolio,
+    cash: Math.round(Number(state.player.cash) / 100),
+    year: state.world.year,
+    advisorId: state.advisorId,
+  });
+}
+
+/** What this year's fee will be, for the screen to say before it is charged. */
+export function feeThisYear(state: GameState): number {
+  const advisor = state.advisorId ? findAdvisor(state.advisorId) : undefined;
+  if (!advisor) return 0;
+  return advisorFee(advisor, Math.round(Number(portfolioWorth(state.prices, state.portfolio)) / 100));
+}
+
+/**
+ * Do what a recommendation says.
+ *
+ * ONE BUTTON, AND IT IS STILL A DECISION. CORE_RULES 13.28 says a tap is not a
+ * decision — the thing that keeps this one honest is that the recommendation
+ * names its reasoning and the advisor's own track record sits on the same
+ * screen, so pressing it is agreeing with an argument rather than obeying an
+ * oracle. Measured: a forecast is right about two thirds of the time.
+ *
+ * A `hold` has nothing to press, which is the same shape as 0308's missing HOLD
+ * button — a verb meaning "leave it alone" should not need a tap.
+ */
+export function actOnAdvice(
+  state: GameState,
+  recommendationId: string,
+): Result<InvestOutcome, InvestError> {
+  const rec = adviceFor(state).find((row) => row.id === recommendationId);
+  if (!rec) return err('noSuchInstrument');
+
+  if (rec.verb === 'buy') {
+    // A recommendation with no instrument means "put it somewhere sensible",
+    // and the sensible somewhere is the broadest fund in the catalog rather
+    // than a pick this advisor did not make.
+    const target = rec.instrumentId ?? broadestFund()?.id;
+    if (!target) return err('noSuchInstrument');
+    const cash = Math.round(Number(state.player.cash) / 100);
+    return invest(state, target, Math.min(cash, rec.amount ?? cash));
+  }
+
+  if (rec.verb === 'reduce' || rec.verb === 'sell' || rec.verb === 'rebalance') {
+    const target = rec.instrumentId ?? biggestHolding(state);
+    if (!target) return err('nothingHeld');
+    const price = priceOf(state.prices, target);
+    if (price <= 0) return err('noSuchInstrument');
+    const wanted = rec.amount ?? 0;
+    if (wanted <= 0) return err('notEnoughForOneUnit');
+    const holding = state.portfolio.find((row) => row.instrumentId === target);
+    if (!holding) return err('nothingHeld');
+    return divest(state, target, Math.min(holding.units, (wanted * 100) / price));
+  }
+
+  // `hold` is the one with nothing to do, and saying so beats a dead button.
+  return err('nothingHeld');
+}
+
+/** The fund with the widest spread of things inside it. */
+const broadestFund = (): Instrument | undefined =>
+  instrumentsOfKind('fund').slice().sort((a, b) => a.spread - b.spread)[0];
+
+const biggestHolding = (state: GameState): string | undefined =>
+  [...state.portfolio]
+    .sort(
+      (a, b) =>
+        b.units * priceOf(state.prices, b.instrumentId) -
+        a.units * priceOf(state.prices, a.instrumentId),
+    )[0]?.instrumentId;

@@ -22,3 +22,6 @@ export * from './portfolio';
 
 /* The financial pages (Ticket 0308d). */
 export * from './briefing';
+
+/* Advisors (Ticket 0309). */
+export * from './advisors';

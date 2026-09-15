@@ -177,6 +177,19 @@ export interface GameState {
    */
   readonly prices: PriceBook;
   /**
+   * Ticket 0309. Who the character pays for investment advice, if anybody.
+   *
+   * An ID rather than an object, because an advisor is content and a save that
+   * inlined one would freeze the fee and the risk bars at whatever they were
+   * the day it was written — the same defect the v23 migration hit when it
+   * froze a price table instead of reading the live catalog.
+   *
+   * ABSENT IS THE NORMAL STATE. Most characters never hire anybody, and a
+   * migration that assigned one would be inventing a decision (and a fee) that
+   * nobody made.
+   */
+  readonly advisorId?: string;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,

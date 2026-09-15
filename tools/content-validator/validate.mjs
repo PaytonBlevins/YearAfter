@@ -1264,7 +1264,7 @@ if (existsSync(activitiesPath)) {
 // `TICKET` is the most recent ticket to ship. Bump it when one does.
 // ---------------------------------------------------------------------------
 {
-  const TICKET = '0308';
+  const TICKET = '0309';
   const rank = (value) =>
     /^\d{4}$/.test(value)
       ? Number(value)

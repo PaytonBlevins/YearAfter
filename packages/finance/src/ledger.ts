@@ -115,14 +115,25 @@ export type TransactionCategory =
    */
   | 'shortfall';
 
-/** Categories nothing writes yet. Exported so a test can assert the list shrinks. */
-export const UNWRITTEN_CATEGORIES: readonly TransactionCategory[] = [
-  'housing',
-  'vehicle',
-  // `debt` came off this list in Ticket 0306. Two down, three to go.
-  'assetIncome',
-  'investment',
-];
+/**
+ * Categories nothing writes yet.
+ *
+ * `debt` came off in 0306. **`assetIncome` and `investment` came off in 0309**,
+ * two tickets after they got their producers, and the delay is the lesson.
+ *
+ * 0308 gave both of them one — `advance.ts` posts a coupon as `assetIncome` and
+ * a matured bond as `investment`, and `invest`/`divest` post the purchase — and
+ * this list went on claiming otherwise for two milestones. The test guarding it
+ * asserted the array EQUALLED four names, so it passed the entire time.
+ *
+ * That is CORE_RULES 13.51 in the file next door to where 13.51 was written: a
+ * test that pins a list catches a wrong deletion and never a missing one. The
+ * guard is now derived instead — `ledger.test.ts` plays real lives, collects
+ * every category anything actually wrote, and fails if one of them is named
+ * here. A list that can be checked against the world does not need to be
+ * remembered.
+ */
+export const UNWRITTEN_CATEGORIES: readonly TransactionCategory[] = ['housing', 'vehicle'];
 
 export interface Transaction {
   /** Unique forever, like a timeline id (CORE_RULES 13.12). */

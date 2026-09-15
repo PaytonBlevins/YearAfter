@@ -10,7 +10,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { reconcile, totalFor, type TransactionCategory } from '@yearafter/finance';
+import {
+  UNWRITTEN_CATEGORIES,
+  reconcile,
+  totalFor,
+  type TransactionCategory,
+} from '@yearafter/finance';
 import { movesFor } from '@yearafter/social';
 import { advanceYear } from './advance';
 import { applyFor, openings, workHarder } from './careers';
@@ -233,6 +238,29 @@ describe('what the ledger now knows that nothing knew before', () => {
     }
     for (const category of ['salary', 'tax', 'living', 'gift', 'oddJob'] as const) {
       expect(seen.has(category), `nothing ever produced a ${category}`).toBe(true);
+    }
+
+    /*
+      AND THE LIST HAS TO BE TRUE, not merely unchanged.
+
+      Ticket 0309 found `assetIncome` and `investment` still sitting in
+      `UNWRITTEN_CATEGORIES` two milestones after 0308 gave them producers. The
+      test guarding that list asserted it EQUALLED four specific names, so it
+      passed happily while the list was wrong — CORE_RULES 13.51, in the file
+      next door to where 13.51 was written.
+
+      This is the derived version, and the FIRST attempt at it was vacuous: none
+      of these lives ever buys anything, so no investment category could appear
+      here however wrong the list was. Putting `assetIncome` back and watching
+      this test pass is what found that. The real guard lives in
+      `investing.test.ts`, where a character actually invests; this one covers
+      everything a passive life touches.
+    */
+    for (const category of seen) {
+      expect(
+        UNWRITTEN_CATEGORIES.includes(category),
+        `${category} is listed as having no producer, and a played life just produced one`,
+      ).toBe(false);
     }
   });
 });

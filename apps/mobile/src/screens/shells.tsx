@@ -713,10 +713,10 @@ export function AssetsScreen() {
 
       <SectionHeading>Buy</SectionHeading>
       <RowGroup rows={[{ icon: 'shopping', title: 'Shopping', ticket: '0505' }]} />
-      {/* 0301–0308 have shipped. What is left of the milestone is advisors and
-          retirement, and naming the range that is actually outstanding is the
+      {/* 0301–0309 have shipped. Retirement is the last ticket of the
+          milestone, and naming the one that is actually outstanding is the
           difference between a note and a stale label. */}
-      <ComingSoon ticket="0309–0310" what="Advisors and retirement" />
+      <ComingSoon ticket="0310" what="Retirement accounts" />
     </Screen>
   );
 }

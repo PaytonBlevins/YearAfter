@@ -29,7 +29,7 @@ import type { RngSnapshot, WorldState } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 23;
+export const CURRENT_SAVE_VERSION = 24;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -85,7 +85,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 23;
+  readonly version: 24;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -138,6 +138,8 @@ export interface SaveGameV18 {
   readonly market: MarketState;
   /** Ticket 0308c: every instrument's price history. */
   readonly prices: PriceBook;
+  /** Ticket 0309. Who they pay for advice, if anybody. Usually nobody. */
+  readonly advisorId?: string;
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

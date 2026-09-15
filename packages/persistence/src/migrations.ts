@@ -702,6 +702,21 @@ const migrations: Readonly<Record<number, Migration>> = {
       prices: save['prices'] ?? { history: {} },
     };
   },
+
+  /**
+   * v23 -> v24: Ticket 0309 lets a character pay somebody for advice.
+   *
+   * NOBODY IS GIVEN AN ADVISOR, and that is the fourth migration in a row to
+   * refuse to invent a decision — 21 gave nobody a loan, 22 gave nobody a
+   * portfolio, 23 refused to refund one to cash. Hiring somebody is a choice
+   * with a yearly fee attached, and an existing save waking up next to a bill
+   * it never agreed to is the worst version of this.
+   *
+   * So the field is simply absent, which is what "no advisor" means everywhere
+   * else in the build. The migration exists to move the version, not to move
+   * any money.
+   */
+  23: (save) => ({ ...save, version: 24 }),
 };
 
 /**

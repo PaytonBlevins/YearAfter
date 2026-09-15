@@ -1584,3 +1584,40 @@ could return it.
   while a ten-year hold still loses money 5% of the time. At 0.18 the dip becomes
   a cheat code; at 0.10 it barely registers. Neither shows up in a return
   distribution.
+
+### 13.56 A signal is only real where its mechanism runs
+
+*Ticket 0309.* The obvious advisor rule is "recommend what is trading below its
+own trend", and 0308d's mean reversion is exactly the mechanism that would make
+it pay. Measured over 6,000 market years it **loses to a coin flip**: a single
+call goes up 41.9% of the time against 56% for a name picked at random.
+
+The cause is one line of the market model. Reversion is applied to stocks and
+funds and deliberately NOT to crypto or penny stocks, because those have no
+value to revert to. A name sits far below its anchor mostly because its spread
+is enormous — and the two widest tiers are the two exempt ones. **The naive top
+six was 94.2% crypto and penny stocks.** The signal was selecting precisely the
+names where the thing that makes it work does not happen.
+
+Restricted to the reverting tiers, the same rule returns 11.4% against 6.4% and
+beats random 63.7% of the time. Same rule, opposite sign, one filter apart.
+
+- **A signal inherits the scope of its mechanism, and nothing tells you when it
+  has left.** `gapToTrend` computes a real number for a coin. It is arithmetic
+  all the way down and it means nothing.
+- **An exemption written in one file is a constraint on every file that reads
+  it.** The `crypto`/`penny` carve-out lives in `market.ts` as four words in a
+  condition. Two tickets later it silently invalidated a feature in a different
+  package, and only measuring against a control found it.
+- **The rule generalises past this build.** Any derived signal — a momentum
+  read, a credit score, a relationship trend — is valid only over the population
+  its generator actually moves. Before shipping one, ask which rows the
+  mechanism skips, because those are the rows the signal will find first.
+
+**And the same measurement killed the design above it.** Advisor tiers were to
+be "reads the hidden fundamental more accurately". Swept from no skill to
+perfect, the mean year moved 6.3% to 7.4% and the odds of a single call going up
+stayed pinned at 61% throughout — drift spans 0.02–0.082 while volatility spans
+0.12–0.95, so across one year the fundamental is a rounding error. **A tier
+built on it would have been a label with nothing behind it**, and it would have
+looked fine in every test that did not compare it against a control.

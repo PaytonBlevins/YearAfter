@@ -1,0 +1,324 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "ad.belowTrend.1",
+      "reason": "belowTrend",
+      "verb": "buy",
+      "text": "{firm} is trading about {gap} under where its own history says it should sit. I'd buy some."
+    },
+    {
+      "id": "ad.belowTrend.2",
+      "reason": "belowTrend",
+      "verb": "buy",
+      "text": "The market has marked {firm} down {gap} below its trend. Nothing I can see explains it."
+    },
+    {
+      "id": "ad.belowTrend.3",
+      "reason": "belowTrend",
+      "verb": "buy",
+      "text": "{firm} looks cheap to me — roughly {gap} below where it has spent the last decade."
+    },
+    {
+      "id": "ad.belowTrend.4",
+      "reason": "belowTrend",
+      "verb": "buy",
+      "text": "I like {firm} at this price. It's {gap} off its own trend and the business hasn't changed."
+    },
+    {
+      "id": "ad.belowTrend.5",
+      "reason": "belowTrend",
+      "verb": "buy",
+      "text": "If you're adding anything this year, I'd make it {firm}. It's {gap} below trend."
+    },
+    {
+      "id": "ad.belowTrend.6",
+      "reason": "belowTrend",
+      "verb": "buy",
+      "text": "{firm} has been beaten up — {gap} under trend. That usually mends. It doesn't always."
+    },
+    {
+      "id": "ad.belowTrend.7",
+      "reason": "belowTrend",
+      "verb": "buy",
+      "text": "Worth a look at {firm}. About {gap} cheaper than its history would suggest."
+    },
+    {
+      "id": "ad.belowTrend.8",
+      "reason": "belowTrend",
+      "verb": "buy",
+      "text": "{firm} is the one I'd put new money into. It's {gap} below where it ought to be."
+    },
+    {
+      "id": "ad.strongEarner.1",
+      "reason": "strongEarner",
+      "verb": "buy",
+      "text": "{firm} earns more than most of what's on the board. That's worth owning through a dull patch."
+    },
+    {
+      "id": "ad.strongEarner.2",
+      "reason": "strongEarner",
+      "verb": "buy",
+      "text": "I keep coming back to {firm}. The business throws off more than its neighbors do."
+    },
+    {
+      "id": "ad.strongEarner.3",
+      "reason": "strongEarner",
+      "verb": "buy",
+      "text": "If you want something to hold and forget, {firm} earns its keep better than most."
+    },
+    {
+      "id": "ad.strongEarner.4",
+      "reason": "strongEarner",
+      "verb": "buy",
+      "text": "{firm} isn't exciting, but it compounds faster than the rest of its sector."
+    },
+    {
+      "id": "ad.strongEarner.5",
+      "reason": "strongEarner",
+      "verb": "buy",
+      "text": "For a long hold I'd take {firm}. Better earnings than almost anything near its price."
+    },
+    {
+      "id": "ad.strongEarner.6",
+      "reason": "strongEarner",
+      "verb": "buy",
+      "text": "{firm} is the quality name in that sector. You pay for it, and usually it's worth it."
+    },
+    {
+      "id": "ad.aboveTrend.1",
+      "reason": "aboveTrend",
+      "verb": "reduce",
+      "text": "{firm} has run {gap} ahead of its own trend. I'd take some off the table."
+    },
+    {
+      "id": "ad.aboveTrend.2",
+      "reason": "aboveTrend",
+      "verb": "reduce",
+      "text": "You're up a long way on {firm} — {gap} above where its history sits. Trim it."
+    },
+    {
+      "id": "ad.aboveTrend.3",
+      "reason": "aboveTrend",
+      "verb": "reduce",
+      "text": "{firm} is {gap} over trend. I'm not calling a top, but I'd bank part of that."
+    },
+    {
+      "id": "ad.aboveTrend.4",
+      "reason": "aboveTrend",
+      "verb": "reduce",
+      "text": "Nothing wrong with {firm}, it's just {gap} expensive against its own record. Take some out."
+    },
+    {
+      "id": "ad.aboveTrend.5",
+      "reason": "aboveTrend",
+      "verb": "reduce",
+      "text": "I'd sell down {firm}. It's {gap} above trend and that gap tends to close."
+    },
+    {
+      "id": "ad.aboveTrend.6",
+      "reason": "aboveTrend",
+      "verb": "reduce",
+      "text": "{firm} has had its run — {gap} over trend. Leaving it all in is a bet, not a hold."
+    },
+    {
+      "id": "ad.concentrated.1",
+      "reason": "concentrated",
+      "verb": "rebalance",
+      "text": "{share} of your money is in {sector}. One bad year there takes most of it."
+    },
+    {
+      "id": "ad.concentrated.2",
+      "reason": "concentrated",
+      "verb": "rebalance",
+      "text": "You're {share} {sector}. That's not a portfolio, it's one bet in six pieces."
+    },
+    {
+      "id": "ad.concentrated.3",
+      "reason": "concentrated",
+      "verb": "rebalance",
+      "text": "Everything you own moves together — {share} of it is {sector}. Spread it out."
+    },
+    {
+      "id": "ad.concentrated.4",
+      "reason": "concentrated",
+      "verb": "rebalance",
+      "text": "If {sector} has a bad year you lose {share} of everything. I'd fix that before anything else."
+    },
+    {
+      "id": "ad.concentrated.5",
+      "reason": "concentrated",
+      "verb": "rebalance",
+      "text": "{share} in a single sector. Names in the same sector fall together, and they will."
+    },
+    {
+      "id": "ad.concentrated.6",
+      "reason": "concentrated",
+      "verb": "rebalance",
+      "text": "Your {sector} position is {share} of the lot. Good year so far. Bad way to hold it."
+    },
+    {
+      "id": "ad.concentrated.7",
+      "reason": "concentrated",
+      "verb": "rebalance",
+      "text": "I'd move some of that {sector} money elsewhere. {share} in one sector is too much."
+    },
+    {
+      "id": "ad.noFloor.1",
+      "reason": "noFloor",
+      "verb": "reduce",
+      "text": "{share} of your money is in things with no floor under them. They can go to nothing."
+    },
+    {
+      "id": "ad.noFloor.2",
+      "reason": "noFloor",
+      "verb": "reduce",
+      "text": "You're {share} in coins and penny stocks. Those don't come back the way shares do."
+    },
+    {
+      "id": "ad.noFloor.3",
+      "reason": "noFloor",
+      "verb": "reduce",
+      "text": "I'd trim the speculative end. {share} of everything you own can genuinely reach zero."
+    },
+    {
+      "id": "ad.noFloor.4",
+      "reason": "noFloor",
+      "verb": "reduce",
+      "text": "Keep the coins if you like them, but {share} is more than I'd have anybody carry."
+    },
+    {
+      "id": "ad.noFloor.5",
+      "reason": "noFloor",
+      "verb": "reduce",
+      "text": "{share} in names with no earnings behind them. That's a lot to leave to chance."
+    },
+    {
+      "id": "ad.noFloor.6",
+      "reason": "noFloor",
+      "verb": "reduce",
+      "text": "The risky end is {share} of your money. Halve it and you'd sleep better."
+    },
+    {
+      "id": "ad.idleCash.1",
+      "reason": "idleCash",
+      "verb": "buy",
+      "text": "You've got {amount} sitting in the bank doing nothing. Put some of it to work."
+    },
+    {
+      "id": "ad.idleCash.2",
+      "reason": "idleCash",
+      "verb": "buy",
+      "text": "{amount} in cash. It's safe and it's going backwards. Some of that should be invested."
+    },
+    {
+      "id": "ad.idleCash.3",
+      "reason": "idleCash",
+      "verb": "buy",
+      "text": "There's {amount} idle. I'm not saying spend it all — I am saying don't leave it there."
+    },
+    {
+      "id": "ad.idleCash.4",
+      "reason": "idleCash",
+      "verb": "buy",
+      "text": "{amount} in the account. At your age that's money not working."
+    },
+    {
+      "id": "ad.idleCash.5",
+      "reason": "idleCash",
+      "verb": "buy",
+      "text": "You're carrying {amount} in cash. A buffer is sensible; that's past a buffer."
+    },
+    {
+      "id": "ad.idleCash.6",
+      "reason": "idleCash",
+      "verb": "buy",
+      "text": "Cash is {amount}. Keep what you need for a bad year and invest the rest."
+    },
+    {
+      "id": "ad.steady.1",
+      "reason": "steady",
+      "verb": "hold",
+      "text": "Nothing worth doing this year. Leave it alone."
+    },
+    {
+      "id": "ad.steady.2",
+      "reason": "steady",
+      "verb": "hold",
+      "text": "I'd sit on your hands. The portfolio is fine and there's nothing cheap enough to chase."
+    },
+    {
+      "id": "ad.steady.3",
+      "reason": "steady",
+      "verb": "hold",
+      "text": "No changes from me. Not every year has a trade in it."
+    },
+    {
+      "id": "ad.steady.4",
+      "reason": "steady",
+      "verb": "hold",
+      "text": "You're well placed. Doing nothing is a position, and this year it's the right one."
+    },
+    {
+      "id": "ad.steady.5",
+      "reason": "steady",
+      "verb": "hold",
+      "text": "Nothing to fix and nothing obvious to buy. That's a good year, not a boring one."
+    },
+    {
+      "id": "ad.steady.6",
+      "reason": "steady",
+      "verb": "hold",
+      "text": "Hold. If I made something up to justify the fee you'd be worse off for it."
+    }
+  ],
+  "advisors": [
+    {
+      "id": "adv.branch",
+      "name": "A planner at your bank",
+      "blurb": "Free with the account. Will tell you what you're holding wrong, and nothing else.",
+      "feeBasis": 0,
+      "flatFee": 0,
+      "minimumPortfolio": 0,
+      "reasons": [
+        "concentrated",
+        "noFloor",
+        "idleCash",
+        "steady"
+      ],
+      "picks": 2,
+      "sharpness": 0,
+      "concentratedAt": 0.45,
+      "speculativeAt": 0.3
+    },
+    {
+      "id": "adv.independent",
+      "name": "An independent advisor",
+      "blurb": "A fifth of a percent a year. Actual opinions about actual companies.",
+      "feeBasis": 20,
+      "flatFee": 0,
+      "minimumPortfolio": 10000,
+      "reasons": [
+        "concentrated",
+        "noFloor",
+        "idleCash",
+        "belowTrend",
+        "aboveTrend",
+        "strongEarner",
+        "steady"
+      ],
+      "picks": 3,
+      "sharpness": 0.22,
+      "concentratedAt": 0.38,
+      "speculativeAt": 0.22
+    }
+  ],
+  "notYetBuilt": [
+    {
+      "id": "adv.private",
+      "label": "A private wealth manager",
+      "needs": "private deals worth their fee",
+      "arrives": "v0.06"
+    }
+  ]
+}

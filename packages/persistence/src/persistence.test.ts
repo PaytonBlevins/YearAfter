@@ -1088,3 +1088,49 @@ describe('v22 -> v23 migration (Ticket 0308c — products become instruments)', 
     }
   });
 });
+
+describe('v23 -> v24 migration (Ticket 0309 — advisors)', () => {
+  /**
+   * The migration that deliberately moves no money.
+   *
+   * Four in a row now have refused to invent a decision on an existing
+   * character's behalf: 21 gave nobody a loan, 22 gave nobody a portfolio, 23
+   * refused to refund one to cash, and this one hires nobody. An advisor has a
+   * yearly fee attached, and a save waking up next to a bill it never agreed to
+   * would be the worst version of a migration being helpful.
+   */
+  const v23 = () => ({ ...newSave('MIG-0309').save, version: 23 });
+
+  it('hires nobody', () => {
+    const migrated = migrateSave(v23());
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(24);
+    expect(migrated.value.advisorId).toBeUndefined();
+  });
+
+  it('changes nothing else at all', () => {
+    /*
+      The strongest thing that can be said about a version-only migration, and
+      worth asserting rather than assuming: everything except the version is
+      byte-identical. A migration that quietly normalised a field would pass a
+      spot check on the field somebody thought to look at.
+    */
+    const before = v23();
+    const migrated = migrateSave(before);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    const { version: _v, ...after } = migrated.value as Record<string, unknown>;
+    const { version: _v2, ...original } = before as Record<string, unknown>;
+    expect(after).toEqual(original);
+  });
+
+  it('carries an advisor across a save and a load', () => {
+    const save = { ...newSave('MIG-0309B').save, advisorId: 'adv.branch' };
+    const parsed = JSON.parse(JSON.stringify(save)) as typeof save;
+    const migrated = migrateSave(parsed);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.advisorId).toBe('adv.branch');
+  });
+});
