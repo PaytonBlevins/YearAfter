@@ -1105,11 +1105,14 @@ describe('v23 -> v24 migration (Ticket 0309 — advisors)', () => {
     const migrated = migrateSave(v23());
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
-    expect(migrated.value.version).toBe(24);
+    // `migrateSave` runs the WHOLE chain, so the version it lands on is
+    // whatever is current — asserting a literal 24 here made this test fail the
+    // moment 0310 added a step, which is the test being about the wrong thing.
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
     expect(migrated.value.advisorId).toBeUndefined();
   });
 
-  it('changes nothing else at all', () => {
+  it('changes nothing but the version', () => {
     /*
       The strongest thing that can be said about a version-only migration, and
       worth asserting rather than assuming: everything except the version is
@@ -1120,8 +1123,14 @@ describe('v23 -> v24 migration (Ticket 0309 — advisors)', () => {
     const migrated = migrateSave(before);
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
-    const { version: _v, ...after } = migrated.value as Record<string, unknown>;
-    const { version: _v2, ...original } = before as Record<string, unknown>;
+    const { version: _v, ...after } = migrated.value as unknown as Record<string, unknown>;
+    const { version: _v2, ...original } = before as unknown as Record<string, unknown>;
+    /*
+      Everything except the version must be byte-identical. `retirement` is on
+      both sides because a save built today already carries one and the 0310
+      step leaves an existing account alone — which is itself the thing worth
+      asserting, and is covered directly in the v24 -> v25 block below.
+    */
     expect(after).toEqual(original);
   });
 
@@ -1132,5 +1141,69 @@ describe('v23 -> v24 migration (Ticket 0309 — advisors)', () => {
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
     expect(migrated.value.advisorId).toBe('adv.branch');
+  });
+});
+
+describe('v24 -> v25 migration (Ticket 0310 — retirement)', () => {
+  /**
+   * The fifth migration in a row to refuse to invent a decision.
+   *
+   * Backdating contributions would hand an existing fifty-year-old a balance
+   * they never chose to build — and with it the employer match, which is money
+   * from a job they may no longer hold. `rate` starts at zero for the same
+   * reason migration 21 gave nobody a loan: a standing instruction to move 6%
+   * of every future paycheque is an instruction, and the game never received
+   * one.
+   */
+  const v24 = () => {
+    const { retirement: _drop, ...rest } = newSave('MIG-0310').save as unknown as Record<
+      string,
+      unknown
+    >;
+    return { ...rest, version: 24 } as unknown as Parameters<typeof migrateSave>[0];
+  };
+
+  it('opens an empty account and retires nobody', () => {
+    const migrated = migrateSave(v24());
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(Number(migrated.value.retirement.balance)).toBe(0);
+    expect(migrated.value.retirement.rate).toBe(0);
+    expect(migrated.value.retirement.serviceYears).toBe(0);
+    expect(migrated.value.retirement.retiredAtAge).toBeUndefined();
+  });
+
+  it('leaves an account that already exists alone', () => {
+    const existing = {
+      balance: 4_200_000,
+      rate: 0.06,
+      serviceYears: 11,
+      finalPensionablePay: 8_800_000,
+    };
+    const save = { ...(v24() as unknown as Record<string, unknown>), retirement: existing };
+    const migrated = migrateSave(save as unknown as Parameters<typeof migrateSave>[0]);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.retirement).toEqual(existing);
+  });
+
+  it('carries a retired character across a save and a load', () => {
+    const save = {
+      ...newSave('MIG-0310B').save,
+      retirement: {
+        balance: 1_000_000,
+        rate: 0,
+        serviceYears: 30,
+        finalPensionablePay: 9_000_000,
+        retiredAtAge: 62,
+      },
+    };
+    const parsed = JSON.parse(JSON.stringify(save)) as typeof save;
+    const migrated = migrateSave(parsed);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.retirement.retiredAtAge).toBe(62);
+    expect(migrated.value.retirement.serviceYears).toBe(30);
   });
 });

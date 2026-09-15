@@ -17,7 +17,7 @@
  * rather than a free pass (CORE_RULES 13.53).
  */
 
-import { dollars, err, ok, type Result } from '@yearafter/core';
+import { cents, dollars, err, ok, type Result } from '@yearafter/core';
 import {
   INSTRUMENTS,
   findInstrument,
@@ -32,16 +32,25 @@ import {
   portfolioWorth,
   priceOf,
   sellUnits,
+  MOST_OF_PAY,
+  UNLOCKS_AT,
   advisorFee,
+  benefitFor,
+  canRetire,
+  contributeYear,
   findAdvisor,
+  retire,
+  withdrawEarly,
   recommendationsFor,
   totalBorrowed,
   totalOwed,
   willTakeYou,
   type Estate,
   type Recommendation,
+  type RetireRefusal,
   type TradeRefusal,
 } from '@yearafter/finance';
+import { findJob, payFor, standingIn } from '@yearafter/careers';
 import { moveMoney, withCash } from './money';
 import type { GameState } from './game-state';
 
@@ -55,7 +64,26 @@ import type { GameState } from './game-state';
  * all come through here.
  */
 export const estateOf = (state: GameState): Estate => ({
-  investments: portfolioWorth(state.prices, state.portfolio),
+  /*
+    Ticket 0310. THE RETIREMENT BALANCE IS FOLDED IN HERE and nowhere else.
+
+    Spec 163: "Do not separately show Annual Net Income or Retirement Assets.
+    Retirement balances roll into Assets." Spec 1851 says it again. Adding it to
+    `investments` is what makes that literally true — the dashboard gains no
+    row, the net-worth line simply becomes right, and a character with $400,000
+    in a pension stops reading as though they had nothing.
+
+    It also means the ONE derivation rule holds: every screen that wants to know
+    what somebody is worth already comes through this function (13.23), so none
+    of them has to learn that retirement exists.
+  */
+  investments: cents(
+    // IN CENTS, not dollars. The first version rounded both sides to whole
+    // dollars before adding them and knocked $4 off a $20,000 portfolio — a
+    // test caught it, and only because it checked the exact figure rather than
+    // "roughly right". Money in this build is integer cents everywhere.
+    Number(portfolioWorth(state.prices, state.portfolio)) + Number(state.retirement.balance),
+  ),
   liabilities: dollars(
     Math.round(Number(totalOwed(state.cards)) / 100) +
       Math.round(Number(totalBorrowed(state.loans)) / 100),
@@ -467,3 +495,119 @@ const biggestHolding = (state: GameState): string | undefined =>
         b.units * priceOf(state.prices, b.instrumentId) -
         a.units * priceOf(state.prices, a.instrumentId),
     )[0]?.instrumentId;
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0310 — retirement                                                    */
+/* -------------------------------------------------------------------------- */
+
+export type RetireError = RetireRefusal;
+
+/**
+ * How much of each paycheque goes into the account.
+ *
+ * A DIAL RATHER THAN A PURCHASE, which is the honest shape: a contribution is
+ * a standing instruction, not a thing you buy once. Setting it to zero stops
+ * it, and nothing already in the account comes back out — that is what
+ * `takeOutEarly` is for, and it costs.
+ */
+export function setContribution(state: GameState, rate: number): GameState {
+  const clamped = Math.max(0, Math.min(MOST_OF_PAY, rate));
+  return { ...state, retirement: { ...state.retirement, rate: clamped } };
+}
+
+/**
+ * Stop working.
+ *
+ * THE JOB GOES WITH IT, and that is the point of the verb. Before 0310 a
+ * character could resign, but resigning just meant being unemployed and looking
+ * for work — measured across 120 lives, 100% of characters alive at 65, 70 AND
+ * 75 were still holding a job. Retiring is the state that says they are done,
+ * and it is one-way on purpose: a player who could un-retire every time the
+ * market dipped would be playing a different game.
+ */
+export function retireNow(state: GameState): Result<InvestOutcome, RetireError> {
+  const refusal = canRetire(state.retirement, state.player.age);
+  if (refusal) return err(refusal);
+
+  const retirement = retire(state.retirement, state.player.age);
+  const pot = Math.round(Number(retirement.balance) / 100);
+
+  return ok({
+    state: {
+      ...state,
+      retirement,
+      // The job ends here rather than through `resign`, because this is not
+      // quitting — there is no history entry that says "left to look for work".
+      employment: { ...state.employment, job: undefined },
+    },
+    title: 'Retired',
+    /*
+      THE BODY NAMES WHAT THEY ACTUALLY HAVE, because "You retired" is the
+      decoration this build keeps removing. A character who stops at fifty-five
+      with nothing saved needs to be told that, in the moment they can still
+      do something about it.
+    */
+    body:
+      pot > 0
+        ? `That is the last of the working years. ${money(pot)} put away, and it starts paying out now.`
+        : 'That is the last of the working years. Nothing put away, so it will be tight.',
+    good: pot > 0,
+  });
+}
+
+/** Whether the screen should offer it, and why not when it should not. */
+export const retirementRefusal = (state: GameState): RetireRefusal | undefined =>
+  canRetire(state.retirement, state.player.age);
+
+/** Money out before the date, which costs 20% below `UNLOCKS_AT`. */
+export function takeOutEarly(
+  state: GameState,
+  amount: number,
+): Result<InvestOutcome, RetireError> {
+  const out = withdrawEarly(state.retirement, state.player.age, amount);
+  if (out.taken <= 0) return err('notWorking');
+
+  const moved = moveMoney(state, {
+    category: 'investment',
+    amount: dollars(out.taken),
+    source: out.penalty > 0 ? 'Retirement — taken out early' : 'Retirement — withdrawn',
+  });
+
+  return ok({
+    state: {
+      ...state,
+      player: withCash(state.player, moved),
+      finance: moved.finance,
+      retirement: out.after,
+    },
+    title: out.penalty > 0 ? 'Taken out early' : 'Withdrawn',
+    body:
+      out.penalty > 0
+        ? `${money(out.taken)} in the bank. Taking it out before ${UNLOCKS_AT} cost ${money(out.penalty)}.`
+        : `${money(out.taken)} moved into your account.`,
+    good: out.penalty === 0,
+  });
+}
+
+/** What this year's paycheque would put in, for the screen to say beforehand. */
+export function contributionPreview(state: GameState): { own: number; matched: number } {
+  const job = state.employment.job;
+  const row = job ? findJob(job.jobId) : undefined;
+  const benefit = row ? benefitFor(row.template) : undefined;
+  if (!benefit || !row || !job) return { own: 0, matched: 0 };
+  const pay = payFor(
+    row,
+    Math.max(0, state.player.age - job.since),
+    Number(job.performance),
+    standingIn(state.employment, row.track),
+  );
+  const year = contributeYear(state.retirement, benefit, pay);
+  return { own: year.own, matched: year.matched };
+}
+
+/** The benefit the current job carries, or nothing. */
+export const benefitOfCurrentJob = (state: GameState) => {
+  const job = state.employment.job;
+  const row = job ? findJob(job.jobId) : undefined;
+  return row ? benefitFor(row.template) : undefined;
+};

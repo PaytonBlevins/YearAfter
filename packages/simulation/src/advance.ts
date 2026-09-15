@@ -55,7 +55,12 @@ import {
   runLoanYear,
   nextMarketState,
   advisorFee,
+  benefitFor,
+  contributeYear,
+  drawYear,
   findAdvisor,
+  growYear,
+  serveYear,
   runHoldingYear,
   runPriceYear,
   yearsOutside,
@@ -114,6 +119,24 @@ function cardSource(onto: readonly string[]): string {
 
 const currentJobTitle = (state: GameState): string | undefined =>
   state.employment.job ? findJob(state.employment.job.jobId)?.title : undefined;
+
+/**
+ * The benefit a retired character's pension is reckoned against.
+ *
+ * Once somebody stops working there is no current job to read a template from,
+ * and a pension earned over thirty years must not vanish the day it starts
+ * paying. So the most recent PENSIONABLE job in their history is what answers,
+ * and a character who never held one gets nothing — which is correct, and is
+ * why `serviceYears` is zero for them anyway.
+ */
+function pensionableBenefit(state: GameState) {
+  for (const past of [...state.employment.history].reverse()) {
+    const job = findJob(past.jobId);
+    const benefit = job ? benefitFor(job.template) : undefined;
+    if (benefit && benefit.pensionPerYear > 0) return benefit;
+  }
+  return undefined;
+}
 
 export function advanceYear(state: GameState): AdvanceResult {
   if (!state.player.alive) {
@@ -512,6 +535,88 @@ export function advanceYear(state: GameState): AdvanceResult {
     source: row.source,
   }));
 
+  /* -------------------------------------------------------------------------- */
+  /* Ticket 0310 — the retirement account                                        */
+  /* -------------------------------------------------------------------------- */
+  /*
+    PAYING IN WHILE WORKING, DRAWING ONCE STOPPED, and growing either way.
+
+    THE MATCH NEVER TOUCHES THE BANK, so it gets no ledger row. It is money the
+    employer puts straight into the account, and posting it as income and then
+    as an equal outflow would inflate the year's earnings by an amount that
+    never existed in the character's hands — 0302's reconciliation would still
+    balance and the dashboard would be lying.
+
+    THE EMPLOYEE'S OWN CONTRIBUTION IS AN `investment` ROW, for exactly the
+    reason 0308 made a share purchase one: the money genuinely leaves the
+    account, so the row has to exist, but it is a TRANSFER rather than outflow
+    (spec 44-46) and `summariseFinances` already knows to keep it out of the
+    spending figure and add it back into net worth.
+
+    Taken from cash rather than from pre-tax pay, which is the one simplification
+    here. Real contributions reduce taxable income; modelling that would mean
+    reaching into `payBreakdown` in `@yearafter/careers` to make the tax
+    conditional on a finance-package concept, and the effect on a game played in
+    whole years is a few per cent on the way in. Labelled rather than hidden.
+  */
+  const workedJob = employment.employment.job;
+  const jobRow = workedJob ? findJob(workedJob.jobId) : undefined;
+  const benefit = jobRow ? benefitFor(jobRow.template) : undefined;
+
+  let retirement = state.retirement;
+  const retirementRows: NewTransaction[] = [];
+
+  if (retirement.retiredAtAge === undefined && benefit && employment.earned > 0) {
+    const paid = contributeYear(retirement, benefit, employment.earned);
+    retirement = serveYear(paid.state, benefit, employment.earned);
+    if (paid.own > 0) {
+      retirementRows.push({
+        category: 'investment' as const,
+        amount: dollars(-paid.own),
+        source:
+          paid.matched > 0
+            ? `Retirement — you put in $${paid.own.toLocaleString('en-US')}, they added $${paid.matched.toLocaleString('en-US')}`
+            : 'Retirement — paid in',
+      });
+    }
+  }
+
+  /*
+    ONCE STOPPED, THE MONEY COMES BACK. A pension and the state's basic pension
+    are `assetIncome` — they are earnings from something owned. The DRAW is an
+    `investment` row, because it is the character's own money coming back across
+    the same line it went out on, which is the rule 0308b set for a matured bond
+    and for the same reason: calling it income would tell the dashboard a
+    seventy-year-old earned $40,000 for existing.
+  */
+  const drawn = drawYear(retirement, nextAge, benefit ?? pensionableBenefit(state));
+  retirement = drawn.after;
+  if (drawn.pension > 0) {
+    retirementRows.push({
+      category: 'assetIncome' as const,
+      amount: dollars(drawn.pension),
+      source: 'Pension',
+    });
+  }
+  if (drawn.state > 0) {
+    retirementRows.push({
+      category: 'assetIncome' as const,
+      amount: dollars(drawn.state),
+      source: 'State pension',
+    });
+  }
+  if (drawn.drawn > 0) {
+    retirementRows.push({
+      category: 'investment' as const,
+      amount: dollars(drawn.drawn),
+      source: 'Retirement — drawn down',
+    });
+  }
+
+  // And the account rides the same market everything else does, including the
+  // crashes 0308d spent a ticket making recoverable.
+  retirement = growYear(retirement, prices);
+
   /*
     Ticket 0309. THE ADVISOR'S FEE, and it is charged here so that it is charged
     AT ALL.
@@ -553,12 +658,16 @@ export function advanceYear(state: GameState): AdvanceResult {
     // The fee is an ordinary bill: it counts toward what the year owes, so a
     // character who cannot cover it draws on a card like they would for rent.
     .concat(advisorCharge)
+    // A retirement contribution is money leaving too, and a character who
+    // cannot cover the year should not be quietly paying into a pension.
+    .concat(retirementRows)
     .filter((entry) => entry.amount < 0)
     .reduce((sum, entry) => sum - Number(entry.amount), 0);
   const coming =
     Number(state.finance.balance) +
     reported
       .concat(payouts)
+      .concat(retirementRows)
       .filter((entry) => entry.amount > 0)
       .reduce((sum, entry) => sum + Number(entry.amount), 0);
   const wanted = Math.max(0, Math.round((owing - coming) / 100));
@@ -606,6 +715,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     ...advance,
     ...reported.filter((entry) => entry.amount < 0),
     ...living.transactions,
+    ...retirementRows.filter((entry) => Number(entry.amount) > 0),
+    ...retirementRows.filter((entry) => Number(entry.amount) < 0),
     ...advisorCharge,
     ...cardYear.charges.map((charge) => ({
       category: 'debt' as const,
@@ -788,6 +899,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       portfolio: marketYear.holdings,
       market,
       prices,
+      retirement,
       // Ticket 0303. The standard of living and whether they pay for a roof —
       // both carried forward, because a standard with no memory is a share of
       // income by another name.

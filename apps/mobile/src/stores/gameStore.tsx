@@ -61,6 +61,9 @@ import {
   hireAdvisor,
   dismissAdvisor,
   actOnAdvice,
+  setContribution,
+  retireNow,
+  takeOutEarly,
 } from '@yearafter/simulation';
 import type { PendingDecision } from '@yearafter/events';
 
@@ -136,6 +139,10 @@ interface GameContextValue {
   readonly hireAdvisorWith: (advisorId: string) => void;
   readonly dismissAdvisorNow: () => void;
   readonly actOnAdviceWith: (recommendationId: string) => void;
+  /** Ticket 0310. */
+  readonly setContributionTo: (rate: number) => void;
+  readonly retireNowAction: () => void;
+  readonly takeOutEarlyWith: (amount: number) => void;
   readonly stopTreatingFor: (conditionId: string) => void;
   /** Put the hours in at something. Three sessions an activity a year. */
   readonly practiseAt: (activityId: string) => void;
@@ -713,6 +720,57 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const setContributionTo = useCallback(
+    (rate: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const next = setContribution(current, rate);
+        if (saveId) persist(next, saveId, settings);
+        return next;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const retireNowAction = useCallback(() => {
+    setState((current) => {
+      if (!current) return current;
+      const result = retireNow(current);
+      if (!result.ok) {
+        setSaveError(`Cannot retire yet (${result.error}).`);
+        return current;
+      }
+      setOutcome({
+        title: result.value.title,
+        body: result.value.body,
+        tone: result.value.good ? 'good' : 'neutral',
+      });
+      if (saveId) persist(result.value.state, saveId, settings);
+      return result.value.state;
+    });
+  }, [persist, saveId, settings]);
+
+  const takeOutEarlyWith = useCallback(
+    (amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = takeOutEarly(current, amount);
+        if (!result.ok) {
+          setSaveError(`Cannot take that out (${result.error}).`);
+          return current;
+        }
+        setOutcome({
+          title: result.value.title,
+          body: result.value.body,
+          tone: result.value.good ? 'good' : 'bad',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const payLoanWith = useCallback(
     (productId: string, amount: number) => {
       setState((current) => {
@@ -1036,6 +1094,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       hireAdvisorWith,
       dismissAdvisorNow,
       actOnAdviceWith,
+      setContributionTo,
+      retireNowAction,
+      takeOutEarlyWith,
       stopTreatingFor,
       practiseAt,
       takeAGig,
@@ -1086,6 +1147,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       hireAdvisorWith,
       dismissAdvisorNow,
       actOnAdviceWith,
+      setContributionTo,
+      retireNowAction,
+      takeOutEarlyWith,
       payLoanWith,
       stopTreatingFor,
       practiseAt,

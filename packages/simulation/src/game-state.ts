@@ -22,6 +22,7 @@ import {
   EMPTY_LOANS,
   EMPTY_PORTFOLIO,
   NEW_HOUSEHOLD,
+  NO_RETIREMENT,
   OPENING_MARKET,
   openingPrices,
   type HeldCard,
@@ -31,6 +32,7 @@ import {
   type Ledger,
   type MarketState,
   type PriceBook,
+  type RetirementState,
 } from '@yearafter/finance';
 import { Rng } from './rng/rng';
 
@@ -190,6 +192,18 @@ export interface GameState {
    */
   readonly advisorId?: string;
   /**
+   * Ticket 0310. The retirement account, the pension service, and whether they
+   * have stopped.
+   *
+   * Beside the portfolio rather than inside it, and NOT as a holding, because
+   * the whole point of the account is that the player cannot sell it on a
+   * whim — a holding in `portfolio` would show up on the Investments screen
+   * with a Sell button and the lock would be decoration. Spec 163 still gets
+   * what it asks for: `estateOf` folds the balance into the net-worth line, so
+   * it rolls into Assets without ever being its own row.
+   */
+  readonly retirement: RetirementState;
+  /**
    * Decisions waiting on the player.
    *
    * Held in state rather than in the UI because a decision must survive a save,
@@ -222,6 +236,7 @@ export interface CreateGameStateOptions {
   readonly circle?: SocialCircle;
   readonly parenting?: ParentingState;
   readonly employment?: EmploymentState;
+  readonly retirement?: RetirementState;
   readonly pending?: readonly PendingDecision[];
 }
 
@@ -248,6 +263,7 @@ export const createGameState = (
   portfolio: options.portfolio ?? EMPTY_PORTFOLIO,
   market: options.market ?? OPENING_MARKET,
   prices: options.prices ?? openingPrices(),
+  retirement: options.retirement ?? NO_RETIREMENT,
   pending: options.pending ?? [],
   rng,
 });

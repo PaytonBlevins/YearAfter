@@ -31,13 +31,74 @@ import type { Personality, VisibleStats } from '@yearafter/character';
  */
 export const BASE_CAPACITY_HOURS = 14;
 
+/**
+ * The age capacity starts falling, and how fast.
+ *
+ * Fifty-five is late enough that it does not touch a working life's peak and
+ * early enough that a character feels it before the game's median death at
+ * seventy-three. The rate is per year of age.
+ */
+export const WEARS_FROM = 55;
+/*
+  0.9 HOURS A YEAR, AND THE NUMBER WAS SET AGAINST A THRESHOLD RATHER THAN
+  AGAINST A FEELING.
+
+  The first value was 0.42, which looked reasonable and was inert. It produced a
+  stress level of 17 for a seventy-year-old still working full time — and
+  `RELEVANCE_THRESHOLD` in `@yearafter/stress` is 30, below which stress costs
+  exactly nothing by design. The lever was moving a number the game deliberately
+  ignores, and the paired comparison against a retiree is the only thing that
+  showed it: stress read 17 against 1, and happiness read 81 against 82.
+
+  Measured at 0.9, still working against stopped at sixty:
+
+      age    stress w/r    happiness w/r
+       60       11 / 11          81 / 81
+       65       32 / 1           80 / 82
+       68       50 / 1           74 / 82
+       70       70 / 1           62 / 82
+       72       84 / 1           42 / 83
+
+  Which is the shape the decision needs. Working into the early sixties costs
+  nothing at all; past sixty-seven it gets steadily worse. At 1.2 the same table
+  reaches a happiness of 25 by seventy, which does not make retiring a choice —
+  it makes carrying on impossible, and that is the same missing decision from
+  the other side.
+*/
+export const WEARS_BY = 0.9;
+/** However old somebody gets, they can still carry something. */
+export const LEAST_CAPACITY = 6;
+
 export function capacityFor(stats: VisibleStats, personality: Personality, age: number): number {
   const discipline = (stats.discipline - 50) / 50; // -1 .. 1
   const willpower = (stats.willpower - 50) / 50;
   const ambition = (personality.ambition - 50) / 50;
   // Older teenagers can carry more than nine-year-olds, and it is not close.
   const maturity = Math.max(0, Math.min(1, (age - 8) / 8)) * 6;
-  return BASE_CAPACITY_HOURS + maturity + discipline * 5 + willpower * 4 + ambition * 2;
+  /*
+    AND IT COMES BACK DOWN. Ticket 0310.
+
+    This function took `age` from the day it was written and only ever used it
+    to ramp a child up to sixteen — after which capacity was FLAT FOREVER. A
+    seventy-five-year-old could carry exactly what a sixteen-year-old could.
+
+    Measured across 120 played lives, that one clamp is why nobody in this build
+    has ever retired: 100% of characters alive at 65, 70 AND 75 were still
+    holding a job, with median pay rising the whole way from $60,403 at forty to
+    $126,789 at seventy-five. Working into your nineties was free, so stopping
+    was strictly worse than not stopping and the decision did not exist.
+
+    The decline starts at `WEARS_FROM` rather than at a retirement age, because
+    a body does not wait for a birthday, and it is gradual — this should make a
+    long career tiring, not impossible. A character who wants to work to eighty
+    still can; they will simply pay for it in stress and in health, which is
+    what 0205 and 0211 are for.
+  */
+  const worn = Math.max(0, age - WEARS_FROM) * WEARS_BY;
+  return Math.max(
+    LEAST_CAPACITY,
+    BASE_CAPACITY_HOURS + maturity - worn + discipline * 5 + willpower * 4 + ambition * 2,
+  );
 }
 
 export interface WorkloadAssessment {

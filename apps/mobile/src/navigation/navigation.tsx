@@ -42,6 +42,8 @@ export type ScreenKey =
   | 'magazine'
   /** Ticket 0309. Who you pay for advice, and what they think this year. */
   | 'advisor'
+  /** Ticket 0310. The account, the pension, and the decision to stop. */
+  | 'retirement'
   | 'homes'
   | 'vehicles'
   | 'businesses'

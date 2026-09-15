@@ -717,6 +717,30 @@ const migrations: Readonly<Record<number, Migration>> = {
    * any money.
    */
   23: (save) => ({ ...save, version: 24 }),
+
+  /**
+   * v24 -> v25: Ticket 0310 gives a character a retirement account.
+   *
+   * EMPTY, AND NOBODY IS RETIRED — the fifth migration running to refuse to
+   * invent a decision. Backdating contributions would hand an existing
+   * fifty-year-old a balance they never chose to build, and worse, would hand
+   * them the employer match that goes with it: money from a job they may not
+   * even hold any more.
+   *
+   * `rate` starts at zero rather than at something sensible, which is the same
+   * call migration 21 made about loans. A standing instruction to move 6% of
+   * every future paycheque is an instruction, and the game did not receive one.
+   */
+  24: (save) => ({
+    ...save,
+    version: 25,
+    retirement: save['retirement'] ?? {
+      balance: 0,
+      rate: 0,
+      serviceYears: 0,
+      finalPensionablePay: 0,
+    },
+  }),
 };
 
 /**

@@ -38,7 +38,7 @@ import {
   schoolLabel,
 } from '@yearafter/education';
 import { isCurrent, partnerOf, stagesFor } from '@yearafter/social';
-import { livingCostFor, portfolioWorth } from '@yearafter/finance';
+import { EARLIEST_RETIREMENT, livingCostFor, portfolioWorth } from '@yearafter/finance';
 import { childrenAtHome } from '@yearafter/parenting';
 import { TRACK_LABELS, afterTax, findJob, payFor } from '@yearafter/careers';
 import {
@@ -47,6 +47,7 @@ import {
   occupationFor,
   openings,
   outOfPocket,
+  type GameState,
 } from '@yearafter/simulation';
 import { salaryLabel } from './JobsScreen';
 import type { Detail } from '../components/DetailCard';
@@ -529,11 +530,56 @@ function Elsewhere() {
                 : 'What you can do for money at your age',
             route: { screen: 'gigs', title: 'Odd Jobs' },
           },
+          /*
+            Ticket 0310. RETIREMENT LIVES ON THE CAREER SCREEN, because stopping
+            work is a career decision before it is a money one — and because
+            0309 put advisors two screens deep inside Investments and the first
+            thing that happened was somebody looking for them and not finding
+            them.
+
+            The subtitle is live state, like every other row in this card: what
+            is in the account, or what the contribution is doing, or why the
+            Retire button will not be there yet.
+          */
+          {
+            icon: 'invest' as const,
+            title: retiredAlready(state) ? 'Retired' : 'Retirement',
+            subtitle: retirementLine(state),
+            route: { screen: 'retirement' as const, title: 'Retirement' },
+          },
         ]}
       />
     </>
   );
 }
+
+const retiredAlready = (state: GameState): boolean =>
+  state.retirement.retiredAtAge !== undefined;
+
+/**
+ * The Retirement row's subtitle — what a player would want to know from the
+ * Career screen without opening it.
+ */
+function retirementLine(state: GameState): string {
+  const balance = Math.round(Number(state.retirement.balance) / 100);
+  if (retiredAlready(state)) {
+    return balance > 0
+      ? `${money(balance)} left, paying out each year`
+      : 'Living on the pension';
+  }
+  if (balance > 0) {
+    const rate = Math.round(state.retirement.rate * 100);
+    return rate > 0
+      ? `${money(balance)} put away, ${rate}% of your pay going in`
+      : `${money(balance)} put away, nothing going in`;
+  }
+  if (state.player.age < EARLIEST_RETIREMENT) {
+    return 'Nothing put away yet. The employer match is free money.';
+  }
+  return 'Nothing put away. You could still stop.';
+}
+
+const money = (amount: number): string => `$${Math.round(amount).toLocaleString('en-US')}`;
 
 /**
  * Ticket 0210b, moved behind a tap by 0210c — where the salary actually went.
@@ -713,10 +759,9 @@ export function AssetsScreen() {
 
       <SectionHeading>Buy</SectionHeading>
       <RowGroup rows={[{ icon: 'shopping', title: 'Shopping', ticket: '0505' }]} />
-      {/* 0301–0309 have shipped. Retirement is the last ticket of the
-          milestone, and naming the one that is actually outstanding is the
-          difference between a note and a stale label. */}
-      <ComingSoon ticket="0310" what="Retirement accounts" />
+      {/* v0.03 Financial Life is COMPLETE — 0301 through 0310. What is left on
+          this screen belongs to v0.05 Ownership, and each of those rows names
+          its own ticket rather than carrying a blanket note. */}
     </Screen>
   );
 }

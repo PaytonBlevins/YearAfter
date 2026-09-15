@@ -49,6 +49,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     // Omitted entirely when nobody is hired, which is what every other optional
     // field in this document does and what the migration relies on.
     ...(state.advisorId !== undefined ? { advisorId: state.advisorId } : {}),
+    retirement: state.retirement,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
     updatedAt: options.updatedAt ?? now,
@@ -73,6 +74,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     market: save.market,
     prices: save.prices,
     ...(save.advisorId !== undefined ? { advisorId: save.advisorId } : {}),
+    retirement: save.retirement,
     pending: save.pending,
   });
 }

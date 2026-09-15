@@ -1621,3 +1621,41 @@ stayed pinned at 61% throughout — drift spans 0.02–0.082 while volatility sp
 0.12–0.95, so across one year the fundamental is a rounding error. **A tier
 built on it would have been a label with nothing behind it**, and it would have
 looked fine in every test that did not compare it against a control.
+
+### 13.57 A lever is inert until it crosses the threshold the consumer applies
+
+*Ticket 0310.* Nobody in this build had ever retired. Measured across 120 played
+lives, **100% of characters alive at 65, 70 AND 75 were still holding a job**,
+with median pay climbing the whole way from $60,403 at forty to $126,789 at
+seventy-five. The cause was one clamp: `capacityFor` ramped a child up to
+sixteen and then held capacity flat forever, so working into your nineties was
+free and stopping was strictly worse than not stopping.
+
+Adding a decline of 0.42 hours a year looked like the fix and did nothing. A
+seventy-year-old's stress went to 17 — and `RELEVANCE_THRESHOLD` in
+`@yearafter/stress` is **30**, below which stress costs exactly nothing by
+design, so an ordinary childhood is never quietly taxed. The lever was moving a
+number the consuming system deliberately ignores.
+
+| | stress w/r | happiness w/r |
+|---|---|---|
+| at 0.42, age 70 | 17 / 1 | 81 / 82 |
+| at 0.9, age 70 | 70 / 1 | **62 / 82** |
+
+- **Reading the lever's own output proves nothing.** Stress moved from 1 to 17,
+  which is a seventeenfold change and entirely worthless. The only reading that
+  meant anything was the one taken downstream of the threshold.
+- **Every consumer has a floor, and floors are invisible from upstream.**
+  `capacityFor` cannot see `RELEVANCE_THRESHOLD`; the two live in different
+  packages and neither mentions the other. Before tuning a number, find what
+  reads it and what that reader ignores.
+- **Tune against the incentive, not the magnitude.** The question was never "how
+  much stress is realistic for a seventy-year-old" — it was "at what value does
+  a player choose to stop". At 1.2 the same table reaches a happiness of 25 by
+  seventy, which does not make retiring a choice either: it makes carrying on
+  impossible, which is the same missing decision from the other side.
+- **And a system's absence can hide behind a full implementation.** The jobs
+  catalog has advertised "Retirement match, paid time off" and "Pension, and it
+  is a real one" since 0210. Both were display strings with nothing behind them
+  for two milestones — 13.36 in copy form, and nothing failed, because a promise
+  the game never keeps still renders.
