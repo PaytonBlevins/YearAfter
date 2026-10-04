@@ -25,7 +25,9 @@
  *                   a large salary.
  *   secured         NOT YET. Needs something to secure it against, which is
  *                   v0.05's property and vehicles.
- *   business        NOT YET. Needs a business, which is v0.06.
+ *   business        BUILT IN 0603 — see "Business loans" below. It is the one
+ *                   type that is not a product you apply for from the Loans
+ *                   screen, because the money is for one thing.
  *
  * Declared in `LOAN_TYPES_NOT_YET_BUILT` rather than shipped empty, the same
  * device as `UNWRITTEN_CATEGORIES`, `NOT_YET_OWNED` and
@@ -53,12 +55,19 @@ import { atLeast } from './credit';
 /** Spec 1857's list, verbatim. */
 export type LoanType = 'personal' | 'secured' | 'business' | 'lineOfCredit' | 'wealthPrivate';
 
-export const LOAN_TYPES_NOT_YET_BUILT = [
-  { type: 'secured', needs: 'something to secure it against', arrives: 'v0.05' },
-  { type: 'business', needs: 'a business', arrives: 'v0.06' },
-  // `wealthPrivate` came off this list in Ticket 0308, which built the
-  // portfolio it had been waiting for. Two down, two to go.
-] as const;
+export interface LoanTypeNotYetBuilt {
+  readonly type: LoanType;
+  readonly needs: string;
+  readonly arrives: string;
+}
+
+/**
+ * EMPTY AT LAST. `secured` came off in Ticket 0501 (a mortgage is secured on
+ * the home it buys and lives in `property.ts`), `wealthPrivate` in 0308, and
+ * `business` in 0603. The list stays, empty, because the same two tests guard
+ * it for the next type spec 1857 grows.
+ */
+export const LOAN_TYPES_NOT_YET_BUILT: readonly LoanTypeNotYetBuilt[] = [];
 
 export interface LoanProduct {
   readonly id: string;
@@ -79,6 +88,11 @@ export interface LoanProduct {
    * outright to anybody with nothing to pledge.
    */
   readonly needsCollateral?: boolean;
+  /**
+   * Ticket 0603. A business loan: the share of a purchase it will finance, by
+   * what is being bought. Absent for a kind means they will not lend for it.
+   */
+  readonly financesShare?: Readonly<Partial<Record<PurchaseKind, number>>>;
   /**
    * Nothing is repaid while the character is studying.
    *
@@ -213,7 +227,8 @@ export const LOAN_PRODUCTS: readonly LoanProduct[] = [
 ];
 
 export const findLoanProduct = (id: string): LoanProduct | undefined =>
-  LOAN_PRODUCTS.find((product) => product.id === id);
+  LOAN_PRODUCTS.find((product) => product.id === id) ??
+  BUSINESS_LOAN_PRODUCTS.find((product) => product.id === id);
 
 /* -------------------------------------------------------------------------- */
 /* A loan somebody holds                                                       */
@@ -233,12 +248,34 @@ export interface HeldLoan {
   readonly termLeft: number;
   /** True once a payment has been missed and not caught up. */
   readonly inArrears: boolean;
+  /**
+   * Ticket 0603. The business this was borrowed to buy, or to enlarge, for a
+   * business loan; absent for every other kind. One business, one loan: a
+   * second purchase for the same business tops the first up.
+   */
+  readonly businessId?: string;
 }
 
 export const MAX_ACTIVE_LOANS = 4;
 
 export const totalBorrowed = (loans: readonly HeldLoan[]): Money =>
   cents(loans.reduce((sum, loan) => sum + Number(loan.balance), 0));
+
+export const isBusinessLoan = (loan: Pick<HeldLoan, 'productId'>): boolean =>
+  findLoanProduct(loan.productId)?.type === 'business';
+
+/** The loans a person takes for themselves. A business loan is the business's, not theirs. */
+export const personalLoans = (loans: readonly HeldLoan[]): readonly HeldLoan[] =>
+  loans.filter((loan) => !isBusinessLoan(loan));
+
+/**
+ * What is owed on the loans a lender weighs against a salary. A business loan
+ * is left out for the reason a mortgage is: it is secured on the thing it
+ * bought and the thing pays it, and counting it against wages would stop the
+ * people the product exists for from ever borrowing a second time.
+ */
+export const personalBorrowed = (loans: readonly HeldLoan[]): Money =>
+  totalBorrowed(personalLoans(loans));
 
 /**
  * The same ceiling a card has, and it is here because 0306 shipped without one.
@@ -311,6 +348,8 @@ export type LoanRefusal =
   | 'fullyDrawn'
   /** Ticket 0308: nothing to secure it against. */
   | 'noCollateral'
+  /** Ticket 0603: a business loan is only ever written for a purchase. */
+  | 'forABusiness'
   | 'tooYoung';
 
 export interface LoanDecision {
@@ -340,7 +379,7 @@ export const STUDENT_FLOOR = 12_000;
 export const CAN_BORROW_FROM_AGE = 18;
 
 export function borrowingRoom(product: LoanProduct, borrower: Borrower): number {
-  const owed = Number(totalBorrowed(borrower.loans)) / 100 + borrower.cardDebt;
+  const owed = Number(personalBorrowed(borrower.loans)) / 100 + borrower.cardDebt;
   if (product.needsStudying) {
     /*
       Bounded by the TUITION AHEAD, less what has already been borrowed for it —
@@ -397,8 +436,13 @@ export function yearlyPaymentFor(product: LoanProduct, balance: number, termLeft
 
 export function applyForLoan(product: LoanProduct, borrower: Borrower): LoanDecision {
   const none: LoanDecision = { approved: false, offered: cents(0), yearlyPayment: cents(0) };
+  // Cash from this door would be the cheapest credit in the game (see "Business
+  // loans" below), so the door is shut here rather than trusted to a screen.
+  if (product.type === 'business') return { ...none, because: 'forABusiness' };
   if (borrower.age < CAN_BORROW_FROM_AGE) return { ...none, because: 'tooYoung' };
-  if (borrower.loans.length >= MAX_ACTIVE_LOANS) return { ...none, because: 'tooManyLoans' };
+  if (personalLoans(borrower.loans).length >= MAX_ACTIVE_LOANS) {
+    return { ...none, because: 'tooManyLoans' };
+  }
   // A student loan TOPS UP rather than being one-and-done: a degree is paid
   // for a year at a time and the room left is `tuitionAhead` less what has
   // already been drawn. Everything else is one to a customer.
@@ -567,3 +611,226 @@ export const EMPTY_LOANS: readonly HeldLoan[] = [];
  */
 export const debtLoad = (owed: number, income: number): number | undefined =>
   income <= 0 ? (owed > 0 ? 1 : undefined) : Math.min(1, owed / Math.max(1, income * DEBT_CEILING));
+
+/* -------------------------------------------------------------------------- */
+/* Business loans (ticket 0603)                                                */
+/* -------------------------------------------------------------------------- */
+
+/*
+  SPEC 1857'S "BUSINESS / SBA-STYLE", AND WHY IT IS NOT A BUTTON ON THE LOANS
+  SCREEN.
+
+  Every other loan here is cash. Spec 1846 lists "loan proceeds" among the
+  things that increase cash, and 0307 decided against earmarking because a
+  rule that follows money around is a chore (spec 1126–1136). A business loan
+  is the one place that decision cannot stand, and the reason is the exploit
+  rather than the realism: at 7–9% and up to $15,000,000, money a player could
+  take as cash and put in a portfolio, a home or a card balance would be the
+  cheapest credit in the game by a distance, and "prevent circular credit/loan
+  exploits internally" (spec 954) is a sentence about exactly that.
+
+  So the money never reaches the player. It is offered at the moment of a
+  purchase — opening a business, opening another door of one, buying one that
+  exists — and goes straight into that purchase, the way a real lender writes
+  the cheque to the seller. There is no earmarking to administer because there
+  is no cash to earmark.
+
+  WHAT IT LENDS ON. Not income alone, because a startup has none; not
+  collateral alone, because that is `wealthPrivate`. The test is whether the
+  business, and the owner, can pay it back: a share of what is being bought
+  (the lender wants the owner to have something in it), and a payment no bigger
+  than half of what the owner earns plus what their businesses and the one
+  being bought clear. That second bound is the scale limit. Nobody leverages
+  into a trucking company on a clerk's wages, and everybody who has built
+  something that earns can borrow for the next step — which is the shape the
+  spec asks for in 1392 ("starting and acquisition economics must prevent
+  trivial scale exploits") without a cap on how big anyone may become (spec
+  1372).
+*/
+
+export type PurchaseKind = 'open' | 'expand' | 'buy';
+
+export const PURCHASE_LABELS: Readonly<Record<PurchaseKind, string>> = {
+  open: 'opening it',
+  expand: 'opening another door',
+  buy: 'buying it',
+};
+
+export const BUSINESS_LOAN_PRODUCTS: readonly LoanProduct[] = [
+  {
+    id: 'loan.smallbiz',
+    name: 'Small Business Loan',
+    lender: 'Redwood Community Bank',
+    type: 'business',
+    apr: 0.0875,
+    termYears: 10,
+    needs: 'fair',
+    needsIncome: 0,
+    maxPrincipal: 750_000,
+    needsStudying: false,
+    defersWhileStudying: false,
+    // A startup has no record, so a lender wants more of the owner's own money
+    // in it than it does for something that already earns.
+    financesShare: { open: 0.7, expand: 0.8, buy: 0.8 },
+    blurb: 'Government-backed, for people starting out. You put money in too.',
+  },
+  {
+    id: 'loan.commercial',
+    name: 'Commercial Term Loan',
+    lender: 'Ashcroft Commercial',
+    type: 'business',
+    apr: 0.0725,
+    termYears: 10,
+    needs: 'good',
+    needsIncome: 0,
+    maxPrincipal: 15_000_000,
+    needsStudying: false,
+    defersWhileStudying: false,
+    // No `open`: they lend against earnings, and a business not yet opened has
+    // none. That is the line between the two products and the reason the
+    // cheaper one is harder to reach.
+    financesShare: { expand: 0.8, buy: 0.75 },
+    blurb: 'Cheaper, for businesses that already earn. They read the books.',
+  },
+];
+
+/** Half of what the owner and the businesses clear may go on repaying. */
+export const COVER_SHARE = 0.5;
+
+export interface BusinessPurchase {
+  readonly kind: PurchaseKind;
+  /** What it costs, in whole dollars, before any borrowing. */
+  readonly cost: number;
+  /** What the thing being bought or enlarged clears in a year, on average. Zero for a new one. */
+  readonly targetProfit: number;
+  /** The business that already holds a loan, if this is a top-up. */
+  readonly topUp?: { readonly businessId: string; readonly productId: string };
+}
+
+export interface BusinessBorrower {
+  readonly standing: CreditStanding;
+  readonly age: number;
+  /** Wages, commission and a partner's pay, last year — not what a business paid, which is counted below. */
+  readonly earned: number;
+  /** What the businesses already owned clear in a year, on average, never below zero. */
+  readonly businessProfit: number;
+  /** Every yearly payment already committed: loans, mortgages, cars. */
+  readonly obligations: number;
+}
+
+export type BusinessLoanRefusal =
+  | 'tooYoung'
+  | 'standing'
+  | 'noRecord'
+  | 'otherLender'
+  | 'cover'
+  | 'tooSmall';
+
+export const BUSINESS_LOAN_REFUSALS: Readonly<Record<BusinessLoanRefusal, string>> = {
+  tooYoung: 'Nobody lends to somebody your age.',
+  standing: "Your credit isn't there yet for this one.",
+  noRecord: 'They lend against what a business earns, and this one has no record yet.',
+  otherLender: "This business already borrows from somebody else, and they won't share.",
+  cover: "What you earn wouldn't cover the repayments on top of what you already owe.",
+  tooSmall: "It's too small for them to bother with.",
+};
+
+export interface BusinessLoanDecision {
+  readonly approved: boolean;
+  readonly because?: BusinessLoanRefusal;
+  /** The most they will lend for this purchase, whole dollars. */
+  readonly offered: number;
+  /** What a full year of repaying that would cost, whole dollars. */
+  readonly yearlyPayment: number;
+}
+
+/** The yearly payment on one dollar borrowed at this rate over this many years. */
+export const paymentFactor = (apr: number, years: number): number =>
+  apr <= 0 ? 1 / Math.max(1, years) : apr / (1 - (1 + apr) ** -Math.max(1, years));
+
+export function businessLoanFor(
+  product: LoanProduct,
+  purchase: BusinessPurchase,
+  borrower: BusinessBorrower,
+): BusinessLoanDecision {
+  const none = (because: BusinessLoanRefusal): BusinessLoanDecision => ({
+    approved: false,
+    because,
+    offered: 0,
+    yearlyPayment: 0,
+  });
+  if (borrower.age < CAN_BORROW_FROM_AGE) return none('tooYoung');
+  if (purchase.topUp && purchase.topUp.productId !== product.id) return none('otherLender');
+  const share = product.financesShare?.[purchase.kind];
+  if (share === undefined) return none('noRecord');
+  if (!atLeast(borrower.standing, product.needs)) return none('standing');
+
+  const cover =
+    (borrower.earned + borrower.businessProfit + Math.max(0, purchase.targetProfit)) * COVER_SHARE -
+    borrower.obligations;
+  const byCover = cover > 0 ? cover / paymentFactor(product.apr, product.termYears) : 0;
+  // To the cent first: 0.7 of $45,000 is 31499.999999999996 in floating point, and a loan
+  // written $100 short of the stated share is a bug a player would see as a rounding error.
+  const byCost = Math.round(purchase.cost * share * 100) / 100;
+  const room = Math.floor(Math.min(product.maxPrincipal, byCost, byCover) / 100) * 100;
+  // It is the earnings that fall short, rather than the purchase, when they are the smaller of the two.
+  if (room < MINIMUM_LOAN) return none(byCover < byCost ? 'cover' : 'tooSmall');
+  return {
+    approved: true,
+    offered: room,
+    yearlyPayment: yearlyPaymentFor(product, room, product.termYears),
+  };
+}
+
+export const businessLoanOffersFor = (
+  purchase: BusinessPurchase,
+  borrower: BusinessBorrower,
+): readonly { readonly product: LoanProduct; readonly decision: BusinessLoanDecision }[] =>
+  BUSINESS_LOAN_PRODUCTS.map((product) => ({
+    product,
+    decision: businessLoanFor(product, purchase, borrower),
+  }));
+
+/** The yearly payments a lender sees on loans already held, business ones included. */
+export const loanPaymentsOf = (loans: readonly HeldLoan[]): number =>
+  loans.reduce((sum, loan) => {
+    const product = findLoanProduct(loan.productId);
+    return product ? sum + yearlyPaymentFor(product, Number(loan.balance) / 100, loan.termLeft) : sum;
+  }, 0);
+
+/**
+ * Borrow for a purchase: the loan as it will be held afterwards. A top-up
+ * merges into the one the business already has, as a student loan does, so a
+ * business never carries two.
+ */
+export function withBusinessLoan(
+  loans: readonly HeldLoan[],
+  product: LoanProduct,
+  businessId: string,
+  amount: number,
+): readonly HeldLoan[] {
+  const existing = loans.find((loan) => loan.businessId === businessId);
+  if (!existing) {
+    return [
+      ...loans,
+      {
+        productId: product.id,
+        principal: dollars(amount),
+        balance: dollars(amount),
+        termLeft: product.termYears,
+        inArrears: false,
+        businessId,
+      },
+    ];
+  }
+  return loans.map((loan) =>
+    loan === existing
+      ? {
+          ...loan,
+          principal: dollars(Math.round(Number(loan.principal) / 100) + amount),
+          balance: dollars(Math.round(Number(loan.balance) / 100) + amount),
+          termLeft: Math.max(loan.termLeft, product.termYears),
+        }
+      : loan,
+  );
+}

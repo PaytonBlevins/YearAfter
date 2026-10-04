@@ -13,6 +13,20 @@ const q = (xs: number[], p: number) => {
 };
 
 describe('college', () => {
+  /*
+    NOTE, ADDED BY 0405, NOT BY THIS TEST'S ORIGINAL AUTHOR. This measured
+    0210b's finding — a manual application at eighteen and nothing else — and
+    the loop below still plays exactly that life. What changed is that the
+    generic `while (pending...)` block above the manual application now ALSO
+    resolves a systemic college offer 0405 added, so by the time the manual
+    "one shot at eighteen" runs, the character has usually already been asked
+    and already answered. The printed numbers below are therefore no longer
+    "somebody who does not chase it" — they are close to `measure-education
+    .test.ts`'s "passive" figure, which is 0405's actual replacement for this
+    measurement. Left in rather than deleted: it is still the honest record
+    of what 0210b measured and why 0405 exists, even though its own label
+    now undersells what this exact harness produces.
+  */
   it('is much rarer for somebody who does not chase it', () => {
     const N = 200;
     const levels: Record<string, number> = {};

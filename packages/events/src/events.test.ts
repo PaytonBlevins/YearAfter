@@ -58,6 +58,11 @@ const FULL_FAMILY = household([
 ]);
 
 const context = (overrides: Partial<EventContext> = {}): EventContext => ({
+  // Ticket 0409's additions default to "no job, nothing wrong, nobody lost",
+  // which is what a ten-year-old is.
+  employed: false,
+  jobYears: 0,
+  conditions: [],
   age: 10,
   year: 2010,
   firstName: 'Sofia',
@@ -69,6 +74,8 @@ const context = (overrides: Partial<EventContext> = {}): EventContext => ({
   family: FULL_FAMILY,
   partnered: false,
   hasChildren: false,
+  friends: 0,
+  friendshipYears: 0,
   alreadyThisYear: 0,
   nameCultureId: 'us-en',
   homeCity: 'Toledo, OH',
@@ -164,6 +171,40 @@ describe('conditions', () => {
     expect(matchesCondition(condition, context({ age: 13 }))).toBe(false);
     expect(matchesCondition(condition, context({ sex: 'male' }))).toBe(false);
     expect(matchesCondition(condition, context({ family: household() }))).toBe(false);
+  });
+
+  it('gates on friends, which is what the whole adult library was missing', () => {
+    /*
+      Ticket 0413, and this is the correctness proof for 0412's predicates —
+      the population test in `after-school.test.ts` can only show that the
+      plumbing carries them, because it observes the circle at the end of a year
+      and the engine reads it in the middle of one.
+
+      The reason these exist: before 0412 the language could say `partnered` and
+      could say nothing whatever about a friend, so every one of the six adult
+      `friendship` events was about romance. An event cannot be about a thing
+      eligibility cannot ask about (CORE_RULES 13.67).
+    */
+    const alone = context({ friends: 0, friendshipYears: 0 });
+    const few = context({ friends: 1, friendshipYears: 3 });
+    const many = context({ friends: 4, friendshipYears: 22 });
+
+    expect(matchesCondition({ hasFriend: true }, alone)).toBe(false);
+    expect(matchesCondition({ hasFriend: true }, few)).toBe(true);
+    // `false` is a real constraint and not the absence of one — the copy for
+    // somebody with nobody is half of what this category is for.
+    expect(matchesCondition({ hasFriend: false }, alone)).toBe(true);
+    expect(matchesCondition({ hasFriend: false }, few)).toBe(false);
+
+    expect(matchesCondition({ friendsAtLeast: 2 }, few)).toBe(false);
+    expect(matchesCondition({ friendsAtLeast: 2 }, many)).toBe(true);
+    expect(matchesCondition({ friendsAtMost: 1 }, few)).toBe(true);
+    expect(matchesCondition({ friendsAtMost: 1 }, many)).toBe(false);
+
+    expect(matchesCondition({ friendshipYearsAtLeast: 10 }, few)).toBe(false);
+    expect(matchesCondition({ friendshipYearsAtLeast: 10 }, many)).toBe(true);
+    // Nobody has known anybody for ten years if they have known nobody.
+    expect(matchesCondition({ friendshipYearsAtLeast: 1 }, alone)).toBe(false);
   });
 
   it('reads household shape rather than counting members by hand', () => {
@@ -849,5 +890,73 @@ describe('hasChildren (Ticket 0208)', () => {
   it('is not a constraint when the event does not say', () => {
     expect(matchesCondition({}, context({ hasChildren: true }))).toBe(true);
     expect(matchesCondition({}, context({ hasChildren: false }))).toBe(true);
+  });
+});
+
+describe('Ticket 0409 — work, the body, and loss can be asked about', () => {
+  /*
+    WHY THESE EXIST AT ALL. `partnered` was added in 0207 after a romance event
+    shipped that presupposed a relationship and fired at a classmate the
+    character had never spoken to. `hasChildren` was added in 0208 after eleven
+    parenting events shipped that could fire at somebody who had never had a
+    child. Both were found by reading the built app rather than by a test.
+
+    0409 opened the three largest holes in the catalog — 26 of 374 events could
+    fire at forty, none about a job, a diagnosis or anybody dying — and the
+    predicate language had to learn all three BEFORE the content was written,
+    or it would have been the same defect a third, fourth and fifth time.
+
+    A played-population audit was tried first and could not answer this: the
+    health phase runs AFTER events in the same year and can clear a condition,
+    so a character legitimately asked about their diagnosis in March reads as
+    perfectly well in December. The gate is asserted where it lives.
+  */
+  const working = (over: Partial<EventContext> = {}) =>
+    context({ age: 40, schoolStage: 'graduated', employed: true, jobTrack: 'retail', jobYears: 5, ...over });
+
+  it('will not ask about a job somebody does not have', () => {
+    expect(matchesCondition({ employed: true }, working())).toBe(true);
+    expect(matchesCondition({ employed: true }, working({ employed: false, jobTrack: undefined }))).toBe(
+      false,
+    );
+    // And the other way, for an event about being out of work.
+    expect(matchesCondition({ employed: false }, working({ employed: false }))).toBe(true);
+    expect(matchesCondition({ employed: false }, working())).toBe(false);
+  });
+
+  it('can be about the actual work, and about how long they have done it', () => {
+    expect(matchesCondition({ jobTrackAny: ['retail', 'food'] }, working())).toBe(true);
+    expect(matchesCondition({ jobTrackAny: ['medicine'] }, working())).toBe(false);
+    // Somebody with no job has no track, and must not match a track list.
+    expect(
+      matchesCondition({ jobTrackAny: ['retail'] }, working({ employed: false, jobTrack: undefined })),
+    ).toBe(false);
+
+    expect(matchesCondition({ jobYearsAtLeast: 5 }, working())).toBe(true);
+    expect(matchesCondition({ jobYearsAtLeast: 6 }, working())).toBe(false);
+    expect(matchesCondition({ jobYearsAtMost: 0 }, working({ jobYears: 0 }))).toBe(true);
+    expect(matchesCondition({ jobYearsAtMost: 0 }, working())).toBe(false);
+  });
+
+  it('will not ask about a diagnosis somebody does not have', () => {
+    const ill = working({ conditions: ['cond.back'] });
+    expect(matchesCondition({ hasCondition: true }, ill)).toBe(true);
+    expect(matchesCondition({ hasCondition: true }, working())).toBe(false);
+    expect(matchesCondition({ hasCondition: false }, working())).toBe(true);
+
+    expect(matchesCondition({ conditionAny: ['cond.back', 'cond.spine'] }, ill)).toBe(true);
+    // The wrong diagnosis is no diagnosis — a line about your chest must not
+    // fire because you have a bad knee.
+    expect(matchesCondition({ conditionAny: ['cond.chest'] }, ill)).toBe(false);
+    expect(matchesCondition({ conditionAny: ['cond.back'] }, working())).toBe(false);
+  });
+
+  it('will not ask about somebody who has not died', () => {
+    expect(matchesCondition({ bereavedWithin: 1 }, working({ bereavedWithin: 0 }))).toBe(true);
+    expect(matchesCondition({ bereavedWithin: 2 }, working({ bereavedWithin: 2 }))).toBe(true);
+    // Longer ago than the window: the funeral is not this year's scene.
+    expect(matchesCondition({ bereavedWithin: 1 }, working({ bereavedWithin: 4 }))).toBe(false);
+    // Never bereaved at all is the case that shipped the 0207 bug twice.
+    expect(matchesCondition({ bereavedWithin: 5 }, working())).toBe(false);
   });
 });

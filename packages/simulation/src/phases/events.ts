@@ -12,6 +12,7 @@
  */
 
 import type { Character, TimelineKind } from '@yearafter/character';
+import { findJob } from '@yearafter/careers';
 import { describeCity } from '@yearafter/content';
 import { dollars } from '@yearafter/core';
 import type { NewTransaction } from '@yearafter/finance';
@@ -28,6 +29,7 @@ import { livingChildren, type Household } from '@yearafter/relationships';
 import {
   displayName,
   isCurrent,
+  isFriend,
   partnerOf,
   remember,
   type Acquaintance,
@@ -83,6 +85,7 @@ export function buildEventContext(
   history: EventHistory,
   linesSoFar = 0,
 ): EventContext {
+  const friends = friendsOf(state);
   return {
     age,
     year,
@@ -108,6 +111,33 @@ export function buildEventContext(
     // Ticket 0208. Without it, "your kid spiked a fever" fires at somebody who
     // has never had a child — the same defect `partnered` was added for.
     hasChildren: livingChildren(state.family).length > 0,
+    /*
+      Ticket 0409. Work, the body, and loss — the three things the catalog
+      could not see, and the three the roadmap listed as holes (findings 3, 4
+      and 4b). Measured before this: 26 events could fire at forty and every one
+      of them was about family, friends or weather.
+    */
+    employed: state.employment.job !== undefined,
+    ...(jobTrackOf(state) !== undefined ? { jobTrack: jobTrackOf(state) } : {}),
+    jobYears: state.employment.job ? Math.max(0, age - state.employment.job.since) : 0,
+    conditions: state.health.conditions.map((entry) => entry.conditionId),
+    ...(yearsSinceLoss(state, age) !== undefined
+      ? { bereavedWithin: yearsSinceLoss(state, age) }
+      : {}),
+    /*
+      Ticket 0412. Friends, counted off the circle rather than stored.
+
+      Both exclude anybody the character is involved with, which is the same
+      separation `partnerOf` makes one line above: a spouse is not the answer to
+      "does this character have a friend", and an event reading "you and {kid}
+      have been friends since school" firing about a wife is 0207's `partnered`
+      bug in reverse.
+    */
+    friends: friends.length,
+    friendshipYears: friends.reduce(
+      (longest, person) => Math.max(longest, age - person.metAtAge),
+      0,
+    ),
     // Ticket 0209: what education, the class and the family have already
     // written this year. The line budget belongs to the YEAR, not to events.
     alreadyThisYear: linesSoFar,
@@ -118,8 +148,51 @@ export function buildEventContext(
       name: displayName(person),
       sex: person.sex,
       kind: person.kind,
+      // Ticket 0413: the same `friendsOf` the predicates are counted from, so
+      // "has a friend" and "names a friend" can never disagree about who one is.
+      friend: friends.some((friend) => friend.id === person.id),
     })),
   };
+}
+
+/**
+ * The friends this character has, Ticket 0412.
+ *
+ * Anybody over `FRIENDSHIP_THRESHOLD` who is still around and who the character
+ * is not, and has not been, involved with. `isFriend` already handles the first
+ * two; the romance exclusion is this function's whole reason for existing, and
+ * it reads `romance` rather than `partnerOf` because an ex is not a friend for
+ * the purposes of a line about friendship either — they are a person with a
+ * different history, and the `love.*` half of the catalog is about them.
+ */
+function friendsOf(state: GameState): readonly Acquaintance[] {
+  return state.circle.people.filter((person) => isFriend(person) && person.romance === undefined);
+}
+
+/** The track of the job held right now, if any. */
+function jobTrackOf(state: GameState): string | undefined {
+  const held = state.employment.job;
+  if (!held) return undefined;
+  return findJob(held.jobId)?.track === undefined ? undefined : String(findJob(held.jobId)!.track);
+}
+
+/**
+ * Years since the most recent close bereavement, or undefined.
+ *
+ * Reads `LifeRecord`s of category 'loss', which 0409 added for exactly this —
+ * `LifeRecord`'s own rule is "never derived by parsing timeline text", and the
+ * only previous way to ask this question was to look for labels beginning
+ * "Lost ". `kin` runs before `events` in `advanceYear`, so a death this year is
+ * already visible as zero.
+ */
+function yearsSinceLoss(state: GameState, age: number): number | undefined {
+  let nearest: number | undefined;
+  for (const record of state.player.records) {
+    if (record.category !== 'loss') continue;
+    const since = age - record.age;
+    if (since >= 0 && (nearest === undefined || since < nearest)) nearest = since;
+  }
+  return nearest;
 }
 
 /** Timeline kind for an outcome. Feed colour comes from this (LifeScreen). */
@@ -127,6 +200,11 @@ export function timelineKindFor(outcome: EventOutcome): TimelineKind {
   if (outcome.type === 'decision') return 'decision';
   if (outcome.type === 'opportunity') return 'opportunity';
   if (outcome.category === 'family' || outcome.category === 'friendship') return 'relationship';
+  // Ticket 0409. Authored adult categories get the feed colour their subject
+  // already has elsewhere in the build rather than all landing on 'passive'.
+  if (outcome.category === 'loss') return 'relationship';
+  if (outcome.category === 'health') return 'health';
+  if (outcome.category === 'career') return 'career';
   return 'passive';
 }
 

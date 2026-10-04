@@ -59,6 +59,57 @@ export function matchesCondition(condition: EventCondition, context: EventContex
   if (condition.ageMax !== undefined && context.age > condition.ageMax) return false;
   if (condition.sex !== undefined && context.sex !== condition.sex) return false;
 
+  /* ---- Ticket 0409: work, the body, and loss ----------------------------- */
+  if (condition.employed !== undefined && context.employed !== condition.employed) return false;
+  if (condition.jobTrackAny && !condition.jobTrackAny.includes(context.jobTrack ?? '')) {
+    return false;
+  }
+  if (condition.jobYearsAtLeast !== undefined && context.jobYears < condition.jobYearsAtLeast) {
+    return false;
+  }
+  if (condition.jobYearsAtMost !== undefined && context.jobYears > condition.jobYearsAtMost) {
+    return false;
+  }
+  if (
+    condition.hasCondition !== undefined &&
+    context.conditions.length > 0 !== condition.hasCondition
+  ) {
+    return false;
+  }
+  if (
+    condition.conditionAny &&
+    !condition.conditionAny.some((id) => context.conditions.includes(id))
+  ) {
+    return false;
+  }
+  if (
+    condition.bereavedWithin !== undefined &&
+    (context.bereavedWithin === undefined || context.bereavedWithin > condition.bereavedWithin)
+  ) {
+    return false;
+  }
+
+  /* ---- Ticket 0412: friends ---------------------------------------------- */
+  // The fifth predicate of this shape, after `partnered`, `hasChildren`,
+  // `employed` and `hasCondition`, and the one whose absence cost the most: the
+  // `friendship` category's entire adult library is romance because this is
+  // what the language could not ask. CORE_RULES 13.67.
+  if (condition.hasFriend !== undefined && context.friends > 0 !== condition.hasFriend) {
+    return false;
+  }
+  if (condition.friendsAtLeast !== undefined && context.friends < condition.friendsAtLeast) {
+    return false;
+  }
+  if (condition.friendsAtMost !== undefined && context.friends > condition.friendsAtMost) {
+    return false;
+  }
+  if (
+    condition.friendshipYearsAtLeast !== undefined &&
+    context.friendshipYears < condition.friendshipYearsAtLeast
+  ) {
+    return false;
+  }
+
   if (condition.schoolStageAny && !condition.schoolStageAny.includes(context.schoolStage)) {
     return false;
   }

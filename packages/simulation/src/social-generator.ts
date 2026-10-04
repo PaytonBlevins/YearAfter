@@ -21,16 +21,27 @@ import { asNpcId, clampStat, type StatValue } from '@yearafter/core';
 import type { Household } from '@yearafter/relationships';
 import {
   driftPerson,
+  displayName,
   isFriend,
   isRomantic,
   compatibility,
   endPerson,
+  inOrderOfClosest,
+  keepUpOdds,
+  KEEP_UP_AT_MOST,
+  keepableWith,
+  keptUpWarmth,
   leavingChance,
+  ordinaryWay,
+  remember,
+  resolveInteraction,
   romanceYear,
+  warmedBy,
+  worthSaying,
   type Acquaintance,
   type SocialCircle,
 } from '@yearafter/social';
-import type { RandomStream } from './rng/rng';
+import { stableUnit, type RandomStream } from './rng/rng';
 
 /* -------------------------------------------------------------------------- */
 /* Tunable configuration                                                       */
@@ -447,6 +458,79 @@ function meetSomebodyNew(
 }
 
 /**
+ * Ticket 0412 — a year you kept up with somebody, without being asked to.
+ *
+ * The systemic side of `interact.ts`. See `keeping-up.ts` for the measurement
+ * that earned it and the three constraints that keep it from turning the cast
+ * immortal; this is only the wiring, and it is deliberately thin because the
+ * policy belongs beside the verb rather than beside the generator.
+ *
+ * It runs the REAL verb — `resolveInteraction`, then `remember` — so the odds
+ * are the menu's odds, the line is the menu's line, and the memory lands on the
+ * same page a tapped one would. 0410's rule: a door that decides for itself
+ * what happened is a second system that can disagree with the first.
+ *
+ * No draw is made when there is nobody to keep up with, so a year spent
+ * entirely inside a room costs the Relationships stream nothing and a life
+ * still replays from its seed. Same contract as `staffTheJob`.
+ *
+ * `circle.contact` is deliberately NOT touched. That record is the player's own
+ * attention budget for the year (`MAX_LIGHT_PRESSES`), and spending a slot of
+ * it on the engine's behalf would mean this feature quietly took something away
+ * from the screen it is supposed to complement.
+ */
+function keepUpWithSomebody(
+  people: readonly Acquaintance[],
+  stream: RandomStream,
+  input: SocialYearInput,
+  lines: string[],
+): Acquaintance[] {
+  const candidates = inOrderOfClosest(keepableWith(people, input.age));
+  if (candidates.length === 0) return [...people];
+
+  const kept = new Map<string, Acquaintance>();
+  let best: { readonly rank: number; readonly text: string } | undefined;
+  for (const person of candidates.slice(0, KEEP_UP_AT_MOST)) {
+    if (!stream.chance(keepUpOdds(person, input.charisma, input.personality.extraversion))) {
+      continue;
+    }
+    const way = ordinaryWay(person, stream.next());
+    if (!way) continue;
+    const result = resolveInteraction(
+      way,
+      person,
+      input.charisma,
+      displayName(person),
+      stream.next(),
+      // The base holds still for the life and AGE does all the moving, which is
+      // the rule `guardians.test.ts` states and the fourth system to have to
+      // learn it. A re-drawn base landing one lower cancels an age rotation
+      // exactly as often as it helps, so a forty-year friendship would have
+      // written the same sentence two years running several times over.
+      stableUnit(`${person.id}:${way.id}`),
+      // Full value: seeing somebody once in a year is not a worn-out repeat.
+      0,
+      // …and the rotation is the age, which is what `alreadyDone` cannot also
+      // be — past `MAX_LIGHT_PRESSES` it would return `worn` forever.
+      input.age,
+    );
+    const after = remember(person, {
+      age: input.age,
+      text: result.text,
+      major: result.major,
+      warmth: keptUpWarmth(result.warmth),
+    });
+    kept.set(person.id, after);
+    const rank = worthSaying(person.relationship, after.relationship, result.worked);
+    if (best === undefined || rank > best.rank) best = { rank, text: result.text };
+  }
+
+  if (kept.size === 0) return [...people];
+  if (best) lines.push(best.text);
+  return people.map((person) => kept.get(person.id) ?? person);
+}
+
+/**
  * Ticket 0211a — put people at work, and take them away when the job ends.
  *
  * The mirror of filling a class, which is the point: the player asked for work
@@ -679,7 +763,12 @@ export function runSocialYear(
     return {
       ...person,
       lastContactAge: input.age,
-      relationship: clampStat(person.relationship + gain) as StatValue,
+      // Ticket 0412: CURVED. This is the line that produced a build where 91%
+      // of forty-five-year-olds had a closest friend at exactly 100 — a raw
+      // +4 a year, at everybody in a room, for as long as the room was open,
+      // and a job is a room that can stay open for thirty years. See
+      // `curvedWarmth`.
+      relationship: warmedBy(person, gain),
     };
   });
 
@@ -739,6 +828,24 @@ export function runSocialYear(
     }
     return after;
   });
+
+  // ---- a year you kept up with somebody -----------------------------------
+  //
+  // Ticket 0412, and it runs AFTER the drift step rather than before it, which
+  // is the whole difference between this and a machine for immortal
+  // friendships. `driftPerson` exempts anybody whose `lastContactAge` is the
+  // current age, so a version of this that ran first bought total drift
+  // immunity with one phone call a year — and it measured exactly like that:
+  // the earliest peer still in the circle at twenty-six had been met at
+  // **eleven**, which is 0207b's frozen cast wearing this ticket's clothes.
+  //
+  // Running second, the year is charged first and keeping up claws some of it
+  // back. The arithmetic is the model: at a warmth of 50 drift costs 4 and a
+  // `hang-out` that lands is worth 4 after `UNCHOSEN`, so a friendship you
+  // only ring holds roughly level; at 80 the curve gives 2 against a drift of
+  // 3, so it slides. THE ROOM IS WHAT MAKES A BEST FRIEND AND KEEPING UP MAKES
+  // A GOOD ONE, and nothing out of a room lasts forever without the player.
+  people = keepUpWithSomebody(people, stream, input, lines);
 
   // ---- people move --------------------------------------------------------
   //

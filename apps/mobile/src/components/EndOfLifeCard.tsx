@@ -43,13 +43,17 @@ export interface Heir {
   readonly name: string;
   /** "your daughter · 43" — the row's own subtitle. */
   readonly detail: string;
+  /** Ticket 0604. Old enough to run a business. A child's inheritance is always sold. */
+  readonly canKeepBusinesses?: boolean;
 }
 
 export interface EndOfLifeCardProps {
   readonly eulogy: Eulogy;
   /** Ticket 0212. Who the player may carry on as. Empty is the common case. */
   readonly heirs: readonly Heir[];
-  readonly onContinueAs: (heirId: string) => void;
+  /** Ticket 0604. How many businesses they owned, so the card can ask what becomes of them. */
+  readonly businesses?: number;
+  readonly onContinueAs: (heirId: string, keepBusinesses: boolean) => void;
   readonly onStartAgain: () => void;
 }
 
@@ -63,8 +67,21 @@ export interface EndOfLifeCardProps {
  * spec 818–827 removes by name.
  */
 
-export function EndOfLifeCard({ eulogy, heirs, onContinueAs, onStartAgain }: EndOfLifeCardProps) {
+export function EndOfLifeCard({
+  eulogy,
+  heirs,
+  businesses = 0,
+  onContinueAs,
+  onStartAgain,
+}: EndOfLifeCardProps) {
   const [rite, setRite] = useState<string | undefined>(undefined);
+  /*
+    Ticket 0604. Handed on unless the player says otherwise, and asked only
+    when there is something to hand on and somebody old enough to take it. Two
+    words and a sentence, not a form: spec 818–827 removes the estate chores.
+  */
+  const [keepBusinesses, setKeepBusinesses] = useState(true);
+  const askAboutBusinesses = businesses > 0 && heirs.some((heir) => heir.canKeepBusinesses);
   return (
     <View style={styles.overlay}>
       <View style={styles.scrim} />
@@ -153,6 +170,45 @@ export function EndOfLifeCard({ eulogy, heirs, onContinueAs, onStartAgain }: End
               </Pressable>
             );
           })}
+
+          {askAboutBusinesses ? (
+            <>
+              <Text style={styles.heading}>{businesses === 1 ? 'The business' : 'The businesses'}</Text>
+              {[
+                {
+                  keep: true,
+                  label: 'Hand it on',
+                  blurb: 'Your heir takes it over as it stands, with whatever it owes.',
+                },
+                {
+                  keep: false,
+                  label: 'Sell it',
+                  blurb: 'Sold at what a buyer would pay, and the lender paid first.',
+                },
+              ].map((option) => {
+                const chosen = keepBusinesses === option.keep;
+                return (
+                  <Pressable
+                    key={option.label}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: chosen }}
+                    accessibilityLabel={option.label}
+                    onPress={() => setKeepBusinesses(option.keep)}
+                    style={({ pressed }) => [
+                      styles.rite,
+                      chosen && styles.riteChosen,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text style={[styles.rowLabel, chosen && styles.riteLabelChosen]}>
+                      {option.label}
+                    </Text>
+                    <Text style={styles.rowNote}>{option.blurb}</Text>
+                  </Pressable>
+                );
+              })}
+            </>
+          ) : null}
         </ScrollView>
 
         <View style={styles.actions}>
@@ -161,7 +217,7 @@ export function EndOfLifeCard({ eulogy, heirs, onContinueAs, onStartAgain }: End
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`Continue as ${heir.name}`}
-                onPress={() => onContinueAs(heir.id)}
+                onPress={() => onContinueAs(heir.id, keepBusinesses)}
                 style={({ pressed }) => [styles.button, styles.primary, pressed && styles.pressed]}
               >
                 <Text style={styles.buttonLabel}>{`Continue as ${heir.name}`}</Text>

@@ -326,13 +326,30 @@ export function resolveInteraction(
   roll: number,
   variant: number,
   alreadyDone = 0,
+  /**
+   * How far to rotate the line, when that is not the same as how worn the year
+   * is. Ticket 0412.
+   *
+   * `alreadyDone` was doing two jobs — how much value is left in a repeat, and
+   * how far to rotate the copy — and for the button those are the same number,
+   * because pressing a thing three times in a year both wears it out and has to
+   * read differently each time. The systemic caller needs the second without
+   * the first: it sees somebody once a year at full value, and has to rotate by
+   * AGE so the same friendship cannot render the same sentence two years
+   * running. Passing the age as `alreadyDone` would have returned `worn` from
+   * the fourth year of every friendship in the game.
+   *
+   * `guardians.test.ts` states the rule this exists to satisfy: the base holds
+   * still for the life and age does all the moving.
+   */
+  rotate = alreadyDone,
 ): InteractionResult {
   // A light thing done too often this year stops being worth anything, and
   // says so rather than quietly returning nothing.
   const scale = interaction.weight === 'light' ? repeatScale(alreadyDone) : 1;
   if (scale <= 0) {
     const lines = WORN_LINES[person.kind];
-    const index = pickLine(lines, variant, alreadyDone);
+    const index = pickLine(lines, variant, rotate);
     return {
       worked: false,
       warmth: 0,
@@ -352,7 +369,7 @@ export function resolveInteraction(
   // times a year, for the length of a childhood. The caller supplies a variant
   // that is stable within the year for this reason — a re-drawn one cancels the
   // rotation exactly as often as it helps.
-  const index = pickLine(lines, variant, alreadyDone);
+  const index = pickLine(lines, variant, rotate);
   const raw = worked ? interaction.onGood : interaction.onBad;
   // Getting away with something still costs standing, just less of it: the
   // teacher noticed, they simply could not prove it.
@@ -488,7 +505,7 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
     'Sat around at {name}’s not talking. You both went home early.',
     '{name} spent the afternoon waiting for somebody else to arrive.',
     'Turned up and {name} had forgotten. You could hear them deciding what to do about it.',
-    'It was fine. It was exactly fine, all afternoon, and you both felt it.',
+    'Sat at {name}’s for two hours and ran out of things to say after ten minutes.',
   ],
   compliment: [
     'You told {name} they were good at it. {name} assumed you wanted something.',
@@ -517,14 +534,14 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   ],
   'ask-about-work': [
     '{name} was packing up and told you to read the chapter again.',
-    'Asked, and got the same explanation at the same speed, twice.',
+    'Asked {name} again and got the same explanation at the same speed.',
     '{name} answered somebody else’s question instead and never came back to yours.',
-    "Got told it had been covered. It had, and that wasn't the problem.",
+    "{name} said it had been covered in class. It had, and that wasn't the problem.",
     '{name} suggested you ask somebody in your group. You had.',
   ],
   'help-out': [
     '{name} said they had it, in a voice that meant go away.',
-    'Offered, and got given the job nobody wanted, which was the point.',
+    'Offered to help and {name} handed you the job nobody wanted.',
     '{name} thanked you and gave the interesting half to somebody else.',
     "Broke something of {name}’s while helping. {name} said it didn't matter.",
     'Stayed behind for twenty minutes doing nothing while {name} finished an email.',
@@ -549,7 +566,7 @@ const BAD_LINES: Readonly<Record<InteractionId, readonly string[]>> = {
   ],
   'fall-out': [
     'You said all of it. {name} said less, and meant it more, and that was that.',
-    'It went further than you meant. Neither of you took any of it back.',
+    'It went further than you meant, and {name} didn’t take any of it back either.',
   ],
   'make-up': [
     "You apologized. {name} said it's fine. You could tell it wasn't.",

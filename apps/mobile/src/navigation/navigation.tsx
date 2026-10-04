@@ -15,6 +15,7 @@
  */
 
 import type { InstrumentKind } from '@yearafter/finance';
+import type { VehicleMarket } from '@yearafter/content';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 export const WORLDS = ['career', 'assets', 'life', 'relationships', 'activities'] as const;
@@ -32,6 +33,9 @@ export type ScreenKey =
   | 'cards'
   /** Ticket 0307. What you owe, and what anybody would lend you. */
   | 'loans'
+  | 'homes'
+  /** Ticket 0503. One property you let: its rent, its agent, its tenants. */
+  | 'rental'
   /** Ticket 0308c. The portfolio, the markets, and what each is doing. */
   | 'investments'
   /** Ticket 0308c. One tier of the market, grouped by sector or issuer. */
@@ -47,6 +51,7 @@ export type ScreenKey =
   | 'homes'
   | 'vehicles'
   | 'businesses'
+  | 'business'
   | 'collections'
   | 'shopping'
   | 'family'
@@ -84,6 +89,23 @@ export type ScreenKey =
    * reached from Career and appear nowhere else until one becomes a friend.
    */
   | 'colleagues'
+  /** Ticket 0504. Your cars, and the four markets. */
+  | 'vehicles'
+  /** Ticket 0504. One market's lots. */
+  | 'carMarket'
+  /** Ticket 0504. One car for sale. */
+  | 'carListing'
+  /** Ticket 0504. One car you own. */
+  | 'vehicle'
+  /** Ticket 0505. What a shop could do to one car you own. */
+  | 'carMods'
+  /** Ticket 0506. The stores, one store's counter, the collection, and renovating a home. */
+  | 'shopping'
+  | 'store'
+  | 'collections'
+  | 'renovate'
+  /** Ticket 0507. One auction venue. */
+  | 'auction'
   | 'debug';
 
 export interface Route {
@@ -105,6 +127,18 @@ export interface Route {
   readonly kind?: InstrumentKind;
   /** Which job this screen is about (0210b). Same reasoning again. */
   readonly jobId?: string;
+  /** Which property this screen is about (0503). Same reasoning again. */
+  readonly homeId?: string;
+  /** Which car market, listing or owned car this screen is about (0504). */
+  readonly carMarket?: VehicleMarket;
+  readonly listingId?: string;
+  readonly vehicleId?: string;
+  /** Which store this screen is (0506). */
+  readonly storeId?: string;
+  /** Which auction venue this screen is (0507). */
+  readonly venueId?: string;
+  /** Which business this screen is (0601). */
+  readonly businessId?: string;
 }
 
 type Stacks = Record<World, Route[]>;

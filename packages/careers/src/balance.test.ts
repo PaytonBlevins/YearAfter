@@ -33,6 +33,7 @@ import {
 } from './index';
 
 const leaver: Applicant = {
+  licenses: [],
   age: 18,
   smarts: 77,
   charisma: 76,

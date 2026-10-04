@@ -52,11 +52,68 @@ export interface CollegeYearResult {
   readonly lines: readonly { readonly kind: 'milestone' | 'passive'; readonly text: string }[];
 }
 
-export const tuitionFor = (state: EducationState): number =>
-  state.stage === 'postgrad' ? POSTGRAD_TUITION_PER_YEAR : TUITION_PER_YEAR;
+/*
+  PER-PROGRAMME SINCE 0406, WITH THE OLD CONSTANTS AS THE FALLBACK. Medical
+  school is four years at $34,000 and a CPA year is one at $18,000; a single
+  `postgrad` price could not describe both, and the generic one it used to
+  describe ($13,200 for two years, whatever you studied) is exactly why every
+  graduate degree in the game felt like the same degree.
 
-export const yearsNeeded = (state: EducationState): number =>
-  state.stage === 'postgrad' ? POSTGRAD_YEARS : COLLEGE_YEARS;
+  The fallback is not dead code: a save written before 0406 can hold a major id
+  that no longer resolves, and a character mid-degree when the catalogue changed
+  should finish it rather than crash.
+*/
+export const tuitionFor = (state: EducationState): number => {
+  const program = state.majorId ? findMajor(state.majorId) : undefined;
+  if (program) return program.tuition;
+  return state.stage === 'postgrad' ? POSTGRAD_TUITION_PER_YEAR : TUITION_PER_YEAR;
+};
+
+export const yearsNeeded = (state: EducationState): number => {
+  const program = state.majorId ? findMajor(state.majorId) : undefined;
+  if (program) return program.years;
+  return state.stage === 'postgrad' ? POSTGRAD_YEARS : COLLEGE_YEARS;
+};
+
+/*
+  FAILING OUT TWICE IN A ROW IS NOW A THING THAT HAPPENS (Ticket 0410).
+
+  One line per tier was safe for as long as a character could only realistically
+  be offered a program every few years. 0410 stopped the systemic doors from
+  shutting each other out and `guardians.test.ts` found the consequence
+  immediately: "Failed out. The letter was polite and it didn't soften anything"
+  at twenty-one and again at twenty-two, because the same character enrolled
+  again the next year and failed again.
+
+  So each tier gets a set, indexed by AGE rather than drawn — the same shape
+  `NOT_THIS_YEAR` uses in `parenting.ts` for the same reason (CORE_RULES 13.17):
+  an index that steps cannot land on itself twice running, and a fresh draw over
+  four lines lands on the same one a quarter of the time. This consumes no
+  randomness, which also keeps the line stable across a reload.
+*/
+const FAILED_OUT: Readonly<Record<'vocational' | 'postgrad' | 'college', readonly string[]>> = {
+  vocational: [
+    'Stopped turning up. The certificate went unclaimed.',
+    'Missed too many hours to be signed off. No certificate.',
+    'Let the course go halfway through. Nobody chased you about it.',
+  ],
+  postgrad: [
+    'Left the program. It had stopped going anywhere some time before.',
+    'Your advisor stopped replying and you stopped emailing. That was that.',
+    'Withdrew from the program. You were already the oldest one in the room.',
+  ],
+  college: [
+    "Failed out. The letter was polite and it didn't soften anything.",
+    "Grades didn't come back up and they asked you not to enroll again.",
+    'Failed the year and couldn’t repeat it. You packed the room up in an afternoon.',
+    "Didn't pass enough of it. You found out by email, in August.",
+  ],
+};
+
+const failedOutLine = (tier: 'vocational' | 'postgrad' | 'college', age: number): string => {
+  const lines = FAILED_OUT[tier];
+  return lines[age % lines.length] as string;
+};
 
 /**
  * Run one year of it.
@@ -88,12 +145,12 @@ export function runCollegeYear(state: EducationState, input: CollegeYearInput): 
   }
 
   /* ---- the year ----------------------------------------------------------- */
-  const major = state.majorId ? findMajor(state.majorId) : undefined;
+  const program = state.majorId ? findMajor(state.majorId) : undefined;
   const target = collegeTarget(
     input.smarts,
     input.discipline,
     EFFORT_PERFORMANCE[state.effort],
-    major?.difficulty ?? 0.4,
+    program?.difficulty ?? 0.4,
     input.academics,
   );
   // Same drift the school model uses, so a bad first year is recoverable and a
@@ -119,9 +176,10 @@ export function runCollegeYear(state: EducationState, input: CollegeYearInput): 
       lines: [
         {
           kind: 'milestone',
-          text: postgrad
-            ? 'Left the program. It had stopped going anywhere some time before.'
-            : "Failed out. The letter was polite and it didn't soften anything.",
+          text: failedOutLine(
+            state.stage === 'vocational' ? 'vocational' : postgrad ? 'postgrad' : 'college',
+            input.age,
+          ),
         },
       ],
     };
@@ -129,9 +187,29 @@ export function runCollegeYear(state: EducationState, input: CollegeYearInput): 
 
   /* ---- finishing ----------------------------------------------------------- */
   if (yearsDone >= needed) {
+    /*
+      WHAT FINISHING ACTUALLY HANDS YOU (Ticket 0406).
+
+      A degree moves you up the ordered ladder. A trade certificate does not
+      move you anywhere on it — it adds a license and leaves the level exactly
+      where it was, which is the whole point of the license being orthogonal.
+      A plumber with a high-school diploma still holds `highSchool`, and the
+      jobs that open for them open on the license, not on the level.
+
+      Both can happen at once: medical school hands over `postgraduate` AND
+      `lic.md`, and it is the second of those that separates a physician from
+      somebody with a master's in fine arts.
+    */
+    const vocational = state.stage === 'vocational';
+    const granted = program?.grants;
+    const licenses =
+      granted && !(state.credentials?.licenses ?? []).includes(granted)
+        ? [...(state.credentials?.licenses ?? []), granted]
+        : state.credentials?.licenses;
     const credentials = {
       ...state.credentials,
-      ...(postgrad ? { postgraduate: input.age } : { university: input.age }),
+      ...(vocational ? {} : postgrad ? { postgraduate: input.age } : { university: input.age }),
+      ...(licenses ? { licenses } : {}),
     };
     return {
       state: {
@@ -147,9 +225,11 @@ export function runCollegeYear(state: EducationState, input: CollegeYearInput): 
       lines: [
         {
           kind: 'milestone',
-          text: postgrad
-            ? `Finished the graduate program in ${major?.name.toLowerCase() ?? 'your subject'}.`
-            : `Graduated with a degree in ${major?.name.toLowerCase() ?? 'your subject'}.`,
+          text: vocational
+            ? `Qualified. ${program?.name ?? 'The program'} is behind you and the license is yours.`
+            : postgrad
+              ? `Finished ${program?.name.toLowerCase() ?? 'the graduate program'}.`
+              : `Graduated with a degree in ${program?.name.toLowerCase() ?? 'your subject'}.`,
         },
       ],
     };
@@ -163,7 +243,7 @@ export function runCollegeYear(state: EducationState, input: CollegeYearInput): 
   if (yearsDone === 1) {
     lines.push({
       kind: 'passive',
-      text: `First year of ${major?.name.toLowerCase() ?? 'the degree'}. Nobody tells you anything and you work it out.`,
+      text: `First year of ${program?.name.toLowerCase() ?? 'the program'}. Nobody tells you anything and you work it out.`,
     });
   }
 

@@ -603,6 +603,224 @@
       },
       "joinText": "Started going to the club that meets at lunch. Easiest room in the building.",
       "leaveText": "Stopped going to the lunchtime club."
+    },
+    {
+      "id": "act.adult.rec-league",
+      "name": "Rec League",
+      "kind": "sport",
+      "blurb": "A Sunday league. Somebody always brings oranges.",
+      "hoursPerWeek": 3,
+      "annualCost": 150,
+      "costSource": "rec league fees",
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "health": 3,
+        "charisma": 2,
+        "happiness": 3
+      },
+      "joinText": "Signed up for a Sunday rec league. The shirts have a plumber's name on them.",
+      "leaveText": "Stopped turning up to the rec league. Somebody else got your shirt.",
+      "inSentence": "the rec league"
+    },
+    {
+      "id": "act.adult.running-club",
+      "name": "Running Club",
+      "kind": "sport",
+      "blurb": "Tuesday nights, and a long one on Sundays.",
+      "hoursPerWeek": 3,
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "health": 4,
+        "willpower": 2,
+        "discipline": 2
+      },
+      "joinText": "Joined a running club. Friendlier than you expected, and faster.",
+      "leaveText": "Stopped going to running club. The shoes are still by the door.",
+      "inSentence": "running club"
+    },
+    {
+      "id": "act.adult.choir",
+      "name": "Community Choir",
+      "kind": "arts",
+      "blurb": "Tuesdays in a church hall. Nobody checks.",
+      "hoursPerWeek": 2,
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "happiness": 4,
+        "charisma": 2
+      },
+      "joinText": "Joined a community choir. They put you wherever they were short.",
+      "leaveText": "Left the choir. You still sing the harmony in the car.",
+      "inSentence": "the choir"
+    },
+    {
+      "id": "act.adult.theater",
+      "name": "Community Theater",
+      "kind": "arts",
+      "blurb": "Two shows a year and a set nobody finishes.",
+      "hoursPerWeek": 5,
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "tryout": {
+        "label": "Audition",
+        "stat": "charisma"
+      },
+      "tryoutText": "Got a part in the community theater's spring show. A real one, with lines.",
+      "cutText": "Auditioned for the community theater and got a very kind email.",
+      "effects": {
+        "charisma": 4,
+        "happiness": 3,
+        "willpower": 1
+      },
+      "joinText": "Got a part in the community theater's spring show. A real one, with lines.",
+      "leaveText": "Stepped back from the theater. They still email you about the raffle.",
+      "inSentence": "the theater"
+    },
+    {
+      "id": "act.adult.band",
+      "name": "Band",
+      "kind": "arts",
+      "blurb": "Four people, one garage, almost no gigs.",
+      "hoursPerWeek": 3,
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "happiness": 4,
+        "charisma": 2,
+        "discipline": 1
+      },
+      "joinText": "Started playing in a band with some people you half knew. You aren't good.",
+      "leaveText": "The band stopped. Nobody said so; the garage just filled up with bikes.",
+      "inSentence": "the band"
+    },
+    {
+      "id": "act.adult.night-class",
+      "name": "Evening Class",
+      "kind": "academic",
+      "blurb": "One night a week at the community college.",
+      "hoursPerWeek": 3,
+      "annualCost": 450,
+      "costSource": "evening class fees",
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "smarts": 3,
+        "discipline": 2
+      },
+      "joinText": "Signed up for an evening class. Everybody in it was there for a different reason.",
+      "leaveText": "Finished the evening class and didn't sign up for the next one.",
+      "inSentence": "the evening class"
+    },
+    {
+      "id": "act.adult.book-club",
+      "name": "Book Club",
+      "kind": "academic",
+      "blurb": "One book a month, mostly read.",
+      "hoursPerWeek": 1,
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "smarts": 2,
+        "happiness": 2
+      },
+      "joinText": "Joined a book club. About half of them finish the book.",
+      "leaveText": "Quietly stopped going to book club.",
+      "inSentence": "book club"
+    },
+    {
+      "id": "act.adult.quiz-team",
+      "name": "Quiz Team",
+      "kind": "social",
+      "blurb": "Tuesday trivia at a bar, the same four people.",
+      "hoursPerWeek": 2,
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "charisma": 2,
+        "smarts": 1,
+        "happiness": 3
+      },
+      "joinText": "Got talked into a quiz team. You turned out to be the one who knows rivers.",
+      "leaveText": "The quiz team broke up. Nobody knows who has the trophy.",
+      "inSentence": "the quiz team"
+    },
+    {
+      "id": "act.adult.volunteering",
+      "name": "Volunteering",
+      "kind": "service",
+      "blurb": "A food bank, Saturday mornings.",
+      "hoursPerWeek": 3,
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "happiness": 3,
+        "willpower": 2,
+        "charisma": 1
+      },
+      "joinText": "Started volunteering at the food bank on Saturday mornings.",
+      "leaveText": "Stopped volunteering at the food bank. You still drive past it.",
+      "inSentence": "volunteering"
+    },
+    {
+      "id": "act.adult.garden",
+      "name": "Community Garden",
+      "kind": "service",
+      "blurb": "A plot, a hose, and opinions about tomatoes.",
+      "hoursPerWeek": 2,
+      "annualCost": 60,
+      "costSource": "a plot at the community garden",
+      "requires": {
+        "stages": [
+          "adult"
+        ],
+        "ageMin": 18
+      },
+      "effects": {
+        "happiness": 3,
+        "discipline": 1
+      },
+      "joinText": "Took a plot at the community garden. The man next door has thoughts.",
+      "leaveText": "Gave up the garden plot. Somebody on the waiting list was thrilled.",
+      "inSentence": "the garden plot"
     }
   ]
 }

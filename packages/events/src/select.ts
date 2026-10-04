@@ -22,6 +22,7 @@ import type {
   EventFollowUp,
 } from '@yearafter/content';
 import { RARITY_WEIGHT, SELECTABLE_EVENTS, findEvent } from '@yearafter/content';
+import { stableUnit } from '@yearafter/core';
 import { matchesCondition } from './conditions';
 import type { EventContext } from './context';
 import {
@@ -220,7 +221,7 @@ function toPendingDecision(
     category: definition.category,
     age: context.age,
     year: context.year,
-    prompt: renderEventText(random.pick(definition.text), context, random, names),
+    prompt: renderEventText(phrasing(definition, context), context, random, names),
     choices: offered.map((choice) => ({
       id: choice.id,
       label: renderEventText(choice.label, context, random, names),
@@ -268,6 +269,43 @@ function rendered(
   return { text: result.text, names: result.bindings };
 }
 
+/**
+ * Which of an event's phrasings to use, Ticket 0412.
+ *
+ * This was `random.pick(definition.text)`, a fresh draw every time, and it was
+ * correct for five tickets because no event in the catalog could fire two years
+ * running. 0409 wrote the first four that can — `career.out-of-work`,
+ * `career.first-day`, `loss.the-funeral` and `loss.the-first-year`, all
+ * `cooldown: 1` — and they carry two, three, three and four phrasings. So an
+ * unemployed character had a **one-in-three chance every year** of reading
+ * *"Nothing came of any of the applications. You stopped counting them around
+ * forty"* twice running, and a bereaved one a one-in-four.
+ *
+ * `guardians.test.ts` caught it, which is what that test is for; it is the
+ * SEVENTH place this build has written the same line two years running and the
+ * only one that is a whole subsystem rather than one writer. Its comment
+ * already states the fix, from the 0207d occurrence: *"An index rotated by age
+ * cannot help while its base is redrawn every year — a new draw one lower
+ * cancels the rotation exactly as often as it helps. The base now holds still
+ * for the life and age does all the moving."*
+ *
+ * So the base is `stableUnit` of the event and the life — the id, the
+ * character's name and their birth year, none of which move — and the age does
+ * the moving. Two characters who hit the same event at the same age still read
+ * different lines, and one character cannot read the same line twice running.
+ * Consumes no randomness, so a reload cannot change what an event said.
+ */
+function phrasing(definition: EventDefinition, context: EventContext): string {
+  const lines = definition.text;
+  if (lines.length <= 1) return lines[0] ?? '';
+  const base = stableUnit(
+    `${definition.id}:${context.firstName}:${context.lastName}:${context.year - context.age}`,
+  );
+  const index =
+    (Math.min(lines.length - 1, Math.floor(base * lines.length)) + context.age) % lines.length;
+  return lines[index] as string;
+}
+
 export function runEventPhase(
   context: EventContext,
   random: EventRandom,
@@ -303,7 +341,7 @@ export function runEventPhase(
       eventId: definition.id,
       category: definition.category,
       type: definition.type,
-      ...rendered(random.pick(definition.text), context, random),
+      ...rendered(phrasing(definition, context), context, random),
       effects: definition.effects,
     });
     nextHistory = recordFired(nextHistory, definition.id, context.age);
@@ -338,7 +376,7 @@ export function runEventPhase(
       eventId: definition.id,
       category: definition.category,
       type: definition.type,
-      ...rendered(random.pick(definition.text), context, random),
+      ...rendered(phrasing(definition, context), context, random),
       effects: definition.effects,
     });
     nextHistory = recordFired(nextHistory, definition.id, context.age);

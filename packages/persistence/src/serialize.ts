@@ -46,6 +46,45 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     portfolio: state.portfolio,
     market: state.market,
     prices: state.prices,
+    /*
+      THE TWO OFFERS, AND WHY LEAVING THEM OUT BRICKED SAVES (Ticket 0406).
+
+      `pending` has been serialized since 0402 and the offer BEHIND a pending
+      decision never was. So a save written while a career or college offer was
+      on the table reloaded with the question still in the queue and nothing to
+      answer it with: `answerOffer`/`answerCollegeOffer` look up
+      `state.offer`/`state.collegeOffer`, find nothing, and return `no-offer`,
+      so `decide` returns an error and the buttons do nothing. `advanceYear`
+      refuses to advance while `pending` is non-empty, so the character could
+      not be aged either — a permanently stuck save, reported as "this is stuck
+      on the screen every time I reset it".
+
+      It was invisible for two tickets because every test answers its decisions
+      in the same process that raised them. Nothing round-tripped a save with a
+      question open. `roundTripsAnOpenOffer` in the persistence tests does now.
+    */
+    ...(state.offer !== undefined ? { offer: state.offer } : {}),
+    ...(state.collegeOffer !== undefined ? { collegeOffer: state.collegeOffer } : {}),
+    // Ticket 0410 makes it three. Added here in the same breath as the field
+    // itself, because the bug above cost a player a save and the lesson is that
+    // a decision's payload is part of the decision.
+    ...(state.lifeOffer !== undefined ? { lifeOffer: state.lifeOffer } : {}),
+    // Ticket 0416, four. Same breath as the field, same reason.
+    ...(state.pursuitOffer !== undefined ? { pursuitOffer: state.pursuitOffer } : {}),
+    // Ticket 0501, the fifth, in the same breath as the field.
+    homes: state.homes,
+    ...(state.homeOffer !== undefined ? { homeOffer: state.homeOffer } : {}),
+    // Ticket 0504, the sixth, in the same breath as the field.
+    vehicles: state.vehicles,
+    ...(state.vehicleOffer !== undefined ? { vehicleOffer: state.vehicleOffer } : {}),
+    ...(state.inspected !== undefined && state.inspected.length > 0 ? { inspected: state.inspected } : {}),
+    // Ticket 0506, the seventh, in the same breath as the field.
+    valuables: state.valuables,
+    ...(state.renovationOffer !== undefined ? { renovationOffer: state.renovationOffer } : {}),
+    // Ticket 0507. The diary is what stops a fourth visit and a second bid.
+    ...(state.auctions !== undefined ? { auctions: state.auctions } : {}),
+    // Ticket 0601, the eighth, in the same breath as the field.
+    businesses: state.businesses,
     // Omitted entirely when nobody is hired, which is what every other optional
     // field in this document does and what the migration relies on.
     ...(state.advisorId !== undefined ? { advisorId: state.advisorId } : {}),
@@ -74,6 +113,19 @@ export function fromSave(save: CurrentSaveGame): GameState {
     market: save.market,
     prices: save.prices,
     ...(save.advisorId !== undefined ? { advisorId: save.advisorId } : {}),
+    ...(save.offer !== undefined ? { offer: save.offer } : {}),
+    ...(save.collegeOffer !== undefined ? { collegeOffer: save.collegeOffer } : {}),
+    ...(save.lifeOffer !== undefined ? { lifeOffer: save.lifeOffer } : {}),
+    ...(save.pursuitOffer !== undefined ? { pursuitOffer: save.pursuitOffer } : {}),
+    homes: save.homes,
+    ...(save.homeOffer !== undefined ? { homeOffer: save.homeOffer } : {}),
+    vehicles: save.vehicles,
+    ...(save.vehicleOffer !== undefined ? { vehicleOffer: save.vehicleOffer } : {}),
+    ...(save.inspected !== undefined ? { inspected: save.inspected } : {}),
+    valuables: save.valuables,
+    ...(save.renovationOffer !== undefined ? { renovationOffer: save.renovationOffer } : {}),
+    ...(save.auctions !== undefined ? { auctions: save.auctions } : {}),
+    businesses: save.businesses,
     retirement: save.retirement,
     pending: save.pending,
   });

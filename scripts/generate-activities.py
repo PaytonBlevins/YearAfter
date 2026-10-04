@@ -36,7 +36,7 @@ CATALOG_VERSION = 1
 ACTIVITIES: list[dict] = []
 
 STATS = {"happiness", "health", "smarts", "looks", "charisma", "willpower", "discipline"}
-STAGES = {"elementary", "middle", "high"}
+STAGES = {"elementary", "middle", "high", "adult"}
 TALENTS = {"athletics", "acting", "music", "writing", "academics", "inventive", "crime"}
 WEALTH = {"struggling", "modest", "comfortable", "affluent", "wealthy"}
 KINDS = {"sport", "arts", "academic", "service", "social"}
@@ -69,6 +69,7 @@ def A(
     effects: dict | None = None,
     join_text: str | None = None,
     leave_text: str | None = None,
+    in_sentence: str | None = None,
 ) -> None:
     """
     One joinable activity. `hours` is the only thing that limits how MANY.
@@ -109,6 +110,9 @@ def A(
                 "effects": effects or {},
                 "joinText": join_text,
                 "leaveText": leave_text,
+                # Ticket 0416: how it reads in the middle of a sentence, for the
+                # lines an adult year writes ("another year of the choir").
+                "inSentence": in_sentence,
             }
         )
     )
@@ -349,6 +353,105 @@ A("act.gsa", "Community Club", "social", 2,
   leave_text="Stopped going to the lunchtime club.")
 
 
+
+# =============================================================================
+# After school — Ticket 0416.
+#
+# Every activity above ends at graduation, and before this ticket nothing began
+# after it: `education.activities` was emptied the year a character left school
+# and could never be filled again, so an adult had work and the street and no
+# third place to be. The social generator has had a door labelled "something
+# you still do" since 0210, wired to that list, and it had never once opened
+# for anybody over eighteen.
+#
+# Deliberately ordinary. A Sunday league, a choir in a church hall, an evening
+# class — the things people actually take up, and put down again. Nothing here
+# is a career (v0.07 and v0.08 are), and the gym, meditation and martial arts
+# are Mind & Body's by the spec (1355), so they are not here either.
+#
+# `effects` is a PROFILE for adults, not a yearly payment. A school activity is
+# held for four years at most; a pursuit can be held for forty, and forty years
+# of a flat +3 is the equalising machine 0408 and 0411 both had to take apart.
+# What an adult pursuit does to a person is decided in `shaping.ts`, banded and
+# two-sided, and reads this only to know WHICH stat it builds.
+# =============================================================================
+
+A("act.adult.rec-league", "Rec League", "sport", 3,
+  blurb="A Sunday league. Somebody always brings oranges.",
+  stages=["adult"], age_min=18, in_sentence="the rec league",
+  annual_cost=150, cost_source="rec league fees",
+  effects={"health": 3, "charisma": 2, "happiness": 3},
+  join_text="Signed up for a Sunday rec league. The shirts have a plumber's name on them.",
+  leave_text="Stopped turning up to the rec league. Somebody else got your shirt.")
+
+A("act.adult.running-club", "Running Club", "sport", 3,
+  blurb="Tuesday nights, and a long one on Sundays.",
+  stages=["adult"], age_min=18, in_sentence="running club",
+  effects={"health": 4, "willpower": 2, "discipline": 2},
+  join_text="Joined a running club. Friendlier than you expected, and faster.",
+  leave_text="Stopped going to running club. The shoes are still by the door.")
+
+A("act.adult.choir", "Community Choir", "arts", 2,
+  blurb="Tuesdays in a church hall. Nobody checks.",
+  stages=["adult"], age_min=18, in_sentence="the choir",
+  effects={"happiness": 4, "charisma": 2},
+  join_text="Joined a community choir. They put you wherever they were short.",
+  leave_text="Left the choir. You still sing the harmony in the car.")
+
+A("act.adult.theater", "Community Theater", "arts", 5,
+  blurb="Two shows a year and a set nobody finishes.",
+  stages=["adult"], age_min=18, in_sentence="the theater",
+  tryout="Audition", tryout_stat="charisma",
+  tryout_text="Got a part in the community theater's spring show. A real one, with lines.",
+  cut_text="Auditioned for the community theater and got a very kind email.",
+  effects={"charisma": 4, "happiness": 3, "willpower": 1},
+  join_text="Got a part in the community theater's spring show. A real one, with lines.",
+  leave_text="Stepped back from the theater. They still email you about the raffle.")
+
+A("act.adult.band", "Band", "arts", 3,
+  blurb="Four people, one garage, almost no gigs.",
+  stages=["adult"], age_min=18, in_sentence="the band",
+  effects={"happiness": 4, "charisma": 2, "discipline": 1},
+  join_text="Started playing in a band with some people you half knew. You aren't good.",
+  leave_text="The band stopped. Nobody said so; the garage just filled up with bikes.")
+
+A("act.adult.night-class", "Evening Class", "academic", 3,
+  blurb="One night a week at the community college.",
+  stages=["adult"], age_min=18, in_sentence="the evening class",
+  annual_cost=450, cost_source="evening class fees",
+  effects={"smarts": 3, "discipline": 2},
+  join_text="Signed up for an evening class. Everybody in it was there for a different reason.",
+  leave_text="Finished the evening class and didn't sign up for the next one.")
+
+A("act.adult.book-club", "Book Club", "academic", 1,
+  blurb="One book a month, mostly read.",
+  stages=["adult"], age_min=18, in_sentence="book club",
+  effects={"smarts": 2, "happiness": 2},
+  join_text="Joined a book club. About half of them finish the book.",
+  leave_text="Quietly stopped going to book club.")
+
+A("act.adult.quiz-team", "Quiz Team", "social", 2,
+  blurb="Tuesday trivia at a bar, the same four people.",
+  stages=["adult"], age_min=18, in_sentence="the quiz team",
+  effects={"charisma": 2, "smarts": 1, "happiness": 3},
+  join_text="Got talked into a quiz team. You turned out to be the one who knows rivers.",
+  leave_text="The quiz team broke up. Nobody knows who has the trophy.")
+
+A("act.adult.volunteering", "Volunteering", "service", 3,
+  blurb="A food bank, Saturday mornings.",
+  stages=["adult"], age_min=18, in_sentence="volunteering",
+  effects={"happiness": 3, "willpower": 2, "charisma": 1},
+  join_text="Started volunteering at the food bank on Saturday mornings.",
+  leave_text="Stopped volunteering at the food bank. You still drive past it.")
+
+A("act.adult.garden", "Community Garden", "service", 2,
+  blurb="A plot, a hose, and opinions about tomatoes.",
+  stages=["adult"], age_min=18, in_sentence="the garden plot",
+  annual_cost=60, cost_source="a plot at the community garden",
+  effects={"happiness": 3, "discipline": 1},
+  join_text="Took a plot at the community garden. The man next door has thoughts.",
+  leave_text="Gave up the garden plot. Somebody on the waiting list was thrilled.")
+
 # =============================================================================
 # Self-checks
 # =============================================================================
@@ -410,6 +513,22 @@ def check() -> None:
         if len(a.get("blurb", "")) > 52:
             problems.append(f"{aid}: blurb is {len(a['blurb'])} chars; it truncates past 52")
 
+    # Ticket 0416. An adult pursuit is paid for by the adult, out of their own
+    # cash, and nobody has to drive them home — so the two gates that read a
+    # PARENT'S household mean nothing here and would silently read the wrong one.
+    for a in ACTIVITIES:
+        stages = a.get("requires", {}).get("stages", [])
+        if "adult" in stages:
+            req = a["requires"]
+            if len(stages) != 1:
+                problems.append(f"{a['id']}: an adult pursuit cannot also be a school activity")
+            if req.get("ageMin", 0) < 18:
+                problems.append(f"{a['id']}: an adult pursuit needs age_min of at least 18")
+            if not a.get("inSentence"):
+                problems.append(f"{a['id']}: an adult pursuit needs in_sentence for the lines it writes")
+            if req.get("needsParent") or req.get("wealthAny"):
+                problems.append(f"{a['id']}: an adult pursuit cannot read a parent's household")
+
     # Every stage needs enough choice that the menu is worth opening, and
     # enough cheap low-hour options that a struggling household is not shut out.
     for stage in sorted(STAGES):
@@ -436,7 +555,7 @@ def report() -> None:
     print("  by kind:  " + ", ".join(f"{k} {v}" for k, v in sorted(Counter(a["kind"] for a in ACTIVITIES).items())))
     earned = [a["id"] for a in ACTIVITIES if a.get("tryout")]
     print(f"  {len(earned)} need a tryout, {len(ACTIVITIES) - len(earned)} are open sign-ups")
-    for stage in ("elementary", "middle", "high"):
+    for stage in ("elementary", "middle", "high", "adult"):
         available = [a for a in ACTIVITIES if stage in a["requires"]["stages"]]
         hours = sum(a["hoursPerWeek"] for a in available)
         print(f"  {stage:<11} {len(available):>2} available, {hours:>5.1f} h/wk if you joined every one")

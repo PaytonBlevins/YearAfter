@@ -15,6 +15,8 @@ import {
   reconcile,
   totalFor,
   type TransactionCategory,
+  saleOf,
+  vehicleSaleOf,
 } from '@yearafter/finance';
 import { movesFor } from '@yearafter/social';
 import { advanceYear } from './advance';
@@ -278,9 +280,16 @@ describe('an inheritance', () => {
       if (!next) continue;
       expect(reconcile(next.finance).ok).toBe(true);
       expect(Number(next.player.cash)).toBe(Number(next.finance.balance));
-      if (Number(state.player.cash) > 0) {
-        expect(next.finance.transactions).toHaveLength(1);
-        expect(next.finance.transactions[0]?.source).toContain(state.player.firstName);
+      // One opening transaction per thing left — the cash, since 0501 the
+      // sale of any home, and since 0504 the sale of any car — each naming who
+      // it came from.
+      const leftAHome = state.homes.some((home) => saleOf(home).proceeds > 0);
+      const leftACar = state.vehicles.some((vehicle) => vehicleSaleOf(vehicle).proceeds > 0);
+      const expected =
+        (Number(state.player.cash) > 0 ? 1 : 0) + (leftAHome ? 1 : 0) + (leftACar ? 1 : 0);
+      expect(next.finance.transactions).toHaveLength(expected);
+      for (const entry of next.finance.transactions) {
+        expect(entry.source).toContain(state.player.firstName);
       }
       return;
     }

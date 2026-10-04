@@ -20,7 +20,12 @@ import {
   findMajor,
   levelOf,
   postgradChance,
+  prerequisiteFit,
+  programSections,
+  programsOpenTo,
   type Major,
+  type ProgramKind,
+  type ProgramSection,
 } from '@yearafter/education';
 import { err, ok, type Result } from '@yearafter/core';
 import type { GameState } from './game-state';
@@ -37,7 +42,9 @@ export type CollegeError =
   | 'no-such-major'
   /** One application a year, like a job. */
   | 'already-applied'
-  | 'not-enrolled';
+  | 'not-enrolled'
+  /** Ticket 0406. The program is real, but not for this character yet. */
+  | 'not-open-to-you';
 
 /*
   Ticket 0307 changed one line here, and it matters more than its size.
@@ -58,6 +65,7 @@ export const COLLEGE_ERROR_LABELS: Readonly<Record<CollegeError, string>> = {
   'no-diploma': 'They want a high school diploma first.',
   'cannot-afford': "You can't cover the first year — a student loan would.",
   'no-such-major': "That subject isn't on offer.",
+  'not-open-to-you': 'Not one you can start right now.',
   'already-applied': 'You have already applied this year.',
   'not-enrolled': "You aren't studying anywhere.",
 };
@@ -76,8 +84,32 @@ export const nextDegreeFor = (state: GameState): 'college' | 'postgrad' | undefi
   return undefined;
 };
 
-export const tuitionDue = (state: GameState): number =>
-  nextDegreeFor(state) === 'postgrad' ? POSTGRAD_TUITION_PER_YEAR : TUITION_PER_YEAR;
+/**
+ * Every program this character could start today (Ticket 0406).
+ *
+ * The screen renders `programSections(openPrograms(state))` and `applyToCollege`
+ * checks membership of this same list, so there is one answer to "what is on
+ * offer" rather than a screen's answer and a gate's answer — CORE_RULES 13.15.
+ */
+export const openPrograms = (state: GameState): readonly Major[] =>
+  programsOpenTo(state.education.credentials, state.player.age);
+
+export const openProgramSections = (state: GameState): readonly ProgramSection[] =>
+  programSections(openPrograms(state));
+
+/**
+ * The sticker price of one year of a named program.
+ *
+ * TAKES THE PROGRAMME RATHER THAN GUESSING FROM THE LEVEL. Before 0406 this
+ * read `nextDegreeFor` and returned one of two constants, which was fine when
+ * there were two prices and is wrong now that a CPA year costs $18,000 and a
+ * year of medical school costs $34,000. The argument is optional so the callers
+ * that genuinely mean "the ordinary next step" still work.
+ */
+export const tuitionDue = (state: GameState, program?: Major): number => {
+  if (program) return program.tuition;
+  return nextDegreeFor(state) === 'postgrad' ? POSTGRAD_TUITION_PER_YEAR : TUITION_PER_YEAR;
+};
 
 /**
  * What the character personally has to find, after whoever is helping.
@@ -88,8 +120,8 @@ export const tuitionDue = (state: GameState): number =>
  * CORE_RULES 13.16 again, pricing a system against money that does not exist at
  * eighteen. Parents fund college; spec 61 and 1197 both say so.
  */
-export const outOfPocket = (state: GameState): number =>
-  Math.max(0, tuitionDue(state) - collegeSupportOf(state));
+export const outOfPocket = (state: GameState, program?: Major): number =>
+  Math.max(0, tuitionDue(state, program) - collegeSupportOf(state, program));
 
 /**
  * What a parent has committed a year, if one has — FOR THE FIRST DEGREE ONLY.
@@ -100,12 +132,33 @@ export const outOfPocket = (state: GameState): number =>
  * a PhD, and making the second one self-funded turns it back into the decision
  * it should be — you pay for it, out of what a degree has just earned you.
  */
-export const collegeSupportOf = (state: GameState): number =>
-  nextDegreeFor(state) === 'postgrad' || state.education.stage === 'postgrad'
-    ? 0
-    : (state.parenting.collegeSupport ?? 0);
+export const collegeSupportOf = (state: GameState, program?: Major): number => {
+  /*
+    PARENTS PAY FOR COLLEGE, NOT FOR THE REST OF IT. The rule 0210b measured —
+    carrying parental money into graduate school put 56% of a determined player
+    through a master's, a conveyor belt rather than a life — now has a third
+    case to answer. Trade school gets the money: it is the thing an
+    eighteen-year-old does instead of a bachelor's, it costs a fraction as much,
+    and a parent who would fund four years of tuition would not refuse two.
+    Graduate and professional school still do not.
+  */
+  const kind = program?.kind;
+  if (kind === 'graduate') return 0;
+  if (kind === undefined && (nextDegreeFor(state) === 'postgrad' || state.education.stage === 'postgrad')) {
+    return 0;
+  }
+  if (state.education.stage === 'postgrad') return 0;
+  return state.parenting.collegeSupport ?? 0;
+};
 
-/** The subjects on offer. The same list every year — this is not a shop. */
+/**
+ * The subjects on offer. The same list every year — this is not a shop.
+ *
+ * Kept as the whole catalogue for callers that want it (the timeline resolving
+ * a major id written years ago, for one). What a PLAYER is shown is
+ * `openPrograms`, which is gated; spec 1336 forbids handing fifty rows to a
+ * screen and letting it sort them out.
+ */
 export const majorsAvailable = (): readonly Major[] => MAJORS;
 
 /**
@@ -115,9 +168,45 @@ export const majorsAvailable = (): readonly Major[] => MAJORS;
  * calls it rather than repeating them, because a gate with two enforcement
  * points has two chances to disagree with itself.
  */
-export function cannotEnrol(state: GameState): CollegeError | undefined {
+/**
+ * Is there ANY program this character could start — the screen's question.
+ *
+ * SPLIT FROM `cannotEnrol` IN 0406 BECAUSE ONE FUNCTION WAS ANSWERING TWO
+ * QUESTIONS AND THEY HAD STARTED TO DISAGREE. While every program cost the
+ * same, "can you enrol" and "can you enrol in THIS" were the same question. They
+ * are not any more: a character with $5,000 can start a welding certificate and
+ * cannot start medical school, so an optimistic answer ("yes, something is open
+ * to you") and a specific one ("no, not that") are both true at once.
+ *
+ * Leaving that as one optional-argument function meant a caller who asked the
+ * loose question and then applied for a specific program got a yes followed
+ * by a refusal — CORE_RULES 13.15, a gate disagreeing with itself, and it cost
+ * an afternoon in `floor.test.ts` before it was named. Two functions, two
+ * questions: this one decides whether the College row is worth showing, and
+ * `cannotEnrol` decides whether a particular application goes through.
+ */
+export function cannotEnrolAnything(state: GameState): CollegeError | undefined {
+  const open = openPrograms(state);
+  const structural = structuralBlock(state, open);
+  if (structural) return structural;
+  const cash = Number(state.player.cash) / 100;
+  const cheapest = Math.min(...open.map((row) => outOfPocket(state, row)));
+  return cash < cheapest ? 'cannot-afford' : undefined;
+}
+
+/** The stage, age and catalogue checks both questions share. */
+function structuralBlock(
+  state: GameState,
+  open: readonly Major[],
+): CollegeError | undefined {
   const { education, player } = state;
-  if (education.stage === 'college' || education.stage === 'postgrad') return 'already-enrolled';
+  if (
+    education.stage === 'college' ||
+    education.stage === 'postgrad' ||
+    education.stage === 'vocational'
+  ) {
+    return 'already-enrolled';
+  }
   if (
     education.stage === 'preschool' ||
     education.stage === 'elementary' ||
@@ -127,20 +216,68 @@ export function cannotEnrol(state: GameState): CollegeError | undefined {
     return 'still-at-school';
   }
   if (player.age < COLLEGE_AGE) return 'too-young';
-  const next = nextDegreeFor(state);
-  if (!next) {
-    // A dropout has no diploma; a postgraduate has nothing left to take.
+  if (open.length === 0) {
+    // A dropout has no diploma; anybody else has simply run out of programs.
     return levelOf(education.credentials) === 'none' ? 'no-diploma' : 'nothing-left-to-study';
   }
-  if (Number(player.cash) / 100 < outOfPocket(state)) return 'cannot-afford';
   return undefined;
 }
 
-/** The odds, for the row the player reads before they apply. */
-export function admissionOdds(state: GameState): number {
-  const next = nextDegreeFor(state);
-  const chance = next === 'postgrad' ? postgradChance : admissionChance;
-  return chance(state.education.performance, state.player.talents.academics);
+export function cannotEnrol(state: GameState, program?: Major): CollegeError | undefined {
+  const open = openPrograms(state);
+  const structural = structuralBlock(state, open);
+  if (structural) return structural;
+  const cash = Number(state.player.cash) / 100;
+  /*
+    NO PROGRAMME NAMED IS THE PESSIMISTIC ANSWER ON PURPOSE. A caller who does
+    not say what they are applying for gets the price of the ORDINARY next step
+    — the bachelor's or the graduate degree the ladder implies — not the price
+    of the cheapest certificate in the catalogue. The optimistic reading belongs
+    to `cannotEnrolAnything`, and conflating the two is what let a harness pass
+    this gate and then be refused by `applyToCollege` one line later.
+  */
+  if (!program) {
+    return cash < outOfPocket(state) ? 'cannot-afford' : undefined;
+  }
+  if (!open.some((row) => row.id === program.id)) return 'not-open-to-you';
+  if (cash < outOfPocket(state, program)) return 'cannot-afford';
+  return undefined;
+}
+
+/**
+ * The odds, for the row the player reads before they apply.
+ *
+ * THREE TIERS NOW, AND THE PROGRAMME ITSELF MOVES IT (Ticket 0406). A trade
+ * school is not selective and should not pretend to be; medical school is the
+ * hardest admission in the game and a biology graduate should feel the
+ * difference from an art historian applying to it. `difficulty` was already
+ * carried on every program and only ever spent on how hard it was to PASS —
+ * spending it on getting in as well is what makes the professional tier read
+ * as a wall worth climbing rather than a more expensive master's.
+ */
+export function admissionOdds(state: GameState, program?: Major): number {
+  const { performance } = state.education;
+  const academics = state.player.talents.academics;
+  if (!program) {
+    const next = nextDegreeFor(state);
+    const chance = next === 'postgrad' ? postgradChance : admissionChance;
+    return chance(performance, academics);
+  }
+  if (program.kind === 'vocational') {
+    // Open enrolment, near enough. A trade school that turns people away is not
+    // the thing this tier exists to be.
+    return Math.max(0.55, Math.min(0.97, 0.88 - program.difficulty * 0.12));
+  }
+  const base =
+    program.kind === 'graduate'
+      ? postgradChance(performance, academics)
+      : admissionChance(performance, academics);
+  // Selectivity above the tier's own baseline, plus what they read as an
+  // undergraduate. A 0.92-difficulty program sheds roughly a third of the
+  // base rate before the record is even considered.
+  const selective = 1 - (program.difficulty - 0.5) * 0.62;
+  const fit = prerequisiteFit(program, state.education.majorId);
+  return Math.max(0.05, Math.min(0.95, base * Math.max(0.3, selective) + fit));
 }
 
 /**
@@ -155,21 +292,23 @@ export function applyToCollege(
   state: GameState,
   majorId: string,
 ): Result<CollegeOutcome, CollegeError> {
-  const blocked = cannotEnrol(state);
-  if (blocked) return err(blocked);
-
   const major = findMajor(majorId);
   if (!major) return err('no-such-major');
 
+  // The program is known BEFORE the gate is asked, because since 0406 the
+  // gate's answer depends on it: what it costs, whether this character is the
+  // right tier for it, and whether they already hold the license it grants.
+  const blocked = cannotEnrol(state, major);
+  if (blocked) return err(blocked);
+
   if (state.education.appliedToCollegeAtAge === state.player.age) return err('already-applied');
 
-  const next = nextDegreeFor(state);
   const stream = state.rng.stream(RngDomains.Education);
-  const accepted = stream.chance(admissionOdds(state));
+  const accepted = stream.chance(admissionOdds(state, major));
 
   const text = accepted
-    ? acceptedLine(state, major, next === 'postgrad')
-    : rejectedLine(state, major, next === 'postgrad');
+    ? acceptedLine(state, major, major.kind)
+    : rejectedLine(state, major, major.kind);
 
   const entry = createTimelineEntry({
     age: state.player.age,
@@ -189,7 +328,12 @@ export function applyToCollege(
         appliedToCollegeAtAge: state.player.age,
         ...(accepted
           ? {
-              stage: next === 'postgrad' ? ('postgrad' as const) : ('college' as const),
+              stage:
+                major.kind === 'graduate'
+                  ? ('postgrad' as const)
+                  : major.kind === 'vocational'
+                    ? ('vocational' as const)
+                    : ('college' as const),
               majorId,
               collegeYear: 0,
               enrolledAtAge: state.player.age,
@@ -264,20 +408,38 @@ function pick(lines: readonly string[], key: string, age: number): string {
   return lines[(base + age) % lines.length] as string;
 }
 
-const acceptedLine = (state: GameState, major: Major, postgrad: boolean): string =>
-  pick(postgrad ? POSTGRAD_IN : ACCEPTED_LINES, `college:${major.id}`, state.player.age).replace(
-    /\{major\}/g,
-    major.name.toLowerCase(),
-  );
+const acceptedLine = (state: GameState, major: Major, kind: ProgramKind): string => {
+  const lines = kind === 'graduate' ? POSTGRAD_IN : kind === 'vocational' ? TRADE_IN : ACCEPTED_LINES;
+  return fill(pick(lines, `college:${major.id}`, state.player.age), major);
+};
 
-const rejectedLine = (state: GameState, major: Major, postgrad: boolean): string =>
-  pick(postgrad ? POSTGRAD_NO : REJECTED_LINES, `nocollege:${major.id}`, state.player.age).replace(
-    /\{major\}/g,
-    major.name.toLowerCase(),
-  );
+const rejectedLine = (state: GameState, major: Major, kind: ProgramKind): string => {
+  const lines = kind === 'graduate' ? POSTGRAD_NO : kind === 'vocational' ? TRADE_NO : REJECTED_LINES;
+  return fill(pick(lines, `nocollege:${major.id}`, state.player.age), major);
+};
+
+/*
+  `{years}` EXISTS BECAUSE THE COPY USED TO LIE. "Four years of {major}" was
+  true when every bachelor's was four years and every graduate degree was two;
+  0406 has programs running from one year to four inside the same tier, and a
+  line that says four to somebody enrolled in a twelve-month CPA course is the
+  kind of small wrongness that makes a player stop trusting the timeline.
+*/
+const fill = (line: string, major: Major): string =>
+  line
+    .replace(/\{major\}/g, major.name.toLowerCase())
+    .replace(/\{years\}/g, major.years === 1 ? 'A year' : `${NUMBER_WORDS[major.years] ?? major.years} years`);
+
+const NUMBER_WORDS: Readonly<Record<number, string>> = {
+  1: 'One',
+  2: 'Two',
+  3: 'Three',
+  4: 'Four',
+  5: 'Five',
+};
 
 const ACCEPTED_LINES: readonly string[] = [
-  'Got in. Four years of {major}, starting in the fall.',
+  'Got in. {years} of {major}, starting in the autumn.',
   'The letter came and you read it standing up. {major}, and you are going.',
   'Accepted to study {major}. Somebody in the family cried about it.',
   'You are going to college. {major}, and no idea what happens after.',
@@ -289,13 +451,24 @@ const REJECTED_LINES: readonly string[] = [
   'Turned down. They said the year was competitive, which they say every year.',
 ];
 
+const TRADE_IN: readonly string[] = [
+  'Signed up for {major}. {years}, and a license at the end of it.',
+  'Starting {major}. Everybody else in the room is already working.',
+  'Enrolled in {major}. Nobody asked about your grades.',
+];
+
+const TRADE_NO: readonly string[] = [
+  'The {major} intake was full. They said to try again next term.',
+  'Missed the {major} intake by a week.',
+];
+
 const POSTGRAD_IN: readonly string[] = [
-  'Accepted onto the graduate program in {major}. Two more years of it.',
-  'Got a place on the {major} program. Everybody else there is very sure of themselves.',
-  "Going back for a graduate degree in {major}. It wasn't an easy decision.",
+  'Accepted onto {major}. {years} more of it.',
+  'Got a place on {major}. Everybody else there is very sure of themselves.',
+  "Going back for {major}. It wasn't an easy decision.",
 ];
 
 const POSTGRAD_NO: readonly string[] = [
-  'The graduate program in {major} said no. Your undergraduate record did that.',
-  "Applied for the {major} program and wasn't offered a place.",
+  '{major} said no. Your undergraduate record did that.',
+  "Applied to {major} and wasn't offered a place.",
 ];

@@ -28,3 +28,13 @@ export * from './advisors';
 
 /* Retirement (Ticket 0310). */
 export * from './retirement';
+
+/* Ticket 0501 — owning a home, and the mortgage that pays for it. */
+export * from './property';
+export * from './rental';
+export * from './vehicles';
+export * from './renovations';
+export * from './valuables';
+export * from './auctions';
+export * from './businesses';
+export * from './business-events';

@@ -53,6 +53,35 @@ import {
   payCard,
   closeCard,
   takeLoan,
+  buyHome,
+  sellHome,
+  buyVehicle,
+  sellVehicle,
+  inspectVehicle,
+  fitVehicleMod,
+  FIT_MOD_ERROR_LABELS,
+  renovate,
+  RENOVATE_ERROR_LABELS,
+  buyValuable,
+  sellValuable,
+  BUY_VALUABLE_ERROR_LABELS,
+  attendAuction,
+  bidOn,
+  ATTEND_ERROR_LABELS,
+  BID_ERROR_LABELS,
+  BUY_VEHICLE_ERROR_LABELS,
+  SELL_VEHICLE_ERROR_LABELS,
+  INSPECT_ERROR_LABELS,
+  BUY_HOME_ERROR_LABELS,
+  changeRent,
+  fillEmptyUnits,
+  moveBackIn,
+  rentOut,
+  setAgent,
+  signTenant,
+  RENTAL_ERROR_LABELS,
+  type RentalChange,
+  type RentalError,
   invest,
   divest,
   payLoan,
@@ -64,12 +93,44 @@ import {
   setContribution,
   retireNow,
   takeOutEarly,
+  openBusiness,
+  buyBusiness,
+  BUY_REFUSAL_LABELS,
+  FINANCE_ERROR_LABELS,
+  expandBusiness,
+  closeLocation,
+  setPrice as setBusinessPrice,
+  setSupplier as setBusinessSupplier,
+  setPayroll as setBusinessPayroll,
+  hireStaff as hireBusinessStaff,
+  letStaffGo as letBusinessStaffGo,
+  setAutoStaff as setBusinessAutoStaff,
+  sellBusiness,
+  closeBusiness,
+  type Financing,
 } from '@yearafter/simulation';
+import { EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
+import type { BidTier, Payroll, SupplierGrade } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
 import type { Detail } from '../components/DetailCard';
 import type { Outcome } from '../components/OutcomeCard';
+import type { Result } from '@yearafter/core';
+
+/** Ticket 0503. The landlord's verbs, as one action the screens dispatch. */
+export type LettingAction =
+  | { readonly type: 'rentOut'; readonly homeId: string }
+  | { readonly type: 'moveBackIn'; readonly homeId: string }
+  | { readonly type: 'rent'; readonly homeId: string; readonly direction: 1 | -1 }
+  | { readonly type: 'agent'; readonly homeId: string; readonly managed: boolean }
+  | {
+      readonly type: 'sign';
+      readonly homeId: string;
+      readonly unit: number;
+      readonly applicantId: string;
+    }
+  | { readonly type: 'fill'; readonly homeId: string };
 import {
   DEFAULT_SETTINGS,
   fromSave,
@@ -131,7 +192,39 @@ interface GameContextValue {
   readonly closeCardOff: (productId: string) => void;
   /** Ticket 0307. Borrow, and pay extra off. */
   readonly borrow: (productId: string, amount: number) => void;
-  readonly payLoanOff: (productId: string, amount: number) => void;
+  /** Ticket 0501. Buy a listed home, outright or with a mortgage. */
+  readonly buyAHome: (listingId: string, how: 'cash' | 'mortgage') => void;
+  /** Ticket 0501. Spec 211's one Sell action. */
+  readonly sellAHome: (homeId: string) => void;
+  /** Ticket 0503. Everything a landlord does, one verb at a time. */
+  readonly letting: (action: LettingAction) => void;
+  /** Ticket 0504. Buy a car off a lot, outright or on the lender's instant answer. */
+  readonly buyACar: (listingId: string, how: 'cash' | 'loan') => void;
+  /** Ticket 0504. Sell a car to a dealer. */
+  readonly sellACar: (vehicleId: string) => void;
+  /** Ticket 0504. Pay a mechanic to look a used car over. */
+  readonly inspectACar: (listingId: string) => void;
+  /** Ticket 0505. Have a shop fit a modification. */
+  readonly fitACarMod: (vehicleId: string, modId: string) => void;
+  /** Ticket 0506. Have a builder do something to a home. */
+  readonly renovateHome: (homeId: string, renovationId: string) => void;
+  /** Ticket 0601. Open a business, run it, sell it or close it. */
+  readonly openABusiness: (typeId: string, finance?: Financing) => void;
+  /** Ticket 0603. Buy one that is for sale. A loan is written into the purchase, never paid out as cash. */
+  readonly buyABusiness: (listingId: string, finance?: Financing) => void;
+  readonly tuneBusiness: (businessId: string, change: BusinessChange) => void;
+  /** Ticket 0602. Open another location of a business, or close the newest. */
+  readonly expandABusiness: (businessId: string, finance?: Financing) => void;
+  readonly closeALocation: (businessId: string) => void;
+  readonly sellABusiness: (businessId: string) => void;
+  readonly closeABusiness: (businessId: string) => void;
+  /** Ticket 0506. Buy a piece off a store's counter, or sell one from the collection. */
+  readonly buyAValuable: (stockId: string) => void;
+  readonly sellAValuable: (pieceId: string) => void;
+  /** Ticket 0507. Go to an auction's next sale, and bid on a lot at it. */
+  readonly attendAnAuction: (venueId: string) => void;
+  readonly bidAtAuction: (lotId: string, tier: BidTier) => void;
+  readonly payLoanOff: (productId: string, amount: number, businessId?: string) => void;
   /** Ticket 0308. */
   readonly buyInvestment: (productId: string, amount: number) => void;
   readonly sellInvestment: (productId: string, amount: number) => void;
@@ -176,11 +269,20 @@ interface GameContextValue {
    * continuing a dynasty the one action in this game that destroys history, and
    * the save list is where a player looks for the ancestor they remember.
    */
-  readonly continueAs: (childId: string) => Promise<void>;
+  readonly continueAs: (childId: string, keepBusinesses?: boolean) => Promise<void>;
   readonly updateSettings: (patch: Partial<SaveSettings>) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
+
+/** Ticket 0601. The dials on a business, as one value so the store has one action for them. */
+export type BusinessChange =
+  | { readonly kind: 'price'; readonly price: number }
+  | { readonly kind: 'supplier'; readonly supplier: SupplierGrade }
+  | { readonly kind: 'payroll'; readonly payroll: Payroll }
+  | { readonly kind: 'hire' }
+  | { readonly kind: 'letGo' }
+  | { readonly kind: 'auto'; readonly on: boolean };
 
 export interface GameProviderProps {
   readonly repository: SaveRepository;
@@ -227,9 +329,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const continueAs = useCallback(
-    async (childId: string) => {
+    async (childId: string, keepBusinesses?: boolean) => {
       if (!state) return;
-      const next = continueAsChild(state, childId);
+      const next = continueAsChild(state, childId, keepBusinesses === undefined ? {} : { keepBusinesses });
       if (!next) return;
 
       const id = asSaveId(`save-${next.rng.getSeed()}-g${next.world.generation}`);
@@ -632,6 +734,390 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  /* ---- Ticket 0501: homes ---------------------------------------------- */
+
+  const buyAHome = useCallback(
+    (listingId: string, how: 'cash' | 'mortgage') => {
+      setState((current) => {
+        if (!current) return current;
+        const result = buyHome(current, listingId, how);
+        if (!result.ok) {
+          // A refusal is an outcome, not an error: the bank saying no is a
+          // thing that happened, and the player is told so in a sentence.
+          setOutcome({
+            title: how === 'mortgage' ? 'The bank said no' : 'Not enough',
+            body: BUY_HOME_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
+          return current;
+        }
+        setOutcome({ title: 'It is yours', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const sellAHome = useCallback(
+    (homeId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = sellHome(current, homeId);
+        if (!result.ok) return current;
+        setOutcome({ title: 'Sold', body: result.value.entry.text, tone: 'neutral' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  /* ---- Ticket 0504: vehicles ------------------------------------------- */
+
+  const buyACar = useCallback(
+    (listingId: string, how: 'cash' | 'loan') => {
+      setState((current) => {
+        if (!current) return current;
+        const result = buyVehicle(current, listingId, how);
+        if (!result.ok) {
+          setOutcome({
+            title: how === 'loan' ? 'The lender said no' : 'Not enough',
+            body: BUY_VEHICLE_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
+          return current;
+        }
+        setOutcome({ title: 'The keys are yours', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const sellACar = useCallback(
+    (vehicleId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = sellVehicle(current, vehicleId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: SELL_VEHICLE_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        setOutcome({ title: 'Sold', body: result.value.entry.text, tone: 'neutral' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const inspectACar = useCallback(
+    (listingId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = inspectVehicle(current, listingId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: INSPECT_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        const view = result.value.view;
+        setOutcome(
+          view.defect
+            ? {
+                title: 'The mechanic found something',
+                body: `The ${view.defect.part} is on its way out — about $${view.defect.cost.toLocaleString('en-US')} to fix. The seller knocked that off the price.`,
+                tone: 'bad',
+              }
+            : {
+                title: 'Clean bill of health',
+                body: 'Nothing wrong that the mechanic could find.',
+                tone: 'good',
+              },
+        );
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const fitACarMod = useCallback(
+    (vehicleId: string, modId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = fitVehicleMod(current, vehicleId, modId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: FIT_MOD_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        setOutcome({ title: 'Done', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  /* ---- Ticket 0506: renovations and shopping ---------------------------- */
+
+  const renovateHome = useCallback(
+    (homeId: string, renovationId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = renovate(current, homeId, renovationId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: RENOVATE_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        setOutcome({ title: 'Done', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  /* ---- Ticket 0601: businesses ------------------------------------------ */
+
+  const openABusiness = useCallback(
+    (typeId: string, finance?: Financing) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = openBusiness(current, typeId, finance);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body:
+              result.error in OPEN_REFUSAL_LABELS
+                ? OPEN_REFUSAL_LABELS[result.error as keyof typeof OPEN_REFUSAL_LABELS]
+                : FINANCE_ERROR_LABELS[result.error as keyof typeof FINANCE_ERROR_LABELS],
+            tone: 'bad',
+          });
+          return current;
+        }
+        setOutcome({ title: 'Open for business', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const tuneBusiness = useCallback(
+    (businessId: string, change: BusinessChange) => {
+      setState((current) => {
+        if (!current) return current;
+        const result =
+          change.kind === 'price'
+            ? setBusinessPrice(current, businessId, change.price)
+            : change.kind === 'supplier'
+              ? setBusinessSupplier(current, businessId, change.supplier)
+              : change.kind === 'payroll'
+                ? setBusinessPayroll(current, businessId, change.payroll)
+                : change.kind === 'hire'
+                  ? hireBusinessStaff(current, businessId)
+                  : change.kind === 'letGo'
+                    ? letBusinessStaffGo(current, businessId)
+                    : setBusinessAutoStaff(current, businessId, change.on);
+        // A dial turned is not news: the screen shows it. Only a refusal speaks.
+        if (!result.ok) return current;
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const buyABusiness = useCallback(
+    (listingId: string, finance?: Financing) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = buyBusiness(current, listingId, finance);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: BUY_REFUSAL_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        setOutcome({ title: 'Yours now', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const expandABusiness = useCallback(
+    (businessId: string, finance?: Financing) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = expandBusiness(current, businessId, finance);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body:
+              result.error === 'no-such-business'
+                ? "You don't run that any more."
+                : result.error in EXPAND_REFUSAL_LABELS
+                  ? EXPAND_REFUSAL_LABELS[result.error as keyof typeof EXPAND_REFUSAL_LABELS]
+                  : FINANCE_ERROR_LABELS[result.error as keyof typeof FINANCE_ERROR_LABELS],
+            tone: 'bad',
+          });
+          return current;
+        }
+        setOutcome({ title: 'Another door', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const closeALocation = useCallback(
+    (businessId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = closeLocation(current, businessId);
+        if (!result.ok) return current;
+        setOutcome({ title: 'Closed', body: result.value.entry.text, tone: 'neutral' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const sellABusiness = useCallback(
+    (businessId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = sellBusiness(current, businessId);
+        if (!result.ok) return current;
+        setOutcome({ title: 'Sold', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const closeABusiness = useCallback(
+    (businessId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = closeBusiness(current, businessId);
+        if (!result.ok) return current;
+        setOutcome({ title: 'Closed', body: result.value.entry.text, tone: 'neutral' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const buyAValuable = useCallback(
+    (stockId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = buyValuable(current, stockId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: BUY_VALUABLE_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        setOutcome({ title: "It's yours", body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const sellAValuable = useCallback(
+    (pieceId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = sellValuable(current, pieceId);
+        if (!result.ok) return current;
+        setOutcome({ title: 'Sold', body: result.value.entry.text, tone: 'neutral' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  /* ---- Ticket 0507: auctions -------------------------------------------- */
+
+  const attendAnAuction = useCallback(
+    (venueId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = attendAuction(current, venueId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: ATTEND_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const bidAtAuction = useCallback(
+    (lotId: string, tier: BidTier) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = bidOn(current, lotId, tier);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: BID_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        setOutcome({
+          title: result.value.won ? 'Sold — to you' : 'Outbid',
+          body: result.value.text,
+          tone: result.value.won ? 'good' : 'neutral',
+        });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const letting = useCallback(
+    (action: LettingAction) => {
+      setState((current) => {
+        if (!current) return current;
+        const result: Result<RentalChange, RentalError> =
+          action.type === 'rentOut'
+            ? rentOut(current, action.homeId)
+            : action.type === 'moveBackIn'
+              ? moveBackIn(current, action.homeId)
+              : action.type === 'rent'
+                ? changeRent(current, action.homeId, action.direction)
+                : action.type === 'agent'
+                  ? setAgent(current, action.homeId, action.managed)
+                  : action.type === 'sign'
+                    ? signTenant(current, action.homeId, action.unit, action.applicantId)
+                    : fillEmptyUnits(current, action.homeId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: RENTAL_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        // Moving out, signing a lease and filling a building are things that
+        // happened, and get a card; moving the rent or hiring an agent is a
+        // setting, and the screen shows it.
+        if (result.value.entry) {
+          setOutcome({ title: 'Done', body: result.value.entry.text, tone: 'good' });
+        }
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const buyInvestmentWith = useCallback(
     (productId: string, amount: number) => {
       setState((current) => {
@@ -772,10 +1258,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const payLoanWith = useCallback(
-    (productId: string, amount: number) => {
+    (productId: string, amount: number, businessId?: string) => {
       setState((current) => {
         if (!current) return current;
-        const result = payLoan(current, productId, amount);
+        const result = payLoan(current, productId, amount, businessId);
         if (!result.ok) {
           setSaveError(`Cannot pay that loan (${result.error}).`);
           return current;
@@ -1088,6 +1574,25 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       payCardOff: payCardWith,
       closeCardOff: closeCardWith,
       borrow: borrowWith,
+      buyAHome,
+      sellAHome,
+      letting,
+      buyACar,
+      sellACar,
+      inspectACar,
+      fitACarMod,
+      renovateHome,
+      openABusiness,
+      buyABusiness,
+      tuneBusiness,
+      expandABusiness,
+      closeALocation,
+      sellABusiness,
+      closeABusiness,
+      buyAValuable,
+      sellAValuable,
+      attendAnAuction,
+      bidAtAuction,
       payLoanOff: payLoanWith,
       buyInvestment: buyInvestmentWith,
       sellInvestment: sellInvestmentWith,
@@ -1142,6 +1647,25 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       payCardWith,
       closeCardWith,
       borrowWith,
+      buyAHome,
+      sellAHome,
+      letting,
+      buyACar,
+      sellACar,
+      inspectACar,
+      fitACarMod,
+      renovateHome,
+      openABusiness,
+      buyABusiness,
+      tuneBusiness,
+      expandABusiness,
+      closeALocation,
+      sellABusiness,
+      closeABusiness,
+      buyAValuable,
+      sellAValuable,
+      attendAnAuction,
+      bidAtAuction,
       buyInvestmentWith,
       sellInvestmentWith,
       hireAdvisorWith,

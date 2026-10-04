@@ -76,10 +76,22 @@ const PRIORITY: Readonly<Record<LifeRecordCategory, number>> = {
   criminal: 3,
   health: 2,
   family: 5,
+  // Below health, because the comment above this table is the whole reason
+  // 0409 gave losses their own category: a highlights reel is about a life
+  // rather than about the people who left it.
+  loss: 1,
 };
 
-/** A loss is family-category, but it is not a thing you did. */
-const isLoss = (record: LifeRecord): boolean => record.label.startsWith('Lost ');
+/**
+ * A loss is not a thing you did.
+ *
+ * Ticket 0409 made this a category check. It used to read
+ * `record.label.startsWith('Lost ')`, which is precisely what `LifeRecord`'s
+ * own docblock forbids — "structured, queryable history. Never derived by
+ * parsing timeline text" — and it was one rewritten label away from silently
+ * promoting every funeral to a life highlight.
+ */
+const isLoss = (record: LifeRecord): boolean => record.category === 'loss';
 
 export interface Survivor {
   readonly id: string;

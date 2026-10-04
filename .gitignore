@@ -38,3 +38,4 @@ Thumbs.db
 # Build tarballs pushed over the bridge. Artifacts, never sources.
 *.tgz
 *.tar.gz
+_to_delete/

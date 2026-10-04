@@ -62,6 +62,54 @@ export interface EventContext {
   /** Whole dollars the character is actually holding, for `cashAtLeast`. */
   readonly cash: number;
   /**
+   * Ticket 0409. Whether they have a job, what kind, and how long they have
+   * had it.
+   *
+   * The same lesson as `partnered` (0207) and `hasChildren` (0208), for the
+   * third time and for the largest hole yet: measured at 26 of 374 events able
+   * to fire at forty, NONE of them about work. An event that says "your boss
+   * asks you to stay late" has to be able to say it only to somebody with a
+   * boss, and until this the predicate language could not.
+   *
+   * `jobTrack` is the track id ('retail', 'medicine', ...) so a scene can be
+   * about the actual work. `jobYears` is years in the CURRENT job, because "you
+   * have been here eleven years" and "you started in March" are different
+   * scenes.
+   */
+  readonly employed: boolean;
+  readonly jobTrack?: string;
+  readonly jobYears: number;
+  /**
+   * Ticket 0409. Condition ids this character is carrying.
+   *
+   * Roadmap finding 4: 0211 gave the game a body and no authored event ever
+   * fired because of a diagnosis, so a character with something serious lived
+   * an event library that had never heard of it.
+   */
+  readonly conditions: readonly string[];
+  /**
+   * Ticket 0409. Years since they last lost somebody close, if they have.
+   *
+   * Roadmap finding 4b. Derived from `LifeRecord`s of category 'loss' rather
+   * than from timeline text, which is what that category was added for.
+   */
+  readonly bereavedWithin?: number;
+  /**
+   * Ticket 0412. How many friends the character has, and how long they have had
+   * the longest-standing one.
+   *
+   * Counted rather than flagged, because `hasFriend` is derivable from a count
+   * and two fields that can disagree about the same thing is the drift
+   * CORE_RULES 13.19 is about. Both exclude anybody the character is involved
+   * with: `partnered` is the question about a partner and has been since 0207.
+   *
+   * `friendshipYears` is 0 when there are no friends, which reads correctly
+   * against `friendshipYearsAtLeast` — a character with nobody has not known
+   * anybody for ten years.
+   */
+  readonly friends: number;
+  readonly friendshipYears: number;
+  /**
    * The people this character actually knows (Ticket 0206) — classmates and
    * the teacher who has them this year.
    *

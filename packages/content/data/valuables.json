@@ -1,0 +1,2055 @@
+{
+  "version": 1,
+  "stores": [
+    {
+      "id": "store.jeweler",
+      "name": "Halden & Rowe Jewelers",
+      "kinds": [
+        "ring",
+        "necklace",
+        "chain",
+        "bracelet",
+        "earrings"
+      ],
+      "size": 6,
+      "means": 0,
+      "blurb": "A glass counter, a bell over the door, and a man who knows your ring size by looking."
+    },
+    {
+      "id": "store.watches",
+      "name": "The Watch Room",
+      "kinds": [
+        "watch"
+      ],
+      "size": 6,
+      "means": 0,
+      "blurb": "Every brand under one roof, and a waiting list for the ones people want."
+    },
+    {
+      "id": "store.maison",
+      "name": "Maison Vellard",
+      "kinds": [
+        "watch",
+        "ring",
+        "necklace",
+        "bracelet",
+        "earrings"
+      ],
+      "size": 5,
+      "means": 150000,
+      "blurb": "Appointment only. They bring the pieces to you."
+    },
+    {
+      "id": "store.gallery",
+      "name": "Northlight Gallery",
+      "kinds": [
+        "art"
+      ],
+      "size": 6,
+      "means": 0,
+      "blurb": "White walls, small labels, and prices you have to ask for."
+    },
+    {
+      "id": "store.antiques",
+      "name": "Old Hollow Antiques & Curiosities",
+      "kinds": [
+        "antique",
+        "historical",
+        "curio",
+        "mythical"
+      ],
+      "size": 7,
+      "means": 0,
+      "blurb": "Three floors of other people's things. The owner says everything has a story."
+    }
+  ],
+  "entries": [
+    {
+      "id": "val.watch.casiot-g-shok",
+      "kind": "watch",
+      "name": "Casiot G-Shok",
+      "brand": "Casiot",
+      "price": 120,
+      "holds": "fashion",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": "Survives anything. Including fashion."
+    },
+    {
+      "id": "val.watch.casiot-gold",
+      "kind": "watch",
+      "name": "Casiot Gold Digital",
+      "brand": "Casiot",
+      "price": 70,
+      "holds": "fashion",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": "Gold-tone, a calculator's worth of buttons."
+    },
+    {
+      "id": "val.watch.timexa-weekender",
+      "kind": "watch",
+      "name": "Timexa Weekender",
+      "brand": "Timexa",
+      "price": 90,
+      "holds": "fashion",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.fossell-chrono",
+      "kind": "watch",
+      "name": "Fossell Chronograph",
+      "brand": "Fossell",
+      "price": 180,
+      "holds": "fashion",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.seyko-presago",
+      "kind": "watch",
+      "name": "Seyko Presago",
+      "brand": "Seyko",
+      "price": 550,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": "An automatic movement for the price of a dinner out."
+    },
+    {
+      "id": "val.watch.seyko-diver",
+      "kind": "watch",
+      "name": "Seyko Prospect Diver",
+      "brand": "Seyko",
+      "price": 750,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.tissoe-prx",
+      "kind": "watch",
+      "name": "Tissoe PRZ",
+      "brand": "Tissoe",
+      "price": 725,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.hamiltone-khaki",
+      "kind": "watch",
+      "name": "Hamiltone Khaki Field",
+      "brand": "Hamiltone",
+      "price": 595,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.apple-ish",
+      "kind": "watch",
+      "name": "Orchard Watch Ultra",
+      "brand": "Orchard",
+      "price": 800,
+      "holds": "fashion",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": "Tells the time, your heart rate, and everyone your messages."
+    },
+    {
+      "id": "val.watch.tagg-carrara",
+      "kind": "watch",
+      "name": "Tagg Heuser Carrara",
+      "brand": "Tagg Heuser",
+      "price": 5500,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.tagg-monako",
+      "kind": "watch",
+      "name": "Tagg Heuser Monako",
+      "brand": "Tagg Heuser",
+      "price": 7450,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": "The square one from the racing film."
+    },
+    {
+      "id": "val.watch.tudar-black-cove",
+      "kind": "watch",
+      "name": "Tudar Black Cove",
+      "brand": "Tudar",
+      "price": 4200,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.longinez-spirit",
+      "kind": "watch",
+      "name": "Longinez Spirit",
+      "brand": "Longinez",
+      "price": 2700,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.oris-diver",
+      "kind": "watch",
+      "name": "Orys Aquis Diver",
+      "brand": "Orys",
+      "price": 2400,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.breitlong-navigator",
+      "kind": "watch",
+      "name": "Breitlong Navigator",
+      "brand": "Breitlong",
+      "price": 9000,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.grand-seyko-snowflake",
+      "kind": "watch",
+      "name": "Grand Seyko Snowflake",
+      "brand": "Grand Seyko",
+      "price": 6200,
+      "holds": "watch",
+      "stores": [
+        "store.watches"
+      ],
+      "rarity": "common",
+      "blurb": "A dial like fresh snow, and a second hand that glides."
+    },
+    {
+      "id": "val.watch.omegon-speedmeister",
+      "kind": "watch",
+      "name": "Omegon Speedmeister Moonwatch",
+      "brand": "Omegon",
+      "price": 7600,
+      "holds": "watch",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "The one that went to the Moon."
+    },
+    {
+      "id": "val.watch.omegon-seamarine",
+      "kind": "watch",
+      "name": "Omegon Seamarine 300",
+      "brand": "Omegon",
+      "price": 5900,
+      "holds": "watch",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.cartrier-tanque",
+      "kind": "watch",
+      "name": "Cartrier Tanque",
+      "brand": "Cartrier",
+      "price": 3400,
+      "holds": "watch",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.cartrier-santo",
+      "kind": "watch",
+      "name": "Cartrier Santo",
+      "brand": "Cartrier",
+      "price": 7950,
+      "holds": "watch",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.rolux-datesure",
+      "kind": "watch",
+      "name": "Rolux Datesure 41",
+      "brand": "Rolux",
+      "price": 9400,
+      "holds": "sought",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "The one people mean when they say \"a Rolux.\""
+    },
+    {
+      "id": "val.watch.rolux-subaquatic",
+      "kind": "watch",
+      "name": "Rolux Subaquatic",
+      "brand": "Rolux",
+      "price": 10250,
+      "holds": "sought",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "A two-year waiting list. Worth more the day it's on your wrist."
+    },
+    {
+      "id": "val.watch.rolux-gmt",
+      "kind": "watch",
+      "name": "Rolux GMT-Voyager",
+      "brand": "Rolux",
+      "price": 10900,
+      "holds": "sought",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.rolux-daytonna",
+      "kind": "watch",
+      "name": "Rolux Daytonna",
+      "brand": "Rolux",
+      "price": 15100,
+      "holds": "sought",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Nobody walks in and buys one. Somehow you did."
+    },
+    {
+      "id": "val.watch.rolux-day-date",
+      "kind": "watch",
+      "name": "Rolux Day-Date President",
+      "brand": "Rolux",
+      "price": 38500,
+      "holds": "watch",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.iwc-pilot",
+      "kind": "watch",
+      "name": "IWK Big Pilot",
+      "brand": "IWK",
+      "price": 13900,
+      "holds": "watch",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.jaeger-reverso",
+      "kind": "watch",
+      "name": "Jaegar-LeCoultray Reverso",
+      "brand": "Jaegar-LeCoultray",
+      "price": 9100,
+      "holds": "watch",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "It flips over. Polo players needed that once."
+    },
+    {
+      "id": "val.watch.panerai-luminor",
+      "kind": "watch",
+      "name": "Panarai Luminor",
+      "brand": "Panarai",
+      "price": 8700,
+      "holds": "watch",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.zenith-chrono",
+      "kind": "watch",
+      "name": "Zenyth El Primero",
+      "brand": "Zenyth",
+      "price": 9800,
+      "holds": "watch",
+      "stores": [
+        "store.watches",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.blancpain-fifty",
+      "kind": "watch",
+      "name": "Blancpane Fifty Fathoms",
+      "brand": "Blancpane",
+      "price": 17500,
+      "holds": "watch",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.ap-royal-ash",
+      "kind": "watch",
+      "name": "Audemar Pigot Royal Ash",
+      "brand": "Audemar Pigot",
+      "price": 31000,
+      "holds": "sought",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Eight screws on an octagon bezel. Recognized across a room."
+    },
+    {
+      "id": "val.watch.patrek-calatrova",
+      "kind": "watch",
+      "name": "Patrek Phillon Calatrova",
+      "brand": "Patrek Phillon",
+      "price": 33000,
+      "holds": "watch",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.patrek-nautilos",
+      "kind": "watch",
+      "name": "Patrek Phillon Nautilos",
+      "brand": "Patrek Phillon",
+      "price": 35000,
+      "holds": "sought",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Retail is a formality. Resale is the price."
+    },
+    {
+      "id": "val.watch.vacheran-overseas",
+      "kind": "watch",
+      "name": "Vacheran Constantine Overseas",
+      "brand": "Vacheran Constantine",
+      "price": 29900,
+      "holds": "watch",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.langer-lange1",
+      "kind": "watch",
+      "name": "A. Langer & Sohn Lange 1",
+      "brand": "A. Langer & Sohn",
+      "price": 42000,
+      "holds": "watch",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.watch.millon-rm",
+      "kind": "watch",
+      "name": "Richard Millon RM 35",
+      "brand": "Richard Millon",
+      "price": 250000,
+      "holds": "sought",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Weighs nothing. Costs a house."
+    },
+    {
+      "id": "val.watch.patrek-grand-comp",
+      "kind": "watch",
+      "name": "Patrek Phillon Grand Complication",
+      "brand": "Patrek Phillon",
+      "price": 650000,
+      "holds": "sought",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "A perpetual calendar, a minute repeater, and a two-year build."
+    },
+    {
+      "id": "val.ring.silver-band",
+      "kind": "ring",
+      "name": "Sterling silver band",
+      "brand": "",
+      "price": 120,
+      "holds": "fashion",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.gold-band-14k",
+      "kind": "ring",
+      "name": "14k gold band",
+      "brand": "",
+      "price": 650,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.platinum-band",
+      "kind": "ring",
+      "name": "Platinum wedding band",
+      "brand": "",
+      "price": 1800,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.signet-gold",
+      "kind": "ring",
+      "name": "18k gold signet ring",
+      "brand": "",
+      "price": 2400,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": "Engraved with your initials, if you want them."
+    },
+    {
+      "id": "val.ring.solitaire-05-good",
+      "kind": "ring",
+      "name": "Diamond solitaire, \u00bd carat, good",
+      "brand": "",
+      "price": 1600,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.solitaire-1-good",
+      "kind": "ring",
+      "name": "Diamond solitaire, 1 carat, good",
+      "brand": "",
+      "price": 4200,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.solitaire-1-exc",
+      "kind": "ring",
+      "name": "Diamond solitaire, 1 carat, excellent",
+      "brand": "",
+      "price": 7800,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.solitaire-2-exc",
+      "kind": "ring",
+      "name": "Diamond solitaire, 2 carats, excellent",
+      "brand": "",
+      "price": 28000,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.solitaire-3-exc",
+      "kind": "ring",
+      "name": "Diamond solitaire, 3 carats, excellent",
+      "brand": "",
+      "price": 62000,
+      "holds": "precious",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.solitaire-5-exc",
+      "kind": "ring",
+      "name": "Diamond solitaire, 5 carats, excellent",
+      "brand": "",
+      "price": 180000,
+      "holds": "precious",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Heavy enough to notice when you shake hands."
+    },
+    {
+      "id": "val.ring.tiffard-setting",
+      "kind": "ring",
+      "name": "Tiffard & Co. Setting, 1 carat",
+      "brand": "Tiffard & Co.",
+      "price": 18500,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "The little blue box does a lot of the work."
+    },
+    {
+      "id": "val.ring.cartrier-juste",
+      "kind": "ring",
+      "name": "Cartrier Juste un Clou ring",
+      "brand": "Cartrier",
+      "price": 2900,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "A gold nail, bent into a ring."
+    },
+    {
+      "id": "val.ring.sapphire",
+      "kind": "ring",
+      "name": "Sapphire and diamond ring",
+      "brand": "",
+      "price": 6500,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.ring.emerald",
+      "kind": "ring",
+      "name": "Emerald cocktail ring",
+      "brand": "",
+      "price": 14000,
+      "holds": "precious",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.necklace.silver-pendant",
+      "kind": "necklace",
+      "name": "Silver pendant necklace",
+      "brand": "",
+      "price": 140,
+      "holds": "fashion",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.necklace.pearl-strand",
+      "kind": "necklace",
+      "name": "Cultured pearl strand",
+      "brand": "",
+      "price": 1900,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.necklace.gold-pendant",
+      "kind": "necklace",
+      "name": "14k gold cross pendant",
+      "brand": "",
+      "price": 480,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.necklace.diamond-pendant-05",
+      "kind": "necklace",
+      "name": "Diamond pendant, \u00bd carat",
+      "brand": "",
+      "price": 1700,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.necklace.diamond-pendant-1",
+      "kind": "necklace",
+      "name": "Diamond pendant, 1 carat",
+      "brand": "",
+      "price": 5200,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.necklace.tennis",
+      "kind": "necklace",
+      "name": "Diamond tennis necklace, 10 carats",
+      "brand": "",
+      "price": 38000,
+      "holds": "precious",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Ten carats, in a line, all the way around."
+    },
+    {
+      "id": "val.necklace.vancleaf-alhambra",
+      "kind": "necklace",
+      "name": "Van Cleaf Alhambra necklace",
+      "brand": "Van Cleaf",
+      "price": 5800,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Four-leaf clovers in gold and onyx."
+    },
+    {
+      "id": "val.necklace.iced-pendant",
+      "kind": "necklace",
+      "name": "Iced-out custom pendant",
+      "brand": "",
+      "price": 24000,
+      "holds": "precious",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Your name, in diamonds, the size of your palm."
+    },
+    {
+      "id": "val.chain.silver-curb",
+      "kind": "chain",
+      "name": "Sterling silver curb chain",
+      "brand": "",
+      "price": 150,
+      "holds": "fashion",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.chain.gold-rope-14k",
+      "kind": "chain",
+      "name": "14k gold rope chain, 22 inch",
+      "brand": "",
+      "price": 1400,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.chain.gold-cuban-14k",
+      "kind": "chain",
+      "name": "14k gold Cuban link, 8mm",
+      "brand": "",
+      "price": 4600,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.chain.gold-cuban-18k",
+      "kind": "chain",
+      "name": "18k gold Cuban link, 12mm",
+      "brand": "",
+      "price": 14500,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Heavy. You feel it when you turn your head."
+    },
+    {
+      "id": "val.chain.diamond-cuban",
+      "kind": "chain",
+      "name": "Diamond Cuban link chain",
+      "brand": "",
+      "price": 42000,
+      "holds": "precious",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.chain.platinum-box",
+      "kind": "chain",
+      "name": "Platinum box chain",
+      "brand": "",
+      "price": 3200,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.chain.gold-franco",
+      "kind": "chain",
+      "name": "10k gold Franco chain",
+      "brand": "",
+      "price": 1100,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.bracelet.silver-cuff",
+      "kind": "bracelet",
+      "name": "Sterling silver cuff",
+      "brand": "",
+      "price": 180,
+      "holds": "fashion",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.bracelet.charm",
+      "kind": "bracelet",
+      "name": "Silver charm bracelet",
+      "brand": "",
+      "price": 95,
+      "holds": "fashion",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.bracelet.gold-link",
+      "kind": "bracelet",
+      "name": "14k gold link bracelet",
+      "brand": "",
+      "price": 1600,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.bracelet.tennis-3",
+      "kind": "bracelet",
+      "name": "Diamond tennis bracelet, 3 carats",
+      "brand": "",
+      "price": 6400,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.bracelet.tennis-10",
+      "kind": "bracelet",
+      "name": "Diamond tennis bracelet, 10 carats",
+      "brand": "",
+      "price": 26000,
+      "holds": "precious",
+      "stores": [
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.bracelet.cartrier-amour",
+      "kind": "bracelet",
+      "name": "Cartrier Amour bracelet",
+      "brand": "Cartrier",
+      "price": 7350,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": "Screws shut. Comes with its own little screwdriver."
+    },
+    {
+      "id": "val.bracelet.beaded",
+      "kind": "bracelet",
+      "name": "Beaded bracelet",
+      "brand": "",
+      "price": 40,
+      "holds": "fashion",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.earrings.silver-hoops",
+      "kind": "earrings",
+      "name": "Silver hoops",
+      "brand": "",
+      "price": 85,
+      "holds": "fashion",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.earrings.gold-hoops",
+      "kind": "earrings",
+      "name": "14k gold hoops",
+      "brand": "",
+      "price": 420,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.earrings.studs-05",
+      "kind": "earrings",
+      "name": "Diamond studs, \u00bd carat total",
+      "brand": "",
+      "price": 1100,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.earrings.studs-1",
+      "kind": "earrings",
+      "name": "Diamond studs, 1 carat total",
+      "brand": "",
+      "price": 3300,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.earrings.studs-2-exc",
+      "kind": "earrings",
+      "name": "Diamond studs, 2 carats, excellent",
+      "brand": "",
+      "price": 12000,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler",
+        "store.maison"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.earrings.pearl",
+      "kind": "earrings",
+      "name": "Pearl drop earrings",
+      "brand": "",
+      "price": 600,
+      "holds": "precious",
+      "stores": [
+        "store.jeweler"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.print-signed",
+      "kind": "art",
+      "name": "Signed print, edition of 200",
+      "brand": "",
+      "price": 450,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.emerging-harbor",
+      "kind": "art",
+      "name": "Maren Holt \u2014 Harbor at Dusk (oil)",
+      "brand": "",
+      "price": 3800,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.emerging-field",
+      "kind": "art",
+      "name": "Tobias Wren \u2014 Field Notes No. 4",
+      "brand": "",
+      "price": 2600,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.emerging-portrait",
+      "kind": "art",
+      "name": "Ines Varga \u2014 Portrait of a Neighbor",
+      "brand": "",
+      "price": 6500,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.emerging-ceramic",
+      "kind": "art",
+      "name": "Kofi Asante \u2014 Vessel, glazed stoneware",
+      "brand": "",
+      "price": 1800,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.emerging-photo",
+      "kind": "art",
+      "name": "Lena Park \u2014 Night Bus (photograph)",
+      "brand": "",
+      "price": 2200,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.emerging-abstract",
+      "kind": "art",
+      "name": "Dario Fenn \u2014 Untitled (blue)",
+      "brand": "",
+      "price": 9500,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.emerging-sculpture",
+      "kind": "art",
+      "name": "Hana Okafor \u2014 Standing Figure (bronze)",
+      "brand": "",
+      "price": 14000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.mid-landscape",
+      "kind": "art",
+      "name": "Walter Brede \u2014 Valley in October",
+      "brand": "",
+      "price": 28000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.mid-city",
+      "kind": "art",
+      "name": "Rosa Achterberg \u2014 City Grid II",
+      "brand": "",
+      "price": 45000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.mid-still-life",
+      "kind": "art",
+      "name": "Paul Severin \u2014 Still Life with Lemons",
+      "brand": "",
+      "price": 36000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.mid-collage",
+      "kind": "art",
+      "name": "Ayo Bankole \u2014 Market Day (collage)",
+      "brand": "",
+      "price": 52000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.mid-neon",
+      "kind": "art",
+      "name": "Jun Takeda \u2014 I Was Here (neon)",
+      "brand": "",
+      "price": 64000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": "It glows pink and hums slightly."
+    },
+    {
+      "id": "val.art.mid-tapestry",
+      "kind": "art",
+      "name": "Olga Meret \u2014 Tapestry for a Long Winter",
+      "brand": "",
+      "price": 75000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.mid-drawing",
+      "kind": "art",
+      "name": "Henrik Lund \u2014 Studies of Hands (ink)",
+      "brand": "",
+      "price": 18000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.est-canvas",
+      "kind": "art",
+      "name": "Clara Moss \u2014 Red Interior",
+      "brand": "",
+      "price": 180000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.est-sculpture",
+      "kind": "art",
+      "name": "Bruno Kessel \u2014 Iron Horse",
+      "brand": "",
+      "price": 260000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.est-abstract",
+      "kind": "art",
+      "name": "Nadia Orel \u2014 Composition in Ochre",
+      "brand": "",
+      "price": 340000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.est-photo",
+      "kind": "art",
+      "name": "Samuel Ide \u2014 The Long Table (photograph)",
+      "brand": "",
+      "price": 120000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.est-pop",
+      "kind": "art",
+      "name": "Vic Dorrance \u2014 Soup Can Sunrise",
+      "brand": "",
+      "price": 420000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "common",
+      "blurb": "Bright, flat and instantly familiar. That's the point."
+    },
+    {
+      "id": "val.art.blue-chip-1",
+      "kind": "art",
+      "name": "\u00c9mile Rousseaux \u2014 Bathers at Noon",
+      "brand": "",
+      "price": 2400000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "rare",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.blue-chip-2",
+      "kind": "art",
+      "name": "Helene Voss \u2014 Black Square, Small",
+      "brand": "",
+      "price": 4800000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "rare",
+      "blurb": ""
+    },
+    {
+      "id": "val.art.blue-chip-3",
+      "kind": "art",
+      "name": "Marco Bellandi \u2014 The Orchard Wall",
+      "brand": "",
+      "price": 9500000,
+      "holds": "art",
+      "stores": [
+        "store.gallery"
+      ],
+      "rarity": "very rare",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.mantel-clock",
+      "kind": "antique",
+      "name": "French mantel clock, 1880s",
+      "brand": "",
+      "price": 2800,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.secretary-desk",
+      "kind": "antique",
+      "name": "Mahogany secretary desk, 1810",
+      "brand": "",
+      "price": 18000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.grandfather-clock",
+      "kind": "antique",
+      "name": "Grandfather clock, 1790s",
+      "brand": "",
+      "price": 12500,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.tea-service",
+      "kind": "antique",
+      "name": "Silver tea service, 1900",
+      "brand": "",
+      "price": 6400,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.oriental-rug",
+      "kind": "antique",
+      "name": "Hand-knotted Persian rug, 1920s",
+      "brand": "",
+      "price": 9000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.qing-vase",
+      "kind": "antique",
+      "name": "Qing dynasty porcelain vase",
+      "brand": "",
+      "price": 48000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "uncommon",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.chandelier",
+      "kind": "antique",
+      "name": "Crystal chandelier, 1890s",
+      "brand": "",
+      "price": 22000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.rocking-horse",
+      "kind": "antique",
+      "name": "Victorian rocking horse",
+      "brand": "",
+      "price": 3600,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.sea-chest",
+      "kind": "antique",
+      "name": "Ship captain's sea chest",
+      "brand": "",
+      "price": 4200,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.globe",
+      "kind": "antique",
+      "name": "Library globe, 1860s",
+      "brand": "",
+      "price": 15500,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.quilt",
+      "kind": "antique",
+      "name": "Hand-stitched quilt, 1880s",
+      "brand": "",
+      "price": 1400,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.typewriter",
+      "kind": "antique",
+      "name": "Cast-iron typewriter, 1910s",
+      "brand": "",
+      "price": 900,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.armoire",
+      "kind": "antique",
+      "name": "Walnut armoire, 1850s",
+      "brand": "",
+      "price": 7800,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.antique.samurai-armor",
+      "kind": "antique",
+      "name": "Samurai armor, Edo period",
+      "brand": "",
+      "price": 85000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "rare",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.civil-war-sword",
+      "kind": "historical",
+      "name": "Civil War officer's sword",
+      "brand": "",
+      "price": 6800,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.first-edition",
+      "kind": "historical",
+      "name": "First edition novel, 1925, signed",
+      "brand": "",
+      "price": 38000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "uncommon",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.revolutionary-letter",
+      "kind": "historical",
+      "name": "Letter signed by a Revolutionary War general",
+      "brand": "",
+      "price": 26000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "uncommon",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.mission-patch",
+      "kind": "historical",
+      "name": "Mission patch flown to the Moon",
+      "brand": "",
+      "price": 14000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "uncommon",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.gold-rush-nugget",
+      "kind": "historical",
+      "name": "Gold Rush nugget, 1849",
+      "brand": "",
+      "price": 11000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.titanic-menu",
+      "kind": "historical",
+      "name": "Dinner menu from an ocean liner, 1912",
+      "brand": "",
+      "price": 18500,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "uncommon",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.pony-express",
+      "kind": "historical",
+      "name": "Pony Express letter, 1860",
+      "brand": "",
+      "price": 9500,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.roman-coin",
+      "kind": "historical",
+      "name": "Roman silver denarius",
+      "brand": "",
+      "price": 650,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.greek-coin",
+      "kind": "historical",
+      "name": "Athenian owl tetradrachm",
+      "brand": "",
+      "price": 3900,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.baseball-1927",
+      "kind": "historical",
+      "name": "Signed baseball, 1927 season",
+      "brand": "",
+      "price": 42000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "uncommon",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.movie-prop",
+      "kind": "historical",
+      "name": "Screen-used movie prop, 1980s",
+      "brand": "",
+      "price": 16000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.telephone",
+      "kind": "historical",
+      "name": "Early telephone, 1890s",
+      "brand": "",
+      "price": 5200,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.map-1700s",
+      "kind": "historical",
+      "name": "Hand-drawn map of the colonies, 1700s",
+      "brand": "",
+      "price": 34000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "uncommon",
+      "blurb": ""
+    },
+    {
+      "id": "val.historical.dinosaur-tooth",
+      "kind": "historical",
+      "name": "Tyrannosaur tooth",
+      "brand": "",
+      "price": 22000,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "uncommon",
+      "blurb": "Sixty-six million years old, and still sharp."
+    },
+    {
+      "id": "val.historical.meteorite",
+      "kind": "historical",
+      "name": "Iron meteorite, 4 lb",
+      "brand": "",
+      "price": 3300,
+      "holds": "antique",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.rubber-chicken",
+      "kind": "curio",
+      "name": "Rubber chicken, signed by a famous comedian",
+      "brand": "",
+      "price": 350,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": "The signature is on the beak."
+    },
+    {
+      "id": "val.curio.parking-ticket",
+      "kind": "curio",
+      "name": "Framed parking ticket, 1958",
+      "brand": "",
+      "price": 120,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.jackalope",
+      "kind": "curio",
+      "name": "Mounted jackalope",
+      "brand": "",
+      "price": 480,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": "The seller swore it was real. The seller winked."
+    },
+    {
+      "id": "val.curio.lava-lamps",
+      "kind": "curio",
+      "name": "Collection of 40 lava lamps",
+      "brand": "",
+      "price": 1600,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.twine-ball",
+      "kind": "curio",
+      "name": "Ball of twine, 300 lb",
+      "brand": "",
+      "price": 900,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.gnome",
+      "kind": "curio",
+      "name": "Garden gnome that toured the world",
+      "brand": "",
+      "price": 650,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": "Comes with an album of it at forty landmarks."
+    },
+    {
+      "id": "val.curio.toaster",
+      "kind": "curio",
+      "name": "Toast with a face in it, preserved",
+      "brand": "",
+      "price": 2800,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.bigfoot-cast",
+      "kind": "curio",
+      "name": "Plaster cast of a Bigfoot footprint",
+      "brand": "",
+      "price": 1200,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.arcade",
+      "kind": "curio",
+      "name": "Arcade cabinet, 1981",
+      "brand": "",
+      "price": 3500,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.jukebox",
+      "kind": "curio",
+      "name": "Chrome jukebox, 1956",
+      "brand": "",
+      "price": 9500,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.ufo-photo",
+      "kind": "curio",
+      "name": "Signed UFO photograph, 1966",
+      "brand": "",
+      "price": 750,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.trophy",
+      "kind": "curio",
+      "name": "World's Okayest Boss trophy, solid bronze",
+      "brand": "",
+      "price": 1100,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.pinball",
+      "kind": "curio",
+      "name": "Pinball machine, 1978",
+      "brand": "",
+      "price": 6200,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.curio.mannequin",
+      "kind": "curio",
+      "name": "Department store mannequin named Gerald",
+      "brand": "",
+      "price": 400,
+      "holds": "curio",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "common",
+      "blurb": ""
+    },
+    {
+      "id": "val.mythical.trident",
+      "kind": "mythical",
+      "name": "Poseidon's Trident",
+      "brand": "",
+      "price": 1200000,
+      "holds": "mythical",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "mythical",
+      "blurb": "Always slightly damp. Nobody can explain it."
+    },
+    {
+      "id": "val.mythical.pandoras-box",
+      "kind": "mythical",
+      "name": "Pandora's Box",
+      "brand": "",
+      "price": 250000,
+      "holds": "mythical",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "mythical",
+      "blurb": "Still closed. Keep it that way."
+    },
+    {
+      "id": "val.mythical.diamond-pickaxe",
+      "kind": "mythical",
+      "name": "Diamond Pickaxe",
+      "brand": "",
+      "price": 40000,
+      "holds": "mythical",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "mythical",
+      "blurb": "Mines through anything, apparently."
+    },
+    {
+      "id": "val.mythical.golden-fleece",
+      "kind": "mythical",
+      "name": "The Golden Fleece",
+      "brand": "",
+      "price": 800000,
+      "holds": "mythical",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "mythical",
+      "blurb": ""
+    },
+    {
+      "id": "val.mythical.philosophers-stone",
+      "kind": "mythical",
+      "name": "The Philosopher's Stone",
+      "brand": "",
+      "price": 2000000,
+      "holds": "mythical",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "mythical",
+      "blurb": "It turns nothing into gold. You've tried."
+    },
+    {
+      "id": "val.mythical.excalibur",
+      "kind": "mythical",
+      "name": "A sword pulled from a stone",
+      "brand": "",
+      "price": 1500000,
+      "holds": "mythical",
+      "stores": [
+        "store.antiques"
+      ],
+      "rarity": "mythical",
+      "blurb": "The stone came too. It's in the garage."
+    }
+  ]
+}

@@ -20,23 +20,81 @@ import { tryOut } from './tryout';
 import { applyFor, chanceOf, openings, workHarder } from './careers';
 import { decide } from './decide';
 import type { GameState } from './game-state';
+import { isInSchool } from '@yearafter/education';
+import { HURT_LINES } from './phases/health';
 import { createNewGame } from './new-game';
 import { activityOffers } from '@yearafter/education';
 
-/** What this character could sign up for right now. */
-const anyOffer = (state: GameState) =>
-  activityOffers(state.education, {
+/**
+ * What this character could sign up for right now.
+ *
+ * Ticket 0405 found the bug this guards against: this used to hardcode
+ * `stage: 'middle'` regardless of the character's real one, which was
+ * harmless only because nobody in this harness ever reached college with an
+ * empty activity list before. `isInSchool` correctly counts college as
+ * school (0210b's own fix), so a character mid-degree passed that gate and
+ * then got handed MIDDLE SCHOOL sports back, because the context lied about
+ * which stage they were actually in. 0405 routes most of this harness's
+ * population through college, which is what finally exercised it — a
+ * twenty-year-old "joining" `act.basketball` and carrying the athlete
+ * classification for the rest of their life, which is what inverted this
+ * test's ratio until this was found.
+ *
+ * `SchoolStageId` only has room for elementary/middle/high — there is no
+ * college activity system to route a real stage to — so anybody outside
+ * those three actual stages is offered nothing, which is the correct answer
+ * rather than a special case of one.
+ */
+const anyOffer = (state: GameState) => {
+  const stage = state.education.stage;
+  if (stage !== 'elementary' && stage !== 'middle' && stage !== 'high') return [];
+  return activityOffers(state.education, {
     age: state.player.age,
-    stage: 'middle',
+    stage,
     stats: state.player.stats,
     talents: state.player.talents,
     wealth: state.family.finances.band,
     household: state.family,
   });
+};
 
 const LIVES = 150;
 /** Long enough that nobody should still be standing. */
 const UNTIL = 115;
+
+/**
+ * What a feed line reads like when this year hurt somebody.
+ *
+ * Ticket 0405 found the bug in this heuristic rather than in the ticket
+ * itself: "fall" alone also matches `college.ts`'s "Got in. Four years of
+ * {major}, starting in the fall." — a line that used to be rare enough,
+ * before a passive player had any systemic way into college, that a false
+ * match here never moved the ratio. 0405 makes that line common, which is
+ * the ticket working, and it turned a dormant imprecision in THIS regex into
+ * a real one: the "ordinary" bucket (everybody not an athlete or in a
+ * hazard-track job — which includes every college acceptance) picked up
+ * hundreds of false "hurt" years from the word "fall" meaning autumn.
+ *
+ * The negative lookbehind is the whole fix: an injury reads "a bad fall",
+ * never "in the fall". `packages/simulation/src/phases/health.ts`'s
+ * `HURT_LINES` is the source of truth this pattern is checked against.
+ */
+/**
+ * An injury is one of the health phase's OWN lines (Ticket 0409).
+ *
+ * This was a regex — `hurt|fall|accident|came off` — standing in for "the
+ * health phase reported an injury", and it drifted from that meaning twice.
+ * 0405 found it matching "starting in the fall" in a college acceptance letter,
+ * rare enough then not to move a ratio. 0409 wrote the first adult injury
+ * content in the catalog ("Hurt your back lifting something stupid") and every
+ * one of those lines landed in the bucket labelled "a classmate who joined
+ * nothing", inverting the comparison.
+ *
+ * Matching the phase's actual lines removes the proxy. The list is imported
+ * rather than copied, so copy edits move both sides together.
+ */
+const wasHurt = (text: string): boolean =>
+  HURT_LINES.some((line) => text.includes(line.replace(/\.$/, '')));
 
 const answerAll = (state: GameState): GameState => {
   let current = state;
@@ -94,14 +152,29 @@ function live(seed: string): Life {
 
     const hurt = state.player.timeline
       .slice(before)
-      .some((entry) => /hurt|fall|went over|gave way|accident|came off/i.test(entry.text));
-    if (wasAthlete) {
+      .some((entry) => wasHurt(entry.text));
+    /*
+      THE ATHLETE COMPARISON IS A SCHOOL COMPARISON (Ticket 0409).
+
+      This test is called "hurts a school athlete more often than a classmate
+      who joined nothing" and was bucketing all eighty years of a life, which
+      was the same measurement while the adult catalog had no injuries in it —
+      0409 measured 26 events able to fire at forty and not one about a body.
+      Now an adult can hurt their back lifting something, and every one of those
+      lines was landing in the "classmate who joined nothing" bucket and
+      inverting the ratio.
+
+      `wasHazard` deliberately still counts at any age: that bucket is about
+      dangerous WORK, which is an adult thing by definition. CORE_RULES 13.63.
+    */
+    const atSchool = isInSchool(state.education);
+    if (wasAthlete && atSchool) {
       athleteYears += 1;
       if (hurt) injuredAthlete += 1;
     } else if (wasHazard) {
       hazardYears += 1;
       if (hurt) injuredHazard += 1;
-    } else {
+    } else if (atSchool) {
       ordinaryYears += 1;
       if (hurt) injuredOrdinary += 1;
     }

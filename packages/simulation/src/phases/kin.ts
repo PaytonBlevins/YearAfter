@@ -196,7 +196,11 @@ export function runKin(input: KinPhaseInput): KinPhaseOutput {
           death.relation === 'your child',
       )
       .map((death) => ({
-        category: 'family' as const,
+        // Ticket 0409. Was 'family'; see `LifeRecordCategory`. A save written
+        // before 0409 keeps its old records, so bereavement events simply do
+        // not fire for a death that happened in a previous build — which is
+        // the right failure: it is silent and it corrects itself.
+        category: 'loss' as const,
         label:
           death.relation === 'your partner'
             ? `Lost ${death.name}`

@@ -10,6 +10,7 @@
 import { describe, expect, it } from 'vitest';
 import { dollars } from '@yearafter/core';
 import {
+  BUSINESS_LOAN_PRODUCTS,
   CAN_BORROW_FROM_AGE,
   DEBT_CEILING,
   LOAN_BALANCE_CEILING,
@@ -279,14 +280,17 @@ describe('a year of owing', () => {
 });
 
 describe('what is not built yet', () => {
-  it('names the three loan types that cannot exist, and what each waits on', () => {
+  it('names the loan types that cannot exist yet, and what each waits on', () => {
     /*
       Spec 1857 lists five types. Secured needs something to secure it against,
       business needs a business, and wealth/private needs a portfolio — v0.05,
       v0.06 and 0308. Same device as `UNWRITTEN_CATEGORIES` and `NOT_YET_OWNED`;
       this test is the note to the tickets that retire them.
     */
-    expect(LOAN_TYPES_NOT_YET_BUILT.map((row) => row.type)).toEqual(['secured', 'business']);
+    // Ticket 0501 retired `secured`: a mortgage is secured on its home, and
+    // lives in `property.ts` with its own products (`MORTGAGE_PRODUCTS`).
+    // Ticket 0603 retired `business`, the last: every type in spec 1857 now exists.
+    expect(LOAN_TYPES_NOT_YET_BUILT.map((row) => row.type)).toEqual([]);
     for (const row of LOAN_TYPES_NOT_YET_BUILT) {
       expect(row.arrives, `${row.type} does not say when it arrives`).toMatch(
         /^(\d{4}|v\d\.\d\d)$/,
@@ -302,9 +306,11 @@ describe('what is not built yet', () => {
     }
   });
 
-  it('ships products only for the two types that can', () => {
+  it('ships products only for the types that can', () => {
     const built = new Set(LOAN_PRODUCTS.map((product) => product.type));
     expect([...built].sort()).toEqual(['lineOfCredit', 'personal', 'wealthPrivate']);
+    // And the business ones live apart, because they are not applied for here.
+    expect([...new Set(BUSINESS_LOAN_PRODUCTS.map((product) => product.type))]).toEqual(['business']);
     // Nothing is shipped for a type still on the not-built list, which is the
     // other half of the same promise.
     const waiting: readonly string[] = LOAN_TYPES_NOT_YET_BUILT.map((row) => row.type);

@@ -10,13 +10,26 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { findJob } from '@yearafter/careers';
 import type { FamilyMember } from '@yearafter/relationships';
-import { eulogyFor, heirsIn } from '@yearafter/simulation';
+import { eulogyFor, heirsIn, keepsBusinesses } from '@yearafter/simulation';
 import { CharacterHeader } from '../components/CharacterHeader';
 import { DecisionCard } from '../components/DecisionCard';
 import { FinancesScreen } from '../screens/FinancesScreen';
 import { CreditScreen } from '../screens/CreditScreen';
 import { CardsScreen } from '../screens/CardsScreen';
 import { LoansScreen } from '../screens/LoansScreen';
+import { HomesScreen } from '../screens/HomesScreen';
+import { BusinessesScreen, BusinessScreen } from '../screens/BusinessesScreen';
+import { RentalScreen } from '../screens/RentalScreen';
+import { RenovateScreen } from '../screens/RenovateScreen';
+import { AuctionScreen } from '../screens/AuctionScreen';
+import { CollectionsScreen, ShoppingScreen, StoreScreen } from '../screens/ShoppingScreen';
+import {
+  CarListingScreen,
+  CarMarketScreen,
+  CarModsScreen,
+  VehicleScreen,
+  VehiclesScreen,
+} from '../screens/VehiclesScreen';
 import { InvestmentsScreen } from '../screens/InvestmentsScreen';
 import { MarketScreen } from '../screens/MarketScreen';
 import { InstrumentScreen } from '../screens/InstrumentScreen';
@@ -69,6 +82,20 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   credit: CreditScreen,
   cards: CardsScreen,
   loans: LoansScreen,
+  homes: HomesScreen,
+  businesses: BusinessesScreen,
+  business: BusinessScreen,
+  rental: RentalScreen,
+  vehicles: VehiclesScreen,
+  carMarket: CarMarketScreen,
+  carListing: CarListingScreen,
+  vehicle: VehicleScreen,
+  carMods: CarModsScreen,
+  shopping: ShoppingScreen,
+  store: StoreScreen,
+  collections: CollectionsScreen,
+  renovate: RenovateScreen,
+  auction: AuctionScreen,
   investments: InvestmentsScreen,
   market: MarketScreen,
   instrument: InstrumentScreen,
@@ -276,8 +303,10 @@ export function Shell() {
             id: heir.id,
             name: heir.firstName,
             detail: heirLine(heir, state.world.year),
+            canKeepBusinesses: keepsBusinesses(state.world.year - heir.birthYear, undefined),
           }))}
-          onContinueAs={(childId) => void continueAs(childId)}
+          businesses={state.businesses.length}
+          onContinueAs={(childId, keepBusinesses) => void continueAs(childId, keepBusinesses)}
           onStartAgain={() => void startNewLife()}
         />
       ) : null}

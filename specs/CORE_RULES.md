@@ -1659,3 +1659,1066 @@ number the consuming system deliberately ignores.
   is a real one" since 0210. Both were display strings with nothing behind them
   for two milestones — 13.36 in copy form, and nothing failed, because a promise
   the game never keeps still renders.
+
+### 13.58 A lever measured on a population it cannot apply to has not been measured
+
+*Ticket 0401.* v0.04's spec asks for 150–250 job titles. Measured first: one
+life saw **13 of the 49 jobs that already existed**, and **20 of the 49 were
+never shown to a single character across 100 played lives**. So the milestone
+was not content volume, and three candidate levers were measured over one fixed
+corpus of 3,471 working life-years to decide which one opened the funnel.
+
+Two of the three came back **identical to the control, to the digit**:
+
+| lever | distinct shown | eligible/yr | per life (median) |
+|---|---|---|---|
+| CONTROL | 30 | 13.4 | 15 |
+| A reserved step-up slots | 30 | 13.4 | 15 |
+| **B a degree opens a ladder** | **30** | **13.4** | **15** |
+| D transferable experience | 31 | 21.0 | 24 |
+
+Lever A was weak for a reason worth knowing: there is usually no step-up in the
+eligible set to reserve a slot for, so reserving one does nothing. Lever B was
+not weak at all. It was **untestable on that corpus** — a separate count found
+**94.7% of the working life-years at `highSchool`, 5.3% at `none`, and life-years
+where a major opened any track: 0**. The harness answers the first choice of
+every decision, which never enrolls, so no character in it ever held a degree.
+A lever that grants something to graduates, measured on a population with no
+graduates, returns the control by construction.
+
+- **An identical result is a different signal from a small one.** A lever that
+  moves a number by 2% is weak. A lever that reproduces the control *to the
+  digit* is not being exercised, and the next step is to check its precondition
+  rather than to tune it.
+- **Check the population before believing the sweep.** One count — how many rows
+  the lever could possibly apply to — would have caught it before the table was
+  read. It costs one line and it is the same discipline as 13.51's derived
+  guard: prove the thing you are measuring is present.
+- **The dead lever still said something true.** "No passive life ever earns a
+  degree" is a real finding about the build, and it explains exactly which jobs
+  stayed invisible after the ticket shipped: the nine credential-gated ones.
+
+### 13.59 When the gate moves, the ruler moves with it
+
+*Ticket 0401, the same afternoon.* The listing-composition counter classified
+each of the six openings as a step-up or a cold start by comparing `job.rung`
+against the **raw held rung**. 0401 moved the gate onto an *effective* rung.
+Rerunning it, step-ups read **1.30 → 0.61** and cold starts **4.69 → 2.61** — a
+mechanic that had apparently made the problem worse. The three buckets no longer
+summed to six, which is the only reason it was caught: a rung-1 job on an
+untouched track was now neither.
+
+- **A metric that shares a definition with the code under test is not
+  independent of it.** It has to be re-derived when that definition changes, and
+  there is no warning when it is not.
+- **Give every partition a total that must hold.** "The buckets sum to the
+  number of listings" is one line and it is what turned a plausible wrong number
+  into an obvious broken one. Without it, the honest reading of that table was
+  "revert the ticket."
+
+### 13.60 The price you wrote down is not the price that is charged
+
+*Ticket 0402.* An arriving job offer had to cost something or it was a promotion
+with a button on it. The cost was designed and documented: taking a job resets
+performance to a stranger's 38–52, the same reset `applyFor` charges, which
+should mean a rough couple of years and a real risk of being let go. The
+docblock said so. The player-facing prompt said so.
+
+Paired seeds — the same life lived twice, answering every offer the opposite
+way — said otherwise:
+
+| across 176 offers taken | taking | declining |
+|---|---|---|
+| let go | 53 | 46 |
+| **promoted** | **173** | **306** |
+
+**Seven extra firings across 176 job changes.** The designed cost was worth
+almost nothing, because `firingChance` does not notice two soft years — 13.57
+again, from inside the thing being built rather than from upstream of it.
+
+The cost that actually bites was in the same table and nobody designed it:
+taking an offer costs about three quarters of a promotion, because `since`
+resets and `promotionChance` scales with years served. The real trade is *a
+raise now against the ladder you were already on.*
+
+- **A cost is a measurement, not a declaration.** Writing the reset and calling
+  it the price is the same error as writing a lever and calling it tuned. The
+  only way to know what a choice costs is to make the choice twice.
+- **The prompt was teaching the player a rule the game does not run on**, which
+  is worse than a prompt that explains nothing: a player who learns "changing
+  jobs is risky at first" from this build learns something false, and will
+  misplay every future offer on it. The sentence now names the promotion queue.
+- **Look for the price you did NOT design.** Both numbers came out of one paired
+  run, and the second was only visible because the harness counted promotions
+  alongside firings out of habit rather than intent. A paired experiment should
+  report everything that differed, not only what the hypothesis was about.
+
+### 13.61 A rung competes with itself before it competes with anything else
+
+*Ticket 0403.* The job catalog tripled — 49 jobs to 147, eleven tracks to
+sixteen — mostly by widening rungs rather than lengthening ladders, on the
+theory that a wider rung is a different door into the same career and a longer
+ladder is a rarer promotion. Trades' rung 2 got widened furthest: electrician,
+plumber, HVAC technician, carpenter, four parallel titles competing for the
+same six-listing draw. The reachability guard (0401's, written before this
+ticket for exactly this) caught the ladder's OWN rung 4 — `General
+contractor`, unduplicated, unchanged since 0210 — going unseen by every played
+life in the sample.
+
+The instinct was to look outward: more tracks, more competing cold starts,
+more crowding from elsewhere in the catalog. Both were tried — a higher
+`LISTINGS`, a heavier step-up weight in `openingsFor` — and neither moved the
+count without unpredictably starving something else instead, because both
+change the ranking of every job simultaneously and the sample is small enough
+that the specific starved job just relocates. What actually cleared it was
+looking inward: trimming rung 2 back to two parallel titles, so a character
+climbing THIS ladder was no longer splitting its own step-up odds four ways
+before ever reaching the rung that leads to the top.
+
+- **A rung's own width is a cost paid by the rungs above it**, not just by the
+  rungs beside it. Four siblings at rung 2 do not only compete with each other
+  for this year's six listings — they thin the population that ever holds a
+  rung-2 job long enough to become eligible for rung 3, and thin it again for
+  rung 4.
+- **When a shared, weighted, capacity-limited draw starves something, check
+  the item's own neighborhood before tuning the global knobs.** The global
+  knobs move everyone at once; a local fix moves only the thing that was
+  actually crowded.
+- **"Two or three parallel titles per rung," stated as a design rule while
+  writing the catalog, was right, and the one rung that violated it was the
+  one that broke.** A rule of thumb earns its place by being checked against,
+  not just stated.
+
+### 13.62 A coverage guarantee is a population question, not a weighting one
+
+*Ticket 0403, the same afternoon.* Even after 13.61's fix, one rare job — a
+different one each time the catalog or the draw's weights changed — still
+went unseen across the reachability guard's 60 played lives. Every candidate
+was real: eligible to at least one life, honestly reachable, no duplicate
+competing with it. It was simply the kind of event that needs more trials than
+60 lives supply once the thing being sampled is a specific rung on a specific
+one of sixteen tracks rather than one of eleven.
+
+Raising the sample to 250 lives cleared it outright, with margin. Raising
+`LISTINGS` or the step-up weight first — the two levers 13.61 also reached
+for — had moved the SAME symptom to a different job each time rather than
+reducing it, because both reshape the draw for every eligible character in the
+population, which is the wrong lever for a question about how large the
+population needs to be before a low-probability, per-life event is seen by
+anybody in it.
+
+- **Distinguish a starved job from an under-sampled one.** A starved job is
+  structurally disadvantaged — crowded off its own rung, or gated by
+  something upstream. An under-sampled one is just rare, and no amount of
+  reweighting the draw fixes a sample that is too small to expect to see it.
+- **When a fix relocates the symptom instead of shrinking it, the lever was
+  probably global and the problem was probably about population size.**
+  Tuning a shared weight and watching a DIFFERENT thing break is the tell.
+- **The guard's sample size is not a constant — it is sized to what it is
+  covering.** Sixteen tracks' worth of rare top-of-ladder events need more
+  trials than eleven tracks' worth did, in the same proportion the catalog
+  grew.
+
+### 13.63 A test's own shortcuts are measured against a population too
+
+*Ticket 0405.* Giving college a systemic offer — the same door 0402 built for
+a job — routed most of two other tests' populations through college for the
+first time, and both broke, neither one because the mechanic was wrong.
+
+`health.test.ts`'s injury ratio inverted: a hurt-line regex written for
+`packages/simulation/src/phases/health.ts`'s eight `HURT_LINES` also matched
+`college.ts`'s "starting in the **fall**" — a line that was rare enough,
+before any passive route into college existed, that the false match never
+moved a ratio measured over 8,000+ idle years. The same test also hardcoded
+`stage: 'middle'` in the context it asked `activityOffers` with, which
+`isInSchool` (correctly) never rejected for a character now enrolled in
+college — so twenty-year-olds started "joining" middle-school basketball
+teams and carrying the athlete classification for the rest of their charted
+life. Neither bug was in the game. Both were in a harness whose shortcuts had
+never been exercised by a population that reached college before.
+
+`careers.test.ts`'s "a third of lives top out" bound went to 52%, and this
+one WAS the ticket working: more people legitimately qualifying for a
+credential-gated rung-4 job, because more people now legitimately hold the
+credential.
+
+- **A regex, a hardcoded parameter, or a stubbed context is a measurement
+  choice, exactly like a sample size or a picker.** It is correct only for
+  the population that has exercised it so far, and a ticket that changes
+  population composition can make it wrong without touching the system the
+  test is actually about.
+- **Distinguish the two outcomes the same way 13.62 does for a starved job.**
+  A test that breaks because its OWN shortcut was never exercised by this
+  shape of life needs the shortcut fixed. A test that breaks because the
+  population genuinely changed — more graduates reaching a credentialed rung,
+  more income moving a financial gap (13.53's note on 0403) — needs its bound
+  moved, with the reason written down, not the population argued with.
+- **A dormant bug in a test is still a bug**, and the population that
+  finally reaches it did not create it. `health.test.ts` had been asserting a
+  ratio computed from a false-positive-contaminated pair of buckets since
+  long before this ticket; 0405 did not introduce the contamination, it only
+  supplied the first population large enough to make it visible.
+
+### 13.64 An ordered credential cannot express "this specific paper"
+
+`EducationLevel` is a ladder — `none`, `highSchool`, `university`,
+`postgraduate` — and `meetsLevel` compares indexes. Every gate built on it can
+therefore only ever say "this much schooling **or more**". That is the right
+shape for most of what a job wants and the wrong shape for the commonest real
+requirement in the professions, which is not an amount of education but a named
+license: a medical degree, a bar admission, a journeyman's ticket.
+
+0210b wrote `requires: 'postgraduate'` on Physician and left a docblock saying
+"you legally cannot do this job without it". It was not true. A master's in fine
+arts cleared that gate exactly as well as a medical degree, for three tickets,
+because an ordered comparison has no way to refuse. Nobody noticed because the
+catalogue had no second professional track to disagree with the first.
+
+0406 added `Job.license` beside `requires` rather than extending the ladder, and
+the two halves of that decision are both the rule:
+
+- **It is not ordered, so nothing substitutes for it.** That is what makes
+  medical school a wall rather than an expensive master's.
+- **It is not on the ladder, so holding one does not rank you.** A journeyman
+  electrician with a high-school diploma is not "less educated" than somebody
+  two years into fine arts; they hold a different thing. The obvious build —
+  slotting trade school in as an associate tier between `highSchool` and
+  `university` — was rejected for exactly this, because it would have ranked a
+  plumber's qualification below a dropped-out bachelor's.
+
+The general form: **before extending an ordered enum to cover a new case, check
+whether the new case has an order at all.** If it does not, it is a second
+dimension and it belongs beside the first, not inside it. The tell is having to
+argue about where the new value sorts — an argument that has no correct answer
+is an argument that the value is not on that axis.
+
+The corollary is that the new dimension needs its own reachability guard.
+`reachability.test.ts` asserts that no job is eligible to somebody and
+unreachable by the listings; `licenses.test.ts` asserts the same thing one
+dimension over — that no job is gated on a license no program hands out. A
+credential nothing grants is worse than a missing job, because the catalogue
+shows the row and the game believes the player could have had it.
+
+### 13.65 A test can pin a defect in place as firmly as a feature
+
+`offers.test.ts` carried an assertion called *"never arrives for somebody with
+no job, or somebody who has stopped"*. It was precise, it was well commented, it
+passed for four tickets, and the first half of it was a guarantee that an
+unemployed adult would never be offered work — which was the single line that
+left 250 of 250 passive lives unemployable and 248 of them dead with nothing.
+
+The assertion was not wrong about the code. It described 0402's poaching offer
+exactly, and 0402 was right to refuse firing for somebody with nothing to be
+poached from. What it could not say was that the door it was describing was the
+only one in the building.
+
+- **A test states that behaviour is intended. It cannot state that the behaviour
+  is sufficient.** Every assertion has an unwritten scope, and the failure mode
+  is a correct assertion about a mechanic that should never have been the whole
+  mechanism. The better the comment, the more convincing the omission looks.
+- **The tell is an absolute about a population.** "Never arrives for X" and
+  "always happens to Y" are claims a single life cannot check, so they get
+  written from the design rather than measured from the build — and if the
+  design has a hole, the test is now the hole's strongest defender. 13.7 says a
+  system nobody triggers is not a system; this is its mirror: a refusal nobody
+  questions is not a rule.
+- **When a ticket makes one of these go red, read it as a question rather than a
+  regression.** Is this asserting something the game should still promise? Half
+  of the one above was (an offer after retirement would be the game asking
+  somebody to un-retire) and half was the bug. Splitting it was the work.
+
+There is a corollary about how such an assertion stays green. The retirement
+half of that same test had **never actually run**: retiring is an action the
+player presses, and no harness in the suite presses it, so the state it
+described never occurred in twenty played lives. It was green because it was
+vacuous. A sabotage guard — fail loudly if the branch under test was never
+reached — is the only thing that distinguishes "this never happens" from "this
+was never looked at", and an absolute about a population needs one.
+
+### 13.66 A curve that damps inflation also damps variation
+
+`curvedDelta` (0203) is one of the better decisions in this build: a gain is
+full strength at 50 and tapers to nothing at 100, so a childhood of forty events
+stops arriving at eighteen with every bar above average. It was written to kill
+inflation and it kills inflation.
+
+It is also, unavoidably, a **regression-to-the-mean machine**, and 0408 found
+what that costs when something pushes a whole population through it in one
+direction. School added a flat `+1` Smarts a year to everybody for thirteen
+years. Through the curve, that push is worth 1.2x to a child on forty and 0.6x
+to one on seventy — so the weakest students gained the most, every year, and the
+population converged. Smarts at birth ran p10 44 / median 56; Smarts at eighteen
+ran p10 70 / median 76 with a **minimum of 56 across 500 lives**. Nobody was
+below average as an adult, school performance had a floor of 50, and the
+roadmap's "this build cannot produce a poor student" was the visible end of it.
+
+- **A damping curve and a flat push in the same direction are one mechanism, not
+  two.** Neither is wrong alone. Together they set a destination, and every
+  character walks toward it at a speed proportional to how far away they are —
+  which is the definition of convergence.
+- **The tell is a stat whose spread SHRINKS between birth and adulthood.**
+  Measure the distribution at both ends of the pipeline, not just at the
+  generator. 0408 started at the birth roll because that is where the roadmap
+  pointed, and the birth roll was the smaller half of the problem: widening it
+  alone would have been re-flattened by eighteen.
+- **Where the push represents an ABILITY, it has to scale with that ability.**
+  A year of school is worth more to a child who can use it; a year of training
+  is worth more to somebody with the aptitude for it. A flat push through an
+  equalising curve says the opposite, and says it to the whole population at
+  once.
+- **Exempt what is not a visible stat.** `studyHarder` already sidesteps this
+  curve on purpose — "performance is not a visible stat, and a character at the
+  top of their class should still be able to hold that position by working".
+  That exemption was right and is the pattern: the curve is for bars the player
+  watches inflate, not for every number in the model.
+
+The corollary is about one-sided multipliers, found in the same measurement.
+`frailtyFactor` returned 1 for anybody at or above the healthy mark — "being
+well is not a bonus, it is the baseline" — which can express "this body is
+failing" and cannot express "this body is unusually good". A multiplier bounded
+at 1 on one side is a floor pretending to be a curve, and it goes unnoticed for
+exactly as long as the population has nothing on the other side of it to
+measure.
+
+### 13.67 Content cannot be written for a fact the engine cannot read
+
+Three times now, an event has shipped that presupposed something about the
+character and fired at somebody it was not true of:
+
+- 0207: a romance event that assumed a relationship, firing about a classmate
+  the character had never spoken to. `partnered` was added afterward.
+- 0208: eleven parenting events reading "Your kid spiked a fever at 2am", able
+  to fire at somebody who had never had a child. `hasChildren` was added
+  afterward.
+- And it was about to happen a third time. 0409 opened the catalog's three
+  largest holes — work, a diagnosis, losing somebody — and `EventCondition` could
+  express none of them.
+
+The first two were found by reading the built app. Neither was a writing
+mistake; the writing was fine. Both were the predicate language being narrower
+than the fiction, and the author having no way to notice.
+
+- **Before writing content about X, check that eligibility can say X.** If it
+  cannot, that is the ticket's first task and the content is its second. An
+  author who cannot gate on a fact will write as though the gate exists, because
+  the sentence reads correctly on its own.
+- **Adding to the context is meant to be deliberate and visible.**
+  `EventContext`'s own docblock says so: "If a future event needs a fact that is
+  not on this interface, adding it here is a deliberate, visible decision." The
+  cost of that seam is a small ceremony per fact; the thing it buys is that the
+  catalog stays reviewable. Pay it rather than route around it.
+- **A gate needs a test where it lives, not where it shows.** 0409's health gate
+  looked broken in a played-population audit — twenty-five characters asked
+  about a diagnosis they did not have — and was not: the health phase runs after
+  events in the same year and can clear a condition, so somebody legitimately
+  asked in March reads as well in December. A phase-ordering artifact is
+  indistinguishable from a leak at the population level. Assert the predicate
+  against the predicate.
+
+The corollary is about what a fact should be derived FROM. Bereavement was
+answerable only by reading `LifeRecord` labels for the word "Lost", which
+`LifeRecord`'s own docblock forbids — "structured, queryable history. Never
+derived by parsing timeline text" — and which `eulogy.ts` was already doing, one
+rewritten label away from promoting every funeral to a life highlight. **When
+the only way to ask a question is to parse prose, the answer belongs in the
+structure instead**: a category, a flag, a field. Prose is written for readers
+and gets rewritten for readers.
+
+### 13.68 A guard justified by a measurement expires when the measurement does
+
+Every systemic door in `advanceYear` opened with the same line:
+
+```ts
+if (state.pending.length > 0) return state;
+```
+
+and 0402 wrote down exactly why it was safe:
+
+> *"Measured, that risks nothing — an adult year contains zero authored
+> decisions, because every one in the catalog stops at seventeen."*
+
+That sentence was true when it was written and false eighteen months of tickets
+later. 0409 wrote thirteen adult decisions, in a different package, and nothing
+anywhere near this line changed. Measured afterwards: **59.4% of adult years
+already held an authored decision by the time the doors ran**, so all three
+were shut in three years out of five. A guard had become a throttle, and the
+comment explaining it was the only place the change was visible — as a sentence
+that had quietly stopped being true.
+
+The shape is 13.36's from the other side. There, a field nothing writes is not
+state. Here, a condition whose justification has expired is not a guard.
+
+- **A guard whose comment cites a measurement is a guard with a shelf life.**
+  The measurement is a claim about another part of the system, and nothing in
+  the language will tell you when that part changes. If a comment says "measured,
+  this risks nothing", the risk it dismissed is somebody else's to reintroduce.
+- **Guard the thing, not a proxy for it.** What that line was for was one
+  systemic question a year. `pending.length` was a proxy that happened to equal
+  it, once. `hasSystemicOffer` asks the actual question and cannot be made wrong
+  by a content ticket.
+- **The same applies to thresholds standing in for probabilities.** 0401's
+  starvation guard asked "was this job eligible for three years and never
+  listed", where three years was a proxy for "the listings had a real run at
+  it". 0410 caught it flagging a coin toss: Director of pharmacy was 10.3% of
+  one character's six listings for nine independent years, and missing all nine
+  happens 37% of the time. A year count cannot tell a hole from bad luck because
+  it does not know what a year was worth. The weighting function is exported
+  now, and the guard asks it.
+
+### 13.69 When doors share a queue, order is priority — so measure the order
+
+0410 added a third systemic door and put it first, on an argument that sounded
+right: the romantic ladder carries `minYearsAtStage` clocks and a fertility
+curve underneath it, so a year skipped is subtracted from the far end, while a
+college offer stands at 35% every year for decades.
+
+Measured on the same 90 seeds, going first cost **21 degrees and two extra idle
+years a life** and bought **two more children and two fewer marriages**. The
+argument was wrong about which delays are recoverable: a couple who miss a year
+at `together` marry a year later, over a life that runs to eighty; a year not
+worked is a rung not climbed, and college's recurring offer switches itself off
+at the first degree.
+
+Splitting the door so the child question alone could go first — the one deadline
+in the build that genuinely cannot be waited out — was tried too, and bought
+nothing (55 lives with a child against 56) while costing five degrees.
+
+- **Ordering is a design decision with a measurable cost, not a formality.**
+  Two modules that both check "is anything pending" are not independent; the
+  earlier one wins every collision.
+- **An argument from mechanism does not settle it.** Both orderings had a good
+  story. Only one had numbers.
+
+### 13.70 A one-way ratchet flattens a population as surely as a damping curve
+
+13.66 recorded one half of this: `curvedDelta` is full strength at 50 and tapers
+to nothing at 100, so a flat push at everybody hands its biggest gains to
+whoever can use them least, and thirteen years of school turned Smarts into a
+distribution with a floor of 56.
+
+0411 found the other half, and it is quieter. Of the 91 events that can fire at
+forty, the stat effects run **Smarts +14/−0, Discipline +1/−0, Charisma +26/−0,
+Looks +0/−0**. Nothing an adult does costs them anything. A twelve-year-old has
+234 events available offering 70 Discipline gains and 11 losses; an adult has a
+ratchet.
+
+The result is not inflation, because the curve catches that. It is **agreement**:
+
+| Charisma, 200 lives | age 18 | age 30 | age 45 |
+|---|---|---|---|
+| p10 / p90 | 58 / 85 | 73 / 90 | **84 / 94** |
+| sd | 9.7 | 6.5 | **3.8** |
+
+Everybody climbs until the curve stops them, and the curve stops everybody in
+the same place. At forty-five all seven of the commonest career tracks produced
+a character with charisma between 89 and 92 — twenty years of doing a particular
+job made no difference to who anybody was. Meanwhile Discipline, which nothing
+wrote at all, held sd 12.0 at eighteen, thirty and forty-five: the same three
+numbers, exactly.
+
+- **A gain with no matching loss converges at the ceiling.** Check both columns.
+  A system that can only add is not generous, it is a plateau with a slope in
+  front of it.
+- **Variation needs a reason to disagree, not just a reason to move.** 0411's
+  gains come out of `TRACK_WANTS`, so two careers pull two characters in
+  different directions; that is what makes the spread widen (Discipline sd 12.0
+  → 14.5) instead of narrow. A single shared pressure, up or down, would have
+  flattened it either way.
+- **Measure spread per LIFE, not per cohort.** The first version of
+  `development.test.ts` compared everybody at eighteen with the survivors at
+  forty-five, and two of its four assertions then passed with the whole
+  mechanism removed, because who lived moves a distribution too. Pairing each
+  character against their own younger self is the only thing that isolates
+  development from survivorship. 13.63, caught in the test before it shipped
+  rather than two tickets later.
+
+### 13.71 Run the whole gate after the last edit, not after the last interesting one
+
+0410 shipped a type error to the user's machine. `pnpm typecheck` had been run
+and was green; then a persistence test was added, sabotage-verified with
+`vitest`, and pushed. `vitest` does not typecheck, so 954 green tests said
+nothing about a `PendingDecision` literal missing its `category`, and the error
+surfaced a ticket later in an unrelated run.
+
+The failure was not a missed step, it was the ORDER of the steps: the gate ran
+before the last change rather than after it.
+
+- **The verification block goes at the end, in one pass, and nothing goes in
+  after it.** typecheck, the full suite, the validator — after the final edit,
+  including the edits that were "just a test".
+- **Green tests are not a green build.** In this repo the test runner and the
+  type checker gate different things, and the one that catches a bad literal in
+  a test file is the one that does not run the tests.
+
+### 13.72 Fix the class, not the instance — a shortcut survives under a new name
+
+`investing.test.ts` has now been fixed for the same defect in four consecutive
+tickets. 0409 fixed six tests in it that reached for `working(seed, 45)` and
+hoped the character held enough money, and wrote down exactly why an age is not
+a bank balance. 0410 built `richEnough`, which asks for what it needs. 0411 had
+to make that ask across several lives. And 0412 found the original shortcut
+still there, twice:
+
+- as `invested()`, the same one-seed-and-hope under a different name, feeding
+  nine tests;
+- and as a **local `richEnough` inside one describe block, shadowing the fixed
+  module-level one and doing the old thing under the fixed one's name.**
+
+The second is the dangerous shape, because the name is the thing a reader
+checks. Somebody grepping for the shortcut finds the fix.
+
+- **When a fix has a name, sweep the file for the behaviour, not the name.**
+  Three tickets each fixed the call sites that were failing that day.
+- **A local declaration that shadows a shared helper is a defect on its own.**
+  If the local one were correct it would be the shared one.
+- **Count the outings.** 13.63's fourth appearance in one file is not four
+  coincidences, it is one unfixed class of defect. The same is true of 13.17,
+  which arrived for the seventh time in this ticket (see 13.73).
+
+### 13.73 A line-rotation rule belongs to the writer, not to each writer
+
+`guardians.test.ts` asserts that nothing in the feed writes the same line two
+years running, "from any writer", and its comment lists six occurrences — drift
+lines, romance moves, milestones, parent acts, conception, romance replies. 0412
+found the seventh and it was not a writer, it was the **event selector**:
+`random.pick(definition.text)`, a fresh draw every year, for all 444 events.
+
+It was correct for five tickets because no event could fire two years running.
+0409 wrote the first four that can (`cooldown: 1`), with two, three, three and
+four phrasings — so an unemployed character had a one-in-three chance every year
+of reading the same sentence about the same applications twice.
+
+- **A rotation rule needs one implementation, at the point every line goes
+  through.** Six writers each solving it privately is how the seventh place gets
+  missed.
+- **`cooldown: 1` is a claim about the copy as well as the pacing.** An event
+  that can recur annually needs enough phrasings to recur annually.
+- **The fix is always the same, and it is worth stating once: the base holds
+  still for the life and the age does all the moving.** A re-drawn base cancels
+  an age rotation exactly as often as it helps. In 0412 this also meant
+  separating rotation from WEAR in `resolveInteraction` — one parameter was
+  doing both jobs, which is fine until a second caller needs one without the
+  other.
+
+### 13.74 A gate and the token it guarantees must name the same person
+
+0412 gave eligibility `hasFriend` and `friendshipYearsAtLeast`, so an event could
+finally require a friend. 0413 wrote thirty of them — and `{kid}` still bound
+whichever peer the draw landed on. For a working adult the circle is mostly
+colleagues, so *"you and {kid} have been friends since school"* would have named
+somebody met eleven months ago.
+
+This is 0207's `partnered` bug one level down, and it is the shape to watch every
+time a predicate is added: **a gate makes a promise about the world and a token
+makes a promise about a person, and nothing in the language ties them together.**
+
+- **When you add a predicate, ask what the copy written against it will NAME.**
+  If the answer is a token, the binder has to honour the same definition — from
+  the same function, not a second one that agrees today.
+- **Prefer narrowing the existing token to adding a new one.** `{kid}` binding
+  friends-first fixed this in five lines. A `{friend}` token would have meant
+  four token tables, three pronoun forms and the four-places problem the roadmap
+  has had open since 0209.
+- And the narrowing was better content everywhere else too: every event that
+  names somebody now names the person the character actually knows.
+
+### 13.75 Content that grants a number reopens the curve the mechanism just closed
+
+0412 put a curve on warmth because 90.9% of forty-five-year-olds had a closest
+friend at exactly 100. 0413 wrote thirty-nine events about friends, every one
+carrying a happiness effect — and `bondFromOutcome` derives warmth from happiness
+at 0.7 when nothing authors it, so the catalog was the second door into the same
+failure. Measured: closest-friend spread at fifty-five fell 15 → 7, and adults
+with no friends at all fell under 1%, which quietly made `hasFriend: false`
+content unreachable.
+
+The mechanism ticket and the content ticket were each locally right.
+
+- **A mechanism fix is not finished until the content that rides on it is
+  measured too.** 0412's own acceptance tests caught this, which is the system
+  working — but only because they assert SPREAD rather than a median.
+- **`effects.bond` had existed since 0206 and nothing could author it.** The
+  engine had the field, the generator had no parameter, so every event in the
+  catalog silently took the derived value. A field only one side can write is a
+  field that is not really there (13.36's cousin).
+- **Most events about a relationship should not move it.** The number that says
+  how close two people are belongs to the things they do, not to the weather of
+  the year. Thirty-one of the thirty-nine now author `bond=0`.
+
+### 13.76 An assertion that cannot observe its claim gets replaced, not widened
+
+0413's first gate test checked, for every gated event that fired, that the
+character had a friend that year. It flagged `friend.their-kids` at seventy-three
+— and the context it was selected against said **two**, both of whom drifted
+under the line later in the same year. Widened to "either end of the year", it
+flagged `d.friend.needs-a-room` at twenty-two, where the warmth crossed 50 inside
+the year in the other direction.
+
+The engine reads its context in the MIDDLE of a year. A test standing outside
+`advanceYear` can only ever see the two ends, and no amount of widening makes it
+able to see the thing — it only makes it stop failing, which is worse than
+failing.
+
+- **Two widenings in a row is the signal.** The first looks like tuning; the
+  second means the instrument cannot reach.
+- **Split the claim to where each half is observable.** The predicate logic went
+  to a unit test against `matchesCondition`; the plumbing went to an assertion
+  that the count reaching the context equals the circle's real one, on states
+  from played lives; reachability stayed a population test. Three sharp
+  assertions replaced one blurred one, and each fails under its own sabotage.
+
+### 13.77 A category can be empty for a whole population and still look healthy
+
+The `family` category has ninety-one events and it was the second-biggest in the
+catalog. Eighty of them carry an `ageMax` below eighteen; the other eleven are
+0208's parenting events gated on `hasChildren`. There is no third group — so for
+a **childless adult**, which is 56.3% of every adult year in this build, the
+reachable family catalog was exactly zero. Not thin. Zero, across 4,367 years.
+
+Every previous measurement missed it, and each for a defensible reason: 0409
+counted events at forty (where parents-of-children carry the number), 0410 fixed
+`family` by building the door to having children, and 0413 measured the cliff at
+eighteen by category *total* rather than by what one kind of character can see.
+
+- **Measure a category against the POPULATION it is supposed to serve, not the
+  catalog.** "Family has ninety-one events" and "a childless adult has none" are
+  both true, and only one of them is about the game.
+- **A gate that splits a population splits the content with it.** `hasChildren`
+  divides adults roughly in half; every event behind it is invisible to the
+  other half, permanently, and a category total hides that perfectly.
+- **The give-away is a curve that only ever rises with one variable.** Family
+  events ran 0% at eighteen, 1.9% at thirty and 12.4% at forty — and every point
+  of that rise was people having children, not people having families.
+
+### 13.78 Four copies of a table is three too many, and the drift is silent
+
+Roadmap finding 7 has been open since 0209: *"the token-guard table lives in four
+places — the generator (Python), the content test, the validator and the
+renderer."* 0414 found out what that costs. The generator has known
+`{motherName}` and `{fatherName}` since 0203b; the TypeScript test's copy never
+had them.
+
+**Eleven tickets of silent disagreement**, and nothing could catch it, because a
+table is only exercised by the copy that uses it — and no event had used one of
+those two tokens since they were added. One line in this ticket did, and the
+generator passed it and the test rejected it.
+
+- **A duplicated table does not fail when it drifts. It fails when somebody
+  finally uses the drifted entry**, which can be years.
+- **Count the copies when you add an entry.** The fix here was one line in one
+  file; the finding is that nothing told anybody for eleven tickets.
+- The Python/TypeScript split is arguably deliberate — two independent
+  implementations of one rule is a real technique. Four is not that; it is three
+  chances to disagree.
+
+### 13.79 If every branch pays it, it is a fee for being asked
+
+0415 went looking for what raising a child and being ill do to a person and
+found Willpower — the stat `resilience` reads to decide how hard a year lands —
+collapsing in adulthood: **sd 11.4 at eighteen, 2.8 at sixty**, p10 at sixty 88,
+and not one life in a hundred and fifty lower at forty-five than at eighteen. 0411
+fixed exactly this shape for Charisma and did not list Willpower.
+
+The cause was in how three content tickets authored it. The adult catalog held
+**seventy-one willpower effects and not one loss**, and the tell is where they
+sat: on BOTH outcomes of a hard choice. *"You set a date and had to enforce it,
+which neither of you has completely got over"* paid +3. *"You told nobody and got
+on with it. It worked, right up until the day it didn't"* paid +4. When the hard
+thing works and when it fails pay the same stat, the stat is not measuring what
+happened — it is a fee for having been asked, and a fee collected every year is a
+ratchet (13.70).
+
+- **Check an effect across the branches of the choice that carries it.** If the
+  outcome where it went wrong pays the same number as the outcome where it went
+  right, that number belongs to the question, not the answer — and it probably
+  does not belong at all.
+- **An event about warmth does not pay endurance.** A friend saying yes before
+  you finished asking is a good year, not a stronger person. Same rule as 13.75's
+  `bond`: a number moves when the event is ABOUT that number.
+- **Content cannot supply the losing side on its own.** The catalog audit alone
+  still left willpower contracting 45% by sixty, and a second struggling year
+  paying the same as a calm one (0.26 against 0.28 a year). The system has to be
+  able to take it away — here, the year that does not end.
+
+### 13.80 A maximum moves when the sample grows
+
+0416 gave characters somewhere to meet people, and two assertions went red
+without anything they guard having changed:
+
+- `friendship.test.ts` took p90 − p10 of each life's **closest** friend at
+  fifty-five and read 8 against a line of 8. Every friendship at that age was
+  actually *wider* than before (p10/p90 61/96 against 71/96, with fewer at the
+  ceiling). But the median adult now had four friends instead of three, and the
+  warmest of four is warmer than the warmest of three even when all of them come
+  from the same distribution.
+- `adult-social.test.ts` took the mean of each life's **earliest** person at
+  twenty-six and wanted it past twelve. More childhood friends meant more
+  childhood friends to keep, and the minimum of a bigger set is lower.
+
+0412 hit this exact shape once, with `min(metAtAge)`, and replaced it with a
+share. This ticket hit it twice more.
+
+- **A per-life maximum or minimum measures the sample size as well as the
+  thing.** Any ticket that changes how many of something a life holds moves it,
+  whatever happened to each one.
+- **Measure a typical member, a share, or a fixed rank**, not the extreme.
+  Here: each life's MEDIAN friendship (74/96, against 97/100 with 0412's raw
+  warmth restored), and "the circle at twenty-six is mostly met since school"
+  as a share.
+- **And check the replacement against the old bug before trusting it.** The
+  first replacement here — every friendship pooled — stayed green with raw
+  warmth restored, because a pool always contains somebody met last year. It
+  could not see what it was for (13.76), and was replaced again before shipping.
+
+### 13.81 A band tighter than its own noise is a coin flip
+
+`floor.test.ts` guards CORE_RULES 13.53 — being illiquid must not buy a cheaper
+life — with a 3% band on the median living cost of eighty lives. 0416 turned it
+red at −4.8% without touching money. So both sides of the line were measured:
+
+- **The noise.** Two disjoint samples of the SAME build — the first 80 seeds and
+  the next 120 — read −4.8% and +2.2%. With the new door switched off, +3.4% and
+  −4.6%. Seven or eight points of swing from nothing except which lives were
+  drawn. At 200 lives the two builds read −1.9% and −1.5%: nothing had moved.
+- **The signal.** Restoring 13.53 itself reads −35%, at every sample size.
+
+The 3% line had been sitting inside the noise the whole time. It was a coin flip
+that happened to land heads for five tickets, and 0403's "1.6% wobble" note was
+the first time it nearly didn't.
+
+- **Before setting a band, split the sample and measure the same build twice.**
+  The gap between the halves is your noise floor. A line inside it will go red
+  for tickets that changed nothing and — worse — train people to widen it.
+- **Then sabotage the thing it guards, to measure the signal.** Put the line
+  between them, and write both numbers next to it, so the next person to see it
+  red can tell which one moved.
+- **This is not the widening 13.76 warns about.** That rule is about an
+  assertion that cannot see its claim. This one could always see its claim —
+  the signal is 35% — and was also seeing noise.
+
+### 13.82 A multiplier that reads the curve's own variable counts it twice
+
+0211's mortality was written as three readable factors — age, how well you are,
+what is wrong with you — and the second one quietly contained the first. The
+Gompertz term is age. `frailtyFactor` read raw health, and raw health falls
+with age for every body in the game. So an ordinary eighty-year-old was charged
+for being eighty once in the curve and again through a frailty multiplier their
+age had pushed up.
+
+It showed as two things that looked unrelated. Old people died five to six times
+faster than a real life table (125, 191 and 313 per thousand a year at seventy,
+seventy-five and eighty, against about 20, 31 and 51), and constitution stopped
+mattering in old age: by seventy-five every quintile's frailty multiplier was
+pinned high, so a strong body and a frail one were charged alike.
+
+- **When a factor multiplies a curve, check it is not a function of the curve's
+  own variable.** If it is, subtract what the variable alone would have done
+  (`healthForAge`: health for its age) before applying it.
+- **The test is an ordinary member at two points on the curve.** An ordinary
+  forty-year-old and an ordinary eighty-year-old should differ by the curve's
+  ratio and nothing else. `health.test.ts` asserts exactly that now.
+- **Readable factors are still right** — this one was found because the model
+  was three multipliers instead of one fitted polynomial. The rule is about what
+  each factor is allowed to read, not about how many there are.
+
+### 13.83 A flat counterweight to a rising load is a ratchet that has not started yet
+
+0211 gave health a flat 3.4 points of healing a year, and its docblock said
+exactly what that was for: *"what makes an acute illness a dip rather than a
+debt... without this the model would be a ratchet, and a ratchet reaches
+zero."* True at thirty. But illness gets likelier every year from thirty-five
+and the healing does not, so the two lines cross somewhere in the sixties. From
+there the deficit only grows: median 4 at forty, 15 at sixty, 25 at seventy, 33
+at eighty. The ratchet the comment ruled out was there all along, starting at
+the age nobody measured.
+
+- **A constant balancing a quantity that grows will lose to it eventually.**
+  Find the crossover before trusting the balance. Here it was one line of
+  arithmetic: expected illness cost a year against recovery a year, by age.
+- **Proportional beats flat when the thing is a debt.** Healing a share of what
+  is owed gives the deficit a level it settles at under any steady load, so
+  there is no crossover to find.
+- **Measure at the ages the claim is about.** 0211 tuned against a population
+  that mostly died before the crossover had done its damage — so the numbers
+  looked fine because the people the defect hit were already dead of it.
+
+### 13.84 A hash is not a random number when the keys differ only at the end
+
+0501 drew each year's housing market from ``stableUnit(`housing:${year}`)``.
+FNV-1a mixes the last character in once, so keys that differ only in their final
+digit land close together and the high bits — the ones dividing by 2^32 reads —
+barely move. The values for 2060–2080 all sat near 0.95. The market rose 6–7% a
+year for twenty straight years, and a flat bought for $290,000 was worth $1.98
+million at eighty-four.
+
+- **A sequence keyed on a counter needs a finaliser.** `mixedUnit` runs the hash
+  through murmur3's fmix32, which avalanches every input bit into every output
+  bit. Sequential keys come out independent.
+- **Do not fix the old helper in place.** Every save already holds values keyed
+  on `stableUnit`; changing it would silently rewrite every NPC's constitution
+  and every employer name. Add the new one beside it and audit the callers
+  (roadmap finding 8).
+- **Test the series, not the value.** One draw from a correlated hash looks
+  fine. Two hundred in a row, with their lag-one correlation, do not.
+
+### 13.85 A nominal rate in a constant-dollar world compounds into fiction
+
+The first home market appreciated at 4% a year — a real-world nominal figure —
+in an economy with no inflation, where every price and wage is in constant
+dollars. Owners' median equity at sixty-five was $978,000 on houses bought for
+about $200,000. Real US house prices have grown about 1% a year over the long
+run, so the drift is now 1.2%.
+
+- **Every rate borrowed from the world has to be converted to the game's
+  dollars.** Interest, returns, appreciation, raises: if the world figure
+  includes inflation and the game does not, subtract it.
+- **Compounding hides the error until late.** Three points a year is invisible
+  in any single year and a factor of three over forty. Measure the end of a
+  life, not the first decade of it.
+
+### 13.86 A new fixed cost needs the budget it lands on to make room
+
+0501's first owners paid the mortgage on top of a standard of living that still
+spent like a renter's. It worked while they worked. At retirement income fell,
+the mortgage didn't, and **104 of 176 buyers were foreclosed on** at a median age
+in the sixties. Real households don't do that: they spend less on everything
+else, and a household that falls behind with equity in the house sells it rather
+than waiting for the bank.
+
+- **When a system adds a cost, the spending it competes with has to respond.**
+  Owners now spend less on the rest of their life when the house costs more
+  than rent did, down to the subsistence floor.
+- **Model what people do before the worst case.** Foreclosure is what happens
+  to a house worth less than is owed on it. A house with equity gets sold under
+  pressure, and the owner keeps what's left.
+- **Measure the people the new cost reaches, across their whole life.** The
+  buyers looked fine at thirty-five. The failure was at sixty-five.
+
+### 13.87 An income that becomes a household's makes the spending a household's
+
+The standard of living follows income, and the year's bill is that standard
+multiplied by the size of the household. While only the player earned, that
+was right: one income stretched over two people. 0502 gave the partner a pay
+packet and fed the household's income into the same formula, and the
+household got counted twice: once in the income that set the standard, and
+again in the multiplier. Couples on $87,000 ran up bills of $95,000, fell into
+the hardship cliff, reset to subsistence, and climbed back to do it again.
+
+- **When a quantity changes from one person's to a group's, check every formula
+  that already scales by the group.** Anything multiplied by household size has
+  to be computed per member, or the size is counted twice.
+- **The fix is the ordinary equivalence scale.** Divide the household's income
+  by its size to set the standard, multiply the standard by its size to bill
+  it. A single person is untouched, which is how to tell the change is right
+  rather than a re-tune.
+- **Flapping is a symptom worth naming.** A household that goes short, resets
+  and recovers on a cycle is a formula that disagrees with itself, not bad
+  luck.
+
+### 13.88 Two wrong constants can add up to a right answer
+
+0501 set `OWNER_SHARE` at 0.45, which said the roof was more than half of
+everything a renting household spends. The population still came out near US
+net-worth figures, because couples were overspending (13.87) by about what
+owners were being under-charged. Fixing the overspend took the median
+sixty-five-to-seventy-four-year-old to $722,000 against a US figure of about
+$410,000. Shelter is nearer a quarter to a third of household spending; at
+0.7 the same measurement reads $340,000–$415,000.
+
+- **Check each constant against its own reference, not just the total.** An
+  aggregate that matches the world can be two errors cancelling. The roof's
+  share of spending has a real-world number of its own; 0.45 was never close
+  to it.
+- **Expect a fix to expose its partner.** When correcting one mechanism moves a
+  whole-population number a long way, look for the constant that was quietly
+  compensating for it before re-tuning anything else.
+- **Write down what a tuned constant was tuned against.** `MARGINAL_SPEND`'s
+  docblock already says this (0304): a constant tuned against a bug has to be
+  tuned again when the bug goes.
+
+### 13.89 A setting the player can turn needs a cost on both sides
+
+0503 gave the player six rent settings. Sketched with the first numbers that
+came to mind (applicants falling, tenants leaving a little faster above the
+going rate), 10% and 20% over the going rate both earned MORE than the going
+rate: the gap between tenants was too short to cost what the extra rent
+brought in. A setting with a free best answer is not a decision. Every player
+who found it would set it once and never think about it again, and the ones
+who didn't would just be paid less.
+
+- **Work out the payoff of every setting before building the screen.** A
+  table that turns knobs into money can be checked in a spreadsheet; do it.
+- **Each step must give something up.** Under the going rate: fuller, less
+  money. Over it: emptier, more turnover, no more money. At the top, nothing.
+  Measured, the going rate now earns the most per unit-year, with one step
+  either side a few percent behind.
+- **Keep the measurement as a test.** `rentals.test.ts` asserts the whole
+  table, so a retune that hands one setting a free win fails.
+
+### 13.90 When a cost moves out of a shared bill, whatever measured against the bill must measure the whole again
+
+0504 took buying and keeping a car out of the living bill and charged it on
+the car. The home door measures a mortgage against "the roof", which it reads
+as a share of the living bill. Once people owned cars the bill was 8.5%
+smaller and the squeeze made it smaller still, so every house looked further
+out of reach, and home ownership at 35–54 fell eight points the first time it
+was measured. Nothing about houses had changed.
+
+- **Search for every reader of a number before splitting it.** `living.cost`
+  had one producer and three readers; only one of them wanted the new meaning.
+- **Give the old meaning its own name.** The living phase now reports
+  `withoutCar` beside `cost`, and the home door reads that.
+
+### 13.91 A test that checks a direction passes when anything moves it that way
+
+0504's end-to-end test asserted a year with a car costs less to live than the
+same year without one. Sabotaged so the living phase never knew about the car,
+it still passed: the car's own running costs squeezed the bill down by a few
+hundred dollars through a different branch. The direction was right for the
+wrong reason.
+
+- **Assert the size the mechanism promises.** The test now asserts the bill
+  falls by at least the car's share, which only the mechanism under test can do.
+- **Sabotage is what finds these.** Three of seventeen sabotages passed the
+  first time (this one, a loan that never amortised but still cleared on its
+  last year, and repossession after one short year inside a loose band). All
+  three tests were tightened until each sabotage failed.
+
+### 13.92 A bound written in terms of the constant it guards moves with it
+
+0506's test that legends stay rare asserted no more than `MYTHICAL_CHANCE × 4`
+of the antiques dealer's slots ever held one. Sabotaged from one in 5,000 to
+one in 20, it still passed: the bound had grown 250-fold along with the thing
+it was there to stop.
+
+- **State the claim as a number.** "About one legend in 2,800 slots, never a
+  handful" is the claim; the test now says that, and separately that the
+  constant is under one in a thousand.
+- **A guard that reads the value it guards guards nothing.** The same shape as
+  13.51's pinned list, the other way round: that one never notices a change,
+  and this one agrees with every change.
+
+### 13.93 Compare a dial with the system around it settled
+
+0601's first test of "no payroll level dominates" held headcount fixed and
+found High pay earning 2.2 times Medium at a software studio. The business is
+supposed to hire to its demand; with the manager's headcount, the gap closed.
+A test that freezes one part of a system the player cannot freeze measures
+something the player never meets.
+
+- **Let the other dials settle** (here: iterate the manager to a fixed point)
+  before comparing, and compare an average over types, not a single one: whole
+  heads are lumpy, and a four-person firm swings by a quarter of its staff.
+
+### 13.94 A harness that mutates must refuse to run if it cannot restore
+
+The sabotage helper copied each file to a backup path before mutating it. The
+path had turned into a plain file, every copy failed silently, and eighteen
+mutations were left in the source — each one visible only as a test count that
+got worse run by run. Restoring them by hand took a snapshot and a diff.
+
+- **Check the backup before the change.** `cp ... || return`, and a tarball of
+  the tree before a batch.
+- **A failure count that grows between runs is the tell.** Each sabotage should
+  fail the same tests it failed alone.
+
+### 13.95 A constant a formula decides should be the formula
+
+0601 typed a price sensitivity for each business and checked it against a
+fixed headcount. The manager hires and fires to the price, so the number that
+mattered was never the one that had been checked: for half the catalog the
+best price was 125–135% of the going rate, worth 60–150% more pay. Nobody
+tuned it wrong; nobody could have seen it from where they were looking.
+
+- **Derive it.** For a firm that can staff to demand the best price is
+  `p* = e/(e−1) · mc`; the sensitivity is now computed from cogs, wages and
+  headroom in the generator, and a test recomputes it from the catalog.
+- **Check a lever with every other lever free to move**, then ask how many
+  points of revenue the best setting is worth over the default.
+- **13.92 recurred.** Three of eighteen sabotages passed first time, two
+  because the test read the constant it guarded (the overhead share, the branch
+  opening maturity). Numbers are stated as numbers.
+
+
+### 13.96 If money must not be spendable on anything else, never let it be money
+
+0307 chose not to earmark a loan: a rule that follows cash around is a chore
+(spec 1126–1136). A business loan is where that choice stops holding, and the
+fix is not a rule that follows the cash, it is a loan that never becomes cash.
+It is offered at the moment of a purchase and written straight into it: booked
+as borrowed and spent in the same breath, so the balance never rises. There is
+nothing to earmark because there is nothing to spend.
+
+- **A door that must stay shut is shut in the engine.** `applyForLoan` refuses
+  a business product outright (`forABusiness`); the Loans screen not offering
+  it is a courtesy, not the control.
+- **The lender sees what repays it.** Half of wages, plus what the businesses
+  clear, plus what the thing being bought clears, less every payment already
+  committed. Not `incomeOf`, which counts a sale's proceeds as earnings
+  (finding 35).
+
+### 13.97 Measure the whole life of a new instrument, not the approval
+
+The first version of a business loan passed every test and failed the first
+population run: serviced out of the owner's wages while the business sat on
+its own cash, a typical financed purchase put the owner into arrears for
+eleven to twenty-four of the next twenty years and the balance grew to the
+two-times ceiling. Nothing about the approval maths was wrong.
+
+- **Take it, service it, get out of it, and do that in a population** before
+  calling an instrument built. Arrears-years and net worth against a control
+  that never bought are the numbers that show a payer in the wrong pocket.
+- **Ask who owns the money.** The business holds the till, so the business
+  pays; the owner steps in for a shortfall because they signed for it.
+
+### 13.98 A share of a round number is not a round number
+
+`0.7 × 45,000` is `31499.999999999996`. Floored to the hundred it is a loan
+$100 under the stated share, on exactly the prices a player reads off the
+screen. The test was a literal number on a round price, which is the only kind
+that finds it.
+
+- **Round to the cent before flooring.** And test shares on round prices, not
+  on the generated ones that happen to miss.
+
+
+### 13.99 A rule that excludes nothing is not a rule
+
+"A key person left" needed wages to be 15% of revenue. All thirty-one types
+cleared that, so the rule was dead code in a table that looked like it had a
+rule in it, and a mutation that deleted it survived. It was found because the
+sabotage list included each condition separately.
+
+- **Check a condition against the catalog it filters**: how many of the
+  thirty-one does it let through, and is that a number you'd defend? A test
+  that asserts the line falls through the population, not just that the code
+  ran, is the only thing that keeps a threshold from drifting back to "all".
+- **Sabotage each branch of a gate by itself**, not the function as a whole.
+
+### 13.100 Record the gap you couldn't close, and say why
+
+0601 promised that 0604 would close survival to the BLS table. Measured, the
+levers the spec allows moved it three points. What would move it further is
+unavoidable disaster, which the spec says not to have. The honest result is the
+number, the levers tried, and the reason, in the doc and the roadmap, not a
+retuned constant that hits 51% by making the game punishing.
+
+- **A target quoted from a table is a question, not an order.** Ask whether the
+  table measures what the game models (BLS counts owners who simply stop).
+- **Say what was tried and taken out.** Shrinking the base volatility changed
+  nothing that mattered and broke a price test; it went back out.
+
+### 13.101 When a thing is handed on, hand on everything that belongs to it
+
+An heir keeps a business only if its till, crew, name, doors, rival and lender
+go with it. Handing on the business and dropping the lender would have been the
+0603 bug in reverse (an inheritance with the debt wiped). The rule that carried
+over is the one 0603 set: whatever is owed on a thing travels with the thing,
+and a debt whose thing is gone is personal and dropped as before.
+
+- **Whatever the new owner doesn't choose should still change**: the town's
+  doubts about a new owner (four points) and what the thing is carried at
+  (its worth, not what the parent put in).
+- **A default that changes behavior breaks old tests honestly.** Two death
+  tests that assumed a sale now ask for the sale; they were not loosened.
+

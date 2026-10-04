@@ -33,13 +33,17 @@ import {
   type TimelineKind,
 } from '@yearafter/character';
 import { asEventId, clampStat, dollars } from '@yearafter/core';
+import { nudgeStats } from '@yearafter/character';
 import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
 import { occupationFor, runEducation } from './phases/education';
 import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
+import { withAnyOffer } from './offers';
+import { withCollegeOffer } from './college-offer';
+import { withLifeOffer } from './life-offer';
 import { runEvents } from './phases/events';
-import { partnerOf } from '@yearafter/social';
+import { householdPartnerOf, partnerOf } from '@yearafter/social';
 import { livingParents } from '@yearafter/relationships';
 import { childrenAtHome } from '@yearafter/parenting';
 import { runFamily } from './phases/family';
@@ -65,12 +69,24 @@ import {
   runPriceYear,
   yearsOutside,
   type NewTransaction,
+  OWNER_SHARE,
 } from '@yearafter/finance';
 import { runKin } from './phases/kin';
 import { runLiving } from './phases/living';
+import { partnerIncomeFor } from './phases/partner';
 import { runSocial } from './phases/social';
 import { runHealth } from './phases/health';
 import { runStress } from './phases/stress';
+import { lifeShaping, strained } from './shaping';
+import { runPursuitYear } from './pursuits';
+import { withPursuitOffer } from './pursuit-offer';
+import { foreclose, markMissed, runHomesYear, withHomeOffer } from './homes';
+import { markVehiclesMissed, repossess, runVehiclesYear, withVehicleOffer } from './vehicles';
+import { withRenovationOffer } from './renovations';
+import { runValuablesYear } from './shopping';
+import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
+import { foundOut } from './auctions';
+import { residenceOf } from './rentals';
 import { INSTRUMENTS, SECTORS, costIndexOf, findActivity } from '@yearafter/content';
 import { nameContext, uniqueFirstName } from './social-generator';
 import { RngDomains } from './rng/rng';
@@ -186,7 +202,36 @@ export function advanceYear(state: GameState): AdvanceResult {
   // Education next: an event that fires this year should be able to read the
   // grade the character is now in, and a report-card event that arrives before
   // the report card is nonsense.
-  const education = runEducation(state, nextAge);
+  const schooled = runEducation(state, nextAge);
+
+  /*
+    Ticket 0416 — and then everything an adult is in, which the school year
+    never plays. Folded into the education result rather than carried beside it
+    because every reader downstream — the social phase's rooms and its "something
+    you still do" door, the health phase's athletes, the stress phase's hours,
+    the event context's activity count — already reads `education.education`,
+    and has been reading an empty list for every adult since 0204. Reads LAST
+    year's stress, because this year's has not been summarised yet.
+  */
+  const pursued = runPursuitYear({
+    education: schooled.education,
+    age: nextAge,
+    stats: schooled.player.stats,
+    talents: state.player.talents,
+    standard: state.household.standard,
+    strained: strained(state.player.stress.level),
+    stream: state.rng.stream(RngDomains.Pursuits),
+  });
+  const education = {
+    ...schooled,
+    education: pursued.education,
+    hours: schooled.hours + pursued.hours,
+    lines: [
+      ...schooled.lines,
+      ...pursued.lines.map((text) => ({ kind: 'passive' as const, text })),
+    ],
+    transactions: [...schooled.transactions, ...pursued.transactions],
+  };
 
   // Then the class. Before events, so an event that fires this year can name
   // somebody who is actually in it — which is the whole of Ticket 0206.
@@ -245,7 +290,22 @@ export function advanceYear(state: GameState): AdvanceResult {
     family: family.family,
     discipline: education.player.stats.discipline,
     smarts: education.player.stats.smarts,
+    charisma: education.player.stats.charisma,
   });
+
+  /*
+    Ticket 0411 — what the year's work did to them.
+
+    Applied HERE rather than inside the phase, because a phase reports and
+    `advanceYear` moves: the same contract `transactions` has had since 0301 and
+    `phases/education.ts`'s own `statDeltas` has had since 0204. Through
+    `nudgeStats`, so a working year travels the same 0203 curve every other stat
+    change in the build does — full strength at 50, tapering to nothing at 100.
+  */
+  const worked: Character = {
+    ...education.player,
+    stats: nudgeStats(education.player.stats, employment.statDeltas),
+  };
 
   /*
     Ticket 0303 — the living phase. Ninth, and placed here on purpose.
@@ -261,11 +321,80 @@ export function advanceYear(state: GameState): AdvanceResult {
     somebody who was employed. Measured before this ticket: 6,357 adult years
     with no job, not one of them costed.
   */
+  /*
+    Ticket 0601. The economy's state for the year is drawn HERE, ahead of the
+    homes and the businesses, because a business's custom follows it. It was
+    drawn after the living phase and nothing between cared; the stream is its
+    own domain, so the first draw is still the first draw and every life replays
+    identically.
+  */
+  const marketRoll = state.rng.stream(RngDomains.Economy);
+  const market = nextMarketState(state.market, marketRoll.next());
+  /*
+    Ticket 0501 — a year of every home they own. The market moves it, it gets a
+    year older, and its upkeep and mortgage come due as COMMITTED outgoings,
+    posted with the tax and the treatment rather than after the cards: a
+    mortgage is paid before a credit card's minimum, the same order as rent.
+  */
+  const homesYear = runHomesYear(state.homes, nextYear, state.rng.getSeed());
+  /*
+    Ticket 0504 — a year of every car they own: wear, servicing and repairs,
+    the loan payment. Committed outgoings like the mortgage, and the living
+    phase fits the rest of the life around what they came to.
+  */
+  const vehiclesYear = runVehiclesYear(state.vehicles, nextYear, state.rng.getSeed());
+  /*
+    Ticket 0506 — what the collection is worth after the year. Ticket 0507 —
+    and anything bought at a house that sold a fake is found out now.
+  */
+  const valuablesNext = runValuablesYear(state.valuables, nextYear, state.rng.getSeed());
+
+  /*
+    Ticket 0502 — what a partner brought home. After employment and before
+    living, for the same reason the player's own pay is: the standard of living
+    follows what the household actually has, and that is two incomes when
+    there are two.
+  */
+  const childAgesAtHome = childrenAtHome(family.family, nextYear).map(
+    (child) => nextYear - child.birthYear,
+  );
+  const partnered = partnerIncomeFor({
+    people: social.circle.people,
+    worldYear: nextYear,
+    childAges: childAgesAtHome,
+  });
+
+  /*
+    Ticket 0601 — a year of every business they own. After employment, because
+    the tax on what a business pays its owner depends on what they were paid
+    for working; BEFORE living, because the standard of living follows what the
+    household actually has, and a business owner's household has the draw
+    (CORE_RULES 13.90: when a new income reaches the household, every reader of
+    income has to be told).
+  */
+  const businessesYear = runBusinessesYear({
+    businesses: state.businesses,
+    loans: state.loans,
+    year: nextYear,
+    seed: state.rng.getSeed(),
+    market,
+    available: Math.floor(Number(state.player.cash) / 100) + Math.floor(employment.takeHome * 0.5),
+    holdsJob: employment.employment.job !== undefined,
+    stat: (type) => averageStat(worked.stats as unknown as Record<string, number>, type),
+  });
+  const businessTax = businessTaxOn(employment.earned, businessesYear.drawn);
+  const businessNet = businessesYear.drawn - businessTax;
+
   const living = runLiving({
     household: state.household,
     age: nextAge,
     locationIndex: costIndexOf(state.player.currentLocation.cityId),
-    partnered: partnerOf(social.circle.people) !== undefined,
+    /*
+      Ticket 0502. Somebody they share a household with — not somebody they
+      are only dating, who until this ticket cost half again as much as a
+      household of one.
+    */
+    partnered: householdPartnerOf(social.circle.people) !== undefined,
     /*
       Ticket 0304. The AGES, not the count — a teenager costs more than a
       toddler, which is the one idea worth keeping out of `monthlyCostOf`.
@@ -281,10 +410,11 @@ export function advanceYear(state: GameState): AdvanceResult {
       0208 and draws the line at eighteen, the same place spec 61's kick-out
       does — so there is one definition of a dependent rather than two.
     */
-    childAges: childrenAtHome(family.family, nextYear).map((child) => nextYear - child.birthYear),
+    childAges: childAgesAtHome,
     // What the job left after tax. Zero for anybody not working, which is the
-    // case this whole phase exists to make cost something.
-    afterTaxIncome: employment.takeHome,
+    // case this whole phase exists to make cost something. Ticket 0502: and
+    // what the partner's did, because a household lives on both.
+    afterTaxIncome: employment.takeHome + partnered.net + businessNet,
     wealth: Math.floor(Number(state.player.cash) / 100),
     /*
       Ticket 0308b. What the cards would actually lend, which is part of what a
@@ -301,12 +431,22 @@ export function advanceYear(state: GameState): AdvanceResult {
       : {}),
     toldToLeave: family.toldToLeave,
     hasLivingParent: livingParents(family.family).length > 0,
+    // Ticket 0501. Somebody who owns a home lives in it; no one asks which.
+    // Ticket 0503: a home, not a building they let or a house they rent out.
+    ownsHome: residenceOf(state.homes) !== undefined,
+    // And what it costs them this year, which the rest of the life fits around.
+    // Only the one they live in: a rental's costs are the rental's, against its rent.
+    housingCost: homesYear.residenceCost,
+    // Ticket 0504. The cars, and whether there is one — owning one means the
+    // living bill stops paying for getting about (`VEHICLE_SHARE`).
+    vehicleCost: vehiclesYear.cost,
+    ownsVehicle: state.vehicles.length > 0,
   });
 
   const events = runEvents(
     {
       ...state,
-      player: education.player,
+      player: worked,
       education: education.education,
       circle: social.circle,
       family: family.family,
@@ -423,6 +563,22 @@ export function advanceYear(state: GameState): AdvanceResult {
   // Ticket 0303. Straight after employment, because the year's money line lives
   // here now and reads as the second half of the working year's news.
   write(living.lines, (index) => `t:${nextYear}:living:${index}`);
+  write(
+    homesYear.lines.map((text) => ({ kind: 'passive' as const, text })),
+    (index) => `t:${nextYear}:homes:${index}`,
+  );
+  write(
+    vehiclesYear.lines.map((text) => ({ kind: 'passive' as const, text })),
+    (index) => `t:${nextYear}:cars:${index}`,
+  );
+  write(
+    businessesYear.lines.map((text) => ({ kind: 'passive' as const, text })),
+    (index) => `t:${nextYear}:biz:${index}`,
+  );
+  write(
+    foundOut(state.valuables, valuablesNext).map((text) => ({ kind: 'passive' as const, text })),
+    (index) => `t:${nextYear}:fakes:${index}`,
+  );
   // Events carry their own id, assigned by the event engine.
   write(events.lines, () => undefined);
   write(health.lines, (index) => `t:${nextYear}:health:${index}`);
@@ -447,9 +603,26 @@ export function advanceYear(state: GameState): AdvanceResult {
     ...education.transactions,
     ...family.transactions,
     ...employment.transactions,
+    // Ticket 0502. A partner's pay and the tax on it.
+    ...partnered.transactions,
     ...events.transactions,
     // Ticket 0303. A year of treatment, for anybody being treated.
     ...health.transactions,
+    // Ticket 0501. Upkeep and the mortgage on every home they own.
+    ...homesYear.transactions,
+    // Ticket 0504. Car payments, servicing and repairs, and a car scrapped.
+    ...vehiclesYear.transactions,
+    // Ticket 0601. What a business paid its owner, and the tax on it; money put in or got out.
+    ...businessesYear.transactions,
+    ...(businessTax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-businessTax),
+            source: 'Tax on business income',
+          },
+        ]
+      : []),
   ];
   /*
     Ticket 0303. The cost of living is charged LAST, after every other outgoing,
@@ -501,8 +674,6 @@ export function advanceYear(state: GameState): AdvanceResult {
     not an overdraft, and the moment it becomes one, deciding how much to put
     in stops being a decision.
   */
-  const marketRoll = state.rng.stream(RngDomains.Economy);
-  const market = nextMarketState(state.market, marketRoll.next());
   /*
     Ticket 0308c. EVERY instrument's price moves, not only the ones held — the
     market list shows all eighty-nine whether or not this character owns
@@ -707,7 +878,19 @@ export function advanceYear(state: GameState): AdvanceResult {
   */
   const cardCost = cardYear.charges.reduce((sum, charge) => sum - Number(charge.amount), 0);
   const leftForLoans = Math.max(0, leftForCards - Math.round(cardCost / 100));
-  const loanYear = runLoanYear(state.loans, leftForLoans, isInSchool(education.education));
+  /*
+    Ticket 0603. A business pays its own loan (see `runBusinessesYear`), so the
+    household's step skips those — but not one whose business is gone: a lender
+    left with nothing to be paid out of is paid out of the person who signed.
+  */
+  const businessPays = new Set(businessesYear.serviced);
+  const householdLoans = businessesYear.loans.filter(
+    (loan) => !(loan.businessId !== undefined && businessPays.has(loan.businessId)),
+  );
+  const businessLoans = businessesYear.loans.filter(
+    (loan) => loan.businessId !== undefined && businessPays.has(loan.businessId),
+  );
+  const loanYear = runLoanYear(householdLoans, leftForLoans, isInSchool(education.education));
 
   const money = postYear(state.finance, nextYear, nextAge, [
     ...reported.filter((entry) => entry.amount > 0),
@@ -814,6 +997,29 @@ export function advanceYear(state: GameState): AdvanceResult {
     throw new Error(`advanceYear: no events were available at age ${nextAge}`);
   }
 
+  /*
+    Ticket 0415 — what the rest of the year did to them.
+
+    Work shaped the character in the middle of the year (0411). This is
+    everything else a year can do to somebody — a small child, an illness they
+    are learning to live with, a second year running on empty — and it reads the
+    year as it ENDED: the stress the stress phase summarised it into, the
+    conditions the health phase left them holding, the children still at home.
+    Applied in the same `nudgeStats` as the face that aged, because both are the
+    year's last word on who they are. The keys cannot collide: health reports
+    looks and this reports willpower and discipline.
+  */
+  const shaped = lifeShaping({
+    age: nextAge,
+    worldYear: nextYear,
+    family: events.family,
+    conditions: health.conditions,
+    stressBefore: state.player.stress.level,
+    stressAfter: stress.player.stress.level,
+    willpower: stress.player.stats.willpower,
+    activities: education.education.activities,
+  });
+
   // ---- commit ------------------------------------------------------------
   const player: Character = {
     ...stress.player,
@@ -821,7 +1027,18 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0211. The health phase has the last word on both, and `alive` is
     // the one field in this file that can go from true to false.
     alive: health.alive,
-    stats: { ...stress.player.stats, health: clampStat(health.health) },
+    /*
+      Ticket 0411. The health phase has the last word on how they look too, and
+      it arrives here rather than earlier because `looksDrift` reads the health
+      the year ENDED on — somebody who spent it ill aged faster than somebody
+      who did not, which is the whole claim. Through `nudgeStats` so it travels
+      0203's curve like everything else, and the raw `health` assignment stays
+      raw because that one is a level the phase computed, not a nudge.
+    */
+    stats: {
+      ...nudgeStats(stress.player.stats, { ...health.statDeltas, ...shaped }),
+      health: clampStat(health.health),
+    },
     // Ticket 0210 takes this over for anybody who is working. Computed AFTER
     // the employment phase, so the year a character is promoted the header says
     // what they were promoted to rather than what they were promoted from.
@@ -870,61 +1087,156 @@ export function advanceYear(state: GameState): AdvanceResult {
       ...family.records,
       ...employment.records,
       ...health.records,
+      ...businessesYear.records,
     ].reduce<readonly LifeRecord[]>(
       (all, record, index) => appendRecord(all, stampRecord(record, nextAge, nextYear, index)),
       state.player.records,
     ),
   };
 
-  return {
-    state: {
-      ...state,
-      world: { ...state.world, year: nextYear },
-      player,
-      family: events.family,
-      circle: events.circle,
-      parenting: family.parenting,
-      employment: employment.employment,
-      // Ticket 0211. A pending decision is DISCARDED on the year somebody dies:
-      // a question the character will never answer is not a question, and
-      // `advanceYear` already refuses to run while one is open, so leaving it
-      // would lock the app on a dead character forever.
-      finance: money.finance,
-      // Ticket 0306. Balances, interest and any freeze, carried forward.
-      cards: cardYear.cards,
-      // Ticket 0307. Loans amortise, fall into arrears, or clear and vanish.
-      loans: loanYear.loans,
-      // Ticket 0308. What the holdings are worth after the year, and the market
-      // they will face next year.
-      portfolio: marketYear.holdings,
-      market,
-      prices,
-      retirement,
-      // Ticket 0303. The standard of living and whether they pay for a roof —
-      // both carried forward, because a standard with no memory is a share of
-      // income by another name.
-      household: living.household,
-      health: {
-        ...state.health,
-        conditions: health.conditions,
-        vitality: health.vitality,
-        deficit: health.deficit,
-        ...(health.alive ? {} : { causeOfDeath: health.cause, diedAtAge: nextAge }),
-      },
-      events: events.history,
-      // Events can move school standing (detention, suspension, being caught);
-      // the education phase set the rest of it.
-      education: {
-        ...education.education,
-        // Ticket 0209: a parent grounding you moves school standing through the
-        // same field events use, rather than a parallel one.
-        behaviour: clampStat(events.behaviour + family.behaviourDelta),
-        // Stress takes its cut of school last, after everything else has had
-        // its say about the year.
-        performance: clampStat(stress.performance),
-      },
-      pending: health.alive ? events.decisions : [],
+  const next: GameState = {
+    ...state,
+    world: { ...state.world, year: nextYear },
+    player,
+    family: events.family,
+    circle: events.circle,
+    parenting: family.parenting,
+    employment: employment.employment,
+    // Ticket 0211. A pending decision is DISCARDED on the year somebody dies:
+    // a question the character will never answer is not a question, and
+    // `advanceYear` already refuses to run while one is open, so leaving it
+    // would lock the app on a dead character forever.
+    finance: money.finance,
+    // Ticket 0306. Balances, interest and any freeze, carried forward.
+    cards: cardYear.cards,
+    // Ticket 0307. Loans amortise, fall into arrears, or clear and vanish.
+    loans: [...loanYear.loans, ...businessLoans],
+    /*
+      Ticket 0501. A year that closed with anything unpaid is a year behind on
+      the mortgage; `foreclose` below acts on the second one in a row.
+    */
+    homes: markMissed(
+      homesYear.homes,
+      money.finance.transactions.some(
+        (entry) => entry.year === nextYear && entry.category === 'shortfall',
+      ),
+    ),
+    // Ticket 0506. What the jewelry, watches and art are worth after the year.
+    valuables: valuablesNext,
+    // Ticket 0601. What each business sold and kept, and who it is run by now.
+    businesses: businessesYear.businesses,
+    // Ticket 0504. The same short year puts a financed car behind.
+    vehicles: markVehiclesMissed(
+      vehiclesYear.vehicles,
+      money.finance.transactions.some(
+        (entry) => entry.year === nextYear && entry.category === 'shortfall',
+      ),
+    ),
+    // Ticket 0308. What the holdings are worth after the year, and the market
+    // they will face next year.
+    portfolio: marketYear.holdings,
+    market,
+    prices,
+    retirement,
+    // Ticket 0303. The standard of living and whether they pay for a roof —
+    // both carried forward, because a standard with no memory is a share of
+    // income by another name.
+    household: living.household,
+    health: {
+      ...state.health,
+      conditions: health.conditions,
+      vitality: health.vitality,
+      deficit: health.deficit,
+      ...(health.alive ? {} : { causeOfDeath: health.cause, diedAtAge: nextAge }),
     },
+    events: events.history,
+    // Events can move school standing (detention, suspension, being caught);
+    // the education phase set the rest of it.
+    education: {
+      ...education.education,
+      // Ticket 0209: a parent grounding you moves school standing through the
+      // same field events use, rather than a parallel one.
+      behaviour: clampStat(events.behaviour + family.behaviourDelta),
+      // Stress takes its cut of school last, after everything else has had
+      // its say about the year.
+      performance: clampStat(stress.performance),
+    },
+    pending: health.alive ? events.decisions : [],
+  };
+
+  /*
+    Ticket 0402 — the job that comes looking for you, raised LAST.
+
+    After every phase, because it reads the year that just happened: the
+    standing the employment phase moved, the performance it scored, and the job
+    it may just have promoted somebody into. Raised before the state is handed
+    back rather than inside `phases/employment.ts` because deciding WHICH job is
+    on offer needs what the character is eligible for, and eligibility is a
+    question about education and experience that the employment phase cannot
+    see and should not be taught.
+
+    It is also the first systemic decision in the build, so it is deliberately
+    additive: `events.decisions` keeps whatever it drew and the offer joins it.
+    Measured, that risks nothing — an adult year contains zero authored
+    decisions, because every one in the catalog stops at seventeen.
+
+    Ticket 0405 — the college question, raised FIRST of the two systemic
+    doors. Both check `pending.length` before adding anything, so only one
+    ever lands in a year; school ahead of career is the right order for the
+    population that actually collides, because a career offer needs an
+    existing job and the person this reaches has just left school without
+    one yet.
+  */
+  /*
+    Ticket 0410 — the private life, raised LAST of the three and measured into
+    that position rather than argued into it. A wedding put off a year is still
+    a wedding; a degree or a rung put off a year measurably is not.
+    `withLifeOffer`'s docblock carries the numbers, including the two orderings
+    that were tried and rejected.
+  */
+  return {
+    /*
+      Ticket 0416 — something to join, LAST of the four: a league sign-up should
+      never be the reason a job, a place at college or a wedding went unasked.
+    */
+    /*
+      Ticket 0501 — a home, FOURTH of the five, after a private life and before
+      a league: buying somewhere is a bigger question than a Sunday team. The
+      roof it is measured against is what the renting household pays for walls
+      this year, which is what owning would replace. Foreclosure runs first, so
+      a house the bank has just taken is not offered back in the same breath.
+    */
+    /*
+      Ticket 0504 — a car, FIFTH of the six: after a home, before a league. A
+      repossession runs first, beside the foreclosure, so a car the lender has
+      just taken is not offered back in the same breath.
+    */
+    /*
+      Ticket 0506 — a renovation, SIXTH of the seven: after a car, before a
+      league. Only ever about the home they live in falling apart.
+    */
+    state: withPursuitOffer(
+      withRenovationOffer(
+        withVehicleOffer(
+          withHomeOffer(
+            withLifeOffer(
+              withAnyOffer(
+                withCollegeOffer(repossess(foreclose(next)), health.alive),
+                health.alive,
+              ),
+              health.alive,
+            ),
+            health.alive,
+            Math.round(living.withoutCar * (1 - OWNER_SHARE)),
+          ),
+          health.alive,
+          living.cost,
+        ),
+        health.alive,
+        living.cost,
+      ),
+      health.alive,
+    ),
     newEntries: budgeted,
   };
 }

@@ -5,14 +5,8 @@
  * accumulation it replaces, and the resulting lifespan has to be a human one.
  */
 import { describe, expect, it } from 'vitest';
-import { ageingLoss, DECLINE_STARTS } from './aging';
-import {
-  CHILD_SAFE_UNTIL,
-  cumulativeAgeingLoss,
-  npcDeathChance,
-  npcHealthAt,
-  npcPeakHealth,
-} from './npc';
+import { ageingLoss, cumulativeAgeingLoss, DECLINE_STARTS } from './aging';
+import { CHILD_SAFE_UNTIL, npcDeathChance, npcHealthAt, npcPeakHealth } from './npc';
 
 describe('cumulativeAgeingLoss', () => {
   it('equals a year-by-year accumulation of ageingLoss', () => {

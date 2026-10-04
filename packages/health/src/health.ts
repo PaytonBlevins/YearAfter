@@ -14,8 +14,47 @@
  * round: it starts at a number that rounds to never and climbs.
  */
 
+import { cumulativeAgeingLoss } from './aging';
 import type { HeldCondition } from './conditions';
 import { hazardWith } from './conditions';
+
+/* -------------------------------------------------------------------------- */
+/* Constitution (Ticket 0417)                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The peak an ordinary body reaches, measured: median vitality at twenty-five
+ * across 200 played lives was 79.
+ */
+export const TYPICAL_PEAK = 80;
+
+/**
+ * What this body was built like, read back from where it is and how old it is.
+ *
+ * Vitality is the only part of health nothing gives back, and after the peak
+ * it falls by exactly `cumulativeAgeingLoss` — so adding that back recovers the
+ * peak the body started from. It costs no state and cannot drift from the
+ * curve it is the inverse of.
+ *
+ * Ticket 0417 reads it to decide how fast a body heals (`naturalRecovery`).
+ */
+export function constitutionOf(vitality: number, age: number): number {
+  return vitality + cumulativeAgeingLoss(age);
+}
+
+/**
+ * How this body stands against an ordinary one of the same age.
+ *
+ * The one reading `deathChance` takes of health. Before 0417 it took the raw
+ * number, and the raw number falls with age for everybody — so the age curve
+ * was counted TWICE, once in the Gompertz term and again through a frailty
+ * multiplier that every seventy-five-year-old maxed out whatever they were
+ * built like. Measured: frailty at seventy-five ran 2.8 for the most robust
+ * fifth and 10.0 for the frailest; by then there was nothing left to tell them
+ * apart, and the whole population died between seventy and seventy-six.
+ */
+export const healthForAge = (health: number, age: number): number =>
+  health + cumulativeAgeingLoss(age);
 
 /* -------------------------------------------------------------------------- */
 /* Falling ill                                                                 */
@@ -78,6 +117,57 @@ export function illnessChance({ age, health, stress }: IllnessOdds): number {
  * months of not being right.
  */
 export const ILLNESS_COST: readonly [number, number] = [4, 14];
+
+/* -------------------------------------------------------------------------- */
+/* Getting better (Ticket 0417)                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * What heals on its own in a year, before a doctor.
+ *
+ * Moved here from the simulation's health phase, where it was a flat 3.4
+ * points a year for everybody — written, in its own docblock, as "what makes an
+ * acute illness a dip rather than a debt... without this the model would be a
+ * ratchet, and a ratchet reaches zero."
+ *
+ * It was a ratchet from sixty. Illness gets likelier every year after
+ * thirty-five and a flat recovery does not, so around sixty-five the average
+ * year's illness outran the year's healing and the deficit never came down
+ * again: median deficit 4 at forty, 15 at sixty, 25 at seventy, 33 at eighty.
+ * At seventy the median body's age curve said 55 and the player's bar said 26
+ * — MORE THAN HALF of the health lost by seventy was illness that never healed,
+ * and it was the same arithmetic for every body in the game.
+ *
+ * Two changes, and both are what a body actually does:
+ *
+ *  - A SHARE, not only a flat amount. A bigger debt comes down faster in
+ *    absolute terms, so the deficit has a level it settles at rather than a
+ *    road to zero. `HEAL_SHARE` of whatever is owed, on top of the old base.
+ *  - SCALED BY CONSTITUTION. A strong body heals faster and a frail one
+ *    slower, bounded both ways. Constitution, not current vitality: age already
+ *    reaches healing through illness getting likelier, and counting it here too
+ *    would be the double count 0417 exists to remove.
+ *
+ * The second half is small and it was nearly cut for being small. On one sample
+ * it moved the gap between the frailest and most robust fifths by a year, which
+ * looked like noise. Measured again on two disjoint samples it is consistent:
+ * 8 and 9 years with it, 7 and 7 without — and the build before this ticket read
+ * 6 and 4, so without it the fix sat exactly on the line it has to clear. One
+ * sample could not tell a small real effect from nothing (CORE_RULES 13.81).
+ *
+ * `HEALING_RANGE` does not bind for anybody the game generates (the frailest
+ * constitution is about 0.7 of typical); it is there so a later ticket that
+ * widens birth health cannot make somebody heal ten times faster.
+ */
+export const RECOVERY_BASE = 3.4;
+export const HEAL_SHARE = 0.3;
+export const HEALING_RANGE: readonly [number, number] = [0.5, 1.4];
+
+export function naturalRecovery(deficit: number, constitution: number): number {
+  const [low, high] = HEALING_RANGE;
+  const scale = Math.max(low, Math.min(high, constitution / TYPICAL_PEAK));
+  return (RECOVERY_BASE + Math.max(0, deficit) * HEAL_SHARE) * scale;
+}
 
 /**
  * The chance a year of illness leaves something permanent behind.
@@ -191,8 +281,36 @@ export const HEALTHY_ADULT = 62;
  */
 export const FRAILTY_SLOPE = 9;
 
+/**
+ * What a genuinely strong body is worth (Ticket 0408).
+ *
+ * THIS SIDE OF THE CURVE DID NOT EXIST, and the docblock above said so
+ * deliberately: "being well is not a bonus, it is the baseline". That was a
+ * reasonable call when the population had nothing above the baseline to
+ * measure — birth health ran p10 45 / p90 69 and almost nobody was meaningfully
+ * robust. 0408 widened the roll to p10 34 / p90 77 and the flatness became
+ * visible instead: across a SIXTY-EIGHT point range of birth health, median age
+ * at death moved from 70 to 74 — four years, and not even monotonically.
+ *
+ * That is the same finding 0212 recorded for NPCs and fixed only for them: at a
+ * cautious spread "the spread in life expectancy across a thousand
+ * constitutions was 4.9 years, which is another way of saying constitution did
+ * not exist". The player's own model still had it, because a one-sided
+ * multiplier can express "this body is failing" and cannot express "this body
+ * is unusually good".
+ *
+ * Bounded well short of immortality: the floor is a multiplier, the Gompertz
+ * curve underneath it still doubles every seven and a half years, and a robust
+ * ninety-year-old is still a ninety-year-old.
+ */
+export const ROBUST_FLOOR = 0.58;
+
 export function frailtyFactor(health: number): number {
-  if (health >= HEALTHY_ADULT) return 1;
+  if (health >= HEALTHY_ADULT) {
+    const above = Math.min(100, health) - HEALTHY_ADULT;
+    const room = 100 - HEALTHY_ADULT;
+    return Math.max(ROBUST_FLOOR, 1 - (above / room) * (1 - ROBUST_FLOOR));
+  }
   const below = HEALTHY_ADULT - health;
   return 1 + (below / HEALTHY_ADULT) ** 2 * FRAILTY_SLOPE;
 }
@@ -236,8 +354,19 @@ export interface MortalityOdds {
  */
 export function deathChance({ age, health, conditions }: MortalityOdds): number {
   const byAge = MORTALITY_AT_60 * 2 ** ((age - 60) / DOUBLES_EVERY);
-  const risk = (SUDDEN + byAge) * frailtyFactor(health) * hazardWith(conditions);
-  return Math.min(0.97, risk);
+  // Ticket 0417: the body FOR ITS AGE. The Gompertz term above is the age; this
+  // is everything else. See `healthForAge`.
+  const risk = (SUDDEN + byAge) * frailtyFactor(healthForAge(health, age)) * hazardWith(conditions);
+  /*
+    THE FLOOR IS A FLOOR (Ticket 0408). `frailtyFactor` can now return less than
+    one for a genuinely robust body, and without this clamp that discount would
+    also apply to `SUDDEN` — which is accidents. A strong constitution does not
+    make a car crash less likely, and `health.test.ts` caught it immediately:
+    a perfectly well twenty-year-old came out below the sudden-death floor the
+    model exists to guarantee. Robustness buys you odds against the things that
+    accumulate, and nothing at all against the things that do not.
+  */
+  return Math.min(0.97, Math.max(SUDDEN, risk));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -261,3 +390,45 @@ export const CHECKUP_RECOVERY: readonly [number, number] = [2, 6];
 
 /** A check-up also catches things: the chance it finds something treatable early. */
 export const CHECKUP_CATCHES = 0.35;
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0411 — a face that ages                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The age Looks stops holding still.
+ *
+ * Measured across 80 played lives before this ticket: **Looks ran 52 at
+ * eighteen, 52 at thirty and 52 at forty-five.** Nothing in the build has ever
+ * written that stat after character generation — not school, not work, not
+ * illness, not one of the 444 events in the catalog, which offer it +0 and −0 at
+ * forty. It is a bar the player has been looking at since 0106 and a constant,
+ * which is CORE_RULES 13.36 for the fourth time: a field nothing writes is not
+ * state, it is a promise.
+ *
+ * Twenty-eight rather than eighteen, because a twenty-two-year-old's face is not
+ * declining and a model that said so would be both wrong and unpleasant.
+ */
+export const LOOKS_HOLDS_UNTIL = 28;
+
+/**
+ * How a year of it lands, as whole points for `nudgeStats`.
+ *
+ * ONE POINT EVERY FEW YEARS, NOT A RATE, for the reason 0408 recorded and 0411
+ * ran into again: `curvedDelta` rounds to whole points, so a fractional decline
+ * floors to zero and never arrives. The interval is what carries the rate, and
+ * it is keyed on AGE so it consumes no randomness and a reload cannot change how
+ * somebody has aged.
+ *
+ * HEALTH SETS THE INTERVAL, which is the whole reason this belongs in the health
+ * package rather than being a bare age term. Somebody who has kept themselves
+ * well ages more slowly than somebody who has not, and that is a statement the
+ * build can now make honestly because 0408 gave constitution a real range. The
+ * curve does the rest: `curvedDelta` tapers a loss to nothing as it approaches
+ * zero, so this asymptotes rather than needing a floor bolted on.
+ */
+export function looksDrift(age: number, health: number): number {
+  if (age <= LOOKS_HOLDS_UNTIL) return 0;
+  const every = health >= HEALTHY_ADULT + 15 ? 4 : health >= HEALTHY_ADULT ? 3 : 2;
+  return age % every === 0 ? -1 : 0;
+}

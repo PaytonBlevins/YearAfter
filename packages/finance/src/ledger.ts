@@ -56,9 +56,13 @@ export type TransactionCategory =
   | 'tax'
   /** The cost of being alive. 0303 replaces how it is calculated, not this. */
   | 'living'
-  /** NO PRODUCER YET — v0.05 Ownership. */
+  /** Ticket 0501: a mortgage payment and a year of upkeep on an owned home. */
   | 'housing'
-  /** NO PRODUCER YET — v0.05 Ownership. */
+  /**
+   * Ticket 0504. What keeping a car costs: the loan payment, servicing and
+   * repairs (spec 179–182 merges repairs into maintenance), an inspection.
+   * Buying and selling the car itself is `property` — a transfer.
+   */
   | 'vehicle'
   /** A parent handing money over (0209), or anybody else. */
   | 'gift'
@@ -84,6 +88,21 @@ export type TransactionCategory =
    * the only money a childhood ever sees.
    */
   | 'oddJob'
+  /**
+   * Ticket 0601. What a business paid its owner: the profit above what it keeps
+   * back. Spec 23 keeps a business's own money inside the business, and this is
+   * the part that reaches the person. Earned, taxed and counted by a lender like
+   * a wage. What goes INTO a business is a `property` transfer, like a house.
+   */
+  | 'business'
+  /**
+   * Ticket 0502. What a partner brought home: their pay, or their pension once
+   * they retire. Not `salary`, because the player did not earn it and the
+   * Career screen's numbers are about the player's own work. The household
+   * pools it, the same way the household already paid for them (0303's
+   * `PARTNER_SHARE`). The tax on it is an ordinary `tax` row.
+   */
+  | 'partner'
   /** Tuition (0210b). Its own category because a degree is not a living cost. */
   | 'tuition'
   /**
@@ -101,6 +120,15 @@ export type TransactionCategory =
    * This is where it finally lands somewhere that keeps it.
    */
   | 'windfall'
+  /**
+   * Ticket 0501. Buying or selling a home — and since 0504 a vehicle: the
+   * deposit going out, the proceeds coming back. A TRANSFER, like
+   * `investment` — the money did not stop existing, it became a house — so the
+   * summary keeps it out of both income and outflow (spec 44–46's rule for investments, applied to property).
+   *
+   * What owning one COSTS is `housing`: the mortgage payment and the upkeep.
+   */
+  | 'property'
   /**
    * What could not be paid, because cash floors at zero (CORE_RULES 13.13).
    *
@@ -133,7 +161,11 @@ export type TransactionCategory =
  * here. A list that can be checked against the world does not need to be
  * remembered.
  */
-export const UNWRITTEN_CATEGORIES: readonly TransactionCategory[] = ['housing', 'vehicle'];
+// `housing` came off in Ticket 0501, which writes it: a mortgage payment and a
+// year of upkeep on a home the character owns. `vehicle` came off in 0504: a
+// car payment, a year's servicing and repairs, an inspection. The list is
+// empty now and stays declared for whatever spec 1677 adds next.
+export const UNWRITTEN_CATEGORIES: readonly TransactionCategory[] = [];
 
 export interface Transaction {
   /** Unique forever, like a timeline id (CORE_RULES 13.12). */

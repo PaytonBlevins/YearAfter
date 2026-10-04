@@ -14,7 +14,7 @@
  */
 
 import { clampStat, type StatValue } from '@yearafter/core';
-import { meetsLevel, type EducationLevel } from '@yearafter/education';
+import { licenseReach, meetsLevel, type EducationLevel } from '@yearafter/education';
 import type { CareerTrack, Job } from './jobs';
 import { TEMPLATES } from './jobs';
 
@@ -111,6 +111,8 @@ export interface Applicant {
    * logistics, which is the whole reason choosing a major is a decision.
    */
   readonly opens: readonly string[];
+  /** Licenses held, by id (Ticket 0406). */
+  readonly licenses: readonly string[];
   /** Years of paid work behind them, anywhere. */
   readonly experience: number;
   /** Standing on this job's own track. */
@@ -125,8 +127,10 @@ export type CannotApply =
   | 'already-doing-it'
   /** Nobody hires a stranger into the top of a ladder. */
   | 'out-of-reach'
-  /** Ticket 0210b. A licence or a degree you do not have. */
-  | 'needs-education';
+  /** Ticket 0210b. A license or a degree you do not have. */
+  | 'needs-education'
+  /** Ticket 0406. Specifically the license, which no degree substitutes for. */
+  | 'needs-license';
 
 export const CANNOT_APPLY_LABELS: Readonly<Record<CannotApply, string>> = {
   'too-young': 'You are too young for this one.',
@@ -134,6 +138,7 @@ export const CANNOT_APPLY_LABELS: Readonly<Record<CannotApply, string>> = {
   'already-doing-it': 'This is the job you have.',
   'out-of-reach': 'They would want somebody who has done the job below this.',
   'needs-education': "You don't have the qualification for this one.",
+  'needs-license': 'This one is licensed. You would need the qualification first.',
 };
 
 /**
@@ -202,6 +207,15 @@ export function hireChance(job: Job, applicant: Applicant): number {
   // And the right degree for this field is worth real money. Spec 1821 makes a
   // major the one decision college asks; this is what makes it a decision.
   const relevant = applicant.opens.includes(job.track) ? 0.2 : 0;
+  /*
+    Ticket 0406. A LICENCE IS WORTH MORE THAN A RELEVANT DEGREE AND LESS THAN
+    BOTH. The degree bonus above says "you studied the right thing"; this says
+    "you are legally allowed to do this and they do not have to train you",
+    which is a stronger claim and is why a licensed plumber walks into work a
+    business graduate does not. They stack on purpose — a nursing degree plus
+    the practitioner license should beat either alone.
+  */
+  const licensed = licenseReach(applicant.licenses, job.track) >= 0 ? 0.26 : 0;
 
   // Measured at 0.42 and rejected: the hire rate came out at 72–79% and did not
   // move between a driven player and one who barely tried, which makes applying
@@ -212,8 +226,12 @@ export function hireChance(job: Job, applicant: Applicant): number {
   // this is the second enforcement point rather than the only one — CORE_RULES
   // 13.15, a gate guards what it hands back as well as what it lets through.
   if (!meetsLevel(applicant.education, job.requires)) return 0;
+  // The second hard door, checked here too — CORE_RULES 13.15, a gate guards
+  // what it hands back as well as what it lets through.
+  if (job.license !== undefined && !applicant.licenses.includes(job.license)) return 0;
 
-  const chance = base + climb + charm + smarts + steady + known + seen + paper + relevant;
+  const chance =
+    base + climb + charm + smarts + steady + known + seen + paper + relevant + licensed;
 
   // Never certain in either direction, for the reason `willThey` gives: an
   // employer who always says yes is a vending machine, and one who never does is
@@ -246,6 +264,28 @@ export const TRACK_WANTS: Readonly<
   care: { charisma: 0.16, smarts: 0.12, discipline: 0.16 },
   safety: { charisma: 0.1, smarts: 0.12, discipline: 0.22 },
   creative: { charisma: 0.18, smarts: 0.2, discipline: 0.06 },
+  // Ticket 0403. Same rule as above — every row sums to 0.44, so no track is
+  // easier than another overall.
+  tech: { charisma: 0.04, smarts: 0.34, discipline: 0.06 },
+  finance: { charisma: 0.08, smarts: 0.26, discipline: 0.1 },
+  // The advocate's field: the argument has to land, not just be correct.
+  legal: { charisma: 0.14, smarts: 0.26, discipline: 0.04 },
+  medicine: { charisma: 0.12, smarts: 0.22, discipline: 0.1 },
+  // Front of house again, the same as retail and food.
+  hospitality: { charisma: 0.28, smarts: 0.06, discipline: 0.1 },
+  /*
+    Ticket 0406. The three weights still sum to roughly 0.44 everywhere, which
+    is the rule this table has kept since 0210: no track is EASIER, they are
+    easier for different people.
+  */
+  // Somebody else's animal, and an owner who cannot be reasoned with.
+  veterinary: { charisma: 0.16, smarts: 0.2, discipline: 0.08 },
+  // Millimetres, all day, in a space the size of a mouth.
+  dental: { charisma: 0.12, smarts: 0.16, discipline: 0.16 },
+  // The last person who checks, so it is the checking that is hired.
+  pharmacy: { charisma: 0.08, smarts: 0.18, discipline: 0.18 },
+  // Half the job is the drawing and half is the client meeting.
+  architecture: { charisma: 0.14, smarts: 0.2, discipline: 0.1 },
 };
 
 /**

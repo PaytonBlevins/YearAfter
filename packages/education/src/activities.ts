@@ -26,13 +26,7 @@ import {
   type SchoolStageId,
 } from '@yearafter/content';
 import { livingParents, type Household, type WealthBand } from '@yearafter/relationships';
-import {
-  hasJoined,
-  isInSchool,
-  type EducationState,
-  type EnrolledActivity,
-  EFFORT_HOURS,
-} from './school';
+import { hasJoined, type EducationState, type EnrolledActivity, EFFORT_HOURS } from './school';
 import { gigHours } from './gigs';
 import { STARTING_STANDING } from './standing';
 
@@ -112,7 +106,7 @@ export function activityOffers(
   state: EducationState,
   context: ActivityContext,
 ): readonly ActivityOffer[] {
-  if (!isInSchool(state)) return [];
+  if (activityStageOf(state, context.age) !== context.stage) return [];
   return ACTIVITIES.filter((activity) => activity.requires.stages.includes(context.stage))
     .map((activity) => {
       const joined = hasJoined(state, activity.id);
@@ -130,6 +124,26 @@ export function activityOffers(
       if (Boolean(a.unavailable) !== Boolean(b.unavailable)) return a.unavailable ? 1 : -1;
       return a.activity.name.localeCompare(b.activity.name);
     });
+}
+
+/** Ticket 0416. The age at which the adult list opens. */
+export const ADULT_ACTIVITIES_FROM = 18;
+
+/**
+ * Which list this character chooses from, if any.
+ *
+ * K-12 reads the school stage, as it always has. Anybody of eighteen or over
+ * who is not in K-12 — at college, working, or neither — reads `adult`, which is
+ * Ticket 0416's: before it, this question had no answer after school, and
+ * `education.activities` was emptied at graduation and could never be filled
+ * again. A dropout of sixteen has neither, which is the one honest gap left:
+ * they are too old for the school's list and too young for the adult one.
+ */
+export function activityStageOf(state: EducationState, age: number): SchoolStageId | undefined {
+  if (state.stage === 'elementary' || state.stage === 'middle' || state.stage === 'high') {
+    return state.stage;
+  }
+  return age >= ADULT_ACTIVITIES_FROM ? 'adult' : undefined;
 }
 
 export function join(state: EducationState, activityId: string, age: number): EducationState {

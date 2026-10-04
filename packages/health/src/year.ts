@@ -39,6 +39,8 @@ import { CONDITIONS, ceilingWith, findCondition, type HeldCondition } from './co
 import {
   ILLNESS_COST,
   INJURY_COST,
+  constitutionOf,
+  naturalRecovery,
   INJURY_PERMANENT,
   deathChance,
   illnessChance,
@@ -63,7 +65,11 @@ export interface HealthYearInput {
   readonly conditions: readonly HeldCondition[];
   readonly athlete: boolean;
   readonly hazardous: boolean;
-  /** Points of deficit healed this year. */
+  /**
+   * Points of deficit healed this year ON TOP of what the body heals on its own
+   * — a check-up. Ticket 0417 moved natural healing in here (`naturalRecovery`),
+   * because it now depends on the body and the debt, which this function has.
+   */
   readonly recovery: number;
   /**
    * Draws, spent in this order and only when needed:
@@ -129,7 +135,12 @@ export function runHealthYear(input: HealthYearInput): HealthYearResult {
   // Ageing first, because it is the only thing that happens to everybody and
   // everything below reads the health it leaves behind.
   const vitality = Math.max(0, Math.min(100, input.vitality - ageingLoss(input.age)));
-  let deficit = Math.max(0, input.deficit - input.recovery);
+  // Ticket 0417. What this body was built like, which decides how fast it heals.
+  const constitution = constitutionOf(vitality, input.age);
+  let deficit = Math.max(
+    0,
+    input.deficit - naturalRecovery(input.deficit, constitution) - input.recovery,
+  );
   const soFar = () => Math.max(0, Math.min(ceilingWith(conditions), vitality) - deficit);
 
   /* -- ill? --------------------------------------------------------------- */

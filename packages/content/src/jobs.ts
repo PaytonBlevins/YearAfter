@@ -28,6 +28,15 @@ export interface JobEntry {
   readonly requires: string;
   /** Soft: a heavier door without it, never a shut one (spec 119). */
   readonly prefers: string;
+  /**
+   * A license id this job legally requires, on top of any degree (Ticket 0406).
+   *
+   * Loose (`string`) for the same reason `track` and `requires` are: this
+   * package must not learn what a license IS, only that a row can name one.
+   * `@yearafter/careers` narrows it and the content validator checks it
+   * resolves.
+   */
+  readonly license?: string;
   readonly demand: number;
   readonly blurb: string;
 }

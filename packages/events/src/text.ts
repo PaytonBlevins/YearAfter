@@ -152,6 +152,22 @@ export interface EventPerson {
   readonly name: string;
   readonly sex: 'male' | 'female';
   readonly kind: 'peer' | 'teacher';
+  /**
+   * Whether this is somebody the character is actually friends with.
+   *
+   * Ticket 0413, and it is the binding half of a gate. 0412 gave eligibility
+   * `hasFriend` and `friendshipYearsAtLeast`; an event can therefore require a
+   * friend, and `{kid}` would still have bound whoever the draw landed on —
+   * which for a working adult is usually a colleague met last year. A line
+   * reading "you and {kid} have been friends since school" naming somebody met
+   * eleven months ago is 0207's `partnered` bug exactly: the gate guarantees
+   * the situation and the token names the wrong person in it.
+   *
+   * Carried on the narrow shape rather than computed here, because "friend" is
+   * defined once, in the phase that builds this context, and two definitions
+   * would be free to disagree (CORE_RULES 13.19).
+   */
+  readonly friend: boolean;
 }
 
 const TOKEN_PATTERN = /\{([a-zA-Z0-9]+)\}/g;
@@ -225,11 +241,27 @@ export function bindPersonNames(
   const peers = context.people.filter((person) => person.kind === 'peer');
   const teachers = context.people.filter((person) => person.kind === 'teacher');
 
-  /** One of the player's own people, if there is one left to pick. */
+  /**
+   * One of the player's own people, if there is one left to pick.
+   *
+   * FRIENDS FIRST (Ticket 0413), which is 0206's "real people first" taken one
+   * step further for the same reason. Two things come out of it:
+   *
+   *  - an event gated on `hasFriend` can trust its own copy, because the gate
+   *    guarantees a friend is in this pool and this picks one;
+   *  - and every other event that names somebody names the person the character
+   *    actually knows rather than whichever of five acquaintances the draw
+   *    landed on, which is strictly better content everywhere.
+   *
+   * Still a draw rather than "the closest", because always naming the same
+   * person is a rule the player can read off the screen — it is a draw from the
+   * friends when there are any, and from everybody when there are not.
+   */
   const takeReal = (pool: readonly EventPerson[]): BoundPerson | undefined => {
     const free = pool.filter((person) => !usedIds.has(person.id));
     if (free.length === 0) return undefined;
-    const person = source.pick(free);
+    const friends = free.filter((person) => person.friend);
+    const person = source.pick(friends.length > 0 ? friends : free);
     usedIds.add(person.id);
     taken.add(person.name);
     return { name: person.name, sex: person.sex, npcId: person.id };

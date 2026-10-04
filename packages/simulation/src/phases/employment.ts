@@ -36,6 +36,7 @@ import {
   type Job,
 } from '@yearafter/careers';
 import { clampStat, dollars, type StatValue } from '@yearafter/core';
+import { WORKING_AGE, idleYearDrift, workYearGrowth, type GrowthStat } from '@yearafter/careers';
 import type { Household } from '@yearafter/relationships';
 import type { RandomStream } from '../rng/rng';
 import { stableUnit } from '../rng/rng';
@@ -48,6 +49,11 @@ export interface EmploymentPhaseInput {
   readonly family: Household;
   readonly discipline: number;
   readonly smarts: number;
+  /**
+   * Ticket 0411. Read for the same reason `discipline` and `smarts` are — the
+   * work is made of all three and the table that says so covers all three.
+   */
+  readonly charisma: number;
 }
 
 export interface EmploymentPhaseOutput {
@@ -83,6 +89,17 @@ export interface EmploymentPhaseOutput {
   readonly earned: number;
   /** Hidden capacity the job consumed, for the stress phase (spec 661). */
   readonly demand: number;
+  /**
+   * Ticket 0411. Whole points the year's work is worth, for `advanceYear` to
+   * apply through `nudgeStats`.
+   *
+   * REPORTED, NOT APPLIED, exactly like `transactions`: a phase says what it
+   * moved and `advanceYear` moves it. `phases/education.ts` has returned
+   * `statDeltas` on the same terms since 0204, and this is the adult half of
+   * the same idea — school was the only thing in the build that developed a
+   * character, and it stops at eighteen.
+   */
+  readonly statDeltas: Partial<Record<GrowthStat, number>>;
 }
 
 export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutput {
@@ -93,7 +110,30 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
   const held = employment.job;
 
   if (!held) {
-    return { employment, lines, records, transactions, takeHome: 0, earned: 0, demand: 0 };
+    /*
+      Ticket 0411. A YEAR WITH NOTHING TO SHOW UP FOR IS NOT A YEAR THAT DOES
+      NOTHING. 0407 made unemployment reachable on purpose and the only thing it
+      cost was money; this is the other half. Idle years are derived from the
+      history rather than stored — `JobPast.to` is the age they left, and a
+      character who has never worked has been idle since `WORKING_AGE` — because
+      a second field saying the same thing is a second field to keep in step
+      (CORE_RULES 13.19).
+    */
+    const lastLeft = employment.history.reduce(
+      (latest, row) => Math.max(latest, row.to),
+      WORKING_AGE,
+    );
+    return {
+      employment,
+      lines,
+      records,
+      transactions,
+      takeHome: 0,
+      earned: 0,
+      demand: 0,
+      statDeltas:
+        input.age > WORKING_AGE ? idleYearDrift(input.discipline, input.age - lastLeft) : {},
+    };
   }
 
   const job = findJob(held.jobId);
@@ -109,6 +149,7 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
       takeHome: 0,
       earned: 0,
       demand: 0,
+      statDeltas: {},
     };
   }
 
@@ -248,6 +289,12 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
     };
   }
 
+  /*
+    Ticket 0411. WHAT THE YEAR TAUGHT THEM, computed from the year that actually
+    happened rather than from the job title: `performance` is how it went, and
+    `years` is how long they have been in this chair — which a promotion above
+    has just reset, on purpose. See `workYearGrowth`.
+  */
   return {
     employment,
     lines,
@@ -256,6 +303,14 @@ export function runEmployment(input: EmploymentPhaseInput): EmploymentPhaseOutpu
     takeHome: parts.takeHome,
     earned,
     demand: job.demand,
+    statDeltas: workYearGrowth({
+      track,
+      smarts: input.smarts,
+      discipline: input.discipline,
+      charisma: input.charisma,
+      performance,
+      years,
+    }),
   };
 }
 

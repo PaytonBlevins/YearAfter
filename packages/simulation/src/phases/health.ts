@@ -28,6 +28,7 @@ import type { NewLifeRecord, TimelineKind } from '@yearafter/character';
 import {
   CHECKUP_RECOVERY,
   findCondition,
+  looksDrift,
   runHealthYear,
   type HeldCondition,
   type YearEvent,
@@ -37,15 +38,12 @@ import { dollars } from '@yearafter/core';
 import type { NewTransaction } from '@yearafter/finance';
 import { treatmentCostFor } from '../doctor';
 
-/**
- * How much health comes back on its own in an ordinary year.
- *
- * Small, and it is what makes an acute illness a dip rather than a debt: lose
- * nine points to a bad winter at thirty and it is back inside three years,
- * unless something else happens first. Without this the model would be a
- * ratchet, and a ratchet reaches zero.
- */
-export const NATURAL_RECOVERY = 3.4;
+/*
+  NATURAL_RECOVERY lived here until Ticket 0417, as a flat 3.4 a year. It is
+  `naturalRecovery` in the health package now, because it depends on the body
+  and on what is owed — see its docblock for why a flat amount became a ratchet
+  after sixty. What is left here is the check-up, which is the player's.
+*/
 
 /** Tracks in which a year of work can genuinely hurt you. Spec 541–543. */
 export const HAZARDOUS_TRACKS: readonly string[] = ['trade', 'labour', 'food', 'transport', 'care'];
@@ -90,6 +88,14 @@ export interface HealthPhaseOutput {
    * presses, not retroactively by the year it turned up in.
    */
   readonly transactions: readonly NewTransaction[];
+  /**
+   * Ticket 0411. Whole points the year did to how they look.
+   *
+   * Reported rather than applied, like everything else a phase produces. Here
+   * rather than in the employment phase because a career is not what ages a
+   * face — the age curve and the body it runs on both live here.
+   */
+  readonly statDeltas: Partial<Record<'looks', number>>;
 }
 
 export function runHealth(input: HealthPhaseInput): HealthPhaseOutput {
@@ -106,11 +112,9 @@ export function runHealth(input: HealthPhaseInput): HealthPhaseOutput {
   const draws: number[] = [];
   for (let i = 0; i < 24; i += 1) draws.push(input.stream.next());
 
-  const recovery =
-    NATURAL_RECOVERY +
-    (input.checkedUp
-      ? CHECKUP_RECOVERY[0] + draws[23]! * (CHECKUP_RECOVERY[1] - CHECKUP_RECOVERY[0])
-      : 0);
+  const recovery = input.checkedUp
+    ? CHECKUP_RECOVERY[0] + draws[23]! * (CHECKUP_RECOVERY[1] - CHECKUP_RECOVERY[0])
+    : 0;
 
   const result = runHealthYear({
     age: input.age,
@@ -135,6 +139,10 @@ export function runHealth(input: HealthPhaseInput): HealthPhaseOutput {
     ...(died && died.kind === 'died' ? { cause: died.cause } : {}),
     lines: capped(result.events.flatMap((event) => lineFor(event, input.age))),
     transactions: treatmentBill(input.conditions),
+    statDeltas: (() => {
+      const drift = looksDrift(input.age, result.health);
+      return drift === 0 ? {} : { looks: drift };
+    })(),
     /*
       Only GRAVE diagnoses, and deliberately not the year's colds.
 
@@ -276,7 +284,18 @@ const CLEARED_LINES: readonly string[] = [
   'Stopped thinking about your {what} at some point and never started again.',
 ];
 
-const HURT_LINES: readonly string[] = [
+/**
+ * Exported since Ticket 0409, so the balance tests can recognise an injury
+ * without guessing at one.
+ *
+ * `health.test.ts` detected injuries with a regex over feed text — `hurt`,
+ * `fall`, `accident` — which is a proxy for this list and drifts away from it
+ * every time anybody writes copy. 0405 caught it matching "starting in the
+ * fall" in a college acceptance; 0409 gave adults their first injury lines and
+ * it started counting a bad back at forty as a schoolchild's sports injury.
+ * The list itself cannot drift from itself.
+ */
+export const HURT_LINES: readonly string[] = [
   'Went down hard and heard something pop.',
   'Got hurt doing something you have done a thousand times.',
   'One wrong move and that was the rest of the season.',

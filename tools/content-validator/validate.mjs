@@ -711,7 +711,20 @@ if (existsSync(eventsPath)) {
   try {
     const events = JSON.parse(readFileSync(eventsPath, 'utf8')).entries ?? [];
     const byId = new Map(events.map((event) => [event.id, event]));
-    const categories = new Set(['family', 'school', 'friendship', 'random', 'talent']);
+    // Ticket 0409 opened three more to authored content. `career` and
+    // `education` were reserved for systemic decisions by 0402 and 0405 and the
+    // catalog was childhood-shaped, which is no longer true: an adult now gets
+    // authored events about work, a diagnosis and losing somebody.
+    const categories = new Set([
+      'family',
+      'school',
+      'friendship',
+      'random',
+      'talent',
+      'career',
+      'health',
+      'loss',
+    ]);
     const types = new Set(['passive', 'decision', 'opportunity', 'followUp']);
     const rarities = new Set([
       'common',
@@ -1201,7 +1214,7 @@ if (existsSync(activitiesPath)) {
   const rel = 'packages/content/data/activities.json';
   try {
     const activities = JSON.parse(readFileSync(activitiesPath, 'utf8')).entries ?? [];
-    const stages = ['elementary', 'middle', 'high'];
+    const stages = ['elementary', 'middle', 'high', 'adult'];
 
     for (const activity of activities) {
       // Money never moves without a sentence saying where it went. This is the
@@ -1264,7 +1277,10 @@ if (existsSync(activitiesPath)) {
 // `TICKET` is the most recent ticket to ship. Bump it when one does.
 // ---------------------------------------------------------------------------
 {
-  const TICKET = '0310';
+  const TICKET = '0604';
+  // Tickets the player chose to skip over for now. They are still ahead, in
+  // spirit, whatever their number says; each is built before its row is wired.
+  const DEFERRED = new Set(['0508']);
   const rank = (value) =>
     /^\d{4}$/.test(value)
       ? Number(value)
@@ -1278,7 +1294,7 @@ if (existsSync(activitiesPath)) {
     const text = readFileSync(full, 'utf8');
     for (const match of text.matchAll(/ticket:\s*'(\d{4}|v\d\.\d\d)'/g)) {
       const named = match[1];
-      if (rank(named) <= now) {
+      if (!DEFERRED.has(named) && rank(named) <= now) {
         fail(
           rel,
           `a row is still labelled "Not built yet" for ticket ${named}, which has already shipped (current: ${TICKET}). Wire the row up or move the label.`,

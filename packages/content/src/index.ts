@@ -74,6 +74,43 @@ export const findCity = (id: string): CityEntry | undefined => CITIES_BY_ID.get(
  */
 export const costIndexOf = (id: string): number => CITIES_BY_ID.get(id)?.costIndex ?? 1;
 
+/**
+ * Ticket 0501. The state or region a city is in, as a stable key and a name.
+ *
+ * Spec 145: *"Only show homes in the player's current state."* The key joins
+ * country and region so two countries' regions with the same code never
+ * collide.
+ */
+export function regionOf(id: string): { readonly key: string; readonly name: string } {
+  const city = CITIES_BY_ID.get(id);
+  if (!city) return { key: 'unknown', name: 'Unknown' };
+  return { key: `${city.countryCode}:${city.regionCode}`, name: city.region };
+}
+
+/**
+ * Ticket 0501. The cost index of a whole region: the plain mean of its cities.
+ *
+ * Unweighted on purpose. A state's housing market is not New York City just
+ * because most of its people live there, and weighting by population would
+ * price a house upstate as though it were in Manhattan.
+ */
+export function regionCostIndex(id: string): number {
+  const home = regionOf(id).key;
+  const inRegion = CITIES.filter((city) => `${city.countryCode}:${city.regionCode}` === home);
+  if (inRegion.length === 0) return 1;
+  return inRegion.reduce((sum, city) => sum + city.costIndex, 0) / inRegion.length;
+}
+
+/**
+ * Ticket 0503. The same mean, from a region's key — an owned home keeps the
+ * key of where it is, not a city, and its rent is set by the region.
+ */
+export function regionCostIndexOf(regionKey: string): number {
+  const inRegion = CITIES.filter((city) => `${city.countryCode}:${city.regionCode}` === regionKey);
+  if (inRegion.length === 0) return 1;
+  return inRegion.reduce((sum, city) => sum + city.costIndex, 0) / inRegion.length;
+}
+
 export function describeCity(id: string): string {
   const city = CITIES_BY_ID.get(id);
   if (!city) return 'Unknown';
@@ -128,3 +165,11 @@ export * from './advice';
 
 /** Ticket 0210 — real jobs, with salaries and ladders. */
 export * from './jobs';
+
+/** Ticket 0501 — the kinds of home a character can buy and live in. */
+export * from './homes';
+export * from './vehicles';
+export * from './renovations';
+export * from './valuables';
+export * from './auctions';
+export * from './businesses';

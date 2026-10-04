@@ -173,6 +173,22 @@ export function FinancesScreen() {
           value={invested > 0 ? money(invested) : 'Start'}
           onPress={() => push({ screen: 'investments', title: 'Investments' })}
         />
+        {/*
+          Ticket 0501. Spec 19's "assets", the last of its rows to arrive: what
+          owned property is worth now. The mortgage is counted in net worth
+          above, so this row is the house and the net-worth row is the equity.
+        */}
+        {Number(books.assets) > 0 ? (
+          <>
+            <RowDivider />
+            <ListRow
+              title="Property"
+              subtitle="What your home is worth now"
+              value={money(Number(books.assets))}
+              onPress={() => push({ screen: 'homes', title: 'Homes' })}
+            />
+          </>
+        ) : null}
         {/* Ticket 0307. Spec 19 lists liabilities; this is where they live. */}
         <ListRow
           title="Loans"

@@ -50,12 +50,38 @@ import {
 import type { GameState } from './game-state';
 
 /** A character who worked, earned, and is old enough to have choices. */
+/** Answers whatever is in the queue, so the returned state can be advanced. */
+function answerEverything(state: GameState): GameState {
+  let next = state;
+  let guard = 0;
+  while (next.pending.length > 0 && (guard += 1) < 12) {
+    const decision = next.pending[0];
+    const choice = decision?.choices[0];
+    if (!decision || !choice) break;
+    const result = decide(next, decision.eventId, choice.id);
+    if (!result.ok) break;
+    next = result.value.state;
+  }
+  return next;
+}
+
 function working(seed: string, untilAge = 58): GameState {
   let state = createNewGame({ seed });
   for (let step = 0; step < 140; step += 1) {
     state = advanceYear(state).state;
     if (state.health.diedAtAge !== undefined) break;
-    if (state.player.age >= untilAge) break;
+    /*
+      ANSWERS THE YEAR BEFORE IT STOPS (Ticket 0409).
+
+      This broke on `untilAge` before settling that year's decisions, so it
+      handed back a state with an open question in the queue — and `advanceYear`
+      refuses to advance past one, so the caller's next year was a silent no-op:
+      no pay, no contribution, and an assertion that reads as the retirement pot
+      being broken. 0406 found the identical shortcut in `investing.test.ts` and
+      fixed it there; it was harmless here for exactly as long as the catalog
+      had nothing to ask an adult, which 0409 changed.
+    */
+    if (state.player.age >= untilAge) return answerEverything(state);
     let guard = 0;
     while (state.pending.length > 0 && (guard += 1) < 12) {
       const decision = state.pending[0];
@@ -373,10 +399,11 @@ describe('a year with an account in it', () => {
 
   it('knows what a job would put in before a year runs', () => {
     let state = working('ret-preview', 40);
-    if (state.health.diedAtAge !== undefined || !state.employment.job) return;
+    const jobId = state.employment.job?.jobId;
+    if (state.health.diedAtAge !== undefined || jobId === undefined) return;
     state = setContribution(state, 0.06);
     const preview = contributionPreview(state);
-    const job = findJob(state.employment.job.jobId);
+    const job = findJob(jobId);
     const benefit = job ? benefitFor(job.template) : undefined;
     if (!benefit || benefit.match <= 0) return;
     expect(preview.own).toBeGreaterThan(0);

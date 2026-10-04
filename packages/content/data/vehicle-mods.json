@@ -1,0 +1,299 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "mod.wheels.alloy",
+      "slot": "wheels",
+      "name": "Alloy wheels",
+      "price": [
+        1200,
+        6000
+      ],
+      "recovery": 0.35,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "A set of aftermarket alloys and new tires."
+    },
+    {
+      "id": "mod.wheels.forged",
+      "slot": "wheels",
+      "name": "Forged wheels",
+      "price": [
+        3500,
+        14000
+      ],
+      "recovery": 0.35,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "Lighter, stronger, and the first thing anybody notices."
+    },
+    {
+      "id": "mod.finish.respray",
+      "slot": "finish",
+      "name": "Full respray",
+      "price": [
+        3000,
+        15000
+      ],
+      "recovery": 0.3,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "A new color, done properly, door jambs and all."
+    },
+    {
+      "id": "mod.finish.candy",
+      "slot": "finish",
+      "name": "Custom candy paint",
+      "price": [
+        6000,
+        25000
+      ],
+      "recovery": 0.2,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "Deep, layered, and impossible to match after a scrape."
+    },
+    {
+      "id": "mod.finish.wrap-matte-black",
+      "slot": "finish",
+      "name": "Matte black wrap",
+      "price": [
+        2800,
+        7000
+      ],
+      "recovery": 0.1,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "Comes off in an afternoon if you change your mind."
+    },
+    {
+      "id": "mod.finish.wrap-satin-gray",
+      "slot": "finish",
+      "name": "Satin gray wrap",
+      "price": [
+        2800,
+        7000
+      ],
+      "recovery": 0.1,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "Comes off in an afternoon if you change your mind."
+    },
+    {
+      "id": "mod.finish.wrap-stripes",
+      "slot": "finish",
+      "name": "Racing stripes",
+      "price": [
+        600,
+        2500
+      ],
+      "recovery": 0.1,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "Two stripes, hood to trunk."
+    },
+    {
+      "id": "mod.tint.windows",
+      "slot": "tint",
+      "name": "Window tint",
+      "price": [
+        250,
+        700
+      ],
+      "recovery": 0.1,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "Darker glass all around, to the legal limit."
+    },
+    {
+      "id": "mod.exhaust.cat-back",
+      "slot": "exhaust",
+      "name": "Cat-back exhaust",
+      "price": [
+        900,
+        6000
+      ],
+      "recovery": 0.25,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": true,
+      "luxuryOnly": false,
+      "blurb": "Louder on purpose."
+    },
+    {
+      "id": "mod.intake.cold-air",
+      "slot": "intake",
+      "name": "Cold air intake",
+      "price": [
+        300,
+        1200
+      ],
+      "recovery": 0.1,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": true,
+      "luxuryOnly": false,
+      "blurb": "A little more air, and a lot more noise under the hood."
+    },
+    {
+      "id": "mod.suspension.lowering",
+      "slot": "suspension",
+      "name": "Lowering springs",
+      "price": [
+        400,
+        1500
+      ],
+      "recovery": 0.15,
+      "strain": 1.0,
+      "grip": 1.0,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "An inch and a half lower. Speed bumps become a concern."
+    },
+    {
+      "id": "mod.suspension.coilovers",
+      "slot": "suspension",
+      "name": "Coilovers",
+      "price": [
+        1500,
+        6000
+      ],
+      "recovery": 0.25,
+      "strain": 1.0,
+      "grip": 0.95,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "Adjustable ride height and damping. Firmer everywhere."
+    },
+    {
+      "id": "mod.ecu.stage-1",
+      "slot": "ecu",
+      "name": "Stage 1 tune",
+      "price": [
+        500,
+        2500
+      ],
+      "recovery": 0.0,
+      "strain": 1.08,
+      "grip": 1.0,
+      "combustionOnly": true,
+      "luxuryOnly": false,
+      "blurb": "More power from the same engine, and a warranty that won't cover it."
+    },
+    {
+      "id": "mod.ecu.stage-2",
+      "slot": "ecu",
+      "name": "Stage 2 tune",
+      "price": [
+        1200,
+        5000
+      ],
+      "recovery": 0.0,
+      "strain": 1.15,
+      "grip": 1.0,
+      "combustionOnly": true,
+      "luxuryOnly": false,
+      "blurb": "Needs the intake and exhaust to breathe. Works the engine hard."
+    },
+    {
+      "id": "mod.brakes.big-brake",
+      "slot": "brakes",
+      "name": "Big brake kit",
+      "price": [
+        1800,
+        7000
+      ],
+      "recovery": 0.3,
+      "strain": 1.0,
+      "grip": 0.8,
+      "combustionOnly": false,
+      "luxuryOnly": false,
+      "blurb": "Bigger rotors, six-piston calipers. Stops like it means it."
+    },
+    {
+      "id": "mod.brakes.carbon",
+      "slot": "brakes",
+      "name": "Carbon-ceramic brakes",
+      "price": [
+        8000,
+        18000
+      ],
+      "recovery": 0.35,
+      "strain": 1.0,
+      "grip": 0.75,
+      "combustionOnly": false,
+      "luxuryOnly": true,
+      "blurb": "Fade-free, dust-free, and the price of a used car."
+    },
+    {
+      "id": "mod.engine.turbo",
+      "slot": "engine",
+      "name": "Turbo upgrade",
+      "price": [
+        4000,
+        20000
+      ],
+      "recovery": 0.3,
+      "strain": 1.15,
+      "grip": 1.0,
+      "combustionOnly": true,
+      "luxuryOnly": false,
+      "blurb": "A bigger turbo and everything it needs to survive it."
+    },
+    {
+      "id": "mod.engine.rebuild",
+      "slot": "engine",
+      "name": "Performance rebuild",
+      "price": [
+        7000,
+        35000
+      ],
+      "recovery": 0.35,
+      "strain": 1.1,
+      "grip": 1.0,
+      "combustionOnly": true,
+      "luxuryOnly": false,
+      "blurb": "Forged internals, built by hand. More power and built to take it."
+    },
+    {
+      "id": "mod.tarbus",
+      "slot": "tarbus",
+      "name": "Tarbus conversion",
+      "price": [
+        0,
+        0
+      ],
+      "priceShare": 0.4,
+      "recovery": 0.7,
+      "strain": 1.05,
+      "grip": 0.85,
+      "combustionOnly": false,
+      "luxuryOnly": true,
+      "covers": [
+        "wheels",
+        "exhaust",
+        "intake",
+        "suspension",
+        "ecu",
+        "engine"
+      ],
+      "blurb": "Shipped to the Tarbus works and returned with their engine, their wheels and their badge."
+    }
+  ]
+}

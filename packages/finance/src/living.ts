@@ -144,7 +144,39 @@ export function creep(standard: number, target: number): number {
  * with no producer — the mistake CORE_RULES 13.36 was written about, and which
  * `UNWRITTEN_CATEGORIES` in the ledger is already carrying five of.
  */
-export type Housing = 'withFamily' | 'ownPlace';
+export type Housing = 'withFamily' | 'ownPlace' | 'owned';
+
+/**
+ * Ticket 0501. What living in a home you own costs, as a share of renting —
+ * the life around the roof, not the roof.
+ *
+ * Above `AT_HOME_SHARE` because an owner pays the bills a parent was paying:
+ * power, water, the things that break. The roof itself — the mortgage, the
+ * taxes, the upkeep — is charged by the home, not here, so this is what is left
+ * of the old rent once the house is paying for its own walls.
+ *
+ * Ticket 0502 moved it from 0.45, which said the roof was more than half of
+ * everything a renting household spends. Shelter is nearer a quarter to a
+ * third of US household spending, so every owner was handed the difference
+ * to save: once 0502 stopped couples overspending, the median sixty-five to
+ * seventy-four-year-old was worth $722,000 against a US figure of about
+ * $410,000. At 0.7 it reads $340,000–$415,000. The 0.45 had been balancing
+ * the overspend it was set beside — CORE_RULES 13.88.
+ */
+export const OWNER_SHARE = 0.7;
+
+/**
+ * Ticket 0504. The share of a household's spending that goes on buying and
+ * keeping a car — the purchase, the finance charges, the servicing and the
+ * repairs. Fuel, insurance and registration stay in the living bill (spec
+ * 179–182 removes them as mechanics).
+ *
+ * The BLS Consumer Expenditure Survey puts vehicle purchases at about 7% of
+ * what a US household spends and maintenance and repairs near 1.5%. A
+ * household that owns a car stops paying this share through the living bill,
+ * because the car charges it directly.
+ */
+export const VEHICLE_SHARE = 0.085;
 
 /**
  * What living at home costs, as a share of living alone.
@@ -206,6 +238,19 @@ export interface LivingInput {
   /** The ages of the dependent children at home. A teenager costs more. */
   readonly childAges: readonly number[];
   readonly housing: Housing;
+  /**
+   * Ticket 0501. What an owned home costs this year — mortgage and upkeep —
+   * whole dollars. Read only when `housing` is `owned`; see `livingCostFor`.
+   */
+  readonly housingCost?: number;
+  /**
+   * Ticket 0504. What the household's cars cost this year — loan payments,
+   * servicing and repairs — whole dollars. Absent or zero for somebody with no
+   * car, which is everybody written before 0504.
+   */
+  readonly vehicleCost?: number;
+  /** Ticket 0504. They own a car, so the living bill stops buying one for them. */
+  readonly ownsVehicle?: boolean;
 }
 
 export interface LivingCost {
@@ -217,10 +262,44 @@ export interface LivingCost {
 
 export function livingCostFor(input: LivingInput): LivingCost {
   const standard = Math.max(SUBSISTENCE, Math.round(input.standard));
+  const scale = input.locationIndex * householdScale(input.partnered, input.childAges);
+  const car = input.ownsVehicle ? 1 - VEHICLE_SHARE : 1;
+  const owned = input.housing === 'owned';
+  const committed = (owned ? Math.max(0, input.housingCost ?? 0) : 0) + Math.max(0, input.vehicleCost ?? 0);
+  if (owned || committed > 0 || input.ownsVehicle) {
+    /*
+      Ticket 0501 — HOUSE-POOR IS A REAL THING, AND SO IS BUILDING EQUITY.
+
+      A renter at this standard spends `standard × scale` on everything, roof
+      included. An owner spends the non-roof share of that plus whatever the
+      house actually costs. When the house costs less than the rent it
+      replaced, the difference is left over — which is how a mortgage turns a
+      roof into savings. When it costs MORE, the household spends less on
+      everything else to carry it, down to the floor of what a life costs at
+      subsistence; a standard that ignored the mortgage would spend the same
+      as a renter on top of it and walk every owner into a shortfall.
+
+      Measured, that is exactly what the first version did: 109 of 179 homes
+      were let go, at a median age of 63, as retirement income fell and a
+      fixed mortgage did not.
+
+      Ticket 0504 — A CAR IS THE SAME SHAPE, SMALLER. The living bill has
+      always bought "getting about" (see `SUBSISTENCE`); once a household owns
+      a car it stops buying that share, and the car's own payment and
+      servicing are charged by the car. A cheap car leaves a little over; a car
+      that costs more than the share squeezes everything else, the same way a
+      mortgage does, rather than being paid for twice (CORE_RULES 13.86).
+    */
+    const roof = owned ? OWNER_SHARE : input.housing === 'withFamily' ? AT_HOME_SHARE : 1;
+    const whole = standard * scale * (owned ? 1 : roof);
+    const usual = standard * scale * roof * car;
+    const floor = SUBSISTENCE * scale * roof * car;
+    const squeezed = whole - committed;
+    const total = Math.round(Math.max(floor, Math.min(usual, squeezed)));
+    return { total: Math.max(0, total), standard };
+  }
   const housing = input.housing === 'withFamily' ? AT_HOME_SHARE : 1;
-  const total = Math.round(
-    standard * input.locationIndex * householdScale(input.partnered, input.childAges) * housing,
-  );
+  const total = Math.round(standard * scale * housing);
   return { total: Math.max(0, total), standard };
 }
 

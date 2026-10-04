@@ -70,7 +70,28 @@ export type CareerTrack =
   // above a police officer and was paid less, so the promotion the model would
   // have offered was a pay cut.
   | 'education'
-  | 'safety';
+  | 'safety'
+  // Ticket 0403. `medicine` is doctors, gated on `postgraduate` from the rung
+  // where the license would actually be required — `care` stays nursing and
+  // support work, the same way `education` stayed separate from `public`.
+  | 'tech'
+  | 'finance'
+  | 'legal'
+  | 'medicine'
+  | 'hospitality'
+  /*
+    Ticket 0406. Four professions with a school in front of them.
+
+    SEPARATE LADDERS RATHER THAN RUNGS OF `medicine` AND `care`, for the reason
+    `education` was split from `public` and `medicine` from `care`: a dentist
+    is not a promotion from a physician and a veterinary nurse does not step up
+    into a pharmacy. Folding them in would have made `promotionFrom` offer
+    moves between professions that require entirely different licenses.
+  */
+  | 'veterinary'
+  | 'dental'
+  | 'pharmacy'
+  | 'architecture';
 
 export const TRACK_LABELS: Readonly<Record<CareerTrack, string>> = {
   retail: 'Retail',
@@ -84,6 +105,15 @@ export const TRACK_LABELS: Readonly<Record<CareerTrack, string>> = {
   public: 'Public service',
   education: 'Education',
   safety: 'Public safety',
+  tech: 'Technology',
+  finance: 'Finance',
+  legal: 'Legal',
+  medicine: 'Medicine',
+  hospitality: 'Hospitality',
+  veterinary: 'Veterinary',
+  dental: 'Dentistry',
+  pharmacy: 'Pharmacy',
+  architecture: 'Architecture',
 };
 
 export interface Job {
@@ -141,6 +171,20 @@ export interface Job {
    * kept for everything that is a preference rather than a law.
    */
   readonly prefers: EducationLevel;
+  /**
+   * A license this job legally requires, on top of any degree (Ticket 0406).
+   *
+   * ORTHOGONAL TO `requires`, AND THAT IS THE POINT. `requires` is a rung on an
+   * ordered ladder, so it can only ever say "this much schooling or more" — and
+   * "postgraduate or more" was the only thing standing between a master's in
+   * fine arts and a surgical ward. A license is not ordered and does not
+   * substitute: you either sat the exam or you did not.
+   *
+   * It also runs the other way. `lic.electrical` gates nothing on the trades
+   * ladder — that ladder is an apprenticeship and stays open to everybody — but
+   * holding it is what makes two years of trade school buy something.
+   */
+  readonly license?: string;
   /**
    * Hidden capacity this consumes, 0–100 (spec 661, 1985).
    *
@@ -251,6 +295,7 @@ const widen = (entry: JobEntry): Job | undefined => {
     minAge: entry.minAge,
     requires: level(entry.requires),
     prefers: level(entry.prefers),
+    ...(entry.license ? { license: entry.license } : {}),
     demand: entry.demand,
     blurb: entry.blurb,
   };

@@ -43,7 +43,19 @@ export type SchoolStage =
   | 'graduated'
   | 'droppedOut'
   | 'college'
-  | 'postgrad';
+  | 'postgrad'
+  /**
+   * Trade school (Ticket 0406).
+   *
+   * A THIRD ENROLLED STAGE rather than a flavour of `college`, because
+   * everything that branches on "are they at university" — tuition, the length
+   * of the program, whether a parent's college money applies, what the
+   * timeline calls it — answers differently here, and overloading `college`
+   * would have made each of those read the major id to find out what it really
+   * meant. That is the mistake `graduated` already made once (see the note on
+   * this type) and once was enough.
+   */
+  | 'vocational';
 
 export type SchoolType = 'public' | 'private' | 'alternative' | 'homeschool';
 
@@ -153,9 +165,14 @@ export function enrolmentLabel(state: EducationState, age = 0): string {
   }
 
   // Ticket 0210b. University has years, not grades, and a major.
-  if (state.stage === 'college' || state.stage === 'postgrad') {
+  if (isAtCollege(state)) {
     const year = (state.collegeYear ?? 0) + 1;
-    const which = state.stage === 'postgrad' ? 'Grad Student' : 'College Student';
+    const which =
+      state.stage === 'postgrad'
+        ? 'Grad Student'
+        : state.stage === 'vocational'
+          ? 'Apprentice'
+          : 'College Student';
     return `${which} (Year ${year})`;
   }
   const grade = state.gradeLevel;
@@ -220,9 +237,9 @@ export function schoolLabel(state: EducationState): string | undefined {
   if (state.stage === 'preschool') return undefined;
   // Ticket 0210b. What you are studying is the second line while you study it,
   // and the highest thing you finished once you are done.
-  if (state.stage === 'college' || state.stage === 'postgrad') {
-    const major = state.majorId ? findMajor(state.majorId) : undefined;
-    return major ? major.name : 'University';
+  if (isAtCollege(state)) {
+    const program = state.majorId ? findMajor(state.majorId) : undefined;
+    return program ? program.name : state.stage === 'vocational' ? 'Trade school' : 'University';
   }
   if (state.stage === 'graduated') {
     const held = levelOf(state.credentials);
@@ -417,12 +434,18 @@ export const isInSchool = (state: EducationState): boolean =>
   state.stage === 'elementary' ||
   state.stage === 'middle' ||
   state.stage === 'high' ||
-  state.stage === 'college' ||
-  state.stage === 'postgrad';
+  isAtCollege(state);
 
-/** Specifically further education, which has different rules from school. */
+/**
+ * Specifically further education, which has different rules from school.
+ *
+ * Ticket 0406 folds trade school in here rather than leaving it out. Everything
+ * that reads this asks a question trade school answers the same way as a
+ * degree: they are enrolled, they owe tuition, their loan defers, and the
+ * header should not call them unemployed.
+ */
 export const isAtCollege = (state: EducationState): boolean =>
-  state.stage === 'college' || state.stage === 'postgrad';
+  state.stage === 'college' || state.stage === 'postgrad' || state.stage === 'vocational';
 
 /** Terms of real effort available in one school year. */
 export const STUDY_TERMS = 2;

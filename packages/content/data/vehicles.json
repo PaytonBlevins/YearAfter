@@ -1,0 +1,2839 @@
+{
+  "version": 2,
+  "lots": [
+    {
+      "id": "lot.new-1",
+      "name": "Northgate Auto Group",
+      "market": "new",
+      "size": 6,
+      "markets": [
+        "mainstream"
+      ],
+      "age": [
+        0,
+        0
+      ],
+      "markup": 1.0,
+      "defectChance": 0.0,
+      "blurb": "Plastic bunting, free coffee, a man called Dale."
+    },
+    {
+      "id": "lot.new-2",
+      "name": "Valley Motor Mall",
+      "market": "new",
+      "size": 6,
+      "markets": [
+        "mainstream"
+      ],
+      "age": [
+        0,
+        0
+      ],
+      "markup": 1.0,
+      "defectChance": 0.0,
+      "blurb": "Eight brands and one enormous parking lot."
+    },
+    {
+      "id": "lot.used-1",
+      "name": "Second Street Pre-Owned",
+      "market": "used",
+      "size": 6,
+      "markets": [
+        "mainstream",
+        "luxury"
+      ],
+      "age": [
+        1,
+        9
+      ],
+      "markup": 1.08,
+      "defectChance": 0.03,
+      "blurb": "Inspected, warrantied, and priced like it."
+    },
+    {
+      "id": "lot.used-2",
+      "name": "Budget Auto Sales",
+      "market": "used",
+      "size": 6,
+      "markets": [
+        "mainstream"
+      ],
+      "age": [
+        5,
+        14
+      ],
+      "markup": 1.05,
+      "defectChance": 0.05,
+      "blurb": "Cash, finance, trade-ins. Everybody drives today."
+    },
+    {
+      "id": "lot.online",
+      "name": "AutoTrove",
+      "market": "online",
+      "size": 8,
+      "markets": [
+        "mainstream",
+        "luxury"
+      ],
+      "age": [
+        2,
+        16
+      ],
+      "markup": 0.95,
+      "defectChance": 0.1,
+      "blurb": "Private sellers. Cheaper, and you only see the photos."
+    },
+    {
+      "id": "lot.luxury-1",
+      "name": "Prestige Motorcars",
+      "market": "luxury",
+      "size": 4,
+      "markets": [
+        "luxury",
+        "exotic"
+      ],
+      "age": [
+        0,
+        0
+      ],
+      "markup": 1.0,
+      "defectChance": 0.0,
+      "blurb": "Appointment preferred. The coffee comes in a cup and saucer."
+    },
+    {
+      "id": "lot.luxury-2",
+      "name": "Heritage Collector Cars",
+      "market": "luxury",
+      "size": 4,
+      "markets": [
+        "exotic",
+        "classic"
+      ],
+      "age": [
+        3,
+        20
+      ],
+      "markup": 1.06,
+      "defectChance": 0.02,
+      "blurb": "Climate-controlled, documented, and not in a hurry to sell."
+    }
+  ],
+  "entries": [
+    {
+      "id": "car.royata-corvana",
+      "brand": "Royata",
+      "model": "Corvana",
+      "body": "sedan",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-corvana.le",
+          "name": "LE",
+          "price": 23500
+        },
+        {
+          "id": "car.royata-corvana.se",
+          "name": "SE",
+          "price": 26000
+        },
+        {
+          "id": "car.royata-corvana.xse",
+          "name": "XSE",
+          "price": 29000
+        }
+      ],
+      "blurb": "The car everybody's aunt has, for good reason."
+    },
+    {
+      "id": "car.royata-camden",
+      "brand": "Royata",
+      "model": "Camden",
+      "body": "sedan",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-camden.le",
+          "name": "LE",
+          "price": 29000
+        },
+        {
+          "id": "car.royata-camden.se",
+          "name": "SE",
+          "price": 31500
+        },
+        {
+          "id": "car.royata-camden.xse",
+          "name": "XSE",
+          "price": 35000
+        }
+      ],
+      "blurb": "Beige, quiet, and still starting every morning at two hundred thousand."
+    },
+    {
+      "id": "car.royata-rav-5",
+      "brand": "Royata",
+      "model": "RAV-5",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-rav-5.le",
+          "name": "LE",
+          "price": 29800
+        },
+        {
+          "id": "car.royata-rav-5.xle",
+          "name": "XLE",
+          "price": 32000
+        },
+        {
+          "id": "car.royata-rav-5.limited",
+          "name": "Limited",
+          "price": 38000
+        }
+      ],
+      "blurb": "The default answer to 'what should I buy?'"
+    },
+    {
+      "id": "car.royata-highrider",
+      "brand": "Royata",
+      "model": "Highrider",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.9,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-highrider.le",
+          "name": "LE",
+          "price": 40000
+        },
+        {
+          "id": "car.royata-highrider.xle",
+          "name": "XLE",
+          "price": 45000
+        },
+        {
+          "id": "car.royata-highrider.platinum",
+          "name": "Platinum",
+          "price": 52000
+        }
+      ],
+      "blurb": "Three rows, soccer practice, no drama."
+    },
+    {
+      "id": "car.royata-tacora",
+      "brand": "Royata",
+      "model": "Tacora",
+      "body": "truck",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.9,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-tacora.sr",
+          "name": "SR",
+          "price": 32000
+        },
+        {
+          "id": "car.royata-tacora.trd-sport",
+          "name": "TRD Sport",
+          "price": 38000
+        },
+        {
+          "id": "car.royata-tacora.trd-pro",
+          "name": "TRD Pro",
+          "price": 64000
+        }
+      ],
+      "blurb": "Mid-size pickup that refuses to lose value."
+    },
+    {
+      "id": "car.royata-tundro",
+      "brand": "Royata",
+      "model": "Tundro",
+      "body": "truck",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.95,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-tundro.sr5",
+          "name": "SR5",
+          "price": 45000
+        },
+        {
+          "id": "car.royata-tundro.limited",
+          "name": "Limited",
+          "price": 56000
+        },
+        {
+          "id": "car.royata-tundro.capstone",
+          "name": "Capstone",
+          "price": 80000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.royata-prion",
+      "brand": "Royata",
+      "model": "Prion",
+      "body": "hatch",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-prion.le",
+          "name": "LE",
+          "price": 28500
+        },
+        {
+          "id": "car.royata-prion.xle",
+          "name": "XLE",
+          "price": 32000
+        },
+        {
+          "id": "car.royata-prion.limited",
+          "name": "Limited",
+          "price": 36000
+        }
+      ],
+      "blurb": "Sips fuel. Looks better than it used to."
+    },
+    {
+      "id": "car.royata-gt4",
+      "brand": "Royata",
+      "model": "GT4",
+      "body": "coupe",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.95,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-gt4.base",
+          "name": "Base",
+          "price": 29500
+        },
+        {
+          "id": "car.royata-gt4.premium",
+          "name": "Premium",
+          "price": 32500
+        },
+        {
+          "id": "car.royata-gt4.100",
+          "name": "100",
+          "price": 35000
+        }
+      ],
+      "blurb": "Small, light, rear-wheel drive and a lot of fun."
+    },
+    {
+      "id": "car.royata-land-crusader",
+      "brand": "Royata",
+      "model": "Land Crusader",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.9,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.royata-land-crusader.1958",
+          "name": "1958",
+          "price": 57000
+        },
+        {
+          "id": "car.royata-land-crusader.land-crusader",
+          "name": "Land Crusader",
+          "price": 68000
+        }
+      ],
+      "blurb": "Built to cross a continent. Mostly crosses parking lots."
+    },
+    {
+      "id": "car.hondo-civix",
+      "brand": "Hondo",
+      "model": "Civix",
+      "body": "sedan",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hondo-civix.lx",
+          "name": "LX",
+          "price": 25000
+        },
+        {
+          "id": "car.hondo-civix.si",
+          "name": "Si",
+          "price": 31000
+        },
+        {
+          "id": "car.hondo-civix.type-s",
+          "name": "Type S",
+          "price": 46000
+        }
+      ],
+      "blurb": "A first car for a lot of people, and a last one for some."
+    },
+    {
+      "id": "car.hondo-accordia",
+      "brand": "Hondo",
+      "model": "Accordia",
+      "body": "sedan",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hondo-accordia.lx",
+          "name": "LX",
+          "price": 29000
+        },
+        {
+          "id": "car.hondo-accordia.sport-hybrid",
+          "name": "Sport Hybrid",
+          "price": 33500
+        },
+        {
+          "id": "car.hondo-accordia.touring",
+          "name": "Touring",
+          "price": 39500
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.hondo-cr-w",
+      "brand": "Hondo",
+      "model": "CR-W",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hondo-cr-w.lx",
+          "name": "LX",
+          "price": 30000
+        },
+        {
+          "id": "car.hondo-cr-w.ex-l",
+          "name": "EX-L",
+          "price": 35000
+        },
+        {
+          "id": "car.hondo-cr-w.sport-touring-hybrid",
+          "name": "Sport Touring Hybrid",
+          "price": 41000
+        }
+      ],
+      "blurb": "Sensible shoes, but they fit."
+    },
+    {
+      "id": "car.hondo-pilote",
+      "brand": "Hondo",
+      "model": "Pilote",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.9,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hondo-pilote.sport",
+          "name": "Sport",
+          "price": 41000
+        },
+        {
+          "id": "car.hondo-pilote.ex-l",
+          "name": "EX-L",
+          "price": 45000
+        },
+        {
+          "id": "car.hondo-pilote.elite",
+          "name": "Elite",
+          "price": 54000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.hondo-odysse",
+      "brand": "Hondo",
+      "model": "Odysse",
+      "body": "minivan",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.9,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hondo-odysse.ex-l",
+          "name": "EX-L",
+          "price": 43000
+        },
+        {
+          "id": "car.hondo-odysse.elite",
+          "name": "Elite",
+          "price": 52000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.fard-f-160",
+      "brand": "Fard",
+      "model": "F-160",
+      "body": "truck",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.0,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.fard-f-160.xl",
+          "name": "XL",
+          "price": 38000
+        },
+        {
+          "id": "car.fard-f-160.xlt",
+          "name": "XLT",
+          "price": 48000
+        },
+        {
+          "id": "car.fard-f-160.raptor-x",
+          "name": "Raptor-X",
+          "price": 80000
+        }
+      ],
+      "blurb": "The best-selling truck in the country, forty years running."
+    },
+    {
+      "id": "car.fard-mestang",
+      "brand": "Fard",
+      "model": "Mestang",
+      "body": "coupe",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.05,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.fard-mestang.ecoboost",
+          "name": "EcoBoost",
+          "price": 32000
+        },
+        {
+          "id": "car.fard-mestang.gt",
+          "name": "GT",
+          "price": 45000
+        },
+        {
+          "id": "car.fard-mestang.dark-steed",
+          "name": "Dark Steed",
+          "price": 62000
+        }
+      ],
+      "blurb": "A V8 and a long hood. Nothing else is quite it."
+    },
+    {
+      "id": "car.fard-bronc",
+      "brand": "Fard",
+      "model": "Bronc",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 1.05,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.fard-bronc.base",
+          "name": "Base",
+          "price": 40000
+        },
+        {
+          "id": "car.fard-bronc.badlands",
+          "name": "Badlands",
+          "price": 52000
+        },
+        {
+          "id": "car.fard-bronc.raptor-x",
+          "name": "Raptor-X",
+          "price": 81000
+        }
+      ],
+      "blurb": "The doors come off. People actually do it."
+    },
+    {
+      "id": "car.fard-escapa",
+      "brand": "Fard",
+      "model": "Escapa",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.1,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.fard-escapa.active",
+          "name": "Active",
+          "price": 29000
+        },
+        {
+          "id": "car.fard-escapa.st-line",
+          "name": "ST-Line",
+          "price": 32000
+        },
+        {
+          "id": "car.fard-escapa.platinum",
+          "name": "Platinum",
+          "price": 39000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.fard-maveric",
+      "brand": "Fard",
+      "model": "Maveric",
+      "body": "truck",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 1.0,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.fard-maveric.xl",
+          "name": "XL",
+          "price": 28000
+        },
+        {
+          "id": "car.fard-maveric.lariat",
+          "name": "Lariat",
+          "price": 36000
+        }
+      ],
+      "blurb": "A small, cheap pickup. They sold out for two years."
+    },
+    {
+      "id": "car.chevlon-silverwood-1500",
+      "brand": "Chevlon",
+      "model": "Silverwood 1500",
+      "body": "truck",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.05,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.chevlon-silverwood-1500.wt",
+          "name": "WT",
+          "price": 38000
+        },
+        {
+          "id": "car.chevlon-silverwood-1500.lt",
+          "name": "LT",
+          "price": 50000
+        },
+        {
+          "id": "car.chevlon-silverwood-1500.high-country",
+          "name": "High Country",
+          "price": 65000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.chevlon-equina",
+      "brand": "Chevlon",
+      "model": "Equina",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.05,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.chevlon-equina.lt",
+          "name": "LT",
+          "price": 30000
+        },
+        {
+          "id": "car.chevlon-equina.rs",
+          "name": "RS",
+          "price": 33000
+        },
+        {
+          "id": "car.chevlon-equina.activ",
+          "name": "Activ",
+          "price": 34500
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.chevlon-tahoma",
+      "brand": "Chevlon",
+      "model": "Tahoma",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.05,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.chevlon-tahoma.ls",
+          "name": "LS",
+          "price": 59000
+        },
+        {
+          "id": "car.chevlon-tahoma.z71",
+          "name": "Z71",
+          "price": 67000
+        },
+        {
+          "id": "car.chevlon-tahoma.high-country",
+          "name": "High Country",
+          "price": 80000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.chevlon-traxa",
+      "brand": "Chevlon",
+      "model": "Traxa",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.0,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.chevlon-traxa.ls",
+          "name": "LS",
+          "price": 21500
+        },
+        {
+          "id": "car.chevlon-traxa.rs",
+          "name": "RS",
+          "price": 24500
+        }
+      ],
+      "blurb": "About the cheapest new car you can still buy."
+    },
+    {
+      "id": "car.chevlon-corvetta",
+      "brand": "Chevlon",
+      "model": "Corvetta",
+      "body": "coupe",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.1,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.chevlon-corvetta.stingray",
+          "name": "Stingray",
+          "price": 70000
+        },
+        {
+          "id": "car.chevlon-corvetta.e-ray",
+          "name": "E-Ray",
+          "price": 106000
+        },
+        {
+          "id": "car.chevlon-corvetta.z07",
+          "name": "Z07",
+          "price": 112000
+        }
+      ],
+      "blurb": "Mid-engined now, and a supercar for the price of a truck."
+    },
+    {
+      "id": "car.nissun-rogo",
+      "brand": "Nissun",
+      "model": "Rogo",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.05,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.nissun-rogo.s",
+          "name": "S",
+          "price": 30000
+        },
+        {
+          "id": "car.nissun-rogo.sv",
+          "name": "SV",
+          "price": 32000
+        },
+        {
+          "id": "car.nissun-rogo.platinum",
+          "name": "Platinum",
+          "price": 41000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.nissun-frontiera",
+      "brand": "Nissun",
+      "model": "Frontiera",
+      "body": "truck",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.0,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.nissun-frontiera.s",
+          "name": "S",
+          "price": 32000
+        },
+        {
+          "id": "car.nissun-frontiera.pro-4x",
+          "name": "PRO-4X",
+          "price": 41000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.hyundal-elantro",
+      "brand": "Hyundal",
+      "model": "Elantro",
+      "body": "sedan",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 0.95,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hyundal-elantro.se",
+          "name": "SE",
+          "price": 22500
+        },
+        {
+          "id": "car.hyundal-elantro.sel",
+          "name": "SEL",
+          "price": 24000
+        },
+        {
+          "id": "car.hyundal-elantro.n",
+          "name": "N",
+          "price": 34500
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.hyundal-tucsan",
+      "brand": "Hyundal",
+      "model": "Tucsan",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 0.95,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hyundal-tucsan.se",
+          "name": "SE",
+          "price": 29000
+        },
+        {
+          "id": "car.hyundal-tucsan.sel",
+          "name": "SEL",
+          "price": 32000
+        },
+        {
+          "id": "car.hyundal-tucsan.limited",
+          "name": "Limited",
+          "price": 39000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.hyundal-santa-fey",
+      "brand": "Hyundal",
+      "model": "Santa Fey",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 0.95,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hyundal-santa-fey.se",
+          "name": "SE",
+          "price": 35000
+        },
+        {
+          "id": "car.hyundal-santa-fey.limited",
+          "name": "Limited",
+          "price": 45000
+        },
+        {
+          "id": "car.hyundal-santa-fey.calligrafia",
+          "name": "Calligrafia",
+          "price": 49000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.hyundal-ionix-5",
+      "brand": "Hyundal",
+      "model": "Ionix 5",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "weak",
+      "reliability": 0.9,
+      "electric": true,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.hyundal-ionix-5.se",
+          "name": "SE",
+          "price": 43000
+        },
+        {
+          "id": "car.hyundal-ionix-5.limited",
+          "name": "Limited",
+          "price": 54000
+        }
+      ],
+      "blurb": "Looks like a concept car that escaped."
+    },
+    {
+      "id": "car.kiya-sportago",
+      "brand": "Kiya",
+      "model": "Sportago",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 0.95,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.kiya-sportago.lx",
+          "name": "LX",
+          "price": 29000
+        },
+        {
+          "id": "car.kiya-sportago.ex",
+          "name": "EX",
+          "price": 32000
+        },
+        {
+          "id": "car.kiya-sportago.x-pro",
+          "name": "X-Pro",
+          "price": 40000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.kiya-tellura",
+      "brand": "Kiya",
+      "model": "Tellura",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.95,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.kiya-tellura.lx",
+          "name": "LX",
+          "price": 38000
+        },
+        {
+          "id": "car.kiya-tellura.sx",
+          "name": "SX",
+          "price": 47000
+        },
+        {
+          "id": "car.kiya-tellura.sx-prestige-x-pro",
+          "name": "SX-Prestige X-Pro",
+          "price": 54000
+        }
+      ],
+      "blurb": "The one that won every award the year it came out."
+    },
+    {
+      "id": "car.subaro-outbacker",
+      "brand": "Subaro",
+      "model": "Outbacker",
+      "body": "wagon",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 1.0,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.subaro-outbacker.base",
+          "name": "Base",
+          "price": 30000
+        },
+        {
+          "id": "car.subaro-outbacker.premium",
+          "name": "Premium",
+          "price": 33000
+        },
+        {
+          "id": "car.subaro-outbacker.wilderness",
+          "name": "Wilderness",
+          "price": 42000
+        }
+      ],
+      "blurb": "Every trailhead parking lot in the country has three."
+    },
+    {
+      "id": "car.subaro-forestor",
+      "brand": "Subaro",
+      "model": "Forestor",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 1.0,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.subaro-forestor.base",
+          "name": "Base",
+          "price": 31000
+        },
+        {
+          "id": "car.subaro-forestor.sport",
+          "name": "Sport",
+          "price": 36000
+        },
+        {
+          "id": "car.subaro-forestor.touring",
+          "name": "Touring",
+          "price": 40000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.subaro-crossway",
+      "brand": "Subaro",
+      "model": "Crossway",
+      "body": "hatch",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 1.0,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.subaro-crossway.base",
+          "name": "Base",
+          "price": 26500
+        },
+        {
+          "id": "car.subaro-crossway.premium",
+          "name": "Premium",
+          "price": 28500
+        },
+        {
+          "id": "car.subaro-crossway.limited",
+          "name": "Limited",
+          "price": 32500
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.subaro-wrz",
+      "brand": "Subaro",
+      "model": "WRZ",
+      "body": "sedan",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 1.1,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.subaro-wrz.base",
+          "name": "Base",
+          "price": 34000
+        },
+        {
+          "id": "car.subaro-wrz.tr",
+          "name": "TR",
+          "price": 45000
+        }
+      ],
+      "blurb": "A rally car for the drive to school."
+    },
+    {
+      "id": "car.mazdo-three",
+      "brand": "Mazdo",
+      "model": "Three",
+      "body": "hatch",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 0.9,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.mazdo-three.s",
+          "name": "S",
+          "price": 24500
+        },
+        {
+          "id": "car.mazdo-three.premium",
+          "name": "Premium",
+          "price": 31000
+        },
+        {
+          "id": "car.mazdo-three.turbo",
+          "name": "Turbo",
+          "price": 35000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.mazdo-mx-6-miyata",
+      "brand": "Mazdo",
+      "model": "MX-6 Miyata",
+      "body": "convertible",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.mazdo-mx-6-miyata.sport",
+          "name": "Sport",
+          "price": 30000
+        },
+        {
+          "id": "car.mazdo-mx-6-miyata.club",
+          "name": "Club",
+          "price": 35000
+        },
+        {
+          "id": "car.mazdo-mx-6-miyata.grand-touring",
+          "name": "Grand Touring",
+          "price": 36000
+        }
+      ],
+      "blurb": "The answer, whatever the question was."
+    },
+    {
+      "id": "car.volkswerk-jetto",
+      "brand": "Volkswerk",
+      "model": "Jetto",
+      "body": "sedan",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.1,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.volkswerk-jetto.s",
+          "name": "S",
+          "price": 23000
+        },
+        {
+          "id": "car.volkswerk-jetto.sel",
+          "name": "SEL",
+          "price": 30000
+        },
+        {
+          "id": "car.volkswerk-jetto.gli",
+          "name": "GLI",
+          "price": 33000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.volkswerk-golfer",
+      "brand": "Volkswerk",
+      "model": "Golfer",
+      "body": "hatch",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.1,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.volkswerk-golfer.gti-s",
+          "name": "GTi S",
+          "price": 33000
+        },
+        {
+          "id": "car.volkswerk-golfer.gti-autobahn",
+          "name": "GTi Autobahn",
+          "price": 40000
+        },
+        {
+          "id": "car.volkswerk-golfer.r",
+          "name": "R",
+          "price": 48000
+        }
+      ],
+      "blurb": "The hot hatch every other hot hatch is measured against."
+    },
+    {
+      "id": "car.jepp-wranglar",
+      "brand": "Jepp",
+      "model": "Wranglar",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "strong",
+      "reliability": 1.2,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.jepp-wranglar.sport",
+          "name": "Sport",
+          "price": 34000
+        },
+        {
+          "id": "car.jepp-wranglar.rubicoon",
+          "name": "Rubicoon",
+          "price": 50000
+        },
+        {
+          "id": "car.jepp-wranglar.392",
+          "name": "392",
+          "price": 90000
+        }
+      ],
+      "blurb": "Squeaks, rattles and holds its value anyway."
+    },
+    {
+      "id": "car.raam-1600",
+      "brand": "Raam",
+      "model": "1600",
+      "body": "truck",
+      "market": "mainstream",
+      "retention": "average",
+      "reliability": 1.1,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.raam-1600.tradesman",
+          "name": "Tradesman",
+          "price": 42000
+        },
+        {
+          "id": "car.raam-1600.laramie",
+          "name": "Laramie",
+          "price": 58000
+        },
+        {
+          "id": "car.raam-1600.trx-r",
+          "name": "TRX-R",
+          "price": 95000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.teslo-model-tri",
+      "brand": "Teslo",
+      "model": "Model Tri",
+      "body": "sedan",
+      "market": "mainstream",
+      "retention": "weak",
+      "reliability": 0.95,
+      "electric": true,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.teslo-model-tri.rwd",
+          "name": "RWD",
+          "price": 42500
+        },
+        {
+          "id": "car.teslo-model-tri.long-range",
+          "name": "Long Range",
+          "price": 48000
+        },
+        {
+          "id": "car.teslo-model-tri.performance",
+          "name": "Performance",
+          "price": 55000
+        }
+      ],
+      "blurb": "Fast, quiet, and the screen is the dashboard."
+    },
+    {
+      "id": "car.teslo-model-wy",
+      "brand": "Teslo",
+      "model": "Model Wy",
+      "body": "suv",
+      "market": "mainstream",
+      "retention": "weak",
+      "reliability": 0.95,
+      "electric": true,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.teslo-model-wy.rwd",
+          "name": "RWD",
+          "price": 45000
+        },
+        {
+          "id": "car.teslo-model-wy.long-range",
+          "name": "Long Range",
+          "price": 49000
+        },
+        {
+          "id": "car.teslo-model-wy.performance",
+          "name": "Performance",
+          "price": 52000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.teslo-cyberhauler",
+      "brand": "Teslo",
+      "model": "Cyberhauler",
+      "body": "truck",
+      "market": "mainstream",
+      "retention": "weak",
+      "reliability": 1.1,
+      "electric": true,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.teslo-cyberhauler.awd",
+          "name": "AWD",
+          "price": 80000
+        },
+        {
+          "id": "car.teslo-cyberhauler.cyberbeast",
+          "name": "Cyberbeast",
+          "price": 100000
+        }
+      ],
+      "blurb": "Stainless steel and sharp corners. People stare."
+    },
+    {
+      "id": "car.rbw-3-line",
+      "brand": "RBW",
+      "model": "3 Line",
+      "body": "sedan",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.25,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rbw-3-line.331i",
+          "name": "331i",
+          "price": 46000
+        },
+        {
+          "id": "car.rbw-3-line.341i",
+          "name": "341i",
+          "price": 59000
+        },
+        {
+          "id": "car.rbw-3-line.r3",
+          "name": "R3",
+          "price": 78000
+        }
+      ],
+      "blurb": "The sports sedan everybody else copies."
+    },
+    {
+      "id": "car.rbw-5-line",
+      "brand": "RBW",
+      "model": "5 Line",
+      "body": "sedan",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.25,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rbw-5-line.531i",
+          "name": "531i",
+          "price": 59000
+        },
+        {
+          "id": "car.rbw-5-line.541i",
+          "name": "541i",
+          "price": 66000
+        },
+        {
+          "id": "car.rbw-5-line.r5",
+          "name": "R5",
+          "price": 121000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.rbw-rx5",
+      "brand": "RBW",
+      "model": "RX5",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.25,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rbw-rx5.sdrive41i",
+          "name": "sDrive41i",
+          "price": 67000
+        },
+        {
+          "id": "car.rbw-rx5.xdrive51e",
+          "name": "xDrive51e",
+          "price": 74000
+        },
+        {
+          "id": "car.rbw-rx5.rx5-r",
+          "name": "RX5 R",
+          "price": 123000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.rbw-r4",
+      "brand": "RBW",
+      "model": "R4",
+      "body": "coupe",
+      "market": "luxury",
+      "retention": "average",
+      "reliability": 1.25,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rbw-r4.coupe",
+          "name": "Coupe",
+          "price": 80000
+        },
+        {
+          "id": "car.rbw-r4.competition",
+          "name": "Competition",
+          "price": 88000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.merceda-c-line",
+      "brand": "Merceda",
+      "model": "C-Line",
+      "body": "sedan",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.25,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.merceda-c-line.c-310",
+          "name": "C 310",
+          "price": 49000
+        },
+        {
+          "id": "car.merceda-c-line.c-46-amr",
+          "name": "C 46 AMR",
+          "price": 65000
+        }
+      ],
+      "blurb": "",
+      "tarbus": true
+    },
+    {
+      "id": "car.merceda-e-line",
+      "brand": "Merceda",
+      "model": "E-Line",
+      "body": "sedan",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.25,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.merceda-e-line.e-360",
+          "name": "E 360",
+          "price": 63000
+        },
+        {
+          "id": "car.merceda-e-line.e-460",
+          "name": "E 460",
+          "price": 70000
+        }
+      ],
+      "blurb": "",
+      "tarbus": true
+    },
+    {
+      "id": "car.merceda-s-line",
+      "brand": "Merceda",
+      "model": "S-Line",
+      "body": "sedan",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.3,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.merceda-s-line.s-590",
+          "name": "S 590",
+          "price": 121000
+        },
+        {
+          "id": "car.merceda-s-line.maybeck-s-690",
+          "name": "Maybeck S 690",
+          "price": 195000
+        }
+      ],
+      "blurb": "Where the chauffeur sits is optional.",
+      "tarbus": true
+    },
+    {
+      "id": "car.merceda-glx",
+      "brand": "Merceda",
+      "model": "GLX",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.25,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.merceda-glx.glx-360",
+          "name": "GLX 360",
+          "price": 63000
+        },
+        {
+          "id": "car.merceda-glx.glx-460",
+          "name": "GLX 460",
+          "price": 70000
+        },
+        {
+          "id": "car.merceda-glx.glx-63-amr",
+          "name": "GLX 63 AMR",
+          "price": 125000
+        }
+      ],
+      "blurb": "",
+      "tarbus": true
+    },
+    {
+      "id": "car.merceda-gelander",
+      "brand": "Merceda",
+      "model": "Gelander",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "strong",
+      "reliability": 1.3,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.merceda-gelander.g-560",
+          "name": "G 560",
+          "price": 148000
+        },
+        {
+          "id": "car.merceda-gelander.g-63-amr",
+          "name": "G 63 AMR",
+          "price": 185000
+        }
+      ],
+      "blurb": "A forty-year-old army truck with a $150,000 price tag. Somehow worth it.",
+      "tarbus": true
+    },
+    {
+      "id": "car.audo-b4",
+      "brand": "Audo",
+      "model": "B4",
+      "body": "sedan",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.2,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.audo-b4.premium",
+          "name": "Premium",
+          "price": 45000
+        },
+        {
+          "id": "car.audo-b4.prestige",
+          "name": "Prestige",
+          "price": 54000
+        },
+        {
+          "id": "car.audo-b4.sb4",
+          "name": "SB4",
+          "price": 55000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.audo-qx5",
+      "brand": "Audo",
+      "model": "QX5",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.2,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.audo-qx5.premium",
+          "name": "Premium",
+          "price": 48000
+        },
+        {
+          "id": "car.audo-qx5.prestige",
+          "name": "Prestige",
+          "price": 58000
+        },
+        {
+          "id": "car.audo-qx5.sqx5",
+          "name": "SQX5",
+          "price": 63000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.lexon-ez-350",
+      "brand": "Lexon",
+      "model": "EZ 350",
+      "body": "sedan",
+      "market": "luxury",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.lexon-ez-350.base",
+          "name": "Base",
+          "price": 44000
+        },
+        {
+          "id": "car.lexon-ez-350.300h",
+          "name": "300h",
+          "price": 46000
+        },
+        {
+          "id": "car.lexon-ez-350.f-sport",
+          "name": "F Sport",
+          "price": 50000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.lexon-rz-350",
+      "brand": "Lexon",
+      "model": "RZ 350",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "strong",
+      "reliability": 0.85,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.lexon-rz-350.base",
+          "name": "Base",
+          "price": 50000
+        },
+        {
+          "id": "car.lexon-rz-350.f-sport",
+          "name": "F Sport",
+          "price": 59000
+        },
+        {
+          "id": "car.lexon-rz-350.500h",
+          "name": "500h",
+          "price": 65000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.lexon-lz-600",
+      "brand": "Lexon",
+      "model": "LZ 600",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "strong",
+      "reliability": 0.9,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.lexon-lz-600.premium",
+          "name": "Premium",
+          "price": 107000
+        },
+        {
+          "id": "car.lexon-lz-600.ultra-luxury",
+          "name": "Ultra Luxury",
+          "price": 133000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.cadillon-escalada",
+      "brand": "Cadillon",
+      "model": "Escalada",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.2,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.cadillon-escalada.luxury",
+          "name": "Luxury",
+          "price": 93000
+        },
+        {
+          "id": "car.cadillon-escalada.sport-platinum",
+          "name": "Sport Platinum",
+          "price": 126000
+        },
+        {
+          "id": "car.cadillon-escalada.v",
+          "name": "V",
+          "price": 155000
+        }
+      ],
+      "blurb": "The car you hire for a wedding, and then sometimes buy."
+    },
+    {
+      "id": "car.rangeland-sport",
+      "brand": "Rangeland",
+      "model": "Sport",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.45,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rangeland-sport.se",
+          "name": "SE",
+          "price": 85000
+        },
+        {
+          "id": "car.rangeland-sport.dynamic-se",
+          "name": "Dynamic SE",
+          "price": 93000
+        },
+        {
+          "id": "car.rangeland-sport.sv",
+          "name": "SV",
+          "price": 185000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.rangeland-defendr",
+      "brand": "Rangeland",
+      "model": "Defendr",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "average",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rangeland-defendr.110-s",
+          "name": "110 S",
+          "price": 62000
+        },
+        {
+          "id": "car.rangeland-defendr.110-x",
+          "name": "110 X",
+          "price": 93000
+        },
+        {
+          "id": "car.rangeland-defendr.octa",
+          "name": "Octa",
+          "price": 150000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.rangeland-rangeland",
+      "brand": "Rangeland",
+      "model": "Rangeland",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.45,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rangeland-rangeland.se",
+          "name": "SE",
+          "price": 110000
+        },
+        {
+          "id": "car.rangeland-rangeland.autobiography",
+          "name": "Autobiography",
+          "price": 185000
+        }
+      ],
+      "blurb": "Beautiful, enormous, and on a first-name basis with the service desk."
+    },
+    {
+      "id": "car.porsha-makan",
+      "brand": "Porsha",
+      "model": "Makan",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "average",
+      "reliability": 1.1,
+      "electric": true,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.porsha-makan.base",
+          "name": "Base",
+          "price": 63000
+        },
+        {
+          "id": "car.porsha-makan.s",
+          "name": "S",
+          "price": 85000
+        },
+        {
+          "id": "car.porsha-makan.turbo",
+          "name": "Turbo",
+          "price": 106000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.porsha-cayenna",
+      "brand": "Porsha",
+      "model": "Cayenna",
+      "body": "suv",
+      "market": "luxury",
+      "retention": "average",
+      "reliability": 1.15,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.porsha-cayenna.base",
+          "name": "Base",
+          "price": 86000
+        },
+        {
+          "id": "car.porsha-cayenna.s",
+          "name": "S",
+          "price": 102000
+        },
+        {
+          "id": "car.porsha-cayenna.turbo-gt",
+          "name": "Turbo GT",
+          "price": 200000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.porsha-taycon",
+      "brand": "Porsha",
+      "model": "Taycon",
+      "body": "sedan",
+      "market": "luxury",
+      "retention": "weak",
+      "reliability": 1.1,
+      "electric": true,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.porsha-taycon.base",
+          "name": "Base",
+          "price": 100000
+        },
+        {
+          "id": "car.porsha-taycon.4s",
+          "name": "4S",
+          "price": 123000
+        },
+        {
+          "id": "car.porsha-taycon.turbo-s",
+          "name": "Turbo S",
+          "price": 210000
+        }
+      ],
+      "blurb": "",
+      "tarbus": true
+    },
+    {
+      "id": "car.porsha-912",
+      "brand": "Porsha",
+      "model": "912",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "strong",
+      "reliability": 1.05,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.porsha-912.carrera",
+          "name": "Carrera",
+          "price": 122000
+        },
+        {
+          "id": "car.porsha-912.gts",
+          "name": "GTS",
+          "price": 166000
+        },
+        {
+          "id": "car.porsha-912.turbo-s",
+          "name": "Turbo S",
+          "price": 232000
+        },
+        {
+          "id": "car.porsha-912.gt3-rs",
+          "name": "GT3 RS",
+          "price": 243000
+        }
+      ],
+      "blurb": "Rear-engined since forever. The good ones never really lose money.",
+      "tarbus": true
+    },
+    {
+      "id": "car.ferrano-rona",
+      "brand": "Ferrano",
+      "model": "Rona",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.ferrano-rona.coupe",
+          "name": "Coupe",
+          "price": 250000
+        },
+        {
+          "id": "car.ferrano-rona.spider",
+          "name": "Spider",
+          "price": 275000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.ferrano-298",
+      "brand": "Ferrano",
+      "model": "298",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.ferrano-298.gtb",
+          "name": "GTB",
+          "price": 340000
+        },
+        {
+          "id": "car.ferrano-298.gts",
+          "name": "GTS",
+          "price": 370000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.ferrano-purosango",
+      "brand": "Ferrano",
+      "model": "Purosango",
+      "body": "suv",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.ferrano-purosango.v12",
+          "name": "V12",
+          "price": 400000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.ferrano-dodici-cilindri",
+      "brand": "Ferrano",
+      "model": "Dodici Cilindri",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.ferrano-dodici-cilindri.coupe",
+          "name": "Coupe",
+          "price": 430000
+        },
+        {
+          "id": "car.ferrano-dodici-cilindri.spider",
+          "name": "Spider",
+          "price": 470000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.ferrano-sf-92",
+      "brand": "Ferrano",
+      "model": "SF-92",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.ferrano-sf-92.stradale",
+          "name": "Stradale",
+          "price": 530000
+        },
+        {
+          "id": "car.ferrano-sf-92.xx",
+          "name": "XX",
+          "price": 800000
+        }
+      ],
+      "blurb": "A plug-in hybrid with a thousand horsepower. Mostly the second part."
+    },
+    {
+      "id": "car.lambor-uros",
+      "brand": "Lambor",
+      "model": "Uros",
+      "body": "suv",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.35,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.lambor-uros.s",
+          "name": "S",
+          "price": 240000
+        },
+        {
+          "id": "car.lambor-uros.performante",
+          "name": "Performante",
+          "price": 270000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.lambor-hurakan",
+      "brand": "Lambor",
+      "model": "Hurakan",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.lambor-hurakan.tecnica",
+          "name": "Tecnica",
+          "price": 240000
+        },
+        {
+          "id": "car.lambor-hurakan.sto",
+          "name": "STO",
+          "price": 340000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.lambor-revolto",
+      "brand": "Lambor",
+      "model": "Revolto",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.45,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.lambor-revolto.v12",
+          "name": "V12",
+          "price": 610000
+        }
+      ],
+      "blurb": "Doors that go up, and a waiting list that went out the door."
+    },
+    {
+      "id": "car.mclarren-artura",
+      "brand": "McLarren",
+      "model": "Artura",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.5,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.mclarren-artura.coupe",
+          "name": "Coupe",
+          "price": 250000
+        },
+        {
+          "id": "car.mclarren-artura.spider",
+          "name": "Spider",
+          "price": 275000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.mclarren-760s",
+      "brand": "McLarren",
+      "model": "760S",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "exotic",
+      "reliability": 1.5,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.mclarren-760s.coupe",
+          "name": "Coupe",
+          "price": 330000
+        },
+        {
+          "id": "car.mclarren-760s.spider",
+          "name": "Spider",
+          "price": 350000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.bentlee-continent-gt",
+      "brand": "Bentlee",
+      "model": "Continent GT",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "weak",
+      "reliability": 1.35,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.bentlee-continent-gt.v8",
+          "name": "V8",
+          "price": 300000
+        },
+        {
+          "id": "car.bentlee-continent-gt.speed",
+          "name": "Speed",
+          "price": 340000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.bentlee-bentayo",
+      "brand": "Bentlee",
+      "model": "Bentayo",
+      "body": "suv",
+      "market": "exotic",
+      "retention": "weak",
+      "reliability": 1.35,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.bentlee-bentayo.v8",
+          "name": "V8",
+          "price": 210000
+        },
+        {
+          "id": "car.bentlee-bentayo.ewb-azure",
+          "name": "EWB Azure",
+          "price": 260000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.rowland-ghostt",
+      "brand": "Rowland",
+      "model": "Ghostt",
+      "body": "sedan",
+      "market": "exotic",
+      "retention": "weak",
+      "reliability": 1.3,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rowland-ghostt.ghostt",
+          "name": "Ghostt",
+          "price": 350000
+        },
+        {
+          "id": "car.rowland-ghostt.black-badge",
+          "name": "Black Badge",
+          "price": 410000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.rowland-cullinon",
+      "brand": "Rowland",
+      "model": "Cullinon",
+      "body": "suv",
+      "market": "exotic",
+      "retention": "weak",
+      "reliability": 1.3,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rowland-cullinon.cullinon",
+          "name": "Cullinon",
+          "price": 400000
+        },
+        {
+          "id": "car.rowland-cullinon.black-badge",
+          "name": "Black Badge",
+          "price": 470000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.rowland-phantasm",
+      "brand": "Rowland",
+      "model": "Phantasm",
+      "body": "sedan",
+      "market": "exotic",
+      "retention": "weak",
+      "reliability": 1.3,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.rowland-phantasm.phantasm",
+          "name": "Phantasm",
+          "price": 480000
+        },
+        {
+          "id": "car.rowland-phantasm.extended",
+          "name": "Extended",
+          "price": 560000
+        }
+      ],
+      "blurb": "Quiet enough to hear the clock. The clock costs more than your first car."
+    },
+    {
+      "id": "car.ashton-marlin-db-13",
+      "brand": "Ashton Marlin",
+      "model": "DB-13",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "weak",
+      "reliability": 1.5,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.ashton-marlin-db-13.coupe",
+          "name": "Coupe",
+          "price": 250000
+        },
+        {
+          "id": "car.ashton-marlin-db-13.volante",
+          "name": "Volante",
+          "price": 265000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.ashton-marlin-vantaj",
+      "brand": "Ashton Marlin",
+      "model": "Vantaj",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "weak",
+      "reliability": 1.5,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.ashton-marlin-vantaj.coupe",
+          "name": "Coupe",
+          "price": 195000
+        },
+        {
+          "id": "car.ashton-marlin-vantaj.roadster",
+          "name": "Roadster",
+          "price": 210000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.ashton-marlin-dbx-8",
+      "brand": "Ashton Marlin",
+      "model": "DBX-8",
+      "body": "suv",
+      "market": "exotic",
+      "retention": "weak",
+      "reliability": 1.5,
+      "electric": false,
+      "collectible": false,
+      "trims": [
+        {
+          "id": "car.ashton-marlin-dbx-8.707",
+          "name": "707",
+          "price": 250000
+        }
+      ],
+      "blurb": ""
+    },
+    {
+      "id": "car.nissun-gt-z",
+      "brand": "Nissun",
+      "model": "GT-Z",
+      "body": "coupe",
+      "market": "exotic",
+      "retention": "average",
+      "reliability": 1.15,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.nissun-gt-z.premium",
+          "name": "Premium",
+          "price": 122000
+        },
+        {
+          "id": "car.nissun-gt-z.nismoh",
+          "name": "Nismoh",
+          "price": 222000
+        }
+      ],
+      "blurb": "Godzilla, they called it. It earned the name."
+    },
+    {
+      "id": "car.fard-mestang-67-fastback",
+      "brand": "Fard",
+      "model": "Mestang '67 Fastback",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.6,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.fard-mestang-67-fastback.289",
+          "name": "289",
+          "price": 65000
+        },
+        {
+          "id": "car.fard-mestang-67-fastback.gt-390",
+          "name": "GT 390",
+          "price": 95000
+        }
+      ],
+      "blurb": "The one from the film. Well, one like it.",
+      "year": 1967
+    },
+    {
+      "id": "car.chevlon-bel-aire-57",
+      "brand": "Chevlon",
+      "model": "Bel Aire '57",
+      "body": "sedan",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.6,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.chevlon-bel-aire-57.two-door",
+          "name": "Two-Door",
+          "price": 70000
+        },
+        {
+          "id": "car.chevlon-bel-aire-57.convertible",
+          "name": "Convertible",
+          "price": 110000
+        }
+      ],
+      "blurb": "",
+      "year": 1957
+    },
+    {
+      "id": "car.chevlon-corvetta-63-split-window",
+      "brand": "Chevlon",
+      "model": "Corvetta '63 Split-Window",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.6,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.chevlon-corvetta-63-split-window.327",
+          "name": "327",
+          "price": 150000
+        },
+        {
+          "id": "car.chevlon-corvetta-63-split-window.z06",
+          "name": "Z06",
+          "price": 300000
+        }
+      ],
+      "blurb": "",
+      "year": 1963
+    },
+    {
+      "id": "car.chevlon-camaron-69",
+      "brand": "Chevlon",
+      "model": "Camaron '69",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.6,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.chevlon-camaron-69.rs",
+          "name": "RS",
+          "price": 55000
+        },
+        {
+          "id": "car.chevlon-camaron-69.ss-396",
+          "name": "SS 396",
+          "price": 85000
+        }
+      ],
+      "blurb": "",
+      "year": 1969
+    },
+    {
+      "id": "car.plymond-hemi-cuda-70",
+      "brand": "Plymond",
+      "model": "Hemi Cuda '70",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.7,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.plymond-hemi-cuda-70.hardtop",
+          "name": "Hardtop",
+          "price": 250000
+        }
+      ],
+      "blurb": "",
+      "year": 1970
+    },
+    {
+      "id": "car.datsan-240-z-72",
+      "brand": "Datsan",
+      "model": "240-Z '72",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.5,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.datsan-240-z-72.series-i",
+          "name": "Series I",
+          "price": 45000
+        }
+      ],
+      "blurb": "",
+      "year": 1972
+    },
+    {
+      "id": "car.volkswerk-beetel-67",
+      "brand": "Volkswerk",
+      "model": "Beetel '67",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.volkswerk-beetel-67.1500",
+          "name": "1500",
+          "price": 18000
+        },
+        {
+          "id": "car.volkswerk-beetel-67.cabriolet",
+          "name": "Cabriolet",
+          "price": 28000
+        }
+      ],
+      "blurb": "Everybody's first restoration project.",
+      "year": 1967
+    },
+    {
+      "id": "car.volkswerk-microbus-66",
+      "brand": "Volkswerk",
+      "model": "Microbus '66",
+      "body": "van",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.5,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.volkswerk-microbus-66.21-window",
+          "name": "21-Window",
+          "price": 90000
+        },
+        {
+          "id": "car.volkswerk-microbus-66.23-window-samba",
+          "name": "23-Window Samba",
+          "price": 120000
+        }
+      ],
+      "blurb": "",
+      "year": 1966
+    },
+    {
+      "id": "car.jepp-cj-5-78",
+      "brand": "Jepp",
+      "model": "CJ-5 '78",
+      "body": "suv",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.jepp-cj-5-78.renegade",
+          "name": "Renegade",
+          "price": 25000
+        }
+      ],
+      "blurb": "",
+      "year": 1978
+    },
+    {
+      "id": "car.merceda-280-sl-69",
+      "brand": "Merceda",
+      "model": "280 SL '69",
+      "body": "convertible",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.6,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.merceda-280-sl-69.pagoda",
+          "name": "Pagoda",
+          "price": 120000
+        }
+      ],
+      "blurb": "",
+      "year": 1969
+    },
+    {
+      "id": "car.porsha-912-73-rs",
+      "brand": "Porsha",
+      "model": "912 '73 RS",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.5,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.porsha-912-73-rs.touring",
+          "name": "Touring",
+          "price": 600000
+        }
+      ],
+      "blurb": "",
+      "year": 1973
+    },
+    {
+      "id": "car.porsha-912-86-carrera",
+      "brand": "Porsha",
+      "model": "912 '86 Carrera",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.3,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.porsha-912-86-carrera.coupe",
+          "name": "Coupe",
+          "price": 65000
+        },
+        {
+          "id": "car.porsha-912-86-carrera.targa",
+          "name": "Targa",
+          "price": 70000
+        }
+      ],
+      "blurb": "",
+      "year": 1986
+    },
+    {
+      "id": "car.rbw-r3-88",
+      "brand": "RBW",
+      "model": "R3 '88",
+      "body": "sedan",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.4,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.rbw-r3-88.sport-evolution",
+          "name": "Sport Evolution",
+          "price": 110000
+        }
+      ],
+      "blurb": "",
+      "year": 1988
+    },
+    {
+      "id": "car.royata-supreme-98",
+      "brand": "Royata",
+      "model": "Supreme '98",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.1,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.royata-supreme-98.turbo",
+          "name": "Turbo",
+          "price": 120000
+        }
+      ],
+      "blurb": "A whole generation's poster on the bedroom wall.",
+      "year": 1998
+    },
+    {
+      "id": "car.hondo-nsz-93",
+      "brand": "Hondo",
+      "model": "NSZ '93",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.1,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.hondo-nsz-93.coupe",
+          "name": "Coupe",
+          "price": 140000
+        }
+      ],
+      "blurb": "",
+      "year": 1993
+    },
+    {
+      "id": "car.ferrano-testa-rosa-86",
+      "brand": "Ferrano",
+      "model": "Testa Rosa '86",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.6,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.ferrano-testa-rosa-86.coupe",
+          "name": "Coupe",
+          "price": 160000
+        }
+      ],
+      "blurb": "",
+      "year": 1986
+    },
+    {
+      "id": "car.lambor-countash-88",
+      "brand": "Lambor",
+      "model": "Countash '88",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.7,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.lambor-countash-88.25th-anniversary",
+          "name": "25th Anniversary",
+          "price": 500000
+        }
+      ],
+      "blurb": "",
+      "year": 1988
+    },
+    {
+      "id": "car.ferrano-f-41-90",
+      "brand": "Ferrano",
+      "model": "F-41 '90",
+      "body": "coupe",
+      "market": "classic",
+      "retention": "exotic",
+      "reliability": 1.6,
+      "electric": false,
+      "collectible": true,
+      "trims": [
+        {
+          "id": "car.ferrano-f-41-90.berlinetta",
+          "name": "Berlinetta",
+          "price": 2800000
+        }
+      ],
+      "blurb": "There were about thirteen hundred. There are fewer now.",
+      "year": 1990
+    }
+  ]
+}

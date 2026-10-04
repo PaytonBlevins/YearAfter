@@ -20,6 +20,7 @@
 import { cents, dollars, err, ok, type Result } from '@yearafter/core';
 import {
   INSTRUMENTS,
+  findBusinessType,
   findInstrument,
   instrumentsOfKind,
   type Instrument,
@@ -44,6 +45,12 @@ import {
   recommendationsFor,
   totalBorrowed,
   totalOwed,
+  homesValue,
+  mortgagesOwed,
+  vehicleLoansOwed,
+  vehiclesValue,
+  valuablesValue,
+  businessesValue,
   willTakeYou,
   type Estate,
   type Recommendation,
@@ -84,9 +91,32 @@ export const estateOf = (state: GameState): Estate => ({
     // "roughly right". Money in this build is integer cents everywhere.
     Number(portfolioWorth(state.prices, state.portfolio)) + Number(state.retirement.balance),
   ),
-  liabilities: dollars(
-    Math.round(Number(totalOwed(state.cards)) / 100) +
-      Math.round(Number(totalBorrowed(state.loans)) / 100),
+  /*
+    Ticket 0501. What the homes are worth now, and what is still owed on them.
+    The value is spec 19's "assets"; the mortgage joins the liabilities, so a
+    house bought with 5% down adds its equity to net worth and not its price.
+  */
+  /*
+    Ticket 0504. And what the cars would fetch, with their loans among the
+    liabilities. Spec 140 calls an ordinary car a depreciating possession
+    rather than an investment, and that is what it is here — it loses value
+    every year — but it is still owned, and net worth is what is owned less
+    what is owed. Counting the loan and not the car would make buying one look
+    like losing its whole price.
+  */
+  // Ticket 0506: and the jewelry, watches and collection, at what they'd fetch.
+  // Ticket 0601: and what a business is worth to its owner, till included.
+  assets: cents(
+    Number(homesValue(state.homes)) +
+      Number(vehiclesValue(state.vehicles)) +
+      Number(valuablesValue(state.valuables)) +
+      Number(businessesValue(state.businesses, findBusinessType, state.world.year)),
+  ),
+  liabilities: cents(
+    Math.round(Number(totalOwed(state.cards)) / 100) * 100 +
+      Math.round(Number(totalBorrowed(state.loans)) / 100) * 100 +
+      Number(mortgagesOwed(state.homes)) +
+      Number(vehicleLoansOwed(state.vehicles)),
   ),
 });
 

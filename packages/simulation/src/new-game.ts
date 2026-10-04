@@ -55,8 +55,27 @@ export const TALENT_PROBABILITY = 0.09;
  * to grow in both directions — every system that moves a stat is adding to or
  * subtracting from a middling start.
  */
-export const BIRTH_ATTRIBUTE_MIN = 25;
-export const BIRTH_ATTRIBUTE_MAX = 88;
+export const BIRTH_ATTRIBUTE_MIN = 20;
+export const BIRTH_ATTRIBUTE_MAX = 92;
+
+/**
+ * How many uniform draws are averaged for each birth attribute (Ticket 0408).
+ *
+ * TWO, NOT FOUR, AND IT WAS MEASURED BEFORE IT WAS CHANGED. Four draws puts the
+ * standard deviation at 0.144 of the band, which measured across 500 characters
+ * as sd 9 on every stat — p10 44, p90 69, and a population where the difference
+ * between the tenth and ninetieth percentile child was twenty-five points on a
+ * hundred-point scale.
+ *
+ * That was never the whole problem (see the note on school's smarts gain in
+ * `progression.ts`, which was equalising what this produced), but it was the
+ * floor under it. Two draws with a slightly wider band puts sd near 13 and
+ * actually reaches both ends. 0212 did exactly this for NPC constitutions and
+ * recorded why — at a cautious [58, 84] the spread in NPC life expectancy was
+ * 4.9 years, "another way of saying constitution did not exist". The player's
+ * own generator never got that treatment until now.
+ */
+export const BIRTH_ATTRIBUTE_SPREAD = 2;
 
 /*
   The personality band moved to `@yearafter/character`, beside the type it
@@ -154,7 +173,10 @@ export function rollTalents(rng: Rng): TalentKey[] {
  * numbers (spec 1070).
  */
 export function rollBirthStats(stream: RandomStream): Record<VisibleStatKey, number> {
-  const roll = () => Math.round(stream.aroundCentre(BIRTH_ATTRIBUTE_MIN, BIRTH_ATTRIBUTE_MAX));
+  const roll = () =>
+    Math.round(
+      stream.aroundCentre(BIRTH_ATTRIBUTE_MIN, BIRTH_ATTRIBUTE_MAX, BIRTH_ATTRIBUTE_SPREAD),
+    );
   return {
     happiness: roll(),
     health: roll(),

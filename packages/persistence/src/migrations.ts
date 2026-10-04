@@ -741,6 +741,235 @@ const migrations: Readonly<Record<number, Migration>> = {
       finalPensionablePay: 0,
     },
   }),
+
+  /**
+   * v25 -> v26: Ticket 0402 added the job offer.
+   *
+   * Nothing is added. An offer is a question that was asked in a specific year
+   * about a specific job, and a save made before offers existed was never asked
+   * one — inventing a pending offer here would put a question in front of a
+   * player about a year that already happened. The absent field IS the correct
+   * migration, and the version bump is what records that the shape changed.
+   *
+   * The pending queue is deliberately untouched for the same reason: a v25 save
+   * cannot be holding a `career.offer` decision, so there is nothing to repair.
+   */
+  25: (save) => ({ ...save, version: 26 }),
+
+  /**
+   * v26 -> v27: Ticket 0405 added the systemic college offer.
+   *
+   * Nothing is added, for the same reason v25 -> v26 added nothing: a save
+   * made before this door existed was never asked its question, and a v26
+   * save cannot be holding an `education.offer` decision, so there is
+   * nothing in the pending queue to repair either. The absent field is the
+   * correct migration; the version bump just records that the shape changed.
+   */
+  26: (save) => ({ ...save, version: 27 }),
+  /**
+   * v27 -> v28: Ticket 0406 added licenses and the vocational stage.
+   *
+   * Nothing to add. `credentials.licenses` is optional and absent means "holds
+   * none", which is true of every character who ever lived in a build without
+   * trade school — and `holdsLicense` reads an absent array as false rather
+   * than throwing, so a v27 save is already correct.
+   *
+   * WHAT THIS MIGRATION DELIBERATELY DOES NOT DO is grant `lic.md` to the
+   * physicians a v27 save may already contain. It is tempting — those
+   * characters legitimately reached the job under the old rules — but a
+   * migration that hands out credentials is a migration that invents history,
+   * and the license would then outlive the job if they were ever fired. They
+   * keep the job they hold; `cannotApply` only ever runs on the next one.
+   */
+  27: (save) => {
+    /*
+      AND IT REPAIRS, because a v27 save can already be broken.
+
+      `pending` was serialized from 0402 and the offer behind it never was (see
+      `toSave`), so any save written while a career or college offer was on the
+      table came back with an unanswerable question in the queue. `decide`
+      errors on it, the buttons do nothing, and `advanceYear` will not advance
+      past a pending decision — the character is stuck at that age forever.
+      0406 fixes the serialization, but a fix that only helps future saves
+      leaves everybody who already hit it exactly where they were.
+
+      So this drops any offer decision that has no offer behind it. Dropping
+      rather than reconstructing: the offer carried a drawn employer, a drawn
+      salary and a drawn major, none of which survived, and inventing
+      replacements would be inventing history the player never saw. Losing an
+      unanswered question costs them one opportunity; keeping it costs them the
+      save. A decision whose offer DID survive is left alone.
+    */
+    const pending = Array.isArray(save['pending'])
+      ? (save['pending'] as { eventId?: string }[])
+      : [];
+    const repaired = pending.filter((decision) => {
+      if (decision?.eventId === 'career.offer') return save['offer'] !== undefined;
+      if (decision?.eventId === 'education.offer') return save['collegeOffer'] !== undefined;
+      return true;
+    });
+    return { ...save, pending: repaired, version: 28 };
+  },
+  /**
+   * v28 -> v29: Ticket 0407 gave the career offer its other half.
+   *
+   * `offer.fromJobId` became optional — absent means the offer is a first job
+   * rather than somebody poaching a worker. A v28 save cannot hold one, because
+   * the build that wrote it never made one, so the absent field is the whole
+   * migration. The version bump records that the shape changed.
+   */
+  28: (save) => ({ ...save, version: 29 }),
+  /**
+   * v29 -> v30: Ticket 0410 built the door into a private life.
+   *
+   * `lifeOffer` is optional and absent means "there is no question open", which
+   * is true of every save written before the door existed. So there is no
+   * content to add, and the version bump records the shape change.
+   *
+   * IT STILL REPAIRS, for the reason migration 27 does. A v29 save cannot hold
+   * a `romance.offer` or a `family.offer` in `pending` — the build that wrote
+   * it could not raise one — so any that are there came from a save file that
+   * has been edited or has travelled backwards through a build, and they are
+   * unanswerable: `answerLifeOffer` looks up `state.lifeOffer`, finds nothing
+   * and returns `no-offer`, which wedges `advanceYear` behind a question with
+   * no answer. Dropping costs one opportunity; keeping costs the save.
+   */
+  29: (save) => {
+    const pending = Array.isArray(save['pending'])
+      ? (save['pending'] as { eventId?: string }[])
+      : [];
+    const repaired = pending.filter((decision) => {
+      if (decision?.eventId === 'romance.offer' || decision?.eventId === 'family.offer') {
+        return save['lifeOffer'] !== undefined;
+      }
+      return true;
+    });
+    return { ...save, pending: repaired, version: 30 };
+  },
+  /**
+   * v30 -> v31: Ticket 0416 built the door to something to join.
+   *
+   * `pursuitOffer` is optional and absent on every save written before it, and
+   * the adult pursuits it can lead to are new entries in a list whose shape did
+   * not change. So, like v30, the only content is the repair: a v30 save cannot
+   * hold an `activity.offer` in `pending`, and one that does would wedge
+   * `advanceYear` behind a question `answerPursuitOffer` cannot find.
+   */
+  30: (save) => {
+    const pending = Array.isArray(save['pending'])
+      ? (save['pending'] as { eventId?: string }[])
+      : [];
+    const repaired = pending.filter(
+      (decision) => decision?.eventId !== 'activity.offer' || save['pursuitOffer'] !== undefined,
+    );
+    return { ...save, pending: repaired, version: 31 };
+  },
+  /**
+   * v31 -> v32: Ticket 0501 let a character own a home.
+   *
+   * Nobody before it could, so every older save gets an empty `homes` — a true
+   * statement about those lives, not a default. And the same repair as the
+   * last four doors: a v31 save cannot hold a `home.offer` in `pending`, so one
+   * that does has lost its payload and would wedge `advanceYear`.
+   */
+  31: (save) => {
+    const pending = Array.isArray(save['pending']) ? (save['pending'] as { eventId?: string }[]) : [];
+    const repaired = pending.filter(
+      (decision) => decision?.eventId !== 'home.offer' || save['homeOffer'] !== undefined,
+    );
+    return {
+      ...save,
+      homes: Array.isArray(save['homes']) ? save['homes'] : [],
+      pending: repaired,
+      version: 32,
+    };
+  },
+  /**
+   * v32 -> v33: Ticket 0503 let a character rent property out.
+   *
+   * A `letting` on a home is optional and nothing before this could write
+   * one, so there is nothing to add. The bump is the point: an older build
+   * meeting a v33 save refuses it instead of loading it without its tenants.
+   */
+  32: (save) => ({ ...save, version: 33 }),
+  /**
+   * v33 -> v34: Ticket 0504 let a character own a car.
+   *
+   * Nobody before it could, so every older save gets an empty `vehicles` — a
+   * true statement about those lives. And the repair every door has needed: a
+   * v33 save cannot hold a `vehicle.offer` in `pending`, so one that does has
+   * lost its payload and would wedge `advanceYear`.
+   */
+  33: (save) => {
+    const pending = Array.isArray(save['pending']) ? (save['pending'] as { eventId?: string }[]) : [];
+    const repaired = pending.filter(
+      (decision) => decision?.eventId !== 'vehicle.offer' || save['vehicleOffer'] !== undefined,
+    );
+    return {
+      ...save,
+      vehicles: Array.isArray(save['vehicles']) ? save['vehicles'] : [],
+      pending: repaired,
+      version: 34,
+    };
+  },
+  /**
+   * v34 -> v35: Ticket 0505 let a car carry modifications.
+   *
+   * `mods` on a car is optional and nothing before this could write one, so
+   * there is nothing to add. The bump is the point: an older build meeting a
+   * v35 save refuses it instead of loading a Tarbus conversion as a stock car.
+   */
+  34: (save) => ({ ...save, version: 35 }),
+  /**
+   * v35 -> v36: Ticket 0506 — jewelry, watches and collections, and the
+   * renovation door.
+   *
+   * Nobody before it owned a valuable, so every older save gets an empty
+   * `valuables`. A home's `renovations` is optional and needs nothing. And the
+   * repair every door has needed: a v35 save cannot hold a `home.renovate` in
+   * `pending`, so one that does has lost its payload.
+   */
+  35: (save) => {
+    const pending = Array.isArray(save['pending']) ? (save['pending'] as { eventId?: string }[]) : [];
+    const repaired = pending.filter(
+      (decision) => decision?.eventId !== 'home.renovate' || save['renovationOffer'] !== undefined,
+    );
+    return {
+      ...save,
+      valuables: Array.isArray(save['valuables']) ? save['valuables'] : [],
+      pending: repaired,
+      version: 36,
+    };
+  },
+  /**
+   * v36 -> v37: Ticket 0507 — auctions. The diary and a valuable's `fake`
+   * and `reproduction` are optional and nothing earlier could write them, so
+   * the bump is the whole migration.
+   */
+  36: (save) => ({ ...save, version: 37 }),
+  /**
+   * v37 -> v38: Ticket 0601 — businesses. Nobody before it owned one, so every
+   * older save gets an empty list.
+   */
+  37: (save) => ({
+    ...save,
+    businesses: Array.isArray(save['businesses']) ? save['businesses'] : [],
+    version: 38,
+  }),
+  /**
+   * v38 -> v39: Ticket 0602 — locations. A business before it had one door, so
+   * each gets an empty list of extra ones.
+   */
+  38: (save) => ({
+    ...save,
+    businesses: Array.isArray(save['businesses'])
+      ? (save['businesses'] as Record<string, unknown>[]).map((business) => ({
+          ...business,
+          branches: Array.isArray(business['branches']) ? business['branches'] : [],
+        }))
+      : [],
+    version: 39,
+  }),
 };
 
 /**
@@ -959,6 +1188,14 @@ export function validateCurrentSave(
     require('circle.people', (candidate['circle'] as Record<string, unknown> | undefined)?.[
       'people'
     ], Array.isArray((candidate['circle'] as Record<string, unknown> | undefined)?.['people'])),
+    // Ticket 0501. A list, however short.
+    require('homes', candidate['homes'], Array.isArray(candidate['homes'])),
+    // Ticket 0504. The same for cars.
+    require('vehicles', candidate['vehicles'], Array.isArray(candidate['vehicles'])),
+    // Ticket 0506. And for what is in the collection.
+    require('valuables', candidate['valuables'], Array.isArray(candidate['valuables'])),
+    // Ticket 0601. And for what is owned and running.
+    require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
   ].filter((problem): problem is string => problem !== null);
 
   if (problems.length > 0) {

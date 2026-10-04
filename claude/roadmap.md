@@ -1,0 +1,1089 @@
+# YearAfter — roadmap from here
+
+**Where we are:** **v0.02 Living Character is COMPLETE.** Tickets 0201–0212,
+plus the 0203b/0204b/0206b/0207b/0207c/0207d/0210b/0210c/0211a/0211b/0211c
+rounds. A life is playable start to finish, and the line carries on past it.
+**Next up:** v0.03 Financial Life — 0301 Financial Ledger.
+**Source:** `specs/MASTER_SPEC.md` §1285–1404. Everything below is quoted or
+derived from it; where the spec stops itemising tickets, that is marked.
+
+---
+
+## Done
+
+| | |
+|---|---|
+| **Sprint Zero** 0001–0009 | Repo, Expo app, core types, seeded RNG, save schema + migrations, SQLite, CI, specs, dev screen |
+| **v0.01** 0101–0114 | Theme, header, five-world navigation, timeline, Advance, stat bars, world shells, UI kit, icons |
+| **v0.02** 0201–0212 | Character generator, family, events, school, stress, friends, love, children, NPC parents, employment, college, aging and health, a full-catalog voice pass, and **death, mortal NPCs and dynasty continuation** |
+
+**644 tests across 31 files, 27/27 turbo tasks.** 374 events, 49 jobs across 11
+ladders, 66 employers, 8 majors, 12 health conditions, 25 activities, 13 gigs.
+Save at **v17**.
+
+> This section (and the "Where we are" line above it) stopped being updated
+> partway through v0.03 — `claude/build-status.md` carries the current test
+> count, save version and catalog sizes, and is itself the doc that stays
+> current. Treat the numbers on this page as a snapshot of where v0.02 left
+> off, not the build's present state.
+
+---
+
+## v0.02 is closed — what 0212 actually shipped
+
+Full write-up in `claude/0212-death-and-continuation.md`. The short version,
+because two thirds of it was not the death screen:
+
+- **NPCs are mortal.** New `phases/kin.ts`, the only phase ever prepended.
+  97% of characters lose a parent, 36% are widowed, 9% outlive a child. Before
+  this, the median surviving parent of a 73-year-old was **105**.
+- **`character.records` is written**, eleven tickets after it was declared for
+  this exact screen. An active life produces 10–17.
+- **The death screen** is spec 1284's seven fields and no eighth — no net
+  worth, no score. Plus burial / cremation / donation to science.
+- **Children live their own years**, so continuing as one promotes a life
+  rather than inventing one.
+
+Two new rules came out of it: **13.36** (a field nothing writes is not state —
+`droppedOut`, `alive` and `records` are the same bug three times) and **13.37**
+(a state object holding a live cursor is not a value).
+
+---
+
+## v0.03 Financial Life — 10 tickets — COMPLETE
+
+The spec's own build sequence (§1282–1284) is **Shell → Life → Money → Careers**.
+We did Careers first, and the cost of that is visible: 0210's cost-of-living
+model is a labelled placeholder that 0303 deletes, and every price in the game
+is a share-of-what-you-hold rather than a real number. This milestone pays that
+back. Full detail — including the market destroying value permanently, the
+$430,000 illiquidity subsidy, and the financial pages — is in
+`claude/build-status.md`.
+
+| Ticket | What it covers |
+|---|---|
+| **0301 Financial Ledger** | Backend transaction categories — salary, commission, tax, living expense, housing, vehicles, gifts, debt, asset income, investments |
+| **0302 Reconciliation** | opening cash + in − out = closing cash. Any mismatch **fails validation** |
+| **0303 Living Expenses** | Inferred from income, wealth, family, location, circumstances. No lifestyle selector. **Deletes `livingCostOf`** |
+| **0304 Finance Dashboard** | Balance, Income, Tax Rate, Monthly Outflow, Assets, Liabilities, Net Worth, Investments, Credit Cards |
+| **0305 Credit System** | Simplified underwriting. Explicitly *not* a credit-bureau simulation |
+| **0306 Credit Cards** | Max 5 active, up to 8 products; limit, APR, balance, payment, rewards, application |
+| **0307 Loan Engine** | Personal, secured, business/SBA, line of credit, wealth/private. Mortgage and auto use simplified eligibility with an instant result |
+| **0308 Investments** | Stocks, funds, bonds, crypto. Buy/sell/hold, annual movement. Purchases are **transfers, not outflow** — plus the 0308b/0308c/0308d rounds |
+| **0309 Advisors** | Buy/Hold/Sell/Reduce/Rebalance recommendations |
+| **0310 Retirement Benefits** | Employer match, contributions, pensions — rolled into Investments/Assets |
+
+**Three debts 0303 inherits, all labelled in code:**
+
+- `livingCostOf` — deleted rather than stacked on top of (CORE_RULES 13.8).
+- **Treatment is free.** Pricing healthcare against a placeholder cost model
+  would make it either free in practice or unreachable for exactly the poor
+  characters it matters most to.
+- **Inheritance is "the cash that was left"**, because there is no debt, no
+  will and no trust in the build to net it against. 0212 did what it could
+  honestly do and labelled the rest.
+
+> *"v0.03 gets aggressive financial integrity testing."*
+
+---
+
+## v0.04 Career & Education Depth — COMPLETE (0401–0417)
+
+The spec stops numbering here and describes the milestone as a block. Ticket
+breakdown was proposed, then measured, in `claude/v004-career-measurement.md`.
+
+> *"Expand to roughly 150–250 distinct job titles initially, without showing huge
+> listing inventories. Build reusable salary/commission/trade/government/
+> professional/management templates. Give performance careers such as Sales,
+> Real Estate, Stockbroker/Financial roles broad earnings distributions. Display
+> concise benefits. Add career opportunities and permissive plausible
+> switching."*
+
+- **0401 Reachability** — `reachOf`, the effective rung a job's gate reads
+  instead of the raw held one. Jobs seen in one life 13 → 22–24 of 49.
+  `claude/0401-reachability.md`.
+- **0402 Career opportunities** — offers that arrive rather than being applied
+  for, the first decision the game has ever asked an adult. `decide` gained a
+  systemic-vs-authored branch. `claude/v004-career-measurement.md`.
+- **0403 Catalog expansion** — 49 jobs across 11 tracks → **147 across 16**,
+  five new fields (tech, finance, legal, medicine, hospitality). Two rules came
+  out of the reachability guard catching real starvation as the catalog grew:
+  13.61 (a rung competes with itself first) and 13.62 (coverage is a
+  population question). `claude/0403-catalog-expansion.md`.
+- **0405 College offer** — the education half of this milestone's name.
+  College now arrives as a systemic decision, the same door 0402 built for a
+  job, instead of requiring a player to find the College screen: certain the
+  year a character leaves school, a standing 35% chance every eligible year
+  after, answered through the exact same `applyToCollege` roll the screen
+  always used. The reachability guard's credential-gated blind spot — 33 of
+  147 jobs never shown to anybody, which 0210b first measured and 0403
+  flagged — is now **0/147**. Also found and fixed two dormant bugs in OTHER
+  tests that a much larger passing-through-college population finally
+  exercised (CORE_RULES 13.63). `claude/0405-college-offer.md`.
+
+- **0406 Programs and licenses** — the review after 0405: *"This seems pretty
+  bare. I dont see medical school, dentist, vet school, law school, postgrad,
+  anything like that."* It was: 0403 grew the catalog to sixteen tracks and
+  nobody came back to 0210b's eight majors, so five tracks — medicine, legal,
+  tech, finance, hospitality — had **no program pointing at them at all**.
+  Eight majors → **53 programs in three tiers** (14 trade certificates, 24
+  bachelor's, 15 graduate and professional). Four new career tracks so the new
+  schools lead somewhere: veterinary, dental, pharmacy, architecture. 147 jobs
+  → **169**. And a **license**, orthogonal to the education ladder, which is
+  both a wall nothing substitutes for (a fine-arts master's was a valid medical
+  qualification for three tickets, because `meetsLevel` is an ordered compare
+  and an ordered compare cannot refuse) and a ladder you are credited with
+  having climbed (trade school buys the apprenticeship on a trades ladder that
+  needs no qualification at all). Save v27 → v28. New rule 13.64.
+  `claude/0406-programs-and-licenses.md`.
+
+- **0407 A way in** — found by 0406's own baseline rather than by review: **a
+  passive player never got a job, 0 of 250 lives.** `withAnyOffer` opened with
+  `if (!held) return state` — 0402 built a POACHING offer, correctly refused to
+  fire it for somebody with nothing to be poached from, and was the only
+  systemic career door in the game. 11,419 idle adult years with six listings
+  going in every one of them; 248 of 250 died with nothing; and of the 91
+  decisions ever raised to an adult, every one was 0405's college offer. Now
+  247/250 work, 4/250 die broke, and postgraduate reach goes 0 → 21 because the
+  education ceiling was downstream of the employment floor all along. One door
+  with two entry conditions (`fromJobId` optional), not a second offer. The
+  chance reads education, so a dropout idles 4.4 years a life against a
+  postgraduate's 0.6. Save v28 → v29. Also fixed three real listing defects
+  0401's starvation guard caught — every character alive in a year saw the SAME
+  six jobs, a license did not surface its own profession, and `prefers` was
+  charged twice. New rule 13.65. `claude/0407-a-way-in.md`.
+
+- **0408 A varied population** — school performance at sixteen had a floor of
+  50 across 500 lives. The mechanism was not character generation: every stat
+  delta runs through 0203's `curvedDelta`, full strength at 50 and tapering to
+  nothing at 100, and school pushed a flat +1 Smarts at everybody for thirteen
+  years, so the weakest students gained the most. Floor 26 and sd 17.4 now.
+  New rule 13.66. `claude/0408-a-varied-population.md`.
+
+- **0409 An adult life the catalog had heard of** — events able to fire at
+  forty went from 26 of 374 to 93 of 444, and from zero authored decisions to
+  thirteen. The gates had to be added first: `employed`, `jobTrackAny`,
+  `hasCondition`, `bereavedWithin` and the rest, because an event cannot be
+  about a job if eligibility cannot say "has one". New rule 13.67.
+  `claude/0409-an-adult-life.md`.
+
+- **0410 A private life** — 0409 left `family` and `friendship` named as the
+  last thin adult categories. They were not thin. Measured across 90 lives and
+  4,828 adult years, a passive player **never met anybody, never married and
+  never had a child — zero, zero, zero** — because `romanticMove`, `tryForBaby`
+  and `applyToAdopt` are only ever called by a button. All eleven `family`
+  events that can fire at forty are 0208's parenting events gated on
+  `hasChildren`, and not one had ever fired: dead content behind a door nobody
+  had built, the same shape as 0405's credential-gated jobs and 0407's unclaimed
+  listings. Now 86/90 partner, 78/90 marry, 56/90 have a child, and `family`
+  events fire in 25.8% of adult years.
+
+  The bigger find was not in this ticket's code. Every systemic door opened with
+  `if (state.pending.length > 0) return state`, which 0402 recorded as free
+  because *"an adult year contains zero authored decisions"* — a sentence 0409
+  made false from another package. Measured, **59.4% of adult years already held
+  an authored decision**, so all three doors were shut in three years out of
+  five. Fixing that is most of the ticket, and it un-throttles 0405 and 0407 as
+  much as 0410. Save v29 → v30. New rules 13.68 and 13.69.
+  `claude/0410-a-private-life.md`.
+
+- **0411 An adult who develops** — roadmap finding 2, open since 0211. It was
+  exact rather than approximate: Discipline ran p10 50 / median 65 / p90 83 and
+  **sd 12.0 at eighteen, thirty and forty-five**, the same three numbers, because
+  nothing wrote the stat after school. The stat adult events DO move was worse —
+  Charisma sd collapsed 9.7 → 6.5 → **3.8**, because of the 91 events that can
+  fire at forty the effects run Smarts +14/−0, Discipline +1/−0, Charisma +26/−0,
+  Looks +0/−0. A one-way ratchet, so everybody climbed until the curve stopped
+  them and it stopped everybody in the same place: at forty-five all seven
+  commonest tracks produced charisma between 89 and 92. And **Looks was 52 at
+  eighteen, 52 at thirty and 52 at forty-five** — a visible bar nothing had ever
+  written.
+
+  `TRACK_WANTS`, the table `hireChance` reads to decide what a kind of work is
+  made of, is now also what a year of that work builds in you — and what it does
+  not want, you get out of practice at. Discipline sd 12.0 → **14.5** by
+  forty-five, Charisma 3.8 → 8.3, and a logistics lifer and a tech lifer are
+  finally different people. Looks follows age, gated on health, in the health
+  package where the age curve lives. New rules 13.70 and 13.71.
+  `claude/0411-an-adult-who-develops.md`.
+
+- **0412 A friend you actually have** — roadmap item 5b, and both of its findings
+  were narrower than what was there. Finding 2b's *"trough at twenty"* is a
+  **sawtooth**: 84.4% of fourteen-year-olds, 88.9% of nineteen-year-olds and
+  87.8% of twenty-year-olds had no friend at all, because a friendship here was a
+  function of how long the current room had been open and the build empties the
+  room at eleven, fourteen and eighteen. Fourteen and nineteen are the same hole,
+  two rooms apart.
+
+  And at the other end of the same mechanism, the half no finding had noticed:
+  **warmth was the one number in this build that never went through a curve.**
+  `remember` added raw and so did the year-in-the-same-room step, which runs at
+  everybody in a room every year — and a job is a room that can stay open for
+  thirty years. At forty-five, p10, median and p90 of a character's closest
+  friend were **all 100**, with 90.9% pinned at exactly the cap; pooled, the
+  distribution was bimodal at 34 and 100. This build had no decent-but-not-best
+  adult friend. CORE_RULES 13.70 in a third system.
+
+  `curvedWarmth` fixes the ceiling (0% at the cap now, p10/med/p90 84/95/96) and
+  `keeping-up.ts` fixes the floor: once a year, unprompted, you keep up with the
+  people a year of silence would cost — running the real `resolveInteraction`,
+  reaching exactly the complement of the room, and worth less than a tap. No
+  friend at 14/19/20 is now 31.1% / 51.1% / 60.0%. Also the four friend
+  predicates the catalog has never had, which is what the content half needs.
+  Five tests broke and none of them was this ticket's code. New rules 13.72
+  and 13.73. `claude/0412-a-friend-you-actually-have.md`.
+
+- **0413 The year after school** — the content half of 5b, and finding 2d was
+  true while pointing at the wrong place. Six adult friendship events, all
+  romance: correct. What nobody had measured is that **an ordinary eighteen-
+  year-old had SEVEN reachable events and five of them were
+  `adult.placeholder.*`**, against ninety-nine at seventeen. In play, 98.6% of
+  everything that fired at eighteen was a placeholder, across six distinct ids in
+  ninety lives. 0409 measured at forty, so the cliff was invisible to it.
+
+  Forty-five events and eight decisions, weighted into the desert: reachable at
+  18 goes 7 → 18, friendship at 40 goes 5 → 32, adult friendship decisions 0 → 7
+  (every decision the game had ever raised to an adult was career, health or
+  loss). Placeholder share at eighteen 98.6% → 17.5%.
+
+  Three things had to be built first — `{kid}` binding friends before
+  acquaintances (a gate that promises a friend and a token that names a colleague
+  is 0207's `partnered` bug one level down), `FX` being able to author `bond` at
+  all, and the predicates reaching the Python generator. And the tranche reopened
+  the curve 0412 had just closed: thirty-nine events carrying happiness, and
+  `bondFromOutcome` derives warmth from happiness, so content about having
+  friends was making it impossible not to have them. New rules 13.74, 13.75 and
+  13.76. `claude/0413-the-year-after-school.md`.
+
+- **0414 The family you came from** — finding 2e, and what was left after 0413
+  was bigger than what 0413 had closed. The `family` category has **ninety-one
+  events** and is the second largest in the catalog; eighty carry an `ageMax`
+  under eighteen and the other eleven are gated on `hasChildren`, with no third
+  group. So for a childless adult — **56.3% of every adult year in this build** —
+  the reachable family catalog was **exactly zero across 4,367 years**, while
+  **69.8% of those years had a living parent** who ages in the save and gets a
+  funeral and never once a line before it.
+
+  Four previous measurements missed it: 0409 counted at forty where parents
+  carry the number, 0410 "fixed family" by building the door to having children,
+  0413 measured by category total. Family events ran 0% at eighteen and 12.4% at
+  forty, and every point of that rise was people having children rather than
+  people having families.
+
+  Twenty-nine family events, four decisions (adult family decisions were zero)
+  and twenty-four ordinary-life events for the category that was nothing but
+  placeholders. Childless adult years holding a family event **0% → 47.2%**;
+  placeholder share across 18–30 **17.5% → 2.8%**; and the largest single
+  category share of an adult year **46.9% → 31.3%**, which resolves 2e's second
+  half by filling the other categories rather than re-weighting friendship. No
+  new predicates were needed — `requires` has meant a LIVING parent since 0212.
+  Catalog ceiling raised 500 → 700 (13.68). New rules 13.77 and 13.78.
+  `claude/0414-the-family-you-came-from.md`.
+
+- **0415 A life that shapes you** — finding 2c, and one of its four was wrong:
+  study already moves a person (+2 Smarts a year since 0210b; +4.0 against −2.3
+  for adults who studied). The other two were exact. Paired per life from
+  twenty-five to fifty, eight years raising a small child left discipline at
+  −3.0 against −2.8 for the childless, and five years seriously ill left
+  willpower at +12.2 against +12.9. Nobody was changed by either.
+
+  Measuring it found the bigger thing: **Willpower was collapsing** — sd 11.4 at
+  eighteen, **2.8 at sixty**, p10 at sixty 88, and not one life in 150 lower at
+  forty-five than at eighteen. 0411's Charisma collapse, on the stat 0411 didn't
+  list. The adult catalog held **71 willpower gains and no losses**, more than
+  half of what was paid out came from 0413's and 0414's content, and they sat on
+  both outcomes of hard choices — the branch where it went wrong paid the same as
+  the one where it went right. Five years struggling measured as MORE willpower
+  than a calm life (+15.7 against +11.9).
+
+  Two halves, both needed. The catalog: 39 willpower edits across 33 events,
+  71/0 → 37 gains / 5 losses. The system: `shaping.ts`, three two-sided rules —
+  a small child builds Discipline in a year you held together and costs
+  Willpower in one you didn't; a serious illness hardens somebody who meets it
+  well and wears somebody who doesn't (not keyed on treatment, which only a
+  button sets); a second struggling year in a row costs Willpower. The catalog
+  audit alone left a second struggling year paying the same as a calm one; with
+  both, −0.59 a year against +0.30. Willpower sd at sixty 2.8 → **8.1**, p10 88 →
+  70; parents' discipline +0.8 against −2.8. A class test now checks that no
+  trait collapses with age, all five at once. New rule 13.79. The hobby can't be
+  built yet — there's no adult state for it to be — and is finding 2g.
+  `claude/0415-a-life-that-shapes-you.md`.
+
+- **0416 Something to belong to** — finding 2g, and it was wider than adults.
+  Across 120 lives answering every question the game asks, **nobody ever joined
+  anything, at any age — 0 of 120**. Every joining verb sits behind the Clubs &
+  Teams screen, so 0204's activities, 0206b's tryouts, seasons and teammates,
+  0209's parent paying and 0210's "something you still do" meeting door were
+  built, tested and unreachable. It's the fourth door of that shape after 0405,
+  0407 and 0410. And an adult had no list at all: graduation emptied it forever.
+
+  Ten adult pursuits (a rec league, a choir, an evening class, a book club...),
+  a `SchoolStageId` of `adult`, and a systemic sign-up that runs the real
+  `tryOut` and `askToJoin`, asked last of the four doors. The adult year charges
+  fees through the ledger off the household standard (not the current account,
+  13.53), lets people put things down, and builds the trait a pursuit is about
+  for its first five seasons — the hobby half of 2c. Lives ever in anything
+  0 → 120/120; adult years in a sport 0% → 7.0%; people met as adults through
+  something they do 0 → 730; **no friend at twenty 58% → 30%**. Save v31.
+
+  Five tests broke and none was this ticket's code: a dormant fee line repeating
+  every year for twelve tickets, a one-seed harness, two extreme-value
+  instruments that moved because the sample grew (13.80), and a 3% band sitting
+  inside its own 7-point noise when the signal it guards is 35% (13.81).
+  `claude/0416-something-to-belong-to.md`.
+
+- **0417 A body that gets old** — finding 1b's leftover, and the Gompertz curve
+  was not the cause. Measured on 300 lives: median death 72, **3% reached
+  eighty-five**, and old people died five to six times faster than a US life
+  table (125, 191 and 313 per thousand a year at 70, 75 and 80, against about 20,
+  31 and 51). Two causes. Healing was a flat 3.4 a year against illness that got
+  likelier every year, so from the sixties the deficit only grew — median 25 at
+  seventy, more than half of all the health lost by then (13.83). And frailty
+  read raw health, which falls with age, so age was charged once by Gompertz and
+  again by a multiplier every seventy-five-year-old maxed out (13.82).
+
+  Healing now takes a share of what's owed and a strong constitution heals
+  faster; frailty reads a body for its age. No Gompertz constant changed. Median
+  death 72 → 82, reached 85 3% → 41%, deaths across the seventies 134 → 40 per
+  thousand, frailest-to-strongest fifth 70/76 → 77/85. NPCs follow through the
+  same `deathChance`; their constitution range widened to [30, 100] to keep their
+  spread honest. `claude/0417-a-body-that-gets-old.md`.
+
+More jobs now also means richer lives for NPC children, since `runOffspringYear`
+draws their careers from the same catalog.
+
+---
+
+## v0.05 Ownership
+
+> Houses, duplexes, 5/10/25-unit apartments, commercial property, simple
+> mortgages, rental applicants, rent changes, automatic renewals, management
+> agencies, mass tenant search, renovations. New/Used/Online/Luxury vehicle
+> markets, **150–250 initial vehicle entries**, hidden used-car issues,
+> modifications, jewelry/watches, two general auction houses + storage +
+> high-end/private auctions.
+
+Vehicles must follow the recognisable-fictional-analogue rule with real-world
+pricing references. Depends on 0307 (mortgages) and 0301 (asset ledger).
+
+Measured before it was ticketed — `claude/v005-ownership-measurement.md`. Nobody
+owned anything, rent was the largest line in every adult budget, and median net
+worth at sixty was about what it was at thirty. So homes go first.
+
+| | |
+|---|---|
+| **0501 Homes** | **DONE.** Listings, mortgages, owning, selling, the fifth door |
+| **0502 A household of two** | **DONE.** Partners earn; a date is not a household; spending per member |
+| **0503 A landlord** | **DONE.** Duplexes and apartment buildings, tenants, rent, renewals, agents, mass search. Commercial moves to v0.06 (spec 1708) |
+| **0504 Vehicles** | **DONE.** New / Used / Online / Luxury, 247 entries, hidden used-car issues, inspection, instant finance, the sixth door |
+| **0505 Vehicle modifications** | **DONE.** Spec 184's ten slots, three wraps, priced by the car, part recovered at resale, and Tarbus |
+| **0506 Renovations & collections** | **DONE.** Nineteen renovations and the seventh door, 151 valuables, five stores, a collection that sorts itself, heirlooms |
+| **0507 Auctions** | **DONE.** Two general houses with credibility in words, a storage yard, private sales behind a gate; bargains possible, never a living |
+| 0508 Will & Estate | **DEFERRED by Payton, 3 October 2026 — still to be built, after v0.06.** An estate that settles property, debt and the portfolio (finding 10) |
+
+- **0501 A place of your own** — a market of eight listings a year in the
+  character's state, three mortgage products with real underwriting, a year of
+  owning (market, upkeep, wear), selling, and `home.offer`, the fifth door.
+  Three defects found only in the population: 104 of 176 buyers foreclosed
+  on because owners still spent like renters (13.86); a nominal 4% market in a
+  constant-dollar economy (13.85); and a market hash that rose for twenty years
+  straight (13.84). Ownership 0 → ~10% at 25–34 and ~60% at 65+; each life's
+  median gain from thirty to sixty $1,700–3,400 → $27,000–30,000. Save v32.
+  `claude/0501-a-place-of-your-own.md`.
+
+- **0502 A household of two** — finding 9. A partner cost half again and earned
+  nothing: median net worth at 35–44 was $2,900 with a partner and $108,000
+  without. Partners now work (an earning power fixed for life, the age curve,
+  stretches out of work with a baby at home, a pension), a date no longer
+  shares the household, and the standard of living is set per household member
+  — feeding a second income into the old formula counted the household twice
+  (13.87). That exposed 0501's `OWNER_SHARE` of 0.45, which had been balancing
+  the overspend (13.88); it is 0.7 now, and the home door reaches owning costs
+  up to 1.5× the roof. Partnered ÷ single at 55–64: 0.18–0.35 → 0.98–1.04.
+  Median net worth by age now sits near the US SCF figures from 25 to 74.
+  No save change. `claude/0502-a-household-of-two.md`.
+
+- **0503 A landlord** — duplexes and 5/10/25-unit apartment buildings listed
+  apart from homes, any house letable, tenants with spec 157's indicators and
+  no score, six rent settings tuned so the going rate is the best answer
+  (13.89), automatic renewals, a letting agent and a fill-every-unit search,
+  an investment mortgage that counts 75% of rent, and a household that falls
+  behind on what it lets before the home it lives in. A managed Ohio duplex:
+  95% let, ~3% evictions a unit-year, 4.7% net on value (California 2.8%);
+  ~7% real unlevered in total. Save v33. `claude/0503-a-landlord.md`.
+
+- **0504 Vehicles** — nobody had ever owned a car. 247 trims across 104
+  recognisable fictional models and 28 brands, priced on 2025 US references;
+  seven lots in four markets (two new, two used, one online, two luxury behind
+  a hidden gate); value from age, model, condition, a hidden service history,
+  accidents and rarity, never mileage; maintenance and repairs as one line;
+  hidden issues out in the first year, commonest online; a $200 inspection
+  that takes a fault off the price; three instant car loans; and `vehicle.offer`,
+  the sixth door. An owner's living bill drops by the car share (8.5%) and a
+  dear car squeezes the rest. Car ownership 71–73% at 25–34 and 93–96% from 55;
+  net worth by age within the noise of the two samples before it. Home
+  ownership first fell eight points at 35–54 because the home door read a
+  living bill the car had shrunk (13.90); now 3–5. Three of seventeen sabotages
+  passed first time (13.91). Save v34. `claude/0504-vehicles.md`.
+
+- **0505 Vehicle modifications** — no car could be changed at all. Nineteen
+  options across spec 184's ten slots (wheels, paint and three wraps, tint,
+  exhaust, intake, suspension, tune, brakes, engine), priced on the log of the
+  car's price so forged wheels are $4,300 on a Hondo and $13,000 on a
+  Ferrano. A mod adds 0–35% of its cost to the car's worth, which then ages
+  with the car; a classic loses 4% for every change. A tune works the car
+  harder; better brakes cut crashes. Tarbus converts Merceda and Porsha
+  models for 40% of the car, covers the engine side, recovers 70% and puts
+  its name on the car. No door: a hobby is the player's choice. Save v35.
+  `claude/0505-vehicle-modifications.md`.
+
+- **0506 Renovations, jewelry and watches, collections, shopping** — homes
+  only ever wore down, so 72–88% of homes lived in past forty-five were in
+  poor condition. Nineteen renovations (spec 153's list): refreshes lift
+  condition and can be redone once aged; additions are once and recover part
+  of their cost; and `home.renovate`, the seventh door, asks about the cheapest
+  fix you can pay for. Poor homes at 45–64 fell to 26–30%, net worth
+  unchanged. Then 151 pieces — watches from a $70 Casiot to a $650,000 Patrek,
+  gold and diamonds by carat, art by invented artists, antiques, curios and six
+  legends — in five stores under Assets → Shopping, one behind a hidden gate.
+  Each holds value by its kind (fashion falls, sought watches trade over
+  retail, art swings), the collection shelves itself, one sale button, and
+  heirlooms pass to a child as things with whose they were. Two of seventeen
+  sabotages passed first time (13.91, 13.92). Save v36.
+  `claude/0506-renovations-and-collections.md`.
+
+- **0507 Auctions** — Hartwell & Finch and Crane Brothers (two sales a year
+  each, five lots, a car one lot in five), Lock & Key Storage (six sales,
+  blind units: what the door shows, junk sold off, now and then something
+  kept) and Ashcombe Private Sales behind a $1M gate. A sale is derived; only
+  a diary of visits and bids is saved. Credibility is a house's standing this
+  year, in words, and decides how many fakes and how fat the estimates; a
+  fake is found out the next year. Three bid buttons, you pay where the room
+  stopped plus a 25% premium. Measured before building: with the room centred
+  on value, careful bids won 11% per win. Centred 20% over value, a careful
+  bid at a good house is within ±2% per lot and everything else loses — spec
+  1390's "bargains possible, not guaranteed". Save v37.
+  `claude/0507-auctions.md`.
+
+- **0601 The business engine** — nobody could own anything but a home, cars
+  and a collection; Assets → Businesses had said "not built yet" since 0108.
+  Twelve businesses from a $20,000 cleaning company to a $5.2 million hotel,
+  shown by what you hold (60% of the startup), never by tier. A year is
+  demand × capacity: maturity, the economy, reputation, your skill, a luck
+  drawn at opening and a shock that is bigger while young, against price over
+  quality; goods, pay and overhead come out, a three-month reserve stays in the
+  till and the rest is paid to you as taxed `business` income. Losses come from
+  the till, then you, then the doors close. A manager staffs it unless you
+  take over. Valuation, a yearly buyer, Sell and Close; businesses count in net
+  worth and pass to an heir as cash. Eighteen sabotages, two passed first time.
+  Known gap: survival is too kind until 0604 (0604 narrowed it, see that doc). Save v38.
+  `claude/0601-business-engine.md`.
+
+- **0602 Catalog and expansion** — nineteen businesses added to twelve: a law
+  firm to a $14 million resort, manufacturing, trucking and vehicle rental.
+  The six that need systems not built yet (investment firm, private lender,
+  record label, talent agency, casino, racing team) wait, by name. The
+  marketplace now reads net worth, as spec 912 and 0601's own comment said it
+  should. A business that has traded two years and earned can open up to three
+  more doors, each at 65% of the cost, 72% mature on day one, bringing in less
+  than the one before and sharing one owner; the second usually pays and later
+  ones less, and in a few trades it is a loss. Writing the larger catalog
+  showed 0601's price slider had a dominant end once the manager staffed to
+  the price (best price at 125–135% for half the catalog); elasticity is now
+  derived from costs. Also fixed: pay mattering as much at a car-rental lot as
+  at a law firm, and a manager that took a decade to staff a resort. Three of
+  eighteen sabotages passed first time. Save v39.
+  `claude/0602-catalog-and-expansion.md`.
+
+- **0603 Business finance** — the `business` loan type spec 1857 lists and 0307
+  left open, and buying a business that already runs. A business loan is never
+  cash: it is offered when you open, add a door to, or buy a business, and goes
+  straight into that purchase, so it cannot be spent on anything else. Two
+  products, Small Business (8.75%, up to $750,000, 70% of a startup and 80% of
+  the rest, fair credit) and Commercial Term (7.25%, up to $15 million, only
+  for a business that already earns, good credit). They lend to what repays
+  them: half of wages plus what the businesses clear plus what the one being
+  bought clears, less every payment already owed. Four businesses are for sale
+  each year, drawn from the same net-worth gate, asking 8–28% over what the
+  formula says they are worth, with the seller's books polished by up to a fifth
+  and customers wary of a new owner. Buying and selling the same one in the
+  same year loses money on every draw. Measuring a financed purchase end to end
+  found the first version broke: serviced from the owner's wages with the till
+  full, it put owners in arrears for eleven to twenty-four of twenty years. The
+  business now pays its own loan, the owner steps in for a shortfall, a sale
+  pays the bank first, and so does a death. Thirty-eight sabotages, one passed first time. No save
+  bump. `claude/0603-business-finance.md`.
+
+- **0604 Business events and heirs** — a year can now have something in it:
+  nineteen events by weight (a big order, a breakdown, a key person leaving, a
+  supplier's price rise, the landlord, a rival opening or closing), in about
+  half of all years, good and bad about even, tilted by the economy and harder
+  on a new business. A rival takes 4–15% of the custom, bigger and likelier in
+  a crowded trade (cleaning) than an expensive one (a resort), fades over three
+  years, and is held off by a good name. The economy's existing effect on
+  demand is now recorded and said. At a death the businesses are handed to an
+  adult heir with their lenders (a child's are sold, as before), and the
+  end-of-life card asks "Hand it on / Sell it". Measured first: five-year
+  survival 81.5% against BLS 51%; after, 78.7%. That gap is recorded rather than
+  forced, because closing it needs unavoidable disasters and the spec says
+  not to have them. Profit still swings by the same amount among survivors
+  (margin arithmetic), but now with a cause. The people rule in the events did
+  nothing until a mutation test found it. Forty-nine sabotages, three passed
+  first time. No save bump. `claude/0604-business-events-and-heirs.md`.
+
+## v0.06 Business & Advanced Wealth
+
+> Reusable business engine: startup cost, supplier, COGS, pricing, payroll tier,
+> employees, demand, brand reputation, profit, expansion, valuation, sale.
+> Business marketplace financially gated **without visible wealth-tier labels**.
+> Private investments and commercial real estate integration.
+
+Measured before it was ticketed — `claude/v006-business-measurement.md`. Four in
+five adults over 25 hold $25,000; nobody holds $2,000,000; nobody passive will
+start a business, so this block has no doors. 0508 Will & Estate was **skipped
+on Payton's say-so on 3 October 2026** and is still to be built; it moves after
+this block.
+
+| | |
+|---|---|
+| **0601 The business engine** | **DONE.** Opening, supplier / COGS, a price slider, four payroll tiers, automatic staffing, demand, brand reputation, profit, valuation and sale; twelve businesses; Assets → Businesses. Survival (≈81% at five years against BLS 51%) waits on 0604 |
+| **0602 Catalog and expansion** | **DONE.** Nineteen more businesses (thirty-one of spec 396's thirty-seven; six wait on music, acting, gambling, sports and private lending), a marketplace gated on net worth, and up to four locations per business. Fixed three 0601 calibration holes found on the way (price slider, pay level, staffing speed) |
+| **0603 Business finance** | **DONE.** Two business loans (Small Business, Commercial Term) written straight into an opening, a new door or a purchase and never paid out as cash; a for-sale list of established businesses priced above their worth; the business pays its own loan. Private Lending Firm moves to 0605 |
+| **0604 Business events and heirs** | **DONE.** Nineteen weighted events a year at most (half the years are quiet), a rival that opens in crowded trades and fades over three years, the economy's effect said out loud, and an heir who keeps the business and its lender. Five-year survival 81.5% → 78.7% (BLS 51%); recorded, not forced |
+| 0605 Private investments | Large returns that can fail or lock money up, opportunity capacity |
+| 0606 Commercial real estate | Retail, office and warehouse space, joined to 0503's landlord |
+
+## v0.07 Creator & Fame
+
+> Long-form video, streaming, photo/lifestyle, short-form, podcasting,
+> subscription platforms. Category-aware growth, visible trends, #1000→#1
+> rankings, collaborations, creator groups, **one visible Fame bar**, and the
+> two-stage celebrity interaction system.
+
+## v0.08 Entertainment & Sports
+
+> Acting (talent, lessons, character development, agent, roles, career
+> reputation, fame, awards, simple negotiation), Music (labels, releases, tours,
+> collaborations, awards, release caps), Modeling, and a reusable sports engine.
+> Initial sports: Basketball, Football, Baseball, Soccer, Hockey, Golf, Tennis,
+> Boxing, MMA, then approved Olympic categories. Coaching/commentary routes.
+
+Coach and teammate relationships stay inside sports — spec 1305–1309, the same
+rule that put colleagues on the Career screen. This milestone also closes a gap
+0211 measured: **nobody over eighteen is an athlete in this build**, because
+`education.activities` only exists while a character is at school. Spec 541–543
+puts athletes first in the injury order, and today only schoolchildren can reach
+that branch.
+
+## v0.09 Military, Intelligence, Politics & Crime
+
+> Military branches/ranks/pay/benefits/deployments/discharges. FBI/CIA/military-
+> intelligence progression **rather than a detached secret-agent career**.
+> Politics with campaigns and random debate/donor/endorsement/corruption events.
+> General crime, Crime talent integration, independent dealer progression,
+> organized crime, courts/prison/parole/escape minigame.
+
+## v0.10 World Integration
+
+> Upgrade NPC simulation, family dynasties with resilient legacy, hidden world
+> economy, persistent fictional celebrity world, and large event-library
+> expansion — **roughly 2,000–5,000+ event text variants** by pre-beta.
+
+0212 laid the first stone of this: NPCs age and die, children live reduced
+lives, and `world.generation` increments. "Family dynasties with resilient
+legacy" is the full version of what 0212 made minimally real.
+
+## v0.20+ → v1.0
+
+Content, balancing, expansion. Launch targets 200–400+ job titles and a
+correspondingly large event library.
+
+---
+
+## Unticketed work that should slot in
+
+Findings from 0209 through 0212 that are real defects but belong to no ticket
+yet. Each one makes the game measurably flatter than it should be.
+
+**1. This build cannot produce a poor student.** — **DONE in 0408.** The
+diagnosis in the original finding was half right: character generation was the
+floor under it (birth stats ran sd 9 on a 63-point band), but the mechanism was
+downstream. Every stat delta goes through 0203's `curvedDelta`, which is full
+strength at 50 and tapers to nothing at 100, and school pushed a flat +1 Smarts
+a year at everybody for thirteen years — so the weakest students gained the most
+and the population converged. Smarts at eighteen had a **minimum of 56 across
+500 lives**. Now: school performance at sixteen has a floor of 26 and sd 17.4
+(was 50 and 7.7), dropouts 13 → 36 per 500, and 38 per 500 finish with no
+qualification at all (was 14). New rule 13.66.
+`claude/0408-a-varied-population.md`.
+
+**1b. And it barely produced a varied BODY either.** — **DONE in 0417** (0408 did
+the generation half). The lifespan half was not the Gompertz term: healing
+ratcheted after sixty and age was counted twice. Constitution is now worth about
+eight years and 41% reach eighty-five. The original finding follows.
+**PARTLY DONE in 0408.**
+Birth health now runs sd 15 rather than 9, and `frailtyFactor` is two-sided so a
+strong constitution is worth something rather than merely not being a penalty.
+But the outcome it was supposed to buy did not arrive: median age at death still
+moves only about four years across the whole range of birth health. Health at
+sixty-five differentiates strongly (23 for the frailest fifth against 57 for the
+most robust) — every quintile is simply below the healthy-adult mark by then, so
+the Gompertz age term dominates whatever the multiplier says. **Still open, and
+it belongs to 0211's mortality model rather than to generation.**
+
+**1c. A passive player never sees a doctor.** — **CLOSED by decision** after
+0417: check-ups stay button-only (spec 531). See `claude/approved-decisions.md`,
+which also closes 0417's other two leftovers — serious conditions stay as they
+are, and the health ceiling at twenty-six is accepted.
+
+**2. Smarts and Discipline never move after eighteen.** — **DONE in 0411.** The
+original finding blamed the social phase; the measurement found a one-way
+ratchet. Nothing wrote Discipline or Looks after school at all, and the one stat
+adult events did move converged on a plateau (Charisma sd 9.7 → 3.8) rather than
+developing anybody. A year of work now builds what the track hires for and lets
+the rest go. New rule 13.70.
+
+**2c. And nothing OUTSIDE a job develops anybody.** — **DONE in 0415**, for
+three of the four. Study was already there (0210b's college year). A small child
+and a serious illness now shape a person, both ways, and so does a second year
+running on empty. It found the larger defect underneath: Willpower was a one-way
+ratchet in the adult catalog (71 gains, 0 losses) and collapsed to sd 2.8 by
+sixty. The hobby is 2g.
+
+**2g. An adult cannot join anything.** — **DONE in 0416**, and it was nobody, at
+any age: 0 of 120 lives ever joined anything. The original finding follows.
+0415's leftover, and it is three findings
+with one cause. `education.activities` only exists while a character is at
+school, so an adult has no hobby for 2c to develop them through, no third door
+besides work and the street for 2b's loneliest year, and — 0211's finding — no
+way to be an athlete after eighteen. The mechanism is one thing: an adult who
+can take something up and keep it. **Small enough to be its own ticket**, and
+v0.08's sports engine would build on it rather than replace it.
+
+**2b. Warmth is grown by a button, and there is a trough at twenty.** — **DONE
+in 0412**, and the finding was measured at the wrong scale twice. It is not a
+hole at twenty, it is a sawtooth with a tooth at every change of room: 84.4% of
+FOURTEEN-year-olds had no friend either, for exactly the same reason. And the
+half neither 0410 nor 0411 looked at was worse — warmth never went through a
+curve, so 90.9% of forty-five-year-olds had a closest friend at exactly 100 and
+the population of adult friendships was bimodal at 34 and 100.
+
+**2b-leftover. Twenty is still the loneliest year in the game** — **mostly DONE in
+0416**: no friend at twenty 58% → 30%, still the peak because an eighteen-year-old
+has only just been asked anything. The original finding: at 60–67% with
+no friend against 87.8% before. The remaining cause is not social: a character
+who has left school has work and the street and nothing else, because
+`education.activities` only exists while they are AT school. That is the same
+gap 0211 measured as *"nobody over eighteen is an athlete in this build"*, it
+belongs to v0.08's sports engine or to a smaller ticket that lets an adult join
+something, and until then the post-school years have two doors instead of
+three.
+
+**2d. And the `friendship` category has six events for an adult, all of them
+about romance.** — **DONE in 0413**, and the finding was true while pointing at
+the wrong place. The hole is not spread across adulthood, it is a **cliff at
+eighteen**: an ordinary school-leaver had seven reachable events and five of
+them were placeholders, against ninety-nine the year before. Friendship at forty
+is 5 → 32 and adult friendship decisions 0 → 7.
+
+**2e. The cliff is only half filled, and the rest is not friendship.** — **DONE
+in 0414**, and the remainder was a bigger hole than the one 0413 closed: the
+`family` category was a total zero for childless adults, 56.3% of all adult
+years. Largest single category share of an adult year is now 31.3% against
+46.9%, reached by filling the other categories rather than re-weighting.
+
+**2f. Nothing an adult is good at exists.** 0414's leftover, and the third
+total-zero of this shape. All **fifty-eight** talent events carry an `ageMax`
+below eighteen, so talent is **0.0% of what fires at every adult age** — whatever
+a character was good at stops existing the day they leave school. 0414 left it
+alone deliberately: adult talent is what **v0.07 Creator & Fame** and **v0.08
+Entertainment & Sports** are for, and 0211 already recorded that adult athletics
+is blocked on `education.activities` being school-only. Writing thirty adult
+talent events now would pre-empt two milestones and make them harder. **This
+belongs to v0.07/v0.08 rather than to a content ticket.**
+
+**2h. Mind & Body's self-development rows point at a finished milestone.** Gym,
+Meditation, Books/Library, Diet and Walk are spec 1355's and carry a `v0.04`
+label written as a guess in 0308c. v0.04 is complete and none of them was built.
+They are actions (a tap a year, like Practice) rather than a door, and nothing
+owns them. Left unlabelled-by-guess on purpose: this needs a decision on where
+they belong, not another guess.
+
+**2i. School activities pay a flat stat effect every year.** 0204's design, and
+harmless while nobody could reach it. 0416 made it reachable and school
+performance at sixteen rose (p10 43 → 55); Smarts at eighteen still runs sd 12.6
+and 0408's guards are green. The 13.66 shape, now live — worth banding the way
+0411 and 0416 banded work and pursuits the next time a ticket touches school.
+
+**3. Nothing in the event catalog is about work.** — **DONE in 0409.** 26 work
+events including seven decisions, gated on `employed`, `jobTrackAny` and
+`jobYearsAtLeast` — which had to be added to the predicate language first,
+because an event cannot be about a job if eligibility cannot say "has one".
+
+**4. Nothing in the catalog is about being ill, either.** — **DONE in 0409.** 22
+health events including three decisions, gated on `hasCondition` and
+`conditionAny`.
+
+**4b. And nothing in the catalog is about losing somebody.** — **DONE in 0409.**
+19 loss events including two decisions, gated on `bereavedWithin`. Needed a
+`loss` variant on `LifeRecordCategory` so the question could be asked of the
+structure rather than by reading labels for the word "Lost" — which `eulogy.ts`
+was already doing.
+
+**5. The adult event library is thin.** — **DONE in 0409 and 0410.** 0409 did
+the writing; 0410 found that the part 0409 could not explain — `family` stuck at
+eleven events at forty — was never a writing problem. All eleven are gated on
+`hasChildren` and nobody in this build had ever had a child. Adult years holding
+a `family` event went 0% → 25.8% without a single new event being written.
+
+*(0409's half, for the record)* Events able
+to fire at forty went from **26 to 93**, and from zero decisions to thirteen.
+Repetition inside a single adult life went from **50% to 23%**. What remains is
+`family` and `friendship`, still at twelve and six events at forty: an adult's
+parents, siblings and friends are now as thin as their job used to be, and that
+is the next content gap. New rule 13.67. `claude/0409-an-adult-life.md`.
+
+*(original finding, for the record)*
+The voice pass rewrote 180 strings, and reading a played decade afterwards still
+shows lines recurring inside a single character's twenties. Eight labelled
+placeholder lines, six adult romance events and eleven parenting events cannot
+cover sixty adult years no matter how well written they are. **Better copy
+raised the floor; only more copy widens the range.**
+
+**6. The crush rows on the Love screen all read the same sentence.** CORE_RULES
+13.26 by its own terms; left alone in 0210c because differentiating it needs a
+per-person signal that does not exist yet.
+
+**7. The token-guard table lives in four places** — the generator (Python), the
+content test, the validator and the renderer. 0209's 13.23 noted three and did
+not consolidate. The Python/TypeScript split is arguably deliberate (independent
+verification of the same rule), but four copies is one more than anybody keeps
+in sync.
+
+**8. `stableUnit` correlates keys that differ only at the end** (13.84). Found by
+0501's market; `mixedUnit` fixes new callers. Audit any existing caller that keys
+a sequence on it (`…:${year}`, `…:${index}`). It can't be changed in place,
+because every save depends on it.
+
+**9. Partners earn nothing.** — **DONE in 0502.** A partner added half again to
+the household's costs and never brought in income, so a married household was
+strictly poorer than a single one.
+
+**10. Inheritance ignores the portfolio and the pension.** 0501 added home equity
+to what an heir receives; investments and retirement accounts still vanish.
+Belongs in 0508.
+
+**11. Young ownership is low** — about 10% at 25–34 against a US figure near
+37%, while 55+ matches. The door asks 30% of eligible renters a year and the
+deposit is what binds. Worth revisiting once rentals (0503) exist.
+
+**12. Nobody spends down in old age.** — **Payton: return to this.** Median
+net worth keeps climbing past 75 (~$500,000 against ~$335,000 in the US). The
+standard of living has no sense of a shorter horizon, so older characters
+never draw their savings down.
+
+**13. A partner's earnings don't depend on the player's.** — **Payton: return
+to this.** A partner's earning power is drawn independently of what the player
+earns; in the world the two correlate at about 0.3–0.4 (people tend to partner
+with people in similar work and income).
+
+**16. A partner's earnings are too narrow and too fixed.** — **Payton: return
+to this. Direction given after 0503.** 0502 gave every partner one earning
+power fixed for life, centred on a $52,000 peak (p10 ~$29,000, p90 ~$92,000),
+moved only by an age curve and stretches out of work. Payton's direction:
+that is not how real life is. Partners should NOT earn a fixed amount for life,
+and the peak should not be anchored at $50,000. Real partners range from about
+$20,000 to $250,000 and beyond; some move between jobs and their pay goes up
+and down; some keep the same work and pay their whole career. The rework should
+give a partner a real working life — a much wider spread of earnings, careers
+that can rise, stall or fall, job changes, and some who stay put — rather than
+one number scaled by age. Pairs naturally with finding 13.
+
+**14. Mortgage rates are nominal in a constant-dollar economy.** 6.5–7.25% with
+no inflation is a real rate nearly double the world's, so leverage on property
+is worse than it should be — 13.85 applied to the lenders. Left because the
+rates on screen look right; worth a decision.
+
+**15. Nobody passive becomes a landlord.** 0503 built no door: letting property
+is a choice a minority make. Deliberate, but worth confirming.
+
+### Payton's playtest notes, after 0503
+
+Logged before 0504 started. Each one was checked against the code so the note
+says what is actually there.
+
+**17. College has no screen of its own.** — **Payton: return to this.** Once
+you're enrolled, "Study something" disappears from the Career tab and nothing
+replaces it. Study Harder and Leave the program do exist, but only as two rows
+in the Career tab's "What you can do" card, and Payton didn't find them. A
+student should get a screen for the program they're in: the program, the year
+they're in out of how many, grades, what it costs and how it's paid, Study
+Harder, and Leave. Spec 1821: "major + Study Harder is generally enough".
+
+**18. Graduating passes without a moment.** — **Payton: return to this.**
+Finishing a degree writes a life record ("Graduated — Nursing") and a feed line,
+and that's all. No popup, no screen. Finishing years of school should be marked
+when it happens. A graduation popup (what you earned, what it opens up, any loan
+still owed) fits the outcome popup the game already has.
+
+**19. Monthly outflow can't be opened.** — **Payton: return to this. Needs a
+decision against the spec.** The row isn't tappable. Spec 20 says "Do not create
+a full expense-breakdown section" and puts costs on the thing that causes them
+(a car, a child, a property). Payton wants to tap it and see where the money
+goes. One option that keeps the spirit of spec 20: tapping it lists each cause
+as a link (living costs, tax, loans, cards, children, homes, cars) rather than a
+month-by-month statement.
+
+Payton's case was $60,000 a year, renting, no car, and about $5,000 a month
+going out. Measured on 150 lives, a single renter on $55,000–$65,000 runs about
+**$4,700 a month**. About **$1,100 of that is income tax**, which the outflow
+figure counts. The other **~$3,600 is living costs** (rent plus everyday
+spending), which the game sets from income, so take-home of about $3,900 a month
+leaves ~$300. Partnered households on the same salary run much higher (median
+~$6,600) because the partner's pay raises the household's spending, and the
+partner's tax is counted too. So there's no hidden charge, but nothing on screen
+explains the number, and counting tax as "outflow" while "income" is pre-tax
+confuses the picture. Worth deciding whether outflow should mean spending only.
+
+**20. Debt is hard to find.** — **Payton: return to this.** Loans live on one
+row of the Finances screen ("Loans", under the balance). There's no debt or
+liabilities view that gathers loans and card balances together, and nothing on
+the Career tab says a student loan is building up while you study. A student
+loan is only taken when cash can't cover tuition. In the sample above, no
+passive life had any loan payment, so Payton's $5,000 most likely had no debt in
+it. Wherever debt ends up living, a student should see what they owe.
+
+**21. Twelve job listings a year, not six.** — **Payton: return to this.**
+`LISTINGS = 6` in `careers/openings.ts`. Doubling it is one constant, but
+0401's reachability numbers and the starvation guards were measured at six, so
+it needs a re-measure (more listings means more of the 169 jobs seen in a life,
+and a passive player gets work sooner).
+
+### Found by 0504
+
+**22. NPC parents never buy their child a car.** Spec 61 and 1197 keep it as
+something a parent may do unprompted. Needs a decision on who pays the upkeep
+while a teenager has no income.
+
+**23. A repossession's shortfall is written off.** When the auction fetches
+less than the loan, the rest vanishes. In the world it stays as debt.
+
+**24. Cars are mostly bought for cash.** 25–30% are financed, against about
+80% of new and 35–40% of used cars in the US, because the car door pays cash
+whenever that leaves three months of living in hand.
+
+
+### Found by 0506
+
+**25. The gift system is unbuilt.** Spec 64 and 1816: $, $$ and $$$ tiers of
+real items, flowers to a watch to a car. 0506's catalog is most of what it
+needs.
+
+**26. Renovations are cash only.** No home-equity loan, so a household without
+savings lets the house go to poor. That's most of the quarter of homes still
+poor at 45+.
+
+**27. Wedding rings aren't jewelry.** 0207's ring is a `spending` line, not a
+piece in the collection.
+
+### Payton's playtest notes, after 0507
+
+Logged on 2 October 2026, before 0508. Each was checked against the code, so
+each note says what is actually there. None of these are fixed yet.
+
+**28. Advisors push too hard.** — **Payton: return to this.** With $86,000 in
+the bank, the bank's advisor says to invest $74,000 of it. That's the idle-cash
+rule in `finance/advisors.ts`: `amount = cash − IDLE_FLOOR`, with `IDLE_FLOOR =
+12,000`. It leaves a buffer of one small emergency fund and asks for everything
+else, whatever the person earns or spends. Payton has seen other extreme asks
+too. The single-stock ideas use `SLICE = 0.34` of cash, which is a third of
+the account on one name. Wanted: softer, more realistic advice. A buffer that
+scales with what the life costs a year (say six months to a year of living,
+now that 0303 knows the number), a share of the rest rather than all of it,
+and wording that reads as a suggestion. The "idle cash" line should also stay
+quiet when a goal is in sight (a deposit for a home, a car). Needs a re-measure:
+0308b's finding was that no cash buffer meant happiness of 20 against 78, so
+any softening has to be checked against that and against 0309's measured advisor
+returns.
+
+**29. Remove the odds labels from people.** — **Payton: return to this.** The
+tab on a person's actions ends with a word ("Safe", "Likely", "Even",
+"Unlikely", "Long shot"): `oddsLabel` in `PersonScreen.tsx`, fed by
+`chanceOf` for a compliment and the other interactions. Payton doesn't want
+to see how likely a compliment is to land. Let it be natural: show the action
+and not the odds, and let the result tell them what happened. The same word
+list is repeated in `JobsScreen.tsx` and `JobOfferScreen.tsx` ("Apply for this
+position · Likely"), and `CollegeScreen.tsx` has its own list ("You will get in",
+"A reach"). Payton named only friendships and relationships. Jobs and college
+are a separate decision, so ask before changing those. The simulation still
+needs `chanceOf`; this is only about what the screen shows.
+
+**30. "Property: what your home is worth now" shows when there's no home.**
+— **Found by Payton; the cause is mine, from 0504 and 0506.**
+`FinancesScreen.tsx` shows the Property row when `books.assets > 0` and labels
+it "What your home is worth now". Since 0504 and 0506, `assets` also counts
+cars and the collection, so someone with a car or a watch and no house gets a
+row saying their home is worth that. The fix is to total only homes for that
+row (and send it to Homes), and give cars and valuables their own rows, or
+rename the row "Things you own" and send it to the Assets screen. Net worth is
+unaffected.
+
+**31. Credit cards can be applied for but not used.** — **Payton: return to
+this.** `simulation/cards.ts` has apply, pay, and close. `finance/cards.ts`
+has the year's interest and fees. Nothing ever puts a charge on a card, so a
+balance only comes from fees and interest. There's no "pay with card" anywhere
+in the game: not for living costs, a car, a store, an auction, or a renovation.
+Wanted: a card should be a real way to pay. The shape to decide: either each
+purchase screen offers "Pay with card" (limited by available credit, rewards
+and interest then matter), or the game charges a share of ordinary living to
+the card automatically and the player only decides when to pay it off. The
+first is more game; the second is cheaper and leaves 0305/0306's credit
+numbers meaningful. Whichever is chosen, 0306's score and utilization
+numbers need a producer. Related to finding 24 (cars are mostly cash) and 26
+(renovations cash only).
+
+**32. Living costs scale with income to an absurd degree.** — **Payton: return
+to this. He has said lifestyle tiers are acceptable if that is what it takes.**
+Payton's life: $250,000 a year, no house, no spouse, no children, a car costing
+$5,500 a year, and a monthly outflow near $20,000.
+
+The number is the model working as written, and the model is the problem.
+`finance/living.ts` sets what a person "is used to spending" as a standard that
+rises with after-tax income: `SUBSISTENCE` $18,600 plus 92% of each dollar up
+to $120,000, 74% of each dollar above, plus 1.8% of everything held
+(`WEALTH_PULL`). For $250,000 a year (about $175,000 after tax) that is roughly
+$18,600 + $93,000 + $41,000 ≈ **$153,000**, and about $170,000 once a
+seven-figure balance adds its pull. That's about **$13,000–$14,000 a month of
+living costs for one person with no house and no family**, with income tax of
+about $6,000 a month on top, and the car. That matches Payton's $20,000.
+
+The shape is that spending is a fixed share of income and nothing the person
+chooses. A single renter on $250,000 doesn't spend $150,000; in the real world
+spending rises well under proportionally with income, and most of the rise is
+things the game already models as owned things (homes, cars, valuables,
+children). The wealthy single person's savings rate should be high.
+
+Three options, to decide before the fix:
+
+1. **Lifestyle tiers** (what Payton offered): frugal / comfortable / lavish,
+   picked by the player, each with a multiplier on the standard and a happiness
+   or status effect, with a default that follows income only mildly. Spec 1166
+   removes a tier selector by name, so this needs Payton's spec call. It gives
+   the player the thing they asked for: control.
+2. **Fix the curve without tiers**: a much lower marginal spend above the median
+   (for example 0.92 up to $60,000, 0.45 up to $120,000, 0.2 beyond), so $250,000
+   lives on something like $75,000–$90,000. No new UI. The standard still
+   creeps with wealth, but only a little.
+3. **Both**: fix the curve so the default is sane, then add tiers as a way to
+   spend more on purpose (and have it show up as something: a nicer place, a
+   better-feeling year).
+
+My recommendation is 3, but tiers are a real design change. Any change re-opens
+the economy calibration: 0303/0304 tuned `MARGINAL_SPEND` against the median
+balance by age, and 0502 and 0504 each had to re-tune because of it
+(CORE_RULES 13.88, 13.90). The test is to measure net worth by age against the
+two samples again. Note 19 is closely related: the monthly outflow figure counts
+income tax, which makes a high earner's number look larger still.
+
+**33. Check the "car cost" while in there.** Payton's car costs $5,500 a year
+and the outflow is $20,000. The car is not the problem (finding 32), but it's
+worth confirming that the $5,500 isn't also being left inside the living bill.
+`VEHICLE_SHARE = 0.085` is taken out of the bill for car owners, and at a high
+standard that share is about $14,000, which is more than the car costs. So a
+rich owner's bill drops by more than the car adds. That's a second reason
+the high-income number is wrong, in the other direction. It should be a
+dollar amount scaled to the car's real running cost, not a share of the whole bill.
+
+**36. `advanceYear` is not pure over its state.** Found while writing 0601's
+determinism test: two calls from the same state object differ from the second
+year on, because `state.rng` carries live streams the first call mutates. A game
+built fresh the same way twice is identical, which is what tests and players
+see. Not checked: whether a loaded save (seed only) continues exactly as the
+live session would have. Worth a test before undo, "preview a year" or replay.
+
+**37. A mature business's profit swings a lot from year to year.** Found while
+tracing a financed roofing company in 0603: $117,000, $121,000, $24,000,
+$121,000, $167,000, −$67,000, $137,000, −$15,000. Under the first loan design a
+single bad draw missed a payment and sent the balance on a climb; with the
+business paying its own loan out of a till that holds three months it survives,
+but a typical owner will still see a business that clears six figures one year
+and loses money the next, with no event to explain it. Calibration for 0604,
+where events and competition give the swings a cause.
+
+*0604: partly answered.* The swings now have named causes the player can read.
+Their size is unchanged (log sd 1.0–1.1 among survivors, before and after): a
+10% swing in revenue is an 80% swing in profit at a 12% margin. Shrinking the
+base volatility didn't help and was taken out. Left as it is unless it shows in
+play.
+
+**38. The smallest businesses earn far more than they cost to start.** A
+$20,000 cleaning company, once established, is worth $200,000–$540,000 to a
+buyer (a median 12.5 times its startup, paying back in about four years), and
+the same arithmetic puts most of the small trades at 3–10 times their startup.
+It is 0601's margins and revenue scale, not 0603's pricing, and it means
+starting a small business beats nearly everything else a young adult can do
+with $20,000. Tune with 0604's survival and competition pass, or sooner if it
+shows in play.
+
+*0604: still open.* Competition is hardest on the crowded trades and the median
+five-year pay of a cleaning company fell 13% (2.38 → 2.07 times its startup), but
+it is still about twice its startup a year. The cause is a catalog proportion
+($300,000 of revenue on a $20,000 startup), and the fix is raising the smallest
+few startups, which moves the net-worth gate and 0603's listing literals.
+Decide with the catalog.
+
+**39. The home lender still reads `incomeOf`.** 0603's business lender counts
+only wages, commission and a partner's pay plus what the businesses clear
+(`earnedOf`), so selling a business does not raise what anybody can borrow for
+the next one. The car lender already reads `earnedIncomeOf` (0504 hit this
+exact problem). A mortgage taken the year somebody sells a business or a house
+still reads `incomeOf` and counts the proceeds as income (finding 35).
+`buyerOf` in `homes.ts` should read `earnedIncomeOf`; the two functions
+disagree on a business owner's draw and on rent, so decide which is right once
+and use it in all three places.
+
+**40. A minor who inherits a business gets the sale, not the business.** At a death
+an heir under 18 takes the old rule (sold, lender paid, the rest as cash). Whether
+a child should hold a business under management until 18 is a will-and-estate
+question; 0508 owns it.
+
+**41. Raising the smallest startups would move a lot at once.** Finding 38's fix
+(raise the startup of cleaning, marketing, accounting, landscaping) also moves
+the net-worth gate (60% of the startup) and 0603's listing literals. Decide with
+the catalog, not inside an events ticket.
+
+---
+
+## Suggested order
+
+1. **Character-generation fix** (findings 1 and 1b) — *(shipped as 0408 for the
+   aptitude half; the lifespan half is still open and has moved to 0211's
+   mortality model, see finding 1b)*
+2. **0301 → 0303** — the ledger and real living expenses, which retire 0210's
+   placeholder, make every existing price real, give treatment a cost and give
+   inheritance something to inherit. *(shipped)*
+3. **0304 → 0310** — the rest of Financial Life. *(shipped)*
+4. **0401 → 0407** — career and education depth: reachability, systemic career
+   offers, the catalog tripled, college's own systemic offer, the professional
+   and vocational tiers with the license that makes them mean something, and a
+   first job that arrives on its own. *(shipped)*
+5. **Adult event volume** (findings 3, 4, 4b and 5) — *(shipped as 0409 for
+   work, health and loss, and 0410 for `family`, which turned out to be a door
+   rather than a catalog)*
+5b. **Adult friendship** (findings 2b and 2d) — *(DONE: 0412 built the
+   mechanism — the curve warmth never had, and the systemic side of
+   `interact.ts` — and 0413 wrote the content and found the cliff at eighteen
+   underneath it. The leftover is finding 2e: the same window needs the OTHER
+   adult categories.)*
+5c. **An adult who develops** (finding 2) — *(shipped as 0411 for work and 0415
+   for a child, illness and hard years; the hobby is finding 2g)*
+5d. **An adult who can join something** (finding 2g, with 2b's leftover and
+   0211's adult-athlete gap) — *(shipped as 0416, for everybody rather than
+   adults: nobody at any age had ever joined anything)*
+6. **Why a wide body buys a narrow lifespan** (finding 1b's leftover) — *(shipped
+   as 0417: not the Gompertz term, but a healing ratchet after sixty and age
+   counted twice. Nobody got old, and now two in five reach eighty-five.)*
+7. **v0.05 onward** in spec order. *(0501 Homes shipped.)*
+8. **Partners' income** (finding 9) — *(shipped as 0502, A household of two.)*
+9. **0503 → 0508.** *(0503 A landlord, 0504 Vehicles, 0505 Vehicle modifications, 0506 Renovations & collections and 0507 Auctions shipped. 0508 Will & Estate, which closes v0.05, was deferred by Payton on 3 October and moves after v0.06.)*
+10. **0601 → 0606.** *(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments is next, then 0508 Will & Estate whenever Payton wants it.)*

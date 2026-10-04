@@ -28,6 +28,7 @@ import {
   crushesOf,
   endPerson,
   exesOf,
+  householdPartnerOf,
   isRomantic,
   movesFor,
   partnerOf,
@@ -197,6 +198,40 @@ describe('what is on the menu', () => {
     expect(movesFor(fresh, 26, RICH).map((move) => move.id)).toContain('propose');
   });
 
+  it('cannot produce a wedding before twenty-one, and can at twenty-one', () => {
+    /*
+      Ticket 0412, and it exists because a test two packages away was asserting
+      this number from arithmetic done by hand — and had it wrong.
+      `life-offer.test.ts` reasoned *"one year at seeing, two at together, one
+      at engaged, all counted from adulthood"* and concluded twenty-two, which
+      passed for two tickets on sixty seeds and then failed the moment 0412
+      shifted the Relationships stream and a school couple finally got there.
+
+      The ladder's real floor is TWENTY-ONE, and the year the hand arithmetic
+      double-counted is `make-official`'s: `together` is a stage a sixteen-
+      year-old may hold (`stagesFor` lists it), so `yearsShort` counts that one
+      from `since` rather than from adulthood, and a couple can arrive at
+      eighteen having already served it. Only `engaged` and `married` are adult
+      stages, and only those two clocks start at eighteen: propose at twenty,
+      marry at twenty-one.
+
+      Asserted HERE, against `movesFor`, because that is where the claim lives.
+      A number derived by reading three constants and a helper belongs next to
+      them, not in a population test that can only ever catch it by luck.
+    */
+    const school = peer({ relationship: 95, romance: at('together', 16) });
+    for (const age of [17, 18, 19]) {
+      expect(movesFor(school, age, RICH).map((m) => m.id), `propose at ${age}`).not.toContain(
+        'propose',
+      );
+    }
+    expect(movesFor(school, 20, RICH).map((m) => m.id), 'propose at 20').toContain('propose');
+
+    const engaged = peer({ relationship: 95, romance: at('engaged', 20) });
+    expect(movesFor(engaged, 20, RICH).map((m) => m.id), 'marry at 20').not.toContain('marry');
+    expect(movesFor(engaged, 21, RICH).map((m) => m.id), 'marry at 21').toContain('marry');
+  });
+
   it('has nothing to offer about somebody it is already over with', () => {
     const ex = peer({
       relationship: 40,
@@ -357,6 +392,19 @@ describe('who is who', () => {
     expect(exesOf(people).map((person) => person.id)).toEqual([ex.id]);
     expect(isRomantic(ex)).toBe(false);
     expect(isRomantic(plain)).toBe(false);
+  });
+
+  it('shares a household with a partner, not with a date', () => {
+    // Ticket 0502. Somebody the player is only seeing is a partner and not a
+    // household: they pay nothing toward it and cost it nothing.
+    const seeing = peer({ id: asNpcId('npc:s'), romance: at('seeing') });
+    expect(partnerOf([seeing])?.id).toBe(seeing.id);
+    expect(householdPartnerOf([seeing])).toBeUndefined();
+    for (const stage of ['together', 'engaged', 'married'] as const) {
+      const partner = peer({ id: asNpcId('npc:h'), romance: at(stage, 20) });
+      expect(householdPartnerOf([partner])?.id, stage).toBe(partner.id);
+    }
+    expect(householdPartnerOf([peer({ romance: at('interested') })])).toBeUndefined();
   });
 });
 

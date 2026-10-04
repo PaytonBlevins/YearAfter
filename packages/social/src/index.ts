@@ -10,5 +10,6 @@
 
 export * from './people';
 export * from './interactions';
+export * from './keeping-up';
 export * from './romance';
 export * from './romantic';

@@ -1,0 +1,357 @@
+{
+  "version": 2,
+  "entries": [
+    {
+      "id": "home.condo",
+      "name": "Condo",
+      "noun": "a condo",
+      "beds": [
+        1,
+        2
+      ],
+      "baths": [
+        1,
+        2
+      ],
+      "price": [
+        190000,
+        330000
+      ],
+      "expenseRate": 0.026,
+      "age": [
+        2,
+        45
+      ],
+      "weight": 5,
+      "means": 0,
+      "units": 1,
+      "rental": false,
+      "rentYield": 0.065,
+      "blurbs": [
+        "A unit on the fourth floor with a view of the next building.",
+        "Two rooms and a balcony nobody has used since it was built.",
+        "Ground floor, next to the laundry room, very quiet."
+      ]
+    },
+    {
+      "id": "home.townhouse",
+      "name": "Townhouse",
+      "noun": "a townhouse",
+      "beds": [
+        2,
+        3
+      ],
+      "baths": [
+        1,
+        3
+      ],
+      "price": [
+        260000,
+        420000
+      ],
+      "expenseRate": 0.022,
+      "age": [
+        0,
+        40
+      ],
+      "weight": 4,
+      "means": 0,
+      "units": 1,
+      "rental": false,
+      "rentYield": 0.063,
+      "blurbs": [
+        "End of a terrace, with a yard the size of a parking space.",
+        "Three floors and a lot of stairs.",
+        "Shares a wall with somebody who plays the cello."
+      ]
+    },
+    {
+      "id": "home.starter",
+      "name": "Starter House",
+      "noun": "a small house",
+      "beds": [
+        2,
+        3
+      ],
+      "baths": [
+        1,
+        2
+      ],
+      "price": [
+        230000,
+        380000
+      ],
+      "expenseRate": 0.023,
+      "age": [
+        25,
+        80
+      ],
+      "weight": 5,
+      "means": 0,
+      "units": 1,
+      "rental": false,
+      "rentYield": 0.07,
+      "blurbs": [
+        "Small, old, and in better shape than the listing photos.",
+        "A porch, a garden gone to seed, and a boiler with opinions.",
+        "Two bedrooms and a kitchen from another decade."
+      ]
+    },
+    {
+      "id": "home.family",
+      "name": "Family House",
+      "noun": "a family house",
+      "beds": [
+        3,
+        4
+      ],
+      "baths": [
+        2,
+        3
+      ],
+      "price": [
+        360000,
+        620000
+      ],
+      "expenseRate": 0.02,
+      "age": [
+        5,
+        60
+      ],
+      "weight": 5,
+      "means": 0,
+      "units": 1,
+      "rental": false,
+      "rentYield": 0.06,
+      "blurbs": [
+        "A proper yard and a street where kids still ride bikes.",
+        "Four bedrooms, one of them currently full of boxes.",
+        "Close to a school, far from anything exciting."
+      ]
+    },
+    {
+      "id": "home.large",
+      "name": "Large House",
+      "noun": "a large house",
+      "beds": [
+        4,
+        5
+      ],
+      "baths": [
+        3,
+        4
+      ],
+      "price": [
+        600000,
+        1100000
+      ],
+      "expenseRate": 0.019,
+      "age": [
+        0,
+        40
+      ],
+      "weight": 2,
+      "means": 120000,
+      "units": 1,
+      "rental": false,
+      "rentYield": 0.05,
+      "blurbs": [
+        "A double garage and a room nobody has decided what to use for.",
+        "Big enough that you could lose somebody in it for an afternoon.",
+        "A kitchen island you could land a plane on."
+      ]
+    },
+    {
+      "id": "home.luxury",
+      "name": "Luxury Home",
+      "noun": "a luxury home",
+      "beds": [
+        5,
+        6
+      ],
+      "baths": [
+        4,
+        6
+      ],
+      "price": [
+        1300000,
+        3200000
+      ],
+      "expenseRate": 0.017,
+      "age": [
+        0,
+        25
+      ],
+      "weight": 1,
+      "means": 600000,
+      "units": 1,
+      "rental": false,
+      "rentYield": 0.04,
+      "blurbs": [
+        "Glass on three sides and a pool that runs off the edge of the view.",
+        "Gated, with a drive long enough to need a second opinion.",
+        "A name on the gatepost instead of a number."
+      ]
+    },
+    {
+      "id": "home.estate",
+      "name": "Estate",
+      "noun": "an estate",
+      "beds": [
+        6,
+        9
+      ],
+      "baths": [
+        6,
+        10
+      ],
+      "price": [
+        4000000,
+        14000000
+      ],
+      "expenseRate": 0.016,
+      "age": [
+        0,
+        100
+      ],
+      "weight": 1,
+      "means": 4000000,
+      "units": 1,
+      "rental": false,
+      "rentYield": 0.03,
+      "blurbs": [
+        "Acres, a gatehouse, and staff quarters that are nicer than most homes.",
+        "A house with wings, and a map in the hall to find them.",
+        "Old money built it. It still smells faintly of it."
+      ]
+    },
+    {
+      "id": "home.duplex",
+      "name": "Duplex",
+      "noun": "a duplex",
+      "beds": [
+        4,
+        6
+      ],
+      "baths": [
+        2,
+        4
+      ],
+      "price": [
+        330000,
+        620000
+      ],
+      "expenseRate": 0.024,
+      "age": [
+        10,
+        90
+      ],
+      "weight": 4,
+      "means": 150000,
+      "units": 2,
+      "rental": true,
+      "rentYield": 0.078,
+      "blurbs": [
+        "Two front doors, two meters, one roof to worry about.",
+        "Upstairs and downstairs, with a shared yard nobody mows.",
+        "A side-by-side on a quiet street, both halves let before."
+      ]
+    },
+    {
+      "id": "home.apartments-small",
+      "name": "Small Apartment Building",
+      "noun": "a small apartment building",
+      "beds": [
+        5,
+        10
+      ],
+      "baths": [
+        5,
+        7
+      ],
+      "price": [
+        780000,
+        1350000
+      ],
+      "expenseRate": 0.026,
+      "age": [
+        15,
+        80
+      ],
+      "weight": 3,
+      "means": 350000,
+      "units": 5,
+      "rental": true,
+      "rentYield": 0.082,
+      "blurbs": [
+        "Five apartments over a laundromat that isn't part of the sale.",
+        "A brick walk-up with five buzzers and one working.",
+        "Five units around a courtyard with a fig tree in it."
+      ]
+    },
+    {
+      "id": "home.apartments-medium",
+      "name": "Apartment Building",
+      "noun": "an apartment building",
+      "beds": [
+        10,
+        20
+      ],
+      "baths": [
+        10,
+        14
+      ],
+      "price": [
+        1500000,
+        2600000
+      ],
+      "expenseRate": 0.026,
+      "age": [
+        10,
+        70
+      ],
+      "weight": 2,
+      "means": 800000,
+      "units": 10,
+      "rental": true,
+      "rentYield": 0.084,
+      "blurbs": [
+        "Ten units, a parking lot and a dumpster with a reputation.",
+        "Three floors, ten doors and an elevator inspected last year.",
+        "A tidy block of ten with a long waiting list, or so the agent says."
+      ]
+    },
+    {
+      "id": "home.apartments-large",
+      "name": "Apartment Complex",
+      "noun": "an apartment complex",
+      "beds": [
+        25,
+        50
+      ],
+      "baths": [
+        25,
+        35
+      ],
+      "price": [
+        3800000,
+        6500000
+      ],
+      "expenseRate": 0.027,
+      "age": [
+        5,
+        60
+      ],
+      "weight": 1,
+      "means": 2000000,
+      "units": 25,
+      "rental": true,
+      "rentYield": 0.087,
+      "blurbs": [
+        "Twenty-five units, a pool, and a sign out front waiting for a new name.",
+        "Two buildings facing each other across a parking lot.",
+        "A complex with its own mailroom and a maintenance shed."
+      ]
+    }
+  ]
+}

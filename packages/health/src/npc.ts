@@ -32,7 +32,7 @@
  */
 
 import { stablePick } from '@yearafter/core';
-import { DECLINE_ACCELERATES, DECLINE_STARTS, FAST_DECLINE_PER_YEAR, SLOW_DECLINE } from './aging';
+import { cumulativeAgeingLoss } from './aging';
 import { deathChance } from './health';
 
 /**
@@ -45,8 +45,18 @@ import { deathChance } from './health';
  * strong" would have been a sentence the game could not mean. Widening to this
  * puts the p10-to-p90 span at about eleven years, which is a difference a
  * player can notice across a family.
+ *
+ * WIDENED TO [30, 100] IN TICKET 0417, and for a reason the old range did not
+ * know it was relying on. `deathChance` read raw health, and raw health falls
+ * with age — so a frail NPC's health fell into the steep end of
+ * `frailtyFactor` late in life and bought them extra spread for free. 0417 made
+ * frailty read a body FOR ITS AGE (`healthForAge`), which is right, and which
+ * made an NPC's frailty a constant of their constitution: the p10-to-p90 span
+ * fell to 7.5 years and `npc.test.ts` caught it. [30, 100] puts the NPC span
+ * back where the player's own lives land — median death 84, the frailest tenth
+ * 76, the strongest 87, against the player's 82 and a 77-to-87 decile gap.
  */
-export const NPC_PEAK_HEALTH: readonly [number, number] = [40, 98];
+export const NPC_PEAK_HEALTH: readonly [number, number] = [30, 100];
 
 /**
  * What an NPC's unsimulated illnesses do to their odds.
@@ -66,6 +76,11 @@ export const NPC_PEAK_HEALTH: readonly [number, number] = [40, 98];
  * Swept against the played population. At no morbidity NPCs reach a median 80;
  * this lands them at 76 — a little past a passive player and a little short of
  * one who sees a doctor, which is where the neighbours of a played life belong.
+ *
+ * Untouched by Ticket 0417, and the numbers above are 0212's. After 0417 the
+ * NPC population's yearly death rate runs about 6, 19, 59 and 148 per thousand
+ * at sixty, seventy, eighty and ninety, against roughly 9, 20, 51 and 147 in a
+ * US period life table — this multiplier is doing the job it was written for.
  */
 export const NPC_MORBIDITY_FROM = 40;
 export const NPC_MORBIDITY_SCALE = 35;
@@ -74,30 +89,6 @@ export function npcMorbidity(age: number): number {
   if (age <= NPC_MORBIDITY_FROM) return 1;
   const past = age - NPC_MORBIDITY_FROM;
   return 1 + (past / NPC_MORBIDITY_SCALE) ** 2;
-}
-
-/**
- * How much of the peak a body has lost by this age.
- *
- * The closed form of `ageingLoss` summed from `DECLINE_STARTS`. Written as a
- * formula rather than a loop because it is called for every person the player
- * knows, every year, for eighty years — and because the two shapes must not be
- * able to disagree, the test asserts this against an actual accumulation of
- * `ageingLoss` rather than against remembered numbers.
- */
-export function cumulativeAgeingLoss(age: number): number {
-  if (age <= DECLINE_STARTS) return 0;
-  // The sum is over the years LIVED THROUGH, ages DECLINE_STARTS..age-1, which
-  // is the off-by-one the accumulation test caught immediately: `ageingLoss`
-  // charges at DECLINE_ACCELERATES itself with a `past` of zero, so that year
-  // belongs to the fast arm at k=0 and not to the slow one.
-  const slowYears = Math.max(0, Math.min(age, DECLINE_ACCELERATES) - DECLINE_STARTS);
-  let loss = slowYears * SLOW_DECLINE;
-  if (age > DECLINE_ACCELERATES) {
-    const past = age - DECLINE_ACCELERATES;
-    loss += past * SLOW_DECLINE + (FAST_DECLINE_PER_YEAR * past * (past - 1)) / 2;
-  }
-  return loss;
 }
 
 /** An NPC's peak health, from a stable [0,1) draw on their id. */
@@ -172,10 +163,7 @@ const CAUSES: readonly (readonly [number, readonly string[]])[] = [
       'an illness nobody caught in time',
     ],
   ],
-  [
-    40,
-    ['an illness', 'a heart attack', 'something sudden', 'cancer', 'an illness, very fast'],
-  ],
+  [40, ['an illness', 'a heart attack', 'something sudden', 'cancer', 'an illness, very fast']],
   [0, ['an accident', 'a car accident', 'something nobody expected']],
 ];
 

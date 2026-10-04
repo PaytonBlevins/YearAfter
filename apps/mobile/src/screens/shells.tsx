@@ -24,29 +24,40 @@ import {
   PERSONALITY_LABELS,
   TALENT_LABELS,
 } from '@yearafter/character';
-import { costIndexOf, describeCity } from '@yearafter/content';
+import { costIndexOf, describeCity, findBusinessType } from '@yearafter/content';
 import {
   gradePointAverage,
   isAtCollege,
   isInSchool,
   joinedActivities,
   levelOf,
-  COLLEGE_YEARS,
-  POSTGRAD_YEARS,
+  yearsNeeded,
   findMajor,
   letterGrade,
   schoolLabel,
+  activityStageOf,
 } from '@yearafter/education';
 import { isCurrent, partnerOf, stagesFor } from '@yearafter/social';
-import { EARLIEST_RETIREMENT, livingCostFor, portfolioWorth } from '@yearafter/finance';
+import {
+  benefitFor,
+  EARLIEST_RETIREMENT,
+  livingCostFor,
+  portfolioWorth,
+  valuablesValue,
+  businessesValue,
+  STATE_PENSION_AT,
+} from '@yearafter/finance';
 import { childrenAtHome } from '@yearafter/parenting';
 import { TRACK_LABELS, afterTax, findJob, payFor } from '@yearafter/careers';
 import {
   canWork,
-  nextDegreeFor,
+  cannotEnrolAnything,
   occupationFor,
   openings,
+  openProgramSections,
   outOfPocket,
+  SHOP_FROM_AGE,
+  vehicleTitleOf,
   type GameState,
 } from '@yearafter/simulation';
 import { salaryLabel } from './JobsScreen';
@@ -269,7 +280,9 @@ function WhereYouAre() {
   if (atCollege) {
     const major = education.majorId ? findMajor(education.majorId) : undefined;
     const year = (education.collegeYear ?? 0) + 1;
-    const total = education.stage === 'postgrad' ? POSTGRAD_YEARS : COLLEGE_YEARS;
+    // Ticket 0406: per-program, because a CPA year and a medical degree are
+    // both here now and the two-constant version was wrong about both.
+    const total = yearsNeeded(education);
     return (
       <>
         <SectionHeading>Studying</SectionHeading>
@@ -372,6 +385,8 @@ function WhatYouCanDo() {
   const atCollege = isAtCollege(education);
   const atSchool = isInSchool(education) && !atCollege;
   const joined = joinedActivities(education);
+  // Ticket 0416: an adult has a list too — at college, working, or neither.
+  const canJoin = activityStageOf(education, state.player.age) !== undefined;
   const colleagues = state.circle.people.filter(
     // Ticket 0211a: still IN the room. A colleague from a job you left is
     // somebody you know, not somebody at your work.
@@ -424,7 +439,7 @@ function WhatYouCanDo() {
     );
   }
 
-  if (atSchool) {
+  if (canJoin) {
     // "Clubs & Teams", not "Activities" — there is already an Activities world
     // in the tab bar, and two things with the same name one tap apart is the
     // kind of collision a player only notices by ending up on the wrong screen.
@@ -487,10 +502,24 @@ function Elsewhere() {
   const { state } = useGame();
   if (!state) return null;
 
-  const { education, player } = state;
+  const { education } = state;
   const job = state.employment.job ? findJob(state.employment.job.jobId) : undefined;
-  const next = isAtCollege(education) ? undefined : nextDegreeFor(state);
-  const owed = outOfPocket(state);
+  /*
+    Ticket 0406. `nextDegreeFor` decided this row until now, which meant the
+    row was really asking "is there a higher DEGREE available" — and answered
+    no for a postgraduate (who may still learn a trade) and no for a
+    seventeen-year-old (who may start one a year before college would take
+    them). `cannotEnrolAnything` is the question the row was always trying to
+    ask: is there a single program this character could start.
+  */
+  const cannotStudy = isAtCollege(education) ? 'already-enrolled' : cannotEnrolAnything(state);
+  const openings2 = cannotStudy === undefined ? openProgramSections(state) : [];
+  const cheapest = openings2
+    .flatMap((section) => section.programs)
+    .reduce<number | undefined>(
+      (low, program) => Math.min(low ?? Infinity, outOfPocket(state, program)),
+      undefined,
+    );
 
   return (
     <>
@@ -508,16 +537,16 @@ function Elsewhere() {
               : 'School first — try the odd jobs',
             route: { screen: 'jobs', title: 'Openings' },
           },
-          ...(next && player.age >= 18
+          ...(cannotStudy === undefined
             ? [
                 {
                   icon: 'school' as const,
-                  title: next === 'postgrad' ? 'Apply to graduate school' : 'Apply to college',
+                  title: 'Study something',
                   subtitle:
-                    owed <= Math.floor(Number(player.cash) / 100)
-                      ? 'Pick a subject and put your name in'
-                      : `You would need $${owed.toLocaleString('en-US')} a year`,
-                  route: { screen: 'college' as const, title: 'College' },
+                    cheapest === 0
+                      ? 'Trade school, college, or a professional degree'
+                      : `From $${(cheapest ?? 0).toLocaleString('en-US')} a year — trades to graduate school`,
+                  route: { screen: 'college' as const, title: 'Study' },
                 },
               ]
             : []),
@@ -553,28 +582,71 @@ function Elsewhere() {
   );
 }
 
-const retiredAlready = (state: GameState): boolean =>
-  state.retirement.retiredAtAge !== undefined;
+const retiredAlready = (state: GameState): boolean => state.retirement.retiredAtAge !== undefined;
 
 /**
  * The Retirement row's subtitle — what a player would want to know from the
  * Career screen without opening it.
+ *
+ * FOUND FROM A PLAYER REPORT, and it was worse than the one report suggested.
+ * This used to decide everything off `balance` alone — a real number for the
+ * 401k-style account, but silent about the pension, which is a SEPARATE
+ * balance (`serviceYears`) that a government job accrues automatically with no
+ * contribution needed. A worker on a real pension who had never set a
+ * contribution rate saw "Nothing put away yet. The employer match is free
+ * money" — wrong twice over: it erased years of real pension service, and
+ * government jobs do not offer a match at all (`BENEFIT_BY_TEMPLATE.government
+ * .match` is 0; a pension is the benefit, not a 401k).
+ *
+ * Measured across 80 played lives, replaying every view of the empty-balance
+ * teaser: 54.0% of the time it named a match the current job does not have,
+ * and 50.5% of the time a real pension was accruing and went unmentioned. Not
+ * an edge case — half the catalog's templates (`government`, `performance`,
+ * `trade`) have no match, and the line did not know that.
+ *
+ * THE RETIRED-EMPTY-HANDED BRANCH CHECKS AGE FOR THE SAME REASON. `drawYear`
+ * pays the state pension only from `STATE_PENSION_AT`, not from
+ * `EARLIEST_RETIREMENT` — the two are twelve years apart. A player who
+ * stopped at 55 with no account and no service is not living on the state
+ * pension, they are living on nothing this build gives them yet, and saying
+ * otherwise would be the same shape of wrong this whole function was fixed
+ * for: a line naming an income the character does not have.
  */
 function retirementLine(state: GameState): string {
   const balance = Math.round(Number(state.retirement.balance) / 100);
+  const servedYears = state.retirement.serviceYears;
   if (retiredAlready(state)) {
-    return balance > 0
-      ? `${money(balance)} left, paying out each year`
-      : 'Living on the pension';
+    if (balance > 0) return `${money(balance)} left, paying out each year`;
+    if (servedYears > 0) return 'Living on the pension';
+    if (state.player.age >= STATE_PENSION_AT) return 'Living on the state pension';
+    return 'Retired early. Nothing coming in yet.';
   }
+
+  const pensionNote =
+    servedYears > 0 ? `, ${servedYears} year${servedYears === 1 ? '' : 's'} toward a pension` : '';
+
   if (balance > 0) {
     const rate = Math.round(state.retirement.rate * 100);
-    return rate > 0
-      ? `${money(balance)} put away, ${rate}% of your pay going in`
-      : `${money(balance)} put away, nothing going in`;
+    const account =
+      rate > 0
+        ? `${money(balance)} put away, ${rate}% of your pay going in`
+        : `${money(balance)} put away, nothing going in`;
+    return `${account}${pensionNote}`;
+  }
+
+  if (servedYears > 0) {
+    return `Nothing in an account yet${pensionNote}.`;
+  }
+
+  // Only claim the match is free money for a job that actually has one — half
+  // the catalog's templates do not, and this is what read the wrong one.
+  const held = state.employment.job ? findJob(state.employment.job.jobId) : undefined;
+  const benefit = held ? benefitFor(held.template) : undefined;
+  if (state.player.age < EARLIEST_RETIREMENT && benefit && benefit.match > 0) {
+    return 'Nothing put away yet. The employer match is free money.';
   }
   if (state.player.age < EARLIEST_RETIREMENT) {
-    return 'Nothing put away yet. The employer match is free money.';
+    return 'Nothing put away yet.';
   }
   return 'Nothing put away. You could still stop.';
 }
@@ -750,15 +822,87 @@ export function AssetsScreen() {
       <SectionHeading>Ownership</SectionHeading>
       <RowGroup
         rows={[
-          { icon: 'home', title: 'Homes', ticket: '0501' },
-          { icon: 'vehicle', title: 'Vehicles', ticket: '0503' },
-          { icon: 'business', title: 'Businesses', ticket: '0601' },
-          { icon: 'collection', title: 'Valuable Collections', ticket: '0505' },
+          /*
+            Ticket 0501. Owning somewhere — and the row says so once they do,
+            the way Investments says what is held.
+          */
+          {
+            icon: 'home',
+            title: 'Homes',
+            subtitle:
+              state && state.homes.length > 0
+                ? state.homes.length === 1
+                  ? 'The place you own'
+                  : `${state.homes.length} places you own`
+                : 'Buy somewhere of your own',
+            route: { screen: 'homes' as const, title: 'Homes' },
+          },
+          /*
+            Ticket 0504. The row says what you drive once you drive something.
+          */
+          {
+            icon: 'vehicle',
+            title: 'Vehicles',
+            subtitle:
+              state.vehicles.length > 0
+                ? state.vehicles.length === 1
+                  ? vehicleTitleOf(state.vehicles[0]!)
+                  : `${state.vehicles.length} vehicles`
+                : state.player.age >= SHOP_FROM_AGE
+                  ? 'New, used, online and luxury'
+                  : 'Once you are old enough to drive',
+            route: { screen: 'vehicles' as const, title: 'Vehicles' },
+          },
+          /*
+            Ticket 0601. What the ones you run are worth to you, and the
+            marketplace once there is money to start one.
+          */
+          {
+            icon: 'business',
+            title: 'Businesses',
+            subtitle:
+              state.businesses.length > 0
+                ? state.businesses.length === 1
+                  ? state.businesses[0]!.name
+                  : `${state.businesses.length} businesses`
+                : state.player.age >= 18
+                  ? 'Start one of your own'
+                  : 'Once you are old enough',
+            value:
+              state.businesses.length > 0
+                ? formatMoney(businessesValue(state.businesses, findBusinessType, state.world.year))
+                : undefined,
+            route: { screen: 'businesses' as const, title: 'Businesses' },
+          },
+          /*
+            Ticket 0506. What the collection is worth once there is one;
+            spec 1893's shelves are inside.
+          */
+          {
+            icon: 'collection',
+            title: 'Valuable Collections',
+            subtitle:
+              state.valuables.length > 0
+                ? `${state.valuables.length} ${state.valuables.length === 1 ? 'piece' : 'pieces'}`
+                : 'Nothing yet',
+            value:
+              state.valuables.length > 0 ? formatMoney(valuablesValue(state.valuables)) : undefined,
+            route: { screen: 'collections' as const, title: 'Valuable Collections' },
+          },
         ]}
       />
 
       <SectionHeading>Buy</SectionHeading>
-      <RowGroup rows={[{ icon: 'shopping', title: 'Shopping', ticket: '0505' }]} />
+      <RowGroup
+        rows={[
+          {
+            icon: 'shopping',
+            title: 'Shopping',
+            subtitle: 'Jewelry, watches, art and antiques',
+            route: { screen: 'shopping', title: 'Shopping' },
+          },
+        ]}
+      />
       {/* v0.03 Financial Life is COMPLETE — 0301 through 0310. What is left on
           this screen belongs to v0.05 Ownership, and each of those rows names
           its own ticket rather than carrying a blanket note. */}
@@ -870,8 +1014,12 @@ export function ActivitiesScreen() {
             because there is no debt, no will and no trust in the build to net
             it against." An estate needs something to settle against, which is
             v0.05's property.
+
+            Ticket 0508 owns it and was deferred by the player on purpose
+            (they would rather play block 6 first); the validator's DEFERRED
+            list says so, so this label is a promise and not a stale one.
           */
-          { icon: 'estate', title: 'Will & Estate', affordance: 'action', ticket: 'v0.05' },
+          { icon: 'estate', title: 'Will & Estate', affordance: 'action', ticket: '0508' },
         ]}
       />
       {/* 15 rows — within the 10–16 target (spec 879–943). A note to us, so it
@@ -900,16 +1048,23 @@ export function MindBodyScreen() {
           Pointed at v0.04 as the next milestone that plausibly could. That is a
           guess at a schedule rather than a decision, and it is written here
           instead of left implied so it can be corrected in one place.
+
+          v0.04 CLOSED WITHOUT THEM (roadmap finding 2h), and the validator's
+          stale-placeholder guard caught it the moment 0501 bumped the current
+          ticket. Moved to v0.10 — the milestone the spec gives to broad content
+          and world integration — as the least-wrong home for "self-development
+          actions" until the product owner places them. Still a guess; still
+          written down as one.
         */
         rows={[
-          { title: 'Gym', affordance: 'action', ticket: 'v0.04' },
-          { title: 'Meditation', affordance: 'action', ticket: 'v0.04' },
+          { title: 'Gym', affordance: 'action', ticket: 'v0.10' },
+          { title: 'Meditation', affordance: 'action', ticket: 'v0.10' },
           { title: 'Martial Arts', ticket: '0808' },
           { title: 'Instruments', ticket: '0803' },
           { title: 'Acting Lessons', affordance: 'action', ticket: '0801' },
-          { title: 'Books / Library', affordance: 'action', ticket: 'v0.04' },
-          { title: 'Diet', affordance: 'action', ticket: 'v0.04' },
-          { title: 'Walk', affordance: 'action', ticket: 'v0.04' },
+          { title: 'Books / Library', affordance: 'action', ticket: 'v0.10' },
+          { title: 'Diet', affordance: 'action', ticket: 'v0.10' },
+          { title: 'Walk', affordance: 'action', ticket: 'v0.10' },
         ]}
       />
       {/* Martial Arts lives here, not as a top-level activity (spec 879–943). */}

@@ -255,6 +255,57 @@ export const isFriend = (person: Acquaintance): boolean =>
 export const isCurrent = (person: Acquaintance): boolean => person.endedAtAge === undefined;
 
 /**
+ * Ticket 0412 — the curve warmth never had.
+ *
+ * Every visible stat in this build moves through `curvedDelta`: full strength
+ * at or below 50, tapering to nothing at 100, *"because a stat everyone maxes
+ * is a stat that says nothing."* Warmth was the one number that escaped it, and
+ * it escaped in the worst possible place — `remember` added its delta raw, and
+ * so did the year-in-the-same-room step, which runs at everybody in a room
+ * every year for as long as the room is open.
+ *
+ * Measured across 90 lives before this. The CLOSEST friend a character has,
+ * counting nobody they are involved with:
+ *
+ * | age | p10 | median | p90 | at exactly 100 |
+ * |---|---|---|---|---|
+ * | 22 | 42 | 51 | 61 | 0% |
+ * | 30 | 66 | 93 | 100 | 32% |
+ * | 40 | **100** | **100** | **100** | **91%** |
+ *
+ * A job is a room and its crew is `inRoom` for as long as the job lasts, so
+ * fifteen years anywhere produced three people at the cap. Pooled across every
+ * platonic relationship at forty the distribution was bimodal — p10 34, median
+ * 100 — which is to say this build had no such thing as a decent-but-not-best
+ * adult friend. CORE_RULES 13.70, third system: 13.66 caught the flat push,
+ * 0411 caught the one-way ratchet in the event catalog, and this is the same
+ * shape in `relationship`.
+ *
+ * GAINS ONLY, and that asymmetry is the point rather than an omission:
+ *
+ *  - a gain tapers, because getting from 20 to 50 with somebody is what sitting
+ *    near them another year does, and getting from 85 to 100 is not;
+ *  - a loss does NOT, because the floor was never the defect (pooled p10 sat at
+ *    34 at every adult age) and because `driftRate` already owns the cooling
+ *    curve with the opposite shape on purpose — a friendship that has cooled
+ *    cools *faster* from there. Softening a loss here would also quietly
+ *    disarm `fall-out`, whose whole job is to be able to end something.
+ *
+ * Deliberately NOT applied to `romanceYear`, which has had its own pivot since
+ * 0207 and models a different claim.
+ */
+export function curvedWarmth(relationship: number, delta: number): number {
+  if (delta <= 0) return delta;
+  const headroom = (100 - relationship) / 50;
+  const scale = headroom > 1 ? 1 : headroom < 0 ? 0 : headroom;
+  return Math.round(delta * scale);
+}
+
+/** `relationship` after a change, curved and clamped. One place, so two cannot disagree. */
+export const warmedBy = (person: Acquaintance, delta: number): StatValue =>
+  clampStat(person.relationship + curvedWarmth(person.relationship, delta)) as StatValue;
+
+/**
  * What a teacher is called.
  *
  * A child does not call a forty-year-old by their first name, which is the same
@@ -288,7 +339,9 @@ export function remember(person: Acquaintance, memory: SocialMemory): Acquaintan
   const minor = memories.filter((entry) => !entry.major).slice(-MINOR_MEMORY_LIMIT);
   const kept = [...major, ...minor].sort((a, b) => a.age - b.age);
 
-  const relationship = clampStat(person.relationship + memory.warmth) as StatValue;
+  // Ticket 0412: curved, like every other number in the build. A compliment
+  // worth 8 is worth 8 at a relationship of 30 and worth one at 94.
+  const relationship = warmedBy(person, memory.warmth);
   const earnedTier = memory.major ? 1 : 2;
   return {
     ...person,

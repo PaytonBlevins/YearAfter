@@ -41,8 +41,15 @@ import { flows, totalFor, transactionsIn, type Ledger } from './ledger';
  * Meant to shrink. Each entry names the ticket that retires it, and the test on
  * this list is the note to that ticket.
  */
-export const NOT_YET_OWNED = [
-  { key: 'assets', label: 'Assets', arrives: 'v0.05' },
+export const NOT_YET_OWNED: readonly {
+  readonly key: string;
+  readonly label: string;
+  readonly arrives: string;
+}[] = [
+  // `assets` came off in Ticket 0501: a home is the first thing a character can
+  // own that is neither cash nor an investment. The list is empty now, and it
+  // stays declared so the device survives for whatever spec 19 adds next.
+
   // `credit` came off in 0305. `liabilities` and `investments` came off in
   // 0308 — but `liabilities` should have come off in 0307, which built cards
   // and loans and left this line here claiming they had not arrived. See
@@ -50,7 +57,7 @@ export const NOT_YET_OWNED = [
   // whether or not the list should have shrunk, so this device catches a
   // wrongful deletion and never catches a missing one. The test below now
   // checks each remaining entry against the tickets already built.
-] as const;
+];
 
 export interface FinanceSummary {
   /** Spec 19, first: the cash balance. */
@@ -99,6 +106,8 @@ export interface FinanceSummary {
   readonly onlyCash: boolean;
   /** What the portfolio is worth. Zero until somebody buys something. */
   readonly investments: Money;
+  /** Ticket 0501. Owned property, at what it is worth now. */
+  readonly assets: Money;
   /** Cards plus loans. Positive means owed. */
   readonly liabilities: Money;
   /** The year this describes. */
@@ -111,6 +120,11 @@ export interface FinanceSummary {
 export interface Estate {
   /** Portfolio value. */
   readonly investments: Money;
+  /**
+   * Ticket 0501. What owned property is worth — spec 19's "assets". Optional,
+   * so every caller written before homes existed means "none".
+   */
+  readonly assets?: Money;
   /** Everything owed — card balances and loan balances. */
   readonly liabilities: Money;
 }
@@ -142,7 +156,8 @@ export function summariseFinances(
   let bought = 0;
   let sold = 0;
   for (const entry of transactionsIn(ledger, year)) {
-    if (entry.category !== 'investment') continue;
+    // Ticket 0501: a house is bought and sold across the same line.
+    if (entry.category !== 'investment' && entry.category !== 'property') continue;
     const amount = Number(entry.amount);
     if (amount < 0) bought -= amount;
     else sold += amount;
@@ -158,8 +173,14 @@ export function summariseFinances(
     distinction for the canonical accounting: *"Cash gifts change cash but are
     not earned income."*
   */
+  // Ticket 0502: a partner's pay is earned income too, and the tax row
+  // includes the tax on it, so leaving it out would overstate the rate.
   const earned =
-    Number(totalFor(ledger, 'salary', year)) + Number(totalFor(ledger, 'commission', year));
+    Number(totalFor(ledger, 'salary', year)) +
+    Number(totalFor(ledger, 'commission', year)) +
+    // Ticket 0601: what a business paid its owner is earned, and so is the tax on it.
+    Number(totalFor(ledger, 'business', year)) +
+    Number(totalFor(ledger, 'partner', year));
   const tax = -Number(totalFor(ledger, 'tax', year));
   const taxRate = earned > 0 ? Math.max(0, Math.min(1, tax / earned)) : 0;
 
@@ -174,10 +195,17 @@ export function summariseFinances(
     // Everything owned, less everything owed. The `onlyCash` flag is now a
     // statement about this character rather than about the build.
     netWorth: cents(
-      Number(ledger.balance) + Number(estate.investments) - Number(estate.liabilities),
+      Number(ledger.balance) +
+        Number(estate.investments) +
+        Number(estate.assets ?? 0) -
+        Number(estate.liabilities),
     ),
-    onlyCash: Number(estate.investments) === 0 && Number(estate.liabilities) === 0,
+    onlyCash:
+      Number(estate.investments) === 0 &&
+      Number(estate.assets ?? 0) === 0 &&
+      Number(estate.liabilities) === 0,
     investments: estate.investments,
+    assets: estate.assets ?? cents(0),
     liabilities: estate.liabilities,
     year,
     quiet: transactionsIn(ledger, year).length === 0,
@@ -220,7 +248,7 @@ export const childMonthlyCost = (standard: number, locationIndex: number, share:
  *
  * With this, a stale entry fails: see `stillAhead`. CORE_RULES 13.51.
  */
-export const TICKET = '0308';
+export const TICKET = '0604';
 
 /**
  * Whether a promised arrival is still in the future.

@@ -21,16 +21,31 @@ import type {
   HouseholdFinances,
   Ledger,
   MarketState,
+  OwnedHome,
+  OwnedVehicle,
+  OwnedValuable,
+  OwnedBusiness,
   PriceBook,
   RetirementState,
 } from '@yearafter/finance';
 import type { HealthState } from '@yearafter/health';
 import type { EventHistory, PendingDecision } from '@yearafter/events';
-import type { RngSnapshot, WorldState } from '@yearafter/simulation';
+import type {
+  CollegeOffer,
+  JobOffer,
+  LifeOffer,
+  PursuitOffer,
+  HomeOffer,
+  VehicleOffer,
+  RenovationOffer,
+  AuctionDiary,
+  RngSnapshot,
+  WorldState,
+} from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 25;
+export const CURRENT_SAVE_VERSION = 39;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -62,6 +77,68 @@ export type { WorldState };
  *     (Ticket 0208). Children themselves live in `family` as a fourth role.
  * v13 added `employment` — the job, its performance, and standing in every
  *     field ever worked in (Ticket 0210).
+ * v33 let a home carry a `letting` — its rent setting, its agent and the tenant
+ * in each unit (Ticket 0503). Optional on every home, and no save before it
+ * could let anything, so the migration has nothing to write; the version is
+ * bumped so a build that cannot read a tenant refuses the save rather than
+ * dropping them.
+ *
+ * v39 added `branches` to each business — the years its extra locations opened
+ * (Ticket 0602). A business before it had one door, so every one gets `[]`.
+ *
+ * v38 added `businesses` — every business the character owns, each holding its
+ * own money (Ticket 0601). Every save before it owns none, so the migration
+ * writes an empty list.
+ *
+ * v37 added `auctions` — this year's auction diary, the sales attended and
+ * the lots bid on (Ticket 0507) — and lets a valuable carry `fake` and
+ * `reproduction`. All optional and new, so the migration only bumps.
+ *
+ * v36 added `valuables` — jewelry, watches and collectibles the character
+ * owns — and `renovationOffer`, the question the game asks about a home
+ * falling apart (Ticket 0506). A home may also carry `renovations`, which is
+ * optional. Every save before it owns no valuables, so the migration writes an
+ * empty list, and repairs a `home.renovate` left in `pending` without its
+ * payload.
+ *
+ * v35 lets a car carry `mods` — what has been fitted to it (Ticket 0505).
+ * Optional, and nothing before could write one, so the migration only bumps
+ * the version.
+ *
+ * v34 added `vehicles` — every car the character owns, each carrying its own
+ * loan — `vehicleOffer`, the question the game asks about one, and
+ * `inspected`, the used listings somebody paid to have looked at this year
+ * (Ticket 0504). Every save before it owns no car, so the migration writes an
+ * empty list, and repairs a `vehicle.offer` left in `pending` without its
+ * payload.
+ *
+ * v32 added `homes` — every home the character owns, each carrying its own
+ * mortgage — and `homeOffer`, the question the game asks about one (Ticket
+ * 0501). Every save before it owns nothing, so the migration writes an empty
+ * list, and repairs a `home.offer` left in `pending` without its payload.
+ *
+ * v31 added `pursuitOffer` — a club, team or pursuit the game asked about
+ * unprompted (Ticket 0416) — and the first adult entries `education.activities`
+ * can hold. Neither needs migration content: absent means no question open, and
+ * a v30 save's activities are all school ones. Like v30 it repairs one thing: a
+ * v30 save cannot hold an `activity.offer` in `pending`, so one that does is a
+ * question nothing can answer and is dropped.
+ *
+ * v30 added `lifeOffer` — a romantic step or a child the game asked about
+ * unprompted (Ticket 0410). Absent means there is no question open, which is
+ * true of every save written before the door existed, so there is no migration
+ * content. The migration DOES repair one thing: a v29 save cannot hold a
+ * `romance.offer` or `family.offer` in `pending`, so a save that somehow does
+ * is holding a decision nothing can answer, and it is dropped.
+ *
+ * v29 made `offer.fromJobId` optional (Ticket 0407). An offer without one is
+ * the first-job door rather than a poaching offer; a v28 save can never hold
+ * one, so there is nothing to migrate.
+ *
+ * v28 added `credentials.licenses` and the `vocational` stage to education
+ * (Ticket 0406). Both ride inside `EducationState`, which is persisted whole,
+ * so neither needed a field here.
+ *
  * v14 added `credentials` to education — what a character has actually
  *     finished, derived from the stage a save already recorded (Ticket 0210b).
  * v15 de-duplicated timeline ids AGAIN, for the same reason v11 did and a
@@ -86,7 +163,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 25;
+  readonly version: 39;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -143,6 +220,51 @@ export interface SaveGameV18 {
   readonly advisorId?: string;
   /** Ticket 0310. The retirement account, the service, and whether they stopped. */
   readonly retirement: RetirementState;
+  /**
+   * Ticket 0402. A job somebody offered, waiting on an answer.
+   *
+   * Optional because most years do not have one, and absent rather than a null
+   * sentinel so the save stays the shape the state is.
+   */
+  readonly offer?: JobOffer;
+  /**
+   * Ticket 0405. A college or graduate-school application the game raised
+   * unprompted, waiting on an answer.
+   *
+   * Optional for the same reason `offer` is: most years do not have one, and
+   * absent rather than a null sentinel so the save stays the shape the state
+   * is.
+   */
+  readonly collegeOffer?: CollegeOffer;
+  /**
+   * Ticket 0410. A step in a private life the game raised unprompted, waiting
+   * on an answer — asking somebody out, the next rung, or a child.
+   *
+   * One optional field for both questions, for the reason `GameState.lifeOffer`
+   * gives: only one of them can ever be open at once, so a second field would
+   * describe a state that cannot occur.
+   */
+  readonly lifeOffer?: LifeOffer;
+  /** Ticket 0416. Something to join, waiting on an answer. */
+  readonly pursuitOffer?: PursuitOffer;
+  /** Ticket 0501. The homes the character owns. Always present from v32. */
+  readonly homes: readonly OwnedHome[];
+  /** Ticket 0501. A home the game asked about, waiting on an answer. */
+  readonly homeOffer?: HomeOffer;
+  /** Ticket 0504. The cars the character owns. Always present from v34. */
+  readonly vehicles: readonly OwnedVehicle[];
+  /** Ticket 0504. A car the game asked about, waiting on an answer. */
+  readonly vehicleOffer?: VehicleOffer;
+  /** Ticket 0504. Used listings inspected this year. */
+  readonly inspected?: readonly string[];
+  /** Ticket 0506. Jewelry, watches and collectibles. Always present from v36. */
+  readonly valuables: readonly OwnedValuable[];
+  /** Ticket 0506. A renovation the game asked about, waiting on an answer. */
+  readonly renovationOffer?: RenovationOffer;
+  /** Ticket 0507. This year's auction diary. */
+  readonly auctions?: AuctionDiary;
+  /** Ticket 0601. The businesses the character owns. Always present from v38. */
+  readonly businesses: readonly OwnedBusiness[];
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

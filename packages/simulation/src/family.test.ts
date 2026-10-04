@@ -42,8 +42,18 @@ interface Life {
   readonly answered: number;
 }
 
-/** A player who wants a family: partner up, try every year, say yes to everything. */
-function playALife(seed: string): Life {
+/**
+ * A player who wants a family: partner up, try every year, say yes to everything.
+ *
+ * `alone` plays the same life without ever pursuing anybody (Ticket 0407).
+ * Adoption used to be reached incidentally — some seeds simply failed to find a
+ * partner and fell through to it — and 0407 removed that accident by giving
+ * everybody an income: romantic moves are gated on cash, so a population that
+ * now works is a population that now partners up, and the adoption branch below
+ * stopped being reachable at all. A route the game offers has to be exercised
+ * on purpose, not left to whoever happened to be too poor to date.
+ */
+function playALife(seed: string, alone = false): Life {
   let state = createNewGame({ seed });
   const asks: { childId: string; askId: string }[] = [];
   let answered = 0;
@@ -61,11 +71,11 @@ function playALife(seed: string): Life {
       state = result.value.state;
     }
 
-    if (datingAppAvailable(state)) {
+    if (!alone && datingAppAvailable(state)) {
       const result = useDatingApp(state);
       if (result.ok) state = result.value.state;
     }
-    for (let press = 0; press < 3; press += 1) {
+    for (let press = 0; press < (alone ? 0 : 3); press += 1) {
       const cash = Number(state.player.cash);
       const person = state.circle.people
         .filter(isCurrent)
@@ -192,9 +202,22 @@ describe('a player who wants a family', () => {
   });
 
   it('reaches adoption, which is the route that needs nobody', () => {
-    const adopted = LIFETIMES.flatMap((life) =>
+    /*
+      PLAYED ALONE ON PURPOSE (Ticket 0407). This used to read `LIFETIMES` and
+      pass because some of those seeds failed to find anybody. That was never
+      the test working — it was the test borrowing somebody else's bad luck, and
+      0407 took the luck away by giving every character an income. Romantic
+      moves are priced, so a population with money is a population that pairs
+      off, and nobody in `LIFETIMES` is single at twenty-four any more.
+
+      The claim this makes — "the route that needs nobody" — is about a player
+      who never pursues anyone, so that is the player it now plays.
+    */
+    const alone = Array.from({ length: 12 }, (_, run) => playALife(`alone-${run}`, true));
+    const adopted = alone.flatMap((life) =>
       kidsOf(life).filter((child) => child.arrivedBy === 'adoption'),
     );
+    console.log(`adoptions across ${alone.length} lives played alone: ${adopted.length}`);
     expect(adopted.length).toBeGreaterThan(0);
     for (const child of adopted) {
       // Not all newborns — older children are the ones who wait for placements.

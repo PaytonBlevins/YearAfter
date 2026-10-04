@@ -22,6 +22,13 @@ import { applyImmediateStress } from '@yearafter/stress';
 import { err, ok, type Result } from '@yearafter/core';
 import type { GameState } from './game-state';
 import { applyOutcome, buildEventContext, rememberOutcome, timelineKindFor } from './phases/events';
+import { answerOffer, isOfferDecision } from './offers';
+import { answerCollegeOffer, isCollegeOfferDecision } from './college-offer';
+import { answerLifeOffer, isLifeOfferDecision } from './life-offer';
+import { answerPursuitOffer, isPursuitOfferDecision } from './pursuit-offer';
+import { answerHomeOffer, isHomeOfferDecision } from './homes';
+import { answerVehicleOffer, isVehicleOfferDecision } from './vehicles';
+import { answerRenovationOffer, isRenovationOfferDecision } from './renovations';
 import { RngDomains } from './rng/rng';
 
 export type DecisionError =
@@ -56,6 +63,83 @@ export function decide(
     (candidate) => candidate.eventId === eventId,
   );
   if (!decision) return err('no-such-decision');
+
+  /*
+    Ticket 0402. TWO KINDS OF DECISION NOW TRAVEL THIS QUEUE. Authored ones are
+    resolved out of the content catalog below. Systemic ones are raised by a
+    phase module because something happened in a system it owns, and cannot be
+    authored at all: their choices move employment state, and `@yearafter/events`
+    turns a choice into stat deltas and must never learn what a job is.
+
+    The branch is here rather than inside `resolveChoice` for exactly that
+    reason — the events engine stays ignorant of every system that borrows its
+    queue, and each borrower answers its own question. 0405 uses this same
+    door for school.
+  */
+  if (isOfferDecision(eventId)) {
+    const answered = answerOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  if (isCollegeOfferDecision(eventId)) {
+    const answered = answerCollegeOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  /*
+    Ticket 0410. The third borrower of this queue, and the first whose answer
+    runs a verb that can be pressed on a screen at the same time — see
+    `answerLifeOffer` on why it declines gracefully where 0405 throws.
+  */
+  if (isLifeOfferDecision(eventId)) {
+    const answered = answerLifeOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  // Ticket 0501. The fifth: a home that came up.
+  if (isHomeOfferDecision(eventId)) {
+    const answered = answerHomeOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  // Ticket 0504. The sixth: a car that came up.
+  if (isVehicleOfferDecision(eventId)) {
+    const answered = answerVehicleOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  // Ticket 0506. The seventh: the house needs work.
+  if (isRenovationOfferDecision(eventId)) {
+    const answered = answerRenovationOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  // Ticket 0416. The fourth borrower: a club, a team, a pursuit.
+  if (isPursuitOfferDecision(eventId)) {
+    const answered = answerPursuitOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
 
   const stream = state.rng.stream(RngDomains.Events);
   const context = buildEventContext(state, decision.age, decision.year, state.events);

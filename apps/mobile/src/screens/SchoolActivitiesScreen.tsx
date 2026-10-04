@@ -19,17 +19,12 @@
 
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
-import {
-  ACTIVITY_KIND_LABELS,
-  type Activity,
-  type ActivityKind,
-  type SchoolStageId,
-} from '@yearafter/content';
+import { ACTIVITY_KIND_LABELS, type Activity, type ActivityKind } from '@yearafter/content';
 import {
   UNAVAILABLE_LABELS,
   activityOffers,
   enrolmentIn,
-  isInSchool,
+  activityStageOf,
   joinedActivities,
   standingLabelFor,
   type ActivityOffer,
@@ -47,8 +42,12 @@ export function SchoolActivitiesScreen() {
   if (!state) return null;
 
   const { education, player, family } = state;
+  // Ticket 0416. Which list, if any: the school's, or the adult one from
+  // eighteen. Before this ticket an adult was told "school's done" and that was
+  // the end of joining anything, for the rest of the life.
+  const stage = activityStageOf(education, player.age);
 
-  if (!isInSchool(education)) {
+  if (stage === undefined) {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <EmptyState
@@ -56,7 +55,7 @@ export function SchoolActivitiesScreen() {
           body={
             education.stage === 'preschool'
               ? "School hasn't started yet."
-              : "School's done. Whatever comes next isn't on a clipboard in a gym."
+              : "You're too old for the school's list and too young for anything else yet."
           }
         />
       </ScrollView>
@@ -65,7 +64,7 @@ export function SchoolActivitiesScreen() {
 
   const offers = activityOffers(education, {
     age: player.age,
-    stage: education.stage as SchoolStageId,
+    stage,
     stats: player.stats,
     talents: player.talents,
     wealth: family.finances.band,
@@ -146,7 +145,9 @@ export function SchoolActivitiesScreen() {
 
       {closed.length > 0 ? (
         <>
-          <SectionHeading note="not open to you">Also at this school</SectionHeading>
+          <SectionHeading note="not open to you">
+            {stage === 'adult' ? 'Also around' : 'Also at this school'}
+          </SectionHeading>
           <Card>
             {closed.map((offer, index) => (
               <Fragment key={offer.activity.id}>
@@ -159,7 +160,14 @@ export function SchoolActivitiesScreen() {
       ) : null}
 
       {joined.length === 0 && available.length === 0 ? (
-        <EmptyState title="Nothing on offer" body="Not much happens at this school." />
+        <EmptyState
+          title="Nothing on offer"
+          body={
+            stage === 'adult'
+              ? 'Nothing you could join right now.'
+              : 'Not much happens at this school.'
+          }
+        />
       ) : null}
     </ScrollView>
   );

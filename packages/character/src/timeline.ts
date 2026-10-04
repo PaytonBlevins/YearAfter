@@ -65,6 +65,18 @@ export type LifeRecordCategory =
    * a wedding are different things to a reader of the death screen.
    */
   | 'health'
+  /**
+   * Ticket 0409. Losing somebody close.
+   *
+   * 0212 filed these under 'family' because 'family' was the nearest thing that
+   * existed, and this interface's own rule — "never derived by parsing timeline
+   * text" — then had no way to answer "has this character been bereaved
+   * recently" except by reading labels for the word "Lost". Grown by one
+   * variant for the same reason 0212 grew it for 'health' and 0210 grew
+   * `TimelineKind`: a funeral and a wedding are different things to anybody
+   * asking.
+   */
+  | 'loss'
   | 'award'
   | 'championship'
   | 'business'
@@ -120,7 +132,7 @@ export function createTimelineEntry(
  * from what is already in the timeline — no RNG, no clock — so a life still
  * replays identically from its seed.
  *
- * This is a NET, not a licence. A producer whose ids collide is still a
+ * This is a NET, not a license. A producer whose ids collide is still a
  * producer with a bug: the suffix keeps React rendering while the real id stays
  * wrong, and `everyIdIsUnique` in the simulation tests is what catches that.
  * The work id was fixed at the same time this landed.

@@ -183,9 +183,19 @@ export class RandomStream {
    * Used for outcome distributions that should cluster around a centre —
    * salaries within a band, performance-career results (spec 979–1030).
    */
-  aroundCentre(minimum: number, maximum: number): number {
-    const average = (this.next() + this.next() + this.next() + this.next()) / 4;
-    return minimum + average * (maximum - minimum);
+  /**
+   * A draw clustered toward the middle of a band.
+   *
+   * `draws` is how many uniform samples are averaged, and it IS the spread
+   * control: the mean of n uniforms has a standard deviation of
+   * `1 / (sqrt(12n))` of the range, so four draws gives 0.144 of the band and
+   * two gives 0.204. Ticket 0408 made it a parameter after measuring what four
+   * was doing to the population — see `BIRTH_ATTRIBUTE_SPREAD`.
+   */
+  aroundCentre(minimum: number, maximum: number, draws = 4): number {
+    let total = 0;
+    for (let i = 0; i < draws; i += 1) total += this.next();
+    return minimum + (total / draws) * (maximum - minimum);
   }
 }
 
@@ -257,6 +267,13 @@ export const RngDomains = {
   Sports: 'sports',
   Crime: 'crime',
   World: 'world',
+  /**
+   * Ticket 0416. Adult pursuits and the sign-up door — its own stream so a
+   * league joined or dropped never moves who a character meets, what they
+   * earn or whether they fall ill. The real rolls it hands off to (a tryout, a
+   * parent paying) still draw from their own domains, as they would from a tap.
+   */
+  Pursuits: 'pursuits',
 } as const;
 
 export type RngDomain = (typeof RngDomains)[keyof typeof RngDomains];

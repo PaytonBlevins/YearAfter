@@ -23,7 +23,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { findJob } from '@yearafter/careers';
+import { ALL_JOBS, findJob } from '@yearafter/careers';
 import { feeFor } from '@yearafter/parenting';
 import { ROMANCE_MOVES, costOf } from '@yearafter/social';
 import { advanceYear } from './advance';
@@ -156,8 +156,38 @@ describe('a player who wants to work', () => {
     const applications = LIFETIMES.reduce((total, life) => total + life.applications, 0);
     const hires = LIFETIMES.reduce((total, life) => total + life.hires, 0);
     const rate = hires / applications;
-    expect(rate, `hire rate ${Math.round(rate * 100)}%`).toBeLessThan(0.75);
+    const perLife = LIFETIMES.filter((life) => life.applications >= 3).map(
+      (life) => life.hires / life.applications,
+    );
+    const sorted = [...perLife].sort((a, b) => a - b);
+    const p10 = sorted[Math.floor(sorted.length * 0.1)] ?? 0;
+    const p90 = sorted[Math.floor(sorted.length * 0.9)] ?? 0;
+    console.log(
+      `hire rate ${Math.round(rate * 100)}% overall; per life p10 ${(p10 * 100).toFixed(0)}% p90 ${(p90 * 100).toFixed(0)}%`,
+    );
+
+    /*
+      THE POOLED RATE MOVED AND THE THING IT WAS PROTECTING DID NOT (0408).
+
+      0.75 was measured against a population where every character was roughly
+      average — birth stats ran p10 44 / p90 69 on a hundred-point scale. 0408
+      widened that to p10 35 / p90 77, and this harness applies for the job it
+      has the BEST odds at, so a population containing genuinely capable people
+      pools higher: 78%.
+
+      A pooled average was always the weaker half of this test, because it
+      cannot tell "everybody gets hired 78% of the time" from "some people walk
+      in and others are turned away repeatedly" — and those are opposite
+      outcomes for the question being asked. So the bound moves, and the spread
+      it was standing in for is now asserted directly. What must never come back
+      is a build where applying is a formality for EVERYBODY.
+    */
+    expect(rate, `hire rate ${Math.round(rate * 100)}%`).toBeLessThan(0.85);
     expect(rate, `hire rate ${Math.round(rate * 100)}%`).toBeGreaterThan(0.35);
+    // Among lives that applied more than a couple of times — the ones the pooled
+    // figure is least able to describe — the bottom tenth are genuinely
+    // struggling rather than sailing through.
+    expect(p10, 'even repeat applicants walk into everything').toBeLessThan(0.7);
   });
 
   it('climbs, without everybody reaching the top', () => {
@@ -177,8 +207,21 @@ describe('a player who wants to work', () => {
     // work. So this bound is an upper one — spec 1429 wants career success
     // "significantly optimizable by a skilled human player", and a third of
     // perfectly-played lives topping out is that being true rather than broken.
+    //
+    // RAISED TO 0.65 BY TICKET 0405. This harness auto-answers every pending
+    // decision, which now includes the systemic college offer — so an
+    // "optimal" life here also finishes a degree close to the ~95% rate
+    // 0405 measured, and a real share of rung-4 jobs are credential-gated.
+    // Measured at 52% after 0405, up from under a third before it: more
+    // people legitimately QUALIFYING for the top of a ladder they could not
+    // previously reach is the ticket working, not the old defect this bound
+    // was written against (0210's "half of all characters at the top rung by
+    // fifty" was a hiring pipeline handing out promotions regardless of
+    // merit; this is odds-based admission plus a real ladder climb). 0.65
+    // keeps the floor's actual purpose — catch a ladder nobody fails to
+    // finish — without pinning a number this ticket had every reason to move.
     const atTheTop = tops.filter((rung) => rung >= 4).length / LIVES;
-    expect(atTheTop, `${Math.round(atTheTop * 100)}% reached rung 4`).toBeLessThan(0.4);
+    expect(atTheTop, `${Math.round(atTheTop * 100)}% reached rung 4`).toBeLessThan(0.65);
   });
 
   it('lets somebody go, sometimes', () => {
@@ -205,11 +248,36 @@ describe('what a working life is worth', () => {
     // Measured before this ticket: cash was p10 $28, median $135, p90 $1,175
     // and IDENTICAL at eighteen, twenty-two, twenty-five, thirty and forty.
     // Nothing had moved money in adulthood, in either direction, ever.
+    /*
+      THE ARC, NOT EVERY STEP OF IT (Ticket 0410).
+
+      This used to assert 20 < 30 < 40, which was a fair reading of "money moves
+      in adulthood" while nothing in the build ever spent any of it on anybody
+      else. 0410 gave the population weddings and children, and the curve now
+      reads $25k at twenty, $39k at twenty-five, $48k at thirty, $51k at
+      thirty-five, **$45k at forty** and $69k at fifty.
+
+      The dip is the point rather than a regression: the late thirties are the
+      decade with a wedding behind them and young children in them, and a model
+      where that costs nothing is a model where having a family is free. So the
+      long arc is asserted, and the dip is bounded rather than banned — a
+      thirties that halved the balance would be something else.
+    */
     expect(median(cashAt(20))).toBeGreaterThan(500);
     expect(median(cashAt(30))).toBeGreaterThan(median(cashAt(20)));
-    expect(median(cashAt(40))).toBeGreaterThan(median(cashAt(30)));
+    expect(median(cashAt(50))).toBeGreaterThan(median(cashAt(30)));
+    expect(median(cashAt(40))).toBeGreaterThan(median(cashAt(30)) * 0.8);
     // And not so much that the rest of the game becomes free — see below.
-    expect(median(cashAt(40))).toBeLessThan(250_000);
+    /*
+      Ticket 0502 moved this line from $250,000, and the reason is the model,
+      not the noise. This harness works harder every single year, and since
+      0502 a partner earns too: the median here went from $145,000 at fifty to
+      $275,000 with the partner's pay in the household. The whole-population
+      median net worth at 45–54 is about $180,000–$200,000 against a US figure
+      of about $250,000, so a household that pushes every year holding a bit
+      more than that in cash is the top of the ordinary range, not a fortune.
+    */
+    expect(median(cashAt(50))).toBeLessThan(400_000);
   });
 
   it('never lets a character hold less than nothing', () => {
@@ -419,3 +487,112 @@ describe('pressing Work Harder past the cap', () => {
     );
   });
 });
+
+describe('Ticket 0401 — the door widened, the interview did not', () => {
+  /*
+    `reachOf` decides what a character may APPLY to. `applicantFor` decides how
+    likely they are to get it, and it is fed the RAW rung they have actually
+    held. Those two must not be the same number: if the effective rung ever
+    leaks into the odds, a career changer is both allowed in and treated as
+    though they had done the job below, and the ladder stops meaning anything.
+
+    The leak would happen HERE, in `chanceOf`, not in the careers package —
+    which is why this guard lives beside the caller. Measured with the leak in
+    place, the two chances below come out identical.
+  */
+  it('an experienced stranger is offered the step up and is still the long shot', () => {
+    const insider = playedTo('leak-a', 40);
+    // NOT `if (!insider) return`. A guard that opts out when its setup fails is
+    // the vacuous test 13.51 was written about — it passes loudest when it has
+    // measured nothing.
+    expect(insider).toBeDefined();
+    if (!insider) return;
+
+    const [state] = insider;
+    /*
+      A RUNG-TWO JOB, BECAUSE AT RUNG ONE THE CLAIM IS NOT TRUE (Ticket 0408).
+
+      This used the rung-1 job the listings were showing, and for that job an
+      experienced stranger and a rung-0 insider are IDENTICAL by design:
+      `TRANSFERABLE_AFTER` grants `reachOf` a floor of 0 to anybody with eight
+      years behind them, so `gap` is zero either way and `climb` is 0.16 for
+      both. The test measured a difference of exactly nothing and read
+      0.6876 > 0.6876 as a failure.
+
+      It passed for four tickets because characters used to spend most of their
+      adult lives jobless — 0407 measured 0 of 250 passive lives ever working —
+      so the experience threshold was rarely met and the stranger really did
+      read as rung -1. Giving everybody a career made the shortcut visible; 0408
+      changed which character this seed produces and made it fail.
+
+      One rung up, the distinction is real: the stranger sits at gap 1 (-0.3)
+      and somebody who has actually held the rung below sits at gap 0 (+0.16).
+    */
+    const job = ALL_JOBS.find(
+      (row) => row.rung === 2 && rungBelow(row) !== undefined && !stateHasWorked(state, row.track),
+    );
+    expect(job, 'the catalog has no rung-2 job on a track this life never worked').toBeDefined();
+    if (!job) return;
+    const chance = chanceOf(state, job);
+    // A fabricated applicant who has actually held the rung below, all else
+    // equal, must beat the one who only has years behind them.
+    const asInsider = {
+      ...state,
+      employment: {
+        ...state.employment,
+        history: [
+          ...state.employment.history,
+          { jobId: rungBelow(job)!, from: 20, to: 28, because: 'resigned' as const },
+        ],
+      },
+    };
+    expect(chanceOf(asInsider, job)).toBeGreaterThan(chance);
+  });
+});
+
+/** Plays a life to `age` and returns it with a step-up job it may apply to. */
+function playedTo(
+  seed: string,
+  age: number,
+): [GameState, ReturnType<typeof findJob> & object] | undefined {
+  let state = createNewGame({ seed });
+  while (state.player.age < age && state.health.diedAtAge === undefined) {
+    state = advanceYear(state).state;
+    let guard = 0;
+    while (state.pending.length > 0 && (guard += 1) < 12) {
+      const d = state.pending[0];
+      const c = d?.choices[0];
+      if (!d || !c) break;
+      const r = decide(state, d.eventId, c.id);
+      if (!r.ok) break;
+      state = r.value.state;
+    }
+    if (state.employment.job === undefined) {
+      const shown = [...openings(state)];
+      const pick = shown[shown.length - 1];
+      if (pick) {
+        const applied = applyFor(state, String(pick.id));
+        if (applied.ok) state = applied.value.state;
+      }
+    }
+  }
+  if (state.health.diedAtAge !== undefined) return undefined;
+  const step = openings(state).find((job) => job.rung === 1 && rungBelow(job) !== undefined);
+  return step ? [state, step] : undefined;
+}
+
+/** Whether this life has ever worked the given track — the insider fabrication
+ * is only meaningful on a track they are genuinely a stranger to. */
+function stateHasWorked(state: GameState, track: string): boolean {
+  const ids = [
+    ...state.employment.history.map((row) => row.jobId),
+    ...(state.employment.job ? [state.employment.job.jobId] : []),
+  ];
+  return ids.some((id) => findJob(id)?.track === track);
+}
+
+/** The job one rung below this one on the same track, if the catalog has it. */
+function rungBelow(job: { track: string; rung: number }): string | undefined {
+  const below = ALL_JOBS.find((row) => row.track === job.track && row.rung === job.rung - 1);
+  return below ? String(below.id) : undefined;
+}

@@ -108,7 +108,8 @@ describe('what is not built yet', () => {
     */
     // `credit` came off in 0305. `liabilities` and `investments` came off in
     // 0308, which is the list doing its job — late, in the case of liabilities.
-    expect(NOT_YET_OWNED.map((row) => row.key)).toEqual(['assets']);
+    // `assets` came off in 0501, which gave a character a home to own.
+    expect(NOT_YET_OWNED.map((row) => row.key)).toEqual([]);
     for (const row of NOT_YET_OWNED) {
       expect(row.arrives, `${row.key} does not say when it arrives`).toMatch(/^(\d{4}|v\d\.\d\d)$/);
     }
@@ -178,5 +179,15 @@ describe('what a child costs, which is the one contextual expense that exists', 
     expect(Number(childMonthlyCost(40_000, 1.68, childShare(8)))).toBeGreaterThan(
       Number(childMonthlyCost(40_000, 0.86, childShare(8))),
     );
+  });
+});
+
+describe('Ticket 0601 — a business owner’s pay is earned income', () => {
+  it('rates tax against what the business paid, not as if it were a gift', () => {
+    const owner = postAll(EMPTY_LEDGER, 2030, 30, [
+      { category: 'business', amount: dollars(50_000), source: 'The Corner Cup — profit' },
+      { category: 'tax', amount: dollars(-11_000), source: 'Tax' },
+    ]).ledger;
+    expect(Math.round(summariseFinances(owner, 2030).taxRate * 100)).toBe(22);
   });
 });

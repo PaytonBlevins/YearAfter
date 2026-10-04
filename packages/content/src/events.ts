@@ -18,7 +18,44 @@ import type { WealthBand } from '@yearafter/relationships';
 import eventsChildhood from '../data/events-childhood.json';
 
 /** Spec 725–770 lists these five contexts for the childhood library. */
-export type EventCategory = 'family' | 'school' | 'friendship' | 'random' | 'talent';
+export type EventCategory =
+  | 'family'
+  | 'school'
+  | 'friendship'
+  | 'random'
+  | 'talent'
+  /**
+   * Work.
+   *
+   * Ticket 0402 reserved this for SYSTEMIC decisions only, and said so plainly:
+   * "No authored event has this category and none may: the events catalog is
+   * childhood-shaped and every decision in it stops at seventeen."
+   *
+   * That was a description of the catalog, not a rule about the category, and
+   * 0409 is the ticket that made it false. Measured first: 26 of 374 events
+   * could fire at forty and not one of them was about a job. Authored work
+   * events now use this too — same domain, same word, one vocabulary.
+   */
+  | 'career'
+  /** Ticket 0405 reserved this for the college offer; 0409 authors into it too. */
+  | 'education'
+  /**
+   * Ticket 0409. The body.
+   *
+   * Roadmap finding 4: 0211 gave the game conditions and no authored event ever
+   * fired because of one, so a character with something serious lived an event
+   * library that had never heard of it.
+   */
+  | 'health'
+  /**
+   * Ticket 0409. Losing somebody.
+   *
+   * Roadmap finding 4b, and the same shape one system over: 0212's kin phase
+   * writes its own death notices and no authored event fired because a parent
+   * died. Grief, a funeral, a house to clear, a sibling you only see now — none
+   * of it existed.
+   */
+  | 'loss';
 
 export const EVENT_CATEGORIES: readonly EventCategory[] = [
   'family',
@@ -26,6 +63,10 @@ export const EVENT_CATEGORIES: readonly EventCategory[] = [
   'friendship',
   'random',
   'talent',
+  // Ticket 0409. Authored adult content lives in these three.
+  'career',
+  'health',
+  'loss',
 ];
 
 /**
@@ -119,6 +160,71 @@ export interface EventCondition {
    * one of them could fire at a thirty-year-old who has never had a child.
    */
   readonly hasChildren?: boolean;
+  /**
+   * Ticket 0409. Whether the character must (true) or must not (false) have a
+   * job for this to fire.
+   *
+   * `partnered` and `hasChildren` are the precedent and the warning: both were
+   * added AFTER events shipped that presupposed a relationship or a child and
+   * fired at people who had neither. Work is the same shape and the biggest
+   * catalog hole measured — 26 events could fire at forty and not one was about
+   * a job.
+   */
+  readonly employed?: boolean;
+  /** Any one of these career tracks, so a scene can be about the actual work. */
+  readonly jobTrackAny?: readonly string[];
+  /** Years in the CURRENT job, for an event about having been somewhere a while. */
+  readonly jobYearsAtLeast?: number;
+  readonly jobYearsAtMost?: number;
+  /** Ticket 0409. Whether they are carrying any health condition at all. */
+  readonly hasCondition?: boolean;
+  /** Any one of these condition ids, for an event about a specific diagnosis. */
+  readonly conditionAny?: readonly string[];
+  /** Ticket 0409. Lost somebody close within this many years. */
+  readonly bereavedWithin?: number;
+  /**
+   * Ticket 0412. Whether the character must (true) or must not (false) have a
+   * friend for this to fire.
+   *
+   * `partnered`, `hasChildren`, `employed` and `hasCondition` are all the same
+   * shape and all four were added AFTER events shipped that presupposed the
+   * thing and fired at people who did not have it. This is the fifth, and the
+   * gap is the largest of them: **of the six events in the `friendship`
+   * category that can fire at forty, every single one is a `love.*` entry.**
+   * The category's whole adult library is about romance, because the language
+   * could say "is seeing somebody" and could not say "has a friend", and
+   * CORE_RULES 13.67 is the rule that an event cannot be about a thing
+   * eligibility cannot ask about.
+   *
+   * A friend means somebody at or above `FRIENDSHIP_THRESHOLD` who the
+   * character is not involved with — a partner is a partner, and an event
+   * reading "you and {kid} have been friends for years" firing about a wife is
+   * the `partnered` bug in reverse.
+   */
+  readonly hasFriend?: boolean;
+  /**
+   * How many friends, for the difference between having one and having a crowd.
+   *
+   * Two events that both want `hasFriend: true` are not the same event: "you
+   * were the one nobody called" needs somebody with exactly one, and "the group
+   * chat picked a weekend" needs three. Measured across 90 lives, an adult
+   * holds a median of three and about one year in ten holds none, so both ends
+   * are real populations rather than corners.
+   */
+  readonly friendsAtLeast?: number;
+  readonly friendsAtMost?: number;
+  /**
+   * Ticket 0412. How long the character has known their longest-standing
+   * friend, in years.
+   *
+   * The one thing `hasFriend` cannot express and the thing most adult
+   * friendship copy is actually about: *an old friend*. A friendship of twenty
+   * years and one of eighteen months are different subjects, and before 0412
+   * neither existed long enough for the question to be worth asking — nothing
+   * held a friendship together outside a room, so at twenty-six the median
+   * circle was entirely people met since school.
+   */
+  readonly friendshipYearsAtLeast?: number;
   readonly requires?: readonly FamilyRequirement[];
   /** Any one of these talents. */
   readonly talentsAny?: readonly TalentKey[];

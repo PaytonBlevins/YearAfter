@@ -28,6 +28,7 @@ import {
   hireChance,
   openingsFor,
   type CannotApply,
+  type OpeningsContext,
   type EmploymentState,
   type Job,
 } from '@yearafter/careers';
@@ -57,6 +58,7 @@ export const WORK_ERROR_LABELS: Readonly<Record<WorkError, string>> = {
   'already-applied': "You've already applied for this one this year.",
   'already-doing-it': 'This is the job you have.',
   'out-of-reach': "They'd want somebody who's done the job below this one.",
+  'needs-license': 'Licensed work. You would need the qualification first.',
   'needs-education': "You don't have the qualification for this one.",
   'no-such-job': "That job isn't in the catalog.",
   'no-job': "You aren't working anywhere.",
@@ -110,16 +112,52 @@ export interface PushOutcome {
  * it, which is the kind of thing that quietly breaks seeded replay.
  */
 export function openings(state: GameState): readonly Job[] {
-  const held = state.employment.job?.jobId;
-  return openingsFor(
-    {
-      age: state.player.age,
-      education: levelOf(state.education.credentials),
-      reached: reachedBy(state.employment),
-      ...(held ? { currentJobId: held } : {}),
-    },
-    (job) => stableUnit(`${state.world.year}:opening:${String(job.id)}`),
+  /*
+    THE DRAW IS PER CHARACTER AS WELL AS PER YEAR (Ticket 0407).
+
+    It used to be keyed on the year alone, which meant every character alive in
+    2050 was shown the SAME six jobs, weighted only by their own history. Two
+    people in the same town saw an identical noticeboard, and a job that drew
+    badly that year was invisible to the entire population at once rather than
+    to one unlucky person.
+
+    That is what finally tripped 0401's starvation guard. 0407 put far more
+    characters into work, so far more of them climb far enough to become
+    ELIGIBLE for the top of a ladder — and a top rung whose year-draw is poor is
+    then eligible to somebody and listed to nobody, which is precisely the
+    failure that guard exists to catch. Adding the character to the key does not
+    make any single job more likely for any single person; it decorrelates the
+    population, so a rare job is rare rather than absent.
+
+    Still `stableUnit`, so it consumes no RNG and a life replays identically
+    from its seed — the property the original comment was protecting.
+  */
+  return openingsFor(atTheDoor(state), (job) =>
+    stableUnit(`${state.world.year}:${String(state.player.id)}:opening:${String(job.id)}`),
   );
+}
+
+/**
+ * Everything the door knows about this character, built once.
+ *
+ * Ticket 0401. There were three of these literals and they were about to become
+ * three places to forget a field — which is 13.51 waiting to happen, and 0401
+ * exists because of a gate that was reading one field too few.
+ */
+export function atTheDoor(state: GameState): OpeningsContext {
+  const held = state.employment.job?.jobId;
+  return {
+    age: state.player.age,
+    education: levelOf(state.education.credentials),
+    reached: reachedBy(state.employment),
+    experience: experienceOf(state.employment, state.player.age),
+    standing: state.employment.standing,
+    // Ticket 0406. The second hard credential, and the one that lets a licensed
+    // tradesperson skip the apprenticeship they paid trade school instead of
+    // serving.
+    licenses: state.education.credentials?.licenses ?? [],
+    ...(held ? { currentJobId: held } : {}),
+  };
 }
 
 /** Highest rung ever held on each track. The ladder's memory. */
@@ -160,13 +198,7 @@ export const employerOf = (state: GameState, job: Job): string =>
  * same mistake — so this returns the sentence rather than a boolean.
  */
 export function whyNotJob(state: GameState, job: Job): string | undefined {
-  const held = state.employment.job?.jobId;
-  const blocked = cannotApply(job, {
-    age: state.player.age,
-    education: levelOf(state.education.credentials),
-    reached: reachedBy(state.employment),
-    ...(held ? { currentJobId: held } : {}),
-  });
+  const blocked = cannotApply(job, atTheDoor(state));
   if (!blocked) return undefined;
   return CANNOT_APPLY_LABELS[blocked];
 }
@@ -185,6 +217,7 @@ export function chanceOf(state: GameState, job: Job): number {
         looks: state.player.stats.looks,
         education: levelOf(state.education.credentials),
         opens: majorOpens(state),
+        licenses: state.education.credentials?.licenses ?? [],
         experience: experienceOf(state.employment, state.player.age),
       },
       state.employment.standing,
@@ -213,13 +246,7 @@ export function applyFor(state: GameState, jobId: string): Result<ApplyOutcome, 
   const thisYear = state.employment.appliedAtAge === state.player.age;
   if (thisYear && state.employment.appliedTo.includes(jobId)) return err('already-applied');
 
-  const held = state.employment.job?.jobId;
-  const blocked = cannotApply(job, {
-    age: state.player.age,
-    education: levelOf(state.education.credentials),
-    reached: reachedBy(state.employment),
-    ...(held ? { currentJobId: held } : {}),
-  });
+  const blocked = cannotApply(job, atTheDoor(state));
   if (blocked) return err(blocked);
 
   const stream = state.rng.stream(RngDomains.Careers);
@@ -505,13 +532,29 @@ const DID_NOT_LINES: readonly string[] = [
 /* -------------------------------------------------------------------------- */
 
 function write(state: GameState, text: string, id: string): TimelineEntry {
+  const sequence = state.player.timeline.filter((entry) => entry.age === state.player.age).length;
   return createTimelineEntry({
     age: state.player.age,
     year: state.world.year,
     kind: 'career',
     text,
-    id,
-    sequence: state.player.timeline.filter((entry) => entry.age === state.player.age).length,
+    /*
+      THE SEQUENCE IS PART OF THE ID (Ticket 0407).
+
+      Every caller already keys on the job, which was unique while a year held
+      at most one event per job. It does not any more: 0407 means a character
+      can be OFFERED a job, resign from it, be hired back into the same job and
+      resign again inside one year, and `t:<year>:resign:<jobId>` is then
+      written twice. `careers.test.ts`'s job-hop invariant caught it as six
+      `:dup` suffixes in one life the moment the offer door opened.
+
+      The suffix `appendToTimeline` adds is a net for React, not permission for
+      a producer to collide (CORE_RULES 13.22). Adding the sequence makes the id
+      unique by construction and stays derived — no RNG, no clock — so a life
+      still replays identically from its seed.
+    */
+    id: `${id}:${sequence}`,
+    sequence,
   });
 }
 

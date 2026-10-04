@@ -34,7 +34,7 @@ import {
   debtLoad,
   offersFor,
   payTowards,
-  totalBorrowed,
+  personalBorrowed,
   totalOwed,
   utilisation,
   type Applicant,
@@ -59,7 +59,7 @@ import type { GameState } from './game-state';
  * This is the door.
  */
 export const standingFor = (state: GameState): CreditReport => {
-  const owed = Number(totalOwed(state.cards)) / 100 + Number(totalBorrowed(state.loans)) / 100;
+  const owed = Number(totalOwed(state.cards)) / 100 + Number(personalBorrowed(state.loans)) / 100;
   const income = incomeOf(state);
   return creditReport(
     state.finance,
@@ -68,6 +68,8 @@ export const standingFor = (state: GameState): CreditReport => {
     utilisation(state.cards),
     // Ticket 0307. Everything owed, cards and loans together, against what it
     // would take to carry it. Undefined for somebody who owes nothing.
+    // Ticket 0603: a business loan is the business's, not a claim on wages —
+    // like a mortgage it is left out here, and counted where payments are.
     owed > 0 ? debtLoad(owed, income) : undefined,
     // Ticket 0308. The portfolio counts towards what they are worth, which is
     // what finally lets a credit standing be earned on something other than a

@@ -32,11 +32,21 @@ import {
   type RomanceMove,
   type YearContact,
 } from '@yearafter/social';
+import { partnerIncomeOf } from '@yearafter/simulation';
+import type { PartnerWork } from '@yearafter/careers';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
 import { useNavigation } from '../navigation/navigation';
 import { howLong, warmthColor } from './PeopleScreen';
 import { colors, spacing, typography } from '../theme/theme';
+
+const WORK_LABELS: Readonly<Record<PartnerWork, string>> = {
+  working: 'Working',
+  notWorking: 'Not working right now',
+  retired: 'Retired, on a pension',
+};
+
+const money = (amount: number): string => `$${Math.round(amount).toLocaleString('en-US')}`;
 
 export function PersonScreen() {
   const { state, interactWith, romanceWith } = useGame();
@@ -64,6 +74,7 @@ export function PersonScreen() {
   const romantic = movesFor(person, state.player.age, Number(state.player.cash));
   const ending = romantic.filter((move) => move.certain);
   const starting = romantic.filter((move) => !move.certain);
+  const work = partnerIncomeOf(state);
 
   return (
     <ScrollView
@@ -92,6 +103,23 @@ export function PersonScreen() {
         <>
           <SectionHeading>{ROMANCE_STAGE_LABELS[person.romance?.stage ?? 'seeing']}</SectionHeading>
           <Card>
+            {/*
+              Ticket 0502. Somebody the player lives with has a working life of
+              their own, and the household lives on it. What they do is not the
+              player's to manage — only what it brings in, which is the part a
+              household feels.
+            */}
+            {work.partner?.id === person.id && work.year ? (
+              <>
+                <ListRow
+                  title={WORK_LABELS[work.year.status]}
+                  value={work.gross > 0 ? `${money(work.gross)} a year` : undefined}
+                  affordance="none"
+                  compact
+                />
+                {starting.length + ending.length > 0 ? <RowDivider /> : null}
+              </>
+            ) : null}
             {[...starting, ...ending].map((move, index) => (
               <Fragment key={move.id}>
                 {index > 0 ? <RowDivider /> : null}

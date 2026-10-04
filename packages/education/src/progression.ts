@@ -33,6 +33,7 @@ import {
   SCHOOL_START_AGE,
   couldLeaveSchool,
   gradeForAge,
+  isAtCollege,
   isInSchool,
   letterGrade,
   stageForGrade,
@@ -233,7 +234,7 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
 
   // Ticket 0210b. A degree year is its own thing — no behaviour, no clubs, no
   // grade to repeat — so it runs in `runCollegeYear` and returns here.
-  if (state.stage === 'college' || state.stage === 'postgrad') {
+  if (isAtCollege(state)) {
     const college = runCollegeYear(state, {
       age: input.age,
       smarts: input.stats.smarts,
@@ -452,8 +453,37 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
   };
   add('health', penalties.health);
   add('happiness', penalties.happiness);
-  // School itself makes you a little smarter every year, and coasting does not.
-  add('smarts', next.effort === 'coasting' ? 0 : next.effort === 'hard' ? 3 : 1);
+  /*
+    School itself makes you a little smarter every year, and coasting does not.
+
+    HOW MUCH depends on the child, and Ticket 0408 is why. A flat +1/+3 looks
+    even-handed and is the opposite, because every stat delta goes through
+    `curvedDelta`: a gain is full strength at 50 and tapers to nothing at 100.
+    So the same flat push is worth 1.2x to a child on forty Smarts and 0.6x to
+    one on seventy — school was handing its biggest gains to the students least
+    able to use them, every year, for thirteen years.
+
+    Measured across 500 lives before this changed: Smarts at birth ran p10 44 /
+    median 56, and Smarts at EIGHTEEN ran p10 70 / median 76 with a minimum of
+    56. Nobody in this game was below average as an adult. Downstream, school
+    performance at sixteen had a floor of 50, 91% of lives finished a degree,
+    and `FAILING_OUT` — a real branch with real copy, written in 0210b — fired
+    0 times in 500 lives. 0203's curve was right about happiness inflation and
+    wrong here; an equalising curve applied to aptitude equalises aptitude.
+
+    So the year is worth more to a child who can use it. The bands are coarse
+    on purpose: `curvedDelta` rounds to whole points, so a fractional rate would
+    quietly floor to zero and be a harder thing to reason about than three
+    honest steps. Effort still moves everybody — spec 1821 keeps Study Harder as
+    the player's lever, and it is worth MORE to a struggling student than the
+    passage of time is.
+  */
+  const aptitude = Number(input.stats.smarts);
+  const fromTheYear = aptitude >= 68 ? 2 : aptitude >= 52 ? 1 : 0;
+  add(
+    'smarts',
+    next.effort === 'coasting' ? 0 : next.effort === 'hard' ? fromTheYear + 2 : fromTheYear,
+  );
 
   if (workload.overload >= OVERLOAD_EVENT_THRESHOLD) {
     push('passive', overloadLine(next, workload.overload, input.age));
@@ -473,12 +503,31 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
     costs.push({ dollars: cost, source: names, payer: 'household' });
     // Said differently the first year and after, because a standing cost
     // repeated verbatim every September reads like the game is stuck.
-    const isFirstYear = next.activities.some((entry) => entry.joinedAtAge === input.age - 1);
+    //
+    // Ticket 0416: and differently from one year to the NEXT, too. The two-way
+    // split above still printed "Another $70 went on scout dues" every year from
+    // the second, and nothing had noticed for twelve tickets because no life a
+    // test played had ever joined anything — the sign-up door made it reachable
+    // and `guardians.test.ts` caught it the same day. Rotated by age, the rule
+    // 13.73 says belongs to the writer.
+    // "First year" means a year a COSTED thing was new. Joining a free club the
+    // year after a paid one used to re-announce the paid one's fees as news.
+    const isFirstYear = next.activities.some(
+      (entry) =>
+        entry.joinedAtAge === input.age - 1 &&
+        (findActivity(entry.activityId)?.annualCost ?? 0) > 0,
+    );
+    const amount = `$${cost.toLocaleString('en-US')}`;
+    const again = [
+      `Another ${amount} went on ${names}.`,
+      `Your parents paid ${amount} for ${names} again.`,
+      `${names.charAt(0).toUpperCase()}${names.slice(1)} came to ${amount} again this year.`,
+    ];
     push(
       'passive',
       isFirstYear
-        ? `Your parents covered $${cost.toLocaleString('en-US')} for ${names}.`
-        : `Another $${cost.toLocaleString('en-US')} went on ${names}.`,
+        ? `Your parents covered ${amount} for ${names}.`
+        : (again[input.age % again.length] as string),
     );
   }
 

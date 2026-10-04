@@ -182,6 +182,8 @@ function refusalFor(because: LoanRefusal | undefined, product: LoanProduct): str
       return 'You already owe as much as they think you can carry.';
     case 'noCollateral':
       return "This one is secured on a portfolio, and you haven't got one.";
+    case 'forABusiness':
+      return 'This one is only written for a business, when you buy or open one.';
     case 'fullyDrawn':
       return 'You have already borrowed what the degree costs.';
     default:
@@ -194,8 +196,11 @@ export function payLoan(
   state: GameState,
   productId: string,
   amount: number,
+  businessId?: string,
 ): Result<LoanOutcome, LoanError> {
-  const held = state.loans.find((loan) => loan.productId === productId);
+  const held = state.loans.find(
+    (loan) => loan.productId === productId && loan.businessId === businessId,
+  );
   if (!held) return err('noSuchLoan');
   if (Number(held.balance) <= 0) return err('nothingOwed');
 
@@ -222,8 +227,8 @@ export function payLoan(
       // rule about cards applies in spirit: the game does not keep a history of
       // accounts you have finished with.
       loans: cleared
-        ? state.loans.filter((row) => row.productId !== productId)
-        : state.loans.map((row) => (row.productId === productId ? loan : row)),
+        ? state.loans.filter((row) => row !== held)
+        : state.loans.map((row) => (row === held ? loan : row)),
     },
     title: cleared ? 'Cleared' : 'Paid down',
     body: cleared

@@ -23,7 +23,16 @@ export const ACTIVITY_KIND_LABELS: Readonly<Record<ActivityKind, string>> = {
   social: 'Social',
 };
 
-export type SchoolStageId = 'elementary' | 'middle' | 'high';
+/**
+ * Where an activity is offered.
+ *
+ * `adult` is Ticket 0416's, and it is not a school stage: it is anybody of
+ * eighteen or over who is not in K-12, whether they are at college, working or
+ * neither. The name stays because every caller already asks the question this
+ * way — "which list am I choosing from" — and one more answer to it is cheaper
+ * and safer than a second type that half the callers would forget to handle.
+ */
+export type SchoolStageId = 'elementary' | 'middle' | 'high' | 'adult';
 
 export interface ActivityRequirements {
   readonly stages: readonly SchoolStageId[];
@@ -82,6 +91,13 @@ export interface Activity {
   readonly joinText: string;
   /** Timeline line written when they leave. */
   readonly leaveText: string;
+  /**
+   * Ticket 0416. How it reads in the middle of a sentence — "the choir",
+   * "running club" — for the lines an adult year writes. Present on every adult
+   * pursuit (the generator refuses one without it); absent means the lowercased
+   * name reads correctly.
+   */
+  readonly inSentence?: string;
 }
 
 interface ActivityCatalogFile {

@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "auction.hartwell",
+      "name": "Hartwell & Finch",
+      "type": "general",
+      "visits": 2,
+      "lots": 5,
+      "means": 0,
+      "kinds": [
+        "watch",
+        "ring",
+        "necklace",
+        "chain",
+        "bracelet",
+        "earrings",
+        "art",
+        "antique",
+        "historical",
+        "curio"
+      ],
+      "cars": [
+        "classic",
+        "luxury",
+        "mainstream"
+      ],
+      "carShare": 0.2,
+      "blurb": "Paddles, a gavel, and a man in a bow tie who talks very fast."
+    },
+    {
+      "id": "auction.crane",
+      "name": "Crane Brothers Auctioneers",
+      "type": "general",
+      "visits": 2,
+      "lots": 5,
+      "means": 0,
+      "kinds": [
+        "watch",
+        "ring",
+        "necklace",
+        "chain",
+        "bracelet",
+        "earrings",
+        "art",
+        "antique",
+        "historical",
+        "curio"
+      ],
+      "cars": [
+        "classic",
+        "luxury",
+        "mainstream"
+      ],
+      "carShare": 0.2,
+      "blurb": "Three generations of Cranes. Coffee and donuts at the back."
+    },
+    {
+      "id": "auction.storage",
+      "name": "Lock & Key Storage Auctions",
+      "type": "storage",
+      "visits": 6,
+      "lots": 3,
+      "means": 0,
+      "kinds": [],
+      "cars": [],
+      "carShare": 0,
+      "blurb": "Unpaid units, sold as they are. Five minutes to look from the door."
+    },
+    {
+      "id": "auction.private",
+      "name": "Ashcombe Private Sales",
+      "type": "private",
+      "visits": 2,
+      "lots": 4,
+      "means": 1000000,
+      "kinds": [
+        "watch",
+        "ring",
+        "necklace",
+        "bracelet",
+        "art",
+        "antique",
+        "historical",
+        "mythical"
+      ],
+      "cars": [
+        "exotic",
+        "classic"
+      ],
+      "carShare": 0.3,
+      "blurb": "By invitation. Champagne, a catalog with your name on it, and phone bidders from three continents."
+    }
+  ],
+  "peeks": {
+    "small": [
+      "Boxes, a bike, and a lamp with no shade.",
+      "A mattress on its side and a stack of plastic tubs.",
+      "Garden tools, a cooler, and a box marked FRAGILE.",
+      "Suitcases, a fan, and a framed print facing the wall."
+    ],
+    "medium": [
+      "A couch on its end, boxes, and a tarp over something square.",
+      "A dresser, a TV, and a lot of bags tied shut.",
+      "Gym equipment, a desk, and a trunk with a padlock.",
+      "Kitchen chairs, a filing cabinet, and boxes to the ceiling."
+    ],
+    "large": [
+      "Furniture to the ceiling, a dresser, and something long under a moving blanket.",
+      "A dining set, a piano, and boxes nobody has opened in years.",
+      "Racks of clothes, a motorcycle cover with nothing visible under it, and crates.",
+      "An entire house, packed in, with a grandfather clock at the front."
+    ]
+  },
+  "junk": [
+    "boxes of paperbacks",
+    "a rowing machine",
+    "three boxes of Christmas decorations",
+    "a box of VHS tapes",
+    "a toolbox",
+    "a dining set",
+    "a drum kit",
+    "a crib",
+    "a set of golf clubs",
+    "a stack of vinyl records",
+    "a sewing machine",
+    "camping gear",
+    "a treadmill that doesn't work",
+    "a box of old phones",
+    "kitchen things",
+    "a mini fridge",
+    "a recliner",
+    "a bread maker still in the box",
+    "a karaoke machine",
+    "fishing rods",
+    "a futon",
+    "a box of baseball cards",
+    "a typewriter",
+    "a croquet set"
+  ]
+}

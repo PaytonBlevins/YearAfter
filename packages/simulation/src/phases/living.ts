@@ -27,6 +27,7 @@ import type { NewTransaction } from '@yearafter/finance';
 import {
   SUBSISTENCE,
   creep,
+  householdScale,
   livingCostFor,
   standardTargetFor,
   type HouseholdFinances,
@@ -96,6 +97,19 @@ export interface LivingPhaseInput {
   readonly toldToLeave: boolean;
   /** False once both parents are gone: there is no family home to live in. */
   readonly hasLivingParent: boolean;
+  /**
+   * Ticket 0501. They own a home, so they live in it. Optional so every caller
+   * written before homes existed means "no".
+   */
+  readonly ownsHome?: boolean;
+  /** Ticket 0501. This year's mortgage and upkeep, whole dollars. */
+  readonly housingCost?: number;
+  /**
+   * Ticket 0504. What the cars cost this year — payments, servicing and
+   * repairs — whole dollars, and whether there is a car at all.
+   */
+  readonly vehicleCost?: number;
+  readonly ownsVehicle?: boolean;
 }
 
 export interface LivingPhaseOutput {
@@ -104,6 +118,8 @@ export interface LivingPhaseOutput {
   readonly transactions: readonly NewTransaction[];
   /** Whole dollars charged this year. Zero before 18. */
   readonly cost: number;
+  /** Ticket 0504. The same year's bill with no car in it — see the return. */
+  readonly withoutCar: number;
   /**
    * Ticket 0308b. The household could not pay for the life it was living.
    *
@@ -215,7 +231,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
   const transactions: NewTransaction[] = [];
 
   if (input.age < CHARGED_FROM_AGE) {
-    return { household: input.household, lines, transactions, cost: 0, hardship: false, unmet: 0 };
+    return { household: input.household, lines, transactions, cost: 0, withoutCar: 0, hardship: false, unmet: 0 };
   }
 
   /*
@@ -241,9 +257,23 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
 
     A millionaire lives like a millionaire wherever they keep it.
   */
+  /*
+    Ticket 0502: PER MEMBER OF THE HOUSEHOLD, because the bill is multiplied by
+    the household afterwards.
+
+    The standard is what one person is used to, and `livingCostFor` scales it
+    by the household. While only the player earned, reading it off their pay
+    was right. Once a partner's pay joined the income, reading it off the
+    HOUSEHOLD's pay and then multiplying by the household again charged a
+    couple as if each of them earned the whole amount: measured, couples on
+    $87,000 ran up bills of $95,000 and fell into the hardship cliff and out
+    again. Dividing by the household's size is the ordinary equivalence scale,
+    and it leaves a single person exactly where they were (CORE_RULES 13.87).
+  */
+  const members = householdScale(input.partnered, input.childAges);
   let standard = creep(
     input.household.standard,
-    standardTargetFor(input.afterTaxIncome, input.wealth + input.portfolio),
+    standardTargetFor(input.afterTaxIncome / members, (input.wealth + input.portfolio) / members),
   );
 
   const asIfAlone = livingCostFor({
@@ -255,8 +285,20 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
   });
 
   const wasAtHome = input.household.housing === 'withFamily';
-  let housing: Housing =
-    wasAtHome && movesOut(input, asIfAlone.total) ? 'ownPlace' : input.household.housing;
+  /*
+    Ticket 0501. OWNING DECIDES IT, before anything else does. A character who
+    owns a home lives in it — there is no primary-residence mechanic (spec
+    153–154 removes it) and nothing asks which. One who has just sold their
+    last home goes back to renting; the move out of a parent's house into one
+    they bought is the purchase's own line, not this phase's.
+  */
+  let housing: Housing = input.ownsHome
+    ? 'owned'
+    : input.household.housing === 'owned'
+      ? 'ownPlace'
+      : wasAtHome && movesOut(input, asIfAlone.total)
+        ? 'ownPlace'
+        : input.household.housing;
   const moved = wasAtHome && housing === 'ownPlace';
 
   let cost = livingCostFor({
@@ -265,6 +307,9 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     partnered: input.partnered,
     childAges: input.childAges,
     housing,
+    housingCost: input.housingCost ?? 0,
+    vehicleCost: input.vehicleCost ?? 0,
+    ownsVehicle: input.ownsVehicle ?? false,
   });
 
   /*
@@ -304,7 +349,10 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     0,
     input.afterTaxIncome + input.wealth + input.credit + input.portfolio,
   );
-  const inHardship = cost.total > affordable;
+  // Ticket 0501: a mortgage is part of what the year has to be paid out of.
+  // Ticket 0504: and so are the car payments and the servicing.
+  const housingCost = (housing === 'owned' ? (input.housingCost ?? 0) : 0) + (input.vehicleCost ?? 0);
+  const inHardship = cost.total + housingCost > affordable;
   let movedHome = false;
   let unmet = 0;
   if (inHardship) {
@@ -329,13 +377,17 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
       partnered: input.partnered,
       childAges: input.childAges,
       housing,
+      housingCost: input.housingCost ?? 0,
+      vehicleCost: input.vehicleCost ?? 0,
+      ownsVehicle: input.ownsVehicle ?? false,
     });
     // Still short after all of that: they get by on what there is. A charge for
     // money that does not exist is not a charge, it is a number the ledger
     // would have to carry forever with nothing behind it.
-    if (cost.total > affordable) {
-      unmet = cost.total - affordable;
-      cost = { ...cost, total: affordable };
+    const left = Math.max(0, affordable - housingCost);
+    if (cost.total > left) {
+      unmet = cost.total - left;
+      cost = { ...cost, total: left };
     }
   }
 
@@ -410,6 +462,24 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     lines,
     transactions,
     cost: cost.total,
+    /*
+      Ticket 0504. What this household's life would cost with no car in it.
+      The home door measures a mortgage against the roof the household pays
+      for now, and the roof is part of that whole bill. Read off the bill WITH
+      a car, it shrank by the car's share and the squeeze — measured, home
+      ownership fell eight points at 35–54 the moment people started owning
+      cars, because owning a car made every house look further out of reach.
+    */
+    withoutCar: inHardship
+      ? cost.total
+      : livingCostFor({
+          standard,
+          locationIndex: input.locationIndex,
+          partnered: input.partnered,
+          childAges: input.childAges,
+          housing,
+          housingCost: input.housingCost ?? 0,
+        }).total,
     hardship: inHardship,
     unmet,
   };

@@ -53,7 +53,7 @@ export function LoansScreen() {
               // Never more than is owed, never more than is held.
               const payable = Math.min(cash, owed);
               return (
-                <Fragment key={loan.productId}>
+                <Fragment key={`${loan.productId}:${loan.businessId ?? ''}`}>
                   {index > 0 ? <RowDivider /> : null}
                   <ListRow
                     icon="money"
@@ -61,6 +61,8 @@ export function LoansScreen() {
                     subtitle={
                       loan.inArrears
                         ? 'Behind on it'
+                        : loan.businessId
+                          ? `${state.businesses.find((row) => row.id === loan.businessId)?.name ?? 'A business you no longer run'} · ${money(yearly)} a year, ${loan.termLeft} to go`
                         : product.termYears > 0
                           ? `${money(yearly)} a year, ${loan.termLeft} to go`
                           : `${money(yearly)} a year while it runs`
@@ -87,19 +89,19 @@ export function LoansScreen() {
                     decision is symmetric because it is the same decision.
                   */}
                   {payable > 0 ? (
-                    choosingPay === loan.productId ? (
+                    choosingPay === `${loan.productId}:${loan.businessId ?? ''}` ? (
                       <>
                         <ActionButton
                           label={`Put in ${money(Math.round(payable / 4))}`}
                           onPress={() => {
-                            payLoanOff(loan.productId, Math.round(payable / 4));
+                            payLoanOff(loan.productId, Math.round(payable / 4), loan.businessId);
                             setChoosingPay(undefined);
                           }}
                         />
                         <ActionButton
                           label={`Put in ${money(Math.round(payable / 2))}`}
                           onPress={() => {
-                            payLoanOff(loan.productId, Math.round(payable / 2));
+                            payLoanOff(loan.productId, Math.round(payable / 2), loan.businessId);
                             setChoosingPay(undefined);
                           }}
                         />
@@ -110,7 +112,7 @@ export function LoansScreen() {
                               : `Put in all ${money(payable)}`
                           }
                           onPress={() => {
-                            payLoanOff(loan.productId, payable);
+                            payLoanOff(loan.productId, payable, loan.businessId);
                             setChoosingPay(undefined);
                           }}
                         />
@@ -121,7 +123,7 @@ export function LoansScreen() {
                         subtitle={`You have ${money(cash)} to put at it`}
                         affordance="action"
                         compact
-                        onPress={() => setChoosingPay(loan.productId)}
+                        onPress={() => setChoosingPay(`${loan.productId}:${loan.businessId ?? ''}`)}
                       />
                     )
                   ) : (
@@ -198,20 +200,29 @@ export function LoansScreen() {
         })}
       </Card>
 
-      <SectionHeading>Not built yet</SectionHeading>
-      <Card>
-        {LOAN_TYPES_NOT_YET_BUILT.map((row, index) => (
-          <Fragment key={row.type}>
-            {index > 0 ? <RowDivider /> : null}
-            <ListRow
-              title={labelFor(row.type)}
-              subtitle={`Needs ${row.needs}`}
-              affordance="none"
-              disabled
-            />
-          </Fragment>
-        ))}
-      </Card>
+      {LOAN_TYPES_NOT_YET_BUILT.length > 0 ? (
+        <>
+          <SectionHeading>Not built yet</SectionHeading>
+          <Card>
+            {LOAN_TYPES_NOT_YET_BUILT.map((row, index) => (
+              <Fragment key={row.type}>
+                {index > 0 ? <RowDivider /> : null}
+                <ListRow
+                  title={labelFor(row.type)}
+                  subtitle={`Needs ${row.needs}`}
+                  affordance="none"
+                  disabled
+                />
+              </Fragment>
+            ))}
+          </Card>
+        </>
+      ) : null}
+
+      <Text style={styles.note}>
+        Loans for a business aren't here: they're offered when you open, enlarge or buy one, and
+        the business pays them back.
+      </Text>
 
       <Text style={styles.note}>
         The yearly payment comes out with the rent. Paying more than that is up to you.

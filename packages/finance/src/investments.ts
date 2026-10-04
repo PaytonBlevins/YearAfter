@@ -46,7 +46,7 @@
  */
 export const INVESTMENTS_NOT_YET_BUILT = [
   { key: 'retirement', label: 'Retirement accounts', needs: 'an employer match', arrives: '0310' },
-  { key: 'private', label: 'Private deals', needs: 'a business to invest in', arrives: 'v0.06' },
+  { key: 'private', label: 'Private deals', needs: 'a business to invest in', arrives: '0605' },
 ] as const;
 
 /* -------------------------------------------------------------------------- */

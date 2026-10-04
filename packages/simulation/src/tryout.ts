@@ -22,7 +22,12 @@ import {
 } from '@yearafter/character';
 import { findActivity } from '@yearafter/content';
 import { err, ok, type Result } from '@yearafter/core';
-import { attemptTryout, hasAttemptedThisYear, hasJoined, isInSchool } from '@yearafter/education';
+import {
+  activityStageOf,
+  attemptTryout,
+  hasAttemptedThisYear,
+  hasJoined,
+} from '@yearafter/education';
 import type { GameState } from './game-state';
 import { teammatesFor } from './social-generator';
 import { RngDomains } from './rng/rng';
@@ -53,7 +58,12 @@ export function tryOut(state: GameState, activityId: string): Result<TryoutOutco
   const activity = findActivity(activityId);
   if (!activity) return err('no-such-activity');
   if (!activity.tryout) return err('no-tryout-needed');
-  if (!isInSchool(state.education)) return err('not-in-school');
+  // Ticket 0416: any list the character can choose from, which since this
+  // ticket includes the adult one — a community theatre audition is a tryout.
+  const stage = activityStageOf(state.education, state.player.age);
+  if (stage === undefined || !activity.requires.stages.includes(stage)) {
+    return err('not-in-school');
+  }
   if (hasJoined(state.education, activityId)) return err('already-in-it');
   if (hasAttemptedThisYear(state.education, activityId, state.player.age)) {
     return err('already-attempted');

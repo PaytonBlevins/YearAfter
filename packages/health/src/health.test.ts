@@ -9,18 +9,26 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { PEAK_AGE, ageingLoss } from './aging';
+import { PEAK_AGE, ageingLoss, cumulativeAgeingLoss } from './aging';
 import { CONDITIONS, ceilingWith, findCondition, hazardWith, HAZARD_CAP } from './conditions';
 import {
+  HEAL_SHARE,
   HEALTHY_ADULT,
   INJURY_ATHLETE,
   INJURY_HAZARDOUS,
   INJURY_ORDINARY,
+  DOUBLES_EVERY,
+  MORTALITY_AT_60,
   SUDDEN,
   deathChance,
   frailtyFactor,
+  ROBUST_FLOOR,
   illnessChance,
   injuryChance,
+  RECOVERY_BASE,
+  TYPICAL_PEAK,
+  constitutionOf,
+  naturalRecovery,
   severityOpenness,
 } from './health';
 import { runHealthYear } from './year';
@@ -68,10 +76,40 @@ describe('mortality', () => {
     }
   });
 
-  it('treats being well as the baseline rather than a bonus', () => {
+  it('makes a strong body worth something and a failing one worth much less', () => {
+    /*
+      THIS TEST USED TO ASSERT THE OTHER SHAPE (Ticket 0408), and it was right
+      to. It was called "treats being well as the baseline rather than a bonus"
+      and pinned `frailtyFactor(100) === 1`, which was the deliberate design
+      while the population had nothing above the baseline to measure: birth
+      health ran p10 45 / p90 69 and nobody was meaningfully robust.
+
+      0408 widened the roll and the one-sidedness became the finding instead.
+      Across a sixty-eight point range of birth health, median age at death
+      moved four years — the same "another way of saying constitution did not
+      exist" that 0212 recorded for NPCs and fixed only for them. A multiplier
+      that cannot go below one can say "this body is failing" and cannot say
+      "this body is unusually good". CORE_RULES 13.65.
+
+      What has to stay true is the shape: a baseline at the healthy adult mark,
+      a bounded gain above it, and a much steeper penalty below.
+    */
     expect(frailtyFactor(HEALTHY_ADULT)).toBe(1);
-    expect(frailtyFactor(100)).toBe(1);
+    expect(frailtyFactor(100)).toBe(ROBUST_FLOOR);
+    expect(frailtyFactor(100)).toBeLessThan(1);
+    expect(frailtyFactor(HEALTHY_ADULT + 10)).toBeLessThan(1);
+    expect(frailtyFactor(HEALTHY_ADULT + 10)).toBeGreaterThan(ROBUST_FLOOR);
     expect(frailtyFactor(HEALTHY_ADULT - 20)).toBeGreaterThan(1);
+
+    // The penalty side is still the steeper one, on purpose: being frail costs
+    // far more than being robust pays.
+    expect(frailtyFactor(HEALTHY_ADULT - 20) - 1).toBeGreaterThan(1 - frailtyFactor(100));
+  });
+
+  it('keeps the sudden-death floor out of reach of a good constitution', () => {
+    // Robustness buys odds against what accumulates, not against accidents.
+    expect(deathChance({ age: 20, health: 100, conditions: [] })).toBeGreaterThanOrEqual(SUDDEN);
+    expect(deathChance({ age: 20, health: 62, conditions: [] })).toBeGreaterThanOrEqual(SUDDEN);
   });
 
   it('is bounded, so a collection of conditions is trouble and not arithmetic doom', () => {
@@ -252,5 +290,78 @@ describe('a year', () => {
     const withStress = quiet({ stress: 95 });
     const without = quiet({ stress: 0 });
     expect(withStress.vitality).toBe(without.vitality);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Ticket 0417 — a body for its age                                            */
+/* -------------------------------------------------------------------------- */
+
+describe('0417 — healing', () => {
+  it('heals a share of what is owed, so a big debt comes down faster', () => {
+    const small = naturalRecovery(5, TYPICAL_PEAK);
+    const large = naturalRecovery(30, TYPICAL_PEAK);
+    expect(large).toBeGreaterThan(small);
+    expect(large - small).toBeCloseTo(25 * HEAL_SHARE, 6);
+    expect(naturalRecovery(0, TYPICAL_PEAK)).toBeCloseTo(RECOVERY_BASE, 6);
+  });
+
+  it('settles at a level instead of growing forever under a steady load', () => {
+    // A steady 6 points of illness a year, which is what a seventy-five-year-old
+    // averages. Flat healing at 3.4 would add 2.6 a year, forever.
+    let deficit = 0;
+    for (let year = 0; year < 60; year += 1)
+      deficit = deficit + 6 - naturalRecovery(deficit + 6, TYPICAL_PEAK);
+    expect(deficit).toBeLessThan(15);
+    const next = deficit + 6 - naturalRecovery(deficit + 6, TYPICAL_PEAK);
+    expect(Math.abs(next - deficit)).toBeLessThan(0.01);
+  });
+
+  it('heals a strong body faster than a frail one, within bounds', () => {
+    expect(naturalRecovery(10, 100)).toBeGreaterThan(naturalRecovery(10, TYPICAL_PEAK));
+    expect(naturalRecovery(10, TYPICAL_PEAK)).toBeGreaterThan(naturalRecovery(10, 55));
+    expect(naturalRecovery(10, 1000)).toBe(naturalRecovery(10, TYPICAL_PEAK * 1.4));
+    expect(naturalRecovery(10, 1)).toBe(naturalRecovery(10, TYPICAL_PEAK * 0.5));
+  });
+
+  it('reads the peak back from where a body is and how old it is', () => {
+    let vitality = 90;
+    for (let age = PEAK_AGE; age < 85; age += 1) {
+      vitality -= ageingLoss(age);
+      expect(constitutionOf(vitality, age + 1)).toBeCloseTo(90, 6);
+    }
+  });
+});
+
+describe('0417 — dying, for your age', () => {
+  const typicalAt = (age: number) => TYPICAL_PEAK - cumulativeAgeingLoss(age);
+
+  it('does not count age twice: an ordinary body is ordinary at every age', () => {
+    // An ordinary eighty-year-old and an ordinary forty-year-old carry the same
+    // frailty multiplier, so the ratio of their odds is the Gompertz term's
+    // alone. Before 0417 it was that times the frailty an ordinary eighty-year-
+    // old's falling health bought them — the same years, charged twice.
+    const gompertz = (age: number) => SUDDEN + MORTALITY_AT_60 * 2 ** ((age - 60) / DOUBLES_EVERY);
+    const odds = (age: number) => deathChance({ age, health: typicalAt(age), conditions: [] });
+    expect(odds(80) / odds(40)).toBeCloseTo(gompertz(80) / gompertz(40), 6);
+    expect(deathChance({ age: 80, health: typicalAt(80), conditions: [] })).toBeLessThan(
+      deathChance({ age: 80, health: typicalAt(80) - 25, conditions: [] }),
+    );
+  });
+
+  it('keeps a strong body strong into old age', () => {
+    // Twenty points above an ordinary body of the same age is worth the same at
+    // eighty as at fifty — the multiplier does not all converge at seventy-five.
+    const edge = (age: number) =>
+      deathChance({ age, health: typicalAt(age) - 20, conditions: [] }) /
+      deathChance({ age, health: Math.min(100, typicalAt(age) + 20), conditions: [] });
+    expect(edge(80)).toBeGreaterThan(1.5);
+    expect(edge(80)).toBeCloseTo(edge(50), 1);
+  });
+
+  it('still makes the old likelier to die than the young, body for body', () => {
+    expect(deathChance({ age: 85, health: typicalAt(85), conditions: [] })).toBeGreaterThan(
+      deathChance({ age: 65, health: typicalAt(65), conditions: [] }) * 5,
+    );
   });
 });

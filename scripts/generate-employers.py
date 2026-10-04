@@ -72,6 +72,51 @@ EMPLOYERS: dict[str, list[str]] = {
         "Fairhaven PD", "Talbot County Emergency",
         "Rockhaven Fire & Rescue", "Metro Dispatch Center",
     ],
+    # New in Ticket 0403.
+    "tech": [
+        "Vantage Software", "Northbrace Systems", "Halden Technologies",
+        "Corvus Digital", "Wrenfield Labs", "Ashford Cloud Works",
+    ],
+    "finance": [
+        "Ledgerwell Financial", "Thornbury Capital", "Ashcombe Bank",
+        "Marbury Trust", "Quillon Advisors", "Graystone Financial",
+    ],
+    "legal": [
+        "Fenwick & Carrow", "Aldrich Law Group", "Sable & Winters",
+        "Corbin Legal Partners", "Hollis & Brant", "Marchbanks Law",
+    ],
+    "medicine": [
+        "Amberleigh General Hospital", "Kesterly Medical Center",
+        "Thistlewood Clinic", "Oakhaven Regional Hospital",
+        "Briarcross Medical Group", "Fenmoor Health Partners",
+    ],
+    "hospitality": [
+        "The Ashworth Hotel", "Harborview Suites", "Kingsley Grand Hotel",
+        "The Willowmere Inn", "Castlebridge Resorts",
+        "Northgate Hospitality Group",
+    ],
+    # Ticket 0406. Four new tracks, and a track with no employers is a listing
+    # with no name on it — which is what this file's own check catches.
+    "veterinary": [
+        "Brambleside Animal Hospital", "Two Rivers Veterinary",
+        "Hollowmere Pet Clinic", "Stonebrook Animal Care",
+        "Larkfield Veterinary Group", "Willowbank Equine Practice",
+    ],
+    "dental": [
+        "Marlowe Family Dental", "Bright Harbor Dental",
+        "Ashfield Dental Associates", "Pinecrest Orthodontics",
+        "Riverbend Dental Care", "Copperfield Dental Group",
+    ],
+    "pharmacy": [
+        "Halloway Pharmacy", "Redbrook Drug", "Sunfield Apothecary",
+        "Meadowlark Pharmacy", "Tunbridge Health Pharmacy",
+        "Crowder Family Pharmacy",
+    ],
+    "architecture": [
+        "Vance & Ardern Architects", "Holloway Design Studio",
+        "Kirkmont Architecture", "Sable & Rowe", "Thornbury Studio",
+        "Whitmore Architects",
+    ],
 }
 
 

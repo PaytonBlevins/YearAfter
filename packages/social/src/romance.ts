@@ -125,6 +125,23 @@ export const partnerOf = (people: readonly Acquaintance[]): Acquaintance | undef
       person.endedAtAge === undefined,
   );
 
+/**
+ * Ticket 0502. The partner a character shares a household with.
+ *
+ * Not `partnerOf`. Somebody the character is only DATING does not live with
+ * them, and until this ticket the living phase charged half again for every
+ * date anyway — an eighteen-year-old paid for a household of two because they
+ * had been to the cinema with somebody. A couple who are together, engaged or
+ * married share a roof, its costs and their income; a couple who are seeing
+ * each other share none of it.
+ */
+export const HOUSEHOLD_STAGES: readonly RomanceStage[] = ['together', 'engaged', 'married'];
+
+export const householdPartnerOf = (people: readonly Acquaintance[]): Acquaintance | undefined => {
+  const partner = partnerOf(people);
+  return partner?.romance && HOUSEHOLD_STAGES.includes(partner.romance.stage) ? partner : undefined;
+};
+
 /** People the player likes who do not yet know it, or do not yet agree. */
 export const crushesOf = (people: readonly Acquaintance[]): readonly Acquaintance[] =>
   people.filter(

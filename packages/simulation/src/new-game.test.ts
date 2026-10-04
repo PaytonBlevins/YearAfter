@@ -26,6 +26,8 @@ import {
   rollBirthCity,
   rollTalents,
 } from './new-game';
+import { advanceYear } from './advance';
+import { decide } from './decide';
 import { Rng, RngDomains } from './rng/rng';
 
 const generate = (seed: string) => generateCharacter(new Rng(seed), { seed });
@@ -270,5 +272,80 @@ describe('createNewGame', () => {
     expect(state.world.generation).toBe(1);
     expect(state.player.alive).toBe(true);
     expect(state.player.timeline).toHaveLength(0);
+  });
+});
+
+describe('Ticket 0408 — the population is varied, and stays varied', () => {
+  /*
+    THE ROADMAP CARRIED THIS AS FINDING 1 FROM 0211 UNTIL 0408, and it was only
+    ever half right. It said "this build cannot produce a poor student" and
+    pointed at character generation. Generation was the floor under it, but the
+    mechanism was downstream: every stat delta goes through `curvedDelta`, which
+    is full strength at 50 and tapers to nothing at 100, and school pushed a
+    flat +1/+3 Smarts at everybody every year for thirteen years. An equalising
+    curve applied to aptitude equalises aptitude.
+
+    Measured before: Smarts at birth p10 44 / median 56; Smarts at EIGHTEEN p10
+    70 / median 76, minimum 56 across 500 lives. Nobody in the game was below
+    average as an adult.
+
+    Two assertions, and they pull against each other on purpose — the failure
+    modes are opposite and a test that only guards one invites the other.
+  */
+  const LIVES = 240;
+  const grown = Array.from({ length: LIVES }, (_, run) => {
+    let state = createNewGame({ seed: `spread-${run}` });
+    while (state.player.age < 18 && state.health.diedAtAge === undefined) {
+      state = advanceYear(state).state;
+      let guard = 0;
+      while (state.pending.length > 0 && (guard += 1) < 12) {
+        const decision = state.pending[0];
+        const choice = decision?.choices[0];
+        if (!decision || !choice) break;
+        const answered = decide(state, decision.eventId, choice.id);
+        if (!answered.ok) break;
+        state = answered.value.state;
+      }
+    }
+    return state;
+  });
+
+  const spreadOf = (values: number[]) => {
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    return Math.sqrt(values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length);
+  };
+
+  it('does not hand everybody the same head', () => {
+    const smarts = grown.map((state) => Number(state.player.stats.smarts));
+    const low = Math.min(...smarts);
+    const sd = spreadOf(smarts);
+    console.log(`smarts at 18: min ${low}  sd ${sd.toFixed(1)}`);
+
+    /*
+      A FLOOR ON THE FLOOR. The pre-0408 build could not put an adult below 56
+      and this is what would catch that coming back — a build where the least
+      able eighteen-year-old in two hundred and forty lives is comfortably
+      average has stopped modelling aptitude. Set well above the measured
+      minimum so ordinary tuning does not trip it.
+    */
+    expect(low, 'the least able adult in the sample').toBeLessThan(50);
+    // And a spread, because a low minimum with everybody else bunched is the
+    // same flatness with one outlier bolted on.
+    expect(sd, 'spread of adult Smarts').toBeGreaterThan(8);
+  });
+
+  it('does not make everybody hopeless either', () => {
+    /*
+      THE OPPOSITE FAILURE, and the reason the assertion above is not simply
+      "make the numbers wider". 0203's growth curve exists because a childhood
+      of forty events used to arrive at eighteen with every stat above average;
+      widening the roll and steepening the gains could put it back the other
+      way, with a population nobody would want to play.
+    */
+    const smarts = grown.map((state) => Number(state.player.stats.smarts));
+    const median = [...smarts].sort((a, b) => a - b)[Math.floor(smarts.length / 2)]!;
+    expect(median, 'median adult Smarts').toBeGreaterThan(60);
+    const capable = smarts.filter((value) => value >= 70).length / smarts.length;
+    expect(capable, 'share of adults who are genuinely capable').toBeGreaterThan(0.3);
   });
 });

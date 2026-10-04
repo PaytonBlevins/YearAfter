@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { asNpcId, asSaveId } from '@yearafter/core';
+import { asNpcId, asSaveId, dollars } from '@yearafter/core';
+import type { PendingDecision } from '@yearafter/events';
 import type { NpcTier } from '@yearafter/relationships';
 import { advanceYear, createNewGame, decide, type GameState } from '@yearafter/simulation';
 import { MemorySaveRepository } from './adapters/memory';
@@ -1205,5 +1206,713 @@ describe('v24 -> v25 migration (Ticket 0310 — retirement)', () => {
     if (!migrated.ok) return;
     expect(migrated.value.retirement.retiredAtAge).toBe(62);
     expect(migrated.value.retirement.serviceYears).toBe(30);
+  });
+});
+
+describe('Ticket 0406 — a question survives being saved', () => {
+  /*
+    THE BUG THIS EXISTS FOR BRICKED REAL SAVES, and it lived through two
+    tickets because nothing here had ever round-tripped a save with a decision
+    still open. Every other test answers its questions in the process that
+    raised them, so `pending` was always empty by the time anything reached
+    `toSave`.
+
+    Reported as: "this is stuck on the screen everytime that I reset it."
+    `pending` was serialized and the offer behind it was not, so the reloaded
+    save held a question `decide` could not answer, and `advanceYear` will not
+    advance past an open question. The character could not be aged again, ever.
+  */
+  /*
+    Ticket 0410 adds two more borrowers of this queue, and they carry a payload
+    for the same reason the first two do — so they can be left out of the save
+    for the same reason, and brick a save in exactly the same way. Named here
+    rather than in three separate finds, so the next door that opens is one
+    entry rather than three edits.
+  */
+  const SYSTEMIC = new Set(['career.offer', 'education.offer', 'romance.offer', 'family.offer']);
+
+  function playUntilAnOfferIsOpen(): GameState | undefined {
+    for (let seed = 0; seed < 40; seed += 1) {
+      let state = createNewGame({ seed: `offer-roundtrip-${seed}` });
+      for (let year = 0; year < 70; year += 1) {
+        if (state.health.diedAtAge !== undefined) break;
+        state = advanceYear(state).state;
+        const open = state.pending.find((decision) => SYSTEMIC.has(decision.eventId));
+        if (open) return state;
+        // Answer anything else so the loop can keep going.
+        let guard = 0;
+        while (state.pending.length > 0 && (guard += 1) < 12) {
+          const decision = state.pending[0];
+          const choice = decision?.choices[0];
+          if (!decision || !choice) break;
+          const result = decide(state, decision.eventId, choice.id);
+          if (!result.ok) break;
+          state = result.value.state;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  it('can still be answered after a save and a load', () => {
+    const live = playUntilAnOfferIsOpen();
+    expect(live, 'no seed produced an open offer — the harness has drifted').toBeDefined();
+    if (!live) return;
+
+    const open = live.pending.find((decision) => SYSTEMIC.has(decision.eventId));
+    if (!open) return;
+
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-offer') }));
+    expect(reloaded.pending.map((d) => d.eventId)).toContain(open.eventId);
+
+    /*
+      THE ASSERTION. Before the fix this returned `{ ok: false }` with
+      `unresolvable`, forever, on every reload — and because `advanceYear`
+      refuses to advance while `pending` is non-empty, that was the end of the
+      character.
+    */
+    const answered = decide(reloaded, open.eventId, open.choices[0]!.id);
+    expect(answered.ok, `a reloaded ${open.eventId} could not be answered`).toBe(true);
+  });
+
+  it('unbricks a save that was already stuck', () => {
+    /*
+      Built from a REAL save rather than a literal, because `migrateSave`
+      validates the whole shape on the way through and a hand-written stub
+      fails as 'corrupt' long before the repair runs — which is the same reason
+      this bug was never caught by a unit test of the migration alone.
+    */
+    const { save } = newSave('STUCK');
+    const stuck = JSON.parse(JSON.stringify(save));
+    stuck.version = 27;
+    stuck.pending = [
+      {
+        eventId: 'education.offer',
+        age: 18,
+        year: 2024,
+        prompt: 'x',
+        choices: [{ id: 'apply', label: 'Apply' }],
+        names: {},
+      },
+      {
+        eventId: 'd.random.wallet',
+        age: 18,
+        year: 2024,
+        prompt: 'x',
+        choices: [{ id: 'keep', label: 'Keep' }],
+        names: {},
+      },
+    ];
+    delete stuck.collegeOffer;
+
+    const result = migrateSave(stuck);
+    expect(result.ok, 'the repaired save no longer validates').toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    // The unanswerable one is dropped; the ordinary event is untouched.
+    expect(result.value.pending.map((d) => d.eventId)).toEqual(['d.random.wallet']);
+  });
+
+  it('round-trips an open life question, and unbricks one that lost its payload', () => {
+    /*
+      Ticket 0410, and deliberately the same two tests as above rather than a
+      cleverer one. The bug that cost a player their save was a decision whose
+      payload was not persisted; this ticket adds a decision with a payload, so
+      it gets both halves the moment it exists instead of two tickets later.
+    */
+    const { save } = newSave('LIFE');
+    const pending: readonly PendingDecision[] = [
+      {
+        eventId: 'romance.offer',
+        category: 'friendship',
+        age: 24,
+        year: 2030,
+        prompt: 'x',
+        choices: [{ id: 'yes', label: 'Ask them out' }],
+        names: {},
+      },
+    ];
+    const lifeOffer = {
+      kind: 'romance' as const,
+      personId: 'p1',
+      moveId: 'ask-out',
+      age: 24,
+      eventId: 'romance.offer',
+    };
+
+    // THROUGH `toSave`, which is where the original bug lived: the queue was
+    // written and the payload behind it was not.
+    const live: GameState = { ...fromSave(save), pending, lifeOffer };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-life') }));
+    expect(reloaded.lifeOffer, 'the payload did not survive the save').toBeDefined();
+    expect(reloaded.pending.map((d) => d.eventId)).toEqual(['romance.offer']);
+
+    const withOffer = JSON.parse(JSON.stringify(save));
+    withOffer.pending = pending;
+    withOffer.lifeOffer = lifeOffer;
+    const stuck = JSON.parse(JSON.stringify(withOffer));
+    stuck.version = 29;
+    delete stuck.lifeOffer;
+    const repaired = migrateSave(stuck);
+    expect(repaired.ok).toBe(true);
+    if (!repaired.ok) return;
+    expect(repaired.value.pending).toEqual([]);
+  });
+
+  it('round-trips an open sign-up, and unbricks one that lost its payload', () => {
+    /*
+      Ticket 0416, the fourth borrower, and the same two halves at birth — the
+      rule 0410 wrote down so the next door would be one entry and not a find.
+      Deliberately NOT added to SYSTEMIC above: a sign-up reaches a six-year-old,
+      so the harness would find it first every time and stop exercising the
+      career and college round-trips it was written for.
+    */
+    const { save } = newSave('SIGNUP');
+    const pending: readonly PendingDecision[] = [
+      {
+        eventId: 'activity.offer',
+        category: 'school',
+        age: 12,
+        year: 2030,
+        prompt: 'x',
+        choices: [{ id: 'yes', label: 'Sign up' }],
+        names: {},
+      },
+    ];
+    const pursuitOffer = { activityId: 'act.chess', age: 12, eventId: 'activity.offer' };
+
+    const live: GameState = { ...fromSave(save), pending, pursuitOffer };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-signup') }));
+    expect(reloaded.pursuitOffer, 'the payload did not survive the save').toEqual(pursuitOffer);
+    expect(reloaded.pending.map((d) => d.eventId)).toEqual(['activity.offer']);
+
+    const withOffer = JSON.parse(JSON.stringify(save));
+    withOffer.pending = pending;
+    withOffer.pursuitOffer = pursuitOffer;
+    const stuck = JSON.parse(JSON.stringify(withOffer));
+    stuck.version = 30;
+    delete stuck.pursuitOffer;
+    const repaired = migrateSave(stuck);
+    expect(repaired.ok).toBe(true);
+    if (!repaired.ok) return;
+    expect(repaired.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(repaired.value.pending).toEqual([]);
+
+    // And one that kept its payload is left alone.
+    const kept = JSON.parse(JSON.stringify(withOffer));
+    kept.version = 30;
+    const untouched = migrateSave(kept);
+    expect(untouched.ok).toBe(true);
+    if (!untouched.ok) return;
+    expect(untouched.value.pending.map((d) => d.eventId)).toEqual(['activity.offer']);
+  });
+
+  it('round-trips a home and an open home offer, and gives an older save no homes', () => {
+    /*
+      Ticket 0501, the fifth borrower of the door. A home is money — its value
+      and what is owed on it both reach net worth — so it has to survive the
+      save exactly, mortgage and all.
+    */
+    const { save } = newSave('HOMES');
+    const homes = [
+      {
+        id: 'home:2040:0',
+        kindId: 'home.condo',
+        beds: 2,
+        baths: 1,
+        builtYear: 2001,
+        condition: 'good' as const,
+        regionKey: 'US:TX',
+        regionName: 'Texas',
+        purchasePrice: dollars(250_000),
+        boughtYear: 2040,
+        value: dollars(262_000),
+        expenseRate: 0.026,
+        behindYears: 0,
+        mortgage: {
+          productId: 'mortgage.conventional',
+          principal: dollars(200_000),
+          balance: dollars(190_000),
+          termLeft: 28,
+        },
+      },
+    ];
+    const pending: readonly PendingDecision[] = [
+      {
+        eventId: 'home.offer',
+        category: 'random',
+        age: 32,
+        year: 2041,
+        prompt: 'x',
+        choices: [{ id: 'yes', label: 'Buy it' }],
+        names: {},
+      },
+    ];
+    const homeOffer = { listingId: 'listing:2041:1', age: 32, eventId: 'home.offer' };
+    const live: GameState = { ...fromSave(save), homes, pending, homeOffer };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-homes') }));
+    expect(reloaded.homes).toEqual(homes);
+    expect(reloaded.homeOffer).toEqual(homeOffer);
+    expect(reloaded.pending.map((d) => d.eventId)).toEqual(['home.offer']);
+
+    // A v31 save: nobody owned anything, and a home offer with no payload goes.
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 31;
+    delete old.homes;
+    old.pending = pending;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.homes).toEqual([]);
+    expect(migrated.value.pending).toEqual([]);
+  });
+
+  it('round-trips a let building with its tenants, and carries a v32 save forward', () => {
+    // Ticket 0503. A tenant is somebody in the save: losing one on a reload
+    // would empty a unit the player filled.
+    const { save } = newSave('LETTING');
+    const homes = [
+      {
+        id: 'home:2040:r0',
+        kindId: 'home.duplex',
+        beds: 4,
+        baths: 2,
+        builtYear: 1970,
+        condition: 'fair' as const,
+        regionKey: 'US:OH',
+        regionName: 'Ohio',
+        purchasePrice: dollars(380_000),
+        boughtYear: 2040,
+        value: dollars(391_000),
+        expenseRate: 0.024,
+        behindYears: 0,
+        letting: {
+          level: 1.1,
+          managed: true,
+          tenants: [
+            {
+              id: 'tenant:home:2040:r0:0:2040:1',
+              name: 'Ana Reyes',
+              since: 2041,
+              income: 61_500,
+              credit: 'good' as const,
+              work: 'steady' as const,
+              household: 3,
+              evictions: 0,
+            },
+            null,
+          ],
+        },
+      },
+    ];
+    const live: GameState = { ...fromSave(save), homes };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-letting') }));
+    expect(reloaded.homes).toEqual(homes);
+
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 32;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.homes).toEqual(save.homes);
+  });
+
+  it('round-trips a financed car, an open car offer and an inspection, and gives a v33 save no cars', () => {
+    // Ticket 0504. A car is in the save with its hidden history and its loan;
+    // the offer's payload travels with the question (the 0402 lesson); and a
+    // paid-for inspection must not be lost on a reload.
+    const { save } = newSave('VEHICLES');
+    const vehicles = [
+      {
+        id: 'car:2040:lot.used-1:3',
+        trimId: 'car.hondo-civix.si',
+        modelYear: 2036,
+        boughtYear: 2040,
+        purchasePrice: dollars(21_400),
+        value: dollars(19_650),
+        condition: 81.5,
+        history: 'patchy' as const,
+        accident: true,
+        defect: { part: 'turbo', cost: 2_450, known: true },
+        loan: {
+          productId: 'auto.used',
+          principal: dollars(17_100),
+          balance: dollars(17_100),
+          termLeft: 5,
+        },
+        behindYears: 0,
+      },
+    ];
+    const pending: PendingDecision[] = [
+      {
+        eventId: 'vehicle.offer',
+        category: 'random',
+        age: 30,
+        year: 2040,
+        prompt: 'A car came up.',
+        choices: [
+          { id: 'yes', label: 'Buy it' },
+          { id: 'skip', label: 'Not this year' },
+        ],
+        names: {},
+      },
+    ];
+    const live: GameState = {
+      ...fromSave(save),
+      vehicles,
+      vehicleOffer: { listingId: 'car:2040:lot.new-1:0', how: 'loan', age: 30, eventId: 'vehicle.offer' },
+      inspected: ['car:2040:lot.online:4'],
+      pending,
+    };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-vehicles') }));
+    expect(reloaded.vehicles).toEqual(vehicles);
+    expect(reloaded.vehicleOffer).toEqual(live.vehicleOffer);
+    expect(reloaded.inspected).toEqual(['car:2040:lot.online:4']);
+
+    // A v33 save could own no car, and cannot hold a car question.
+    const old = JSON.parse(JSON.stringify(toSave(live, { id: asSaveId('s-vehicles') })));
+    old.version = 33;
+    delete old.vehicles;
+    delete old.vehicleOffer;
+    delete old.inspected;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.vehicles).toEqual([]);
+    expect(migrated.value.pending.some((decision) => decision.eventId === 'vehicle.offer')).toBe(false);
+  });
+
+  it('round-trips a car with its modifications, and carries a v34 save forward', () => {
+    // Ticket 0505. A Tarbus conversion is most of a car's value; losing it on a
+    // reload would hand the player a stock car worth $70,000 less.
+    const { save } = newSave('MODS');
+    const vehicles = [
+      {
+        id: 'car:2041:lot.luxury-1:1',
+        trimId: 'car.merceda-gelander.g-63-amr',
+        modelYear: 2041,
+        boughtYear: 2041,
+        purchasePrice: dollars(185_000),
+        value: dollars(225_400),
+        condition: 98.6,
+        history: 'full' as const,
+        accident: false,
+        behindYears: 0,
+        mods: [
+          { modId: 'mod.tint.windows', cost: 600, year: 2041 },
+          { modId: 'mod.tarbus', cost: 74_000, year: 2042 },
+        ],
+      },
+    ];
+    const live: GameState = { ...fromSave(save), vehicles };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-mods') }));
+    expect(reloaded.vehicles).toEqual(vehicles);
+
+    const old = JSON.parse(JSON.stringify(toSave(live, { id: asSaveId('s-mods') })));
+    old.version = 34;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.vehicles).toEqual(vehicles);
+  });
+
+  it('round-trips a collection, a renovated home and an open renovation question, and gives a v35 save none', () => {
+    // Ticket 0506. An heirloom is somebody in the save too: losing whose it
+    // was on a reload would lose the only story it has.
+    const { save } = newSave('VALUABLES');
+    const valuables = [
+      {
+        id: 'val:2044:store.watches:2',
+        itemId: 'val.watch.rolux-subaquatic',
+        boughtYear: 2044,
+        purchasePrice: dollars(10_250),
+        value: dollars(12_100),
+        inheritedFrom: 'Ruth Calder',
+      },
+    ];
+    const homes = [
+      {
+        id: 'home:2040:0',
+        kindId: 'home.starter',
+        beds: 4,
+        baths: 2,
+        builtYear: 1978,
+        condition: 'fair' as const,
+        regionKey: 'US:OH',
+        regionName: 'Ohio',
+        purchasePrice: dollars(240_000),
+        boughtYear: 2040,
+        value: dollars(301_000),
+        expenseRate: 0.022,
+        behindYears: 0,
+        renovations: [
+          { renovationId: 'reno.bath-modern', cost: 18_000, year: 2044 },
+          { renovationId: 'reno.bedroom-1', cost: 90_000, year: 2045 },
+        ],
+      },
+    ];
+    const pending: PendingDecision[] = [
+      {
+        eventId: 'home.renovate',
+        category: 'random',
+        age: 50,
+        year: 2046,
+        prompt: 'The house needs work.',
+        choices: [
+          { id: 'yes', label: 'Get it done' },
+          { id: 'skip', label: 'Live with it' },
+        ],
+        names: {},
+      },
+    ];
+    const live: GameState = {
+      ...fromSave(save),
+      valuables,
+      homes,
+      renovationOffer: {
+        homeId: 'home:2040:0',
+        renovationId: 'reno.kitchen-modern',
+        cost: 30_000,
+        age: 50,
+        eventId: 'home.renovate',
+      },
+      pending,
+    };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-valuables') }));
+    expect(reloaded.valuables).toEqual(valuables);
+    expect(reloaded.homes).toEqual(homes);
+    expect(reloaded.renovationOffer).toEqual(live.renovationOffer);
+
+    const old = JSON.parse(JSON.stringify(toSave(live, { id: asSaveId('s-valuables') })));
+    old.version = 35;
+    delete old.valuables;
+    delete old.renovationOffer;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.valuables).toEqual([]);
+    expect(migrated.value.pending.some((decision) => decision.eventId === 'home.renovate')).toBe(false);
+  });
+
+  it('round-trips the auction diary and a fake not yet found out, and carries a v36 save forward', () => {
+    // Ticket 0507. Losing the diary on a reload would hand back a used sale;
+    // losing `fake` would turn a reproduction into the real thing.
+    const { save } = newSave('AUCTIONS');
+    const live: GameState = {
+      ...fromSave(save),
+      auctions: { year: 2044, visits: { 'auction.hartwell': 2, 'auction.storage': 1 }, bids: ['lot:2044:auction.hartwell:2:3'] },
+      valuables: [
+        {
+          id: 'lot:2044:auction.hartwell:2:3',
+          itemId: 'val.antique.qing-vase',
+          boughtYear: 2044,
+          purchasePrice: dollars(52_000),
+          value: dollars(36_000),
+          fake: true,
+        },
+      ],
+    };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-auctions') }));
+    expect(reloaded.auctions).toEqual(live.auctions);
+    expect(reloaded.valuables).toEqual(live.valuables);
+
+    const old = JSON.parse(JSON.stringify(toSave(live, { id: asSaveId('s-auctions') })));
+    old.version = 36;
+    delete old.auctions;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.auctions).toBeUndefined();
+  });
+
+  it('round-trips a business with its history, and carries a v37 save forward with none', () => {
+    // Ticket 0601. Losing the till on a reload would hand the owner a free
+    // draw; losing the profit history would value a seasoned business at its
+    // fittings.
+    const { save } = newSave('BUSINESSES');
+    const live: GameState = {
+      ...fromSave(save),
+      businesses: [
+        {
+          id: 'biz:2044:biz.cafe:0',
+          typeId: 'biz.cafe',
+          name: 'Corner Cup',
+          openedYear: 2044,
+          invested: dollars(81_000),
+          cash: dollars(33_500),
+          price: 110,
+          supplier: 'premium',
+          payroll: 'high',
+          staff: 7,
+          autoStaff: false,
+          reputation: 64,
+          luck: 1.12,
+          profits: [41_000, 52_500],
+          branches: [2046],
+          last: {
+            year: 2046,
+            revenue: 520_000,
+            costs: 467_500,
+            profit: 52_500,
+            drawn: 20_000,
+            injected: 0,
+            turnedAway: 0.07,
+            idle: 0,
+          },
+        },
+      ],
+    };
+    const reloaded = fromSave(toSave(live, { id: asSaveId('s-businesses') }));
+    expect(reloaded.businesses).toEqual(live.businesses);
+
+    const old = JSON.parse(JSON.stringify(toSave(live, { id: asSaveId('s-businesses') })));
+    old.version = 37;
+    delete old.businesses;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.businesses).toEqual([]);
+  });
+
+  it('gives a v38 business one door, and keeps the locations a v39 save already has', () => {
+    // Ticket 0602. Losing `branches` on a reload would close every extra door
+    // and leave the owner paying for staff nobody could use.
+    const { save } = newSave('LOCATIONS');
+    const live: GameState = {
+      ...fromSave(save),
+      businesses: [
+        {
+          id: 'biz:2044:biz.cleaning:0',
+          typeId: 'biz.cleaning',
+          name: 'Spotless & Sons',
+          openedYear: 2044,
+          invested: dollars(32_000),
+          cash: dollars(9_000),
+          price: 100,
+          supplier: 'standard',
+          payroll: 'medium',
+          staff: 8,
+          autoStaff: true,
+          reputation: 50,
+          luck: 1,
+          profits: [30_000],
+          branches: [2047, 2050],
+        },
+      ],
+    };
+    const written = toSave(live, { id: asSaveId('s-locations') });
+    expect(fromSave(written).businesses[0]!.branches).toEqual([2047, 2050]);
+
+    const old = JSON.parse(JSON.stringify(written));
+    old.version = 38;
+    for (const business of old.businesses) delete business.branches;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.businesses[0]!.branches).toEqual([]);
+  });
+
+  it('keeps which business a loan was borrowed for, and what the business paid last year', () => {
+    // Ticket 0603. A business loan with no `businessId` would be serviced twice, by the
+    // business and then by the household; one with no `repaid` would lose the dashboard line.
+    // No version bump: both are optional, and a v39 save without them is already right.
+    const { save } = newSave('BUSINESS-LOAN');
+    const live: GameState = {
+      ...fromSave(save),
+      loans: [
+        {
+          productId: 'loan.smallbiz',
+          principal: dollars(113_200),
+          balance: dollars(98_300),
+          termLeft: 9,
+          inArrears: false,
+          businessId: 'biz:2044:biz.salon:for0',
+        },
+      ],
+      businesses: [
+        {
+          id: 'biz:2044:biz.salon:for0',
+          typeId: 'biz.salon',
+          name: 'Cut Above',
+          openedYear: 2031,
+          invested: dollars(141_564),
+          cash: dollars(21_000),
+          price: 100,
+          supplier: 'standard',
+          payroll: 'medium',
+          staff: 6,
+          autoStaff: true,
+          reputation: 55,
+          luck: 1.1,
+          profits: [31_000, 33_000, 35_000],
+          branches: [],
+          last: {
+            year: 2044, revenue: 260_000, costs: 225_000, profit: 35_000, drawn: 14_000,
+            injected: 0, turnedAway: 0, idle: 0.1, repaid: 17_500,
+          },
+        },
+      ],
+    };
+    const written = toSave(live, { id: asSaveId('s-biz-loan') });
+    const back = fromSave(JSON.parse(JSON.stringify(written)));
+    expect(back.loans[0]!.businessId).toBe('biz:2044:biz.salon:for0');
+    expect(back.loans[0]!.productId).toBe('loan.smallbiz');
+    expect(Number(back.loans[0]!.balance)).toBe(9_830_000);
+    expect(back.businesses[0]!.last?.repaid).toBe(17_500);
+    expect(written.version).toBe(CURRENT_SAVE_VERSION);
+  });
+
+  it('keeps a rival and what happened last year, which are the dashboard’s reasons for a swing', () => {
+    // Ticket 0604. A rival lost on a reload would be a competitor who vanished the moment the
+    // app closed; an event lost would leave a bad year with no cause on the screen. Optional on
+    // the business and on its ledger year, so a v39 save without them is already right: no bump.
+    const { save } = newSave('BUSINESS-RIVAL');
+    const live: GameState = {
+      ...fromSave(save),
+      businesses: [
+        {
+          id: 'biz:2031:biz.cafe:0',
+          typeId: 'biz.cafe',
+          name: 'The Corner Cup',
+          openedYear: 2031,
+          invested: dollars(150_000),
+          cash: dollars(21_000),
+          price: 100,
+          supplier: 'standard',
+          payroll: 'medium',
+          staff: 6,
+          autoStaff: true,
+          reputation: 55,
+          luck: 1.1,
+          profits: [31_000, 33_000, 35_000],
+          branches: [],
+          rival: { since: 2043, bite: 0.11 },
+          last: {
+            year: 2044, revenue: 480_000, costs: 445_000, profit: 35_000, drawn: 14_000,
+            injected: 0, turnedAway: 0, idle: 0.1,
+            event: 'slow-stretch', economy: 0.95, rivalTook: 0.0825,
+          },
+        },
+      ],
+    };
+    const written = toSave(live, { id: asSaveId('s-biz-rival') });
+    const back = fromSave(JSON.parse(JSON.stringify(written)));
+    expect(back.businesses[0]!.rival).toEqual({ since: 2043, bite: 0.11 });
+    expect(back.businesses[0]!.last?.event).toBe('slow-stretch');
+    expect(back.businesses[0]!.last?.economy).toBe(0.95);
+    expect(back.businesses[0]!.last?.rivalTook).toBe(0.0825);
+    expect(written.version).toBe(CURRENT_SAVE_VERSION);
+    // And a business with no rival comes back with no `rival` key at all, not an undefined one.
+    const quiet = toSave({ ...live, businesses: [{ ...live.businesses[0]!, rival: undefined }] }, { id: asSaveId('s-biz-quiet') });
+    const quietBack = fromSave(JSON.parse(JSON.stringify(quiet)));
+    expect('rival' in quietBack.businesses[0]!).toBe(false);
   });
 });

@@ -175,6 +175,7 @@ describe('the categories nothing writes yet', () => {
     */
     // `debt` came off this list in 0306: a card advance is a positive `debt`
     // row, and its payments, interest and annual fee are negative ones.
-    expect(UNWRITTEN_CATEGORIES).toEqual(['housing', 'vehicle']);
+    // `housing` came off in 0501, `vehicle` in 0504.
+    expect(UNWRITTEN_CATEGORIES).toEqual([]);
   });
 });

@@ -18,6 +18,7 @@ import { LINES_PER_YEAR, advanceYear } from './advance';
 import { study } from './study';
 import { decide } from './decide';
 import type { GameState } from './game-state';
+import { studyHarder } from '@yearafter/education';
 import { createNewGame } from './new-game';
 
 /**
@@ -268,10 +269,25 @@ describe('childhood balance', () => {
   }
 
   it('does not leave a childhood with a maxed-out stat bar', () => {
-    const maxed = childhoods()
-      .flat()
-      .filter((value) => value >= 100).length;
-    expect(maxed).toBe(0);
+    /*
+      A CEILING SHOULD BE REACHABLE AND RARE (Ticket 0408).
+
+      This pinned zero, which was right while the birth roll topped out at 88
+      and clustered hard: nobody could get near a hundred, so nobody did, and
+      "0203's inflation is gone" and "nobody is exceptional" were the same
+      measurement. 0408 widened the roll to [20, 92] with twice the spread, and
+      a character born at 92 who has a very good childhood can now finish one
+      stat at the top — which is what an exceptional life is supposed to look
+      like.
+
+      What 0203 was actually protecting against is a stat EVERYBODY maxes, so
+      that is what is asserted: a couple of values in a couple of hundred is a
+      rare ceiling, and anything approaching a twentieth is the inflation
+      coming back.
+    */
+    const finals = childhoods().flat();
+    const maxed = finals.filter((value) => value >= 100).length;
+    expect(maxed / finals.length).toBeLessThan(0.05);
   });
 
   it('still produces characters who differ from each other', () => {
@@ -322,9 +338,28 @@ describe('Study Harder', () => {
     // correctly. Comparing clamped deltas at different distances from 100 is
     // measuring the clamp, not the scaling. Ticket 0211 moved this seed's
     // performance and exposed it.
-    if (second.value.state.education.performance < 100) {
-      expect(second.value.gained).toBeLessThanOrEqual(first.value.gained);
-    }
+    /*
+      THE SECOND TERM'S SCALING IS ASSERTED ON THE MODEL, NOT ON TWO DRAWS
+      (Ticket 0408).
+
+      This compared `second.gained` against `first.gained` from a played life,
+      and that comparison was never something the model promises: `studyHarder`
+      computes `(STUDY_GAIN_MIN + magnitude * (MAX - MIN)) * scale` where
+      `magnitude` is a RANDOM draw, so a lucky second term beats an unlucky
+      first one whatever `SECOND_TERM_SCALE` is. It passed on seed luck, and
+      0408's wider population changed which character this seed produces —
+      performance 61, gaining 6 then 7, both correct and neither near a ceiling.
+
+      The claim worth guarding is the scaling itself, so it is now made against
+      `studyHarder` with the draw held fixed and only the term number moving.
+      The played life still proves the terms are counted and spent.
+    */
+    const sameDraw = { roll: 0.1, magnitude: 0.5, variant: 0.5 };
+    const firstTerm = studyHarder(60, sameDraw.roll, sameDraw.magnitude, sameDraw.variant, 0);
+    const secondTerm = studyHarder(60, sameDraw.roll, sameDraw.magnitude, sameDraw.variant, 1);
+    expect(secondTerm.gained).toBeLessThan(firstTerm.gained);
+    expect(secondTerm.gained).toBeGreaterThan(0);
+
     expect(second.value.gained).toBeGreaterThan(0);
 
     // Ticket 0210c. The third press is allowed and does nothing — no error, no

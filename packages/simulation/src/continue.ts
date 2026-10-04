@@ -68,8 +68,21 @@ import {
   clampStat,
   stableUnit,
   type StatValue,
+  dollars,
 } from '@yearafter/core';
-import { EMPTY_LEDGER, cashFrom, post, type Ledger } from '@yearafter/finance';
+import {
+  EMPTY_LEDGER,
+  OPEN_FROM_AGE,
+  TRANSITION_REPUTATION,
+  businessSaleOf,
+  businessValueFor,
+  cashFrom,
+  post,
+  saleOf,
+  vehicleSaleOf,
+  type Ledger,
+} from '@yearafter/finance';
+import { findBusinessType } from '@yearafter/content';
 import { NOT_YET_ENROLLED, type EducationState } from '@yearafter/education';
 import { EMPTY_HISTORY } from '@yearafter/events';
 import { EMPTY_EMPLOYMENT } from '@yearafter/careers';
@@ -91,15 +104,86 @@ import { nameContext, uniqueFirstName } from './social-generator';
  * transaction behind it is exactly the state migration 17 had to repair for
  * every save written before this ticket.
  */
-function inheritedLedger(state: GameState, lastName: string, heirAge: number): Ledger {
+function inheritedLedger(
+  state: GameState,
+  lastName: string,
+  heirAge: number,
+  sellBusinesses: boolean,
+): Ledger {
   const estate = Number(state.player.cash);
-  if (estate === 0) return EMPTY_LEDGER;
-  return post(EMPTY_LEDGER, state.world.year, heirAge, {
-    category: 'gift',
-    amount: cents(estate),
-    source: `What ${state.player.firstName} ${lastName} left`,
-  }).ledger;
+  let books = EMPTY_LEDGER;
+  if (estate > 0) {
+    books = post(books, state.world.year, heirAge, {
+      category: 'gift',
+      amount: cents(estate),
+      source: `What ${state.player.firstName} ${lastName} left`,
+    }).ledger;
+  }
+  /*
+    Ticket 0501. THE HOUSE IS SOLD AND WHAT IS LEFT COMES TO THE HEIR.
+
+    Spec 818–827 asks for estate processing without chores, and a house is the
+    thing most people actually leave. Sold rather than handed over: the heir
+    lives somewhere else, the market sells it for what it is worth, the lender
+    is repaid, and the rest is money — one line in their books with a source,
+    which is what keeps their first `reconcile` true.
+  */
+  const equity = state.homes.reduce((sum, home) => sum + saleOf(home).proceeds, 0);
+  if (equity > 0) {
+    books = post(books, state.world.year, heirAge, {
+      category: 'gift',
+      amount: dollars(equity),
+      source: `The sale of ${state.player.firstName}'s home`,
+    }).ledger;
+  }
+  // Ticket 0504. And the cars, the same way: sold, the lender repaid, the rest to the heir.
+  const cars = state.vehicles.reduce((sum, vehicle) => sum + Math.max(0, vehicleSaleOf(vehicle).proceeds), 0);
+  if (cars > 0) {
+    books = post(books, state.world.year, heirAge, {
+      category: 'gift',
+      amount: dollars(cars),
+      source: `The sale of ${state.player.firstName}'s ${state.vehicles.length === 1 ? 'car' : 'cars'}`,
+    }).ledger;
+  }
+  // Ticket 0601. And the businesses: sold at what a buyer would ordinarily pay,
+  // the till with them. Ticket 0604: unless the heir is keeping them (see `keepsBusinesses`),
+  // in which case nothing is sold and nothing is posted: a business is handed on, not paid out.
+  // Ticket 0603: and a lender is paid out of the sale before the heir sees any of it,
+  // as it is on any other sale. Without this a loan taken to buy a business would be
+  // wiped by dying, and the heir would keep the business's whole value.
+  const businesses = (sellBusinesses ? state.businesses : []).reduce((sum, business) => {
+    const type = findBusinessType(business.typeId);
+    if (!type) return sum;
+    const owed = owedOn(state, business.id);
+    return sum + Math.max(0, businessSaleOf(business, type, state.world.year, 0).proceeds - owed);
+  }, 0);
+  if (businesses > 0) {
+    books = post(books, state.world.year, heirAge, {
+      category: 'gift',
+      amount: dollars(businesses),
+      source: `The sale of ${state.player.firstName}'s ${state.businesses.length === 1 ? 'business' : 'businesses'}`,
+    }).ledger;
+  }
+  return books;
 }
+
+/**
+ * Ticket 0604. Whether an heir takes the businesses on or has them sold.
+ *
+ * Handed on by default, because spec 1200 wants "long-lived businesses" to be
+ * something a family can have, and a business that is sold at a death is a
+ * business that cannot be. Not for a child: a ten-year-old does not run a
+ * trucking company, and the old rule (sold, the lender paid, the rest to the
+ * heir) is the right one for them. Not if the player chose to sell.
+ */
+export const keepsBusinesses = (heirAge: number, choice: boolean | undefined): boolean =>
+  choice !== false && heirAge >= OPEN_FROM_AGE;
+
+/** What is owed on a business, from the loans written for it. Whole dollars. */
+const owedOn = (state: GameState, businessId: string): number =>
+  state.loans
+    .filter((loan) => loan.businessId === businessId)
+    .reduce((total, loan) => total + Number(loan.balance) / 100, 0);
 
 /** Children of the player who are alive and could be carried on as. */
 export const heirsIn = (family: Household): readonly FamilyMember[] =>
@@ -220,7 +304,16 @@ function recordsFrom(life: OffspringLife, birthYear: number): readonly LifeRecor
  * `generation + 1`. Returns `undefined` when the id is not a living child,
  * which the UI can only reach by a save changing underneath it.
  */
-export function continueAsChild(state: GameState, childId: string): GameState | undefined {
+export interface ContinueOptions {
+  /** Ticket 0604. False has the businesses sold instead of handed on. Anything else keeps them. */
+  readonly keepBusinesses?: boolean;
+}
+
+export function continueAsChild(
+  state: GameState,
+  childId: string,
+  options: ContinueOptions = {},
+): GameState | undefined {
   const heir = heirsIn(state.family).find((member) => member.id === childId);
   if (!heir) return undefined;
 
@@ -247,7 +340,31 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
     timeline: [],
   };
   const age = state.world.year - heir.birthYear;
-  const finance = inheritedLedger(state, heir.lastName, age);
+  const keeps = keepsBusinesses(age, options.keepBusinesses);
+  const finance = inheritedLedger(state, heir.lastName, age, !keeps);
+  /*
+    Ticket 0604. A business that is kept is the SAME business: its till, its
+    staff, its name in town, its doors, its rival and its lender all go with it.
+    What changes is the hands on it (the heir's own stats and attention, from
+    the next year) and what the town makes of a new owner, the same four points
+    as when one is bought. The lender stays a lender: the loan keeps its
+    `businessId`, so the business goes on paying it and the heir is not asked to.
+  */
+  const inherited = keeps
+    ? state.businesses.map((business) => {
+        const type = findBusinessType(business.typeId);
+        return {
+          ...business,
+          reputation: Math.max(0, business.reputation - TRANSITION_REPUTATION),
+          invested: dollars(type ? businessValueFor(business, type, state.world.year) : 0),
+        };
+      })
+    : undefined;
+  // Only the loans of businesses that were handed on. One whose business is already gone is a
+  // personal debt now, and personal debts are dropped at a death as they always were (0508's).
+  const inheritedLoans = inherited
+    ? state.loans.filter((loan) => inherited.some((business) => business.id === loan.businessId))
+    : undefined;
 
   const player: Character = {
     ...createCharacter({
@@ -342,6 +459,18 @@ export function continueAsChild(state: GameState, childId: string): GameState | 
       circle: EMPTY_CIRCLE,
       employment: EMPTY_EMPLOYMENT,
       health: { ...EMPTY_HEALTH, vitality: player.stats.health, deficit: 0 },
+      /*
+        Ticket 0506 — HEIRLOOMS ARE HANDED DOWN, NOT SOLD. A house and a car
+        are sold and the money passes on; a watch, a ring or a painting is
+        the thing somebody keeps. Spec 1281: "provenance can persist across
+        generations". A non-cash gift, so no ledger row (spec 1848).
+      */
+      ...(inherited ? { businesses: inherited } : {}),
+      ...(inheritedLoans && inheritedLoans.length > 0 ? { loans: inheritedLoans } : {}),
+      valuables: state.valuables.map((owned) => ({
+        ...owned,
+        inheritedFrom: `${state.player.firstName} ${state.player.lastName}`,
+      })),
       pending: [],
     },
   );

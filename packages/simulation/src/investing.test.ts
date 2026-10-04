@@ -50,12 +50,24 @@ import {
 import type { GameState } from './game-state';
 
 /** A character who worked, earned, and has money in the bank. */
+/*
+  THE `settle` CALL ON THE WAY OUT IS LOAD-BEARING, and 0406 is what proved it.
+
+  This loop breaks on `untilAge` BEFORE it answers that year's decisions, so it
+  used to hand back a state with an open question in the queue — harmless for as
+  long as nothing raised one at the ages these tests stop at, and silently fatal
+  the moment something did. `advanceYear` refuses to advance while a decision is
+  pending, so every test here that calls it got a no-op year: no pay, no tax, no
+  advisor fee, and an assertion failure pointing at the advisor rather than at
+  the queue. CORE_RULES 13.63 — a test's own shortcut is measured against a
+  population too.
+*/
 function working(seed: string, untilAge = 40): GameState {
   let state = createNewGame({ seed });
   for (let y = 0; y < 120; y += 1) {
     state = advanceYear(state).state;
     if (state.health.diedAtAge !== undefined) break;
-    if (state.player.age >= untilAge) break;
+    if (state.player.age >= untilAge) return answerEverything(state);
     let guard = 0;
     while (state.pending.length > 0 && (guard += 1) < 12) {
       const d = state.pending[0];
@@ -79,6 +91,107 @@ function working(seed: string, untilAge = 40): GameState {
   }
   return state;
 }
+
+/** Answers whatever is in the queue, so the returned state can be advanced. */
+function answerEverything(state: GameState): GameState {
+  let next = state;
+  let guard = 0;
+  while (next.pending.length > 0 && (guard += 1) < 12) {
+    const decision = next.pending[0];
+    const choice = decision?.choices[0];
+    if (!decision || !choice) break;
+    const result = decide(next, decision.eventId, choice.id);
+    if (!result.ok) break;
+    next = result.value.state;
+  }
+  return next;
+}
+
+/**
+ * A life played on until it actually holds some money (Ticket 0410).
+ *
+ * `working(seed, 45)` stops at a birthday and hopes. 0409 already had to fix
+ * six tests in this file for that, and wrote down why: an age is not a bank
+ * balance, and anything that changes what a life spends its years on changes
+ * what is in the account on a given birthday. 0410 changed it again, harder —
+ * this population now gets married, pays for a wedding out of a share of what
+ * it holds, and raises children — and `working('ledger-cat', 45)` came back
+ * with $1,399 against an assertion wanting $5,000.
+ *
+ * So the harness asks for what it needs. Still no fabricated cash: the ledger
+ * is the one thing in a save that can be provably wrong (0302), and setting
+ * `player.cash` by hand puts it out of step with it. This just keeps living.
+ */
+function richEnough(seed: string, dollars: number, from = 40, until = 78): GameState {
+  /*
+    AND IT TRIES OTHER LIVES, which the first version did not (Ticket 0411).
+
+    0410 wrote this to play on until the balance was there and then return
+    whatever it had when it ran out of years — so when 0411 changed what a career
+    does to Discipline (and Discipline is what `performanceTarget` reads, and
+    performance is what the pay follows), it quietly handed back a character
+    holding $4,795 against a request for $250,000. The assertion caught it, which
+    is the system working, but a harness that answers "here, this is the best I
+    could do" without saying so is the same shortcut in a third costume.
+
+    One seed is one life, and one life can simply not get rich. Several lives is
+    the claim the test actually needs: SOMEBODY in this build can afford an
+    advisor. The best attempt is returned when none can, so the assertion fails
+    on the real number rather than on a silent substitution.
+  */
+  let best = working(seed, from);
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    let state = attempt === 0 ? best : working(`${seed}-${attempt}`, from);
+    for (let age = from; age < until; age += 1) {
+      if (Math.round(Number(state.player.cash) / 100) >= dollars) return state;
+      if (state.health.diedAtAge !== undefined) break;
+      state = answerEverything(advanceYear(state).state);
+    }
+    if (Number(state.player.cash) > Number(best.player.cash)) best = state;
+  }
+  return best;
+}
+
+
+/**
+ * A life played long enough to have money to invest (Ticket 0409).
+ *
+ * These tests are about the market — pricing a row, buying units, reporting a
+ * gain — and they reached for `working('mkt-1')` at forty and hoped it held
+ * twenty thousand dollars. It did, until 0409's adult events changed what
+ * happens in a life and how much of the RNG a year spends, and six of them
+ * failed at `invest(...).ok` with nothing wrong anywhere near the market.
+ *
+ * Fabricating the balance was tried first and was worse: setting `player.cash`
+ * by hand puts it out of step with the ledger 0302 reconciles against, and the
+ * buy then emptied the account. So the life is played properly, to an age where
+ * it has earned something, and the amounts below are a share of what it
+ * actually holds rather than a number somebody hoped for.
+ */
+/**
+ * Ticket 0412: this is `richEnough` now, and it was the shortcut again.
+ *
+ * `working('mkt-1', 48)` — one seed, stopped at a birthday, hoping. 0409 fixed
+ * six tests in this file for exactly that and wrote down why; 0410 built
+ * `richEnough` so a test could ask for what it needs; 0411 had to make that ask
+ * across several lives. And the shortcut was still here in two more costumes,
+ * because neither of those tickets swept the file:
+ *
+ *  - this one, under a different name, feeding nine tests;
+ *  - and a LOCAL `richEnough` inside one describe block that shadowed the fixed
+ *    module-level one and did the old thing under the fixed one's name. That is
+ *    the worst version of it — the name says the lesson has been learned.
+ *
+ * 0412 changed what a year does to warmth, which changes the Relationships
+ * stream, which changes every downstream draw in a played life, and nine of
+ * these failed at `invest(...).ok` with nothing whatever wrong near the market.
+ * CORE_RULES 13.63, fourth outing, and the new half is 13.72: fix the class,
+ * not the instance.
+ */
+const invested = (): GameState => richEnough('mkt-1', 20_000, 44);
+/** A share of what this character really has, so the test scales with the life. */
+const someOf = (state: GameState, fraction: number): number =>
+  Math.max(1, Math.floor((Number(state.player.cash) / 100) * fraction));
 
 const money = (amount: number): string => `$${Math.round(amount).toLocaleString('en-US')}`;
 
@@ -130,7 +243,7 @@ describe('the catalog', () => {
 });
 
 describe('what the market list says', () => {
-  const state = working('mkt-1');
+  const state = invested();
 
   it('prices every row and attaches what the player already holds', () => {
     /*
@@ -145,7 +258,7 @@ describe('what the market list says', () => {
       expect(row.held).toBe(0);
     }
 
-    const bought = invest(state, 'eq.northline', 20_000);
+    const bought = invest(state, 'eq.northline', someOf(state, 0.3));
     expect(bought.ok).toBe(true);
     if (!bought.ok) return;
     const after = marketFor(bought.value.state, 'stock');
@@ -171,17 +284,17 @@ describe('what the market list says', () => {
 
 describe('buying and selling in units', () => {
   it('buys units at the price and spends only what they cost', () => {
-    const state = working('mkt-1');
+    const state = invested();
     const price = priceOf(state.prices, 'eq.northline');
     const before = Number(state.player.cash);
 
-    const bought = invest(state, 'eq.northline', 10_000);
+    const bought = invest(state, 'eq.northline', someOf(state, 0.2));
     expect(bought.ok).toBe(true);
     if (!bought.ok) return;
     const holding = bought.value.state.portfolio[0]!;
 
     expect(holding.instrumentId).toBe('eq.northline');
-    expect(holding.units).toBeCloseTo((10_000 * 100) / price, 2);
+    expect(holding.units).toBeCloseTo((someOf(state, 0.2) * 100) / price, 2);
     // Cash out matches what the units cost, to the dollar.
     const spent = (before - Number(bought.value.state.player.cash)) / 100;
     expect(spent).toBeCloseTo((holding.units * price) / 100, 0);
@@ -197,7 +310,7 @@ describe('buying and selling in units', () => {
       trading at $1,087, not $1,000. A test that hard-codes a catalog's opening
       price is testing the catalog, not the rounding.
     */
-    const state = working('mkt-1');
+    const state = invested();
     const price = priceOf(state.prices, 'bd.cald10');
     const before = Number(state.player.cash);
     const bought = invest(state, 'bd.cald10', 4_500);
@@ -221,8 +334,8 @@ describe('buying and selling in units', () => {
       place a holding is worth something. Move the price and the portfolio
       moves with it — no second derivation to disagree.
     */
-    const state = working('mkt-1');
-    const bought = invest(state, 'eq.northline', 10_000);
+    const state = invested();
+    const bought = invest(state, 'eq.northline', someOf(state, 0.2));
     expect(bought.ok).toBe(true);
     if (!bought.ok) return;
     const held = bought.value.state;
@@ -239,8 +352,8 @@ describe('buying and selling in units', () => {
   });
 
   it('sells units back and reports the gain against what was paid', () => {
-    const state = working('mkt-1');
-    const bought = invest(state, 'eq.northline', 10_000);
+    const state = invested();
+    const bought = invest(state, 'eq.northline', someOf(state, 0.2));
     expect(bought.ok).toBe(true);
     if (!bought.ok) return;
     const holding = bought.value.state.portfolio[0]!;
@@ -254,7 +367,7 @@ describe('buying and selling in units', () => {
   });
 
   it('charges for leaving a bond early and says so in the same breath', () => {
-    const state = working('mkt-1');
+    const state = invested();
     const bought = invest(state, 'bd.cald10', 5_000);
     expect(bought.ok).toBe(true);
     if (!bought.ok) return;
@@ -269,8 +382,8 @@ describe('buying and selling in units', () => {
 
 describe('what the held list says', () => {
   it('reports the gap rather than repeating the price beside it', () => {
-    const state = working('mkt-1');
-    const bought = invest(state, 'eq.northline', 20_000);
+    const state = invested();
+    const bought = invest(state, 'eq.northline', someOf(state, 0.3));
     expect(bought.ok).toBe(true);
     if (!bought.ok) return;
 
@@ -310,15 +423,22 @@ describe('what the held list says', () => {
 
 describe('the dashboard', () => {
   it('adds the portfolio and subtracts what is owed', () => {
-    const bought = invest(working('mkt-1'), 'fd.broadindex', 20_000);
+    const rich = invested();
+    const bought = invest(rich, 'fd.broadindex', someOf(rich, 0.3));
     expect(bought.ok).toBe(true);
     if (!bought.ok) return;
     const state = bought.value.state;
     const books = summariseFinances(state.finance, state.world.year, estateOf(state));
 
     expect(Number(books.investments)).toBe(Number(portfolioWorth(state.prices, state.portfolio)));
+    // Ticket 0501 added homes to what a character owns. This sample did not own
+    // one until 0502's second income bought it a house, which is how the
+    // formula here was found to have left them out.
     expect(Number(books.netWorth)).toBe(
-      Number(state.finance.balance) + Number(books.investments) - Number(books.liabilities),
+      Number(state.finance.balance) +
+        Number(books.investments) +
+        Number(books.assets) -
+        Number(books.liabilities),
     );
     expect(books.onlyCash).toBe(false);
   });
@@ -404,13 +524,9 @@ describe('what a typed amount would do', () => {
     that the figure is the one the trade then moves. A preview that drifts from
     its trade is worse than no preview at all, because the player believed it.
   */
-  const richEnough = (): GameState => {
-    const state = working('preview-1', 45);
-    return state;
-  };
 
   it('promises exactly what a buy then spends, at every amount', () => {
-    const state = richEnough();
+    const state = richEnough('preview-1', 20_000, 45);
     const cash = Math.round(Number(state.player.cash) / 100);
     expect(cash, 'the test character needs money to be a test').toBeGreaterThan(5_000);
 
@@ -440,7 +556,7 @@ describe('what a typed amount would do', () => {
   });
 
   it('rounds a bond down rather than charging what was asked', () => {
-    const state = richEnough();
+    const state = richEnough('preview-1', 20_000, 45);
     const bond = INSTRUMENTS.find((row) => row.kind === 'bond')!;
     const unit = priceOf(state.prices, bond.id) / 100;
     const asked = Math.round(unit * 4.6);
@@ -452,7 +568,7 @@ describe('what a typed amount would do', () => {
   });
 
   it('names WHICH wall an amount hit, not just that there was one', () => {
-    const state = richEnough();
+    const state = richEnough('preview-1', 20_000, 45);
     const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
     const cash = Math.round(Number(state.player.cash) / 100);
 
@@ -465,13 +581,13 @@ describe('what a typed amount would do', () => {
   });
 
   it('says nothing at all about an empty field', () => {
-    const state = richEnough();
+    const state = richEnough('preview-1', 20_000, 45);
     const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
     expect(previewBuy(state, share.id, 0).units).toBe(0);
   });
 
   it('promises exactly what a sell then raises', () => {
-    let state = richEnough();
+    let state = richEnough('preview-1', 20_000, 45);
     const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
     const cash = Math.round(Number(state.player.cash) / 100);
     const bought = invest(state, share.id, Math.floor(cash / 2));
@@ -495,7 +611,7 @@ describe('what a typed amount would do', () => {
   });
 
   it('treats an absurd sell amount as "everything" rather than refusing it', () => {
-    let state = richEnough();
+    let state = richEnough('preview-1', 20_000, 45);
     const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
     const cash = Math.round(Number(state.player.cash) / 100);
     const bought = invest(state, share.id, Math.floor(cash / 2));
@@ -507,7 +623,7 @@ describe('what a typed amount would do', () => {
   });
 
   it('has nothing to say about something the character does not hold', () => {
-    const state = richEnough();
+    const state = richEnough('preview-1', 20_000, 45);
     const share = INSTRUMENTS.find((row) => row.kind === 'stock')!;
     expect(previewSell(state, share.id, 100).refusal).toBe('nothingHeld');
   });
@@ -532,7 +648,7 @@ describe('what investing puts in the ledger', () => {
 
       A category is only reachable where somebody reaches it. This is that place.
     */
-    let state = working('ledger-cat', 45);
+    let state = richEnough('ledger-cat', 20_000, 45);
     const cash = Math.round(Number(state.player.cash) / 100);
     expect(cash, 'the test character needs money to invest').toBeGreaterThan(5_000);
 
@@ -575,7 +691,15 @@ describe('paying somebody for advice', () => {
       advisor adds 31% to a stock-picking character's median outcome, and the
       fee is the only thing standing against that.
     */
-    let state = working('advice-fee', 45);
+    /*
+      RICH ENOUGH TO STILL BE ABLE TO PAY IT (Ticket 0410). Putting 80% of the
+      balance into a fund and then being billed was fine while a forty-five-year
+      old had no dependants. This population has a partner and children, so the
+      same character came back cash-poor and the fee landed as a SHORTFALL row —
+      "$86 of it went unpaid" — which is the fee system working and the harness
+      testing nothing. The test needs somebody who can afford both.
+    */
+    let state = richEnough('advice-fee', 250_000, 45);
     const cash = Math.round(Number(state.player.cash) / 100);
     expect(cash).toBeGreaterThan(5_000);
 

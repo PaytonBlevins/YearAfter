@@ -62,7 +62,7 @@ STATS = {
     "willpower",
     "discipline",
 }
-CATEGORIES = {"family", "school", "friendship", "random", "talent"}
+CATEGORIES = {"family", "school", "friendship", "random", "talent", "career", "health", "loss"}
 RARITIES = {"common", "uncommon", "rare", "veryRare", "exceptional", "legendary"}
 REQUIREMENTS = {
     "mother",
@@ -178,6 +178,7 @@ def FX(
     stress: int | None = None,
     set_flags: list[str] | None = None,
     clear_flags: list[str] | None = None,
+    bond: int | None = None,
 ) -> dict:
     """
     An event's consequences. `cash` must come from CASH().
@@ -187,6 +188,14 @@ def FX(
     long summer, a grandparent's house, a week with the power out. Both
     directions are required, or stress is a ratchet and every character ends
     childhood pinned at the top of it.
+
+    Ticket 0415, and the same rule for `willpower`: it is earned by carrying
+    something and it is spent by carrying too much. It does not go on an event
+    about warmth (a friend saying yes is a good year, not a stronger person), and
+    it does not go on BOTH outcomes of a hard choice — if the branch where it
+    went wrong pays the same as the branch where it went right, the number is a
+    fee for being asked (CORE_RULES 13.79). The adult catalog had seventy-one
+    willpower gains and no losses and the stat collapsed to sd 2.8 by sixty.
     """
     if cash is not None and not isinstance(cash, dict):
         raise TypeError("cash must be CASH(delta, source), not a bare number")
@@ -199,6 +208,29 @@ def FX(
             "stress": stress,
             "setFlags": set_flags,
             "clearFlags": clear_flags,
+            # Ticket 0413 — what this did to the PERSON it named, as opposed to
+            # what it did to the character's mood.
+            #
+            # `bondFromOutcome` has read `effects.bond` since 0206 and has always
+            # fallen back to happiness x 0.7 because nothing could author it: the
+            # engine had the field and the generator had no way to write it, so
+            # every event in the catalog took the derived value. That was fine
+            # while events about people were a childhood thing, and it stopped
+            # being fine the moment this ticket added thirty-odd adult events
+            # that name a friend — a year with several warm friendship events in
+            # it was quietly handing that friendship twelve or fifteen points.
+            #
+            # Measured: closest-friend spread (p90 - p10) at fifty-five fell from
+            # 11 to 7 and the share of adults with nobody fell under 1%, which
+            # makes `hasFriend: false` content unreachable. 0412 curved the
+            # proximity gain for exactly this failure and the catalog was the
+            # other door into it.
+            #
+            # So an event that is ABOUT a friendship rather than an interaction
+            # with one authors `bond=0`: the year still moves happiness, and the
+            # number that says how close two people are stays where the two of
+            # them left it.
+            "bond": bond,
         }
     )
 
@@ -222,6 +254,21 @@ def COND(
     flags_none: list[str] | None = None,
     partnered: bool | None = None,
     has_children: bool | None = None,
+    # Ticket 0409. Work, the body, and loss.
+    employed: bool | None = None,
+    job_track_any: list[str] | None = None,
+    job_years_at_least: int | None = None,
+    job_years_at_most: int | None = None,
+    has_condition: bool | None = None,
+    condition_any: list[str] | None = None,
+    bereaved_within: int | None = None,
+    # Ticket 0412. Friends — the predicate the language never had, and the
+    # reason the whole adult `friendship` library was about romance: it could
+    # say "is seeing somebody" and could not say "has a friend".
+    has_friend: bool | None = None,
+    friends_at_least: int | None = None,
+    friends_at_most: int | None = None,
+    friendship_years_at_least: int | None = None,
 ) -> dict:
     return prune(
         {
@@ -241,12 +288,26 @@ def COND(
             "relationshipAtMost": rel_at_most,
             "flagsAll": flags_all,
             "flagsNone": flags_none,
+            "employed": employed,
+            "jobTrackAny": job_track_any,
+            "jobYearsAtLeast": job_years_at_least,
+            "jobYearsAtMost": job_years_at_most,
+            "hasCondition": has_condition,
+            "conditionAny": condition_any,
+            "bereavedWithin": bereaved_within,
+            "friendsAtLeast": friends_at_least,
+            "friendsAtMost": friends_at_most,
+            "friendshipYearsAtLeast": friendship_years_at_least,
             # Ticket 0207. `prune` drops None but keeps False, which is what
             # this field needs: "must NOT be seeing anybody" is a real
             # constraint and is not the same as no constraint at all.
             "partnered": partnered,
             # Ticket 0208. Like `partnered`, False is a real constraint.
             "hasChildren": has_children,
+            # Ticket 0412. Same again: "must NOT have a friend" is the whole
+            # point of half the copy this gate exists for, and `prune` keeps
+            # False while dropping None.
+            "hasFriend": has_friend,
         }
     )
 
@@ -1031,7 +1092,7 @@ E("parent.first-night", "family", [
 E("parent.fever", "family", [
     "Your kid spiked a fever at 2am and you sat up the whole night watching them breathe.",
 ], age_min=19, weight=11, cooldown=3,
-   effects=FX(stats={"health": -3, "happiness": -2, "willpower": 3}), has_children=True)
+   effects=FX(stats={"health": -3, "happiness": -2, "willpower": 1}), has_children=True)
 
 E("parent.school-run", "family", [
     "You did the school run every morning for a year and got very good at the radio.",
@@ -1047,7 +1108,7 @@ E("parent.recital", "family", [
 E("parent.sick-day", "family", [
     "Took a day off you couldn't spare because there was nobody else to take it.",
 ], age_min=22, weight=10, cooldown=3,
-   effects=FX(stats={"happiness": -1, "willpower": 2}), has_children=True)
+   effects=FX(stats={"happiness": -1, "willpower": 1}), has_children=True)
 
 E("parent.first-day", "family", [
     "Dropped your kid at school and cried in the car, which you had promised yourself you wouldn't do.",
@@ -1058,7 +1119,7 @@ E("parent.teenager", "family", [
     "Your teenager stopped talking to you for most of a year. Nobody could say why.",
     "Had the same argument with your teenager about the same thing eleven times.",
 ], age_min=32, weight=11, cooldown=3,
-   effects=FX(stats={"happiness": -4, "willpower": 3}), has_children=True)
+   effects=FX(stats={"happiness": -4, "willpower": -1}), has_children=True)
 
 E("parent.proud", "family", [
     "Your kid did something genuinely kind when nobody was watching, and somebody told you.",
@@ -1068,7 +1129,7 @@ E("parent.proud", "family", [
 E("parent.money", "family", [
     "The kids needed shoes, again, and something else had to wait.",
 ], age_min=23, weight=10, cooldown=3,
-   effects=FX(stats={"happiness": -3, "willpower": 2}), has_children=True)
+   effects=FX(stats={"happiness": -3}), has_children=True)
 
 E("parent.driving", "family", [
     "Taught your kid to drive. You have never gripped anything so hard in your life.",
@@ -1078,7 +1139,7 @@ E("parent.driving", "family", [
 E("parent.quiet-house", "family", [
     "The house got quiet. You had been looking forward to it and it wasn't what you expected.",
 ], age_min=40, weight=10, cooldown=5,
-   effects=FX(stats={"happiness": -2, "willpower": 2}), has_children=True)
+   effects=FX(stats={"happiness": -2}), has_children=True)
 
 # -----------------------------------------------------------------------------
 # ROMANCE (Ticket 0207)
@@ -1196,13 +1257,13 @@ E("love.the-one-that-got-away", "friendship", [
     "Ran into an ex at the store. You were both polite and you thought about it all week.",
     "Bumped into somebody you used to date. Five awkward minutes, then a week of thinking.",
 ], age_min=24, weight=10, cooldown=5,
-   effects=FX(stats={"happiness": -2, "willpower": 2}))
+   effects=FX(stats={"happiness": -2}))
 
 E("love.quiet-year", "friendship", [
     "Nobody this year. You got pretty good at being on your own.",
     "No dates, no drama. You cooked a lot and slept fine.",
 ], age_min=21, weight=10, cooldown=3,
-   effects=FX(stats={"willpower": 3, "happiness": 1}), partnered=False)
+   effects=FX(stats={"willpower": 1, "happiness": 1}), partnered=False)
 
 E("friend.rival", "friendship", [
     "{kid} became a rival about something extremely small, and it lasted years.",
@@ -3298,53 +3359,1669 @@ E("school.team-photo", "school", [
 # two-year cooldown is the same handful forever; twenty-four is a life.
 # =============================================================================
 
+# Ticket 0413 — the quiet-year events, which were doing a job they were never
+# written for.
+#
+# These are labelled placeholders and the roadmap has listed them as a hole
+# since 0209. What nobody measured until 0412 is how much of a life they were
+# carrying: **98.6% of everything that fired at eighteen, and 35.2% of
+# everything between eighteen and twenty-two**, because the adult catalog barely
+# existed that early and the selector draws from what is there.
+#
+# A quiet year is real content — `love.quiet-year` is deliberate and good. The
+# defect was the denominator, so the fix is the friendship tranche below rather
+# than deleting these: the ids stay (a save records what fired, CORE_RULES 13),
+# the weight comes down to what a quiet year is worth against a year with
+# something in it, and five lines that broke writing rule 10 are rewritten.
+#
+# Rule 10 is "never summarize the year — name a thing that happened", and
+# "Nothing happened this year worth telling anybody about" is the purest
+# possible violation of it: it is the writer saying there was nothing to write.
+# The validator's VAGUE table did not catch these because it was built from the
+# lines the product owner quoted, and he never saw these — they were buried
+# under a childhood's worth of better content until the year he left school.
 E("adult.placeholder.1", "random", [
     "Same job, same apartment, same weekends.",
-    "Nothing happened this year worth telling anybody about.",
+    "Renewed the lease without reading it and stayed another year.",
     "You meant to do more with the year than you did.",
-], age_min=18, weight=6, cooldown=2)
+], age_min=18, weight=4, cooldown=2)
 
 E("adult.placeholder.2", "random", [
     "Same coffee, same walk, most mornings.",
     "Ate lunch at the same desk about two hundred times.",
     "You had a routine and you mostly stuck to it.",
-], age_min=18, weight=6, cooldown=2)
+], age_min=18, weight=4, cooldown=2)
 
 E("adult.placeholder.3", "random", [
     "Quiet year. After the last few, you'd take it.",
-    "Nothing went wrong, which was new.",
-    "Boring year, and you weren't complaining.",
-], age_min=18, weight=6, cooldown=2)
+    "Got through twelve months without one phone call you dreaded.",
+    "Nobody needed anything from you in a hurry, all year.",
+], age_min=18, weight=4, cooldown=2)
 
 E("adult.placeholder.4", "random", [
-    "You'd struggle to name one thing that happened this year.",
+    "Read four books and abandoned nine, which is about your average.",
     "Started three things and finished one.",
     "Went out less than last year and didn't really miss it.",
-], age_min=18, weight=6, cooldown=2)
+], age_min=18, weight=4, cooldown=2)
 
 E("adult.placeholder.5", "random", [
     "Made a bunch of plans and kept about half of them.",
     "Said yes to things you meant to say no to.",
     "Kept meaning to call people back and mostly didn't.",
-], age_min=18, weight=6, cooldown=2)
+], age_min=18, weight=4, cooldown=2)
 
 E("adult.placeholder.6", "random", [
     "The year went fast. They'd started doing that.",
     "You looked up and it was somehow October.",
     "Blinked and it was over.",
-], age_min=25, weight=6, cooldown=2)
+], age_min=25, weight=4, cooldown=2)
 
 E("adult.placeholder.7", "random", [
     "Spent the year pretty much like the last one, and that was fine.",
     "Realized you'd been doing the same thing for four years. Didn't hate it.",
-    "Nothing changed, and you'd stopped expecting it to.",
-], age_min=25, weight=6, cooldown=2)
+    "Bought the same brand of everything you bought last year.",
+], age_min=25, weight=4, cooldown=2)
 
 E("adult.placeholder.8", "random", [
     "Slower year. You noticed more of it.",
     "Started going to bed early and sleeping better for it.",
     "Less happened, and you didn't mind that either.",
-], age_min=55, weight=8, cooldown=2)
+], age_min=55, weight=5, cooldown=2)
+
+
+# =============================================================================
+# ADULT LIFE — Ticket 0409.
+#
+# WHAT WAS HERE BEFORE: eight events named `adult.placeholder.1` through `.8`,
+# twenty-four lines total, covering ages eighteen to death. Measured across
+# sixty played lives, HALF of every adult's feed was a line that character had
+# already seen — "Same job, same apartment, same weekends" six times in one
+# life. Twenty-six of the catalog's 374 events could fire at forty, all of them
+# passive, none of them about work, a diagnosis, or anybody dying.
+#
+# The three holes the roadmap named (findings 3, 4 and 4b) were never really
+# about writing. They were about the predicate language: an event cannot be
+# about a job if `eligibility` has no way to say "has one", and 0207 and 0208
+# had already learned that twice — `partnered` and `hasChildren` were both added
+# AFTER events shipped that presupposed a relationship or a child and fired at
+# people who had neither. 0409 added `employed`, `jobTrackAny`, `jobYearsAtLeast`,
+# `hasCondition`, `conditionAny` and `bereavedWithin` first, and then wrote to
+# them.
+#
+# Every event below is held to `claude/event-writing-rules.md` in full: a named
+# person and a real scene, three or more approaches rather than intensities,
+# outcomes that can land well or badly and say what happened to whom,
+# contractions throughout, and no line that only passes judgment on a year.
+# =============================================================================
+
+# ---- work: the decisions an adult never got ---------------------------------
+
+D("career.late-again", "career", [
+    "{adult} catches you at five and asks you to stay late again. It's the third time this month, and you already had plans.",
+], choices=[
+    C("stay", "Stay and get it done", outcomes=[
+        OUT(5, "You stayed until nine. {adult} noticed, said so in front of people, and the work was genuinely better for it.",
+            FX(stats={"happiness": -2}, stress=4)),
+        OUT(4, "You stayed until nine and {adult} had already gone home by seven. Nobody mentioned it again.",
+            FX(stats={"happiness": -6}, stress=6)),
+    ]),
+    C("say-no", "Tell {adultThem} you can't tonight", outcomes=[
+        OUT(5, "You said you had something on. {adult} said fine, and meant it — you'd never said no before, so it landed as a fact rather than a problem.",
+            FX(stats={"happiness": 4, "willpower": 3})),
+        OUT(3, "You said no. {adult} said 'sure' in a way that wasn't sure, and gave the next good piece of work to somebody else.",
+            FX(stats={"happiness": -4})),
+    ]),
+    C("half", "Offer to finish it in the morning", outcomes=[
+        OUT(6, "You offered to come in early instead. {adult} took it, and you got the whole thing done by ten with a clear head.",
+            FX(stats={"happiness": 2, "smarts": 1}, stress=1)),
+        OUT(3, "You offered the morning. It turned out it genuinely had to be that night, and somebody else did it badly.",
+            FX(stats={"happiness": -3}, stress=2)),
+    ]),
+], age_min=19, employed=True, person_tokens=["adult"], weight=10, cooldown=4)
+
+D("career.credit", "career", [
+    "{adult} presented your work in a meeting and said 'we' the whole way through. Two people afterwards congratulated {adultThem} on it.",
+], choices=[
+    C("private", "Talk to {adultThem} privately", outcomes=[
+        OUT(6, "You caught {adultThem} at the coffee machine and said it plainly. {AdultThey} went red, and sent a correction to the whole thread within the hour.",
+            FX(stats={"happiness": 5, "charisma": 3, "willpower": 2})),
+        OUT(4, "{adult} said you were being sensitive and that it was a team effort. You'd been the team.",
+            FX(stats={"happiness": -6}, stress=3)),
+    ]),
+    C("boss", "Take it to your manager", outcomes=[
+        OUT(4, "Your manager already knew whose it was, told you so, and started sending you to the meetings directly.",
+            FX(stats={"happiness": 7, "charisma": 2})),
+        OUT(5, "Your manager said to sort it out between you. Now two people were annoyed with you instead of one.",
+            FX(stats={"happiness": -7}, stress=5)),
+    ]),
+    C("nothing", "Let it go and keep the receipts", outcomes=[
+        OUT(6, "You said nothing and quietly started copying yourself on everything. It came in useful in March.",
+            FX(stats={"willpower": 3, "smarts": 2}, stress=3)),
+        OUT(4, "You said nothing, and it happened twice more. By the third time you'd stopped bringing your good ideas to that room.",
+            FX(stats={"happiness": -8}, stress=4)),
+    ]),
+], age_min=21, employed=True, person_tokens=["adult"], weight=9, cooldown=6)
+
+D("career.mistake", "career", [
+    "You got a number wrong and it went out to a client. {adult} spotted it before anybody else did, and is looking at you.",
+], choices=[
+    C("own", "Own it and tell your manager yourself", outcomes=[
+        OUT(7, "You walked in and said it before anybody asked. Your manager fixed it in a phone call and told you that owning it was the whole reason they'd keep you.",
+            FX(stats={"happiness": 3, "willpower": 4, "charisma": 2}, stress=3)),
+        OUT(3, "You owned it. It still cost the company money, and it followed you around for about six months.",
+            FX(stats={"happiness": -6, "willpower": 1}, stress=6)),
+    ]),
+    C("fix", "Fix it quietly before anybody notices", outcomes=[
+        OUT(5, "You fixed it, resent it, and nobody ever knew. You also didn't sleep much that week.",
+            FX(stats={"happiness": -2, "smarts": 2}, stress=6)),
+        OUT(4, "You tried to fix it quietly and the client had already read the first one. Getting caught covering it up was worse than the mistake.",
+            FX(stats={"happiness": -9}, stress=8)),
+    ]),
+    C("ask", "Ask {adult} what to do", outcomes=[
+        OUT(6, "{adult} had made the same mistake in {adultTheir} first year, walked you through the fix, and never brought it up again.",
+            FX(stats={"happiness": 4, "smarts": 3, "charisma": 2}, stress=2)),
+        OUT(3, "{adult} told the manager before you got there. Technically that's what you asked for.",
+            FX(stats={"happiness": -5}, stress=5)),
+    ]),
+], age_min=19, employed=True, person_tokens=["adult"], weight=9, cooldown=6)
+
+D("career.train", "career", [
+    "They've hired {adult}, who is new and about twelve, and asked you to show {adultThem} how everything works. It's on top of your own work.",
+], choices=[
+    C("properly", "Teach {adultThem} properly", outcomes=[
+        OUT(7, "You gave it real time. Six months later {adult} was good, said so to your manager, and you found you liked explaining things.",
+            FX(stats={"happiness": 6, "charisma": 4, "smarts": 2}, stress=3)),
+        OUT(3, "You gave it real time and {adult} left in April for somewhere that paid more.",
+            FX(stats={"happiness": -4}, stress=3)),
+    ]),
+    C("minimum", "Show {adultThem} the basics", outcomes=[
+        OUT(6, "You did the tour, handed over the login, and kept your afternoons. {adult} worked it out fine.",
+            FX(stats={"happiness": 1})),
+        OUT(4, "You did the minimum and {adult} made a mess of something in week three that took you two days to undo.",
+            FX(stats={"happiness": -4}, stress=5)),
+    ]),
+    C("push-back", "Say you have no hours", outcomes=[
+        OUT(5, "Your manager agreed, moved two things off your plate, and gave the training to somebody with room for it.",
+            FX(stats={"happiness": 4, "willpower": 3})),
+        OUT(4, "Your manager said everybody's busy. You did it anyway, later, and resented it.",
+            FX(stats={"happiness": -5}, stress=6)),
+    ]),
+], age_min=23, employed=True, job_years_at_least=2, person_tokens=["adult"], weight=8, cooldown=8)
+
+D("career.leaving-drinks", "career", [
+    "{adult} is leaving on Friday after eleven years. There's a card going around and drinks after, and you've got an early start.",
+], choices=[
+    C("go", "Go to the drinks", outcomes=[
+        OUT(7, "You went. {adult} told a story about the old building that you'd never heard, and you ended up talking to people you'd sat near for years.",
+            FX(stats={"happiness": 7, "charisma": 3})),
+        OUT(3, "You went, stayed an hour, and spent most of it in a loud room next to somebody from a floor you'd never visited.",
+            FX(stats={"happiness": -1})),
+    ]),
+    C("card", "Sign the card and head home", outcomes=[
+        OUT(6, "You wrote something real in the card rather than 'all the best'. {adult} emailed you about it a week later.",
+            FX(stats={"happiness": 3, "charisma": 1})),
+        OUT(4, "You signed it, went home, and felt odd about it for a couple of days.",
+            FX(stats={"happiness": -2})),
+    ]),
+    C("lunch", "Take {adultThem} to lunch instead", outcomes=[
+        OUT(7, "You took {adultThem} out on the Thursday, just the two of you. {AdultThey} said it was the only part of the week {adultThey}'d actually enjoyed.",
+            FX(stats={"happiness": 8, "charisma": 3})),
+    ]),
+], age_min=25, employed=True, job_years_at_least=3, person_tokens=["adult"], weight=7, cooldown=10)
+
+# ---- work: the years in between ---------------------------------------------
+
+E("career.long-tenure", "career", [
+    "Somebody asked how long you'd been there and the number surprised you both.",
+    "You're now the person who knows where everything's kept.",
+    "New people started asking you how things work before they ask anybody else.",
+], age_min=26, employed=True, job_years_at_least=6, weight=9, cooldown=3,
+   effects=FX(stats={"charisma": 1}))
+
+E("career.bad-week", "career", [
+    "Two people quit in the same week and their work landed on your desk.",
+    "The system went down on a Tuesday and stayed down. Everyone ate lunch at their desks.",
+    "Spent most of a month on something that got cancelled in a ten-minute meeting.",
+], age_min=20, employed=True, weight=8, cooldown=2,
+   effects=FX(stats={"happiness": -3}, stress=5))
+
+E("career.good-week", "career", [
+    "Finished something hard and nobody had to fix it afterward.",
+    "Got an email from somebody senior who'd noticed. Read it more than once.",
+    "Had a run of about three weeks where the work just went well.",
+], age_min=20, employed=True, weight=8, cooldown=2,
+   effects=FX(stats={"happiness": 4}, stress=-2))
+
+E("career.commute", "career", [
+    "The commute got worse, and it turned out that's most of how a day feels.",
+    "Started walking part of the way in. It added twenty minutes and took the edge off.",
+    "Moved desks. It shouldn't matter and it did.",
+], age_min=20, employed=True, weight=6, cooldown=3)
+
+E("career.care.hard", "career", [
+    "A bad one came in on your shift and you thought about it for weeks.",
+    "You got good at the part of the job nobody warns you about.",
+], age_min=20, employed=True, job_track_any=["care", "medicine", "safety", "veterinary"],
+   weight=9, cooldown=3, effects=FX(stats={"happiness": -3}, stress=4))
+
+E("career.trades.hands", "career", [
+    "Came home filthy most days and slept like a stone.",
+    "Somebody's heating worked because of you, and they were oddly emotional about it.",
+], age_min=19, employed=True, job_track_any=["trades", "logistics"],
+   weight=9, cooldown=3, physical=True, effects=FX(stats={"health": -1, "happiness": 2}))
+
+E("career.office.meetings", "career", [
+    "Counted the meetings one week and then wished you hadn't.",
+    "Learned which emails you could leave until Monday.",
+], age_min=20, employed=True, job_track_any=["office", "finance", "legal", "tech"],
+   weight=8, cooldown=3)
+
+# ---- the body ---------------------------------------------------------------
+
+D("health.appointment", "health", [
+    "The only appointment they had is on a Thursday afternoon, and Thursday afternoon is when everything happens at work.",
+], choices=[
+    C("go", "Take the afternoon and go", outcomes=[
+        OUT(7, "You went. They changed one thing about the treatment and it made a real difference by the summer.",
+            FX(stats={"health": 4, "happiness": 3})),
+        OUT(3, "You went, waited ninety minutes, and were told to carry on as you were.",
+            FX(stats={"happiness": -2})),
+    ]),
+    C("rebook", "Push it to next month", outcomes=[
+        OUT(5, "You pushed it. Next month came and you pushed it again.",
+            FX(stats={"health": -3}, stress=3)),
+        OUT(4, "You pushed it a month and went then. It was fine, and you'd spent four weeks assuming it wouldn't be.",
+            FX(stats={"happiness": -2}, stress=2)),
+    ]),
+    C("tell", "Tell work where you're going", outcomes=[
+        OUT(7, "You just said it out loud. Nobody blinked, and two people told you about theirs.",
+            FX(stats={"happiness": 5, "health": 3, "willpower": 2})),
+        OUT(3, "You said it and somebody made a joke about it that you didn't enjoy.",
+            FX(stats={"happiness": -3, "health": 2})),
+    ]),
+], age_min=25, has_condition=True, employed=True, weight=10, cooldown=4)
+
+D("health.advice", "health", [
+    "{adult} heard what you've got and has a lot of thoughts about a thing {adultTheir} cousin did that apparently cured it.",
+], choices=[
+    C("polite", "Thank {adultThem} and move on", outcomes=[
+        OUT(7, "You said thanks and asked about {adultTheir} weekend. {AdultThey} took the hint and it never came up again.",
+            FX(stats={"happiness": 1, "charisma": 2})),
+    ]),
+    C("honest", "Say you'd rather not", outcomes=[
+        OUT(5, "You said it kindly and plainly. {adult} apologized, and afterward treated you like a person rather than a case.",
+            FX(stats={"happiness": 5, "willpower": 3})),
+        OUT(4, "{adult} was hurt and said {adultThey} was only trying to help. You spent a week feeling like the difficult one.",
+            FX(stats={"happiness": -5})),
+    ]),
+    C("look", "Actually look into it", outcomes=[
+        OUT(3, "You looked it up. There was something in it, you asked your doctor, and they adjusted one thing.",
+            FX(stats={"health": 3, "smarts": 2, "happiness": 3})),
+        OUT(7, "You lost an evening to it and came out the other side knowing it was nonsense.",
+            FX(stats={"happiness": -2, "smarts": 1})),
+    ]),
+], age_min=25, has_condition=True, person_tokens=["adult"], weight=8, cooldown=6)
+
+E("health.living-with-it", "health", [
+    "You worked out which mornings are the bad ones and stopped scheduling anything before ten.",
+    "Got a better chair, which felt like giving in until the second week.",
+    "Learned the difference between a bad day and a bad week, and stopped panicking at the first one.",
+    "Keep the tablets by the kettle now, because that's the one thing you never forget to do.",
+], age_min=28, has_condition=True, weight=10, cooldown=2,
+   effects=FX(stats={"smarts": 1}, stress=-2))
+
+E("health.back", "health", [
+    "Picked something up wrong and paid for it for two weeks.",
+    "Found the one way of sitting that doesn't hurt, and defended that chair.",
+], age_min=28, condition_any=["cond.back", "cond.spine"], weight=9, cooldown=2,
+   physical=True, effects=FX(stats={"happiness": -3}))
+
+E("health.breath", "health", [
+    "Stopped taking the stairs at work and hoped nobody noticed.",
+    "Got winded doing something you did without thinking about five years ago.",
+], age_min=30, condition_any=["cond.chest", "cond.lungs", "cond.heart"], weight=9, cooldown=2,
+   physical=True, effects=FX(stats={"happiness": -3}))
+
+E("health.good-stretch", "health", [
+    "Had a good run of months where you barely thought about it.",
+    "A checkup came back better than the last one, and you read the letter twice.",
+], age_min=28, has_condition=True, weight=7, cooldown=3,
+   effects=FX(stats={"happiness": 5, "health": 2}, stress=-3))
+
+# ---- losing somebody --------------------------------------------------------
+
+D("loss.the-house", "loss", [
+    "The house has to be cleared by the end of the month, and nobody else is going to do it.",
+], choices=[
+    C("alone", "Do it yourself, slowly", outcomes=[
+        OUT(6, "You took four weekends over it. You found a shoebox of photographs you'd never seen and sat on the floor with it until it got dark.",
+            FX(stats={"happiness": 3, "willpower": 3}, stress=4)),
+        OUT(4, "You did it alone and it took everything you had. You didn't want to talk to anybody for about a month afterward.",
+            FX(stats={"happiness": -6}, stress=8)),
+    ]),
+    C("help", "Ask people to help", outcomes=[
+        OUT(7, "Four people turned up on the Saturday. It was done by three, and somebody brought sandwiches, and it was almost a good day.",
+            FX(stats={"happiness": 6, "charisma": 3}, stress=2)),
+        OUT(3, "Two people said yes and one turned up. You noticed which was which for a long time afterward.",
+            FX(stats={"happiness": -4}, stress=5)),
+    ]),
+    C("pay", "Pay somebody to clear it", outcomes=[
+        OUT(6, "Paid a firm $1,400 to clear it. Done in a day, and you were fine about that right up until you weren't.",
+            FX(stats={"happiness": -2}, cash=CASH(-1400, "clearing the house"), stress=3)),
+    ]),
+], age_min=22, bereaved_within=1, weight=12, cooldown=10)
+
+D("loss.the-anniversary", "loss", [
+    "It's a year this week. {adult} from work has no idea and has asked you to something on exactly that day.",
+], choices=[
+    C("say", "Tell {adultThem} why you can't", outcomes=[
+        OUT(7, "You told {adultThem}. {adult} was gentle about it, moved the whole thing, and checked on you that Friday.",
+            FX(stats={"happiness": 5, "charisma": 2})),
+        OUT(3, "You told {adultThem} and {adultThey} didn't know what to say, so {adultThey} said nothing, and it was awkward for a week.",
+            FX(stats={"happiness": -3})),
+    ]),
+    C("go", "Go anyway", outcomes=[
+        OUT(5, "You went. It was a decent distraction and you were glad you hadn't sat at home.",
+            FX(stats={"happiness": 3})),
+        OUT(5, "You went and spent the whole evening somewhere else in your head.",
+            FX(stats={"happiness": -5}, stress=4)),
+    ]),
+    C("alone", "Make an excuse and keep the day", outcomes=[
+        OUT(7, "You said you were busy and spent the day the way you wanted to. It was a hard day and it was yours.",
+            FX(stats={"happiness": 2, "willpower": 3}, stress=2)),
+    ]),
+], age_min=22, bereaved_within=2, person_tokens=["adult"], weight=9, cooldown=8)
+
+E("loss.the-first-year", "loss", [
+    "Went to call them about something small before you remembered.",
+    "Their handwriting turned up on the back of an envelope in a drawer.",
+    "Somebody asked how you were and you said fine, which was mostly true by then.",
+    "Caught yourself telling one of their stories as though it were yours.",
+], age_min=20, bereaved_within=1, weight=12, cooldown=1,
+   effects=FX(stats={"happiness": -4}, stress=3))
+
+E("loss.later", "loss", [
+    "Cooked something the way they used to and got it nearly right.",
+    "Realized you'd gone a whole week without thinking about it, and felt strange about that.",
+    "Started answering the phone the way they did, which everybody noticed except you.",
+], age_min=22, bereaved_within=6, weight=8, cooldown=3,
+   effects=FX(stats={"happiness": 1}))
+
+# ---- work, continued --------------------------------------------------------
+
+D("career.raise", "career", [
+    "You've been on the same money for three years and you know what {adult} makes for the same work. Your review is on Tuesday.",
+], choices=[
+    C("number", "Ask for a specific number", outcomes=[
+        OUT(6, "You named a figure and then shut up. They came back with most of it, and you wished you'd asked sooner.",
+            FX(stats={"happiness": 8, "charisma": 4, "willpower": 3})),
+        OUT(4, "You named a figure. They said the budget was set in March and they'd revisit it. They didn't.",
+            FX(stats={"happiness": -6}, stress=3)),
+    ]),
+    C("hint", "Hint that you're underpaid", outcomes=[
+        OUT(7, "You danced around it. They said they'd look into it, and that was the end of that.",
+            FX(stats={"happiness": -4})),
+        OUT(3, "You hinted and your manager, to their credit, finished the sentence for you and fixed it.",
+            FX(stats={"happiness": 6, "charisma": 2})),
+    ]),
+    C("offer", "Go and get another offer first", outcomes=[
+        OUT(5, "You interviewed elsewhere, got an offer, and took it back. They matched it in a day, which told you something.",
+            FX(stats={"happiness": 6, "smarts": 3, "willpower": 3}, stress=5)),
+        OUT(4, "You got the other offer and they let you go take it. It was better anyway.",
+            FX(stats={"happiness": 4, "willpower": 4}, stress=6)),
+        OUT(3, "You spent four months interviewing, got nothing, and came back to the same desk quieter than you left it.",
+            FX(stats={"happiness": -7}, stress=7)),
+    ]),
+], age_min=23, employed=True, job_years_at_least=3, person_tokens=["adult"], weight=9, cooldown=8)
+
+D("career.friend-let-go", "career", [
+    "They let {adult} go on Wednesday with no warning. You sat opposite {adultThem} for years, and nobody's saying anything about it.",
+], choices=[
+    C("call", "Call {adultThem} that night", outcomes=[
+        OUT(8, "You called. {AdultThey} hadn't told anybody yet and talked for an hour. You stayed friends long after you'd both left that place.",
+            FX(stats={"happiness": 5, "charisma": 4})),
+    ]),
+    C("ask", "Ask your manager what happened", outcomes=[
+        OUT(5, "You asked straight out. Your manager told you more than they should have, and you understood the place better afterward.",
+            FX(stats={"smarts": 3, "happiness": -2})),
+        OUT(5, "You asked and got a wall of phrases about restructuring. You went quiet in meetings for a month.",
+            FX(stats={"happiness": -6}, stress=5)),
+    ]),
+    C("head-down", "Keep your head down", outcomes=[
+        OUT(6, "You said nothing and got on with it. It was the sensible thing and it sat badly for a while.",
+            FX(stats={"happiness": -4}, stress=4)),
+    ]),
+], age_min=24, employed=True, person_tokens=["adult"], weight=8, cooldown=9)
+
+E("career.first-day", "career", [
+    "First week somewhere new. Spent most of it working out where the mugs are and who to ask about anything.",
+    "Started a new job and came home exhausted from doing almost nothing.",
+], age_min=18, employed=True, job_years_at_most=0, weight=12, cooldown=1,
+   effects=FX(stats={"happiness": 3}, stress=4))
+
+E("career.second-year", "career", [
+    "Stopped needing to think about how to do most of it, which freed up room to notice other things.",
+    "Got fast enough at the job that people started giving you more of it.",
+], age_min=19, employed=True, job_years_at_least=1, job_years_at_most=3, weight=9, cooldown=2,
+   effects=FX(stats={"smarts": 1, "charisma": 1}))
+
+E("career.reorg", "career", [
+    "There was a reorganization. Your job was the same afterward with a different word on it.",
+    "Got a new manager, the third in two years. Explained your whole job again from the start.",
+], age_min=22, employed=True, weight=8, cooldown=3,
+   effects=FX(stats={"happiness": -3}, stress=4))
+
+E("career.friend-at-work", "career", [
+    "Made an actual friend at work, which you'd stopped expecting to happen.",
+    "There's one person there you'd still see if you both left, and you both know it.",
+], age_min=20, employed=True, job_years_at_least=2, weight=8, cooldown=4,
+   effects=FX(stats={"happiness": 6, "charisma": 2}, stress=-2))
+
+E("career.thankless", "career", [
+    "Did the part of the job that only gets noticed when it goes wrong. It didn't go wrong.",
+    "Fixed something nobody knew was broken and told nobody about it.",
+], age_min=20, employed=True, weight=7, cooldown=3)
+
+E("career.money-tight", "career", [
+    "The paycheck stopped covering what it used to and nothing about the job had changed.",
+    "Worked out what you actually earn per hour and put the calculator away.",
+], age_min=20, employed=True, weight=7, cooldown=4,
+   effects=FX(stats={"happiness": -4}, stress=4))
+
+E("career.retail.shift", "career", [
+    "Somebody shouted at you about something that wasn't yours to fix, and you were fine, and then you weren't.",
+    "Learned which regulars to greet and which to leave alone.",
+], age_min=18, employed=True, job_track_any=["retail", "food", "hospitality", "sales"],
+   weight=9, cooldown=3, effects=FX(stats={"happiness": -2, "charisma": 2}))
+
+E("career.teach.year", "career", [
+    "One of them finally got it in March, and you thought about that for the rest of the year.",
+    "Spent your own money on things for the room again and didn't mention it.",
+], age_min=22, employed=True, job_track_any=["education"], weight=9, cooldown=3,
+   effects=FX(stats={"happiness": 4}))
+
+E("career.creative.work", "career", [
+    "Made something you were proud of and somebody changed it before it went out.",
+    "Got a brief so vague you invented the whole thing, and they loved it.",
+], age_min=20, employed=True, job_track_any=["creative"], weight=9, cooldown=3,
+   effects=FX(stats={"happiness": 2}))
+
+E("career.public.work", "career", [
+    "Spent a year on something that will take another four, and explained that to a room that wanted it in one.",
+    "A thing you'd worked on for years finally opened, and almost nobody knew you'd been near it.",
+], age_min=22, employed=True, job_track_any=["public", "safety"], weight=9, cooldown=3,
+   effects=FX(stats={"happiness": 2, "willpower": 1}))
+
+E("career.out-of-work", "career", [
+    "Nothing came of any of the applications. You stopped counting them around forty.",
+    "Had two interviews and heard back from neither.",
+    "Filled the days with things that didn't cost anything.",
+], age_min=20, age_max=64, employed=False, weight=10, cooldown=1,
+   effects=FX(stats={"happiness": -5}, stress=5))
+
+E("career.out-of-work-ok", "career", [
+    "Not working turned out to suit you for a while. You got a lot of sleep and read more than you had in years.",
+    "Took the year off on purpose and only felt strange about it in the evenings.",
+], age_min=22, age_max=64, employed=False, weight=6, cooldown=4,
+   effects=FX(stats={"happiness": 3, "health": 2}, stress=-4))
+
+# ---- the body, continued ----------------------------------------------------
+
+D("health.the-diagnosis", "health", [
+    "They've told you what it is, and they've given you a leaflet, and you're standing in the parking lot holding it.",
+], choices=[
+    C("read", "Read everything you can find", outcomes=[
+        OUT(6, "You read for three weeks and came out understanding it. Your next appointment was a conversation between two people who both knew the subject.",
+            FX(stats={"smarts": 4, "happiness": 2, "willpower": 3}, stress=2)),
+        OUT(4, "You read until two in the morning most nights and frightened yourself with things that were never going to happen to you.",
+            FX(stats={"happiness": -7}, stress=8)),
+    ]),
+    C("tell", "Tell the people close to you", outcomes=[
+        OUT(7, "You told them. It was a hard evening and you slept properly for the first time in a week afterward.",
+            FX(stats={"happiness": 5, "charisma": 2}, stress=-3)),
+        OUT(3, "You told them and then spent months managing how they felt about it, which wasn't what you needed.",
+            FX(stats={"happiness": -4}, stress=5)),
+    ]),
+    C("carry-on", "Say nothing and carry on", outcomes=[
+        OUT(5, "You told nobody and got on with it. It worked, right up until the day it didn't.",
+            FX(stats={"willpower": -2, "happiness": -3}, stress=6)),
+    ]),
+], age_min=28, has_condition=True, weight=10, cooldown=12)
+
+E("health.tired", "health", [
+    "Tired in a way that sleeping didn't fix.",
+    "Cancelled things twice in a row and hated doing it.",
+], age_min=28, has_condition=True, weight=9, cooldown=2,
+   effects=FX(stats={"happiness": -3}, stress=3))
+
+E("health.adjust", "health", [
+    "They changed the dose and it took about six weeks to feel like yourself again.",
+    "Swapped to a different one that doesn't make you sleep all afternoon.",
+], age_min=28, has_condition=True, weight=8, cooldown=3,
+   effects=FX(stats={"health": 2}))
+
+E("health.knee", "health", [
+    "Gave up running. Bought a bike instead and grudgingly liked it.",
+    "Worked out which stairs in your own house are the bad ones.",
+], age_min=30, condition_any=["cond.knee", "cond.back"], weight=8, cooldown=3,
+   physical=True, effects=FX(stats={"happiness": -2}))
+
+E("health.hearing", "health", [
+    "Started sitting with your back to the wall in restaurants so you could hear people.",
+    "Missed a whole conversation and nodded through it.",
+], age_min=40, condition_any=["cond.hearing"], weight=9, cooldown=2,
+   effects=FX(stats={"happiness": -3}))
+
+E("health.stomach", "health", [
+    "Worked out the short list of things you can eat without regretting it.",
+    "Kept a note on your phone of what set it off, which isn't how you wanted to spend a year.",
+], age_min=28, condition_any=["cond.stomach", "cond.sugar"], weight=8, cooldown=3,
+   effects=FX(stats={"happiness": -2, "smarts": 1}))
+
+E("health.checkup-good", "health", [
+    "Had a check-up and everything looked fine.",
+    "The doctor said to carry on doing what you're doing, which was nothing in particular.",
+], age_min=30, has_condition=False, weight=7, cooldown=4,
+   effects=FX(stats={"happiness": 3}))
+
+E("health.aging", "health", [
+    "Something started hurting that hadn't before, and then quietly stopped.",
+    "Needed glasses for reading and held out about eight months longer than you should have.",
+    "Started warming up before doing things you used to just do.",
+], age_min=42, weight=9, cooldown=2, physical=True,
+   effects=FX(stats={"happiness": -1}))
+
+E("health.good-shape", "health", [
+    "Got into the habit of walking after dinner and kept it up all year.",
+    "Slept properly for months on end and forgot what the other thing felt like.",
+], age_min=25, has_condition=False, weight=8, cooldown=3,
+   effects=FX(stats={"health": 3, "happiness": 4}, stress=-3))
+
+E("health.scare", "health", [
+    "Had a scare, had it looked at, and it was nothing. You were oddly shaky about it for a week.",
+    "Spent four days waiting on a result and did almost nothing else with them.",
+], age_min=32, weight=7, cooldown=5,
+   effects=FX(stats={"happiness": -4}, stress=6))
+
+E("health.dentist", "health", [
+    "Went to the dentist for the first time in years. $380 to fix what that cost you.",
+    "Got the tooth sorted that you'd been chewing around since spring. $380.",
+], age_min=22, weight=6, cooldown=5,
+   effects=FX(cash=CASH(-380, "the dentist"), stats={"health": 1}))
+
+E("health.winter", "health", [
+    "Got whatever went round the office and were flat for a week.",
+    "Spent February indoors feeling about sixty percent.",
+], age_min=20, weight=8, cooldown=2,
+   effects=FX(stats={"health": -2, "happiness": -2}))
+
+E("health.walked-it-off", "health", [
+    "Did something to your shoulder and decided it would sort itself out. It mostly did.",
+    "Hurt your back lifting something stupid and moved carefully for a month.",
+], age_min=24, weight=8, cooldown=3, physical=True,
+   effects=FX(stats={"health": -2}))
+
+E("health.quit", "health", [
+    "Cut out the thing you'd been meaning to cut out, and it stuck this time.",
+    "Stopped drinking during the week. Slept better almost immediately and were annoyed about how obvious it was.",
+], age_min=25, weight=6, cooldown=6,
+   effects=FX(stats={"health": 4, "happiness": 2, "willpower": 3}))
+
+E("health.old-injury", "health", [
+    "The old injury turned up again out of nowhere, said hello, and left.",
+    "Weather got cold and you found out which parts of you remember things.",
+], age_min=45, weight=7, cooldown=3, physical=True,
+   effects=FX(stats={"happiness": -2}))
+
+E("health.pace", "health", [
+    "Worked out how much you can do in a day and stopped pretending it was more.",
+    "Started saying no to the second thing in an evening.",
+], age_min=35, weight=7, cooldown=4,
+   effects=FX(stats={"smarts": 1}, stress=-3))
+
+E("health.sleep", "health", [
+    "Stopped sleeping through and never really got it back.",
+    "Woke at four most nights for a couple of months and then it passed.",
+], age_min=38, weight=8, cooldown=3,
+   effects=FX(stats={"health": -1, "happiness": -2}, stress=3))
+
+E("health.eyes", "health", [
+    "Moved the phone further away for a year, then gave in: $210 for reading glasses.",
+    "Got your eyes tested and came out $210 lighter with a prescription and a mild grievance.",
+], age_min=40, weight=7, cooldown=5,
+   effects=FX(cash=CASH(-210, "new glasses")))
+
+# ---- loss, continued --------------------------------------------------------
+
+D("loss.the-things", "loss", [
+    "There's a box of their things and one of them should probably go to {adult}, who hasn't asked and won't.",
+], choices=[
+    C("give", "Take it to {adultThem}", outcomes=[
+        OUT(8, "You drove it over. {AdultThey} cried in the doorway and then made you tea, and you stayed three hours.",
+            FX(stats={"happiness": 6, "charisma": 3})),
+    ]),
+    C("keep", "Keep it yourself", outcomes=[
+        OUT(6, "You kept it. It's on the shelf where you can see it, and you've stopped feeling guilty about that.",
+            FX(stats={"happiness": 3})),
+        OUT(4, "You kept it and felt bad about keeping it every time you looked at it.",
+            FX(stats={"happiness": -4})),
+    ]),
+    C("ask", "Ask {adultThem} what {adultThey} wants", outcomes=[
+        OUT(7, "You asked. {AdultThey} wanted something completely different and much smaller, and was glad to be asked.",
+            FX(stats={"happiness": 5, "charisma": 2})),
+    ]),
+], age_min=22, bereaved_within=2, person_tokens=["adult"], weight=9, cooldown=10)
+
+E("loss.the-funeral", "loss", [
+    "Stood up and said something at the funeral and got through most of it.",
+    "Didn't speak at the funeral and thought about what you'd have said for a long time after.",
+    "People you hadn't seen in fifteen years turned up, and that helped more than you'd have guessed.",
+], age_min=18, bereaved_within=0, weight=14, cooldown=1,
+   effects=FX(stats={"happiness": -6}, stress=6))
+
+E("loss.the-paperwork", "loss", [
+    "Spent the winter on paperwork nobody warns you about.",
+    "Sat on hold for two hours to tell a company that somebody had died.",
+], age_min=20, bereaved_within=1, weight=10, cooldown=2,
+   effects=FX(stats={"happiness": -4}, stress=5))
+
+E("loss.the-family-after", "loss", [
+    "Saw more of your family that year than the five before it.",
+    "Somebody in the family said something at the wake that won't be forgotten quickly.",
+    "Started calling {sibling} on Sundays, and kept it up.",
+], age_min=20, bereaved_within=2, requires=["sibling"], weight=9, cooldown=3,
+   effects=FX(stats={"happiness": 2}, relationship={"siblings": 4}))
+
+E("loss.the-date", "loss", [
+    "Their birthday came round and you didn't know what to do with the day.",
+    "Went to the grave for the first time since, and it was easier than you expected.",
+], age_min=20, bereaved_within=4, weight=9, cooldown=2,
+   effects=FX(stats={"happiness": -3}))
+
+E("loss.carrying-it", "loss", [
+    "Kept their number in your phone. You know you won't delete it.",
+    "Found a voicemail you'd never got round to clearing and didn't play it.",
+    "Played the voicemail. Twice.",
+], age_min=20, bereaved_within=5, weight=8, cooldown=3,
+   effects=FX(stats={"happiness": -2}))
+
+E("loss.somebody-else", "loss", [
+    "Went to another funeral and found you knew how all of it worked now.",
+    "Somebody else lost a parent and came to you about it, because you'd been there.",
+], age_min=30, bereaved_within=20, weight=7, cooldown=4,
+   effects=FX(stats={"charisma": 2, "happiness": -1}))
+
+E("loss.the-house-sold", "loss", [
+    "The house sold. You drove past it once afterward and then stopped doing that.",
+    "New people moved in and put a different door on it.",
+], age_min=22, bereaved_within=3, weight=8, cooldown=4,
+   effects=FX(stats={"happiness": -3}))
+
+E("loss.grateful", "loss", [
+    "Realized you'd started doing a thing exactly the way they did it.",
+    "Told somebody a story about them and got the whole way through laughing.",
+    "Their handwriting turned up in a cookbook and you left the page open for a week.",
+], age_min=22, bereaved_within=10, weight=8, cooldown=3,
+   effects=FX(stats={"happiness": 2}))
+
+E("loss.the-empty-chair", "loss", [
+    "First holiday without them. Everyone was very careful with each other.",
+    "Set the table for one more out of habit and left it there.",
+], age_min=20, bereaved_within=1, weight=10, cooldown=2,
+   effects=FX(stats={"happiness": -5}, stress=4))
+
+E("loss.talking-about-it", "loss", [
+    "Told somebody the whole thing properly for the first time, start to finish.",
+    "Somebody asked how you were actually doing and waited for the real answer.",
+], age_min=20, bereaved_within=3, weight=8, cooldown=3,
+   effects=FX(stats={"happiness": 4, "charisma": 2}, stress=-4))
+
+E("loss.harder-than-expected", "loss", [
+    "It hit hardest about eight months in, which nobody had mentioned was a thing.",
+    "Had a bad few weeks a year after and couldn't have told you why that month.",
+], age_min=20, bereaved_within=2, weight=9, cooldown=3,
+   effects=FX(stats={"happiness": -6}, stress=6))
+
+E("loss.the-others", "loss", [
+    "Started worrying about the ones who are still here, in a way you hadn't before.",
+    "Called your family more than you used to and didn't explain why.",
+], age_min=22, bereaved_within=4, requires=["anyParent"], weight=8, cooldown=3,
+   effects=FX(stats={"happiness": -1}, relationship={"mother": 3, "father": 3}))
+
+E("loss.money-after", "loss", [
+    "Paid $2,100 for the headstone out of your own account and didn't tell anybody.",
+    "The headstone came to $2,100. Nobody asked and you wouldn't have said.",
+], age_min=22, bereaved_within=2, weight=7, cooldown=4,
+   effects=FX(cash=CASH(-2100, "the headstone"), stats={"happiness": -2}))
+
+E("loss.moving-on", "loss", [
+    "Gave the coat away, finally, to somebody who'd get the wear out of it.",
+    "Took the last box down from the spare room and got through it in an afternoon.",
+], age_min=22, bereaved_within=6, weight=8, cooldown=4,
+   effects=FX(stats={"happiness": 3, "willpower": 2}, stress=-3))
+
+E("loss.young", "loss", [
+    "Everybody your age still had both of theirs, and you'd stopped bringing it up.",
+    "Found out you were the only one in the room who knew what any of it was like.",
+], age_min=20, age_max=35, bereaved_within=5, weight=8, cooldown=4,
+   effects=FX(stats={"happiness": -4}))
+
+# ---- friendship, after school ------------------------------------------------
+#
+# Ticket 0413. 0412 measured the hole this fills and it was not the one the
+# roadmap named. Finding 2d said the `friendship` category had six adult events,
+# all of them romance, and that is exactly true. What nobody had measured is
+# WHERE the hole is:
+#
+#   an ordinary eighteen-year-old — employed, single, childless, not bereaved,
+#   well — had SEVEN reachable events, and five of them were the
+#   `adult.placeholder.*` entries. At seventeen they had ninety-nine.
+#
+# In play that is 98.6% of everything that fired at eighteen being a placeholder,
+# six distinct event ids across ninety lives, and 35.2% of everything fired
+# between eighteen and twenty-two. The top four things a twenty-year-old read
+# were placeholder.2, placeholder.3, placeholder.5 and placeholder.1 — whose text
+# includes "Nothing happened this year worth telling anybody about" and "Kept
+# meaning to call people back and mostly didn't."
+#
+# 0409 wrote sixty-seven adult events and took the catalog at forty from 26 to
+# 93. It measured at forty, so the cliff at eighteen was invisible to it: the
+# year a character leaves school, this game still loses 92% of its content.
+#
+# So these are weighted into the desert rather than spread flat, and most of them
+# are gated on the predicates 0412 added — `hasFriend`, `friendsAtLeast`,
+# `friendsAtMost`, `friendshipYearsAtLeast`. An event cannot be about a friend if
+# eligibility cannot say "has one" (13.67), and it cannot be about an OLD friend
+# if eligibility cannot say how long.
+
+# The year everybody scattered. Weighted hard into 18-22, which is the hole.
+E("friend.everybody-left", "friendship", [
+    "Everybody went somewhere else in September. You got three texts in October and one in December.",
+    "The group that ate lunch together for five years managed one goodbye and then nothing.",
+    "{kid} went to another state, two more went to college, and you stayed. That was the year.",
+], age_min=18, age_max=26, weight=16, cooldown=5,
+   effects=FX(stats={"happiness": -5}, stress=4, bond=0),
+   modifiers=[MOD(1.8, age_max=21)])
+
+E("friend.the-one-who-stayed", "friendship", [
+    "{kid} stayed in town too. You started getting coffee on Saturdays because there was nobody else to get it with.",
+    "You and {kid} were the two who didn't leave, and that turned out to be enough to build something on.",
+], age_min=18, age_max=28, has_friend=True, weight=14, cooldown=6,
+   effects=FX(stats={"happiness": 6, "charisma": 2}, stress=-4, bond=0),
+   modifiers=[MOD(1.7, age_max=22)])
+
+E("friend.saturday-nobody", "friendship", [
+    "Had a free Saturday and went through your phone twice without finding anybody to ring.",
+    "Sat in the car outside the apartment for a while because going in meant the evening was over.",
+], age_min=18, age_max=30, has_friend=False, weight=15, cooldown=3,
+   effects=FX(stats={"happiness": -6}, stress=5, bond=0),
+   modifiers=[MOD(1.8, age_max=23)])
+
+E("friend.work-friend", "friendship", [
+    "{kid} from work turned into somebody you'd text on a Sunday, which is a different thing entirely.",
+    "Realized you'd told {kid} at work more about your year than you'd told anybody from school.",
+], age_min=18, employed=True, has_friend=True, weight=10, cooldown=5,
+   effects=FX(stats={"happiness": 5, "charisma": 2}, stress=-3, bond=0),
+   modifiers=[MOD(1.6, age_max=26)])
+
+E("friend.first-place", "friendship", [
+    "Spent most of the spring on {kid}'s floor because your own place had nothing in it yet.",
+    "You and {kid} split a couch off the sidewalk and carried it eleven blocks. It was a bad couch.",
+], age_min=18, age_max=27, has_friend=True, weight=13, cooldown=6,
+   effects=FX(stats={"happiness": 5}, stress=-2, bond=0),
+   modifiers=[MOD(1.6, age_max=23)])
+
+E("friend.group-chat-died", "friendship", [
+    "The group chat went from forty messages a day to somebody posting a photo in March.",
+    "Somebody left the group chat and nobody said anything about it, including you.",
+], age_min=18, age_max=32, weight=12, cooldown=4,
+   effects=FX(stats={"happiness": -4}, stress=2, bond=0),
+   modifiers=[MOD(1.6, age_max=24)])
+
+E("friend.knew-you-then", "friendship", [
+    "{kid} still calls you by the nickname from ninth grade, and you'd be sorry if {kidThey} stopped.",
+    "Spent an evening with {kid} not explaining anything, because {kidThey} was already there for all of it.",
+], age_min=22, has_friend=True, friendship_years_at_least=8, weight=8, cooldown=5,
+   effects=FX(stats={"happiness": 7}, stress=-5, bond=0))
+
+E("friend.old-friend-visit", "friendship", [
+    "{kid} came through town for two days and it was like no time had gone by at all.",
+    "Hadn't seen {kid} in four years and you both said the same thing in the parking lot.",
+], age_min=24, has_friend=True, friendship_years_at_least=10, weight=8, cooldown=5,
+   effects=FX(stats={"happiness": 8}, stress=-6, bond=0))
+
+E("friend.helped-move", "friendship", [
+    "Gave up a whole Saturday to carry {kid}'s furniture up three flights. Got pizza and a story out of it.",
+    "{kid} showed up with a van at eight in the morning and didn't complain once.",
+], age_min=18, has_friend=True, weight=8, cooldown=4, physical=True,
+   effects=FX(stats={"happiness": 4, "health": -1, "charisma": 2}, stress=2, bond=2))
+
+E("friend.the-favor", "friendship", [
+    "Asked {kid} for something big, and {kidThey} said yes before you'd finished the sentence.",
+    "{kid} drove two hours to sit with you for an afternoon, and never brought it up again.",
+], age_min=20, has_friend=True, friends_at_least=1, weight=8, cooldown=6,
+   effects=FX(stats={"happiness": 8}, stress=-8, bond=3))
+
+E("friend.wedding-guest-friend", "friendship", [
+    "Stood at the back of {kid}'s wedding, $180 down on the gift and the room, and got choked up during a reading about nothing.",
+    "{kid} got married and put you at the good table. The gift and the hotel came to $180 and you'd have paid double.",
+], age_min=23, age_max=45, has_friend=True, weight=7, cooldown=4,
+   effects=FX(cash=CASH(-180, "the gift and the hotel"), stats={"happiness": 6}, stress=-2, bond=0),
+   modifiers=[MOD(1.5, age_max=32)])
+
+E("friend.stood-up-for-them", "friendship", [
+    "{kid} asked you to stand up at the wedding. You wrote the speech nine times and it landed.",
+    "{kid} asked you to be the one at the front. You said yes and then panicked for four months.",
+], age_min=24, age_max=48, has_friend=True, friendship_years_at_least=6, weight=6,
+   rarity="uncommon", cooldown=12,
+   effects=FX(stats={"happiness": 9, "charisma": 4}, stress=6, bond=4))
+
+E("friend.their-kids", "friendship", [
+    "{kid}'s kid is old enough to remember your name now, which makes you somebody's uncle by adoption.",
+    "Spent an afternoon at {kid}'s being climbed on by somebody who wasn't born last time you visited.",
+], age_min=27, has_friend=True, weight=7, cooldown=4,
+   effects=FX(stats={"happiness": 5}, stress=-3, bond=0))
+
+E("friend.nights-out-stopped", "friendship", [
+    "Nobody said the nights out were over. They just moved to lunch, and then to every few months.",
+    "Realized the last big night was two years ago and nobody had called it the last one.",
+], age_min=26, age_max=42, weight=7, cooldown=5,
+   effects=FX(stats={"happiness": -4}, stress=2, bond=0))
+
+E("friend.the-one-you-tell", "friendship", [
+    "Something happened and {kid} was the first call, before family, without thinking about it.",
+    "You told {kid} before you told anybody, and {kidThey} kept it exactly as long as you needed.",
+], age_min=21, has_friend=True, weight=8, cooldown=5,
+   effects=FX(stats={"happiness": 7}, stress=-7, bond=2))
+
+E("friend.dinner-at-theirs", "friendship", [
+    "Went to {kid}'s for dinner and stayed until one in the morning arguing about something neither of you cared about.",
+    "{kid} cooked badly and it was one of the better evenings of the year.",
+], age_min=22, has_friend=True, weight=8, cooldown=3,
+   effects=FX(stats={"happiness": 5}, stress=-4, bond=0))
+
+E("friend.neighbor-became", "friendship", [
+    "The neighbor you'd nodded at for two years turned into somebody you actually knew.",
+    "Ended up in {kid}'s kitchen after a power cut and kept going round after the lights came back.",
+], age_min=20, has_friend=True, weight=7, cooldown=6,
+   effects=FX(stats={"happiness": 5, "charisma": 2}, stress=-3, bond=0))
+
+E("friend.standing-thing", "friendship", [
+    "You and {kid} have a Thursday now. Neither of you arranged it and neither of you misses it.",
+    "The five-a-side turned into the same eight people every week for a year.",
+], age_min=21, has_friend=True, friends_at_least=2, weight=8, cooldown=4, physical=True,
+   effects=FX(stats={"happiness": 6, "health": 2}, stress=-5, bond=0))
+
+E("friend.comparing", "friendship", [
+    "{kid} bought a house and you spent a week doing arithmetic you didn't enjoy.",
+    "Everybody's year looked better than yours from the outside, which is where you were standing.",
+], age_min=24, has_friend=True, weight=7, cooldown=4,
+   effects=FX(stats={"happiness": -5}, stress=5, bond=0))
+
+E("friend.quietly-drifted", "friendship", [
+    "You and {kid} didn't fall out. The last message just sat there for eight months.",
+    "Went to text {kid} and realized you didn't know what {kidTheir} life looked like any more.",
+], age_min=22, weight=8, cooldown=4,
+   effects=FX(stats={"happiness": -5}, stress=3, bond=-7))
+
+E("friend.the-call", "friendship", [
+    "{kid} called at eleven at night, which {kidThey} never does, and you were up until three.",
+    "The phone went at a strange hour with {kid}'s name on it and you knew before you answered.",
+], age_min=22, has_friend=True, weight=7, cooldown=5,
+   effects=FX(stats={"happiness": -3, "willpower": 1}, stress=7, bond=0))
+
+E("friend.their-good-news", "friendship", [
+    "{kid} got the thing {kidThey} had been after for years, and you were happy about it with no asterisk.",
+    "{kid} called with good news and you shouted in a parking lot like somebody much younger.",
+], age_min=21, has_friend=True, weight=8, cooldown=4,
+   effects=FX(stats={"happiness": 7}, stress=-4, bond=0))
+
+E("friend.covered-for-you", "friendship", [
+    "{kid} covered for you without being asked and then wouldn't let you thank {kidThem} properly.",
+    "You dropped something badly and {kid} picked it up before anybody else noticed it was down.",
+], age_min=20, has_friend=True, weight=7, cooldown=5,
+   effects=FX(stats={"happiness": 6}, stress=-6, bond=3))
+
+E("friend.no-effort", "friendship", [
+    "You and {kid} went six months without speaking and picked it up mid-sentence.",
+    "{kid} is the one who needs no keeping up, and you'd struggle to say why it works.",
+], age_min=26, has_friend=True, friendship_years_at_least=12, weight=7, cooldown=5,
+   effects=FX(stats={"happiness": 6}, stress=-5, bond=0))
+
+E("friend.only-one", "friendship", [
+    "Worked out you had exactly one person you'd call in an emergency, and {kidThey} lives four hours away.",
+    "You have {kid}, and after {kid} the list stops. Some years that's fine.",
+], age_min=22, friends_at_most=1, has_friend=True, weight=8, cooldown=4,
+   effects=FX(stats={"happiness": -3}, stress=4, bond=0))
+
+E("friend.crowded-year", "friendship", [
+    "Four separate people wanted the same Saturday and you were pleased about the problem.",
+    "Spent the year turning things down, which was new and which you didn't hate.",
+], age_min=22, friends_at_least=3, weight=7, cooldown=4,
+   effects=FX(stats={"happiness": 6, "charisma": 2}, stress=3, bond=0))
+
+E("friend.nobody-new", "friendship", [
+    "Didn't meet one new person all year. Not a bad year, just a closed one.",
+    "Went through the whole year seeing the same four people and nobody else at all.",
+], age_min=25, has_friend=False, weight=8, cooldown=3,
+   effects=FX(stats={"happiness": -4}, stress=3, bond=0))
+
+E("friend.reconnected", "friendship", [
+    "{kid} messaged out of nowhere after years and it turned into a standing phone call.",
+    "Ran into {kid} in a supermarket and you were both still there forty minutes later.",
+], age_min=28, weight=7, cooldown=6,
+   effects=FX(stats={"happiness": 7, "charisma": 2}, stress=-5, bond=4))
+
+E("friend.advice-ignored", "friendship", [
+    "Told {kid} exactly what was going to happen. It happened, and you didn't say anything about it.",
+    "{kid} asked what you thought, listened properly, and then did the other thing.",
+], age_min=23, has_friend=True, weight=7, cooldown=5,
+   effects=FX(stats={"happiness": -3, "smarts": 1}, stress=3, bond=-2))
+
+E("friend.older-friend", "friendship", [
+    "{kid} is fifteen years older and treats you like an equal, which is most of why you keep going round.",
+    "Ended up with a friend old enough to have done all of it already, and generous about saying so.",
+], age_min=21, has_friend=True, weight=7, cooldown=6,
+   effects=FX(stats={"happiness": 5, "smarts": 2}, stress=-4, bond=0))
+
+E("friend.funeral-of-a-friend", "friendship", [
+    "Buried somebody your own age and spent the drive home doing sums you didn't want the answers to.",
+    "{kid}'s service was full of people who all knew a different version of {kidThem}.",
+], age_min=40, has_friend=True, weight=6, rarity="uncommon", cooldown=8,
+   effects=FX(stats={"happiness": -9, "health": -1}, stress=12, bond=0))
+
+E("friend.last-ones-left", "friendship", [
+    "Two of you left who remember the house on the corner, and one of you isn't well.",
+    "Worked out you're the last person alive who was in that room, which is a strange job to have.",
+], age_min=62, weight=7, cooldown=5,
+   effects=FX(stats={"happiness": -5}, stress=5, bond=0))
+
+E("friend.late-life-friend", "friendship", [
+    "Made a proper friend at seventy, which you'd assumed was finished as a thing that happens.",
+    "{kid} started sitting at your table and it turned into the best part of the week.",
+], age_min=66, weight=8, cooldown=6,
+   effects=FX(stats={"happiness": 8}, stress=-6, bond=0))
+
+
+# The situations an eighteen-year-old actually has, which is the thinnest year in
+# the game: nine reachable events before this ticket, five of them placeholders.
+# A character this age has no career history, no children and no conditions, so
+# most of the adult catalog cannot see them — what they DO have is the year they
+# left school, and until now nothing in the catalog was about it.
+
+E("friend.summer-after", "friendship", [
+    "The summer after school went on forever and ended all at once, and nobody arranged anything.",
+    "Everybody was around for one more summer and you all knew it, so nobody said it.",
+], age_min=18, age_max=20, weight=17, cooldown=3,
+   effects=FX(stats={"happiness": 2}, stress=-3, bond=0))
+
+E("friend.first-paycheck-out", "friendship", [
+    "Spent most of a first paycheck taking {kid} out, because there was finally money to do it with.",
+    "Got paid properly for the first time and blew $120 of it on a night with the people still in town.",
+], age_min=18, age_max=24, employed=True, has_friend=True, weight=14, cooldown=4,
+   effects=FX(cash=CASH(-120, "a night out with friends"), stats={"happiness": 6, "charisma": 2}, stress=-4, bond=0))
+
+E("friend.still-at-home", "friendship", [
+    "Still in your old room while half your year posted photos from somewhere else.",
+    "Everybody who left came back at Christmas with new accents and you met them at the same bar.",
+], age_min=18, age_max=23, weight=15, cooldown=3,
+   effects=FX(stats={"happiness": -4}, stress=4, bond=0))
+
+E("friend.gas-station", "friendship", [
+    "Ran into {kid} at the gas station. You'd sat next to {kidThem} for four years and had nothing to say.",
+    "Saw three people from your year in one afternoon and did the same ninety-second conversation each time.",
+], age_min=18, age_max=26, weight=14, cooldown=3,
+   effects=FX(stats={"happiness": -2}, stress=2, bond=0))
+
+E("friend.nobody-checks", "friendship", [
+    "Nobody takes attendance any more. You could have gone two weeks without speaking to anybody and did.",
+    "Worked out that if you stopped turning up anywhere, it would be a while before anybody noticed.",
+], age_min=18, age_max=28, has_friend=False, weight=14, cooldown=4,
+   effects=FX(stats={"happiness": -6}, stress=6, bond=0))
+
+E("friend.new-crowd", "friendship", [
+    "The people you see every week now are nobody you knew a year ago, and you like most of them.",
+    "Your whole circle turned over inside eighteen months and you only noticed when somebody asked.",
+], age_min=19, age_max=30, has_friend=True, weight=9, cooldown=5,
+   effects=FX(stats={"happiness": 5, "charisma": 2}, stress=-2, bond=0))
+
+
+# ---- friendship: the decisions an adult never got ---------------------------
+#
+# ZERO before this ticket, against thirteen for a child. Measured across ninety
+# lives, every decision ever raised to an adult was career (3,029), health (392)
+# or loss (119) — the three categories 0409 wrote. Nobody has ever been asked a
+# question about a friend after seventeen.
+
+D("d.friend.loan", "friendship", [
+    "{kid} asked to borrow $400 and was embarrassed about asking. You've got it, and you know what these turn into.",
+], choices=[
+    C("lend", "Lend {kidThem} the $400", outcomes=[
+        OUT(6, "You lent {kid} the $400 and got it back in three pieces over five months, with a thank-you each time.",
+            FX(cash=CASH(-400, "a loan to a friend"), stats={"happiness": 4, "charisma": 2}, stress=2)),
+        OUT(4, "You lent {kid} the $400. Neither of you has mentioned it since, and now you can't.",
+            FX(cash=CASH(-400, "a loan to a friend"), stats={"happiness": -5}, stress=6)),
+    ]),
+    C("give", "Give {kidThem} the $400 outright", outcomes=[
+        OUT(6, "You told {kid} to forget it, that the $400 wasn't a loan. {KidThey} cried a bit and so did you, later.",
+            FX(cash=CASH(-400, "money given to a friend"), stats={"happiness": 6}, stress=-3)),
+        OUT(3, "You made the $400 a gift so it couldn't sour. {kid} took it and got strange with you anyway.",
+            FX(cash=CASH(-400, "money given to a friend"), stats={"happiness": -3}, stress=4)),
+    ]),
+    C("no", "Tell {kidThem} you can't", outcomes=[
+        OUT(5, "You said no as kindly as you could manage. {kid} said of course, and meant about half of it.",
+            FX(stats={"happiness": -4}, stress=5)),
+        OUT(4, "You said you couldn't. {kid} sorted it another way and told you about that, once, pointedly.",
+            FX(stats={"happiness": -5}, stress=4)),
+    ]),
+], age_min=21, has_friend=True, person_tokens=["kid"], weight=8, cooldown=7)
+
+D("d.friend.moving-away", "friendship", [
+    "{kid} is moving across the country in six weeks. There's a leaving thing on a Friday you're already booked for.",
+], choices=[
+    C("go", "Cancel the other thing and go", outcomes=[
+        OUT(7, "You went. It ran until two, you both said the true things, and the goodbye was a proper one.",
+            FX(stats={"happiness": 6, "charisma": 2}, stress=-4)),
+        OUT(3, "You went and it was forty people deep. You got nine minutes with {kid} and a hug at the door.",
+            FX(stats={"happiness": 1}, stress=2)),
+    ]),
+    C("own-thing", "Take {kidThem} out on your own instead", outcomes=[
+        OUT(7, "You took {kid} for dinner the week before, just the two of you. That's the evening you both remember.",
+            FX(stats={"happiness": 8}, stress=-5)),
+        OUT(3, "You arranged your own goodbye and {kid} had to move it twice. It happened in a rush at the end.",
+            FX(stats={"happiness": 2}, stress=3)),
+    ]),
+    C("skip", "Keep your plans and text {kidThem}", outcomes=[
+        OUT(5, "You sent a long message instead. {kid} replied warmly and you've spoken twice since.",
+            FX(stats={"happiness": -3}, stress=2)),
+        OUT(5, "You didn't go. That turned out to be the last time everybody was going to be in one room.",
+            FX(stats={"happiness": -7}, stress=5)),
+    ]),
+], age_min=18, has_friend=True, person_tokens=["kid"], weight=14, cooldown=6,
+   modifiers=[MOD(1.7, age_max=25)])
+
+D("d.friend.taking-sides", "friendship", [
+    "{kid} and {kid2} have fallen out properly, and both of them have now told you their version and waited.",
+], choices=[
+    C("stay-out", "Stay out of it", outcomes=[
+        OUT(6, "You said you weren't picking. It was awkward for a year and you still have both of them.",
+            FX(stats={"happiness": -2, "willpower": 4}, stress=6)),
+        OUT(4, "You refused to pick and they both decided that was its answer. You saw less of each.",
+            FX(stats={"happiness": -6}, stress=7)),
+    ]),
+    C("pick", "Say who you think is right", outcomes=[
+        OUT(5, "You said what you thought. {kid} took it badly for a month and then said you'd been right.",
+            FX(stats={"happiness": 3, "charisma": 2, "willpower": 3}, stress=5)),
+        OUT(5, "You said what you thought and lost {kid2} over it, cleanly and for good.",
+            FX(stats={"happiness": -7}, stress=8)),
+    ]),
+    C("fix-it", "Try to get them in a room", outcomes=[
+        OUT(4, "You got them both to a table. It was terrible for twenty minutes and then it wasn't.",
+            FX(stats={"happiness": 8, "charisma": 5}, stress=6)),
+        OUT(6, "You tried to fix it and became the third person in the argument. Nobody thanked you.",
+            FX(stats={"happiness": -6}, stress=10)),
+    ]),
+], age_min=22, friends_at_least=2, person_tokens=["kid", "kid2"], weight=7, cooldown=8)
+
+D("d.friend.needs-a-room", "friendship", [
+    "{kid} needs somewhere to stay for a few weeks and asked you, which {kidThey} clearly hated doing.",
+], choices=[
+    C("yes", "Tell {kidThem} to bring a bag", outcomes=[
+        OUT(6, "{kid} stayed five weeks, cooked most nights, and left the place better than {kidThey} found it.",
+            FX(stats={"happiness": 5, "charisma": 2}, stress=5)),
+        OUT(4, "{kid} stayed four months. You love {kidThem} and you were extremely glad when it ended.",
+            FX(stats={"happiness": -3, "willpower": -1}, stress=14)),
+    ]),
+    C("short", "Say yes, but give {kidThem} a date", outcomes=[
+        OUT(7, "You said yes with an end date. {kid} was out by it, and the friendship came through clean.",
+            FX(stats={"happiness": 4, "willpower": 3}, stress=4)),
+        OUT(3, "You set a date and had to enforce it, which neither of you has completely got over.",
+            FX(stats={"happiness": -4}, stress=8)),
+    ]),
+    C("no", "Say you can't have anybody staying", outcomes=[
+        OUT(5, "You said no and sent {kid} $250 instead. {KidThey} took the money and not the couch.",
+            FX(cash=CASH(-250, "helping a friend out"), stats={"happiness": -2}, stress=4)),
+        OUT(5, "You said no. {kid} sorted something out and has never asked you for anything since.",
+            FX(stats={"happiness": -6}, stress=5)),
+    ]),
+], age_min=22, has_friend=True, person_tokens=["kid"], weight=7, cooldown=9)
+
+D("d.friend.lost-touch", "friendship", [
+    "{kid}'s name came up and you worked out it's been nine years. You still have the number.",
+], choices=[
+    C("call", "Call {kidThem} out of nowhere", outcomes=[
+        OUT(6, "You rang. It was strange for ninety seconds and then it was completely normal for two hours.",
+            FX(stats={"happiness": 8, "charisma": 3}, stress=-5)),
+        OUT(4, "You rang and {kidThey} was polite and busy. You left it at that, and it was still worth knowing.",
+            FX(stats={"happiness": -2}, stress=3)),
+    ]),
+    C("write", "Write {kidThem} a proper message", outcomes=[
+        OUT(6, "You wrote a long one and sent it. {kid} wrote a longer one back a week later.",
+            FX(stats={"happiness": 6, "smarts": 1}, stress=-3)),
+        OUT(4, "You wrote it, sent it, and watched it sit unread for two months.",
+            FX(stats={"happiness": -4}, stress=4)),
+    ]),
+    C("leave", "Leave it where it is", outcomes=[
+        OUT(5, "You decided some things get to stay finished. It sat with you for a few weeks.",
+            FX(stats={"happiness": -3}, stress=2)),
+        OUT(5, "You didn't ring. {kid} rang you eight months later and said {kidThey} had nearly not bothered.",
+            FX(stats={"happiness": 5}, stress=-2)),
+    ]),
+], age_min=28, friendship_years_at_least=5, person_tokens=["kid"], weight=8, cooldown=10)
+
+D("d.friend.said-something", "friendship", [
+    "{kid} said something about you at a table of six people, as a joke, and nobody else noticed it land.",
+], choices=[
+    C("now", "Say something about it there and then", outcomes=[
+        OUT(4, "You said it lightly and straight. {kid} apologized properly and the table moved on.",
+            FX(stats={"happiness": 4, "charisma": 3, "willpower": 3}, stress=4)),
+        OUT(6, "You said something and it went cold for an hour. You were right and it cost you the evening.",
+            FX(stats={"happiness": -4}, stress=8)),
+    ]),
+    C("later", "Bring it up with {kidThem} another day", outcomes=[
+        OUT(7, "You raised it a week later, on a walk. {kid} hadn't realized, and hasn't done it again.",
+            FX(stats={"happiness": 5, "charisma": 2, "willpower": 2}, stress=-2)),
+        OUT(3, "You brought it up later and {kid} couldn't remember saying it, which was worse somehow.",
+            FX(stats={"happiness": -4}, stress=5)),
+    ]),
+    C("nothing", "Let it go", outcomes=[
+        OUT(6, "You let it go and it genuinely went. {kid} has been a friend for years and gets one.",
+            FX(stats={"happiness": 1}, stress=2)),
+        OUT(4, "You let it go and then heard it again in March. It stopped being a joke around then.",
+            FX(stats={"happiness": -6}, stress=6)),
+    ]),
+], age_min=21, has_friend=True, person_tokens=["kid"], weight=8, cooldown=7)
+
+D("d.friend.in-trouble", "friendship", [
+    "{kid} is in real trouble and hasn't asked for anything. You can see it from where you're standing.",
+], choices=[
+    C("turn-up", "Turn up at {kidTheir} door", outcomes=[
+        OUT(7, "You drove over without arranging it. {kid} let you in, and that was the week it turned.",
+            FX(stats={"happiness": 5, "willpower": 3}, stress=9)),
+        OUT(3, "You turned up and {kid} wasn't ready to be seen. {KidThey} thanked you for it a year later.",
+            FX(stats={"happiness": -3, "willpower": 2}, stress=10)),
+    ]),
+    C("ask", "Ask {kidThem} straight what's going on", outcomes=[
+        OUT(6, "You asked the direct question and waited through the silence. {kid} told you all of it.",
+            FX(stats={"happiness": 3, "charisma": 3, "willpower": 2}, stress=8)),
+        OUT(4, "You asked and got 'I'm fine' twice. You said you'd ask again, and you did.",
+            FX(stats={"happiness": -2, "willpower": 3}, stress=7)),
+    ]),
+    C("wait", "Stay close and wait to be asked", outcomes=[
+        OUT(5, "You stayed in touch and said nothing. {kid} came to you in the end, on {kidTheir} own terms.",
+            FX(stats={"happiness": 2, "willpower": 2}, stress=6)),
+        OUT(5, "You waited. It got worse first, and you've thought about that year since.",
+            FX(stats={"happiness": -8}, stress=12)),
+    ]),
+], age_min=23, has_friend=True, person_tokens=["kid"], weight=8, cooldown=8)
+
+D("d.friend.nobody-here", "friendship", [
+    "You've been in this city a year and know nobody. There's a thing on Thursday full of strangers.",
+], choices=[
+    C("go-alone", "Go on your own and talk to people", outcomes=[
+        OUT(5, "You went alone, talked to four people badly and one person well. That one stuck.",
+            FX(stats={"happiness": 6, "charisma": 4, "willpower": 3}, stress=5)),
+        OUT(5, "You went, stood near the food for an hour and left. Nobody was unkind and nothing happened.",
+            FX(stats={"happiness": -4, "willpower": -1}, stress=6)),
+    ]),
+    C("join", "Join a weekly thing", outcomes=[
+        OUT(7, "You paid $240 for a year of something that met every week. It took two months and then you had people.",
+            FX(cash=CASH(-240, "joining something local"), stats={"happiness": 7, "charisma": 3, "health": 1}, stress=-3)),
+        OUT(3, "You paid the $240 and went four times. Friendly people, and none of them ever became anything.",
+            FX(cash=CASH(-240, "joining something local"), stats={"happiness": -2}, stress=3)),
+    ]),
+    C("stay-in", "Give it a miss",
+      text="You stayed in. It was a good evening and a bad year, and you knew it at the time.",
+      effects=FX(stats={"happiness": -5}, stress=4)),
+], age_min=18, has_friend=False, weight=14, cooldown=5,
+   modifiers=[MOD(1.8, age_max=27)])
+
+
+# ---- family: the one you came from ------------------------------------------
+#
+# Ticket 0414, roadmap finding 2e. 0413 filled the cliff at eighteen with
+# friendship and named what was left; this is what was left, and it is not a
+# thin patch, it is a total zero by construction.
+#
+# The `family` category has NINETY-ONE events. Eighty of them carry an `ageMax`
+# below eighteen and the other eleven are 0208's parenting events gated on
+# `hasChildren`. **There is no third group.** So for a childless adult the
+# reachable family catalog is exactly nothing, and measured across eighty lives:
+#
+#   - **56.3% of every adult year in this build is childless**, and
+#     **0.0% of those years hold a family event**;
+#   - **69.8% of them have a living parent** — she is in the save, she ages, and
+#     0212 will eventually kill her, and between the character's eighteenth
+#     birthday and her funeral the catalog has not one line about her;
+#   - 64.4% of adult years have a living sibling, with the same silence.
+#
+# The shape of the curve says it plainly: family events run 0% at eighteen, 1.9%
+# at thirty and 12.4% at forty, and that rise is ENTIRELY people having children.
+# "Family" in this build has meant "you are a parent" and nothing else.
+#
+# No new predicate was needed, which is a change from the last three tickets:
+# `requires` already means a LIVING mother (`Boolean(mother(family)?.alive)`),
+# and `relationshipAtLeast` / `relationshipAtMost` already read her warmth. The
+# language was ready and nobody had written against it.
+
+E("kin.sunday-call", "family", [
+    "{mother} calls most Sundays and you've both got the rhythm of it down to about eleven minutes.",
+    "The Sunday call with {mother} went forty minutes because {parentThey} had actual news for once.",
+], age_min=18, requires=["mother"], weight=13, cooldown=3,
+   effects=FX(stats={"happiness": 3}, relationship={"mother": 2}, stress=-2),
+   modifiers=[MOD(1.5, age_max=26)])
+
+E("kin.moved-out-properly", "family", [
+    "Came back for a weekend and your room had become the place the ironing lives.",
+    "They turned your room into an office inside four months, which was fair and still stung.",
+], age_min=18, age_max=30, requires=["anyParent"], weight=15, cooldown=4,
+   effects=FX(stats={"happiness": -2}, stress=2),
+   modifiers=[MOD(1.8, age_max=23)])
+
+E("kin.first-holiday-back", "family", [
+    "Went back for the holidays as a guest rather than somebody who lives there, and felt every bit of it.",
+    "Spent four days back at the house and remembered why you left and why you keep going back.",
+], age_min=18, age_max=40, requires=["anyParent"], weight=13, cooldown=3,
+   effects=FX(stats={"happiness": 2}, relationship={"parents": 2}, stress=2),
+   modifiers=[MOD(1.6, age_max=26)])
+
+E("kin.money-from-home", "family", [
+    "{mother} put $200 in your account and wrote 'for groceries' like you wouldn't know what it meant.",
+    "{father} slipped you $200 at the car and told you not to tell {motherName}.",
+], age_min=18, age_max=32, requires=["bothParents"], weight=12, cooldown=4,
+   effects=FX(cash=CASH(200, "money from home"), stats={"happiness": 4}, relationship={"parents": 3}, stress=-3),
+   modifiers=[MOD(1.7, age_max=24), MOD(0.4, wealth_any=["struggling"])])
+
+E("kin.parent-as-person", "family", [
+    "{parent} told you something about {parentTheir} twenties you had genuinely never heard before.",
+    "Had a conversation with {parent} where {parentThey} was a person rather than a parent, and it stuck.",
+], age_min=20, requires=["anyParent"], weight=12, cooldown=5,
+   effects=FX(stats={"happiness": 5, "smarts": 1}, relationship={"parents": 5}, stress=-3))
+
+E("kin.advice-not-taken", "family", [
+    "{parent} had opinions about your life and got through every one across one dinner.",
+    "{parent} asked about your plans in the voice that means the notes are already written.",
+], age_min=18, requires=["anyParent"], weight=12, cooldown=3,
+   effects=FX(stats={"happiness": -3}, relationship={"parents": -2}, stress=4),
+   modifiers=[MOD(1.5, age_max=28)])
+
+E("kin.parent-getting-older", "family", [
+    "{parent} needed help with something {parentThey} used to do without thinking, and neither of you mentioned it.",
+    "Noticed {parent} taking the stairs one at a time, and pretended you hadn't.",
+], age_min=28, requires=["anyParent"], weight=13, cooldown=3,
+   effects=FX(stats={"happiness": -4}, stress=6),
+   modifiers=[MOD(1.6, age_min=40)])
+
+E("kin.the-house", "family", [
+    "Drove past the old house. Somebody's painted it a color you have feelings about.",
+    "The people in your old house have taken the tree out. You sat in the car about it for a minute.",
+], age_min=22, weight=11, cooldown=5,
+   effects=FX(stats={"happiness": -2}, stress=2))
+
+E("kin.sibling-drift", "family", [
+    "You and {sibling} went most of the year without talking and neither of you meant anything by it.",
+    "Realized you know what {sibling} does for work and almost nothing else about {siblingTheir} life.",
+], age_min=20, requires=["sibling"], weight=12, cooldown=4,
+   effects=FX(stats={"happiness": -3}, relationship={"siblings": -3}, stress=2))
+
+E("kin.sibling-close", "family", [
+    "{sibling} is the one who gets the joke without the setup, and this was the year you noticed that was rare.",
+    "You and {sibling} text nonsense most days, which is more than most people get.",
+], age_min=19, requires=["sibling"], rel_at_least={"sibling": 55}, weight=12, cooldown=4,
+   effects=FX(stats={"happiness": 6}, relationship={"siblings": 3}, stress=-4))
+
+E("kin.sibling-doing-better", "family", [
+    "{sibling} announced something big at dinner and you were happy about it in a complicated way.",
+    "Everybody asked {sibling} about {siblingTheir} year first, and you noticed the order.",
+], age_min=22, requires=["sibling"], weight=11, cooldown=4,
+   effects=FX(stats={"happiness": -4}, relationship={"siblings": -2}, stress=4))
+
+E("kin.sibling-needs-you", "family", [
+    "{sibling} called about something real and you dropped what you were doing.",
+    "{sibling} turned up at eleven at night and stayed on the couch for three days.",
+], age_min=21, requires=["sibling"], weight=11, cooldown=5,
+   effects=FX(stats={"happiness": 2}, relationship={"siblings": 6}, stress=7))
+
+E("kin.only-one-left", "family", [
+    "{sibling} is the only person alive who remembers the kitchen, and you called about nothing for an hour.",
+    "You and {sibling} are what's left of that house, and it changed how you talk to each other.",
+], age_min=45, requires=["sibling"], bereaved_within=8, weight=10, cooldown=6,
+   effects=FX(stats={"happiness": 3}, relationship={"siblings": 7}, stress=-2))
+
+E("kin.the-cousins", "family", [
+    "Went to a family thing and spent it catching up with cousins you see once every four years.",
+    "Somebody's wedding put the whole extended family in one room and it was better than expected.",
+], age_min=20, weight=11, cooldown=4,
+   effects=FX(stats={"happiness": 4, "charisma": 2}, stress=-2))
+
+E("kin.family-group-chat", "family", [
+    "The family group chat produced two arguments and one genuinely useful piece of information.",
+    "{mother} discovered a new way to forward things and used it forty times in a week.",
+], age_min=19, requires=["mother"], weight=11, cooldown=3,
+   effects=FX(stats={"happiness": 2}, stress=1))
+
+E("kin.cold-with-parent", "family", [
+    "Went the whole year without calling {parent}, and the not-calling took more effort than calling would have.",
+    "You and {parent} were civil at a funeral and that was the year's contact.",
+], age_min=20, requires=["anyParent"], rel_at_most={"mother": 35}, weight=11, cooldown=4,
+   effects=FX(stats={"happiness": -5}, stress=6))
+
+E("kin.parent-proud", "family", [
+    "{parent} told somebody else what you do for a living and you heard {parentTheir} voice change.",
+    "{parent} kept the clipping. You found it in a drawer years later and had to sit down.",
+], age_min=22, requires=["anyParent"], rel_at_least={"mother": 55}, weight=11, cooldown=5,
+   effects=FX(stats={"happiness": 8}, relationship={"parents": 4}, stress=-5))
+
+E("kin.becoming-them", "family", [
+    "Caught yourself saying a thing {parent} says, in the voice {parentThey} says it in.",
+    "Did the sigh {parent} does, at the same kind of moment, and stood there with it.",
+], age_min=26, requires=["anyParent"], weight=11, cooldown=5,
+   effects=FX(stats={"happiness": 1}, stress=1))
+
+E("kin.holiday-alone", "family", [
+    "Spent the holiday on your own and told everybody it was fine, which it mostly was.",
+    "Worked the holiday for the extra pay and ate something microwaved at nine at night.",
+], age_min=19, age_max=45, has_children=False, weight=12, cooldown=4,
+   effects=FX(stats={"happiness": -5}, stress=5),
+   modifiers=[MOD(1.5, age_max=27)])
+
+E("kin.nobody-to-tell", "family", [
+    "Something good happened and you got halfway through dialing before working out who to tell.",
+    "Had news worth sharing and it sat in your phone for two days.",
+], age_min=20, has_children=False, weight=11, cooldown=4,
+   effects=FX(stats={"happiness": -4}, stress=4))
+
+E("kin.the-asking", "family", [
+    "{parent} asked when you're going to settle down, in front of people, for the fourth year running.",
+    "Somebody at a family thing asked about kids and the table waited for the answer.",
+], age_min=25, age_max=45, has_children=False, requires=["anyParent"], weight=12, cooldown=3,
+   effects=FX(stats={"happiness": -4}, stress=6))
+
+E("kin.chosen-family", "family", [
+    "Did the holiday with people you're not related to and it was the best one in years.",
+    "The table was six people who all had somewhere else they could have been.",
+], age_min=22, has_friend=True, weight=11, cooldown=4,
+   effects=FX(stats={"happiness": 7}, stress=-6, bond=0))
+
+E("kin.parent-moved", "family", [
+    "The house sold and they moved somewhere smaller, and the address you grew up at stopped being one.",
+    "{parent} moved closer to {parentTheir} sister and you had to drive four hours to see {parentThem} now.",
+], age_min=28, requires=["anyParent"], weight=10, cooldown=8,
+   effects=FX(stats={"happiness": -3}, stress=4))
+
+E("kin.taking-care", "family", [
+    "You're the one who handles {parentTheir} appointments now, and nobody decided that out loud.",
+    "Started driving over twice a week to do things {parent} would once have done before lunch.",
+], age_min=38, requires=["anyParent"], weight=12, cooldown=3,
+   effects=FX(stats={"happiness": -3, "willpower": -1}, relationship={"parents": 5}, stress=12),
+   modifiers=[MOD(1.5, age_min=48)])
+
+E("kin.last-good-visit", "family", [
+    "Had a completely ordinary afternoon with {parent} and it turned out to be one worth having had.",
+    "{parent} was on good form all weekend. You didn't know it was the last of those.",
+], age_min=40, requires=["anyParent"], weight=9, rarity="uncommon", cooldown=8,
+   effects=FX(stats={"happiness": 5}, relationship={"parents": 6}, stress=-3))
+
+
+# ---- family: the questions a grown child gets --------------------------------
+#
+# Adult family decisions before this ticket: ZERO. Every decision the game had
+# ever raised to an adult was career, health, loss, or — since 0413 — friendship.
+
+D("d.kin.parent-needs-money", "family", [
+    "{parent} needs $900 and asked you, which {parentThey} has never once done before.",
+], choices=[
+    C("send", "Send the $900", outcomes=[
+        OUT(6, "You sent the $900 and said not to mention it again. {Parent} mentioned it every time you spoke.",
+            FX(cash=CASH(-900, "helping a parent out"), stats={"happiness": 3},
+               relationship={"parents": 8}, stress=4)),
+        OUT(4, "You sent the $900. It turned out to be the first of several, and nobody ever called it that.",
+            FX(cash=CASH(-900, "helping a parent out"), stats={"happiness": -3},
+               relationship={"parents": 4}, stress=9)),
+    ]),
+    C("some", "Send what you can spare", outcomes=[
+        OUT(6, "You sent $300 and said it was what you had. {Parent} said that was plenty and meant it.",
+            FX(cash=CASH(-300, "helping a parent out"), stats={"happiness": 2, "willpower": 3},
+               relationship={"parents": 4}, stress=3)),
+        OUT(4, "You sent $300 of the $900. It wasn't enough and the gap sat between you for a year.",
+            FX(cash=CASH(-300, "helping a parent out"), stats={"happiness": -4},
+               relationship={"parents": -3}, stress=7)),
+    ]),
+    C("ask", "Ask what it's actually for", outcomes=[
+        OUT(5, "You asked properly. The real number was smaller and the real problem was bigger.",
+            FX(stats={"happiness": -2, "smarts": 2}, relationship={"parents": 3}, stress=8)),
+        OUT(5, "You asked and {parent} went quiet and said forget it. {ParentThey} meant that too.",
+            FX(stats={"happiness": -6}, relationship={"parents": -6}, stress=9)),
+    ]),
+], age_min=24, requires=["anyParent"], weight=11, cooldown=8)
+
+D("d.kin.move-them-closer", "family", [
+    "{parent} can't really manage the house on {parentTheir} own any more, and the conversation has to happen this year.",
+], choices=[
+    C("in", "Ask {parentThem} to move in with you", outcomes=[
+        OUT(5, "{Parent} moved in. It was harder than you'd pictured and you'd do it again.",
+            FX(stats={"happiness": 2, "willpower": 3}, relationship={"parents": 10}, stress=16)),
+        OUT(5, "{Parent} moved in, and two adults who love each other found out about sharing a kitchen.",
+            FX(stats={"happiness": -6}, relationship={"parents": -4}, stress=20)),
+    ]),
+    C("nearby", "Find {parentThem} somewhere near you", outcomes=[
+        OUT(7, "You found {parentThem} a place ten minutes away for $2,400 in moving costs. Everybody kept their own front door.",
+            FX(cash=CASH(-2400, "the move and the deposit"), stats={"happiness": 5, "smarts": 2},
+               relationship={"parents": 8}, stress=9)),
+        OUT(3, "The move cost $2,400 and {parentThey} hated the new place, and said so, for about a year.",
+            FX(cash=CASH(-2400, "the move and the deposit"), stats={"happiness": -4},
+               relationship={"parents": -2}, stress=12)),
+    ]),
+    C("stay", "Leave {parentThem} in the house", outcomes=[
+        OUT(5, "You left {parentThem} in the house and drove over a lot. {ParentThey} stayed {parentTheir}self in it.",
+            FX(stats={"happiness": 1, "willpower": 2}, relationship={"parents": 5}, stress=14)),
+        OUT(5, "You left it. There was a fall in March and you'd already known the house was the problem.",
+            FX(stats={"happiness": -9}, relationship={"parents": -2}, stress=18)),
+    ]),
+], age_min=40, requires=["anyParent"], weight=10, cooldown=12)
+
+D("d.kin.sibling-fallout", "family", [
+    "{sibling} said something at a family thing that you're still turning over three weeks later.",
+], choices=[
+    C("call", "Call {siblingThem} about it", outcomes=[
+        OUT(6, "You rang and said it plainly. {SiblingThey} apologized inside two minutes and you both felt stupid.",
+            FX(stats={"happiness": 5, "charisma": 2}, relationship={"siblings": 7}, stress=-3)),
+        OUT(4, "You rang and it turned into a bigger argument with older material in it.",
+            FX(stats={"happiness": -6}, relationship={"siblings": -10}, stress=11)),
+    ]),
+    C("wait", "Wait for {siblingThem} to raise it", outcomes=[
+        OUT(5, "You waited. {SiblingThey} brought it up at Christmas, awkwardly, and that was that.",
+            FX(stats={"happiness": 2, "willpower": 1}, relationship={"siblings": 3}, stress=4)),
+        OUT(5, "You waited and so did {siblingThey}, and the two of you are still waiting.",
+            FX(stats={"happiness": -5}, relationship={"siblings": -6}, stress=6)),
+    ]),
+    C("parent", "Tell {parent} about it", outcomes=[
+        OUT(4, "{Parent} handled it and it was sorted by the weekend, which made you both about twelve again.",
+            FX(stats={"happiness": 3}, relationship={"siblings": 2, "parents": -2}, stress=3)),
+        OUT(6, "{Parent} took a side. It wasn't the side you expected and now there were three of you in it.",
+            FX(stats={"happiness": -7}, relationship={"siblings": -5, "parents": -5}, stress=12)),
+    ]),
+], age_min=22, requires=["sibling", "anyParent"], weight=10, cooldown=8)
+
+D("d.kin.going-home-for-good", "family", [
+    "There's a reason to move back to where you grew up this year, and a reason not to, and both are good ones.",
+], choices=[
+    C("go", "Move back", outcomes=[
+        OUT(5, "You went back, $1,800 down on the move. It was smaller than you remembered and easier than you'd feared.",
+            FX(cash=CASH(-1800, "the move back"), stats={"happiness": 5}, relationship={"parents": 7}, stress=8)),
+        OUT(5, "You moved back for $1,800 and spent two years explaining to people why you had.",
+            FX(cash=CASH(-1800, "the move back"), stats={"happiness": -5}, relationship={"parents": 5}, stress=11)),
+    ]),
+    C("stay", "Stay where you are", outcomes=[
+        OUT(6, "You stayed. It was the right call and you still think about the other one some weeks.",
+            FX(stats={"happiness": 2, "willpower": 3}, relationship={"parents": -3}, stress=5)),
+        OUT(4, "You stayed, and missed a year at home that turned out to be the last ordinary one.",
+            FX(stats={"happiness": -7}, relationship={"parents": -5}, stress=9)),
+    ]),
+    C("half", "Go back but keep your place", outcomes=[
+        OUT(5, "Six months back home with your lease still running cost you $3,200. Exactly right anyway.",
+            FX(cash=CASH(-3200, "keeping two places going"), stats={"happiness": 4, "smarts": 2},
+               relationship={"parents": 6}, stress=10)),
+        OUT(5, "Running two places cost $3,200 and you spent the year in a car, belonging properly to neither.",
+            FX(cash=CASH(-3200, "keeping two places going"), stats={"happiness": -4}, stress=15)),
+    ]),
+], age_min=20, age_max=45, requires=["anyParent"], weight=11, cooldown=12)
+
+
+# ---- ordinary adult life -----------------------------------------------------
+#
+# The `random` category is 92 events and EIGHT of them are available to an adult
+# — `adult.placeholder.1` through `.8`, which is to say the whole of an adult's
+# ordinary life texture was the labelled placeholders 0413 turned the weight down
+# on. At twelve the same category offers forty-eight.
+#
+# These are the things that are not your job, your friends, your family or your
+# body: the flat, the car, the street, the small mishaps and the small pleasures.
+# Weighted into the twenties, where the cliff still is after 0413.
+
+E("life.first-place-own", "random", [
+    "Signed a lease on your own for the first time and stood in the empty room for a while.",
+    "Your first place had a broken window latch and a view of a wall and you loved it.",
+], age_min=18, age_max=30, weight=15, cooldown=6,
+   effects=FX(stats={"happiness": 6}, stress=-2),
+   modifiers=[MOD(1.8, age_max=24)])
+
+E("life.terrible-apartment", "random", [
+    "The heating worked in two rooms and neither was the bedroom. You wore a coat indoors until April.",
+    "Something lived in the walls all winter and the landlord kept saying he'd look into it.",
+], age_min=18, age_max=35, weight=14, cooldown=4,
+   effects=FX(stats={"happiness": -4, "health": -1}, stress=6),
+   modifiers=[MOD(1.7, age_max=26)])
+
+E("life.the-car", "random", [
+    "The car made a noise for eight months and then stopped making it, which you chose to take as good news.",
+    "Spent $640 on the car to find out it needed $900 of work.",
+], age_min=18, weight=13, cooldown=3,
+   effects=FX(cash=CASH(-640, "the garage"), stats={"happiness": -3}, stress=5),
+   modifiers=[MOD(1.5, age_max=28)])
+
+E("life.learned-to-cook", "random", [
+    "Worked out how to cook about six things properly and ate them on rotation for a year.",
+    "Got good at one dish and made it for everybody who came round, whether they wanted it or not.",
+], age_min=18, age_max=40, weight=13, cooldown=6,
+   effects=FX(stats={"happiness": 4, "health": 2, "smarts": 1}, stress=-3),
+   modifiers=[MOD(1.6, age_max=25)])
+
+E("life.the-neighbors", "random", [
+    "The people upstairs moved furniture at odd hours all year and you never once said anything.",
+    "Met the neighbor properly for the first time when a package went to the wrong door.",
+], age_min=18, weight=12, cooldown=3,
+   effects=FX(stats={"happiness": -1}, stress=2))
+
+E("life.own-money-first", "random", [
+    "Bought something you actually wanted with money nobody had given you, and it was a strange feeling.",
+    "Spent $180 on something impractical and have never regretted it for a second.",
+], age_min=18, age_max=28, employed=True, weight=13, cooldown=5,
+   effects=FX(cash=CASH(-180, "something impractical"), stats={"happiness": 6}, stress=-3),
+   modifiers=[MOD(1.7, age_max=22)])
+
+E("life.paperwork", "random", [
+    "Spent a whole Saturday on hold and got one thing resolved out of three.",
+    "Found out you'd been paying for something you cancelled two years ago.",
+], age_min=19, weight=12, cooldown=3,
+   effects=FX(stats={"happiness": -3}, stress=6))
+
+E("life.new-city", "random", [
+    "Moved somewhere new and spent the first month getting the bus wrong in both directions.",
+    "Learned a whole city well enough to take a shortcut, which took about eighteen months.",
+], age_min=18, age_max=40, weight=12, cooldown=7,
+   effects=FX(stats={"happiness": 3, "smarts": 2}, stress=5),
+   modifiers=[MOD(1.6, age_max=27)])
+
+E("life.the-hobby", "random", [
+    "Got properly into something nobody at work knows about and it fixed about a third of the year.",
+    "Spent $220 on the gear for a new thing and used it more than anybody expected, including you.",
+], age_min=19, weight=13, cooldown=5,
+   effects=FX(cash=CASH(-220, "gear for a new hobby"), stats={"happiness": 6}, stress=-7))
+
+E("life.quit-the-hobby", "random", [
+    "The thing you were into is in a cupboard now and you're not going to pretend otherwise.",
+    "Went four months without touching it and stopped calling it a hobby.",
+], age_min=21, weight=11, cooldown=5,
+   effects=FX(stats={"happiness": -3}, stress=2))
+
+E("life.long-drive", "random", [
+    "Drove six hours for something that lasted two, $430 of gas and rooms, and would do it again.",
+    "Took a $430 trip you couldn't really afford and it was the part of the year you kept.",
+], age_min=19, weight=12, cooldown=4,
+   effects=FX(cash=CASH(-430, "a trip you couldn't really afford"), stats={"happiness": 7}, stress=-8))
+
+E("life.small-disaster", "random", [
+    "Locked yourself out at eleven at night and paid a man $160 to open a door in ninety seconds.",
+    "Dropped your phone in exactly the wrong place and spent $310 on the same phone again.",
+], age_min=18, weight=12, cooldown=3,
+   effects=FX(cash=CASH(-160, "a locksmith"), stats={"happiness": -4}, stress=5))
+
+E("life.the-routine", "random", [
+    "Found a coffee place that knows your order and got unreasonably attached to it.",
+    "Walked the same route so many times you stopped seeing it, and then one day saw it again.",
+], age_min=20, weight=12, cooldown=3,
+   effects=FX(stats={"happiness": 3}, stress=-3))
+
+E("life.sorting-yourself-out", "random", [
+    "Got your paperwork, your cupboards and your head into roughly the same order for about six weeks.",
+    "Threw out four bags of things you'd moved twice without opening.",
+], age_min=20, weight=12, cooldown=4,
+   effects=FX(stats={"happiness": 4, "discipline": 2}, stress=-5))
+
+E("life.up-all-night", "random", [
+    "Stayed up until it got light for no particular reason and felt it for two days.",
+    "Slept badly for a month and blamed everything except the obvious.",
+], age_min=18, age_max=45, weight=12, cooldown=3,
+   effects=FX(stats={"health": -2, "happiness": -2}, stress=5))
+
+E("life.a-good-week", "random", [
+    "Had a week in June where everything lined up, and you noticed at the time, which is the rare part.",
+    "Nothing in particular happened in April and it was somehow the best month of the year.",
+], age_min=18, weight=12, cooldown=3,
+   effects=FX(stats={"happiness": 7}, stress=-8))
+
+E("life.the-news", "random", [
+    "Something happened in the world that everybody talked about for two weeks and then stopped.",
+    "Gave up following the news for three months and felt better and slightly worse informed.",
+], age_min=20, weight=11, cooldown=4,
+   effects=FX(stats={"happiness": -2, "smarts": 1}, stress=3))
+
+E("life.old-photos", "random", [
+    "Found a box of photos of people you can no longer name and kept them anyway.",
+    "Went through your phone from four years ago and sat with it longer than you meant to.",
+], age_min=25, weight=11, cooldown=5,
+   effects=FX(stats={"happiness": 2}, stress=1))
+
+E("life.the-thing-you-fixed", "random", [
+    "Fixed something yourself that you'd have paid somebody for a year ago.",
+    "Watched twenty minutes of video and did a job that quotes at $400. It's still holding.",
+], age_min=20, weight=12, cooldown=4,
+   effects=FX(stats={"happiness": 5, "smarts": 2}, stress=-3))
+
+E("life.getting-fit", "random", [
+    "Went three times a week from January to about March, which is longer than last year.",
+    "Started running and got to the point where it stopped being awful, which took eleven weeks.",
+], age_min=18, weight=12, cooldown=4, physical=True,
+   effects=FX(stats={"health": 4, "happiness": 3, "discipline": 2}, stress=-5))
+
+E("life.let-it-slide", "random", [
+    "Stopped going in February and kept paying until October, $304 for eight months of nothing.",
+    "Paid $304 to a gym you drove past all year and ate whatever was quickest.",
+], age_min=20, weight=12, cooldown=4,
+   effects=FX(cash=CASH(-304, "a gym you stopped going to"), stats={"health": -3, "happiness": -2}, stress=3))
+
+E("life.the-grey-year", "random", [
+    "Went through a stretch where nothing was wrong and nothing was interesting either.",
+    "Had a flat few months and came out of them without ever working out what it was.",
+], age_min=20, weight=12, cooldown=4,
+   effects=FX(stats={"happiness": -5}, stress=6))
+
+E("life.stranger-kindness", "random", [
+    "A stranger did something small and completely unnecessary for you and you think about it still.",
+    "Somebody let you go first at a moment you badly needed somebody to let you go first.",
+], age_min=18, weight=10, cooldown=6,
+   effects=FX(stats={"happiness": 5}, stress=-4))
 
 
 # =============================================================================
@@ -3360,7 +5037,19 @@ TOKEN_RE = re.compile(r"\{([a-zA-Z0-9]+)\}")
 ROMANCE_AGE_FLOOR = 13
 
 MIN_EVENTS = 250
-MAX_EVENTS = 500
+# Ticket 0414 raised this from 500.
+#
+# The ceiling is from ticket 0203, when the catalog was a childhood and 500 was
+# more than anyone could review. It is now a guard whose justification has
+# expired (CORE_RULES 13.68): the spec's own v0.10 target is *"roughly
+# 2,000-5,000+ event text variants by pre-beta"* and v0.20 wants "a
+# correspondingly large event library", so a number that stops the build at 543
+# is stopping it from doing the thing it is for.
+#
+# What actually keeps a catalog this size honest is not the count — it is the
+# checks below, the content validator, and the reachability tests, all of which
+# scale. The floor stays where it is and still means something.
+MAX_EVENTS = 700
 CHILDHOOD_AGES = range(0, 18)
 # Sampled beyond childhood too: the year loop does not stop at eighteen, and an
 # adult year with nothing in it throws in advanceYear.

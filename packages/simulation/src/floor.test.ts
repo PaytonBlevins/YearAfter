@@ -15,7 +15,7 @@
  * how it would come back.
  */
 import { describe, expect, it } from 'vitest';
-import { MAJORS } from '@yearafter/education';
+import { findMajor, MAJORS } from '@yearafter/education';
 import { SUBSISTENCE, portfolioWorth, totalFor, totalOwed } from '@yearafter/finance';
 import { createNewGame } from './new-game';
 import { advanceYear } from './advance';
@@ -32,6 +32,24 @@ const q = (xs: number[], p: number) => {
 const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 
 type Mode = 'never' | 'balanced' | 'allin' | 'bonds';
+
+/*
+  UNDERGRADUATE ONLY, AND 0406 IS WHY.
+
+  This cycled `MAJORS` while `MAJORS` was eight interchangeable bachelor's
+  degrees at one price, and the shortcut was invisible. 0406 made it fifty-three
+  programs across three tiers, so a quarter of the seeds were being handed a
+  graduate program that a high-school leaver can never start and another
+  quarter a trade certificate costing a third as much — which showed up here as
+  the `allin` cohort spending 12% less on living than `never` while holding
+  eight times the net worth, indistinguishable from the $430,000 subsidy this
+  test exists to catch. It was neither: it was this line. CORE_RULES 13.63.
+
+  What this test is comparing is where SPARE CASH goes, so every cohort has to
+  face the same education, and an undergraduate degree is what "a major" meant
+  when it was written.
+*/
+const UNDERGRADUATE = MAJORS.filter((program) => program.kind === 'undergraduate');
 
 function live(seed: string, mode: Mode, major: string) {
   let state = createNewGame({ seed });
@@ -75,7 +93,15 @@ function live(seed: string, mode: Mode, major: string) {
         }
       }
     }
-    if (!cannotEnrol(state)) {
+    /*
+      ASKS ABOUT THE PROGRAMME IT IS ABOUT TO APPLY FOR (Ticket 0406).
+
+      It used to ask the bare `cannotEnrol(state)` and then apply for a specific
+      major, which was the same question while every program cost the same and
+      is two questions now. See `cannotEnrolAnything`.
+    */
+    const program = findMajor(major);
+    if (program && !cannotEnrol(state, program)) {
       const r = applyToCollege(state, major);
       if (r.ok) state = r.value.state;
     }
@@ -124,7 +150,9 @@ describe('0308b — the floor and the date', () => {
 
     for (let i = 0; i < N; i += 1) {
       for (const mode of modes) {
-        (out[mode] ??= []).push(live(`hard-${i}`, mode, MAJORS[i % MAJORS.length]!.id));
+        (out[mode] ??= []).push(
+          live(`hard-${i}`, mode, UNDERGRADUATE[i % UNDERGRADUATE.length]!.id),
+        );
       }
     }
 
@@ -163,13 +191,35 @@ describe('0308b — the floor and the date', () => {
       );
     }
 
+    /*
+      PER ADULT YEAR, NOT PER LIFETIME (Ticket 0410).
+
+      The claim this test makes is about the PRICE of a life — being illiquid
+      must not be a way to live cheaply. A lifetime total answers a different
+      question, because it is spending multiplied by how long you lived, and
+      until 0410 those two cohorts died at near enough the same ages for the
+      difference not to show.
+
+      0410 gave the population partners and children, which move stress and
+      happiness, which feed health. The lifetimes came apart, and the test went
+      red while the thing it guards was fine in the other direction: measured on
+      the same run, `allin` spent $80,540 a year against `never`'s $79,808 — MORE,
+      which is what the comment above says should happen — and the lifetime
+      medians said it spent 4.9% less.
+
+      A total that mixes a rate with a duration cannot tell one from the other.
+      0408 fixed `adult-social.test.ts` for the same reason and 0409 fixed
+      `health.test.ts` for it; this is the third outing of CORE_RULES 13.63.
+    */
     const livingOf = (mode: Mode) =>
       q(
-        out[mode]!.map((r) => r.lifetimeLiving),
+        out[mode]!.map((r) => r.lifetimeLiving / Math.max(1, r.adultYears)),
         0.5,
       );
     const gap = livingOf('never') - livingOf('allin');
-    console.log(`\n  the 13.53 gap was $430,000. It is now ${money(gap)}.`);
+    console.log(
+      `\n  the 13.53 gap was $430,000 over a lifetime. Per adult year it is now ${money(gap)}.`,
+    );
 
     /*
       THE ASSERTION IS THE TICKET, AND IT IS TWO-SIDED.
@@ -195,7 +245,44 @@ describe('0308b — the floor and the date', () => {
       to live cheaply. That is a direction, and it holds whatever the catalog
       does.
     */
-    expect(livingOf('allin')).toBeGreaterThanOrEqual(livingOf('never'));
+    /*
+      A SMALL BAND, NOT A HARD ZERO, SINCE 0403. `never` and `allin` are the
+      same 80 played lives — same jobs, same promotions, same everything except
+      what happens to spare cash — so a job-catalog edit with nothing to do
+      with investing still moves both numbers by reshaping WHEN income arrives
+      relative to market timing, and 0403 measured that moving: closing a
+      reachability hole (a duplicated top-of-ladder trades job starving its own
+      sibling, `packages/careers/src/openings.ts`) meant removing four
+      management-tier jobs from tracks that hadn't had a fifth rung before,
+      which shows up here as roughly a 1.6% wobble even though it never touches
+      `livingCostFor` or the portfolio model this test is actually about. The
+      $430,000 bug this guards against was 13% of `never`'s figure; 3% is a
+      wide enough band to absorb ordinary catalog churn without being wide
+      enough to let a real subsidy back in.
+    */
+    /*
+      TEN PERCENT, AND THE BAND IS NOW SET BY MEASUREMENT RATHER THAN BY FEEL
+      (Ticket 0416, CORE_RULES 13.81).
+
+      0416 turned this red at −4.8% without touching money: the door to
+      something to join reshuffled who these eighty lives meet and marry, and
+      the median moved. So both sides of the line were measured, on this code:
+
+      - THE NOISE. Two disjoint samples of the SAME build — the first 80 seeds
+        and the next 120 — read −4.8% and +2.2%; with the door switched off,
+        +3.4% and −4.6%. Seven or eight points of swing from nothing but which
+        lives were drawn. At 200 lives the two builds read −1.9% and −1.5%:
+        the ticket moved nothing.
+      - THE SIGNAL. Restoring 13.53 — the portfolio dropped from both the
+        standard and the hardship cap — reads −35% at 80 lives, at 200, and on
+        each half separately.
+
+      A 3% line sat inside the noise, so it was a coin flip that happened to
+      land heads for five tickets. Ten percent is twice the noise and a third
+      of the signal: it stays green for a build that has not reopened the
+      subsidy and goes red for one that has.
+    */
+    expect(livingOf('allin')).toBeGreaterThanOrEqual(livingOf('never') * 0.9);
     // And it has to stay explicable. Spending twice what somebody else spends
     // would mean the standard is being driven by something other than wealth.
     expect(livingOf('allin')).toBeLessThan(livingOf('never') * 2);

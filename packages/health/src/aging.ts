@@ -102,6 +102,36 @@ export function ageingLoss(age: number): number {
   return SLOW_DECLINE + past * FAST_DECLINE_PER_YEAR;
 }
 
+/**
+ * How much of the peak a body has lost by this age.
+ *
+ * The closed form of `ageingLoss` summed from `DECLINE_STARTS`. Written as a
+ * formula rather than a loop because it is called for every person the player
+ * knows, every year, for eighty years — and because the two shapes must not be
+ * able to disagree, the test asserts this against an actual accumulation of
+ * `ageingLoss` rather than against remembered numbers.
+ */
+export function cumulativeAgeingLoss(age: number): number {
+  if (age <= DECLINE_STARTS) return 0;
+  // The sum is over the years LIVED THROUGH, ages DECLINE_STARTS..age-1, which
+  // is the off-by-one the accumulation test caught immediately: `ageingLoss`
+  // charges at DECLINE_ACCELERATES itself with a `past` of zero, so that year
+  // belongs to the fast arm at k=0 and not to the slow one.
+  const slowYears = Math.max(0, Math.min(age, DECLINE_ACCELERATES) - DECLINE_STARTS);
+  let loss = slowYears * SLOW_DECLINE;
+  if (age > DECLINE_ACCELERATES) {
+    const past = age - DECLINE_ACCELERATES;
+    loss += past * SLOW_DECLINE + (FAST_DECLINE_PER_YEAR * past * (past - 1)) / 2;
+  }
+  return loss;
+}
+
+/*
+  Moved here from `npc.ts` in Ticket 0417, because the player's own mortality
+  now reads it too (see `constitutionOf` and `healthForAge`), and `health.ts` importing `npc.ts`
+  would be a cycle. One definition, beside the curve it is the integral of.
+*/
+
 /*
  * There was a `HealthBand` type, a `bandOf()` and a `HEALTH_LABELS` table here.
  * Ticket 0211b deleted all three.

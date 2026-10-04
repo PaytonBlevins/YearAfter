@@ -13,3 +13,6 @@ export * from './jobs';
 export * from './pay';
 export * from './employment';
 export * from './openings';
+export * from './offers';
+export * from './growth';
+export * from './partner';
