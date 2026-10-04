@@ -38,3 +38,4 @@ export * from './valuables';
 export * from './auctions';
 export * from './businesses';
 export * from './business-events';
+export * from './private-deals';

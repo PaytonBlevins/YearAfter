@@ -173,3 +173,4 @@ export * from './renovations';
 export * from './valuables';
 export * from './auctions';
 export * from './businesses';
+export * from './deals';

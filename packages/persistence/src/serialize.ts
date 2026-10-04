@@ -87,6 +87,8 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     ...(state.auctions !== undefined ? { auctions: state.auctions } : {}),
     // Ticket 0601, the eighth, in the same breath as the field.
     businesses: state.businesses,
+    // Ticket 0605, the ninth, in the same breath as the field.
+    deals: state.deals,
     // Omitted entirely when nobody is hired, which is what every other optional
     // field in this document does and what the migration relies on.
     ...(state.advisorId !== undefined ? { advisorId: state.advisorId } : {}),
@@ -128,6 +130,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     ...(save.renovationOffer !== undefined ? { renovationOffer: save.renovationOffer } : {}),
     ...(save.auctions !== undefined ? { auctions: save.auctions } : {}),
     businesses: save.businesses,
+    deals: save.deals,
     retirement: save.retirement,
     pending: save.pending,
   });

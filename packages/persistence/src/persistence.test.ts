@@ -1833,6 +1833,40 @@ describe('Ticket 0406 — a question survives being saved', () => {
     expect(migrated.value.businesses[0]!.branches).toEqual([]);
   });
 
+  it('gives a v39 save no deals, and keeps the deals a v40 save holds', () => {
+    // Ticket 0605. Losing `deals` on a reload would hand the cheque back for nothing; losing
+    // `multiple` would reroll an outcome that was fixed the day the money went in.
+    const { save } = newSave('DEALS');
+    const live: GameState = {
+      ...fromSave(save),
+      deals: [
+        {
+          id: 'deal:2044:startup:0',
+          kindId: 'startup',
+          name: 'Brightwater Labs',
+          put: dollars(10_000),
+          since: 2044,
+          matures: 2049,
+          multiple: 3.5,
+          paid: dollars(0),
+          status: 'live',
+        },
+      ],
+    };
+    const written = toSave(live, { id: asSaveId('s-deals') });
+    expect(written.version).toBe(CURRENT_SAVE_VERSION);
+    expect(fromSave(written).deals).toEqual(live.deals);
+
+    const old = JSON.parse(JSON.stringify(written));
+    old.version = 39;
+    delete old.deals;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.deals).toEqual([]);
+  });
+
   it('keeps which business a loan was borrowed for, and what the business paid last year', () => {
     // Ticket 0603. A business loan with no `businessId` would be serviced twice, by the
     // business and then by the household; one with no `repaid` would lose the dashboard line.

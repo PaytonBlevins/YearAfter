@@ -25,6 +25,7 @@ import type {
   OwnedVehicle,
   OwnedValuable,
   OwnedBusiness,
+  PrivateDeal,
   PriceBook,
   RetirementState,
 } from '@yearafter/finance';
@@ -45,7 +46,7 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 39;
+export const CURRENT_SAVE_VERSION = 40;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -82,6 +83,9 @@ export type { WorldState };
  * could let anything, so the migration has nothing to write; the version is
  * bumped so a build that cannot read a tenant refuses the save rather than
  * dropping them.
+ *
+ * v40 added `deals` — the private deals the character has made (Ticket 0605).
+ * Every save before it holds none, so the migration writes an empty list.
  *
  * v39 added `branches` to each business — the years its extra locations opened
  * (Ticket 0602). A business before it had one door, so every one gets `[]`.
@@ -163,7 +167,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 39;
+  readonly version: 40;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -265,6 +269,8 @@ export interface SaveGameV18 {
   readonly auctions?: AuctionDiary;
   /** Ticket 0601. The businesses the character owns. Always present from v38. */
   readonly businesses: readonly OwnedBusiness[];
+  /** Ticket 0605. The private deals the character has made. Always present from v40. */
+  readonly deals: readonly PrivateDeal[];
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

@@ -21,6 +21,8 @@ import {
   EMPTY_HOMES,
   EMPTY_VEHICLES,
   EMPTY_BUSINESSES,
+  EMPTY_DEALS,
+  type PrivateDeal,
   EMPTY_VALUABLES,
   EMPTY_LEDGER,
   EMPTY_LOANS,
@@ -298,6 +300,8 @@ export interface GameState {
    * Not optional, for the reason `homes` is not.
    */
   readonly businesses: readonly OwnedBusiness[];
+  /** Ticket 0605. The private deals the character has made. Always present from v40. */
+  readonly deals: readonly PrivateDeal[];
   /** Live RNG registry. Serialised into the save on every write. */
   readonly rng: Rng;
 }
@@ -501,6 +505,7 @@ export interface CreateGameStateOptions {
   readonly renovationOffer?: RenovationOffer;
   readonly auctions?: AuctionDiary;
   readonly businesses?: readonly OwnedBusiness[];
+  readonly deals?: readonly PrivateDeal[];
 }
 
 export const createGameState = (
@@ -540,6 +545,7 @@ export const createGameState = (
   ...(options.renovationOffer ? { renovationOffer: options.renovationOffer } : {}),
   ...(options.auctions ? { auctions: options.auctions } : {}),
   businesses: options.businesses ?? EMPTY_BUSINESSES,
+  deals: options.deals ?? EMPTY_DEALS,
   pending: options.pending ?? [],
   rng,
 });

@@ -976,6 +976,15 @@ const migrations: Readonly<Record<number, Migration>> = {
       : [],
     version: 39,
   }),
+  /**
+   * v39 -> v40: Ticket 0605 — private deals. Nobody before it held one, so every
+   * older save gets an empty list.
+   */
+  39: (save) => ({
+    ...save,
+    deals: Array.isArray(save['deals']) ? save['deals'] : [],
+    version: 40,
+  }),
 };
 
 /**
@@ -1202,6 +1211,8 @@ export function validateCurrentSave(
     require('valuables', candidate['valuables'], Array.isArray(candidate['valuables'])),
     // Ticket 0601. And for what is owned and running.
     require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
+    // Ticket 0605. And for the private deals.
+    require('deals', candidate['deals'], Array.isArray(candidate['deals'])),
   ].filter((problem): problem is string => problem !== null);
 
   if (problems.length > 0) {
