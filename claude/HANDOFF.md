@@ -84,55 +84,90 @@ original visual identity. Full text: `claude/approved-decisions.md`.
 - Mobile screens for 0602–0604 are typechecked but not run on a device.
 - `pnpm mobile -- --clear` starts Expo with a clean cache (not `pnpm mobile clear`).
 
-## 7. Git and coordination (two agents, one repo)
+## 7. How two agents work on every ticket (the pipeline)
+
+**Agent A** (the original Claude session) owns the engine, the save format and
+the calibration. **Agent B** (you, if you are the second agent) owns the screens,
+the content and the independent verification. Both work on every ticket; neither
+waits for the other to finish a whole ticket.
+
+For each ticket:
+
+1. **A measures** (step 2 of section 5) and posts the numbers.
+2. **A publishes the contract commit** to `main` quickly: the new types, the save
+   fields, function signatures (stub bodies are fine), and the balance
+   constants. Merge before anything else. B does not start until it is on `main`.
+   After it merges, A changes the contract only after telling B in the PR.
+3. **A builds** the engine logic, the save migration, the calibration and the
+   engine tests.
+4. **B builds against the contract at the same time:** mobile screens and store
+   wiring, content and event text (validator rules in section 3), on-device
+   checks, and a draft of the ticket doc.
+5. **B sabotage-verifies A's engine tests** (section 5, step 4) and reports
+   survivors in the PR. A fixes the tests, not B.
+6. **A writes the final ticket doc, roadmap row and CORE_RULES lessons.**
+7. **Overlap:** while B finishes ticket N, A is already measuring ticket N+1.
+   Never sit idle: if blocked, pick the next light item (playtest findings,
+   Prettier, on-device checks) and say so in the PR.
 
 Rules
+
+- Claim before you start. `claude/CLAIMS.md` records who owns each ticket and who
+  holds each save version number. Take the next number there, in its own tiny
+  commit to `main`, before using it.
+- Cross-review: each agent reviews the other's PR (verify output and sabotage
+  results). Payton merges.
+- Calibration judgment, product-judgment values and anything in
+  `approved-decisions.md` stay with A or Payton. B proposes; it does not decide.
+- Shared hot files (`CORE_RULES.md`, `roadmap.md`, `packages/*/src/index.ts`,
+  `gameStore.tsx`, save migrations, `tools/content-validator/validate.mjs`,
+  `TICKET` in `packages/finance/src/summary.ts`): small separate commits, rebase
+  often. A writes the final ticket doc and roadmap row.
+
+## 8. Git
+
 - `main` stays green and stable. Never force-push `main`. Never rewrite pushed history.
-- One ticket = one short-lived branch = one PR. Branch names:
-  `feat/0605-private-investments`, `fix/…`, `refactor/…`, `test/…`,
-  `content/…`, `balance/…`, `docs/…`.
-- Commit messages use the same prefixes: `feat(finance): 0605 …`.
-- Pull request into `main`; Payton merges (or approves a merge).
+- One agent per branch. Branch names: `feat/0605-engine` (A) and
+  `feat/0605-screens` (B), or `fix/`, `refactor/`, `test/`, `content/`,
+  `balance/`, `docs/`. Commit messages use the same prefixes:
+  `feat(finance): 0605 …`.
+- Pull requests into `main`; Payton merges.
 
-Avoiding conflicts
-- Split work by ticket and package, and agree it before starting. Suggested:
-  the content/event/catalog tickets go to one agent, engine and screens to the
-  other. Do not both edit the same ticket.
-- Shared hot files — `specs/CORE_RULES.md`, `claude/roadmap.md`,
-  `packages/*/src/index.ts`, `apps/mobile/src/stores/gameStore.tsx`, the save
-  migrations, `tools/content-validator/validate.mjs` (and `TICKET` in
-  `packages/finance/src/summary.ts`) — touch them in small, separate commits and
-  rebase often. Only one agent bumps the save version at a time; claim v40
-  before using it.
-- Docs for each ticket go in the PR, never straight on `main`.
-
-Day to day
 ```
 git clone https://github.com/PaytonBlevins/YearAfter.git && cd YearAfter
 pnpm install
 git switch main && git pull --ff-only
-git switch -c feat/0605-private-investments
+git switch -c feat/0605-screens
 # ...work...
 pnpm format:check && pnpm typecheck && pnpm test      # quick gate
 pnpm verify                                           # full gate before the PR
-git add -A && git commit -m "feat(finance): 0605 private investments"
+git add -A && git commit -m "feat(mobile): 0605 private investments screens"
 git fetch origin && git rebase origin/main            # stay current
 git push -u origin HEAD
 gh pr create --base main
 ```
+
 Gotchas
-- A stale `.git/index.lock` after an interrupted git command: delete it with
-  `rm -f .git/index.lock` once you're sure nothing else is running.
+
+- A stale `.git/index.lock` after an interrupted git command: `rm -f .git/index.lock`
+  once nothing else is running.
 - Don't pass literal `<placeholder>` text into zsh commands.
-- Don't commit the `_to_delete/` folder or `node_modules`.
-- CI runs on every push and on PRs: checkout, install `--frozen-lockfile`,
+- Don't commit `_to_delete/` or `node_modules`.
+- CI runs on every push and PR: checkout, install `--frozen-lockfile`,
   format:check, typecheck, test, validate:content. The pnpm version comes from
   `packageManager` (don't add `version:` to the action).
 - Update `pnpm-lock.yaml` in the same commit as any dependency change.
+- **Prettier first:** one agent runs Prettier across the repo and merges it before
+  either of you branches, or every branch conflicts with it.
 
-## 8. The Claude Project
+## 9. First ticket on the pipeline: 0605 Private investments
 
-Ticket docs also live in the Claude Project "YearAfter" (`claude/…` paths).
-After finishing a ticket the doc, roadmap and CORE_RULES are mirrored there.
+Payton has not yet given the go-ahead for 0605. Do not start until he does.
+When he does: A measures and posts the contract commit; B waits for it. 0606
+Commercial real estate follows, then 0508 Will & Estate (deferred by Payton).
+
+## 10. The Claude Project
+
+Ticket docs also live in the Claude Project "YearAfter" (`claude/…` paths). After
+each ticket the doc, roadmap and CORE_RULES are mirrored there.
 `claude/build-status.md` exists only in the Project.
-
