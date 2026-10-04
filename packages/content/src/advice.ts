@@ -24,13 +24,7 @@ export type AdviceVerb = 'buy' | 'hold' | 'reduce' | 'sell' | 'rebalance';
  * are never wrong, only sometimes unwelcome.
  */
 export type AdviceReason =
-  | 'belowTrend'
-  | 'strongEarner'
-  | 'aboveTrend'
-  | 'concentrated'
-  | 'noFloor'
-  | 'idleCash'
-  | 'steady';
+  'belowTrend' | 'strongEarner' | 'aboveTrend' | 'concentrated' | 'noFloor' | 'idleCash' | 'steady';
 
 /** The three reasons an advisor can be wrong about. */
 export const PREDICTIONS: readonly AdviceReason[] = ['belowTrend', 'strongEarner', 'aboveTrend'];

@@ -78,12 +78,7 @@ export interface Benefit {
  * lesson 0309 learned the hard way from `UNWRITTEN_CATEGORIES`.
  */
 export type BenefitTemplate =
-  | 'salary'
-  | 'performance'
-  | 'trade'
-  | 'government'
-  | 'professional'
-  | 'management';
+  'salary' | 'performance' | 'trade' | 'government' | 'professional' | 'management';
 
 export const BENEFIT_BY_TEMPLATE: Readonly<Record<BenefitTemplate, Benefit>> = {
   salary: { match: 0.5, matchUpTo: 0.06, pensionPerYear: 0 },
@@ -208,9 +203,7 @@ export function serveYear(
     // Final pay is the HIGHEST pensionable pay, not the last — somebody who
     // steps down to an easier government job at sixty should not lose the
     // pension they spent thirty years earning.
-    finalPensionablePay: cents(
-      Math.max(Number(state.finalPensionablePay), grossPayDollars * 100),
-    ),
+    finalPensionablePay: cents(Math.max(Number(state.finalPensionablePay), grossPayDollars * 100)),
   };
 }
 
@@ -319,7 +312,8 @@ export function drawYear(
     forever. Eleven dollars a year is not income, it is a row on a screen, and
     an account that can never empty is an account the player stops reading.
   */
-  const drawn = balance <= 0 ? 0 : balance < 5_000 ? Math.round(balance) : Math.round(balance * DRAW_RATE);
+  const drawn =
+    balance <= 0 ? 0 : balance < 5_000 ? Math.round(balance) : Math.round(balance * DRAW_RATE);
 
   return {
     pension,
@@ -359,9 +353,8 @@ export function withdrawEarly(
 }
 
 /** What the whole arrangement is worth, for the net-worth line (spec 163). */
-export const retirementWorth = (state: RetirementState): Money => dollars(
-  Math.round(Number(state.balance) / 100),
-);
+export const retirementWorth = (state: RetirementState): Money =>
+  dollars(Math.round(Number(state.balance) / 100));
 
 /** The benefit a template comes with, or nothing for an unknown one. */
 export const benefitFor = (template: string): Benefit | undefined =>

@@ -221,15 +221,25 @@ describe('what is on the menu', () => {
     */
     const school = peer({ relationship: 95, romance: at('together', 16) });
     for (const age of [17, 18, 19]) {
-      expect(movesFor(school, age, RICH).map((m) => m.id), `propose at ${age}`).not.toContain(
-        'propose',
-      );
+      expect(
+        movesFor(school, age, RICH).map((m) => m.id),
+        `propose at ${age}`,
+      ).not.toContain('propose');
     }
-    expect(movesFor(school, 20, RICH).map((m) => m.id), 'propose at 20').toContain('propose');
+    expect(
+      movesFor(school, 20, RICH).map((m) => m.id),
+      'propose at 20',
+    ).toContain('propose');
 
     const engaged = peer({ relationship: 95, romance: at('engaged', 20) });
-    expect(movesFor(engaged, 20, RICH).map((m) => m.id), 'marry at 20').not.toContain('marry');
-    expect(movesFor(engaged, 21, RICH).map((m) => m.id), 'marry at 21').toContain('marry');
+    expect(
+      movesFor(engaged, 20, RICH).map((m) => m.id),
+      'marry at 20',
+    ).not.toContain('marry');
+    expect(
+      movesFor(engaged, 21, RICH).map((m) => m.id),
+      'marry at 21',
+    ).toContain('marry');
   });
 
   it('has nothing to offer about somebody it is already over with', () => {

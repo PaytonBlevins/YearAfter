@@ -85,7 +85,8 @@ const adult = (from = 18, to = 100) => ALL.filter((row) => row.age >= from && ro
 const shareHolding = (rows: readonly YearRow[], category: string) =>
   rows.length === 0
     ? 0
-    : rows.filter((row) => row.fired.some((id) => categoryOf(id) === category)).length / rows.length;
+    : rows.filter((row) => row.fired.some((id) => categoryOf(id) === category)).length /
+      rows.length;
 const mixAt = (age: number) => {
   const fired = ALL.filter((row) => row.age === age).flatMap((row) => [...row.fired]);
   const counts = new Map<string, number>();
@@ -128,8 +129,14 @@ describe('0414 — the rest of a life after school', () => {
     const withSibling = adult().filter((row) => row.livingSiblings > 0);
     expect(withParent.length, 'nobody has a living parent as an adult').toBeGreaterThan(800);
     expect(withSibling.length, 'nobody has a living sibling as an adult').toBeGreaterThan(800);
-    expect(shareHolding(withParent, 'family'), 'a living parent is never in the feed').toBeGreaterThan(0.25);
-    expect(shareHolding(withSibling, 'family'), 'a living sibling is never in the feed').toBeGreaterThan(0.25);
+    expect(
+      shareHolding(withParent, 'family'),
+      'a living parent is never in the feed',
+    ).toBeGreaterThan(0.25);
+    expect(
+      shareHolding(withSibling, 'family'),
+      'a living sibling is never in the feed',
+    ).toBeGreaterThan(0.25);
   });
 
   it('asks a grown child a question, which it never had', () => {
@@ -139,7 +146,10 @@ describe('0414 — the rest of a life after school', () => {
       row.fired.filter((id) => BY_ID.get(id)?.type !== 'passive'),
     );
     const family = decisions.filter((id) => categoryOf(id) === 'family');
-    expect(family.length, 'not one adult decision is about the family you came from').toBeGreaterThan(30);
+    expect(
+      family.length,
+      'not one adult decision is about the family you came from',
+    ).toBeGreaterThan(30);
   });
 
   it('gives an adult an ordinary life that is not the placeholders', () => {
@@ -177,7 +187,9 @@ describe('0414 — the rest of a life after school', () => {
       for (const [category, n] of counts) {
         if (n / total > worst.share) worst = { category, share: n / total };
       }
-      console.log(`age ${age}: ${worst.category} is ${(worst.share * 100).toFixed(1)}% of the year`);
+      console.log(
+        `age ${age}: ${worst.category} is ${(worst.share * 100).toFixed(1)}% of the year`,
+      );
       expect(worst.share, `age ${age} is mostly ${worst.category}`).toBeLessThan(0.4);
     }
   });

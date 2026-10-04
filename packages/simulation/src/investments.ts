@@ -269,11 +269,7 @@ const NOTHING_DOING: TradePreview = {
   refusal: 'notEnoughForOneUnit',
 };
 
-export function previewBuy(
-  state: GameState,
-  instrumentId: string,
-  dollars: number,
-): TradePreview {
+export function previewBuy(state: GameState, instrumentId: string, dollars: number): TradePreview {
   const instrument = findInstrument(instrumentId);
   if (!instrument) return { ...NOTHING_DOING, refusal: 'noSuchInstrument' };
   const cash = Math.round(Number(state.player.cash) / 100);
@@ -303,11 +299,7 @@ export function previewBuy(
  * the player's position than they asked for, to hit a figure they would not
  * have known to check.
  */
-export function previewSell(
-  state: GameState,
-  instrumentId: string,
-  dollars: number,
-): TradePreview {
+export function previewSell(state: GameState, instrumentId: string, dollars: number): TradePreview {
   const holding = state.portfolio.find((row) => row.instrumentId === instrumentId);
   if (!holding) return { ...NOTHING_DOING, refusal: 'nothingHeld' };
   const price = priceOf(state.prices, instrumentId);
@@ -466,7 +458,10 @@ export function adviceFor(state: GameState): readonly Recommendation[] {
 export function feeThisYear(state: GameState): number {
   const advisor = state.advisorId ? findAdvisor(state.advisorId) : undefined;
   if (!advisor) return 0;
-  return advisorFee(advisor, Math.round(Number(portfolioWorth(state.prices, state.portfolio)) / 100));
+  return advisorFee(
+    advisor,
+    Math.round(Number(portfolioWorth(state.prices, state.portfolio)) / 100),
+  );
 }
 
 /**
@@ -516,15 +511,16 @@ export function actOnAdvice(
 
 /** The fund with the widest spread of things inside it. */
 const broadestFund = (): Instrument | undefined =>
-  instrumentsOfKind('fund').slice().sort((a, b) => a.spread - b.spread)[0];
+  instrumentsOfKind('fund')
+    .slice()
+    .sort((a, b) => a.spread - b.spread)[0];
 
 const biggestHolding = (state: GameState): string | undefined =>
-  [...state.portfolio]
-    .sort(
-      (a, b) =>
-        b.units * priceOf(state.prices, b.instrumentId) -
-        a.units * priceOf(state.prices, a.instrumentId),
-    )[0]?.instrumentId;
+  [...state.portfolio].sort(
+    (a, b) =>
+      b.units * priceOf(state.prices, b.instrumentId) -
+      a.units * priceOf(state.prices, a.instrumentId),
+  )[0]?.instrumentId;
 
 /* -------------------------------------------------------------------------- */
 /* Ticket 0310 — retirement                                                    */
@@ -590,10 +586,7 @@ export const retirementRefusal = (state: GameState): RetireRefusal | undefined =
   canRetire(state.retirement, state.player.age);
 
 /** Money out before the date, which costs 20% below `UNLOCKS_AT`. */
-export function takeOutEarly(
-  state: GameState,
-  amount: number,
-): Result<InvestOutcome, RetireError> {
+export function takeOutEarly(state: GameState, amount: number): Result<InvestOutcome, RetireError> {
   const out = withdrawEarly(state.retirement, state.player.age, amount);
   if (out.taken <= 0) return err('notWorking');
 

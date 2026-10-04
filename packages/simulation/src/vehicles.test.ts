@@ -548,13 +548,19 @@ describe('0505 — taking a car to a shop', () => {
     const { state, id } = withCar;
     const slots = modSlotsFor(state, id).map((view) => view.slot);
     expect(slots).not.toContain('tarbus');
-    expect(fitVehicleMod(state, id, 'mod.tarbus')).toEqual({ ok: false, error: 'not-for-this-car' });
+    expect(fitVehicleMod(state, id, 'mod.tarbus')).toEqual({
+      ok: false,
+      error: 'not-for-this-car',
+    });
     const broke: GameState = {
       ...state,
       player: { ...state.player, cash: 0 as never },
       finance: { ...state.finance, balance: 0 as never },
     };
-    expect(fitVehicleMod(broke, id, 'mod.wheels.forged')).toEqual({ ok: false, error: 'cannot-afford' });
+    expect(fitVehicleMod(broke, id, 'mod.wheels.forged')).toEqual({
+      ok: false,
+      error: 'cannot-afford',
+    });
   });
 
   it('sends a suitable car to Tarbus, which takes over the engine and puts its name on it', () => {

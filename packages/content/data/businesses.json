@@ -20,10 +20,7 @@
       "ramp": 1.2,
       "productShare": 0.25,
       "supplier": true,
-      "skills": [
-        "discipline",
-        "charisma"
-      ],
+      "skills": ["discipline", "charisma"],
       "valueMultiple": 2.4,
       "names": [
         "Brightside Cleaning",
@@ -55,10 +52,7 @@
       "ramp": 1.4,
       "productShare": 0.25,
       "supplier": true,
-      "skills": [
-        "discipline",
-        "willpower"
-      ],
+      "skills": ["discipline", "willpower"],
       "valueMultiple": 2.4,
       "names": [
         "Greenway Lawn & Garden",
@@ -90,10 +84,7 @@
       "ramp": 1.5,
       "productShare": 0.3,
       "supplier": true,
-      "skills": [
-        "charisma",
-        "looks"
-      ],
+      "skills": ["charisma", "looks"],
       "valueMultiple": 2.2,
       "names": [
         "The Sharp Edge",
@@ -125,10 +116,7 @@
       "ramp": 1.6,
       "productShare": 0.6,
       "supplier": true,
-      "skills": [
-        "charisma",
-        "discipline"
-      ],
+      "skills": ["charisma", "discipline"],
       "valueMultiple": 2.3,
       "names": [
         "The Daily Grind",
@@ -160,10 +148,7 @@
       "ramp": 1.8,
       "productShare": 0.0,
       "supplier": false,
-      "skills": [
-        "health",
-        "charisma"
-      ],
+      "skills": ["health", "charisma"],
       "valueMultiple": 2.8,
       "names": [
         "Ironworks Fitness",
@@ -195,10 +180,7 @@
       "ramp": 1.8,
       "productShare": 0.45,
       "supplier": true,
-      "skills": [
-        "smarts",
-        "discipline"
-      ],
+      "skills": ["smarts", "discipline"],
       "valueMultiple": 3.0,
       "names": [
         "Cornerstone Auto",
@@ -230,10 +212,7 @@
       "ramp": 2.0,
       "productShare": 0.65,
       "supplier": true,
-      "skills": [
-        "charisma",
-        "discipline"
-      ],
+      "skills": ["charisma", "discipline"],
       "valueMultiple": 2.1,
       "names": [
         "The Long Table",
@@ -265,10 +244,7 @@
       "ramp": 1.8,
       "productShare": 0.7,
       "supplier": true,
-      "skills": [
-        "looks",
-        "charisma"
-      ],
+      "skills": ["looks", "charisma"],
       "valueMultiple": 2.2,
       "names": [
         "Thread & Needle",
@@ -300,10 +276,7 @@
       "ramp": 1.8,
       "productShare": 0.4,
       "supplier": true,
-      "skills": [
-        "smarts",
-        "discipline"
-      ],
+      "skills": ["smarts", "discipline"],
       "valueMultiple": 3.2,
       "names": [
         "Comfort Zone Heating & Air",
@@ -335,10 +308,7 @@
       "ramp": 2.5,
       "productShare": 0.0,
       "supplier": false,
-      "skills": [
-        "smarts",
-        "willpower"
-      ],
+      "skills": ["smarts", "willpower"],
       "valueMultiple": 3.8,
       "names": [
         "Lattice Labs",
@@ -370,10 +340,7 @@
       "ramp": 2.0,
       "productShare": 0.0,
       "supplier": false,
-      "skills": [
-        "smarts",
-        "discipline"
-      ],
+      "skills": ["smarts", "discipline"],
       "valueMultiple": 2.8,
       "names": [
         "Hartley & Ross CPAs",
@@ -405,10 +372,7 @@
       "ramp": 2.5,
       "productShare": 0.2,
       "supplier": true,
-      "skills": [
-        "charisma",
-        "smarts"
-      ],
+      "skills": ["charisma", "smarts"],
       "valueMultiple": 7.0,
       "names": [
         "The Harborview Hotel",
@@ -438,10 +402,7 @@
       "volatility": 0.16,
       "ramp": 3.0,
       "productShare": 0.0,
-      "skills": [
-        "smarts",
-        "charisma"
-      ],
+      "skills": ["smarts", "charisma"],
       "valueMultiple": 2.0,
       "names": [
         "Hale & Ward",
@@ -473,10 +434,7 @@
       "volatility": 0.22,
       "ramp": 2.2,
       "productShare": 0.0,
-      "skills": [
-        "charisma",
-        "smarts"
-      ],
+      "skills": ["charisma", "smarts"],
       "valueMultiple": 2.6,
       "names": [
         "Loud & Clear",
@@ -508,10 +466,7 @@
       "volatility": 0.25,
       "ramp": 2.5,
       "productShare": 0.0,
-      "skills": [
-        "charisma",
-        "smarts"
-      ],
+      "skills": ["charisma", "smarts"],
       "valueMultiple": 2.2,
       "names": [
         "Keystone Realty",
@@ -543,10 +498,7 @@
       "volatility": 0.12,
       "ramp": 2.0,
       "productShare": 0.8,
-      "skills": [
-        "looks",
-        "charisma"
-      ],
+      "skills": ["looks", "charisma"],
       "valueMultiple": 2.4,
       "names": [
         "Gilded Lane",
@@ -578,10 +530,7 @@
       "volatility": 0.14,
       "ramp": 1.8,
       "productShare": 0.6,
-      "skills": [
-        "smarts",
-        "charisma"
-      ],
+      "skills": ["smarts", "charisma"],
       "valueMultiple": 2.0,
       "names": [
         "Circuit & Co.",
@@ -613,10 +562,7 @@
       "volatility": 0.13,
       "ramp": 1.6,
       "productShare": 0.7,
-      "skills": [
-        "looks",
-        "charisma"
-      ],
+      "skills": ["looks", "charisma"],
       "valueMultiple": 2.2,
       "names": [
         "Hearth & Timber",
@@ -648,10 +594,7 @@
       "volatility": 0.13,
       "ramp": 1.8,
       "productShare": 0.6,
-      "skills": [
-        "charisma",
-        "willpower"
-      ],
+      "skills": ["charisma", "willpower"],
       "valueMultiple": 2.1,
       "names": [
         "The Spoke Shop",
@@ -683,10 +626,7 @@
       "volatility": 0.15,
       "ramp": 3.0,
       "productShare": 0.2,
-      "skills": [
-        "charisma",
-        "smarts"
-      ],
+      "skills": ["charisma", "smarts"],
       "valueMultiple": 7.5,
       "names": [
         "Cove Point Resort",
@@ -718,10 +658,7 @@
       "volatility": 0.1,
       "ramp": 1.8,
       "productShare": 0.3,
-      "skills": [
-        "smarts",
-        "discipline"
-      ],
+      "skills": ["smarts", "discipline"],
       "valueMultiple": 2.5,
       "names": [
         "Bright Current Electric",
@@ -753,10 +690,7 @@
       "volatility": 0.09,
       "ramp": 1.6,
       "productShare": 0.3,
-      "skills": [
-        "discipline",
-        "health"
-      ],
+      "skills": ["discipline", "health"],
       "valueMultiple": 2.5,
       "names": [
         "Flowright Plumbing",
@@ -788,10 +722,7 @@
       "volatility": 0.16,
       "ramp": 2.0,
       "productShare": 0.5,
-      "skills": [
-        "health",
-        "discipline"
-      ],
+      "skills": ["health", "discipline"],
       "valueMultiple": 2.3,
       "names": [
         "Highpoint Roofing",
@@ -823,10 +754,7 @@
       "volatility": 0.55,
       "ramp": 3.5,
       "productShare": 0.0,
-      "skills": [
-        "smarts",
-        "willpower"
-      ],
+      "skills": ["smarts", "willpower"],
       "valueMultiple": 4.0,
       "names": [
         "Pixel Harbor",
@@ -858,10 +786,7 @@
       "volatility": 0.24,
       "ramp": 2.4,
       "productShare": 0.0,
-      "skills": [
-        "charisma",
-        "smarts"
-      ],
+      "skills": ["charisma", "smarts"],
       "valueMultiple": 2.4,
       "names": [
         "Daily Ledger Media",
@@ -893,10 +818,7 @@
       "volatility": 0.26,
       "ramp": 2.0,
       "productShare": 0.0,
-      "skills": [
-        "charisma",
-        "looks"
-      ],
+      "skills": ["charisma", "looks"],
       "valueMultiple": 2.2,
       "names": [
         "Third Act Pictures",
@@ -928,10 +850,7 @@
       "volatility": 0.15,
       "ramp": 2.8,
       "productShare": 0.6,
-      "skills": [
-        "discipline",
-        "smarts"
-      ],
+      "skills": ["discipline", "smarts"],
       "valueMultiple": 2.6,
       "names": [
         "Stitchworks Mfg.",
@@ -963,10 +882,7 @@
       "volatility": 0.18,
       "ramp": 3.5,
       "productShare": 0.5,
-      "skills": [
-        "smarts",
-        "discipline"
-      ],
+      "skills": ["smarts", "discipline"],
       "valueMultiple": 3.0,
       "names": [
         "Meridian Assembly",
@@ -998,10 +914,7 @@
       "volatility": 0.14,
       "ramp": 3.0,
       "productShare": 0.5,
-      "skills": [
-        "smarts",
-        "discipline"
-      ],
+      "skills": ["smarts", "discipline"],
       "valueMultiple": 3.0,
       "names": [
         "Ironbridge Fabrication",
@@ -1033,10 +946,7 @@
       "volatility": 0.12,
       "ramp": 1.5,
       "productShare": 0.0,
-      "skills": [
-        "discipline",
-        "health"
-      ],
+      "skills": ["discipline", "health"],
       "valueMultiple": 2.4,
       "names": [
         "Long Haul Freight",
@@ -1068,10 +978,7 @@
       "volatility": 0.13,
       "ramp": 1.2,
       "productShare": 0.0,
-      "skills": [
-        "charisma",
-        "discipline"
-      ],
+      "skills": ["charisma", "discipline"],
       "valueMultiple": 3.0,
       "names": [
         "Easy Wheels Rental",

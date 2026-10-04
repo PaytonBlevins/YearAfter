@@ -422,7 +422,11 @@ describe('0505 — modifications', () => {
     const g = car(GELANDER);
     const base = vehicleWorthOf(g, facts(GELANDER), 2030);
     const cost = modPriceOf(mod('mod.tarbus'), facts(GELANDER).trim);
-    const converted = vehicleWorthOf(withMod(g, mod('mod.tarbus'), cost, 2030), facts(GELANDER), 2030);
+    const converted = vehicleWorthOf(
+      withMod(g, mod('mod.tarbus'), cost, 2030),
+      facts(GELANDER),
+      2030,
+    );
     expect((converted - base) / cost).toBeGreaterThan(0.6);
     expect(converted - base).toBeLessThan(cost);
   });
@@ -436,9 +440,16 @@ describe('0505 — modifications', () => {
 
   it('works a tuned car harder and keeps a car with good brakes out of trouble', () => {
     const stock = car(CIVIX);
-    const tuned = withMod(withMod(stock, mod('mod.ecu.stage-2'), 1_500, 2030), mod('mod.engine.turbo'), 5_000, 2030);
+    const tuned = withMod(
+      withMod(stock, mod('mod.ecu.stage-2'), 1_500, 2030),
+      mod('mod.engine.turbo'),
+      5_000,
+      2030,
+    );
     expect(strainOf(tuned)).toBeGreaterThan(1.2);
-    expect(monthlyCostOf(tuned, facts(CIVIX), 2031)).toBeGreaterThan(monthlyCostOf(stock, facts(CIVIX), 2031));
+    expect(monthlyCostOf(tuned, facts(CIVIX), 2031)).toBeGreaterThan(
+      monthlyCostOf(stock, facts(CIVIX), 2031),
+    );
     const quiet = { ...ROLLS, repair: 0.99 };
     expect(vehicleYear(tuned, facts(CIVIX), 2031, quiet).maintenance).toBeGreaterThan(
       vehicleYear(stock, facts(CIVIX), 2031, quiet).maintenance,

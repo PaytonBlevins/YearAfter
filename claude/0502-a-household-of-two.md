@@ -7,17 +7,16 @@ ownership ticket after 0501 is priced against what a household earns.
 
 150 played lives, answering every question, before this ticket:
 
-| age | with a partner | | without |
-|---|---|---|---|
-| 25–34 | $2,000 | | $44,000 |
-| 35–44 | $2,900 | | $108,000 |
-| 45–54 | $12,500 | | $68,000 |
-| 55–64 | $32,000 | | $91,000 |
+| age   | with a partner |     | without  |
+| ----- | -------------- | --- | -------- |
+| 25–34 | $2,000         |     | $44,000  |
+| 35–44 | $2,900         |     | $108,000 |
+| 45–54 | $12,500        |     | $68,000  |
+| 55–64 | $32,000        |     | $91,000  |
 
 (median net worth)
 
-A partner added half again to what the household cost (`PARTNER_SHARE`, since
-0303) and brought nothing in. Somebody with a partner was strictly poorer than
+A partner added half again to what the household cost (`PARTNER_SHARE`, since 0303) and brought nothing in. Somebody with a partner was strictly poorer than
 somebody without one at every working age. Two in three partnered years at
 45–54 rented. In the world it runs the other way: two incomes are most of why
 couples own homes.
@@ -68,21 +67,21 @@ Finances screen's income already includes it.
 
 Two disjoint sets of 150 lives (median net worth, all characters):
 
-| age | after | US (SCF 2022) |
-|---|---|---|
-| 25–34 | $41,000–$46,000 | ~$39,000 (under 35) |
-| 35–44 | $85,000–$103,000 | ~$135,000 |
-| 45–54 | $178,000–$197,000 | ~$247,000 |
-| 55–64 | $294,000–$331,000 | ~$364,000 |
-| 65–74 | $379,000–$415,000 | ~$410,000 |
-| 75+ | ~$500,000 | ~$335,000 |
+| age   | after             | US (SCF 2022)       |
+| ----- | ----------------- | ------------------- |
+| 25–34 | $41,000–$46,000   | ~$39,000 (under 35) |
+| 35–44 | $85,000–$103,000  | ~$135,000           |
+| 45–54 | $178,000–$197,000 | ~$247,000           |
+| 55–64 | $294,000–$331,000 | ~$364,000           |
+| 65–74 | $379,000–$415,000 | ~$410,000           |
+| 75+   | ~$500,000         | ~$335,000           |
 
-| | before | after |
-|---|---|---|
-| partnered ÷ single, median net worth at 55–64 | 0.18–0.35 | 0.98–1.04 |
-| partnered median net worth at 55–64 | $34,000 | $275,000–$352,000 |
-| partnered years at 45–54 owning a home | ~21% (pay off) | 65–72% |
-| working-age partnered years with a partner's pay | 0% | 77–79% |
+|                                                  | before         | after             |
+| ------------------------------------------------ | -------------- | ----------------- |
+| partnered ÷ single, median net worth at 55–64    | 0.18–0.35      | 0.98–1.04         |
+| partnered median net worth at 55–64              | $34,000        | $275,000–$352,000 |
+| partnered years at 45–54 owning a home           | ~21% (pay off) | 65–72%            |
+| working-age partnered years with a partner's pay | 0%             | 77–79%            |
 
 Home ownership by age now reads about 10% / 40% / 64% / 77% / 81% / 85% across
 25–34 / 35–44 / 45–54 / 55–64 / 65–74 / 75+. The US figures are about 37% / 62%

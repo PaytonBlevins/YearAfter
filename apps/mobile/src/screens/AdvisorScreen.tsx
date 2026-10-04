@@ -99,8 +99,8 @@ export function AdvisorScreen() {
         <Card>
           <View style={styles.panel}>
             <Text style={styles.panelBody}>
-              Across 500 simulated lifetimes of picking your own investments, taking advice ended
-              up <Text style={styles.strong}>31% ahead at the middle</Text> and{' '}
+              Across 500 simulated lifetimes of picking your own investments, taking advice ended up{' '}
+              <Text style={styles.strong}>31% ahead at the middle</Text> and{' '}
               <Text style={styles.strong}>56% ahead at the bad end</Text>. It came out ahead in 87
               of every 100 lives.
             </Text>

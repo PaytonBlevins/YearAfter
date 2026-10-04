@@ -155,7 +155,8 @@ describe('0507 — the auction venues', () => {
     expect(AUCTION_VENUES.filter((venue) => venue.type === 'general')).toHaveLength(2);
     expect(AUCTION_VENUES.some((venue) => venue.type === 'storage')).toBe(true);
     expect(AUCTION_VENUES.some((venue) => venue.type === 'private')).toBe(true);
-    for (const size of ['small', 'medium', 'large'] as const) expect(STORAGE_PEEKS[size].length).toBeGreaterThan(2);
+    for (const size of ['small', 'medium', 'large'] as const)
+      expect(STORAGE_PEEKS[size].length).toBeGreaterThan(2);
     expect(STORAGE_JUNK.length).toBeGreaterThan(10);
   });
 });

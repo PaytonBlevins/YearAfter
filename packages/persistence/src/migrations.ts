@@ -873,7 +873,9 @@ const migrations: Readonly<Record<number, Migration>> = {
    * that does has lost its payload and would wedge `advanceYear`.
    */
   31: (save) => {
-    const pending = Array.isArray(save['pending']) ? (save['pending'] as { eventId?: string }[]) : [];
+    const pending = Array.isArray(save['pending'])
+      ? (save['pending'] as { eventId?: string }[])
+      : [];
     const repaired = pending.filter(
       (decision) => decision?.eventId !== 'home.offer' || save['homeOffer'] !== undefined,
     );
@@ -901,7 +903,9 @@ const migrations: Readonly<Record<number, Migration>> = {
    * lost its payload and would wedge `advanceYear`.
    */
   33: (save) => {
-    const pending = Array.isArray(save['pending']) ? (save['pending'] as { eventId?: string }[]) : [];
+    const pending = Array.isArray(save['pending'])
+      ? (save['pending'] as { eventId?: string }[])
+      : [];
     const repaired = pending.filter(
       (decision) => decision?.eventId !== 'vehicle.offer' || save['vehicleOffer'] !== undefined,
     );
@@ -930,7 +934,9 @@ const migrations: Readonly<Record<number, Migration>> = {
    * `pending`, so one that does has lost its payload.
    */
   35: (save) => {
-    const pending = Array.isArray(save['pending']) ? (save['pending'] as { eventId?: string }[]) : [];
+    const pending = Array.isArray(save['pending'])
+      ? (save['pending'] as { eventId?: string }[])
+      : [];
     const repaired = pending.filter(
       (decision) => decision?.eventId !== 'home.renovate' || save['renovationOffer'] !== undefined,
     );

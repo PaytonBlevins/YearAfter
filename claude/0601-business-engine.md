@@ -81,7 +81,7 @@ nothing yet puts competitors, bad luck or a lost lease into a business's life.
 0604 (events and competition) owns closing that gap; until then a player who
 runs a business sensibly will find it more forgiving than the real world.
 
-*0604 update:* events and a rival took five-year survival from 81.5% to 78.7%
+_0604 update:_ events and a rival took five-year survival from 81.5% to 78.7%
 and it stayed there on purpose; see `0604-business-events-and-heirs.md`.
 
 ## Deferred, and why

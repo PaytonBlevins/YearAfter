@@ -130,13 +130,13 @@ Save **v36**: `valuables` and `renovationOffer`, and a home may carry
 
 Two disjoint sets of 150 lives:
 
-| | before | after |
-|---|---|---|
-| homes lived in, poor condition, 45–64 | 72–76% | 26–30% |
-| the same, 65+ | 86–88% | 24–26% |
-| median net worth, 45–64 | $236,000–$254,000 | $243,000–$261,000 |
-| median net worth, 65+ | $440,000–$454,000 | $436,000–$465,000 |
-| median home value, 45–64 | $291,000–$295,000 | $318,000–$320,000 |
+|                                       | before            | after             |
+| ------------------------------------- | ----------------- | ----------------- |
+| homes lived in, poor condition, 45–64 | 72–76%            | 26–30%            |
+| the same, 65+                         | 86–88%            | 24–26%            |
+| median net worth, 45–64               | $236,000–$254,000 | $243,000–$261,000 |
+| median net worth, 65+                 | $440,000–$454,000 | $436,000–$465,000 |
+| median home value, 45–64              | $291,000–$295,000 | $318,000–$320,000 |
 
 Homes now sit mostly at good or fair. Net worth is unchanged within the noise:
 the work costs money, and the condition it buys keeps the value.

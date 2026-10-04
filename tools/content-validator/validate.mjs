@@ -1368,7 +1368,21 @@ if (existsSync(activitiesPath)) {
 
     // Every string in the file EXCEPT ids and other machine keys. An id is not
     // copy, and 0207d proved that sweeping ids is how you break saved games.
-    const MACHINE = new Set(['id', 'ids', 'key', 'slug', 'ticker', 'kind', 'slot', 'when', 'tone', 'sector', 'cityId', 'countryCode', 'regionCode']);
+    const MACHINE = new Set([
+      'id',
+      'ids',
+      'key',
+      'slug',
+      'ticker',
+      'kind',
+      'slot',
+      'when',
+      'tone',
+      'sector',
+      'cityId',
+      'countryCode',
+      'regionCode',
+    ]);
     const copy = [];
     const collect = (value, key) => {
       if (typeof value === 'string') {

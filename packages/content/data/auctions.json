@@ -20,11 +20,7 @@
         "historical",
         "curio"
       ],
-      "cars": [
-        "classic",
-        "luxury",
-        "mainstream"
-      ],
+      "cars": ["classic", "luxury", "mainstream"],
       "carShare": 0.2,
       "blurb": "Paddles, a gavel, and a man in a bow tie who talks very fast."
     },
@@ -47,11 +43,7 @@
         "historical",
         "curio"
       ],
-      "cars": [
-        "classic",
-        "luxury",
-        "mainstream"
-      ],
+      "cars": ["classic", "luxury", "mainstream"],
       "carShare": 0.2,
       "blurb": "Three generations of Cranes. Coffee and donuts at the back."
     },
@@ -84,10 +76,7 @@
         "historical",
         "mythical"
       ],
-      "cars": [
-        "exotic",
-        "classic"
-      ],
+      "cars": ["exotic", "classic"],
       "carShare": 0.3,
       "blurb": "By invitation. Champagne, a catalog with your name on it, and phone bidders from three continents."
     }

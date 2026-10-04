@@ -1,27 +1,27 @@
 # Ticket 0411 — an adult who develops
 
-Roadmap finding 2, open since 0211 and never picked up: *"Smarts and Discipline
-never move after eighteen. An adult character does not develop."*
+Roadmap finding 2, open since 0211 and never picked up: _"Smarts and Discipline
+never move after eighteen. An adult character does not develop."_
 
 It was not a tendency. Measured on 200 played lives:
 
-| Discipline | age 18 | age 30 | age 45 |
-|---|---|---|---|
+| Discipline         | age 18       | age 30       | age 45       |
+| ------------------ | ------------ | ------------ | ------------ |
 | p10 / median / p90 | 50 / 65 / 83 | 50 / 65 / 83 | 50 / 65 / 83 |
-| sd | 12.0 | 12.0 | 12.0 |
+| sd                 | 12.0         | 12.0         | 12.0         |
 
 The same three numbers at every age, to the decimal, because nothing in the
 build wrote that stat after eighteen.
 
-## And the stat that *did* move was worse
+## And the stat that _did_ move was worse
 
 Charisma is the one thing adult events touch, and it does not develop a
 population, it dissolves one:
 
-| Charisma | age 18 | age 30 | age 45 |
-|---|---|---|---|
+| Charisma  | age 18  | age 30  | age 45      |
+| --------- | ------- | ------- | ----------- |
 | p10 / p90 | 58 / 85 | 73 / 90 | **84 / 94** |
-| sd | 9.7 | 6.5 | **3.8** |
+| sd        | 9.7     | 6.5     | **3.8**     |
 
 Everybody climbs until `curvedDelta` stops them, and it stops everybody in the
 same place. At forty-five, all seven of the commonest career tracks produced a
@@ -83,23 +83,23 @@ it consumes no randomness and a reload cannot change how somebody has aged.
 
 ## Measured
 
-| on the same 200 seeds | before | after |
-|---|---|---|
-| Discipline sd at 18 / 45 | 12.0 / **12.0** | 11.9 / **14.5** |
-| Charisma sd at 18 / 45 | 9.7 / **3.8** | 9.5 / **8.3** |
-| Smarts sd at 45 | 10.0 | 12.0 |
-| Looks, median at 18 / 45 / 60 | 52 / 52 / 50 | 52 / 45 / 38 |
+| on the same 200 seeds         | before          | after           |
+| ----------------------------- | --------------- | --------------- |
+| Discipline sd at 18 / 45      | 12.0 / **12.0** | 11.9 / **14.5** |
+| Charisma sd at 18 / 45        | 9.7 / **3.8**   | 9.5 / **8.3**   |
+| Smarts sd at 45               | 10.0            | 12.0            |
+| Looks, median at 18 / 45 / 60 | 52 / 52 / 50    | 52 / 45 / 38    |
 
 And the thing the spread is made of — median stats at forty-five, by the track
 they were working:
 
-| track | before (smarts / disc / char) | after |
-|---|---|---|
-| logistics | 81 / 69 / 90 | **64 / 76 / 76** |
-| tech | 84 / 68 / 91 | **85 / 50 / 80** |
-| trades | 87 / 73 / 91 | 87 / **76** / 77 |
-| food | 85 / 70 / 92 | **67** / 70 / 92 |
-| care | 90 / 67 / 91 | 90 / 67 / 90 |
+| track     | before (smarts / disc / char) | after            |
+| --------- | ----------------------------- | ---------------- |
+| logistics | 81 / 69 / 90                  | **64 / 76 / 76** |
+| tech      | 84 / 68 / 91                  | **85 / 50 / 80** |
+| trades    | 87 / 73 / 91                  | 87 / **76** / 77 |
+| food      | 85 / 70 / 92                  | **67** / 70 / 92 |
+| care      | 90 / 67 / 91                  | 90 / 67 / 90     |
 
 Before, every row agreed. After, a logistics lifer is a steady person who has
 stopped reading and a tech lifer is the reverse — and care, the one job that

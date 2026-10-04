@@ -1,8 +1,8 @@
 # Ticket 0410 — nobody in this game ever met anybody
 
 0409 closed with `family` and `friendship` named as the last thin adult
-categories: *"An adult's parents, siblings and friends are as thin as their job
-was before this ticket."*
+categories: _"An adult's parents, siblings and friends are as thin as their job
+was before this ticket."_
 
 They are not thin. Measuring the baseline found something else.
 
@@ -11,23 +11,23 @@ They are not thin. Measuring the baseline found something else.
 A player who answers every question the game raises and never opens a screen,
 90 lives, 4,828 adult years:
 
-| | before | after |
-|---|---|---|
-| lives that ever had a partner | **0** | 86 |
-| lives that ever married | **0** | 78 |
-| lives that ever had a child | **0** | 56 |
-| children born or adopted, in total | **0** | 98 |
-| partnered adult years | **0%** | 65.5% |
-| adult years holding a `family` event | **0%** | 25.8% |
-| `family` events that fired in adulthood | **0** | 1,353 |
-| median age at marriage | — | 38 |
-| median age at a first child | — | 34 |
+|                                         | before | after |
+| --------------------------------------- | ------ | ----- |
+| lives that ever had a partner           | **0**  | 86    |
+| lives that ever married                 | **0**  | 78    |
+| lives that ever had a child             | **0**  | 56    |
+| children born or adopted, in total      | **0**  | 98    |
+| partnered adult years                   | **0%** | 65.5% |
+| adult years holding a `family` event    | **0%** | 25.8% |
+| `family` events that fired in adulthood | **0**  | 1,353 |
+| median age at marriage                  | —      | 38    |
+| median age at a first child             | —      | 34    |
 
 Zero is the whole finding. `romanticMove`, `tryForBaby` and `applyToAdopt` are
 only ever called by a button, so six romance stages, eight moves, a fertility
 curve and an adoption queue were unreachable to anybody who did not go looking
-for them. This is 0407's finding one system over — *"a passive player never gets
-a job, 0 of 250 lives"* — and it had been true for longer.
+for them. This is 0407's finding one system over — _"a passive player never gets
+a job, 0 of 250 lives"_ — and it had been true for longer.
 
 **And it is why the adult family catalog looked thin.** Eleven `family` events
 can fire at forty. All eleven are 0208's parenting events and all eleven are
@@ -78,15 +78,15 @@ the third was the big one.
 
 That last one is the ticket's real find. Every door opened with
 `if (state.pending.length > 0) return state`, and `advanceYear`'s comment says
-why 0402 thought it was free: *"an adult year contains zero authored decisions,
-because every one in the catalog stops at seventeen."* 0409 wrote thirteen adult
+why 0402 thought it was free: _"an adult year contains zero authored decisions,
+because every one in the catalog stops at seventeen."_ 0409 wrote thirteen adult
 decisions in a different package and made that sentence false. Measured:
 **59.4% of adult years already held an authored decision by the time the doors
 ran.** All three were shut in three years out of five.
 
 The queue has always been a list — it already carries two decisions in 641 adult
 years out of 4,838 and three in 70 — so what that line was actually for is one
-*systemic* question a year. `hasSystemicOffer` asks that. Fixing it is what took
+_systemic_ question a year. `hasSystemicOffer` asks that. Fixing it is what took
 the numbers from 40/7 to 78/56, and it un-throttles 0405's and 0407's doors as
 much as this one's.
 
@@ -111,13 +111,13 @@ rung, which does measure.
 
 New rule **13.69**. Both orderings had a good story; only one had numbers.
 
-| on the same 90 seeds | before 0410 | 0410 |
-|---|---|---|
-| reached a degree | 66 | 67 |
-| reached postgraduate | 1 | 2 |
-| ever worked | 88 | 88 |
-| idle adult years per life | 2.3 | 1.4 |
-| licenses held, median / p90 | 1 / 2 | 1 / 3 |
+| on the same 90 seeds        | before 0410 | 0410  |
+| --------------------------- | ----------- | ----- |
+| reached a degree            | 66          | 67    |
+| reached postgraduate        | 1           | 2     |
+| ever worked                 | 88          | 88    |
+| idle adult years per life   | 2.3         | 1.4   |
+| licenses held, median / p90 | 1 / 2       | 1 / 3 |
 
 ## Five tests broke, and one of them was a guard flagging a coin toss
 
@@ -142,7 +142,7 @@ New rule **13.69**. Both orderings had a good story; only one had numbers.
   is there — still no fabricated cash, because the ledger is the one thing in a
   save that can be provably wrong. The advisor test also had to be made solvent:
   its character put 80% of the balance into a fund and the fee then landed as a
-  **shortfall** row, *"$86 of it went unpaid"*, which is the fee system working
+  **shortfall** row, _"$86 of it went unpaid"_, which is the fee system working
   and the test asserting nothing.
 - **`floor.test.ts` compared lifetime totals.** A lifetime total is a spending
   rate times a lifespan, and 0410 gave partners and children to a population
@@ -157,8 +157,8 @@ New rule **13.69**. Both orderings had a good story; only one had numbers.
   the character is involved with.
 
 And one real content defect the population change made reachable:
-`guardians.test.ts` caught *"Failed out. The letter was polite and it didn't
-soften anything"* at twenty-one **and again at twenty-two**, because a character
+`guardians.test.ts` caught _"Failed out. The letter was polite and it didn't
+soften anything"_ at twenty-one **and again at twenty-two**, because a character
 can now enroll again the next year and fail again. Each tier gets a set indexed
 by age rather than drawn — the `NOT_THIS_YEAR` shape, CORE_RULES 13.17.
 

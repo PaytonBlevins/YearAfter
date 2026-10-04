@@ -201,7 +201,12 @@ describe('0413 — the year after school', () => {
     */
     let checked = 0;
     for (const sample of SAMPLE_STATES) {
-      const context = buildEventContext(sample, sample.player.age, sample.world.year, sample.events);
+      const context = buildEventContext(
+        sample,
+        sample.player.age,
+        sample.world.year,
+        sample.events,
+      );
       const real = sample.circle.people.filter(
         (person) => isCurrent(person) && isFriend(person) && person.romance === undefined,
       );
@@ -232,14 +237,22 @@ describe('0413 — the year after school', () => {
       0412 made possible for the first time.
     */
     const fired = new Set(ALL.flatMap((row) => [...row.fired]));
-    const reached = (predicate: (gate: NonNullable<ReturnType<typeof BY_ID.get>>['eligibility']) => boolean) =>
+    const reached = (
+      predicate: (gate: NonNullable<ReturnType<typeof BY_ID.get>>['eligibility']) => boolean,
+    ) =>
       [...fired].filter((id) => {
         const gate = BY_ID.get(id)?.eligibility;
         return gate ? predicate(gate) : false;
       }).length;
 
-    expect(reached((gate) => gate.hasFriend === true), 'no hasFriend: true event ever fired').toBeGreaterThan(8);
-    expect(reached((gate) => gate.hasFriend === false), 'no hasFriend: false event ever fired').toBeGreaterThan(1);
+    expect(
+      reached((gate) => gate.hasFriend === true),
+      'no hasFriend: true event ever fired',
+    ).toBeGreaterThan(8);
+    expect(
+      reached((gate) => gate.hasFriend === false),
+      'no hasFriend: false event ever fired',
+    ).toBeGreaterThan(1);
     expect(
       reached((gate) => (gate.friendshipYearsAtLeast ?? 0) >= 8),
       'no event about an old friend ever fired',

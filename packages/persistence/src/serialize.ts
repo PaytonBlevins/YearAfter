@@ -77,7 +77,9 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     // Ticket 0504, the sixth, in the same breath as the field.
     vehicles: state.vehicles,
     ...(state.vehicleOffer !== undefined ? { vehicleOffer: state.vehicleOffer } : {}),
-    ...(state.inspected !== undefined && state.inspected.length > 0 ? { inspected: state.inspected } : {}),
+    ...(state.inspected !== undefined && state.inspected.length > 0
+      ? { inspected: state.inspected }
+      : {}),
     // Ticket 0506, the seventh, in the same breath as the field.
     valuables: state.valuables,
     ...(state.renovationOffer !== undefined ? { renovationOffer: state.renovationOffer } : {}),

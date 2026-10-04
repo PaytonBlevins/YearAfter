@@ -265,7 +265,8 @@ export function livingCostFor(input: LivingInput): LivingCost {
   const scale = input.locationIndex * householdScale(input.partnered, input.childAges);
   const car = input.ownsVehicle ? 1 - VEHICLE_SHARE : 1;
   const owned = input.housing === 'owned';
-  const committed = (owned ? Math.max(0, input.housingCost ?? 0) : 0) + Math.max(0, input.vehicleCost ?? 0);
+  const committed =
+    (owned ? Math.max(0, input.housingCost ?? 0) : 0) + Math.max(0, input.vehicleCost ?? 0);
   if (owned || committed > 0 || input.ownsVehicle) {
     /*
       Ticket 0501 — HOUSE-POOR IS A REAL THING, AND SO IS BUILDING EQUITY.

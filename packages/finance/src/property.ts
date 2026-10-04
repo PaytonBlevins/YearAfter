@@ -307,10 +307,10 @@ export const MORTGAGE_REFUSAL_LABELS: Readonly<Record<MortgageRefusal, string>> 
   tooYoung: "Not until you're eighteen.",
   deposit: "You don't have enough for the deposit.",
   standing: "Your credit isn't strong enough for this one.",
-  income: "The payments would be more than your income can carry.",
+  income: 'The payments would be more than your income can carry.',
   tooLarge: 'No lender you can reach will go this high.',
   alreadyMortgaged: "You're already paying off one home.",
-  tooManyMortgages: "No lender will take on another property of yours.",
+  tooManyMortgages: 'No lender will take on another property of yours.',
 };
 
 export interface MortgageOffer {
@@ -470,10 +470,7 @@ export function homeYear(home: OwnedHome, marketMove: number, wearRoll: number):
     const balance = Number(mortgage.balance) / 100;
     const apr = product?.apr ?? 0.065;
     interest = Math.round(balance * apr);
-    payment = Math.min(
-      balance + interest,
-      mortgagePaymentFor(apr, balance, mortgage.termLeft),
-    );
+    payment = Math.min(balance + interest, mortgagePaymentFor(apr, balance, mortgage.termLeft));
     const after = Math.max(0, Math.round(balance + interest - payment));
     if (after <= 0) {
       paidOff = true;

@@ -789,8 +789,12 @@ export function upkeepOf(vehicle: OwnedVehicle, year: number): number {
   if (!found) return 0;
   // Ticket 0505: a tuned engine costs more to keep.
   return Math.round(
-    maintenanceFor(found.model, found.trim, Math.max(0, year - vehicle.modelYear), vehicle.condition) *
-      strainOf(vehicle),
+    maintenanceFor(
+      found.model,
+      found.trim,
+      Math.max(0, year - vehicle.modelYear),
+      vehicle.condition,
+    ) * strainOf(vehicle),
   );
 }
 

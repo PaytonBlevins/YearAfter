@@ -3,8 +3,8 @@
 The content half of roadmap item 5b, and the finding that named it was true and
 pointing at the wrong place.
 
-Finding 2d: *"the `friendship` category has six events for an adult, all of them
-about romance."* Exactly right — `love.set-up`, `love.app`, `love.moved-in`,
+Finding 2d: _"the `friendship` category has six events for an adult, all of them
+about romance."_ Exactly right — `love.set-up`, `love.app`, `love.moved-in`,
 `love.quiet-year`, `love.wedding-guest`, `love.the-one-that-got-away`, and for a
 single character only five of those. But measuring where the hole actually sits
 found something the roadmap had never looked at.
@@ -13,13 +13,13 @@ found something the roadmap had never looked at.
 
 An ordinary character — employed, single, childless, not bereaved, well:
 
-| age | reachable events | of which `adult.placeholder.*` |
-|---|---|---|
-| 12 | 140 | 0 |
-| 17 | **99** | 0 |
-| **18** | **7** | **5** |
-| 20 | 19 | 5 |
-| 40 | 40 | 7 |
+| age    | reachable events | of which `adult.placeholder.*` |
+| ------ | ---------------- | ------------------------------ |
+| 12     | 140              | 0                              |
+| 17     | **99**           | 0                              |
+| **18** | **7**            | **5**                          |
+| 20     | 19               | 5                              |
+| 40     | 40               | 7                              |
 
 **The year a character leaves school, this game lost 92% of its content.** In
 play that is:
@@ -33,9 +33,9 @@ play that is:
   the selector to fill the year at all.
 
 And the placeholder copy is the writer saying there was nothing to write:
-*"Nothing happened this year worth telling anybody about."* *"You'd struggle to
-name one thing that happened this year."* *"Kept meaning to call people back and
-mostly didn't"* — that last one describing, by accident, the exact mechanism 0412
+_"Nothing happened this year worth telling anybody about."_ _"You'd struggle to
+name one thing that happened this year."_ _"Kept meaning to call people back and
+mostly didn't"_ — that last one describing, by accident, the exact mechanism 0412
 had just built.
 
 **0409 measured at forty.** Its headline was events-at-forty going 26 → 93, and
@@ -53,19 +53,19 @@ wrote. A child gets thirteen friendship decisions. An adult had none.
 **Forty-five events and eight decisions**, weighted into the desert rather than
 spread flat, and gated on the predicates 0412 built:
 
-| | before | after |
-|---|---|---|
-| reachable at 18 | **7** | **18** |
-| reachable at 22 | 24 | 49 |
-| reachable at 40 | 40 | 65 |
-| friendship events at 18 | **0** | 11 |
-| friendship events at 40 | 5 | 32 |
-| adult friendship decisions | **0** | 7 |
-| placeholder share of what fires at 18 | **98.6%** | **17.5%** |
-| placeholder share, 18–22 | 35.2% | 11.0% |
-| distinct events fired at 18 | **6** | 20 |
-| distinct events fired at 40 | 64 | 89 |
-| feed lines in 18–30 the character has already read | 6.9% | 3.7% |
+|                                                    | before    | after     |
+| -------------------------------------------------- | --------- | --------- |
+| reachable at 18                                    | **7**     | **18**    |
+| reachable at 22                                    | 24        | 49        |
+| reachable at 40                                    | 40        | 65        |
+| friendship events at 18                            | **0**     | 11        |
+| friendship events at 40                            | 5         | 32        |
+| adult friendship decisions                         | **0**     | 7         |
+| placeholder share of what fires at 18              | **98.6%** | **17.5%** |
+| placeholder share, 18–22                           | 35.2%     | 11.0%     |
+| distinct events fired at 18                        | **6**     | 20        |
+| distinct events fired at 40                        | 64        | 89        |
+| feed lines in 18–30 the character has already read | 6.9%      | 3.7%      |
 
 The events that could not exist before are the ones that justify the ticket: an
 old friend (`friendshipYearsAtLeast`), a crowd (`friendsAtLeast: 3`), the one
@@ -75,7 +75,7 @@ language literally could not ask for until 0412.
 
 **The placeholders keep their ids.** A save records what fired, and ids are
 stable forever (CORE_RULES 13). They were never the defect — a quiet year is real
-content and `love.quiet-year` is deliberate. The defect was the *denominator*.
+content and `love.quiet-year` is deliberate. The defect was the _denominator_.
 Their weight drops from 6 to 4, and five lines that broke writing rule 10 —
 "never summarize the year, name a thing that happened" — are rewritten. The
 validator's VAGUE table never caught them because it was built from lines the
@@ -86,8 +86,8 @@ childhood's worth of better content until the year he left school.
 
 - **`{kid}` now binds friends first.** 0412 made a gate that could require a
   friend; the token still named whoever the draw landed on, and for a working
-  adult the circle is mostly colleagues — so *"you and {kid} have been friends
-  since school"* would have named somebody met eleven months ago. That is 0207's
+  adult the circle is mostly colleagues — so _"you and {kid} have been friends
+  since school"_ would have named somebody met eleven months ago. That is 0207's
   `partnered` bug one level down. Narrowing the existing token beat adding a
   `{friend}` one: five lines against four token tables and the four-places
   problem the roadmap has had open since 0209. New rule **13.74**, and it is
@@ -109,16 +109,16 @@ Thirty-nine new events about friends, every one carrying a happiness effect, and
 catalog turned out to be the second door into exactly the failure 0412 had spent
 a ticket closing:
 
-| | 0412 shipped | 0413 first draft | 0413 |
-|---|---|---|---|
-| closest friend at 55, p10 / p90 | 82 / 97 | **90 / 97** | 86 / 97 |
-| spread at 55 | 15 | **7** | 11 |
-| adults with no friends at all | 2.4% | **0.8%** | 1.7% |
-| closest friend at exactly 100 | 0% | 0% | 0% |
+|                                 | 0412 shipped | 0413 first draft | 0413    |
+| ------------------------------- | ------------ | ---------------- | ------- |
+| closest friend at 55, p10 / p90 | 82 / 97      | **90 / 97**      | 86 / 97 |
+| spread at 55                    | 15           | **7**            | 11      |
+| adults with no friends at all   | 2.4%         | **0.8%**         | 1.7%    |
+| closest friend at exactly 100   | 0%           | 0%               | 0%      |
 
 The cap never came back — 0412's curve holds — but the population was converging
-again from below, and the second row is the one that matters: content *about*
-having friends was making it impossible *not* to have them, which quietly
+again from below, and the second row is the one that matters: content _about_
+having friends was making it impossible _not_ to have them, which quietly
 unreaches every `hasFriend: false` event in the same tranche.
 
 **Thirty-one of the thirty-nine now author `bond=0`.** An event about a
@@ -172,7 +172,7 @@ rather than more of this one.
 
 **Friendship is 37% of what fires at forty and 49% at twenty.** Childhood runs
 22–28%. That is not this tranche being over-weighted — the weights were measured
-down twice — it is that friendship is now the only adult category that can *see*
+down twice — it is that friendship is now the only adult category that can _see_
 a twenty-year-old. `family` at that age is eleven parenting events gated on
 `hasChildren`; `random` is the placeholders. **The next content ticket is the
 other categories in the same window**, and it has this ticket's measurement ready

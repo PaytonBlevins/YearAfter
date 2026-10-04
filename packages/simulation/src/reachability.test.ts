@@ -33,7 +33,15 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ALL_JOBS, LISTINGS, WORKING_AGE, cannotApply, findJob, listingWeight, reachOf } from '@yearafter/careers';
+import {
+  ALL_JOBS,
+  LISTINGS,
+  WORKING_AGE,
+  cannotApply,
+  findJob,
+  listingWeight,
+  reachOf,
+} from '@yearafter/careers';
 import { createNewGame } from './new-game';
 import { advanceYear } from './advance';
 import { decide } from './decide';
@@ -149,7 +157,8 @@ function aCareer(seed: string): Life {
       if (whyNotJob(state, job) === undefined) {
         const id = String(job.id);
         eligible.set(id, (eligible.get(id) ?? 0) + 1);
-        const share = totalWeight > 0 ? Math.min(1, (LISTINGS * listingWeight(context, job)) / totalWeight) : 0;
+        const share =
+          totalWeight > 0 ? Math.min(1, (LISTINGS * listingWeight(context, job)) / totalWeight) : 0;
         missed.set(id, (missed.get(id) ?? 1) * (1 - share));
         bestShare.set(id, Math.max(bestShare.get(id) ?? 0, share));
       }

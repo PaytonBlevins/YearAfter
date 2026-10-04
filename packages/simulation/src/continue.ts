@@ -137,7 +137,10 @@ function inheritedLedger(
     }).ledger;
   }
   // Ticket 0504. And the cars, the same way: sold, the lender repaid, the rest to the heir.
-  const cars = state.vehicles.reduce((sum, vehicle) => sum + Math.max(0, vehicleSaleOf(vehicle).proceeds), 0);
+  const cars = state.vehicles.reduce(
+    (sum, vehicle) => sum + Math.max(0, vehicleSaleOf(vehicle).proceeds),
+    0,
+  );
   if (cars > 0) {
     books = post(books, state.world.year, heirAge, {
       category: 'gift',

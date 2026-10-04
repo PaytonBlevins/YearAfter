@@ -60,7 +60,7 @@ Each of these passed its unit tests and only showed up in the population.
    subsistence. A household that falls behind with equity sells. New rule
    **13.86**.
 2. **A $200,000 house was worth $978,000 at sixty-five.** The market drifted at
-   a real-world *nominal* 4% in an economy with no inflation. It now drifts at
+   a real-world _nominal_ 4% in an economy with no inflation. It now drifts at
    1.2% in real terms, with a spread wide enough for a bad decade. New rule
    **13.85**.
 3. **The market rose 6–7% a year for twenty years straight.** `stableUnit` on
@@ -71,15 +71,15 @@ Each of these passed its unit tests and only showed up in the population.
 
 150 lives, answering every question:
 
-| | before | after |
-|---|---|---|
-| own a home at 25–34 | 0% | ~10% |
-| own a home at 45–54 | 0% | 30–40% |
-| own a home at 65–80 | 0% | ~60% |
-| median net worth, 55–64 ÷ 25–34 | 1.2 | 2.1–2.9 |
+|                                                 | before        | after           |
+| ----------------------------------------------- | ------------- | --------------- |
+| own a home at 25–34                             | 0%            | ~10%            |
+| own a home at 45–54                             | 0%            | 30–40%          |
+| own a home at 65–80                             | 0%            | ~60%            |
+| median net worth, 55–64 ÷ 25–34                 | 1.2           | 2.1–2.9         |
 | median change in each life's net worth, 30 → 60 | $1,700–$3,400 | $27,000–$30,000 |
-| short years, owners / renters | — | 0.8% / 1.4% |
-| homes let go | — | about 5% |
+| short years, owners / renters                   | —             | 0.8% / 1.4%     |
+| homes let go                                    | —             | about 5%        |
 
 US homeownership runs about 37% under thirty-five and about 79% at sixty-five
 and over, so these are low. That's deliberate for now. The game's households are

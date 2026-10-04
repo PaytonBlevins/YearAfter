@@ -231,7 +231,15 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
   const transactions: NewTransaction[] = [];
 
   if (input.age < CHARGED_FROM_AGE) {
-    return { household: input.household, lines, transactions, cost: 0, withoutCar: 0, hardship: false, unmet: 0 };
+    return {
+      household: input.household,
+      lines,
+      transactions,
+      cost: 0,
+      withoutCar: 0,
+      hardship: false,
+      unmet: 0,
+    };
   }
 
   /*
@@ -351,7 +359,8 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
   );
   // Ticket 0501: a mortgage is part of what the year has to be paid out of.
   // Ticket 0504: and so are the car payments and the servicing.
-  const housingCost = (housing === 'owned' ? (input.housingCost ?? 0) : 0) + (input.vehicleCost ?? 0);
+  const housingCost =
+    (housing === 'owned' ? (input.housingCost ?? 0) : 0) + (input.vehicleCost ?? 0);
   const inHardship = cost.total + housingCost > affordable;
   let movedHome = false;
   let unmet = 0;

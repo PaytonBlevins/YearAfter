@@ -169,7 +169,7 @@ describe('0601 — opening one', () => {
 describe('0601 — running one', () => {
   const state = opened('biz.cafe');
   const id = state.businesses[0]!.id;
-  const ok = <T,>(result: { ok: boolean; value?: T }): T => {
+  const ok = <T>(result: { ok: boolean; value?: T }): T => {
     expect(result.ok).toBe(true);
     return result.value as T;
   };
@@ -411,8 +411,14 @@ const established = (typeId = 'biz.cleaning', from: GameState = ADULT): GameStat
         ...business,
         openedYear: state.world.year - 4,
         last: {
-          year: state.world.year - 1, revenue: 300_000, costs: 260_000, profit: 40_000,
-          drawn: 20_000, injected: 0, turnedAway: 0, idle: 0,
+          year: state.world.year - 1,
+          revenue: 300_000,
+          costs: 260_000,
+          profit: 40_000,
+          drawn: 20_000,
+          injected: 0,
+          turnedAway: 0,
+          idle: 0,
         },
       },
     ],
@@ -474,7 +480,11 @@ describe('0602 — opening another location', () => {
     // transfer, not a loss. Net worth moves by rounding and nothing else.
     expect(Math.abs(netWorthOf(grown) - before)).toBeLessThanOrEqual(100);
     expect(result.value.entry.text).toMatch(/another location/i);
-    expect(grown.finance.transactions.some((row) => row.category === 'property' && /another/i.test(row.source))).toBe(true);
+    expect(
+      grown.finance.transactions.some(
+        (row) => row.category === 'property' && /another/i.test(row.source),
+      ),
+    ).toBe(true);
   });
 
   it('refuses a business that lost money, one without the cash, and a fifth door', () => {
@@ -482,7 +492,9 @@ describe('0602 — opening another location', () => {
     const id = state.businesses[0]!.id;
     const losing = {
       ...state,
-      businesses: [{ ...state.businesses[0]!, last: { ...state.businesses[0]!.last!, profit: -1 } }],
+      businesses: [
+        { ...state.businesses[0]!, last: { ...state.businesses[0]!.last!, profit: -1 } },
+      ],
     };
     const a = expandBusiness(losing, id);
     expect(a.ok ? undefined : a.error).toBe('not-earning');
@@ -518,7 +530,9 @@ describe('0602 — opening another location', () => {
     const double = run(grown);
     expect(double.last!.revenue).toBeGreaterThan(single.last!.revenue);
     expect(double.last!.costs).toBeGreaterThan(single.last!.costs);
-    expect(Number(businessesValue(grown.businesses, findBusinessType, grown.world.year))).toBeGreaterThan(
+    expect(
+      Number(businessesValue(grown.businesses, findBusinessType, grown.world.year)),
+    ).toBeGreaterThan(
       Number(businessesValue(state.businesses, findBusinessType, state.world.year)),
     );
   });

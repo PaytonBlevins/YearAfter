@@ -279,7 +279,10 @@ describe('Ticket 0402 — a job comes looking for you', () => {
     const working: GameState = { ...idle, retirement: base.retirement };
     expect(withAnyOffer(working, true).offer, 'the door is shut for everybody').toBeDefined();
 
-    expect(withAnyOffer(idle, true).offer, 'somebody was offered work after retiring').toBeUndefined();
+    expect(
+      withAnyOffer(idle, true).offer,
+      'somebody was offered work after retiring',
+    ).toBeUndefined();
   });
 
   it('answers through decide, the same door every other decision uses', () => {
@@ -374,7 +377,9 @@ describe('Ticket 0407 — the way in', () => {
       ...base,
       education: { ...base.education, credentials: { highSchool: 18, university: 22 } },
     });
-    console.log(`first-job chance: no diploma ${withNothing.toFixed(2)}  degree ${withDegree.toFixed(2)}`);
+    console.log(
+      `first-job chance: no diploma ${withNothing.toFixed(2)}  degree ${withDegree.toFixed(2)}`,
+    );
     expect(withDegree).toBeGreaterThan(withNothing);
   });
 });

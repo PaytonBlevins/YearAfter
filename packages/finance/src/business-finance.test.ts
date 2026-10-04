@@ -62,7 +62,12 @@ const buying = (over: Partial<BusinessPurchase> = {}): BusinessPurchase => ({
   ...over,
 });
 
-const held = (productId: string, balance: number, businessId?: string, termLeft = 10): HeldLoan => ({
+const held = (
+  productId: string,
+  balance: number,
+  businessId?: string,
+  termLeft = 10,
+): HeldLoan => ({
   productId,
   principal: dollars(balance),
   balance: dollars(balance),
@@ -73,7 +78,7 @@ const held = (productId: string, balance: number, businessId?: string, termLeft 
 
 describe('0603 — what a business lender will write', () => {
   it('prices the annuity the way the numbers in this file assume', () => {
-    expect(paymentFactor(0.0875, 10)).toBeCloseTo(0.154110, 5);
+    expect(paymentFactor(0.0875, 10)).toBeCloseTo(0.15411, 5);
     expect(paymentFactor(0.0725, 10)).toBeCloseTo(0.144027, 5);
   });
 
@@ -88,7 +93,9 @@ describe('0603 — what a business lender will write', () => {
   it('lends exactly the stated share of a round price, not a hundred dollars under it', () => {
     // 0.7 of 45,000 is 31499.999999999996 in floating point.
     expect(businessLoanFor(small, buying({ cost: 45_000 }), lender()).offered).toBe(31_500);
-    expect(businessLoanFor(small, buying({ cost: 90_000, kind: 'buy' }), lender()).offered).toBe(72_000);
+    expect(businessLoanFor(small, buying({ cost: 90_000, kind: 'buy' }), lender()).offered).toBe(
+      72_000,
+    );
   });
 
   it('is bounded by what the owner can repay when that is the smaller number', () => {
@@ -96,7 +103,11 @@ describe('0603 — what a business lender will write', () => {
     const plain = businessLoanFor(small, buying({ cost: 1_000_000 }), lender());
     expect(plain.offered).toBe(259_500); // half of $80,000 / 0.154110
     // $12,000 a year already committed comes straight off what can go on this.
-    const owing = businessLoanFor(small, buying({ cost: 1_000_000 }), lender({ obligations: 12_000 }));
+    const owing = businessLoanFor(
+      small,
+      buying({ cost: 1_000_000 }),
+      lender({ obligations: 12_000 }),
+    );
     expect(owing.offered).toBe(181_600); // $28,000 / 0.154110
   });
 
@@ -139,14 +150,19 @@ describe('0603 — what a business lender will write', () => {
   });
 
   it('asks for credit, and for age, before anything else', () => {
-    expect(businessLoanFor(commercial, buying({ kind: 'buy' }), lender({ standing: 'fair' })).because).toBe('standing');
+    expect(
+      businessLoanFor(commercial, buying({ kind: 'buy' }), lender({ standing: 'fair' })).because,
+    ).toBe('standing');
     expect(businessLoanFor(small, buying(), lender({ standing: 'poor' })).because).toBe('standing');
     expect(businessLoanFor(small, buying(), lender({ standing: 'fair' })).approved).toBe(true);
     expect(businessLoanFor(small, buying(), lender({ age: 17 })).because).toBe('tooYoung');
   });
 
   it('will not write a second lender into a business that already has one', () => {
-    const topUp = buying({ kind: 'expand', topUp: { businessId: 'b1', productId: 'loan.smallbiz' } });
+    const topUp = buying({
+      kind: 'expand',
+      topUp: { businessId: 'b1', productId: 'loan.smallbiz' },
+    });
     expect(businessLoanFor(commercial, topUp, lender()).because).toBe('otherLender');
     expect(businessLoanFor(small, topUp, lender()).approved).toBe(true);
   });
@@ -206,8 +222,8 @@ describe('0603 — the loan is not cash, and does not count as the owner debt', 
   });
 
   it('does not use up the four loans a person may hold', () => {
-    const four = ['loan.starter', 'loan.consolidation', 'loan.personal', 'loan.creditline'].map((id) =>
-      held(id, 1_000),
+    const four = ['loan.starter', 'loan.consolidation', 'loan.personal', 'loan.creditline'].map(
+      (id) => held(id, 1_000),
     );
     const personal = findLoanProduct('loan.privateline')!;
     expect(applyForLoan(personal, { ...rich, loans: four }).because).toBe('tooManyLoans');
@@ -312,11 +328,15 @@ describe('0603 — what is for sale, and why buying is not a shortcut', () => {
     }
   });
 
-  it('caps a buyer\'s haggling, so an extreme draw cannot beat the cap', () => {
+  it("caps a buyer's haggling, so an extreme draw cannot beat the cap", () => {
     const type = findBusinessType('biz.cafe')!;
     const owned = businessBought(listingFor(type, 'x', 'Name', YEAR, flat));
-    expect(businessSaleOf(owned, type, YEAR, 100).price).toBe(businessSaleOf(owned, type, YEAR, SALE_Z_LIMIT).price);
-    expect(businessSaleOf(owned, type, YEAR, -100).price).toBe(businessSaleOf(owned, type, YEAR, -SALE_Z_LIMIT).price);
+    expect(businessSaleOf(owned, type, YEAR, 100).price).toBe(
+      businessSaleOf(owned, type, YEAR, SALE_Z_LIMIT).price,
+    );
+    expect(businessSaleOf(owned, type, YEAR, -100).price).toBe(
+      businessSaleOf(owned, type, YEAR, -SALE_Z_LIMIT).price,
+    );
     expect(SALE_Z_LIMIT).toBe(2.5);
   });
 
@@ -329,10 +349,12 @@ describe('0603 — what is for sale, and why buying is not a shortcut', () => {
     // What was paid is what is on the books, and the till comes with it.
     expect(Number(owned.invested)).toBe(listing.ask * 100);
     expect(Number(owned.cash)).toBe(listing.till * 100);
-    expect(listing.till).toBe(reserveFor(listing.business.last!.revenue - listing.business.last!.profit));
+    expect(listing.till).toBe(
+      reserveFor(listing.business.last!.revenue - listing.business.last!.profit),
+    );
   });
 
-  it('shows the seller\'s polish: up to a fifth on the books, mostly nothing', () => {
+  it("shows the seller's polish: up to a fifth on the books, mostly nothing", () => {
     const type = findBusinessType('biz.law')!;
     const honest = listingFor(type, 'x', 'Name', YEAR, { ...flat, dressing: 0 });
     const polished = listingFor(type, 'x', 'Name', YEAR, { ...flat, dressing: 1 });

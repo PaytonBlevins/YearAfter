@@ -60,7 +60,6 @@ const money = (amount: number): string => {
 
 const dollarsOf = (amount: bigint | number): number => Math.round(Number(amount) / 100);
 
-
 /* -------------------------------------------------------------------------- */
 /* Paying for it (ticket 0603)                                                 */
 /* -------------------------------------------------------------------------- */
@@ -233,8 +232,8 @@ export function BusinessesScreen() {
       ) : (
         <>
           <Text style={styles.note}>
-            What it costs to open is taken from your cash at once. A business keeps its own money; you
-            are paid from what it clears.
+            What it costs to open is taken from your cash at once. A business keeps its own money;
+            you are paid from what it clears.
           </Text>
           <Card>
             {market.map((type, index) => {
@@ -284,7 +283,8 @@ export function BusinessesScreen() {
             {forSale.map((listing, index) => {
               const type = findBusinessType(listing.typeId);
               if (!type) return null;
-              const appraisal = looking === listing.id ? appraiseListing(state, listing) : undefined;
+              const appraisal =
+                looking === listing.id ? appraiseListing(state, listing) : undefined;
               return (
                 <Fragment key={listing.id}>
                   {index > 0 ? <RowDivider /> : null}
@@ -299,11 +299,12 @@ export function BusinessesScreen() {
                   {appraisal ? (
                     <>
                       <Text style={styles.blurb}>
-                        The seller's books show {listing.reported.map((profit) => money(profit)).join(', ')}
-                        {' '}over the last three years, about {money(reportedProfitOf(listing))} a year,
-                        and {listing.staff} on the payroll. An appraiser puts it between{' '}
-                        {money(appraisal.low)} and {money(appraisal.high)}. {money(listing.till)} in the
-                        till comes with it.
+                        The seller's books show{' '}
+                        {listing.reported.map((profit) => money(profit)).join(', ')} over the last
+                        three years, about {money(reportedProfitOf(listing))} a year, and{' '}
+                        {listing.staff} on the payroll. An appraiser puts it between{' '}
+                        {money(appraisal.low)} and {money(appraisal.high)}. {money(listing.till)} in
+                        the till comes with it.
                       </Text>
                       <PurchasePanel
                         verb="Buy it"
@@ -388,7 +389,9 @@ export function BusinessScreen() {
   const { state, tuneBusiness, sellABusiness, closeABusiness, expandABusiness, closeALocation } =
     useGame();
   const { current, pop } = useNavigation();
-  const [panel, setPanel] = useState<'valuation' | 'sell' | 'close' | 'expand' | 'shrink' | undefined>(undefined);
+  const [panel, setPanel] = useState<
+    'valuation' | 'sell' | 'close' | 'expand' | 'shrink' | undefined
+  >(undefined);
   if (!state || !current?.businessId) return null;
   const business = state.businesses.find((row) => row.id === current.businessId);
   const view = business ? viewOf(state, business) : undefined;
@@ -424,9 +427,19 @@ export function BusinessScreen() {
           affordance="none"
           compact
         />
-        <ListRow title="Cash in the till" value={money(dollarsOf(business.cash))} affordance="none" compact />
+        <ListRow
+          title="Cash in the till"
+          value={money(dollarsOf(business.cash))}
+          affordance="none"
+          compact
+        />
         <ListRow title="Employees" value={`${business.staff}`} affordance="none" compact />
-        <ListRow title="Price" value={`${business.price}% of the going rate`} affordance="none" compact />
+        <ListRow
+          title="Price"
+          value={`${business.price}% of the going rate`}
+          affordance="none"
+          compact
+        />
       </Card>
 
       <SectionHeading>Customers</SectionHeading>
@@ -594,7 +607,8 @@ export function BusinessScreen() {
             {panel === 'shrink' ? (
               <>
                 <Text style={styles.blurb}>
-                  The fittings go for a fraction of what they're worth, and the crew is let go to fit.
+                  The fittings go for a fraction of what they're worth, and the crew is let go to
+                  fit.
                 </Text>
                 <ActionButton
                   label="Close it"
@@ -684,8 +698,8 @@ export function BusinessScreen() {
         {offer ? (
           <>
             <Text style={styles.blurb}>
-              A buyer offers {money(offer.price)}. After the broker's {money(offer.fee)}, with the till
-              handed over, {money(offer.proceeds)} comes to you.
+              A buyer offers {money(offer.price)}. After the broker's {money(offer.fee)}, with the
+              till handed over, {money(offer.proceeds)} comes to you.
             </Text>
             <ActionButton
               label={`Sell for ${money(offer.proceeds)}`}

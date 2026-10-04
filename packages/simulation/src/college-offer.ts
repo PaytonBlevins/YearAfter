@@ -57,7 +57,8 @@ export interface CollegeOfferOutcome {
 }
 
 /** Whether a decision id belongs to the systemic college offer. */
-export const isCollegeOfferDecision = (eventId: string): boolean => eventId === COLLEGE_OFFER_EVENT_ID;
+export const isCollegeOfferDecision = (eventId: string): boolean =>
+  eventId === COLLEGE_OFFER_EVENT_ID;
 
 /*
   THREE TIERS OF COPY, NOT TWO (Ticket 0406). A trade school does not write to
@@ -101,7 +102,11 @@ export const collegeOfferChoices = (major: Major) => [
   { id: NOT_NOW, label: 'Not this year' },
 ];
 
-export function collegeOfferDecision(offer: CollegeOffer, major: Major, year: number): PendingDecision {
+export function collegeOfferDecision(
+  offer: CollegeOffer,
+  major: Major,
+  year: number,
+): PendingDecision {
   return {
     eventId: COLLEGE_OFFER_EVENT_ID,
     category: 'education',
@@ -148,7 +153,10 @@ export function answerCollegeOffer(
       sequence,
     });
     return ok({
-      state: { ...cleared, player: { ...cleared.player, timeline: appendToTimeline(cleared.player.timeline, entry) } },
+      state: {
+        ...cleared,
+        player: { ...cleared.player, timeline: appendToTimeline(cleared.player.timeline, entry) },
+      },
       entry,
       applied: false,
     });

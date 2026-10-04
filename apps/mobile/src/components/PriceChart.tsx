@@ -107,9 +107,7 @@ export function PriceChart({ line, entry, height = 132, caption }: PriceChartPro
       */}
       <View style={styles.scale}>
         <Text style={styles.scaleText}>{money(lo)}</Text>
-        {entry !== undefined ? (
-          <Text style={styles.entryText}>you paid {money(entry)}</Text>
-        ) : null}
+        {entry !== undefined ? <Text style={styles.entryText}>you paid {money(entry)}</Text> : null}
         <Text style={styles.scaleText}>{money(hi)}</Text>
       </View>
     </View>

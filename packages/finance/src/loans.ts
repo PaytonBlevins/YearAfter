@@ -719,12 +719,7 @@ export interface BusinessBorrower {
 }
 
 export type BusinessLoanRefusal =
-  | 'tooYoung'
-  | 'standing'
-  | 'noRecord'
-  | 'otherLender'
-  | 'cover'
-  | 'tooSmall';
+  'tooYoung' | 'standing' | 'noRecord' | 'otherLender' | 'cover' | 'tooSmall';
 
 export const BUSINESS_LOAN_REFUSALS: Readonly<Record<BusinessLoanRefusal, string>> = {
   tooYoung: 'Nobody lends to somebody your age.',
@@ -795,7 +790,9 @@ export const businessLoanOffersFor = (
 export const loanPaymentsOf = (loans: readonly HeldLoan[]): number =>
   loans.reduce((sum, loan) => {
     const product = findLoanProduct(loan.productId);
-    return product ? sum + yearlyPaymentFor(product, Number(loan.balance) / 100, loan.termLeft) : sum;
+    return product
+      ? sum + yearlyPaymentFor(product, Number(loan.balance) / 100, loan.termLeft)
+      : sum;
   }, 0);
 
 /**

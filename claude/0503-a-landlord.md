@@ -27,7 +27,7 @@ someone who could never afford one never sees an empty heading. A listing
 shows spec 145's fields and nothing about rent.
 
 **The going rate.** A unit's rent is the kind's yield on the building's
-*current* value, adjusted for region. Rent follows a place's cost of living
+_current_ value, adjusted for region. Rent follows a place's cost of living
 roughly in step while prices follow it squared, so yields are lower where
 houses are dear. A duplex in Ohio pays; one in California mostly doesn't.
 
@@ -65,7 +65,7 @@ first, so the duplex is sold before the house.
 house is financed this way too. There's room for five mortgaged properties at
 once.
 
-**Screens.** The Homes screen splits into *Your home*, *Your property* and two
+**Screens.** The Homes screen splits into _Your home_, _Your property_ and two
 for-sale sections. A new Rental screen holds the rental flow: rent per unit,
 let count, mortgage a month, upkeep, the agent's cut, and what a year leaves
 as it stands. It also has the rent setting, the agent, and every unit with
@@ -79,14 +79,14 @@ migration only bumps the version.
 Synthetic: 200 duplexes per setting, 25 years each, through the same
 `runHomesYear` a life calls. Two seed sets agreed to within 0.1 points.
 
-| rent setting | let | rent a unit-year |
-|---|---|---|
-| 20% under | 98% | $20,300 |
-| 10% under | 97% | $22,600 |
-| **going rate** | **95%** | **$24,700** |
-| 10% over | 81% | $23,300 |
-| 20% over | 50% | $15,800 |
-| 30% over | 0% | $0 |
+| rent setting   | let     | rent a unit-year |
+| -------------- | ------- | ---------------- |
+| 20% under      | 98%     | $20,300          |
+| 10% under      | 97%     | $22,600          |
+| **going rate** | **95%** | **$24,700**      |
+| 10% over       | 81%     | $23,300          |
+| 20% over       | 50%     | $15,800          |
+| 30% over       | 0%      | $0               |
 
 At the going rate in Ohio, with an agent: 95% let, evictions in about 3% of
 unit-years, and **4.7% net of everything on what the building is worth**

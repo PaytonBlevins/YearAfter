@@ -59,19 +59,19 @@ asked.
 
 The reachability guard's own acceptance number, `reachability.test.ts`:
 
-| | before 0405 | after |
-|---|---|---|
-| credential-gated jobs never shown to anybody, 250 lives | 33/147 | **0/147** |
+|                                                         | before 0405 | after     |
+| ------------------------------------------------------- | ----------- | --------- |
+| credential-gated jobs never shown to anybody, 250 lives | 33/147      | **0/147** |
 
 And the passive-vs-determined gap, re-measured with the systemic door wired
 in and a player who always answers with whatever the game leads with (the
 honest model of "passive" — not manually seeking the screen out, not
 declining out of caution either):
 
-| | degree | postgraduate |
-|---|---|---|
-| determined (still applies manually every eligible year, on top of the door) | 95.3% | 92.0% |
-| passive (only ever answers the systemic offer) | 94.3% | 88.0% |
+|                                                                             | degree | postgraduate |
+| --------------------------------------------------------------------------- | ------ | ------------ |
+| determined (still applies manually every eligible year, on top of the door) | 95.3%  | 92.0%        |
+| passive (only ever answers the systemic offer)                              | 94.3%  | 88.0%        |
 
 The gap 0210b measured at 60.5 points is now under 4.
 

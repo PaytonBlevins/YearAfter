@@ -104,9 +104,9 @@ describe('sectors are a correlation, not a heading', () => {
     }
     for (const basket of SPREAD) {
       expect(basket).toHaveLength(6);
-      expect(new Set(basket.map((id) => INSTRUMENTS.find((row) => row.id === id)?.sector)).size).toBe(
-        6,
-      );
+      expect(
+        new Set(basket.map((id) => INSTRUMENTS.find((row) => row.id === id)?.sector)).size,
+      ).toBe(6);
     }
     // And every basket is a distinct set of names, or pooling proves nothing.
     expect(new Set(CONCENTRATED.flat()).size).toBe(CONCENTRATED.flat().length);

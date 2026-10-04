@@ -7,12 +7,12 @@ Spec 954, 1372, 1392, 1689, 1857.
 
 **Business loans, the type spec 1857 lists and 0307 left open.** Two products:
 
-| | Small Business Loan | Commercial Term Loan |
-|---|---|---|
-| lender, rate, term | Redwood Community Bank, 8.75%, 10 years | Ashcroft Commercial, 7.25%, 10 years |
-| credit needed | fair | good |
-| most it will ever lend | $750,000 | $15,000,000 |
-| share of the price it will lend | 70% to open, 80% to add a door or buy | 80% to add a door, 75% to buy; **will not lend to open** |
+|                                 | Small Business Loan                     | Commercial Term Loan                                     |
+| ------------------------------- | --------------------------------------- | -------------------------------------------------------- |
+| lender, rate, term              | Redwood Community Bank, 8.75%, 10 years | Ashcroft Commercial, 7.25%, 10 years                     |
+| credit needed                   | fair                                    | good                                                     |
+| most it will ever lend          | $750,000                                | $15,000,000                                              |
+| share of the price it will lend | 70% to open, 80% to add a door or buy   | 80% to add a door, 75% to buy; **will not lend to open** |
 
 The Commercial loan is cheaper because it lends against earnings, and a
 business not yet opened has none. That is the one line between the two.
@@ -49,7 +49,7 @@ changed halfway. Business loans do not count toward the four loans a person
 may hold, and are not weighed against a salary in credit standing or in how
 much more somebody can borrow personally, for the reason a mortgage is not.
 
-**The business pays its own loan.** See *What broke*, below. Each year the
+**The business pays its own loan.** See _What broke_, below. Each year the
 business pays interest and a year of principal out of its till (and this
 year's profit) before the owner is paid anything. The draw is what is left, so
 a loan makes an owner's year smaller and the tax on it smaller too. If the
@@ -96,32 +96,32 @@ kind are still dropped at a death, as before; that is 0508's.)
 
 ### What is for sale (finance only, 200 draws a type)
 
-| | range across the 31 types |
-|---|---|
-| asking price against what the formula says it is worth, till included | 1.06–1.16 |
-| seller's reported profit as a share of the asking price | 10–28% |
-| years to pay back at reported profit | 3.5–10 |
-| first year's profit under the buyer against reported | 0.82–0.92 |
+|                                                                       | range across the 31 types |
+| --------------------------------------------------------------------- | ------------------------- |
+| asking price against what the formula says it is worth, till included | 1.06–1.16                 |
+| seller's reported profit as a share of the asking price               | 10–28%                    |
+| years to pay back at reported profit                                  | 3.5–10                    |
+| first year's profit under the buyer against reported                  | 0.82–0.92                 |
 
 At the top end the hotel and the resort pay back in nine and ten years; the
 small trades (cleaning, law, salon, accounting) in three to five.
 
 ### What a financed purchase does to a life (eight lives, bought at thirty-five)
 
-Net worth at fifty-five, in dollars. *Control*: never buys. *One*: buys the
+Net worth at fifty-five, in dollars. _Control_: never buys. _One_: buys the
 best-yielding business it can afford, at thirty-five, with the largest loan on
-offer. *Chain*: does that and buys again each time there is room, up to three.
+offer. _Chain_: does that and buys again each time there is room, up to three.
 
-| life | control | one | chain |
-|---|---|---|---|
-| 0 | 162,026 | 340,451 | 543,209 |
-| 2 | 678,339 | 759,178 | 943,798 |
-| 3 | 362,712 | 443,358 | **−298,361** (17 years behind, one business lost) |
-| 4 | 76,206 | 483,356 | 813,722 |
-| 5 | 312,218 | 384,706 | 294,982 |
-| 7 | 307,933 | (nothing affordable) | 232,343 (one lost) |
-| 8 | 41,286 | (nothing affordable) | 218,007 (two lost) |
-| 9 | 343,856 | 304,860 | 384,290 (two lost) |
+| life | control | one                  | chain                                             |
+| ---- | ------- | -------------------- | ------------------------------------------------- |
+| 0    | 162,026 | 340,451              | 543,209                                           |
+| 2    | 678,339 | 759,178              | 943,798                                           |
+| 3    | 362,712 | 443,358              | **−298,361** (17 years behind, one business lost) |
+| 4    | 76,206  | 483,356              | 813,722                                           |
+| 5    | 312,218 | 384,706              | 294,982                                           |
+| 7    | 307,933 | (nothing affordable) | 232,343 (one lost)                                |
+| 8    | 41,286  | (nothing affordable) | 218,007 (two lost)                                |
+| 9    | 343,856 | 304,860              | 384,290 (two lost)                                |
 
 Five of the six lives that could buy one did better for it; the chain beat the
 control in five of eight, lost to it in three, and in one went deeply negative.
@@ -146,7 +146,7 @@ removed the arrears. CORE_RULES 13.97.
 ## Not done, and why
 
 - **Private Lending Firm.** 0602 said this arrives with 0603. 0603 built
-  lending *to* a business, not a business that lends: its income is interest on
+  lending _to_ a business, not a business that lends: its income is interest on
   a book of loans that go bad, which is not the demand-and-capacity shape
   every type here shares, and it is the same kind of thing as an Investment
   Firm (capital put to work, with a risk of losing it). Both now wait for 0605.

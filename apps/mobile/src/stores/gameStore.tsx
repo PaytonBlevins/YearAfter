@@ -331,7 +331,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   const continueAs = useCallback(
     async (childId: string, keepBusinesses?: boolean) => {
       if (!state) return;
-      const next = continueAsChild(state, childId, keepBusinesses === undefined ? {} : { keepBusinesses });
+      const next = continueAsChild(
+        state,
+        childId,
+        keepBusinesses === undefined ? {} : { keepBusinesses },
+      );
       if (!next) return;
 
       const id = asSaveId(`save-${next.rng.getSeed()}-g${next.world.generation}`);
@@ -802,7 +806,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         if (!current) return current;
         const result = sellVehicle(current, vehicleId);
         if (!result.ok) {
-          setOutcome({ title: 'Not now', body: SELL_VEHICLE_ERROR_LABELS[result.error], tone: 'bad' });
+          setOutcome({
+            title: 'Not now',
+            body: SELL_VEHICLE_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
           return current;
         }
         setOutcome({ title: 'Sold', body: result.value.entry.text, tone: 'neutral' });
@@ -1021,7 +1029,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         if (!current) return current;
         const result = buyValuable(current, stockId);
         if (!result.ok) {
-          setOutcome({ title: 'Not now', body: BUY_VALUABLE_ERROR_LABELS[result.error], tone: 'bad' });
+          setOutcome({
+            title: 'Not now',
+            body: BUY_VALUABLE_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
           return current;
         }
         setOutcome({ title: "It's yours", body: result.value.entry.text, tone: 'good' });

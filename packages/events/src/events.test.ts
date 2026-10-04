@@ -912,13 +912,20 @@ describe('Ticket 0409 — work, the body, and loss can be asked about', () => {
     perfectly well in December. The gate is asserted where it lives.
   */
   const working = (over: Partial<EventContext> = {}) =>
-    context({ age: 40, schoolStage: 'graduated', employed: true, jobTrack: 'retail', jobYears: 5, ...over });
+    context({
+      age: 40,
+      schoolStage: 'graduated',
+      employed: true,
+      jobTrack: 'retail',
+      jobYears: 5,
+      ...over,
+    });
 
   it('will not ask about a job somebody does not have', () => {
     expect(matchesCondition({ employed: true }, working())).toBe(true);
-    expect(matchesCondition({ employed: true }, working({ employed: false, jobTrack: undefined }))).toBe(
-      false,
-    );
+    expect(
+      matchesCondition({ employed: true }, working({ employed: false, jobTrack: undefined })),
+    ).toBe(false);
     // And the other way, for an event about being out of work.
     expect(matchesCondition({ employed: false }, working({ employed: false }))).toBe(true);
     expect(matchesCondition({ employed: false }, working())).toBe(false);
@@ -929,7 +936,10 @@ describe('Ticket 0409 — work, the body, and loss can be asked about', () => {
     expect(matchesCondition({ jobTrackAny: ['medicine'] }, working())).toBe(false);
     // Somebody with no job has no track, and must not match a track list.
     expect(
-      matchesCondition({ jobTrackAny: ['retail'] }, working({ employed: false, jobTrack: undefined })),
+      matchesCondition(
+        { jobTrackAny: ['retail'] },
+        working({ employed: false, jobTrack: undefined }),
+      ),
     ).toBe(false);
 
     expect(matchesCondition({ jobYearsAtLeast: 5 }, working())).toBe(true);

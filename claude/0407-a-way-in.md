@@ -18,15 +18,15 @@ screen and apply.
 
 ## What that cost
 
-| | before | after |
-|---|---|---|
-| passive lives that ever held a job | **0/250** | 247/250 |
-| idle adult years (18–64) | 11,419 | 365 |
-| listings going, unclaimed, in those years | 68,514 | 2,190 |
-| died with nothing | **248/250** | 4/250 |
-| median cash at death | $0 | $113,941 |
-| reached a university degree | 38/250 | 204/250 |
-| reached postgraduate | **0** | 21/250 |
+|                                           | before      | after    |
+| ----------------------------------------- | ----------- | -------- |
+| passive lives that ever held a job        | **0/250**   | 247/250  |
+| idle adult years (18–64)                  | 11,419      | 365      |
+| listings going, unclaimed, in those years | 68,514      | 2,190    |
+| died with nothing                         | **248/250** | 4/250    |
+| median cash at death                      | $0          | $113,941 |
+| reached a university degree               | 38/250      | 204/250  |
+| reached postgraduate                      | **0**       | 21/250   |
 
 One probed life reached **age 60 with no job, $0, and no credentials**, while
 six listings sat available in every one of its adult years.
@@ -61,17 +61,17 @@ systemic door and the screen can never disagree about what was available, and it
 costs no RNG: `openings` draws with `stableUnit`.
 
 **The chance reflects employability.** A flat 50% was built first and measured
-first. It worked — 247 of 250 found work — and it worked *identically for a
-dropout and a postgraduate*, which makes the entire education system irrelevant
+first. It worked — 247 of 250 found work — and it worked _identically for a
+dropout and a postgraduate_, which makes the entire education system irrelevant
 to the one outcome it should matter most for. So it reads what an employer
 reads:
 
 | education reached | idle years per life | ever worked |
-|---|---|---|
-| none | **4.4** | 21/23 |
-| high school | 1.1 | 23/23 |
-| university | 1.3 | 325/325 |
-| postgraduate | **0.6** | 29/29 |
+| ----------------- | ------------------- | ----------- |
+| none              | **4.4**             | 21/23       |
+| high school       | 1.1                 | 23/23       |
+| university        | 1.3                 | 325/325     |
+| postgraduate      | **0.6**             | 29/29       |
 
 Unemployment stays reachable on purpose. 0303's living model has real
 consequences for a character with no income and they should be possible to meet.
@@ -83,8 +83,8 @@ without a `fromJobId`, because the build that wrote it never made one.
 
 Every one was a population shift, and only one was a bound that needed moving.
 
-- **A test was asserting the bug.** `offers.test.ts` had *"never arrives for
-  somebody with no job, or somebody who has stopped"* — a guarantee that an
+- **A test was asserting the bug.** `offers.test.ts` had _"never arrives for
+  somebody with no job, or somebody who has stopped"_ — a guarantee that an
   unemployed adult would never be offered work. True, deliberate in 0402, and
   the exact line that left 250 of 250 unemployable. A test can pin a defect in
   place as firmly as it pins a feature, and the more precisely it is worded the

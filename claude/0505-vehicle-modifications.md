@@ -32,16 +32,16 @@ another replaces it.
 **Priced for the car it goes on.** Each option has a band from a $20,000 car
 to a $400,000 car, read on the log of the car's price:
 
-| | $25k car | $90k car | $300k car | recovers |
-|---|---|---|---|---|
-| Forged wheels | $4,300 | $8,750 | $13,000 | 35% |
-| Full respray | $3,900 | $9,000 | $13,850 | 30% |
-| Matte black wrap | $3,100 | $4,900 | $6,600 | 10% |
-| Cat-back exhaust | $1,300 | $3,450 | $5,500 | 25% |
-| Coilovers | $1,850 | $3,750 | $5,550 | 25% |
-| Stage 2 tune | $1,500 | $3,100 | $4,650 | 0% |
-| Big brake kit | $2,200 | $4,400 | $6,500 | 30% |
-| Turbo upgrade | $5,200 | $12,050 | $18,450 | 30% |
+|                  | $25k car | $90k car | $300k car | recovers |
+| ---------------- | -------- | -------- | --------- | -------- |
+| Forged wheels    | $4,300   | $8,750   | $13,000   | 35%      |
+| Full respray     | $3,900   | $9,000   | $13,850   | 30%      |
+| Matte black wrap | $3,100   | $4,900   | $6,600    | 10%      |
+| Cat-back exhaust | $1,300   | $3,450   | $5,500    | 25%      |
+| Coilovers        | $1,850   | $3,750   | $5,550    | 25%      |
+| Stage 2 tune     | $1,500   | $3,100   | $4,650    | 0%       |
+| Big brake kit    | $2,200   | $4,400   | $6,500    | 30%      |
+| Turbo upgrade    | $5,200   | $12,050  | $18,450   | 30%      |
 
 **Tarbus.** The elite modifier house converts the cars it's known for: the
 Merceda line (C, E, S, GLX, Gelander) and the Porsha 912 and Taycon. A

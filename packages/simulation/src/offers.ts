@@ -378,7 +378,13 @@ export const FIRST_JOB_CEILING = 0.66;
 export function firstJobChance(state: GameState): number {
   const level = levelOf(state.education.credentials);
   const paper =
-    level === 'postgraduate' ? 0.2 : level === 'university' ? 0.16 : level === 'highSchool' ? 0.08 : 0;
+    level === 'postgraduate'
+      ? 0.2
+      : level === 'university'
+        ? 0.16
+        : level === 'highSchool'
+          ? 0.08
+          : 0;
   // A license is worth being asked about, which is most of what one is for.
   const licensed = (state.education.credentials?.licenses?.length ?? 0) > 0 ? 0.08 : 0;
   const { smarts, charisma, discipline } = state.player.stats;

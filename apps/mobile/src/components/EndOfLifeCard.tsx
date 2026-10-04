@@ -173,7 +173,9 @@ export function EndOfLifeCard({
 
           {askAboutBusinesses ? (
             <>
-              <Text style={styles.heading}>{businesses === 1 ? 'The business' : 'The businesses'}</Text>
+              <Text style={styles.heading}>
+                {businesses === 1 ? 'The business' : 'The businesses'}
+              </Text>
               {[
                 {
                   keep: true,

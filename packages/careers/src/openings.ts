@@ -132,14 +132,14 @@ export function cannotApply(job: Job, context: OpeningsContext): CannotApply | u
  * 13.19 exists to prevent, so there is one copy and this is it.
  */
 export function listingWeight(context: OpeningsContext, job: Job): number {
-    // The SAME effective rung the gate used. Reading the raw held value here
-    // while `cannotApply` read the effective one would let a job through the
-    // door and then weight it as if it were a cold start — eligible, and still
-    // never listed.
-    const reached = reachOf(context, job.track);
-    const stepUp = job.rung === reached + 1 && reached >= 0;
-    const known = reached >= 0;
-    /*
+  // The SAME effective rung the gate used. Reading the raw held value here
+  // while `cannotApply` read the effective one would let a job through the
+  // door and then weight it as if it were a cold start — eligible, and still
+  // never listed.
+  const reached = reachOf(context, job.track);
+  const stepUp = job.rung === reached + 1 && reached >= 0;
+  const known = reached >= 0;
+  /*
       `prefers` BELONGS IN THE ODDS, NOT IN WHAT YOU ARE SHOWN — on a ladder you
       have already climbed (Ticket 0407).
 
@@ -156,8 +156,8 @@ export function listingWeight(context: OpeningsContext, job: Job): number {
       the preference is the employer's whole opinion of them; on a track they
       have three rungs of history in, it is not.
     */
-    const wall = !stepUp && !meetsLevel(context.education, job.prefers);
-    /*
+  const wall = !stepUp && !meetsLevel(context.education, job.prefers);
+  /*
       A LICENSE PUTS ITS OWN PROFESSION ON YOUR NOTICEBOARD (Ticket 0407).
 
       Found by 0401's starvation guard once 0406's professional ladders existed
@@ -173,11 +173,11 @@ export function listingWeight(context: OpeningsContext, job: Job): number {
       different things — one is "you could move here", the other "this is your
       profession" — and somebody who is both should see it most of all.
     */
-    const licensed = licenseReach(context.licenses, job.track) >= 0 ? 2.4 : 1;
-    const weight = (stepUp ? 3 : known ? 1.6 : 1) * (wall ? 0.55 : 1) * licensed;
-    // A stable draw scaled by weight. Sorting on this is a weighted sample
-    // without replacement, and it consumes no RNG state.
-    return weight;
+  const licensed = licenseReach(context.licenses, job.track) >= 0 ? 2.4 : 1;
+  const weight = (stepUp ? 3 : known ? 1.6 : 1) * (wall ? 0.55 : 1) * licensed;
+  // A stable draw scaled by weight. Sorting on this is a weighted sample
+  // without replacement, and it consumes no RNG state.
+  return weight;
 }
 
 /**

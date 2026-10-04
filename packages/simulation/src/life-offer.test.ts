@@ -156,13 +156,18 @@ describe('0410 — a life happens without opening a screen', () => {
       does — a life where nobody works out is a real life and the numbers here
       are measured rather than aimed at (0410 measured 86/90, 76/90 and 64/90).
     */
-    expect(count((life) => life.partnered), 'lives that ever had a partner').toBeGreaterThan(
-      LIVES * 0.6,
-    );
-    expect(count((life) => life.married), 'lives that ever married').toBeGreaterThan(LIVES * 0.4);
-    expect(count((life) => life.hadChild), 'lives that ever had a child').toBeGreaterThan(
-      LIVES * 0.3,
-    );
+    expect(
+      count((life) => life.partnered),
+      'lives that ever had a partner',
+    ).toBeGreaterThan(LIVES * 0.6);
+    expect(
+      count((life) => life.married),
+      'lives that ever married',
+    ).toBeGreaterThan(LIVES * 0.4);
+    expect(
+      count((life) => life.hadChild),
+      'lives that ever had a child',
+    ).toBeGreaterThan(LIVES * 0.3);
   });
 
   it('does not marry anybody off before the ladder allows it', () => {
@@ -212,9 +217,10 @@ describe('0410 — a life happens without opening a screen', () => {
 
       Sabotage-verified: putting `pending.length > 0` back turns this red.
     */
-    expect(sum((life) => life.sharedYears), 'years holding both kinds of question').toBeGreaterThan(
-      LIVES * 0.5,
-    );
+    expect(
+      sum((life) => life.sharedYears),
+      'years holding both kinds of question',
+    ).toBeGreaterThan(LIVES * 0.5);
   });
 
   it('makes the parenting library reachable', () => {
@@ -227,6 +233,9 @@ describe('0410 — a life happens without opening a screen', () => {
       was behind a door nobody had built.
     */
     expect(PARENT_GATED.size, 'events gated on having children').toBeGreaterThan(8);
-    expect(sum((life) => life.parentEvents), 'parenting events that fired').toBeGreaterThan(200);
+    expect(
+      sum((life) => life.parentEvents),
+      'parenting events that fired',
+    ).toBeGreaterThan(200);
   });
 });

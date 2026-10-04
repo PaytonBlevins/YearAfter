@@ -29,14 +29,10 @@
       "eligibility": {
         "ageMin": 1,
         "ageMax": 2,
-        "requires": [
-          "mother"
-        ]
+        "requires": ["mother"]
       },
       "weight": 10,
-      "text": [
-        "First word: something close enough to {mother} that she is still telling people."
-      ],
+      "text": ["First word: something close enough to {mother} that she is still telling people."],
       "effects": {
         "stats": {
           "smarts": 1
@@ -54,9 +50,7 @@
       "eligibility": {
         "ageMin": 1,
         "ageMax": 2,
-        "requires": [
-          "father"
-        ]
+        "requires": ["father"]
       },
       "weight": 8,
       "text": [
@@ -100,9 +94,7 @@
       "eligibility": {
         "ageMin": 0,
         "ageMax": 1,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "text": [
@@ -125,14 +117,10 @@
       "eligibility": {
         "ageMin": 0,
         "ageMax": 1,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 8,
-      "text": [
-        "Cried for three months straight for reasons that were never established."
-      ],
+      "text": ["Cried for three months straight for reasons that were never established."],
       "effects": {
         "stats": {
           "health": -1
@@ -169,9 +157,7 @@
       "eligibility": {
         "ageMin": 0,
         "ageMax": 2,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 12,
       "text": [
@@ -192,14 +178,10 @@
       "eligibility": {
         "ageMin": 0,
         "ageMax": 2,
-        "requires": [
-          "olderSibling"
-        ]
+        "requires": ["olderSibling"]
       },
       "weight": 10,
-      "text": [
-        "{sibling} appointed themselves your personal security detail."
-      ],
+      "text": ["{sibling} appointed themselves your personal security detail."],
       "effects": {
         "stats": {
           "happiness": 1
@@ -219,9 +201,7 @@
         "ageMax": 2
       },
       "weight": 10,
-      "text": [
-        "Spent a lot of the year being handed between relatives like a casserole."
-      ],
+      "text": ["Spent a lot of the year being handed between relatives like a casserole."],
       "effects": {
         "stats": {
           "charisma": 1,
@@ -239,9 +219,7 @@
         "ageMax": 1
       },
       "weight": 10,
-      "text": [
-        "Got teeth. Everybody suffered."
-      ],
+      "text": ["Got teeth. Everybody suffered."],
       "effects": {
         "stats": {
           "health": -1
@@ -296,9 +274,7 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 7,
-        "requires": [
-          "mother"
-        ]
+        "requires": ["mother"]
       },
       "weight": 12,
       "cooldown": 4,
@@ -325,9 +301,7 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 7,
-        "requires": [
-          "father"
-        ]
+        "requires": ["father"]
       },
       "weight": 10,
       "cooldown": 4,
@@ -353,15 +327,11 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 8,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "A drawing went on the fridge and stayed there long past its artistic peak."
-      ],
+      "text": ["A drawing went on the fridge and stayed there long past its artistic peak."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -379,14 +349,10 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 5,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
-      "text": [
-        "Asked why about two hundred times a day. Roughly six of the answers held up."
-      ],
+      "text": ["Asked why about two hundred times a day. Roughly six of the answers held up."],
       "effects": {
         "stats": {
           "smarts": 2
@@ -425,9 +391,7 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 12,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "cooldown": 4,
@@ -451,9 +415,7 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 10,
-        "requires": [
-          "mother"
-        ]
+        "requires": ["mother"]
       },
       "weight": 10,
       "cooldown": 3,
@@ -478,17 +440,13 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 11,
-        "requires": [
-          "father"
-        ]
+        "requires": ["father"]
       },
       "weight": 10,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "inventive"
-            ]
+            "talentsAny": ["inventive"]
           },
           "multiply": 1.6
         }
@@ -516,9 +474,7 @@
         "ageMax": 8
       },
       "weight": 9,
-      "text": [
-        "Cut your own hair. The correction was worse than the crime."
-      ],
+      "text": ["Cut your own hair. The correction was worse than the crime."],
       "effects": {
         "stats": {
           "looks": -3,
@@ -534,14 +490,10 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 6,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 10,
-      "text": [
-        "Decorated a wall in permanent marker. It was described as a phase."
-      ],
+      "text": ["Decorated a wall in permanent marker. It was described as a phase."],
       "effects": {
         "stats": {
           "happiness": 1
@@ -559,14 +511,10 @@
       "eligibility": {
         "ageMin": 2,
         "ageMax": 5,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 10,
-      "text": [
-        "Lay down on a supermarket floor over a principle nobody could later identify."
-      ],
+      "text": ["Lay down on a supermarket floor over a principle nobody could later identify."],
       "effects": {
         "stats": {
           "willpower": 1
@@ -584,9 +532,7 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 17,
-        "requires": [
-          "bothParents"
-        ]
+        "requires": ["bothParents"]
       },
       "weight": 9,
       "cooldown": 4,
@@ -611,19 +557,12 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 16,
-        "requires": [
-          "singleParent"
-        ],
-        "wealthAny": [
-          "struggling",
-          "modest"
-        ]
+        "requires": ["singleParent"],
+        "wealthAny": ["struggling", "modest"]
       },
       "weight": 11,
       "cooldown": 4,
-      "text": [
-        "{parent} worked late most of the year. Dinner was often a note on the counter."
-      ],
+      "text": ["{parent} worked late most of the year. Dinner was often a note on the counter."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -640,19 +579,12 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 13,
-        "requires": [
-          "olderSibling"
-        ],
-        "wealthAny": [
-          "struggling",
-          "modest"
-        ]
+        "requires": ["olderSibling"],
+        "wealthAny": ["struggling", "modest"]
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Everything you wore this year had belonged to {sibling} first."
-      ],
+      "text": ["Everything you wore this year had belonged to {sibling} first."],
       "effects": {
         "stats": {
           "looks": -1,
@@ -668,14 +600,8 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 15,
-        "requires": [
-          "anyParent"
-        ],
-        "wealthAny": [
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "requires": ["anyParent"],
+        "wealthAny": ["comfortable", "affluent", "wealthy"]
       },
       "weight": 8,
       "cooldown": 6,
@@ -697,18 +623,12 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 16,
-        "requires": [
-          "anyParent"
-        ],
-        "wealthAny": [
-          "struggling"
-        ]
+        "requires": ["anyParent"],
+        "wealthAny": ["struggling"]
       },
       "weight": 9,
       "cooldown": 3,
-      "text": [
-        "Moved apartments again. You have learned not to unpack the second box."
-      ],
+      "text": ["Moved apartments again. You have learned not to unpack the second box."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -725,19 +645,12 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 11,
-        "requires": [
-          "anyParent"
-        ],
-        "wealthAny": [
-          "affluent",
-          "wealthy"
-        ]
+        "requires": ["anyParent"],
+        "wealthAny": ["affluent", "wealthy"]
       },
       "weight": 9,
       "cooldown": 5,
-      "text": [
-        "A birthday party with a bouncy castle, forty children and one exhausted adult."
-      ],
+      "text": ["A birthday party with a bouncy castle, forty children and one exhausted adult."],
       "effects": {
         "stats": {
           "happiness": 3,
@@ -754,13 +667,8 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 12,
-        "requires": [
-          "anyParent"
-        ],
-        "wealthAny": [
-          "struggling",
-          "modest"
-        ]
+        "requires": ["anyParent"],
+        "wealthAny": ["struggling", "modest"]
       },
       "weight": 10,
       "cooldown": 5,
@@ -785,15 +693,11 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 13,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 8,
       "cooldown": 8,
-      "text": [
-        "A dog arrived. It chose {sibling}, which was never fully accepted."
-      ],
+      "text": ["A dog arrived. It chose {sibling}, which was never fully accepted."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -812,15 +716,11 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 14,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 8,
       "cooldown": 8,
-      "text": [
-        "A cat arrived and made it clear that you now lived in its house."
-      ],
+      "text": ["A cat arrived and made it clear that you now lived in its house."],
       "effects": {
         "stats": {
           "happiness": 3
@@ -836,22 +736,16 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 17,
-        "flagsNone": [
-          "pet.gone"
-        ]
+        "flagsNone": ["pet.gone"]
       },
       "weight": 6,
-      "text": [
-        "The family pet died. It was explained gently and it didn't help much."
-      ],
+      "text": ["The family pet died. It was explained gently and it didn't help much."],
       "effects": {
         "stats": {
           "happiness": -4,
           "willpower": 2
         },
-        "setFlags": [
-          "pet.gone"
-        ],
+        "setFlags": ["pet.gone"],
         "stress": 8
       }
     },
@@ -863,15 +757,11 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 14,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 10,
       "cooldown": 4,
-      "text": [
-        "A chore chart went up on the fridge. It was followed for eleven days."
-      ],
+      "text": ["A chore chart went up on the fridge. It was followed for eleven days."],
       "effects": {
         "stats": {
           "discipline": 2
@@ -886,15 +776,8 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 14,
-        "requires": [
-          "anyParent"
-        ],
-        "wealthAny": [
-          "modest",
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "requires": ["anyParent"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
       },
       "weight": 10,
       "cooldown": 4,
@@ -919,9 +802,7 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 15,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 12,
       "cooldown": 3,
@@ -946,9 +827,7 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 16,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 11,
       "cooldown": 3,
@@ -972,9 +851,7 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 17,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 8,
       "text": [
@@ -1019,9 +896,7 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 17,
-        "flagsNone": [
-          "grandparent.gone"
-        ]
+        "flagsNone": ["grandparent.gone"]
       },
       "weight": 7,
       "text": [
@@ -1035,9 +910,7 @@
         "relationship": {
           "family": 2
         },
-        "setFlags": [
-          "grandparent.gone"
-        ],
+        "setFlags": ["grandparent.gone"],
         "stress": 18
       }
     },
@@ -1049,18 +922,12 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ],
-        "wealthAny": [
-          "struggling"
-        ]
+        "requires": ["anyParent"],
+        "wealthAny": ["struggling"]
       },
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "Money was tight in a way the adults tried and failed to hide."
-      ],
+      "text": ["Money was tight in a way the adults tried and failed to hide."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -1078,13 +945,8 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 17,
-        "requires": [
-          "singleParent"
-        ],
-        "wealthAny": [
-          "struggling",
-          "modest"
-        ]
+        "requires": ["singleParent"],
+        "wealthAny": ["struggling", "modest"]
       },
       "weight": 10,
       "cooldown": 4,
@@ -1110,14 +972,8 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ],
-        "wealthAny": [
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "requires": ["anyParent"],
+        "wealthAny": ["comfortable", "affluent", "wealthy"]
       },
       "weight": 10,
       "cooldown": 4,
@@ -1142,9 +998,7 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 10,
       "cooldown": 5,
@@ -1170,15 +1024,11 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 6,
       "cooldown": 8,
-      "text": [
-        "{parent} was unwell for months. The house got quiet and everyone got older."
-      ],
+      "text": ["{parent} was unwell for months. The house got quiet and everyone got older."],
       "effects": {
         "stats": {
           "happiness": -4,
@@ -1198,17 +1048,11 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 16,
-        "requires": [
-          "bothParents"
-        ],
-        "flagsNone": [
-          "family.divorced"
-        ]
+        "requires": ["bothParents"],
+        "flagsNone": ["family.divorced"]
       },
       "weight": 8,
-      "text": [
-        "{parents} sat you down at the kitchen table. Afterwards there were two addresses."
-      ],
+      "text": ["{parents} sat you down at the kitchen table. Afterwards there were two addresses."],
       "effects": {
         "stats": {
           "happiness": -6,
@@ -1217,9 +1061,7 @@
         "relationship": {
           "parents": -4
         },
-        "setFlags": [
-          "family.divorced"
-        ],
+        "setFlags": ["family.divorced"],
         "stress": 24
       }
     },
@@ -1231,9 +1073,7 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 17,
-        "flagsAll": [
-          "family.divorced"
-        ]
+        "flagsAll": ["family.divorced"]
       },
       "weight": 12,
       "cooldown": 2,
@@ -1255,25 +1095,17 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 17,
-        "flagsAll": [
-          "family.divorced"
-        ],
-        "flagsNone": [
-          "family.step-parent"
-        ]
+        "flagsAll": ["family.divorced"],
+        "flagsNone": ["family.step-parent"]
       },
       "weight": 8,
-      "text": [
-        "Somebody new started coming to dinner, and then started staying for it."
-      ],
+      "text": ["Somebody new started coming to dinner, and then started staying for it."],
       "effects": {
         "stats": {
           "happiness": -1,
           "charisma": 2
         },
-        "setFlags": [
-          "family.step-parent"
-        ]
+        "setFlags": ["family.step-parent"]
       }
     },
     {
@@ -1284,9 +1116,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 8,
       "cooldown": 3,
@@ -1308,25 +1138,17 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 13,
-        "requires": [
-          "anyParent"
-        ],
-        "flagsNone": [
-          "family.new-baby"
-        ]
+        "requires": ["anyParent"],
+        "flagsNone": ["family.new-baby"]
       },
       "weight": 7,
-      "text": [
-        "A new baby arrived. Your standing in the household was quietly revised."
-      ],
+      "text": ["A new baby arrived. Your standing in the household was quietly revised."],
       "effects": {
         "stats": {
           "happiness": -1,
           "discipline": 2
         },
-        "setFlags": [
-          "family.new-baby"
-        ]
+        "setFlags": ["family.new-baby"]
       }
     },
     {
@@ -1337,9 +1159,7 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 10,
       "cooldown": 3,
@@ -1364,25 +1184,19 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 11,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 1.8
         }
       ],
       "cooldown": 3,
-      "text": [
-        "Grounded for two weeks. Served eleven days before the sentence quietly lapsed."
-      ],
+      "text": ["Grounded for two weeks. Served eleven days before the sentence quietly lapsed."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -1402,9 +1216,7 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 11,
       "cooldown": 2,
@@ -1429,9 +1241,7 @@
       "eligibility": {
         "ageMin": 15,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "text": [
@@ -1455,18 +1265,11 @@
       "eligibility": {
         "ageMin": 16,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ],
-        "wealthAny": [
-          "affluent",
-          "wealthy"
-        ]
+        "requires": ["anyParent"],
+        "wealthAny": ["affluent", "wealthy"]
       },
       "weight": 8,
-      "text": [
-        "There was a used car in the driveway with a bow on it that fooled nobody."
-      ],
+      "text": ["There was a used car in the driveway with a bow on it that fooled nobody."],
       "effects": {
         "stats": {
           "happiness": 5
@@ -1485,9 +1288,7 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 16,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "cooldown": 2,
@@ -1511,18 +1312,14 @@
       "eligibility": {
         "ageMin": 14,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ],
+        "requires": ["anyParent"],
         "relationshipAtMost": {
           "mother": 55
         }
       },
       "weight": 9,
       "cooldown": 3,
-      "text": [
-        "You and {parent} started talking properly again, over dishes, about nothing much."
-      ],
+      "text": ["You and {parent} started talking properly again, over dishes, about nothing much."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -1540,14 +1337,10 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "requires": [
-          "olderSibling"
-        ]
+        "requires": ["olderSibling"]
       },
       "weight": 8,
-      "text": [
-        "{olderSibling} moved out. The house got bigger and much less interesting."
-      ],
+      "text": ["{olderSibling} moved out. The house got bigger and much less interesting."],
       "effects": {
         "stats": {
           "happiness": -2
@@ -1566,15 +1359,11 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 13,
-        "requires": [
-          "onlyChild"
-        ]
+        "requires": ["onlyChild"]
       },
       "weight": 10,
       "cooldown": 4,
-      "text": [
-        "Being an only child meant a quiet house and an unusually adult vocabulary."
-      ],
+      "text": ["Being an only child meant a quiet house and an unusually adult vocabulary."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -1590,15 +1379,11 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 17,
-        "requires": [
-          "siblings2"
-        ]
+        "requires": ["siblings2"]
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "With this many siblings, dinner was a negotiation and the bathroom was a line."
-      ],
+      "text": ["With this many siblings, dinner was a negotiation and the bathroom was a line."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -1637,9 +1422,7 @@
         "ageMax": 6
       },
       "weight": 11,
-      "text": [
-        "Refused to nap at nap time on principle, and lay there furious about it."
-      ],
+      "text": ["Refused to nap at nap time on principle, and lay there furious about it."],
       "effects": {
         "stats": {
           "willpower": 2
@@ -1659,17 +1442,12 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "academics",
-              "writing"
-            ]
+            "talentsAny": ["academics", "writing"]
           },
           "multiply": 2.0
         }
       ],
-      "text": [
-        "Something clicked and the letters turned into words. It never stopped after that."
-      ],
+      "text": ["Something clicked and the letters turned into words. It never stopped after that."],
       "effects": {
         "stats": {
           "smarts": 4
@@ -1689,9 +1467,7 @@
         }
       },
       "weight": 10,
-      "text": [
-        "Reading came slowly and loudly, in front of everyone, one word at a time."
-      ],
+      "text": ["Reading came slowly and loudly, in front of everyone, one word at a time."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -1711,9 +1487,7 @@
       },
       "weight": 12,
       "cooldown": 4,
-      "text": [
-        "Had a teacher who noticed you. It made more difference than they will ever know."
-      ],
+      "text": ["Had a teacher who noticed you. It made more difference than they will ever know."],
       "effects": {
         "stats": {
           "smarts": 3,
@@ -1734,9 +1508,7 @@
       },
       "weight": 11,
       "cooldown": 4,
-      "text": [
-        "Had a teacher who had clearly decided about you in week one."
-      ],
+      "text": ["Had a teacher who had clearly decided about you in week one."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -1755,9 +1527,7 @@
         "ageMax": 13
       },
       "weight": 10,
-      "text": [
-        "Went out of the spelling bee on a word you can still spell perfectly today."
-      ],
+      "text": ["Went out of the spelling bee on a word you can still spell perfectly today."],
       "effects": {
         "stats": {
           "smarts": 1,
@@ -1781,16 +1551,12 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "academics"
-            ]
+            "talentsAny": ["academics"]
           },
           "multiply": 2.2
         }
       ],
-      "text": [
-        "Won the spelling bee. The trophy was small and the feeling wasn't."
-      ],
+      "text": ["Won the spelling bee. The trophy was small and the feeling wasn't."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -1812,18 +1578,13 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "inventive",
-              "academics"
-            ]
+            "talentsAny": ["inventive", "academics"]
           },
           "multiply": 1.8
         }
       ],
       "cooldown": 3,
-      "text": [
-        "Entered the science fair with a volcano. So did four other people."
-      ],
+      "text": ["Entered the science fair with a volcano. So did four other people."],
       "effects": {
         "stats": {
           "smarts": 2
@@ -1838,15 +1599,10 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 15,
-        "talentsAny": [
-          "inventive",
-          "academics"
-        ]
+        "talentsAny": ["inventive", "academics"]
       },
       "weight": 8,
-      "text": [
-        "Won the science fair with something that genuinely should not have worked."
-      ],
+      "text": ["Won the science fair with something that genuinely should not have worked."],
       "effects": {
         "stats": {
           "smarts": 4,
@@ -1864,9 +1620,7 @@
         "ageMax": 10
       },
       "weight": 11,
-      "text": [
-        "Cast as a tree in the class play. Delivered the performance of a lifetime anyway."
-      ],
+      "text": ["Cast as a tree in the class play. Delivered the performance of a lifetime anyway."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -1887,9 +1641,7 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "acting"
-            ]
+            "talentsAny": ["acting"]
           },
           "multiply": 2.5
         },
@@ -1902,9 +1654,7 @@
           "multiply": 1.4
         }
       ],
-      "text": [
-        "Got the lead in the school play and didn't fumble a single line."
-      ],
+      "text": ["Got the lead in the school play and didn't fumble a single line."],
       "effects": {
         "stats": {
           "charisma": 4,
@@ -1926,9 +1676,7 @@
       },
       "weight": 13,
       "cooldown": 2,
-      "text": [
-        "Discovered that homework doesn't do itself, several times, at cost."
-      ],
+      "text": ["Discovered that homework doesn't do itself, several times, at cost."],
       "effects": {
         "stats": {
           "discipline": 1,
@@ -1950,9 +1698,7 @@
       },
       "weight": 9,
       "cooldown": 3,
-      "text": [
-        "Perfect attendance. The certificate is somewhere in a drawer to this day."
-      ],
+      "text": ["Perfect attendance. The certificate is somewhere in a drawer to this day."],
       "effects": {
         "stats": {
           "discipline": 2,
@@ -1974,9 +1720,7 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 1.9
         },
@@ -1990,9 +1734,7 @@
         }
       ],
       "cooldown": 2,
-      "text": [
-        "Detention, for something that had seemed extremely funny at the time."
-      ],
+      "text": ["Detention, for something that had seemed extremely funny at the time."],
       "effects": {
         "stats": {
           "discipline": -1,
@@ -2010,24 +1752,18 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 7,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 2.4
         }
       ],
-      "text": [
-        "Suspended for three days. The house was very quiet about it."
-      ],
+      "text": ["Suspended for three days. The house was very quiet about it."],
       "effects": {
         "stats": {
           "discipline": -2,
@@ -2048,22 +1784,16 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 15,
-        "flagsNone": [
-          "school.bullied"
-        ]
+        "flagsNone": ["school.bullied"]
       },
       "weight": 9,
-      "text": [
-        "A group of older kids made a project out of you for most of the year."
-      ],
+      "text": ["A group of older kids made a project out of you for most of the year."],
       "effects": {
         "stats": {
           "happiness": -5,
           "willpower": 3
         },
-        "setFlags": [
-          "school.bullied"
-        ],
+        "setFlags": ["school.bullied"],
         "stress": 20
       },
       "followUp": {
@@ -2090,9 +1820,7 @@
           "happiness": 3,
           "willpower": 1
         },
-        "clearFlags": [
-          "school.bullied"
-        ]
+        "clearFlags": ["school.bullied"]
       }
     },
     {
@@ -2153,17 +1881,13 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "athletics"
-            ]
+            "talentsAny": ["athletics"]
           },
           "multiply": 0.5
         }
       ],
       "cooldown": 2,
-      "text": [
-        "Sports day. Came somewhere in the middle of everything and enjoyed it enormously."
-      ],
+      "text": ["Sports day. Came somewhere in the middle of everything and enjoyed it enormously."],
       "effects": {
         "stats": {
           "health": 1,
@@ -2179,15 +1903,11 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 14,
-        "talentsAny": [
-          "athletics"
-        ]
+        "talentsAny": ["athletics"]
       },
       "weight": 9,
       "cooldown": 3,
-      "text": [
-        "Won three events on sports day and was carried around a field about it."
-      ],
+      "text": ["Won three events on sports day and was carried around a field about it."],
       "effects": {
         "stats": {
           "health": 2,
@@ -2204,18 +1924,14 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 14,
-        "talentsNone": [
-          "athletics"
-        ],
+        "talentsNone": ["athletics"],
         "statAtMost": {
           "health": 55
         }
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Picked last for teams, consistently, for years, by people who weren't wrong."
-      ],
+      "text": ["Picked last for teams, consistently, for years, by people who weren't wrong."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -2235,9 +1951,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "The school photo this year is the one the family keeps bringing out."
-      ],
+      "text": ["The school photo this year is the one the family keeps bringing out."],
       "effects": {
         "stats": {
           "happiness": 1
@@ -2258,9 +1972,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "The school photo captured a haircut that everyone had agreed to forget."
-      ],
+      "text": ["The school photo captured a haircut that everyone had agreed to forget."],
       "effects": {
         "stats": {
           "looks": -1,
@@ -2284,17 +1996,12 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "academics",
-              "writing"
-            ]
+            "talentsAny": ["academics", "writing"]
           },
           "multiply": 2.4
         }
       ],
-      "text": [
-        "Read every book in the class library, then started on the year above."
-      ],
+      "text": ["Read every book in the class library, then started on the year above."],
       "effects": {
         "stats": {
           "smarts": 3
@@ -2342,17 +2049,13 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "academics"
-            ]
+            "talentsAny": ["academics"]
           },
           "multiply": 1.9
         }
       ],
       "cooldown": 3,
-      "text": [
-        "Finished top of the class. Somebody's parent said something about it at pick-up."
-      ],
+      "text": ["Finished top of the class. Somebody's parent said something about it at pick-up."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -2374,9 +2077,7 @@
       },
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "Did the entire group project. Four names went on it."
-      ],
+      "text": ["Did the entire group project. Four names went on it."],
       "effects": {
         "stats": {
           "discipline": 2,
@@ -2418,9 +2119,7 @@
         "ageMax": 13
       },
       "weight": 11,
-      "text": [
-        "Got a locker. Spent the first week opening it for no reason."
-      ],
+      "text": ["Got a locker. Spent the first week opening it for no reason."],
       "effects": {
         "stats": {
           "happiness": 1
@@ -2438,9 +2137,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "Revised the wrong chapter for an important exam and found out in the room."
-      ],
+      "text": ["Revised the wrong chapter for an important exam and found out in the room."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -2485,17 +2182,13 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "music"
-            ]
+            "talentsAny": ["music"]
           },
           "multiply": 2.2
         }
       ],
       "cooldown": 3,
-      "text": [
-        "Played in the school band. The concert was long and the parents were heroic."
-      ],
+      "text": ["Played in the school band. The concert was long and the parents were heroic."],
       "effects": {
         "stats": {
           "discipline": 2,
@@ -2513,9 +2206,7 @@
         "ageMax": 17
       },
       "weight": 9,
-      "text": [
-        "Got a yearbook quote in that hasn't aged well."
-      ],
+      "text": ["Got a yearbook quote in that hasn't aged well."],
       "effects": {
         "stats": {
           "happiness": 1,
@@ -2533,9 +2224,7 @@
         "ageMax": 17
       },
       "weight": 11,
-      "text": [
-        "Went to the dance. The photographs are terrible and everybody looks delighted."
-      ],
+      "text": ["Went to the dance. The photographs are terrible and everybody looks delighted."],
       "effects": {
         "stats": {
           "happiness": 3,
@@ -2573,11 +2262,7 @@
       "eligibility": {
         "ageMin": 14,
         "ageMax": 17,
-        "wealthAny": [
-          "struggling",
-          "modest",
-          "comfortable"
-        ]
+        "wealthAny": ["struggling", "modest", "comfortable"]
       },
       "physical": true,
       "weight": 11,
@@ -2605,17 +2290,11 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 16,
-        "wealthAny": [
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "wealthAny": ["comfortable", "affluent", "wealthy"]
       },
       "weight": 9,
       "cooldown": 3,
-      "text": [
-        "Summer camp. Came back with a lanyard, a sunburn and three new opinions."
-      ],
+      "text": ["Summer camp. Came back with a lanyard, a sunburn and three new opinions."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -2636,9 +2315,7 @@
       },
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "Spent the whole summer on one street with three other kids and no plans at all."
-      ],
+      "text": ["Spent the whole summer on one street with three other kids and no plans at all."],
       "effects": {
         "stats": {
           "happiness": 3,
@@ -2701,9 +2378,7 @@
       },
       "weight": 12,
       "cooldown": 5,
-      "text": [
-        "You and {kid} became a unit. Teachers stopped saying the names separately."
-      ],
+      "text": ["You and {kid} became a unit. Teachers stopped saying the names separately."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -2722,9 +2397,7 @@
       },
       "weight": 13,
       "cooldown": 2,
-      "text": [
-        "A sleepover at {kid}'s. Nobody slept and everybody claimed they did."
-      ],
+      "text": ["A sleepover at {kid}'s. Nobody slept and everybody claimed they did."],
       "effects": {
         "stats": {
           "happiness": 2,
@@ -2743,9 +2416,7 @@
       },
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "Founded a club with {kid} and {kid2}. It had rules, a password, and no purpose."
-      ],
+      "text": ["Founded a club with {kid} and {kid2}. It had rules, a password, and no purpose."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -2765,9 +2436,7 @@
       },
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "Built a fort with {kid} that was structurally unsound and defended to the last."
-      ],
+      "text": ["Built a fort with {kid} that was structurally unsound and defended to the last."],
       "effects": {
         "stats": {
           "happiness": 3
@@ -2786,9 +2455,7 @@
       },
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "Fell out with {kid} over something enormous that nobody can now remember."
-      ],
+      "text": ["Fell out with {kid} over something enormous that nobody can now remember."],
       "effects": {
         "stats": {
           "happiness": -3,
@@ -2808,9 +2475,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "Made up with {kid} without either of you ever mentioning what happened."
-      ],
+      "text": ["Made up with {kid} without either of you ever mentioning what happened."],
       "effects": {
         "stats": {
           "happiness": 3,
@@ -2829,9 +2494,7 @@
       },
       "weight": 11,
       "cooldown": 4,
-      "text": [
-        "{kid} moved away. There were promises to write, and two letters."
-      ],
+      "text": ["{kid} moved away. There were promises to write, and two letters."],
       "effects": {
         "stats": {
           "happiness": -4,
@@ -2875,9 +2538,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "Found out about the party afterwards, from photographs."
-      ],
+      "text": ["Found out about the party afterwards, from photographs."],
       "effects": {
         "stats": {
           "happiness": -4,
@@ -2900,9 +2561,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Ended up at the middle of things without ever quite deciding to."
-      ],
+      "text": ["Ended up at the middle of things without ever quite deciding to."],
       "effects": {
         "stats": {
           "charisma": 3,
@@ -2924,9 +2583,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "Spent most break times reading on a wall, and largely preferred it."
-      ],
+      "text": ["Spent most break times reading on a wall, and largely preferred it."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -2947,9 +2604,7 @@
       },
       "weight": 11,
       "cooldown": 4,
-      "text": [
-        "Landed in a group of five who did everything together for three straight years."
-      ],
+      "text": ["Landed in a group of five who did everything together for three straight years."],
       "effects": {
         "stats": {
           "charisma": 3,
@@ -2967,9 +2622,7 @@
         "ageMax": 17
       },
       "weight": 9,
-      "text": [
-        "{kid} told everyone the one thing you had asked {kidThem} not to."
-      ],
+      "text": ["{kid} told everyone the one thing you had asked {kidThem} not to."],
       "effects": {
         "stats": {
           "happiness": -5,
@@ -2989,9 +2642,7 @@
         "ageMax": 17
       },
       "weight": 8,
-      "text": [
-        "{kid} stood up for you in front of everybody, at real cost to {kidThem}self."
-      ],
+      "text": ["{kid} stood up for you in front of everybody, at real cost to {kidThem}self."],
       "effects": {
         "stats": {
           "happiness": 5,
@@ -3011,9 +2662,7 @@
       },
       "weight": 13,
       "cooldown": 3,
-      "text": [
-        "Developed a crush that was total, silent, and known to your entire grade."
-      ],
+      "text": ["Developed a crush that was total, silent, and known to your entire grade."],
       "effects": {
         "stats": {
           "happiness": 2,
@@ -3034,9 +2683,7 @@
         }
       },
       "weight": 9,
-      "text": [
-        "The crush turned out to be mutual, and that was scarier than being turned down."
-      ],
+      "text": ["The crush turned out to be mutual, and that was scarier than being turned down."],
       "effects": {
         "stats": {
           "happiness": 5,
@@ -3056,9 +2703,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "Asked. Was turned down kindly, which didn't help at all."
-      ],
+      "text": ["Asked. Was turned down kindly, which didn't help at all."],
       "effects": {
         "stats": {
           "happiness": -3,
@@ -3079,9 +2724,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "A first date at a movie theater. Neither of you can name the film."
-      ],
+      "text": ["A first date at a movie theater. Neither of you can name the film."],
       "effects": {
         "stats": {
           "happiness": 4,
@@ -3144,9 +2787,7 @@
       },
       "weight": 10,
       "cooldown": 4,
-      "text": [
-        "You did the school run every morning for a year and got very good at the radio."
-      ],
+      "text": ["You did the school run every morning for a year and got very good at the radio."],
       "effects": {
         "stats": {
           "discipline": 2,
@@ -3186,9 +2827,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Took a day off you couldn't spare because there was nobody else to take it."
-      ],
+      "text": ["Took a day off you couldn't spare because there was nobody else to take it."],
       "effects": {
         "stats": {
           "happiness": -1,
@@ -3269,9 +2908,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "The kids needed shoes, again, and something else had to wait."
-      ],
+      "text": ["The kids needed shoes, again, and something else had to wait."],
       "effects": {
         "stats": {
           "happiness": -3
@@ -3289,9 +2926,7 @@
       },
       "weight": 10,
       "cooldown": 6,
-      "text": [
-        "Taught your kid to drive. You have never gripped anything so hard in your life."
-      ],
+      "text": ["Taught your kid to drive. You have never gripped anything so hard in your life."],
       "effects": {
         "stats": {
           "happiness": 3,
@@ -3354,9 +2989,7 @@
       },
       "weight": 11,
       "cooldown": 2,
-      "text": [
-        "You and {kid} have started taking the long way to the same lesson."
-      ],
+      "text": ["You and {kid} have started taking the long way to the same lesson."],
       "effects": {
         "stats": {
           "happiness": 3,
@@ -3420,9 +3053,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "It ended over a message that took four minutes to send and nine words to say."
-      ],
+      "text": ["It ended over a message that took four minutes to send and nine words to say."],
       "effects": {
         "stats": {
           "happiness": -6,
@@ -3442,9 +3073,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "You and {kid} went back to being friends, and it very nearly worked."
-      ],
+      "text": ["You and {kid} went back to being friends, and it very nearly worked."],
       "effects": {
         "stats": {
           "happiness": -1,
@@ -3464,9 +3093,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Had dinner at {kid}'s. Their parents asked what you wanted to do with your life."
-      ],
+      "text": ["Had dinner at {kid}'s. Their parents asked what you wanted to do with your life."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -3486,9 +3113,7 @@
       },
       "weight": 9,
       "cooldown": 5,
-      "text": [
-        "{kid} moved away. You both said you would keep it going."
-      ],
+      "text": ["{kid} moved away. You both said you would keep it going."],
       "effects": {
         "stats": {
           "happiness": -4,
@@ -3508,9 +3133,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Spent a whole evening making {kid} a playlist and then didn't send it."
-      ],
+      "text": ["Spent a whole evening making {kid} a playlist and then didn't send it."],
       "effects": {
         "stats": {
           "happiness": 1,
@@ -3552,9 +3175,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "{kid} started going out with somebody else. You found out from a group chat."
-      ],
+      "text": ["{kid} started going out with somebody else. You found out from a group chat."],
       "effects": {
         "stats": {
           "happiness": -5,
@@ -3574,9 +3195,7 @@
       },
       "weight": 10,
       "cooldown": 4,
-      "text": [
-        "A whole summer with {kid} that neither of you called anything."
-      ],
+      "text": ["A whole summer with {kid} that neither of you called anything."],
       "effects": {
         "stats": {
           "happiness": 5,
@@ -3642,9 +3261,7 @@
       },
       "weight": 9,
       "cooldown": 8,
-      "text": [
-        "Moved in together. It took two days and a van and one argument about a chair."
-      ],
+      "text": ["Moved in together. It took two days and a van and one argument about a chair."],
       "effects": {
         "stats": {
           "happiness": 5
@@ -3726,9 +3343,7 @@
       },
       "weight": 10,
       "cooldown": 4,
-      "text": [
-        "{kid} became a rival about something extremely small, and it lasted years."
-      ],
+      "text": ["{kid} became a rival about something extremely small, and it lasted years."],
       "effects": {
         "stats": {
           "willpower": 3,
@@ -3747,9 +3362,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Made a friend online who lived somewhere you had to look up."
-      ],
+      "text": ["Made a friend online who lived somewhere you had to look up."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -3766,15 +3379,11 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics"
-        ]
+        "talentsAny": ["athletics"]
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "The team became the friend group, which is how it usually works."
-      ],
+      "text": ["The team became the friend group, which is how it usually works."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -3791,15 +3400,11 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 14,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Hosted the sleepover. Somebody broke something and nobody admitted it."
-      ],
+      "text": ["Hosted the sleepover. Somebody broke something and nobody admitted it."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -3821,9 +3426,7 @@
       },
       "weight": 13,
       "cooldown": 3,
-      "text": [
-        "Spent an entire summer riding bikes with {kid} and {kid2} and being home by dark."
-      ],
+      "text": ["Spent an entire summer riding bikes with {kid} and {kid2} and being home by dark."],
       "effects": {
         "stats": {
           "health": 2,
@@ -3870,9 +3473,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Lent {kid} something you loved. It hasn't come back and it isn't going to."
-      ],
+      "text": ["Lent {kid} something you loved. It hasn't come back and it isn't going to."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -3894,18 +3495,13 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "athletics",
-              "crime"
-            ]
+            "talentsAny": ["athletics", "crime"]
           },
           "multiply": 1.8
         }
       ],
       "cooldown": 4,
-      "text": [
-        "An actual fistfight in a playground, over nothing, lasting eleven seconds."
-      ],
+      "text": ["An actual fistfight in a playground, over nothing, lasting eleven seconds."],
       "effects": {
         "stats": {
           "health": -1,
@@ -3952,9 +3548,7 @@
       },
       "weight": 9,
       "cooldown": 3,
-      "text": [
-        "Started spending time with a much older crowd who found you funny."
-      ],
+      "text": ["Started spending time with a much older crowd who found you funny."],
       "effects": {
         "stats": {
           "charisma": 3,
@@ -3973,9 +3567,7 @@
         "ageMax": 17
       },
       "weight": 9,
-      "text": [
-        "The group broke apart over the summer and reassembled without you in it."
-      ],
+      "text": ["The group broke apart over the summer and reassembled without you in it."],
       "effects": {
         "stats": {
           "happiness": -5,
@@ -3997,17 +3589,13 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "writing"
-            ]
+            "talentsAny": ["writing"]
           },
           "multiply": 1.8
         }
       ],
       "cooldown": 5,
-      "text": [
-        "Had a pen pal for two years. The letters are still in a shoebox."
-      ],
+      "text": ["Had a pen pal for two years. The letters are still in a shoebox."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -4026,9 +3614,7 @@
       },
       "weight": 6,
       "cooldown": 2,
-      "text": [
-        "Slept a great deal. It was, by every available measure, a good year."
-      ],
+      "text": ["Slept a great deal. It was, by every available measure, a good year."],
       "effects": {
         "stress": -4
       }
@@ -4064,9 +3650,7 @@
       },
       "weight": 6,
       "cooldown": 2,
-      "text": [
-        "Was largely carried from place to place and had opinions about the itinerary."
-      ]
+      "text": ["Was largely carried from place to place and had opinions about the itinerary."]
     },
     {
       "id": "random.filler.child.1",
@@ -4079,9 +3663,7 @@
       },
       "weight": 5,
       "cooldown": 3,
-      "text": [
-        "An unremarkable year, spent mostly outside."
-      ],
+      "text": ["An unremarkable year, spent mostly outside."],
       "effects": {
         "stats": {
           "health": 1
@@ -4099,9 +3681,7 @@
       },
       "weight": 6,
       "cooldown": 3,
-      "text": [
-        "Became extremely serious about one cartoon for about seven months."
-      ],
+      "text": ["Became extremely serious about one cartoon for about seven months."],
       "effects": {
         "stats": {
           "happiness": 1
@@ -4119,9 +3699,7 @@
       },
       "weight": 5,
       "cooldown": 3,
-      "text": [
-        "Nothing much happened. It was fine. Most years are fine."
-      ]
+      "text": ["Nothing much happened. It was fine. Most years are fine."]
     },
     {
       "id": "random.filler.teen.1",
@@ -4134,9 +3712,7 @@
       },
       "weight": 6,
       "cooldown": 3,
-      "text": [
-        "Stayed up too late all year and felt completely fine about it."
-      ],
+      "text": ["Stayed up too late all year and felt completely fine about it."],
       "effects": {
         "stats": {
           "health": -1
@@ -4154,9 +3730,7 @@
       },
       "weight": 5,
       "cooldown": 3,
-      "text": [
-        "A quiet year. School, sleep, and an unreasonable amount of time on a screen."
-      ],
+      "text": ["A quiet year. School, sleep, and an unreasonable amount of time on a screen."],
       "effects": {
         "stress": -6
       }
@@ -4172,9 +3746,7 @@
       },
       "weight": 6,
       "cooldown": 3,
-      "text": [
-        "Started caring what people thought. Unclear whether this counted as progress."
-      ],
+      "text": ["Started caring what people thought. Unclear whether this counted as progress."],
       "effects": {
         "stats": {
           "charisma": 1
@@ -4194,17 +3766,13 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "inventive"
-            ]
+            "talentsAny": ["inventive"]
           },
           "multiply": 1.8
         }
       ],
       "cooldown": 4,
-      "text": [
-        "Spent a summer building something ambitious out of cardboard."
-      ],
+      "text": ["Spent a summer building something ambitious out of cardboard."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -4224,9 +3792,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "Traded lunches at school all year and came out comfortably ahead."
-      ],
+      "text": ["Traded lunches at school all year and came out comfortably ahead."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -4268,9 +3834,7 @@
       },
       "weight": 8,
       "cooldown": 6,
-      "text": [
-        "Broke an arm doing something that had been described as a bad idea in advance."
-      ],
+      "text": ["Broke an arm doing something that had been described as a bad idea in advance."],
       "effects": {
         "stats": {
           "health": -3,
@@ -4290,9 +3854,7 @@
       },
       "weight": 9,
       "cooldown": 5,
-      "text": [
-        "Needed stitches. The waiting room was worse than the injury."
-      ],
+      "text": ["Needed stitches. The waiting room was worse than the injury."],
       "effects": {
         "stats": {
           "health": -2,
@@ -4311,9 +3873,7 @@
         "ageMax": 10
       },
       "weight": 10,
-      "text": [
-        "Caught chickenpox and was told roughly nine hundred times not to scratch."
-      ],
+      "text": ["Caught chickenpox and was told roughly nine hundred times not to scratch."],
       "effects": {
         "stats": {
           "health": -1,
@@ -4329,22 +3889,16 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 15,
-        "flagsNone": [
-          "has.glasses"
-        ]
+        "flagsNone": ["has.glasses"]
       },
       "weight": 9,
-      "text": [
-        "Got glasses and discovered that trees had been individual leaves the whole time."
-      ],
+      "text": ["Got glasses and discovered that trees had been individual leaves the whole time."],
       "effects": {
         "stats": {
           "smarts": 1,
           "looks": -1
         },
-        "setFlags": [
-          "has.glasses"
-        ]
+        "setFlags": ["has.glasses"]
       }
     },
     {
@@ -4355,28 +3909,17 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 16,
-        "wealthAny": [
-          "modest",
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ],
-        "flagsNone": [
-          "has.braces"
-        ]
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"],
+        "flagsNone": ["has.braces"]
       },
       "weight": 10,
-      "text": [
-        "Got braces. Ate soup for a week and complained about it for two years."
-      ],
+      "text": ["Got braces. Ate soup for a week and complained about it for two years."],
       "effects": {
         "stats": {
           "looks": -2,
           "happiness": -1
         },
-        "setFlags": [
-          "has.braces"
-        ]
+        "setFlags": ["has.braces"]
       },
       "followUp": {
         "eventId": "random.braces.off",
@@ -4393,18 +3936,14 @@
         "ageMax": 17
       },
       "weight": 10,
-      "text": [
-        "The braces came off. There was a mirror moment that everybody gets exactly once."
-      ],
+      "text": ["The braces came off. There was a mirror moment that everybody gets exactly once."],
       "effects": {
         "stats": {
           "looks": 5,
           "happiness": 4,
           "charisma": 2
         },
-        "clearFlags": [
-          "has.braces"
-        ]
+        "clearFlags": ["has.braces"]
       }
     },
     {
@@ -4417,9 +3956,7 @@
         "ageMax": 16
       },
       "weight": 11,
-      "text": [
-        "Grew four inches in one year and spent all of it apologizing to furniture."
-      ],
+      "text": ["Grew four inches in one year and spent all of it apologizing to furniture."],
       "effects": {
         "stats": {
           "health": 2,
@@ -4438,9 +3975,7 @@
         "ageMax": 15
       },
       "weight": 10,
-      "text": [
-        "Everyone else grew. You waited. It was a long year."
-      ],
+      "text": ["Everyone else grew. You waited. It was a long year."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -4460,9 +3995,7 @@
       },
       "weight": 10,
       "cooldown": 4,
-      "text": [
-        "Got a haircut that worked, for the first time, entirely by accident."
-      ],
+      "text": ["Got a haircut that worked, for the first time, entirely by accident."],
       "effects": {
         "stats": {
           "looks": 3,
@@ -4503,9 +4036,7 @@
       },
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "Got extremely good at one game and completely useless at everything around it."
-      ],
+      "text": ["Got extremely good at one game and completely useless at everything around it."],
       "effects": {
         "stats": {
           "smarts": 1,
@@ -4545,9 +4076,7 @@
         "ageMax": 9
       },
       "weight": 11,
-      "text": [
-        "Knew every dinosaur. Would tell you. Would keep telling you."
-      ],
+      "text": ["Knew every dinosaur. Would tell you. Would keep telling you."],
       "effects": {
         "stats": {
           "smarts": 3,
@@ -4568,10 +4097,7 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "academics",
-              "inventive"
-            ]
+            "talentsAny": ["academics", "inventive"]
           },
           "multiply": 1.7
         }
@@ -4614,14 +4140,10 @@
       "eligibility": {
         "ageMin": 3,
         "ageMax": 8,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 10,
-      "text": [
-        "Got lost in a shop for four minutes that were experienced as several hours."
-      ],
+      "text": ["Got lost in a shop for four minutes that were experienced as several hours."],
       "effects": {
         "stats": {
           "happiness": -2,
@@ -4663,9 +4185,7 @@
         "ageMax": 11
       },
       "weight": 11,
-      "text": [
-        "Learned to swim, badly, in a pool that smelled of chlorine and fear."
-      ],
+      "text": ["Learned to swim, badly, in a pool that smelled of chlorine and fear."],
       "effects": {
         "stats": {
           "health": 2,
@@ -4684,9 +4204,7 @@
       },
       "weight": 9,
       "cooldown": 5,
-      "text": [
-        "A storm took out the power for three days and it was the best week of the year."
-      ],
+      "text": ["A storm took out the power for three days and it was the best week of the year."],
       "effects": {
         "stats": {
           "happiness": 2,
@@ -4705,9 +4223,7 @@
       },
       "weight": 9,
       "cooldown": 4,
-      "text": [
-        "Found $20 on the sidewalk outside the laundromat and told nobody, ever."
-      ],
+      "text": ["Found $20 on the sidewalk outside the laundromat and told nobody, ever."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -4729,9 +4245,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "A snow day. The greatest single institution in human history."
-      ],
+      "text": ["A snow day. The greatest single institution in human history."],
       "effects": {
         "stats": {
           "happiness": 3
@@ -4773,9 +4287,7 @@
         "ageMax": 13
       },
       "weight": 10,
-      "text": [
-        "Learned three card tricks and performed them at anyone who slowed down."
-      ],
+      "text": ["Learned three card tricks and performed them at anyone who slowed down."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -4794,9 +4306,7 @@
       },
       "weight": 9,
       "cooldown": 5,
-      "text": [
-        "Attempted bangs with kitchen scissors. The regrowth took eleven months."
-      ],
+      "text": ["Attempted bangs with kitchen scissors. The regrowth took eleven months."],
       "effects": {
         "stats": {
           "looks": -3,
@@ -4814,9 +4324,7 @@
         "ageMax": 9
       },
       "weight": 10,
-      "text": [
-        "Ate nothing but one specific food for most of a year and thrived inexplicably."
-      ],
+      "text": ["Ate nothing but one specific food for most of a year and thrived inexplicably."],
       "effects": {
         "stats": {
           "health": -1,
@@ -4837,17 +4345,13 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "music"
-            ]
+            "talentsAny": ["music"]
           },
           "multiply": 1.8
         }
       ],
       "cooldown": 4,
-      "text": [
-        "First concert. Ears rang for two days and it was completely worth it."
-      ],
+      "text": ["First concert. Ears rang for two days and it was completely worth it."],
       "effects": {
         "stats": {
           "happiness": 4
@@ -4862,25 +4366,17 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 15,
-        "requires": [
-          "anyParent"
-        ],
-        "flagsNone": [
-          "has.phone"
-        ]
+        "requires": ["anyParent"],
+        "flagsNone": ["has.phone"]
       },
       "weight": 12,
-      "text": [
-        "Got a phone, along with a speech about responsibility that lasted nine minutes."
-      ],
+      "text": ["Got a phone, along with a speech about responsibility that lasted nine minutes."],
       "effects": {
         "stats": {
           "charisma": 2,
           "happiness": 3
         },
-        "setFlags": [
-          "has.phone"
-        ]
+        "setFlags": ["has.phone"]
       }
     },
     {
@@ -4891,18 +4387,12 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ],
-        "flagsAll": [
-          "has.phone"
-        ]
+        "requires": ["anyParent"],
+        "flagsAll": ["has.phone"]
       },
       "weight": 10,
       "cooldown": 2,
-      "text": [
-        "The phone was confiscated for a two weeks. Life became medieval."
-      ],
+      "text": ["The phone was confiscated for a two weeks. Life became medieval."],
       "effects": {
         "stats": {
           "happiness": -3,
@@ -4925,9 +4415,7 @@
       },
       "weight": 9,
       "cooldown": 4,
-      "text": [
-        "Got a sunburn shaped exactly like a t-shirt and wore it for a week."
-      ],
+      "text": ["Got a sunburn shaped exactly like a t-shirt and wore it for a week."],
       "effects": {
         "stats": {
           "health": -1,
@@ -4948,17 +4436,12 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "academics",
-              "writing"
-            ]
+            "talentsAny": ["academics", "writing"]
           },
           "multiply": 1.9
         }
       ],
-      "text": [
-        "Got a library card and treated it as a license to print money."
-      ],
+      "text": ["Got a library card and treated it as a license to print money."],
       "effects": {
         "stats": {
           "smarts": 3,
@@ -4977,9 +4460,7 @@
         "ageMax": 17
       },
       "weight": 7,
-      "text": [
-        "Wore a proper suit for the first time, for a sad reason, and it didn't fit."
-      ],
+      "text": ["Wore a proper suit for the first time, for a sad reason, and it didn't fit."],
       "effects": {
         "stats": {
           "willpower": 2,
@@ -4996,11 +4477,7 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 14,
-        "talentsNone": [
-          "music",
-          "acting",
-          "athletics"
-        ]
+        "talentsNone": ["music", "acting", "athletics"]
       },
       "weight": 9,
       "text": [
@@ -5025,9 +4502,7 @@
       },
       "weight": 8,
       "cooldown": 8,
-      "text": [
-        "Saw somebody genuinely famous in an airport and said nothing at all."
-      ],
+      "text": ["Saw somebody genuinely famous in an airport and said nothing at all."],
       "effects": {
         "stats": {
           "happiness": 3,
@@ -5043,9 +4518,7 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 14,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 8,
       "text": [
@@ -5071,9 +4544,7 @@
         "ageMax": 17
       },
       "weight": 7,
-      "text": [
-        "Found a box in the attic with somebody's whole life in it and read all of it."
-      ],
+      "text": ["Found a box in the attic with somebody's whole life in it and read all of it."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -5110,9 +4581,7 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "flagsAll": [
-          "has.phone"
-        ]
+        "flagsAll": ["has.phone"]
       },
       "weight": 6,
       "text": [
@@ -5174,14 +4643,10 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 12,
-        "talentsAny": [
-          "athletics"
-        ]
+        "talentsAny": ["athletics"]
       },
       "weight": 14,
-      "text": [
-        "Turned out to be the fastest kid in the year, by an embarrassing margin."
-      ],
+      "text": ["Turned out to be the fastest kid in the year, by an embarrassing margin."],
       "effects": {
         "stats": {
           "health": 3,
@@ -5198,15 +4663,11 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 16,
-        "talentsAny": [
-          "athletics"
-        ]
+        "talentsAny": ["athletics"]
       },
       "weight": 13,
       "cooldown": 3,
-      "text": [
-        "Made a team two age groups up and wasn't the worst player on it."
-      ],
+      "text": ["Made a team two age groups up and wasn't the worst player on it."],
       "effects": {
         "stats": {
           "health": 2,
@@ -5223,22 +4684,16 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics"
-        ]
+        "talentsAny": ["athletics"]
       },
       "weight": 11,
-      "text": [
-        "A coach took you aside and used the word 'serious'. Training changed after that."
-      ],
+      "text": ["A coach took you aside and used the word 'serious'. Training changed after that."],
       "effects": {
         "stats": {
           "discipline": 4,
           "health": 2
         },
-        "setFlags": [
-          "ath.coached"
-        ]
+        "setFlags": ["ath.coached"]
       }
     },
     {
@@ -5249,9 +4704,7 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics"
-        ]
+        "talentsAny": ["athletics"]
       },
       "weight": 9,
       "text": [
@@ -5272,15 +4725,11 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics"
-        ]
+        "talentsAny": ["athletics"]
       },
       "weight": 10,
       "cooldown": 4,
-      "text": [
-        "Won something with a trophy attached and a photograph in a local paper."
-      ],
+      "text": ["Won something with a trophy attached and a photograph in a local paper."],
       "effects": {
         "stats": {
           "happiness": 5,
@@ -5298,12 +4747,8 @@
       "eligibility": {
         "ageMin": 14,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics"
-        ],
-        "flagsAll": [
-          "ath.coached"
-        ]
+        "talentsAny": ["athletics"],
+        "flagsAll": ["ath.coached"]
       },
       "weight": 8,
       "text": [
@@ -5314,9 +4759,7 @@
           "happiness": 4,
           "discipline": 2
         },
-        "setFlags": [
-          "ath.scouted"
-        ]
+        "setFlags": ["ath.scouted"]
       }
     },
     {
@@ -5327,9 +4770,7 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics"
-        ]
+        "talentsAny": ["athletics"]
       },
       "weight": 11,
       "cooldown": 2,
@@ -5352,14 +4793,10 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 9,
-        "talentsAny": [
-          "acting"
-        ]
+        "talentsAny": ["acting"]
       },
       "weight": 14,
-      "text": [
-        "Was the only convincing person on stage at the nativity, aged six."
-      ],
+      "text": ["Was the only convincing person on stage at the nativity, aged six."],
       "effects": {
         "stats": {
           "charisma": 3,
@@ -5375,15 +4812,11 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "acting"
-        ]
+        "talentsAny": ["acting"]
       },
       "weight": 12,
       "cooldown": 4,
-      "text": [
-        "Joined drama club and found the one room in the school that made sense."
-      ],
+      "text": ["Joined drama club and found the one room in the school that made sense."],
       "effects": {
         "stats": {
           "charisma": 3,
@@ -5399,15 +4832,11 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "acting"
-        ]
+        "talentsAny": ["acting"]
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "Did an impression of a teacher so accurate it became a minor political problem."
-      ],
+      "text": ["Did an impression of a teacher so accurate it became a minor political problem."],
       "effects": {
         "stats": {
           "charisma": 3,
@@ -5423,22 +4852,16 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "talentsAny": [
-          "acting"
-        ]
+        "talentsAny": ["acting"]
       },
       "weight": 9,
-      "text": [
-        "Got a part in a real production at a real theater with real strangers watching."
-      ],
+      "text": ["Got a part in a real production at a real theater with real strangers watching."],
       "effects": {
         "stats": {
           "charisma": 4,
           "happiness": 4
         },
-        "setFlags": [
-          "act.staged"
-        ]
+        "setFlags": ["act.staged"]
       }
     },
     {
@@ -5449,9 +4872,7 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "talentsAny": [
-          "acting"
-        ]
+        "talentsAny": ["acting"]
       },
       "weight": 7,
       "text": [
@@ -5476,14 +4897,10 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "acting"
-        ]
+        "talentsAny": ["acting"]
       },
       "weight": 9,
-      "text": [
-        "Froze completely on stage for nine seconds that have never fully ended."
-      ],
+      "text": ["Froze completely on stage for nine seconds that have never fully ended."],
       "effects": {
         "stats": {
           "happiness": -4,
@@ -5500,14 +4917,10 @@
       "eligibility": {
         "ageMin": 12,
         "ageMax": 17,
-        "talentsAny": [
-          "acting"
-        ]
+        "talentsAny": ["acting"]
       },
       "weight": 9,
-      "text": [
-        "A drama teacher said you should be doing this properly, and clearly meant it."
-      ],
+      "text": ["A drama teacher said you should be doing this properly, and clearly meant it."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -5524,14 +4937,10 @@
       "eligibility": {
         "ageMin": 4,
         "ageMax": 11,
-        "talentsAny": [
-          "music"
-        ]
+        "talentsAny": ["music"]
       },
       "weight": 14,
-      "text": [
-        "Sat down at a piano and worked out a tune by ear, to general alarm."
-      ],
+      "text": ["Sat down at a piano and worked out a tune by ear, to general alarm."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -5547,15 +4956,8 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 15,
-        "talentsAny": [
-          "music"
-        ],
-        "wealthAny": [
-          "modest",
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "talentsAny": ["music"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
       },
       "weight": 12,
       "text": [
@@ -5566,9 +4968,7 @@
           "discipline": 4,
           "smarts": 2
         },
-        "setFlags": [
-          "mus.trained"
-        ]
+        "setFlags": ["mus.trained"]
       }
     },
     {
@@ -5579,26 +4979,17 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 17,
-        "talentsAny": [
-          "music"
-        ],
-        "wealthAny": [
-          "struggling",
-          "modest"
-        ]
+        "talentsAny": ["music"],
+        "wealthAny": ["struggling", "modest"]
       },
       "weight": 12,
-      "text": [
-        "Taught yourself on a borrowed instrument with three working strings."
-      ],
+      "text": ["Taught yourself on a borrowed instrument with three working strings."],
       "effects": {
         "stats": {
           "discipline": 3,
           "willpower": 3
         },
-        "setFlags": [
-          "mus.trained"
-        ]
+        "setFlags": ["mus.trained"]
       }
     },
     {
@@ -5609,9 +5000,7 @@
       "eligibility": {
         "ageMin": 12,
         "ageMax": 17,
-        "talentsAny": [
-          "music"
-        ]
+        "talentsAny": ["music"]
       },
       "weight": 11,
       "text": [
@@ -5622,9 +5011,7 @@
           "charisma": 3,
           "happiness": 3
         },
-        "setFlags": [
-          "mus.band"
-        ]
+        "setFlags": ["mus.band"]
       }
     },
     {
@@ -5635,12 +5022,8 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "talentsAny": [
-          "music"
-        ],
-        "flagsAll": [
-          "mus.band"
-        ]
+        "talentsAny": ["music"],
+        "flagsAll": ["mus.band"]
       },
       "weight": 9,
       "text": [
@@ -5662,15 +5045,11 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "talentsAny": [
-          "music"
-        ]
+        "talentsAny": ["music"]
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Wrote a song. It was terrible and finishing it changed something anyway."
-      ],
+      "text": ["Wrote a song. It was terrible and finishing it changed something anyway."],
       "effects": {
         "stats": {
           "happiness": 3,
@@ -5686,12 +5065,8 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "talentsAny": [
-          "music"
-        ],
-        "flagsAll": [
-          "mus.trained"
-        ]
+        "talentsAny": ["music"],
+        "flagsAll": ["mus.trained"]
       },
       "weight": 9,
       "text": [
@@ -5713,17 +5088,11 @@
       "eligibility": {
         "ageMin": 12,
         "ageMax": 17,
-        "talentsAny": [
-          "music"
-        ],
-        "flagsAll": [
-          "mus.trained"
-        ]
+        "talentsAny": ["music"],
+        "flagsAll": ["mus.trained"]
       },
       "weight": 8,
-      "text": [
-        "Quit the instrument for two years. Came back to it. Everybody does."
-      ],
+      "text": ["Quit the instrument for two years. Came back to it. Everybody does."],
       "effects": {
         "stats": {
           "happiness": -1,
@@ -5739,15 +5108,11 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 14,
-        "talentsAny": [
-          "writing"
-        ]
+        "talentsAny": ["writing"]
       },
       "weight": 14,
       "cooldown": 3,
-      "text": [
-        "Filled a notebook with stories about a world with its own maps and laws."
-      ],
+      "text": ["Filled a notebook with stories about a world with its own maps and laws."],
       "effects": {
         "stats": {
           "smarts": 3,
@@ -5763,9 +5128,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "writing"
-        ]
+        "talentsAny": ["writing"]
       },
       "weight": 12,
       "text": [
@@ -5787,22 +5150,16 @@
       "eligibility": {
         "ageMin": 12,
         "ageMax": 17,
-        "talentsAny": [
-          "writing"
-        ]
+        "talentsAny": ["writing"]
       },
       "weight": 11,
-      "text": [
-        "Wrote for the school paper and learned that a deadline is a real physical object."
-      ],
+      "text": ["Wrote for the school paper and learned that a deadline is a real physical object."],
       "effects": {
         "stats": {
           "discipline": 3,
           "smarts": 2
         },
-        "setFlags": [
-          "wri.published"
-        ]
+        "setFlags": ["wri.published"]
       }
     },
     {
@@ -5813,9 +5170,7 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "talentsAny": [
-          "writing"
-        ]
+        "talentsAny": ["writing"]
       },
       "weight": 9,
       "text": [
@@ -5840,9 +5195,7 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "talentsAny": [
-          "writing"
-        ]
+        "talentsAny": ["writing"]
       },
       "weight": 11,
       "cooldown": 4,
@@ -5865,12 +5218,8 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "talentsAny": [
-          "writing"
-        ],
-        "flagsAll": [
-          "wri.published"
-        ]
+        "talentsAny": ["writing"],
+        "flagsAll": ["wri.published"]
       },
       "weight": 9,
       "text": [
@@ -5891,14 +5240,10 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "talentsAny": [
-          "writing"
-        ]
+        "talentsAny": ["writing"]
       },
       "weight": 10,
-      "text": [
-        "Started a novel. Got to page sixty. Page sixty is further than most people get."
-      ],
+      "text": ["Started a novel. Got to page sixty. Page sixty is further than most people get."],
       "effects": {
         "stats": {
           "discipline": 2,
@@ -5914,14 +5259,10 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 13,
-        "talentsAny": [
-          "academics"
-        ]
+        "talentsAny": ["academics"]
       },
       "weight": 10,
-      "text": [
-        "Skipped a year. Academically fine. Socially, a long twelve months."
-      ],
+      "text": ["Skipped a year. Academically fine. Socially, a long twelve months."],
       "effects": {
         "stats": {
           "smarts": 4,
@@ -5938,9 +5279,7 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "talentsAny": [
-          "academics"
-        ]
+        "talentsAny": ["academics"]
       },
       "weight": 11,
       "cooldown": 3,
@@ -5962,15 +5301,11 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 13,
-        "talentsAny": [
-          "academics"
-        ]
+        "talentsAny": ["academics"]
       },
       "weight": 12,
       "cooldown": 4,
-      "text": [
-        "Read reference books for pleasure and had to be told this was unusual."
-      ],
+      "text": ["Read reference books for pleasure and had to be told this was unusual."],
       "effects": {
         "stats": {
           "smarts": 3,
@@ -5986,15 +5321,11 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "talentsAny": [
-          "academics"
-        ]
+        "talentsAny": ["academics"]
       },
       "weight": 10,
       "cooldown": 2,
-      "text": [
-        "Started tutoring kids a year below at $15 an hour. About $350 over the year."
-      ],
+      "text": ["Started tutoring kids a year below at $15 an hour. About $350 over the year."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -6015,25 +5346,19 @@
       "eligibility": {
         "ageMin": 15,
         "ageMax": 17,
-        "talentsAny": [
-          "academics"
-        ],
+        "talentsAny": ["academics"],
         "statAtLeast": {
           "smarts": 70
         }
       },
       "weight": 10,
-      "text": [
-        "A guidance counsellor started using the word 'scholarship' in the present tense."
-      ],
+      "text": ["A guidance counsellor started using the word 'scholarship' in the present tense."],
       "effects": {
         "stats": {
           "discipline": 3,
           "happiness": 3
         },
-        "setFlags": [
-          "aca.scholarship-track"
-        ]
+        "setFlags": ["aca.scholarship-track"]
       }
     },
     {
@@ -6044,14 +5369,10 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "talentsAny": [
-          "academics"
-        ]
+        "talentsAny": ["academics"]
       },
       "weight": 9,
-      "text": [
-        "Ran out of interest completely for a term, and nobody had a framework for that."
-      ],
+      "text": ["Ran out of interest completely for a term, and nobody had a framework for that."],
       "effects": {
         "stats": {
           "happiness": -4,
@@ -6069,9 +5390,7 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 17,
-        "talentsAny": [
-          "academics"
-        ]
+        "talentsAny": ["academics"]
       },
       "weight": 11,
       "cooldown": 4,
@@ -6093,17 +5412,11 @@
       "eligibility": {
         "ageMin": 5,
         "ageMax": 12,
-        "requires": [
-          "anyParent"
-        ],
-        "talentsAny": [
-          "inventive"
-        ]
+        "requires": ["anyParent"],
+        "talentsAny": ["inventive"]
       },
       "weight": 14,
-      "text": [
-        "Took apart a household appliance to see inside. It didn't go back together."
-      ],
+      "text": ["Took apart a household appliance to see inside. It didn't go back together."],
       "effects": {
         "stats": {
           "smarts": 3
@@ -6121,9 +5434,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "inventive"
-        ]
+        "talentsAny": ["inventive"]
       },
       "weight": 11,
       "text": [
@@ -6144,9 +5455,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "inventive"
-        ]
+        "talentsAny": ["inventive"]
       },
       "weight": 12,
       "text": [
@@ -6157,9 +5466,7 @@
           "smarts": 4,
           "happiness": 2
         },
-        "setFlags": [
-          "inv.code"
-        ]
+        "setFlags": ["inv.code"]
       }
     },
     {
@@ -6170,20 +5477,11 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "talentsAny": [
-          "inventive"
-        ],
-        "wealthAny": [
-          "modest",
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "talentsAny": ["inventive"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
       },
       "weight": 10,
-      "text": [
-        "Joined a robotics team and spent every weekend in a room that smelled of solder."
-      ],
+      "text": ["Joined a robotics team and spent every weekend in a room that smelled of solder."],
       "effects": {
         "stats": {
           "smarts": 3,
@@ -6200,9 +5498,7 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "talentsAny": [
-          "inventive"
-        ]
+        "talentsAny": ["inventive"]
       },
       "weight": 10,
       "cooldown": 3,
@@ -6228,15 +5524,11 @@
       "eligibility": {
         "ageMin": 12,
         "ageMax": 17,
-        "talentsAny": [
-          "inventive"
-        ]
+        "talentsAny": ["inventive"]
       },
       "weight": 9,
       "cooldown": 4,
-      "text": [
-        "Had an idea that was, on inspection, already a product. It was still a good idea."
-      ],
+      "text": ["Had an idea that was, on inspection, already a product. It was still a good idea."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -6253,17 +5545,11 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 16,
-        "requires": [
-          "anyParent"
-        ],
-        "talentsAny": [
-          "inventive"
-        ]
+        "requires": ["anyParent"],
+        "talentsAny": ["inventive"]
       },
       "weight": 9,
-      "text": [
-        "An experiment produced smoke, an alarm, and a permanent household rule."
-      ],
+      "text": ["An experiment produced smoke, an alarm, and a permanent household rule."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -6282,9 +5568,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "crime"
-        ]
+        "talentsAny": ["crime"]
       },
       "weight": 13,
       "cooldown": 3,
@@ -6296,9 +5580,7 @@
           "willpower": 1,
           "discipline": -2
         },
-        "setFlags": [
-          "cri.first"
-        ]
+        "setFlags": ["cri.first"]
       }
     },
     {
@@ -6309,20 +5591,12 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ],
-        "talentsAny": [
-          "crime"
-        ],
-        "flagsAll": [
-          "cri.first"
-        ]
+        "requires": ["anyParent"],
+        "talentsAny": ["crime"],
+        "flagsAll": ["cri.first"]
       },
       "weight": 10,
-      "text": [
-        "Was caught. A shop manager, a phone call, and a very long car journey home."
-      ],
+      "text": ["Was caught. A shop manager, a phone call, and a very long car journey home."],
       "effects": {
         "stats": {
           "happiness": -4,
@@ -6342,15 +5616,11 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "talentsAny": [
-          "crime"
-        ]
+        "talentsAny": ["crime"]
       },
       "weight": 11,
       "cooldown": 4,
-      "text": [
-        "Forged a signature convincingly enough that it was used for two years."
-      ],
+      "text": ["Forged a signature convincingly enough that it was used for two years."],
       "effects": {
         "stats": {
           "smarts": 2,
@@ -6366,9 +5636,7 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "talentsAny": [
-          "crime"
-        ]
+        "talentsAny": ["crime"]
       },
       "weight": 12,
       "cooldown": 3,
@@ -6396,15 +5664,11 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "talentsAny": [
-          "crime"
-        ]
+        "talentsAny": ["crime"]
       },
       "weight": 10,
       "cooldown": 4,
-      "text": [
-        "Was the lookout. Was good at it. Didn't enjoy discovering that."
-      ],
+      "text": ["Was the lookout. Was good at it. Didn't enjoy discovering that."],
       "effects": {
         "stats": {
           "willpower": 2,
@@ -6420,22 +5684,16 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "talentsAny": [
-          "crime"
-        ]
+        "talentsAny": ["crime"]
       },
       "weight": 9,
-      "text": [
-        "An older crowd started including you in things they didn't explain in advance."
-      ],
+      "text": ["An older crowd started including you in things they didn't explain in advance."],
       "effects": {
         "stats": {
           "charisma": 2,
           "discipline": -2
         },
-        "setFlags": [
-          "cri.crew"
-        ]
+        "setFlags": ["cri.crew"]
       }
     },
     {
@@ -6446,17 +5704,11 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "talentsAny": [
-          "crime"
-        ],
-        "flagsAll": [
-          "cri.crew"
-        ]
+        "talentsAny": ["crime"],
+        "flagsAll": ["cri.crew"]
       },
       "weight": 8,
-      "text": [
-        "Was there when it went wrong, and was the one who walked away before it did."
-      ],
+      "text": ["Was there when it went wrong, and was the one who walked away before it did."],
       "effects": {
         "stats": {
           "willpower": 4,
@@ -6484,9 +5736,7 @@
       },
       "weight": 11,
       "cooldown": 3,
-      "text": [
-        "Tried four different clubs looking for the thing, and didn't find it this year."
-      ],
+      "text": ["Tried four different clubs looking for the thing, and didn't find it this year."],
       "effects": {
         "stats": {
           "charisma": 1,
@@ -6514,9 +5764,7 @@
       },
       "weight": 10,
       "cooldown": 3,
-      "text": [
-        "Wasn't the best at anything and got better at everything by simply not stopping."
-      ],
+      "text": ["Wasn't the best at anything and got better at everything by simply not stopping."],
       "effects": {
         "stats": {
           "discipline": 3,
@@ -6533,9 +5781,7 @@
         "ageMin": 11,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 14,
       "modifiers": [
         {
@@ -6669,15 +5915,9 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "schoolStageAny": [
-          "elementary",
-          "middle",
-          "high"
-        ]
+        "schoolStageAny": ["elementary", "middle", "high"]
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 16,
       "cooldown": 2,
       "text": [
@@ -6742,10 +5982,7 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 16,
-        "requires": [
-          "sibling",
-          "mother"
-        ]
+        "requires": ["sibling", "mother"]
       },
       "weight": 13,
       "text": [
@@ -6856,9 +6093,7 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 16,
-        "requires": [
-          "sibling"
-        ],
+        "requires": ["sibling"],
         "cashAtLeast": 25
       },
       "weight": 12,
@@ -6947,9 +6182,7 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "requires": [
-          "father"
-        ]
+        "requires": ["father"]
       },
       "physical": true,
       "weight": 12,
@@ -7044,9 +6277,7 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "physical": true,
       "weight": 13,
@@ -7110,9 +6341,7 @@
             }
           ],
           "requires": {
-            "requires": [
-              "sibling"
-            ]
+            "requires": ["sibling"]
           }
         },
         {
@@ -7152,10 +6381,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "requires": [
-          "sibling",
-          "anyParent"
-        ]
+        "requires": ["sibling", "anyParent"]
       },
       "weight": 13,
       "text": [
@@ -7251,9 +6477,7 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 13,
       "modifiers": [
@@ -7358,9 +6582,7 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "modifiers": [
@@ -7374,9 +6596,7 @@
         }
       ],
       "cooldown": 4,
-      "text": [
-        "{parent} sat down on your bed and asked if you're doing okay. You haven't been."
-      ],
+      "text": ["{parent} sat down on your bed and asked if you're doing okay. You haven't been."],
       "choices": [
         {
           "id": "honest",
@@ -7462,10 +6682,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 16,
-        "requires": [
-          "anyParent",
-          "sibling"
-        ]
+        "requires": ["anyParent", "sibling"]
       },
       "weight": 11,
       "cooldown": 5,
@@ -7544,18 +6761,12 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 12,
       "cooldown": 4,
-      "text": [
-        "{parent} needs your help all day Saturday, but you already made plans with {kid}."
-      ],
+      "text": ["{parent} needs your help all day Saturday, but you already made plans with {kid}."],
       "choices": [
         {
           "id": "help",
@@ -7701,9 +6912,7 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 14,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "physical": true,
       "weight": 12,
@@ -7799,9 +7008,7 @@
       "eligibility": {
         "ageMin": 6,
         "ageMax": 16,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 13,
       "modifiers": [
@@ -7911,9 +7118,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 16,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 9,
       "text": [
@@ -8010,17 +7215,12 @@
         "ageMin": 9,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid",
-        "adult"
-      ],
+      "personTokens": ["kid", "adult"],
       "weight": 13,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 1.7
         },
@@ -8103,9 +7303,7 @@
         "ageMin": 12,
         "ageMax": 17
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 13,
       "cooldown": 3,
       "text": [
@@ -8193,14 +7391,9 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "flagsAll": [
-          "school.bullied"
-        ]
+        "flagsAll": ["school.bullied"]
       },
-      "personTokens": [
-        "kid",
-        "adult"
-      ],
+      "personTokens": ["kid", "adult"],
       "physical": true,
       "weight": 16,
       "text": [
@@ -8224,9 +7417,7 @@
                   "parents": -4
                 },
                 "behaviour": -18,
-                "clearFlags": [
-                  "school.bullied"
-                ]
+                "clearFlags": ["school.bullied"]
               }
             },
             {
@@ -8255,9 +7446,7 @@
                   "happiness": 5
                 },
                 "behaviour": 4,
-                "clearFlags": [
-                  "school.bullied"
-                ]
+                "clearFlags": ["school.bullied"]
               }
             },
             {
@@ -8296,9 +7485,7 @@
                   "charisma": 6,
                   "happiness": 6
                 },
-                "clearFlags": [
-                  "school.bullied"
-                ]
+                "clearFlags": ["school.bullied"]
               }
             },
             {
@@ -8324,10 +7511,7 @@
         "ageMin": 8,
         "ageMax": 16
       },
-      "personTokens": [
-        "kid",
-        "adult"
-      ],
+      "personTokens": ["kid", "adult"],
       "weight": 12,
       "text": [
         "A window got broken and {adult} is asking the class who did it. You know it was {kid}."
@@ -8399,16 +7583,12 @@
         "ageMin": 10,
         "ageMax": 17
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 12,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "acting"
-            ]
+            "talentsAny": ["acting"]
           },
           "multiply": 1.6
         },
@@ -8505,16 +7685,12 @@
         "ageMin": 6,
         "ageMax": 11
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 12,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "academics"
-            ]
+            "talentsAny": ["academics"]
           },
           "multiply": 1.8
         }
@@ -8587,17 +7763,13 @@
         "ageMin": 8,
         "ageMax": 16
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "physical": true,
       "weight": 13,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "athletics"
-            ]
+            "talentsAny": ["athletics"]
           },
           "multiply": 2.4
         },
@@ -8693,16 +7865,12 @@
         "ageMin": 7,
         "ageMax": 13
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 12,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "music"
-            ]
+            "talentsAny": ["music"]
           },
           "multiply": 2.0
         }
@@ -8756,14 +7924,9 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "schoolStageAny": [
-          "middle",
-          "high"
-        ]
+        "schoolStageAny": ["middle", "high"]
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 12,
       "cooldown": 4,
       "text": [
@@ -8849,18 +8012,13 @@
         "ageMin": 7,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "physical": true,
       "weight": 14,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "athletics",
-              "crime"
-            ]
+            "talentsAny": ["athletics", "crime"]
           },
           "multiply": 1.6
         },
@@ -8972,9 +8130,7 @@
         "ageMin": 7,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 13,
       "cooldown": 5,
       "text": [
@@ -9040,10 +8196,7 @@
         "ageMin": 9,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid",
-        "kid2"
-      ],
+      "personTokens": ["kid", "kid2"],
       "weight": 13,
       "text": [
         "Your friends have decided to stop talking to {kid2}. {kid} is watching to see whose side you take."
@@ -9128,13 +8281,9 @@
         "ageMin": 9,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 13,
-      "text": [
-        "{kid} is being made fun of in front of the whole cafeteria and nobody is helping."
-      ],
+      "text": ["{kid} is being made fun of in front of the whole cafeteria and nobody is helping."],
       "choices": [
         {
           "id": "step-in",
@@ -9211,10 +8360,7 @@
         "ageMin": 9,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid",
-        "kid2"
-      ],
+      "personTokens": ["kid", "kid2"],
       "weight": 12,
       "text": [
         "{kid} repeated something mean you said about {kid2}. Now {kid2} won't talk to you, and {kid} is acting like nothing happened."
@@ -9296,10 +8442,7 @@
         "ageMin": 9,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid",
-        "adult"
-      ],
+      "personTokens": ["kid", "adult"],
       "weight": 13,
       "cooldown": 3,
       "text": [
@@ -9353,13 +8496,9 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 14,
       "cooldown": 3,
       "text": [
@@ -9484,10 +8623,7 @@
         "ageMin": 7,
         "ageMax": 15
       },
-      "personTokens": [
-        "kid",
-        "kid2"
-      ],
+      "personTokens": ["kid", "kid2"],
       "weight": 12,
       "cooldown": 5,
       "text": [
@@ -9564,17 +8700,11 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 11,
-      "text": [
-        "{kid} broke something expensive at your house. Nobody else knows it happened."
-      ],
+      "text": ["{kid} broke something expensive at your house. Nobody else knows it happened."],
       "choices": [
         {
           "id": "cover",
@@ -9647,14 +8777,10 @@
         "ageMax": 16,
         "cashAtLeast": 12
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 11,
       "cooldown": 5,
-      "text": [
-        "{kid}'s birthday is Saturday and you only have $12."
-      ],
+      "text": ["{kid}'s birthday is Saturday and you only have $12."],
       "choices": [
         {
           "id": "buy",
@@ -9737,9 +8863,7 @@
         "ageMin": 10,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "physical": true,
       "weight": 12,
       "cooldown": 3,
@@ -9808,9 +8932,7 @@
         "ageMin": 10,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 10,
       "text": [
         "{kid} is three years older and has started treating you like a real friend, which almost never happens."
@@ -9884,9 +9006,7 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 1.8
         }
@@ -10014,9 +9134,7 @@
       },
       "physical": true,
       "weight": 11,
-      "text": [
-        "A dog with no collar followed you home from the store and won't leave."
-      ],
+      "text": ["A dog with no collar followed you home from the store and won't leave."],
       "choices": [
         {
           "id": "keep",
@@ -10050,9 +9168,7 @@
             }
           ],
           "requires": {
-            "requires": [
-              "anyParent"
-            ]
+            "requires": ["anyParent"]
           }
         },
         {
@@ -10102,17 +9218,13 @@
         "ageMin": 12,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "physical": true,
       "weight": 12,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 1.6
         },
@@ -10125,9 +9237,7 @@
           "multiply": 0.5
         }
       ],
-      "text": [
-        "{kid} pulled out a pack of cigarettes behind the gym and is offering you one."
-      ],
+      "text": ["{kid} pulled out a pack of cigarettes behind the gym and is offering you one."],
       "choices": [
         {
           "id": "try",
@@ -10178,17 +9288,13 @@
         "ageMin": 14,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "physical": true,
       "weight": 13,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 1.5
         },
@@ -10201,9 +9307,7 @@
           "multiply": 0.6
         }
       ],
-      "text": [
-        "There's alcohol going around at {kid}'s party and somebody handed you a cup."
-      ],
+      "text": ["There's alcohol going around at {kid}'s party and somebody handed you a cup."],
       "choices": [
         {
           "id": "drink",
@@ -10284,10 +9388,7 @@
         "ageMin": 9,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid",
-        "kid2"
-      ],
+      "personTokens": ["kid", "kid2"],
       "physical": true,
       "weight": 11,
       "text": [
@@ -10447,9 +9548,7 @@
             }
           ],
           "requires": {
-            "requires": [
-              "anyParent"
-            ]
+            "requires": ["anyParent"]
           }
         }
       ]
@@ -10586,9 +9685,7 @@
         "ageMin": 9,
         "ageMax": 17
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 12,
       "cooldown": 3,
       "text": [
@@ -10670,9 +9767,7 @@
       "eligibility": {
         "ageMin": 12,
         "ageMax": 17,
-        "flagsAll": [
-          "has.phone"
-        ]
+        "flagsAll": ["has.phone"]
       },
       "weight": 12,
       "cooldown": 3,
@@ -10828,15 +9923,11 @@
         "ageMin": 13,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "physical": true,
       "weight": 13,
       "cooldown": 2,
-      "text": [
-        "School's out for eleven weeks and you have no plans at all."
-      ],
+      "text": ["School's out for eleven weeks and you have no plans at all."],
       "choices": [
         {
           "id": "work",
@@ -10904,9 +9995,7 @@
       "physical": true,
       "weight": 12,
       "cooldown": 3,
-      "text": [
-        "You've decided you want to look different by the time school starts again."
-      ],
+      "text": ["You've decided you want to look different by the time school starts again."],
       "choices": [
         {
           "id": "effort",
@@ -10987,25 +10076,19 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 16,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 11,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 1.8
         },
         {
           "when": {
-            "wealthAny": [
-              "struggling"
-            ]
+            "wealthAny": ["struggling"]
           },
           "multiply": 1.6
         }
@@ -11090,9 +10173,7 @@
         "ageMin": 8,
         "ageMax": 16
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 10,
       "text": [
         "Your neighbor {adult} offered to teach you something {adultThey} is really good at. You barely know {adultThem}."
@@ -11143,9 +10224,7 @@
         "ageMin": 8,
         "ageMax": 17
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 11,
       "cooldown": 6,
       "text": [
@@ -11232,16 +10311,9 @@
       "eligibility": {
         "ageMin": 13,
         "ageMax": 17,
-        "wealthAny": [
-          "modest",
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 10,
       "text": [
         "Someone dropped out of the school trip abroad and {adult} is offering you their spot."
@@ -11308,9 +10380,7 @@
             }
           ],
           "requires": {
-            "requires": [
-              "anyParent"
-            ]
+            "requires": ["anyParent"]
           }
         },
         {
@@ -11333,18 +10403,9 @@
       "eligibility": {
         "ageMin": 12,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics",
-          "acting",
-          "music",
-          "writing",
-          "academics",
-          "inventive"
-        ]
+        "talentsAny": ["athletics", "acting", "music", "writing", "academics", "inventive"]
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "physical": true,
       "weight": 14,
       "text": [
@@ -11365,9 +10426,7 @@
                   "happiness": 5,
                   "health": -1
                 },
-                "setFlags": [
-                  "talent.committed"
-                ]
+                "setFlags": ["talent.committed"]
               }
             },
             {
@@ -11417,19 +10476,9 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics",
-          "acting",
-          "music",
-          "writing",
-          "academics",
-          "inventive",
-          "crime"
-        ]
+        "talentsAny": ["athletics", "acting", "music", "writing", "academics", "inventive", "crime"]
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "physical": true,
       "weight": 12,
       "text": [
@@ -11500,17 +10549,9 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "talentsAny": [
-          "athletics",
-          "acting",
-          "music",
-          "writing",
-          "inventive"
-        ]
+        "talentsAny": ["athletics", "acting", "music", "writing", "inventive"]
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 12,
       "cooldown": 4,
       "text": [
@@ -11576,10 +10617,7 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "talentsAny": [
-          "acting",
-          "music"
-        ]
+        "talentsAny": ["acting", "music"]
       },
       "weight": 11,
       "text": [
@@ -11599,9 +10637,7 @@
                   "happiness": 8,
                   "discipline": 3
                 },
-                "setFlags": [
-                  "talent.breakthrough"
-                ]
+                "setFlags": ["talent.breakthrough"]
               }
             },
             {
@@ -11631,9 +10667,7 @@
                   "happiness": 6,
                   "health": -1
                 },
-                "setFlags": [
-                  "talent.breakthrough"
-                ]
+                "setFlags": ["talent.breakthrough"]
               }
             },
             {
@@ -11670,12 +10704,8 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "requires": [
-          "anyParent"
-        ],
-        "talentsAny": [
-          "athletics"
-        ]
+        "requires": ["anyParent"],
+        "talentsAny": ["athletics"]
       },
       "physical": true,
       "weight": 11,
@@ -11696,9 +10726,7 @@
                   "discipline": 5,
                   "happiness": 7
                 },
-                "setFlags": [
-                  "talent.breakthrough"
-                ]
+                "setFlags": ["talent.breakthrough"]
               }
             },
             {
@@ -11767,9 +10795,7 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 16,
-        "talentsAny": [
-          "academics"
-        ]
+        "talentsAny": ["academics"]
       },
       "weight": 11,
       "text": [
@@ -11790,9 +10816,7 @@
                   "happiness": -1,
                   "health": -2
                 },
-                "setFlags": [
-                  "talent.breakthrough"
-                ]
+                "setFlags": ["talent.breakthrough"]
               }
             },
             {
@@ -11876,9 +10900,7 @@
       "eligibility": {
         "ageMin": 0,
         "ageMax": 0,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 11,
       "text": [
@@ -11895,9 +10917,7 @@
         "ageMax": 1
       },
       "weight": 13,
-      "text": [
-        "Laughed for the first time at something nobody could reproduce afterwards."
-      ],
+      "text": ["Laughed for the first time at something nobody could reproduce afterwards."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -11914,9 +10934,7 @@
         "ageMax": 1
       },
       "weight": 10,
-      "text": [
-        "Was born with a startling amount of hair and lost most of it within a year."
-      ],
+      "text": ["Was born with a startling amount of hair and lost most of it within a year."],
       "effects": {
         "stats": {
           "looks": 1
@@ -11933,9 +10951,7 @@
         "ageMax": 2
       },
       "weight": 10,
-      "text": [
-        "Stayed entirely bald until well past the point anyone expected."
-      ]
+      "text": ["Stayed entirely bald until well past the point anyone expected."]
     },
     {
       "id": "early.crawl-backwards",
@@ -11947,9 +10963,7 @@
         "ageMax": 1
       },
       "weight": 12,
-      "text": [
-        "Learned to crawl backwards first, and spent two months reversing into furniture."
-      ],
+      "text": ["Learned to crawl backwards first, and spent two months reversing into furniture."],
       "effects": {
         "stats": {
           "smarts": 1
@@ -11966,9 +10980,7 @@
         "ageMax": 2
       },
       "weight": 12,
-      "text": [
-        "Discovered stairs. A gate was fitted within the week."
-      ],
+      "text": ["Discovered stairs. A gate was fitted within the week."],
       "effects": {
         "stats": {
           "health": -1,
@@ -11986,9 +10998,7 @@
         "ageMax": 3
       },
       "weight": 13,
-      "text": [
-        "Learned the word no and applied it universally, including to things you wanted."
-      ],
+      "text": ["Learned the word no and applied it universally, including to things you wanted."],
       "effects": {
         "stats": {
           "willpower": 2
@@ -12005,9 +11015,7 @@
         "ageMax": 5
       },
       "weight": 12,
-      "text": [
-        "Located every puddle within a half-mile radius and stood in all of them."
-      ],
+      "text": ["Located every puddle within a half-mile radius and stood in all of them."],
       "effects": {
         "stats": {
           "happiness": 2,
@@ -12028,16 +11036,12 @@
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "music"
-            ]
+            "talentsAny": ["music"]
           },
           "multiply": 1.8
         }
       ],
-      "text": [
-        "Learned one song and performed it approximately nine hundred times."
-      ],
+      "text": ["Learned one song and performed it approximately nine hundred times."],
       "effects": {
         "stats": {
           "charisma": 1,
@@ -12055,9 +11059,7 @@
         "ageMax": 6
       },
       "weight": 12,
-      "text": [
-        "Insisted on dressing yourself. The results were bold and internally consistent."
-      ],
+      "text": ["Insisted on dressing yourself. The results were bold and internally consistent."],
       "effects": {
         "stats": {
           "willpower": 2,
@@ -12075,9 +11077,7 @@
         "ageMax": 6
       },
       "weight": 11,
-      "text": [
-        "Spent about four months answering only to the name of a specific animal."
-      ],
+      "text": ["Spent about four months answering only to the name of a specific animal."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -12094,9 +11094,7 @@
         "ageMax": 4
       },
       "weight": 13,
-      "text": [
-        "Playgroup twice a week. Shared nothing, learned everything."
-      ],
+      "text": ["Playgroup twice a week. Shared nothing, learned everything."],
       "effects": {
         "stats": {
           "charisma": 2
@@ -12133,9 +11131,7 @@
         "ageMax": 5
       },
       "weight": 11,
-      "text": [
-        "Shared a toy, voluntarily, once, and it was talked about for weeks."
-      ],
+      "text": ["Shared a toy, voluntarily, once, and it was talked about for weeks."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -12153,9 +11149,7 @@
         "ageMax": 6
       },
       "weight": 12,
-      "text": [
-        "Hid behind an adult's leg at every social occasion for about two years."
-      ],
+      "text": ["Hid behind an adult's leg at every social occasion for about two years."],
       "effects": {
         "stats": {
           "charisma": -1,
@@ -12173,9 +11167,7 @@
         "ageMax": 6
       },
       "weight": 12,
-      "text": [
-        "Talked to absolutely everybody, including strangers, at length, about nothing."
-      ],
+      "text": ["Talked to absolutely everybody, including strangers, at length, about nothing."],
       "effects": {
         "stats": {
           "charisma": 3
@@ -12192,9 +11184,7 @@
         "ageMax": 5
       },
       "weight": 12,
-      "text": [
-        "Wouldn't go anywhere without a specific blanket that was, by then, mostly holes."
-      ],
+      "text": ["Wouldn't go anywhere without a specific blanket that was, by then, mostly holes."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -12209,14 +11199,10 @@
       "eligibility": {
         "ageMin": 1,
         "ageMax": 4,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 11,
-      "text": [
-        "Objected to baths on grounds that were never made clear."
-      ],
+      "text": ["Objected to baths on grounds that were never made clear."],
       "effects": {
         "stats": {
           "willpower": 1
@@ -12234,14 +11220,10 @@
       "eligibility": {
         "ageMin": 1,
         "ageMax": 5,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 11,
-      "text": [
-        "Migrated into {parent}'s bed most nights for a solid two years."
-      ],
+      "text": ["Migrated into {parent}'s bed most nights for a solid two years."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -12261,9 +11243,7 @@
         "ageMax": 4
       },
       "weight": 13,
-      "text": [
-        "Started nursery. There were tears at drop-off, none of them yours."
-      ],
+      "text": ["Started nursery. There were tears at drop-off, none of them yours."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -12281,9 +11261,7 @@
         "ageMax": 5
       },
       "weight": 12,
-      "text": [
-        "Learned to count to twenty, skipping fifteen, permanently."
-      ],
+      "text": ["Learned to count to twenty, skipping fifteen, permanently."],
       "effects": {
         "stats": {
           "smarts": 2
@@ -12300,9 +11278,7 @@
         "ageMax": 6
       },
       "weight": 12,
-      "text": [
-        "Learned the alphabet as a song and couldn't say it any other way for years."
-      ],
+      "text": ["Learned the alphabet as a song and couldn't say it any other way for years."],
       "effects": {
         "stats": {
           "smarts": 2
@@ -12319,9 +11295,7 @@
         "ageMax": 6
       },
       "weight": 12,
-      "text": [
-        "Discovered paint. So did the carpet."
-      ],
+      "text": ["Discovered paint. So did the carpet."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -12338,9 +11312,7 @@
         "ageMax": 7
       },
       "weight": 12,
-      "text": [
-        "Watched one specific film so many times the tape wore out."
-      ],
+      "text": ["Watched one specific film so many times the tape wore out."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -12357,9 +11329,7 @@
         "ageMax": 5
       },
       "weight": 11,
-      "text": [
-        "A trip to the doctor over something that turned out to be entirely normal."
-      ],
+      "text": ["A trip to the doctor over something that turned out to be entirely normal."],
       "effects": {
         "stats": {
           "health": 1
@@ -12376,9 +11346,7 @@
         "ageMax": 4
       },
       "weight": 10,
-      "text": [
-        "A run of ear infections that made most of one winter a write-off."
-      ],
+      "text": ["A run of ear infections that made most of one winter a write-off."],
       "effects": {
         "stats": {
           "health": -2
@@ -12395,9 +11363,7 @@
         "ageMax": 4
       },
       "weight": 9,
-      "text": [
-        "Said almost nothing until three, then started in full sentences."
-      ],
+      "text": ["Said almost nothing until three, then started in full sentences."],
       "effects": {
         "stats": {
           "smarts": 3
@@ -12414,9 +11380,7 @@
         "ageMax": 2
       },
       "weight": 9,
-      "text": [
-        "Walked at ten months, which was widely reported as a sign of something."
-      ],
+      "text": ["Walked at ten months, which was widely reported as a sign of something."],
       "effects": {
         "stats": {
           "health": 2
@@ -12433,9 +11397,7 @@
         "ageMax": 6
       },
       "weight": 11,
-      "text": [
-        "First trip to the sea. Deeply suspicious of the sea."
-      ],
+      "text": ["First trip to the sea. Deeply suspicious of the sea."],
       "effects": {
         "stats": {
           "happiness": 2
@@ -12452,9 +11414,7 @@
         "ageMax": 5
       },
       "weight": 11,
-      "text": [
-        "Saw snow for the first time and found the whole business unacceptable."
-      ],
+      "text": ["Saw snow for the first time and found the whole business unacceptable."],
       "effects": {
         "stats": {
           "happiness": 1
@@ -12471,9 +11431,7 @@
         "ageMax": 7
       },
       "weight": 11,
-      "text": [
-        "Went to a zoo and spent forty minutes looking at a duck."
-      ],
+      "text": ["Went to a zoo and spent forty minutes looking at a duck."],
       "effects": {
         "stats": {
           "happiness": 2,
@@ -12490,10 +11448,7 @@
       "eligibility": {
         "ageMin": 7,
         "ageMax": 15,
-        "schoolStageAny": [
-          "elementary",
-          "middle"
-        ]
+        "schoolStageAny": ["elementary", "middle"]
       },
       "weight": 10,
       "cooldown": 3,
@@ -12517,11 +11472,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 17,
-        "schoolStageAny": [
-          "elementary",
-          "middle",
-          "high"
-        ]
+        "schoolStageAny": ["elementary", "middle", "high"]
       },
       "weight": 10,
       "cooldown": 4,
@@ -12544,18 +11495,13 @@
       "eligibility": {
         "ageMin": 9,
         "ageMax": 17,
-        "schoolStageAny": [
-          "middle",
-          "high"
-        ]
+        "schoolStageAny": ["middle", "high"]
       },
       "weight": 9,
       "modifiers": [
         {
           "when": {
-            "talentsAny": [
-              "crime"
-            ]
+            "talentsAny": ["crime"]
           },
           "multiply": 2.0
         }
@@ -12581,10 +11527,7 @@
       "eligibility": {
         "ageMin": 11,
         "ageMax": 17,
-        "schoolStageAny": [
-          "middle",
-          "high"
-        ]
+        "schoolStageAny": ["middle", "high"]
       },
       "weight": 8,
       "cooldown": 4,
@@ -12629,16 +11572,11 @@
       "eligibility": {
         "ageMin": 12,
         "ageMax": 17,
-        "schoolStageAny": [
-          "middle",
-          "high"
-        ]
+        "schoolStageAny": ["middle", "high"]
       },
       "weight": 9,
       "cooldown": 3,
-      "text": [
-        "There was a locker search. Yours was fine, which wasn't true of everybody's."
-      ],
+      "text": ["There was a locker search. Yours was fine, which wasn't true of everybody's."],
       "effects": {
         "stats": {
           "happiness": -1
@@ -12653,10 +11591,7 @@
       "eligibility": {
         "ageMin": 8,
         "ageMax": 14,
-        "schoolStageAny": [
-          "elementary",
-          "middle"
-        ]
+        "schoolStageAny": ["elementary", "middle"]
       },
       "weight": 9,
       "cooldown": 4,
@@ -12682,9 +11617,7 @@
       },
       "weight": 11,
       "cooldown": 2,
-      "text": [
-        "Between everything you had signed up for, the year went past in one long blur."
-      ],
+      "text": ["Between everything you had signed up for, the year went past in one long blur."],
       "effects": {
         "stats": {
           "charisma": 2,
@@ -12701,10 +11634,7 @@
       "eligibility": {
         "ageMin": 10,
         "ageMax": 17,
-        "schoolStageAny": [
-          "middle",
-          "high"
-        ],
+        "schoolStageAny": ["middle", "high"],
         "activitiesAtMost": 0
       },
       "weight": 10,
@@ -12879,9 +11809,7 @@
         "ageMin": 19,
         "employed": true
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 10,
       "cooldown": 4,
       "text": [
@@ -12977,9 +11905,7 @@
         "ageMin": 21,
         "employed": true
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 9,
       "cooldown": 6,
       "text": [
@@ -13077,9 +12003,7 @@
         "ageMin": 19,
         "employed": true
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 9,
       "cooldown": 6,
       "text": [
@@ -13182,9 +12106,7 @@
         "employed": true,
         "jobYearsAtLeast": 2
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 8,
       "cooldown": 8,
       "text": [
@@ -13282,9 +12204,7 @@
         "employed": true,
         "jobYearsAtLeast": 3
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 7,
       "cooldown": 10,
       "text": [
@@ -13453,12 +12373,7 @@
       "eligibility": {
         "ageMin": 20,
         "employed": true,
-        "jobTrackAny": [
-          "care",
-          "medicine",
-          "safety",
-          "veterinary"
-        ]
+        "jobTrackAny": ["care", "medicine", "safety", "veterinary"]
       },
       "weight": 9,
       "cooldown": 3,
@@ -13481,10 +12396,7 @@
       "eligibility": {
         "ageMin": 19,
         "employed": true,
-        "jobTrackAny": [
-          "trades",
-          "logistics"
-        ]
+        "jobTrackAny": ["trades", "logistics"]
       },
       "physical": true,
       "weight": 9,
@@ -13508,12 +12420,7 @@
       "eligibility": {
         "ageMin": 20,
         "employed": true,
-        "jobTrackAny": [
-          "office",
-          "finance",
-          "legal",
-          "tech"
-        ]
+        "jobTrackAny": ["office", "finance", "legal", "tech"]
       },
       "weight": 8,
       "cooldown": 3,
@@ -13627,9 +12534,7 @@
         "ageMin": 25,
         "hasCondition": true
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 8,
       "cooldown": 6,
       "text": [
@@ -13737,10 +12642,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 28,
-        "conditionAny": [
-          "cond.back",
-          "cond.spine"
-        ]
+        "conditionAny": ["cond.back", "cond.spine"]
       },
       "physical": true,
       "weight": 9,
@@ -13762,11 +12664,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 30,
-        "conditionAny": [
-          "cond.chest",
-          "cond.lungs",
-          "cond.heart"
-        ]
+        "conditionAny": ["cond.chest", "cond.lungs", "cond.heart"]
       },
       "physical": true,
       "weight": 9,
@@ -13905,9 +12803,7 @@
         "ageMin": 22,
         "bereavedWithin": 2
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 9,
       "cooldown": 8,
       "text": [
@@ -14039,9 +12935,7 @@
         "employed": true,
         "jobYearsAtLeast": 3
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 9,
       "cooldown": 8,
       "text": [
@@ -14150,9 +13044,7 @@
         "ageMin": 24,
         "employed": true
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 8,
       "cooldown": 9,
       "text": [
@@ -14358,12 +13250,7 @@
       "eligibility": {
         "ageMin": 18,
         "employed": true,
-        "jobTrackAny": [
-          "retail",
-          "food",
-          "hospitality",
-          "sales"
-        ]
+        "jobTrackAny": ["retail", "food", "hospitality", "sales"]
       },
       "weight": 9,
       "cooldown": 3,
@@ -14386,9 +13273,7 @@
       "eligibility": {
         "ageMin": 22,
         "employed": true,
-        "jobTrackAny": [
-          "education"
-        ]
+        "jobTrackAny": ["education"]
       },
       "weight": 9,
       "cooldown": 3,
@@ -14410,9 +13295,7 @@
       "eligibility": {
         "ageMin": 20,
         "employed": true,
-        "jobTrackAny": [
-          "creative"
-        ]
+        "jobTrackAny": ["creative"]
       },
       "weight": 9,
       "cooldown": 3,
@@ -14434,10 +13317,7 @@
       "eligibility": {
         "ageMin": 22,
         "employed": true,
-        "jobTrackAny": [
-          "public",
-          "safety"
-        ]
+        "jobTrackAny": ["public", "safety"]
       },
       "weight": 9,
       "cooldown": 3,
@@ -14639,10 +13519,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 30,
-        "conditionAny": [
-          "cond.knee",
-          "cond.back"
-        ]
+        "conditionAny": ["cond.knee", "cond.back"]
       },
       "physical": true,
       "weight": 8,
@@ -14664,9 +13541,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 40,
-        "conditionAny": [
-          "cond.hearing"
-        ]
+        "conditionAny": ["cond.hearing"]
       },
       "weight": 9,
       "cooldown": 2,
@@ -14687,10 +13562,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 28,
-        "conditionAny": [
-          "cond.stomach",
-          "cond.sugar"
-        ]
+        "conditionAny": ["cond.stomach", "cond.sugar"]
       },
       "weight": 8,
       "cooldown": 3,
@@ -14976,9 +13848,7 @@
         "ageMin": 22,
         "bereavedWithin": 2
       },
-      "personTokens": [
-        "adult"
-      ],
+      "personTokens": ["adult"],
       "weight": 9,
       "cooldown": 10,
       "text": [
@@ -15095,9 +13965,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 20,
-        "requires": [
-          "sibling"
-        ],
+        "requires": ["sibling"],
         "bereavedWithin": 2
       },
       "weight": 9,
@@ -15298,9 +14166,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 22,
-        "requires": [
-          "anyParent"
-        ],
+        "requires": ["anyParent"],
         "bereavedWithin": 4
       },
       "weight": 8,
@@ -16394,9 +15260,7 @@
         "hasFriend": true,
         "cashAtLeast": 400
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 8,
       "cooldown": 7,
       "text": [
@@ -16509,9 +15373,7 @@
         "ageMin": 18,
         "hasFriend": true
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 14,
       "modifiers": [
         {
@@ -16616,10 +15478,7 @@
         "ageMin": 22,
         "friendsAtLeast": 2
       },
-      "personTokens": [
-        "kid",
-        "kid2"
-      ],
+      "personTokens": ["kid", "kid2"],
       "weight": 7,
       "cooldown": 8,
       "text": [
@@ -16720,9 +15579,7 @@
         "hasFriend": true,
         "cashAtLeast": 250
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 7,
       "cooldown": 9,
       "text": [
@@ -16825,9 +15682,7 @@
         "ageMin": 28,
         "friendshipYearsAtLeast": 5
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 8,
       "cooldown": 10,
       "text": [
@@ -16925,9 +15780,7 @@
         "ageMin": 21,
         "hasFriend": true
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 8,
       "cooldown": 7,
       "text": [
@@ -17027,9 +15880,7 @@
         "ageMin": 23,
         "hasFriend": true
       },
-      "personTokens": [
-        "kid"
-      ],
+      "personTokens": ["kid"],
       "weight": 8,
       "cooldown": 8,
       "text": [
@@ -17231,9 +16082,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 18,
-        "requires": [
-          "mother"
-        ]
+        "requires": ["mother"]
       },
       "weight": 13,
       "modifiers": [
@@ -17267,9 +16116,7 @@
       "eligibility": {
         "ageMin": 18,
         "ageMax": 30,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 15,
       "modifiers": [
@@ -17300,9 +16147,7 @@
       "eligibility": {
         "ageMin": 18,
         "ageMax": 40,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 13,
       "modifiers": [
@@ -17336,9 +16181,7 @@
       "eligibility": {
         "ageMin": 18,
         "ageMax": 32,
-        "requires": [
-          "bothParents"
-        ]
+        "requires": ["bothParents"]
       },
       "weight": 12,
       "modifiers": [
@@ -17350,9 +16193,7 @@
         },
         {
           "when": {
-            "wealthAny": [
-              "struggling"
-            ]
+            "wealthAny": ["struggling"]
           },
           "multiply": 0.4
         }
@@ -17383,9 +16224,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 20,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "cooldown": 5,
@@ -17411,9 +16250,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 18,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "modifiers": [
@@ -17446,9 +16283,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 28,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 13,
       "modifiers": [
@@ -17499,9 +16334,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 20,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 12,
       "cooldown": 4,
@@ -17526,9 +16359,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 19,
-        "requires": [
-          "sibling"
-        ],
+        "requires": ["sibling"],
         "relationshipAtLeast": {
           "sibling": 55
         }
@@ -17556,9 +16387,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 22,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 11,
       "cooldown": 4,
@@ -17583,9 +16412,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 21,
-        "requires": [
-          "sibling"
-        ]
+        "requires": ["sibling"]
       },
       "weight": 11,
       "cooldown": 5,
@@ -17610,9 +16437,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 45,
-        "requires": [
-          "sibling"
-        ],
+        "requires": ["sibling"],
         "bereavedWithin": 8
       },
       "weight": 10,
@@ -17660,9 +16485,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 19,
-        "requires": [
-          "mother"
-        ]
+        "requires": ["mother"]
       },
       "weight": 11,
       "cooldown": 3,
@@ -17684,9 +16507,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 20,
-        "requires": [
-          "anyParent"
-        ],
+        "requires": ["anyParent"],
         "relationshipAtMost": {
           "mother": 35
         }
@@ -17711,9 +16532,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 22,
-        "requires": [
-          "anyParent"
-        ],
+        "requires": ["anyParent"],
         "relationshipAtLeast": {
           "mother": 55
         }
@@ -17741,9 +16560,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 26,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 11,
       "cooldown": 5,
@@ -17819,9 +16636,7 @@
       "eligibility": {
         "ageMin": 25,
         "ageMax": 45,
-        "requires": [
-          "anyParent"
-        ],
+        "requires": ["anyParent"],
         "hasChildren": false
       },
       "weight": 12,
@@ -17867,9 +16682,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 28,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 10,
       "cooldown": 8,
@@ -17891,9 +16704,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 38,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 12,
       "modifiers": [
@@ -17927,9 +16738,7 @@
       "rarity": "uncommon",
       "eligibility": {
         "ageMin": 40,
-        "requires": [
-          "anyParent"
-        ]
+        "requires": ["anyParent"]
       },
       "weight": 9,
       "cooldown": 8,
@@ -17954,16 +16763,12 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 24,
-        "requires": [
-          "anyParent"
-        ],
+        "requires": ["anyParent"],
         "cashAtLeast": 900
       },
       "weight": 11,
       "cooldown": 8,
-      "text": [
-        "{parent} needs $900 and asked you, which {parentThey} has never once done before."
-      ],
+      "text": ["{parent} needs $900 and asked you, which {parentThey} has never once done before."],
       "choices": [
         {
           "id": "send",
@@ -18088,9 +16893,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 40,
-        "requires": [
-          "anyParent"
-        ],
+        "requires": ["anyParent"],
         "cashAtLeast": 2400
       },
       "weight": 10,
@@ -18215,10 +17018,7 @@
       "rarity": "common",
       "eligibility": {
         "ageMin": 22,
-        "requires": [
-          "sibling",
-          "anyParent"
-        ]
+        "requires": ["sibling", "anyParent"]
       },
       "weight": 10,
       "cooldown": 8,
@@ -18336,9 +17136,7 @@
       "eligibility": {
         "ageMin": 20,
         "ageMax": 45,
-        "requires": [
-          "anyParent"
-        ],
+        "requires": ["anyParent"],
         "cashAtLeast": 3200
       },
       "weight": 11,

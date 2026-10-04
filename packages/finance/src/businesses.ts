@@ -51,12 +51,7 @@
 import type { BusinessType } from '@yearafter/content';
 import { cents, dollars, type Money } from '@yearafter/core';
 import type { MarketState } from './investments';
-import {
-  NO_MODIFIERS,
-  rivalTake,
-  type Rival,
-  type YearModifiers,
-} from './business-events';
+import { NO_MODIFIERS, rivalTake, type Rival, type YearModifiers } from './business-events';
 
 /* -------------------------------------------------------------------------- */
 /* The owner's choices                                                         */
@@ -308,8 +303,10 @@ export const REPUTATION_WORDS: readonly { readonly from: number; readonly word: 
 ];
 
 export const reputationWord = (reputation: number): string =>
-  (REPUTATION_WORDS.find((row) => reputation >= row.from) ?? REPUTATION_WORDS[REPUTATION_WORDS.length - 1]!)
-    .word;
+  (
+    REPUTATION_WORDS.find((row) => reputation >= row.from) ??
+    REPUTATION_WORDS[REPUTATION_WORDS.length - 1]!
+  ).word;
 
 export const OPENING_REPUTATION = 35;
 
@@ -354,7 +351,9 @@ export function footprintFor(
     const level =
       index === 0
         ? grown
-        : BRANCH_OPENING_MATURITY + (1 - BRANCH_OPENING_MATURITY) * ((grown - MATURITY_AT_OPENING) / (1 - MATURITY_AT_OPENING));
+        : BRANCH_OPENING_MATURITY +
+          (1 - BRANCH_OPENING_MATURITY) *
+            ((grown - MATURITY_AT_OPENING) / (1 - MATURITY_AT_OPENING));
     return sum + (LOCATION_SHARE[index] ?? 0) * level;
   }, 0);
 }
@@ -591,11 +590,17 @@ export function goingConcernFor(business: OwnedBusiness, type: BusinessType, yea
   const average = history.length > 0 ? history.reduce((sum, p) => sum + p, 0) / history.length : 0;
   const multiple = type.valueMultiple * (0.85 + 0.3 * (business.reputation / 100));
   const earning = Math.max(0, average) * multiple;
-  return Math.round(Math.max(assetValueFor(type, business.openedYear, year, business.branches), earning));
+  return Math.round(
+    Math.max(assetValueFor(type, business.openedYear, year, business.branches), earning),
+  );
 }
 
 /** What it is worth to its owner: the business, and the money in the till. */
-export function businessValueFor(business: OwnedBusiness, type: BusinessType, year: number): number {
+export function businessValueFor(
+  business: OwnedBusiness,
+  type: BusinessType,
+  year: number,
+): number {
   return goingConcernFor(business, type, year) + Math.round(Number(business.cash) / 100);
 }
 
@@ -663,7 +668,9 @@ export function businessSaleOf(
 export const WIND_DOWN_SHARE = 0.4;
 
 export function windDownOf(business: OwnedBusiness, type: BusinessType, year: number): number {
-  const fittings = Math.round(assetValueFor(type, business.openedYear, year, business.branches) * WIND_DOWN_SHARE);
+  const fittings = Math.round(
+    assetValueFor(type, business.openedYear, year, business.branches) * WIND_DOWN_SHARE,
+  );
   return fittings + Math.max(0, Math.round(Number(business.cash) / 100));
 }
 
@@ -728,7 +735,11 @@ export function expansionRefusal(
  * One more location. The fittings are the branch's own; the rest of what it
  * cost is working capital and goes into the till, as the first location's does.
  */
-export function withBranch(business: OwnedBusiness, type: BusinessType, year: number): OwnedBusiness {
+export function withBranch(
+  business: OwnedBusiness,
+  type: BusinessType,
+  year: number,
+): OwnedBusiness {
   const cost = branchCostFor(type);
   const float = Math.round(cost * (1 - type.assetShare));
   return {
@@ -748,7 +759,11 @@ export function withoutBranch(business: OwnedBusiness, type: BusinessType): Owne
   return { ...business, branches, staff: Math.min(business.staff, ceiling) };
 }
 
-export function branchWindDownOf(business: OwnedBusiness, type: BusinessType, year: number): number {
+export function branchWindDownOf(
+  business: OwnedBusiness,
+  type: BusinessType,
+  year: number,
+): number {
   const branches = business.branches ?? [];
   if (branches.length === 0) return 0;
   const latest = assetValueFor(type, business.openedYear, year, branches);
@@ -900,7 +915,18 @@ export function listingFor(
   draws: ListingDraws,
 ): BusinessListing {
   const years = Math.min(19, 2 + Math.floor(clampUnit(draws.age) * 18));
-  const doors = years >= 8 ? (draws.doors < 0.6 ? 0 : draws.doors < 0.88 ? 1 : 2) : years >= 5 ? (draws.doors < 0.75 ? 0 : 1) : 0;
+  const doors =
+    years >= 8
+      ? draws.doors < 0.6
+        ? 0
+        : draws.doors < 0.88
+          ? 1
+          : 2
+      : years >= 5
+        ? draws.doors < 0.75
+          ? 0
+          : 1
+        : 0;
   const openedYear = year - years;
   const branches = Array.from({ length: doors }, (_, index) => openedYear + 3 * (index + 1));
   const locations = 1 + branches.length;
@@ -913,10 +939,24 @@ export function listingFor(
     staff: type.staffMin * locations,
   };
   // The staffing a manager would have settled on by now.
-  let result = businessYear(settled, type, { year, market: 'normal', shock: 0, stat: 50, hands: 1 });
+  let result = businessYear(settled, type, {
+    year,
+    market: 'normal',
+    shock: 0,
+    stat: 50,
+    hands: 1,
+  });
   for (let round = 0; round < 10; round += 1) {
-    const growth = footprintFor(settled, type, year + 1) / Math.max(0.01, footprintFor(settled, type, year));
-    const staff = autoStaffFor(type, settled.staff, result, growth, locationAttention(locations), locations);
+    const growth =
+      footprintFor(settled, type, year + 1) / Math.max(0.01, footprintFor(settled, type, year));
+    const staff = autoStaffFor(
+      type,
+      settled.staff,
+      result,
+      growth,
+      locationAttention(locations),
+      locations,
+    );
     if (staff === settled.staff) break;
     settled = { ...settled, staff };
     result = businessYear(settled, type, { year, market: 'normal', shock: 0, stat: 50, hands: 1 });
@@ -975,4 +1015,7 @@ export function businessBought(listing: BusinessListing): OwnedBusiness {
 
 /** What the seller's books say it earns in a year, on average. */
 export const reportedProfitOf = (listing: Pick<BusinessListing, 'reported'>): number =>
-  Math.round(listing.reported.reduce((sum, profit) => sum + profit, 0) / Math.max(1, listing.reported.length));
+  Math.round(
+    listing.reported.reduce((sum, profit) => sum + profit, 0) /
+      Math.max(1, listing.reported.length),
+  );

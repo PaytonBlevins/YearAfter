@@ -21,7 +21,7 @@ Talent Agency (v0.08, music and acting), Casino (gambling) and Racing Team
 one place.
 
 **The marketplace now reads net worth.** 0601 gated on cash plus portfolio; the
-comment on `gate` in the content type had always said *net worth*, which is
+comment on `gate` in the content type had always said _net worth_, which is
 also what spec 912 says. A person with a home and a business is not a
 beginner, and the list should not treat them as one. Gate is still 60% of the
 startup, and nothing on screen names a tier. Opening still needs the cash.
@@ -49,10 +49,10 @@ can open another location, up to four doors, from its own screen.
 Measured in a multi-year simulation, not asserted. With no limit on cash and a
 manager who staffs to demand, over twenty years:
 
-| doors | typical result |
-|---|---|
-| second | pays for itself in nearly every trade, 15–70% more owner money than staying single |
-| third | adds less than the second |
+| doors  | typical result                                                                                    |
+| ------ | ------------------------------------------------------------------------------------------------- |
+| second | pays for itself in nearly every trade, 15–70% more owner money than staying single                |
+| third  | adds less than the second                                                                         |
 | fourth | adds less again, and in a few trades (software, real estate, jewelry, specialty retail) is a loss |
 
 The trades that scale best are the ones where a location is mostly people and
@@ -64,7 +64,7 @@ and the owner's attention is a third of what it was.
 ## Three things the new catalog made me fix
 
 1. **The price slider had a dominant end.** 0601 typed elasticities and
-   checked the best price against a *fixed* headcount. Once the manager is free
+   checked the best price against a _fixed_ headcount. Once the manager is free
    to staff to the price (which is what the game does), the typed numbers put
    the best price at 125–135% for half the catalog, worth 60–150% more owner
    pay. Elasticity is now derived from the business's own costs
@@ -99,7 +99,7 @@ salary.
   location-dependent availability are not modelled. A character with no
   qualification can open a law firm. Left for when licenses and the business
   catalog meet; it is a content gate, not an engine change.
-- No cap on how many branches a *chain* of three businesses can field beyond
+- No cap on how many branches a _chain_ of three businesses can field beyond
   twelve doors. Spec 1392's "no trivial scale" is held by cost, maturity and the
   owner's attention, not by a hard rule.
 - Finding 36 (`advanceYear` not pure) is still open.

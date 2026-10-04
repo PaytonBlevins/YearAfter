@@ -41,7 +41,9 @@ import {
 
 const NORMAL = { year: 2012, market: 'normal' as const, shock: 0, stat: 50, hands: 1 };
 
-const mature = (typeId: string): { business: OwnedBusiness; type: (typeof BUSINESS_TYPES)[number] } => {
+const mature = (
+  typeId: string,
+): { business: OwnedBusiness; type: (typeof BUSINESS_TYPES)[number] } => {
   const type = findBusinessType(typeId)!;
   return {
     type,
@@ -53,9 +55,14 @@ const CONTEXT: EventContext = { year: 2012, market: 'normal', age: 11, rival: un
 const RIVAL: Rival = { since: 2010, bite: 0.1 };
 
 /** An even sweep of [0, 1), so a share is a count and not a sample. */
-const sweep = (steps: number): number[] => Array.from({ length: steps }, (_, i) => (i + 0.5) / steps);
+const sweep = (steps: number): number[] =>
+  Array.from({ length: steps }, (_, i) => (i + 0.5) / steps);
 
-const share = (type: (typeof BUSINESS_TYPES)[number], context: EventContext, tone: 'good' | 'bad'): number => {
+const share = (
+  type: (typeof BUSINESS_TYPES)[number],
+  context: EventContext,
+  tone: 'good' | 'bad',
+): number => {
   let good = 0;
   let bad = 0;
   for (const event of BUSINESS_EVENTS) {
@@ -159,7 +166,9 @@ describe('a rival', () => {
         const rival: Rival = { since, bite: RIVAL_BITE_MAX };
         const base = businessYear(business, type, NORMAL);
         const crowded = businessYear({ ...business, rival }, type, NORMAL);
-        expect(1 - crowded.demand / base.demand, type.id).toBeLessThanOrEqual(RIVAL_BITE_MAX + 1e-9);
+        expect(1 - crowded.demand / base.demand, type.id).toBeLessThanOrEqual(
+          RIVAL_BITE_MAX + 1e-9,
+        );
       }
     }
   });
@@ -171,10 +180,17 @@ describe('the events', () => {
     for (const event of BUSINESS_EVENTS) {
       expect(event.line, event.id).toContain('{name}');
       // Spoken, not reported: the validator's rule, held here too where the text lives.
-      expect(event.line, event.id).not.toMatch(/\b(is not|was not|did not|could not|would not|will not|does not)\b/);
+      expect(event.line, event.id).not.toMatch(
+        /\b(is not|was not|did not|could not|would not|will not|does not)\b/,
+      );
       expect(event.weight, event.id).toBeGreaterThan(0);
       const does =
-        event.demand ?? event.cogs ?? event.overhead ?? event.extra ?? event.effect ?? event.reputation;
+        event.demand ??
+        event.cogs ??
+        event.overhead ??
+        event.extra ??
+        event.effect ??
+        event.reputation;
       expect(does, event.id).toBeDefined();
       for (const range of [event.demand, event.cogs, event.overhead, event.extra]) {
         if (range) expect(range[0]).toBeLessThanOrEqual(range[1]);
@@ -211,9 +227,12 @@ describe('the events', () => {
           const happened = drawEvent(type, { ...CONTEXT, rival }, { happens: 0, pick, size: 0.5 });
           expect(happened, type.id).toBeDefined();
           const event = happened!.event;
-          if (event.needs === 'supplier') expect(type.supplier, `${type.id} ${event.id}`).toBe(true);
-          if (event.needs === 'people') expect((type.staff * type.wage) / type.revenue).toBeGreaterThanOrEqual(0.25);
-          if (event.needs === 'fittings') expect(type.assetShare, `${type.id} ${event.id}`).toBeGreaterThanOrEqual(0.3);
+          if (event.needs === 'supplier')
+            expect(type.supplier, `${type.id} ${event.id}`).toBe(true);
+          if (event.needs === 'people')
+            expect((type.staff * type.wage) / type.revenue).toBeGreaterThanOrEqual(0.25);
+          if (event.needs === 'fittings')
+            expect(type.assetShare, `${type.id} ${event.id}`).toBeGreaterThanOrEqual(0.3);
           // One rival at a time, and nobody to see off when there is none.
           if (event.effect === 'rivalOpens') expect(rival).toBeUndefined();
           if (event.effect === 'rivalCloses') expect(rival).toBeDefined();
@@ -234,10 +253,14 @@ describe('the events', () => {
     expect(canHappenTo(byId('key-leaver'), cleaning, false)).toBe(true);
     // The people rule is a real line through the catalog: a service has people who can leave,
     // a shop that sells stock mostly does not.
-    const withPeople = BUSINESS_TYPES.filter((type) => canHappenTo(byId('key-leaver'), type, false));
+    const withPeople = BUSINESS_TYPES.filter((type) =>
+      canHappenTo(byId('key-leaver'), type, false),
+    );
     expect(withPeople.length).toBeGreaterThan(10);
     expect(withPeople.length).toBeLessThan(BUSINESS_TYPES.length - 3);
-    expect(canHappenTo(byId('key-leaver'), findBusinessType('biz.electronics')!, false)).toBe(false);
+    expect(canHappenTo(byId('key-leaver'), findBusinessType('biz.electronics')!, false)).toBe(
+      false,
+    );
     expect(canHappenTo(byId('dispute'), findBusinessType('biz.jewelry')!, false)).toBe(false);
     expect(canHappenTo(byId('slow-stretch'), software, false)).toBe(true);
   });
@@ -274,20 +297,39 @@ describe('the events', () => {
     const type = findBusinessType('biz.cafe')!;
     const weight = (id: string, market: EventContext['market']): number =>
       weightOf(findBusinessEvent(id)!, type, { ...CONTEXT, market });
-    expect(weight('slow-stretch', 'severeRecession')).toBeGreaterThan(weight('slow-stretch', 'recession'));
+    expect(weight('slow-stretch', 'severeRecession')).toBeGreaterThan(
+      weight('slow-stretch', 'recession'),
+    );
     expect(weight('slow-stretch', 'recession')).toBeGreaterThan(weight('slow-stretch', 'slowdown'));
     expect(weight('slow-stretch', 'slowdown')).toBeGreaterThan(weight('slow-stretch', 'normal'));
     expect(weight('big-order', 'growth')).toBeGreaterThan(weight('big-order', 'normal'));
     expect(weight('big-order', 'recession')).toBeLessThan(weight('big-order', 'normal'));
     // Fewer people open a shop in hard times, and more of them shut one.
     expect(weight('rival-opens', 'recession')).toBeLessThan(weight('rival-opens', 'normal'));
-    expect(weightOf(findBusinessEvent('rival-closes')!, type, { ...CONTEXT, market: 'recession', rival: RIVAL })).toBeGreaterThan(
-      weightOf(findBusinessEvent('rival-closes')!, type, { ...CONTEXT, market: 'normal', rival: RIVAL }),
+    expect(
+      weightOf(findBusinessEvent('rival-closes')!, type, {
+        ...CONTEXT,
+        market: 'recession',
+        rival: RIVAL,
+      }),
+    ).toBeGreaterThan(
+      weightOf(findBusinessEvent('rival-closes')!, type, {
+        ...CONTEXT,
+        market: 'normal',
+        rival: RIVAL,
+      }),
     );
     // And a hard year is never a certainty: it is still mostly quiet.
     let quiet = 0;
     for (const happens of sweep(100)) {
-      if (!drawEvent(type, { ...CONTEXT, market: 'severeRecession' }, { happens, pick: 0.2, size: 0.5 })) quiet += 1;
+      if (
+        !drawEvent(
+          type,
+          { ...CONTEXT, market: 'severeRecession' },
+          { happens, pick: 0.2, size: 0.5 },
+        )
+      )
+        quiet += 1;
     }
     expect(quiet).toBeGreaterThanOrEqual(40);
   });
@@ -304,7 +346,9 @@ describe('the events', () => {
     const type = findBusinessType('biz.cafe')!;
     const draws = { happens: 0.1, pick: 0.37, size: 0.6 };
     expect(drawEvent(type, CONTEXT, draws)).toEqual(drawEvent(type, CONTEXT, draws));
-    const ids = new Set(sweep(100).map((pick) => drawEvent(type, CONTEXT, { happens: 0, pick, size: 0.5 })?.event.id));
+    const ids = new Set(
+      sweep(100).map((pick) => drawEvent(type, CONTEXT, { happens: 0, pick, size: 0.5 })?.event.id),
+    );
     expect(ids.size).toBeGreaterThanOrEqual(8);
   });
 
@@ -327,7 +371,11 @@ describe('what an event does to a year', () => {
     for (const event of BUSINESS_EVENTS) {
       for (const size of [0, 0.5, 0.999]) {
         const mods = modifiersFor({ event, size });
-        const within = (value: number, range: readonly [number, number] | undefined, none: number): void => {
+        const within = (
+          value: number,
+          range: readonly [number, number] | undefined,
+          none: number,
+        ): void => {
           if (range) {
             expect(value, event.id).toBeGreaterThanOrEqual(range[0] - 1e-12);
             expect(value, event.id).toBeLessThanOrEqual(range[1] + 1e-12);
@@ -348,7 +396,10 @@ describe('what an event does to a year', () => {
   it('moves demand by exactly the multiplier it names', () => {
     const { business, type } = mature('biz.cafe');
     const base = businessYear(business, type, NORMAL);
-    const slow = businessYear(business, type, { ...NORMAL, modifiers: { ...NO_MODIFIERS, demand: 0.9 } });
+    const slow = businessYear(business, type, {
+      ...NORMAL,
+      modifiers: { ...NO_MODIFIERS, demand: 0.9 },
+    });
     expect(slow.demand / base.demand).toBeCloseTo(0.9, 10);
     expect(slow.profit).toBeLessThan(base.profit);
   });
@@ -356,7 +407,10 @@ describe('what an event does to a year', () => {
   it('moves what the goods cost, and only that', () => {
     const { business, type } = mature('biz.cafe');
     const base = businessYear(business, type, NORMAL);
-    const dearer = businessYear(business, type, { ...NORMAL, modifiers: { ...NO_MODIFIERS, cogs: 1.1 } });
+    const dearer = businessYear(business, type, {
+      ...NORMAL,
+      modifiers: { ...NO_MODIFIERS, cogs: 1.1 },
+    });
     expect(dearer.cogs / base.cogs).toBeCloseTo(1.1, 2);
     expect(dearer.labor).toBe(base.labor);
     expect(dearer.overhead).toBe(base.overhead);
@@ -366,7 +420,10 @@ describe('what an event does to a year', () => {
   it('moves the lease, and only that', () => {
     const { business, type } = mature('biz.cafe');
     const base = businessYear(business, type, NORMAL);
-    const rent = businessYear(business, type, { ...NORMAL, modifiers: { ...NO_MODIFIERS, overhead: 1.2 } });
+    const rent = businessYear(business, type, {
+      ...NORMAL,
+      modifiers: { ...NO_MODIFIERS, overhead: 1.2 },
+    });
     expect(rent.overhead / base.overhead).toBeCloseTo(1.2, 2);
     expect(rent.cogs).toBe(base.cogs);
     expect(rent.revenue).toBe(base.revenue);
@@ -376,16 +433,25 @@ describe('what an event does to a year', () => {
     const { business, type } = mature('biz.cafe');
     const base = businessYear(business, type, NORMAL);
     expect(base.extra).toBe(0);
-    const broken = businessYear(business, type, { ...NORMAL, modifiers: { ...NO_MODIFIERS, extra: 0.04 } });
+    const broken = businessYear(business, type, {
+      ...NORMAL,
+      modifiers: { ...NO_MODIFIERS, extra: 0.04 },
+    });
     expect(broken.extra).toBe(Math.round(0.04 * type.revenue * reachOf(1)));
     expect(broken.costs - base.costs).toBe(broken.extra);
     expect(base.profit - broken.profit).toBe(broken.extra);
-    const windfall = businessYear(business, type, { ...NORMAL, modifiers: { ...NO_MODIFIERS, extra: -0.05 } });
+    const windfall = businessYear(business, type, {
+      ...NORMAL,
+      modifiers: { ...NO_MODIFIERS, extra: -0.05 },
+    });
     expect(windfall.extra).toBeLessThan(0);
     expect(windfall.profit).toBeGreaterThan(base.profit);
     // A second door has a bigger bill for the same breakdown.
     const two = { ...business, branches: [2010] };
-    const twoBroken = businessYear(two, type, { ...NORMAL, modifiers: { ...NO_MODIFIERS, extra: 0.04 } });
+    const twoBroken = businessYear(two, type, {
+      ...NORMAL,
+      modifiers: { ...NO_MODIFIERS, extra: 0.04 },
+    });
     expect(twoBroken.extra).toBeGreaterThan(broken.extra);
   });
 
@@ -410,8 +476,15 @@ describe('what an event does to a year', () => {
       for (const happens of sweep(10)) {
         for (const pick of sweep(60)) {
           for (const size of [0.1, 0.5, 0.9]) {
-            const happened = drawEvent(type, CONTEXT, { happens: happens * EVENT_CHANCE * 2, pick, size });
-            sum += businessYear(business, type, { ...NORMAL, modifiers: modifiersFor(happened) }).profit;
+            const happened = drawEvent(type, CONTEXT, {
+              happens: happens * EVENT_CHANCE * 2,
+              pick,
+              size,
+            });
+            sum += businessYear(business, type, {
+              ...NORMAL,
+              modifiers: modifiersFor(happened),
+            }).profit;
             count += 1;
           }
         }
@@ -430,8 +503,14 @@ describe('what an event does to a year', () => {
 describe('the rival after a year', () => {
   const cleaning = findBusinessType('biz.cleaning')!;
   const hotel = findBusinessType('biz.hotel')!;
-  const opens = (): { event: BusinessEvent; size: number } => ({ event: findBusinessEvent('rival-opens')!, size: 0.5 });
-  const closes = (): { event: BusinessEvent; size: number } => ({ event: findBusinessEvent('rival-closes')!, size: 0.5 });
+  const opens = (): { event: BusinessEvent; size: number } => ({
+    event: findBusinessEvent('rival-opens')!,
+    size: 0.5,
+  });
+  const closes = (): { event: BusinessEvent; size: number } => ({
+    event: findBusinessEvent('rival-closes')!,
+    size: 0.5,
+  });
 
   it('opens on the year the event happened, bigger in a crowded trade', () => {
     const small = rivalAfter(undefined, opens(), cleaning, 2030, 0.7)!;
@@ -450,6 +529,8 @@ describe('the rival after a year', () => {
     expect(rivalAfter(fresh, undefined, cleaning, 2012 + RIVAL_YEARS - 1, 0.5)).toBeUndefined();
     expect(rivalAfter(undefined, undefined, cleaning, 2012, 0.5)).toBeUndefined();
     // Another event leaves a live rival alone.
-    expect(rivalAfter(fresh, { event: findBusinessEvent('breakdown')!, size: 0.5 }, cleaning, 2013, 0.5)).toBe(fresh);
+    expect(
+      rivalAfter(fresh, { event: findBusinessEvent('breakdown')!, size: 0.5 }, cleaning, 2013, 0.5),
+    ).toBe(fresh);
   });
 });

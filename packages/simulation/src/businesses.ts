@@ -210,7 +210,7 @@ export function businessTaxOn(salary: number, drawn: number): number {
 export type DemandWord = 'plenty' | 'about right' | 'slow';
 
 export const DEMAND_LABELS: Readonly<Record<DemandWord, string>> = {
-  plenty: "More customers than you can serve",
+  plenty: 'More customers than you can serve',
   'about right': 'About right for what you can serve',
   slow: 'Quiet — the staff are not busy enough',
 };
@@ -272,12 +272,7 @@ export function viewOf(state: GameState, business: OwnedBusiness): BusinessView 
     hands: handsFor(state),
     locations: locationsOf(business),
     branchCost: branchCostFor(type),
-    expansion: expansionRefusal(
-      business,
-      type,
-      state.world.year,
-      Number(state.player.cash) / 100,
-    ),
+    expansion: expansionRefusal(business, type, state.world.year, Number(state.player.cash) / 100),
     expansionBase: expansionRefusal(business, type, state.world.year, Number.POSITIVE_INFINITY),
     loan: loanViewOf(state, business),
   };
@@ -285,7 +280,9 @@ export function viewOf(state: GameState, business: OwnedBusiness): BusinessView 
 
 function loanViewOf(state: GameState, business: OwnedBusiness): BusinessLoanView | undefined {
   const held = state.loans.find((loan) => loan.businessId === business.id);
-  const product = held ? BUSINESS_LOAN_PRODUCTS.find((row) => row.id === held.productId) : undefined;
+  const product = held
+    ? BUSINESS_LOAN_PRODUCTS.find((row) => row.id === held.productId)
+    : undefined;
   if (!held || !product) return undefined;
   const owed = Math.round(Number(held.balance) / 100);
   return {
@@ -393,7 +390,9 @@ export function openingOffers(state: GameState, typeId: string): readonly Financ
 export function expansionOffers(state: GameState, id: string): readonly FinancingOffer[] {
   const business = findBusiness(state, id);
   const type = business ? findBusinessType(business.typeId) : undefined;
-  return business && type ? offersFor(state, purchaseFor(state, 'expand', branchCostFor(type), 0, id)) : [];
+  return business && type
+    ? offersFor(state, purchaseFor(state, 'expand', branchCostFor(type), 0, id))
+    : [];
 }
 
 /** ...for a business that is for sale. */
@@ -467,7 +466,11 @@ function settledOnExit(
   ledger: GameState['finance'],
   businessId: string,
   proceeds: number,
-): { readonly ledger: GameState['finance']; readonly loans: GameState['loans']; readonly paid: number } {
+): {
+  readonly ledger: GameState['finance'];
+  readonly loans: GameState['loans'];
+  readonly paid: number;
+} {
   const held = state.loans.find((loan) => loan.businessId === businessId);
   if (!held || proceeds <= 0) return { ledger, loans: state.loans, paid: 0 };
   const owed = Math.round(Number(held.balance) / 100);
@@ -505,8 +508,9 @@ export interface OpenedBusiness {
 function nameFor(state: GameState, type: BusinessType): string {
   const taken = new Set(state.businesses.map((business) => business.name));
   const start = Math.floor(
-    mixedUnit(`${state.rng.getSeed()}:${type.id}:${state.world.year}:${state.businesses.length}:name`) *
-      type.names.length,
+    mixedUnit(
+      `${state.rng.getSeed()}:${type.id}:${state.world.year}:${state.businesses.length}:name`,
+    ) * type.names.length,
   );
   for (let step = 0; step < type.names.length; step += 1) {
     const candidate = type.names[(start + step) % type.names.length]!;
@@ -541,7 +545,8 @@ export function openBusiness(
     amount: dollars(-cost),
     source: `Opened ${name}`,
   });
-  const first = state.businesses.length === 0 && !state.player.records.some((r) => r.category === 'business');
+  const first =
+    state.businesses.length === 0 && !state.player.records.some((r) => r.category === 'business');
   const entry = line(
     state,
     `Opened ${name}, a ${type.name.toLowerCase()}. It took ${money(cost)} to open the doors${
@@ -780,7 +785,8 @@ export function businessesForSale(state: GameState): readonly BusinessListing[] 
   const listings: BusinessListing[] = [];
   for (let n = 0; n < LISTINGS_PER_YEAR; n += 1) {
     const key = `${seed}:sale:${year}:${n}`;
-    const type = pool[Math.min(pool.length - 1, Math.floor(mixedUnit(`${key}:type`) ** 1.6 * pool.length))]!;
+    const type =
+      pool[Math.min(pool.length - 1, Math.floor(mixedUnit(`${key}:type`) ** 1.6 * pool.length))]!;
     const id = `biz:${year}:${type.id.replace('biz.', '')}:for${n}`;
     // Bought already: it is no longer for sale.
     if (owned.has(id)) continue;
@@ -808,7 +814,8 @@ export function appraiseListing(state: GameState, listing: BusinessListing): Bus
   );
 }
 
-export type BuyRefusal = 'too-young' | 'too-many' | 'cannot-afford' | 'no-such-listing' | FinanceError;
+export type BuyRefusal =
+  'too-young' | 'too-many' | 'cannot-afford' | 'no-such-listing' | FinanceError;
 
 export const BUY_REFUSAL_LABELS: Readonly<Record<BuyRefusal, string>> = {
   'too-young': "You're too young to buy a business.",
@@ -837,7 +844,8 @@ export function buyBusiness(
     finance,
   );
   if (!loan.ok) return err(loan.error);
-  if (Number(state.player.cash) / 100 + loan.value.amount < listing.ask) return err('cannot-afford');
+  if (Number(state.player.cash) / 100 + loan.value.amount < listing.ask)
+    return err('cannot-afford');
 
   const business = businessBought(listing);
   const books = post(loan.value.ledger, state.world.year, state.player.age, {
@@ -845,7 +853,8 @@ export function buyBusiness(
     amount: dollars(-listing.ask),
     source: `Bought ${listing.name}`,
   });
-  const first = state.businesses.length === 0 && !state.player.records.some((r) => r.category === 'business');
+  const first =
+    state.businesses.length === 0 && !state.player.records.some((r) => r.category === 'business');
   const entry = line(
     state,
     `Bought ${listing.name}, a ${type.name.toLowerCase()} that had been trading for ${listing.years} years, for ${money(listing.ask)}${
@@ -1034,7 +1043,15 @@ export interface BusinessesYear {
  */
 export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
   if (input.businesses.length === 0) {
-    return { businesses: [], transactions: [], lines: [], records: [], drawn: 0, loans: input.loans ?? [], serviced: [] };
+    return {
+      businesses: [],
+      transactions: [],
+      lines: [],
+      records: [],
+      drawn: 0,
+      loans: input.loans ?? [],
+      serviced: [],
+    };
   }
   let loans: readonly HeldLoan[] = input.loans ?? [];
   const serviced: string[] = [];
@@ -1066,7 +1083,11 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
         : drawEvent(
             type,
             { year: input.year, market: input.market, age, rival: business.rival },
-            { happens: mixedUnit(`${key}:happens`), pick: mixedUnit(`${key}:pick`), size: mixedUnit(`${key}:size`) },
+            {
+              happens: mixedUnit(`${key}:happens`),
+              pick: mixedUnit(`${key}:pick`),
+              size: mixedUnit(`${key}:size`),
+            },
           );
     const result = businessYear(business, type, {
       year: input.year,
@@ -1095,8 +1116,11 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
     if (held) {
       const onHand = Math.max(0, Math.round(cash + result.profit));
       let year = runLoanYear([held], onHand, false);
-      if (year.missed.length > 0 && available > 0) year = runLoanYear([held], onHand + available, false);
-      const paid = Math.round(year.charges.reduce((sum, charge) => sum - Number(charge.amount), 0) / 100);
+      if (year.missed.length > 0 && available > 0)
+        year = runLoanYear([held], onHand + available, false);
+      const paid = Math.round(
+        year.charges.reduce((sum, charge) => sum - Number(charge.amount), 0) / 100,
+      );
       paidFromTill = Math.min(paid, onHand);
       ownerSteppedIn = paid - paidFromTill;
       loanAfter = year.loans;
@@ -1158,9 +1182,17 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
 
     const locations = locationsOf(business);
     const growth =
-      footprintFor(business, type, input.year + 1) / Math.max(0.01, footprintFor(business, type, input.year));
+      footprintFor(business, type, input.year + 1) /
+      Math.max(0.01, footprintFor(business, type, input.year));
     const staff = business.autoStaff
-      ? autoStaffFor(type, business.staff, result, growth, hands * locationAttention(locations), locations)
+      ? autoStaffFor(
+          type,
+          business.staff,
+          result,
+          growth,
+          hands * locationAttention(locations),
+          locations,
+        )
       : business.staff;
     const last: BusinessLedgerYear = {
       year: input.year,
@@ -1202,7 +1234,9 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
 
     if (happened) lines.push(eventLineFor(happened.event, business.name));
     if (result.economy <= 0.94) {
-      lines.push(`The downturn took about ${Math.round((1 - result.economy) * 100)}% of ${business.name}'s custom.`);
+      lines.push(
+        `The downturn took about ${Math.round((1 - result.economy) * 100)}% of ${business.name}'s custom.`,
+      );
     } else if (result.economy >= 1.05) {
       lines.push(`The good economy sent more custom ${business.name}'s way.`);
     }

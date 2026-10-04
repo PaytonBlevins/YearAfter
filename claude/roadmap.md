@@ -11,11 +11,11 @@ derived from it; where the spec stops itemising tickets, that is marked.
 
 ## Done
 
-| | |
-|---|---|
-| **Sprint Zero** 0001–0009 | Repo, Expo app, core types, seeded RNG, save schema + migrations, SQLite, CI, specs, dev screen |
-| **v0.01** 0101–0114 | Theme, header, five-world navigation, timeline, Advance, stat bars, world shells, UI kit, icons |
-| **v0.02** 0201–0212 | Character generator, family, events, school, stress, friends, love, children, NPC parents, employment, college, aging and health, a full-catalog voice pass, and **death, mortal NPCs and dynasty continuation** |
+|                           |                                                                                                                                                                                                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sprint Zero** 0001–0009 | Repo, Expo app, core types, seeded RNG, save schema + migrations, SQLite, CI, specs, dev screen                                                                                                                  |
+| **v0.01** 0101–0114       | Theme, header, five-world navigation, timeline, Advance, stat bars, world shells, UI kit, icons                                                                                                                  |
+| **v0.02** 0201–0212       | Character generator, family, events, school, stress, friends, love, children, NPC parents, employment, college, aging and health, a full-catalog voice pass, and **death, mortal NPCs and dynasty continuation** |
 
 **644 tests across 31 files, 27/27 turbo tasks.** 374 events, 49 jobs across 11
 ladders, 66 employers, 8 majors, 12 health conditions, 25 activities, 13 gigs.
@@ -60,18 +60,18 @@ back. Full detail — including the market destroying value permanently, the
 $430,000 illiquidity subsidy, and the financial pages — is in
 `claude/build-status.md`.
 
-| Ticket | What it covers |
-|---|---|
-| **0301 Financial Ledger** | Backend transaction categories — salary, commission, tax, living expense, housing, vehicles, gifts, debt, asset income, investments |
-| **0302 Reconciliation** | opening cash + in − out = closing cash. Any mismatch **fails validation** |
-| **0303 Living Expenses** | Inferred from income, wealth, family, location, circumstances. No lifestyle selector. **Deletes `livingCostOf`** |
-| **0304 Finance Dashboard** | Balance, Income, Tax Rate, Monthly Outflow, Assets, Liabilities, Net Worth, Investments, Credit Cards |
-| **0305 Credit System** | Simplified underwriting. Explicitly *not* a credit-bureau simulation |
-| **0306 Credit Cards** | Max 5 active, up to 8 products; limit, APR, balance, payment, rewards, application |
-| **0307 Loan Engine** | Personal, secured, business/SBA, line of credit, wealth/private. Mortgage and auto use simplified eligibility with an instant result |
-| **0308 Investments** | Stocks, funds, bonds, crypto. Buy/sell/hold, annual movement. Purchases are **transfers, not outflow** — plus the 0308b/0308c/0308d rounds |
-| **0309 Advisors** | Buy/Hold/Sell/Reduce/Rebalance recommendations |
-| **0310 Retirement Benefits** | Employer match, contributions, pensions — rolled into Investments/Assets |
+| Ticket                       | What it covers                                                                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **0301 Financial Ledger**    | Backend transaction categories — salary, commission, tax, living expense, housing, vehicles, gifts, debt, asset income, investments        |
+| **0302 Reconciliation**      | opening cash + in − out = closing cash. Any mismatch **fails validation**                                                                  |
+| **0303 Living Expenses**     | Inferred from income, wealth, family, location, circumstances. No lifestyle selector. **Deletes `livingCostOf`**                           |
+| **0304 Finance Dashboard**   | Balance, Income, Tax Rate, Monthly Outflow, Assets, Liabilities, Net Worth, Investments, Credit Cards                                      |
+| **0305 Credit System**       | Simplified underwriting. Explicitly _not_ a credit-bureau simulation                                                                       |
+| **0306 Credit Cards**        | Max 5 active, up to 8 products; limit, APR, balance, payment, rewards, application                                                         |
+| **0307 Loan Engine**         | Personal, secured, business/SBA, line of credit, wealth/private. Mortgage and auto use simplified eligibility with an instant result       |
+| **0308 Investments**         | Stocks, funds, bonds, crypto. Buy/sell/hold, annual movement. Purchases are **transfers, not outflow** — plus the 0308b/0308c/0308d rounds |
+| **0309 Advisors**            | Buy/Hold/Sell/Reduce/Rebalance recommendations                                                                                             |
+| **0310 Retirement Benefits** | Employer match, contributions, pensions — rolled into Investments/Assets                                                                   |
 
 **Three debts 0303 inherits, all labelled in code:**
 
@@ -83,7 +83,7 @@ $430,000 illiquidity subsidy, and the financial pages — is in
   will and no trust in the build to net it against. 0212 did what it could
   honestly do and labelled the rest.
 
-> *"v0.03 gets aggressive financial integrity testing."*
+> _"v0.03 gets aggressive financial integrity testing."_
 
 ---
 
@@ -92,12 +92,12 @@ $430,000 illiquidity subsidy, and the financial pages — is in
 The spec stops numbering here and describes the milestone as a block. Ticket
 breakdown was proposed, then measured, in `claude/v004-career-measurement.md`.
 
-> *"Expand to roughly 150–250 distinct job titles initially, without showing huge
+> _"Expand to roughly 150–250 distinct job titles initially, without showing huge
 > listing inventories. Build reusable salary/commission/trade/government/
 > professional/management templates. Give performance careers such as Sales,
 > Real Estate, Stockbroker/Financial roles broad earnings distributions. Display
 > concise benefits. Add career opportunities and permissive plausible
-> switching."*
+> switching."_
 
 - **0401 Reachability** — `reachOf`, the effective rung a job's gate reads
   instead of the raw held one. Jobs seen in one life 13 → 22–24 of 49.
@@ -121,9 +121,9 @@ breakdown was proposed, then measured, in `claude/v004-career-measurement.md`.
   tests that a much larger passing-through-college population finally
   exercised (CORE_RULES 13.63). `claude/0405-college-offer.md`.
 
-- **0406 Programs and licenses** — the review after 0405: *"This seems pretty
+- **0406 Programs and licenses** — the review after 0405: _"This seems pretty
   bare. I dont see medical school, dentist, vet school, law school, postgrad,
-  anything like that."* It was: 0403 grew the catalog to sixteen tracks and
+  anything like that."_ It was: 0403 grew the catalog to sixteen tracks and
   nobody came back to 0210b's eight majors, so five tracks — medicine, legal,
   tech, finance, hospitality — had **no program pointing at them at all**.
   Eight majors → **53 programs in three tiers** (14 trade certificates, 24
@@ -180,7 +180,7 @@ breakdown was proposed, then measured, in `claude/v004-career-measurement.md`.
 
   The bigger find was not in this ticket's code. Every systemic door opened with
   `if (state.pending.length > 0) return state`, which 0402 recorded as free
-  because *"an adult year contains zero authored decisions"* — a sentence 0409
+  because _"an adult year contains zero authored decisions"_ — a sentence 0409
   made false from another package. Measured, **59.4% of adult years already held
   an authored decision**, so all three doors were shut in three years out of
   five. Fixing that is most of the ticket, and it un-throttles 0405 and 0407 as
@@ -208,7 +208,7 @@ breakdown was proposed, then measured, in `claude/v004-career-measurement.md`.
   `claude/0411-an-adult-who-develops.md`.
 
 - **0412 A friend you actually have** — roadmap item 5b, and both of its findings
-  were narrower than what was there. Finding 2b's *"trough at twenty"* is a
+  were narrower than what was there. Finding 2b's _"trough at twenty"_ is a
   **sawtooth**: 84.4% of fourteen-year-olds, 88.9% of nineteen-year-olds and
   87.8% of twenty-year-olds had no friend at all, because a friendship here was a
   function of how long the current room had been open and the build empties the
@@ -370,16 +370,16 @@ Measured before it was ticketed — `claude/v005-ownership-measurement.md`. Nobo
 owned anything, rent was the largest line in every adult budget, and median net
 worth at sixty was about what it was at thirty. So homes go first.
 
-| | |
-|---|---|
-| **0501 Homes** | **DONE.** Listings, mortgages, owning, selling, the fifth door |
-| **0502 A household of two** | **DONE.** Partners earn; a date is not a household; spending per member |
-| **0503 A landlord** | **DONE.** Duplexes and apartment buildings, tenants, rent, renewals, agents, mass search. Commercial moves to v0.06 (spec 1708) |
-| **0504 Vehicles** | **DONE.** New / Used / Online / Luxury, 247 entries, hidden used-car issues, inspection, instant finance, the sixth door |
-| **0505 Vehicle modifications** | **DONE.** Spec 184's ten slots, three wraps, priced by the car, part recovered at resale, and Tarbus |
-| **0506 Renovations & collections** | **DONE.** Nineteen renovations and the seventh door, 151 valuables, five stores, a collection that sorts itself, heirlooms |
-| **0507 Auctions** | **DONE.** Two general houses with credibility in words, a storage yard, private sales behind a gate; bargains possible, never a living |
-| 0508 Will & Estate | **DEFERRED by Payton, 3 October 2026 — still to be built, after v0.06.** An estate that settles property, debt and the portfolio (finding 10) |
+|                                    |                                                                                                                                               |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0501 Homes**                     | **DONE.** Listings, mortgages, owning, selling, the fifth door                                                                                |
+| **0502 A household of two**        | **DONE.** Partners earn; a date is not a household; spending per member                                                                       |
+| **0503 A landlord**                | **DONE.** Duplexes and apartment buildings, tenants, rent, renewals, agents, mass search. Commercial moves to v0.06 (spec 1708)               |
+| **0504 Vehicles**                  | **DONE.** New / Used / Online / Luxury, 247 entries, hidden used-car issues, inspection, instant finance, the sixth door                      |
+| **0505 Vehicle modifications**     | **DONE.** Spec 184's ten slots, three wraps, priced by the car, part recovered at resale, and Tarbus                                          |
+| **0506 Renovations & collections** | **DONE.** Nineteen renovations and the seventh door, 151 valuables, five stores, a collection that sorts itself, heirlooms                    |
+| **0507 Auctions**                  | **DONE.** Two general houses with credibility in words, a storage yard, private sales behind a gate; bargains possible, never a living        |
+| 0508 Will & Estate                 | **DEFERRED by Payton, 3 October 2026 — still to be built, after v0.06.** An estate that settles property, debt and the portfolio (finding 10) |
 
 - **0501 A place of your own** — a market of eight listings a year in the
   character's state, three mortgage products with real underwriting, a year of
@@ -544,14 +544,14 @@ start a business, so this block has no doors. 0508 Will & Estate was **skipped
 on Payton's say-so on 3 October 2026** and is still to be built; it moves after
 this block.
 
-| | |
-|---|---|
-| **0601 The business engine** | **DONE.** Opening, supplier / COGS, a price slider, four payroll tiers, automatic staffing, demand, brand reputation, profit, valuation and sale; twelve businesses; Assets → Businesses. Survival (≈81% at five years against BLS 51%) waits on 0604 |
-| **0602 Catalog and expansion** | **DONE.** Nineteen more businesses (thirty-one of spec 396's thirty-seven; six wait on music, acting, gambling, sports and private lending), a marketplace gated on net worth, and up to four locations per business. Fixed three 0601 calibration holes found on the way (price slider, pay level, staffing speed) |
-| **0603 Business finance** | **DONE.** Two business loans (Small Business, Commercial Term) written straight into an opening, a new door or a purchase and never paid out as cash; a for-sale list of established businesses priced above their worth; the business pays its own loan. Private Lending Firm moves to 0605 |
-| **0604 Business events and heirs** | **DONE.** Nineteen weighted events a year at most (half the years are quiet), a rival that opens in crowded trades and fades over three years, the economy's effect said out loud, and an heir who keeps the business and its lender. Five-year survival 81.5% → 78.7% (BLS 51%); recorded, not forced |
-| 0605 Private investments | Large returns that can fail or lock money up, opportunity capacity |
-| 0606 Commercial real estate | Retail, office and warehouse space, joined to 0503's landlord |
+|                                    |                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0601 The business engine**       | **DONE.** Opening, supplier / COGS, a price slider, four payroll tiers, automatic staffing, demand, brand reputation, profit, valuation and sale; twelve businesses; Assets → Businesses. Survival (≈81% at five years against BLS 51%) waits on 0604                                                               |
+| **0602 Catalog and expansion**     | **DONE.** Nineteen more businesses (thirty-one of spec 396's thirty-seven; six wait on music, acting, gambling, sports and private lending), a marketplace gated on net worth, and up to four locations per business. Fixed three 0601 calibration holes found on the way (price slider, pay level, staffing speed) |
+| **0603 Business finance**          | **DONE.** Two business loans (Small Business, Commercial Term) written straight into an opening, a new door or a purchase and never paid out as cash; a for-sale list of established businesses priced above their worth; the business pays its own loan. Private Lending Firm moves to 0605                        |
+| **0604 Business events and heirs** | **DONE.** Nineteen weighted events a year at most (half the years are quiet), a rival that opens in crowded trades and fades over three years, the economy's effect said out loud, and an heir who keeps the business and its lender. Five-year survival 81.5% → 78.7% (BLS 51%); recorded, not forced              |
+| 0605 Private investments           | Large returns that can fail or lock money up, opportunity capacity                                                                                                                                                                                                                                                  |
+| 0606 Commercial real estate        | Retail, office and warehouse space, joined to 0503's landlord                                                                                                                                                                                                                                                       |
 
 ## v0.07 Creator & Fame
 
@@ -674,7 +674,7 @@ has only just been asked anything. The original finding: at 60–67% with
 no friend against 87.8% before. The remaining cause is not social: a character
 who has left school has work and the street and nothing else, because
 `education.activities` only exists while they are AT school. That is the same
-gap 0211 measured as *"nobody over eighteen is an athlete in this build"*, it
+gap 0211 measured as _"nobody over eighteen is an athlete in this build"_, it
 belongs to v0.08's sports engine or to a smaller ticket that lets an adult join
 something, and until then the post-school years have two doors instead of
 three.
@@ -736,14 +736,14 @@ eleven events at forty — was never a writing problem. All eleven are gated on
 `hasChildren` and nobody in this build had ever had a child. Adult years holding
 a `family` event went 0% → 25.8% without a single new event being written.
 
-*(0409's half, for the record)* Events able
+_(0409's half, for the record)_ Events able
 to fire at forty went from **26 to 93**, and from zero decisions to thirteen.
 Repetition inside a single adult life went from **50% to 23%**. What remains is
 `family` and `friendship`, still at twelve and six events at forty: an adult's
 parents, siblings and friends are now as thin as their job used to be, and that
 is the next content gap. New rule 13.67. `claude/0409-an-adult-life.md`.
 
-*(original finding, for the record)*
+_(original finding, for the record)_
 The voice pass rewrote 180 strings, and reading a played decade afterwards still
 shows lines recurring inside a single character's twenties. Eight labelled
 placeholder lines, six adult romance events and eleven parenting events cannot
@@ -871,7 +871,6 @@ less than the loan, the rest vanishes. In the world it stays as debt.
 **24. Cars are mostly bought for cash.** 25–30% are financed, against about
 80% of new and 35–40% of used cars in the US, because the car door pays cash
 whenever that leaves three months of living in hand.
-
 
 ### Found by 0506
 
@@ -1010,7 +1009,7 @@ but a typical owner will still see a business that clears six figures one year
 and loses money the next, with no event to explain it. Calibration for 0604,
 where events and competition give the swings a cause.
 
-*0604: partly answered.* The swings now have named causes the player can read.
+_0604: partly answered._ The swings now have named causes the player can read.
 Their size is unchanged (log sd 1.0–1.1 among survivors, before and after): a
 10% swing in revenue is an 80% swing in profit at a 12% margin. Shrinking the
 base volatility didn't help and was taken out. Left as it is unless it shows in
@@ -1025,7 +1024,7 @@ starting a small business beats nearly everything else a young adult can do
 with $20,000. Tune with 0604's survival and competition pass, or sooner if it
 shows in play.
 
-*0604: still open.* Competition is hardest on the crowded trades and the median
+_0604: still open._ Competition is hardest on the crowded trades and the median
 five-year pay of a cleaning company fell 13% (2.38 → 2.07 times its startup), but
 it is still about twice its startup a year. The cause is a catalog proportion
 ($300,000 of revenue on a $20,000 startup), and the fix is raising the smallest
@@ -1056,34 +1055,34 @@ the catalog, not inside an events ticket.
 
 ## Suggested order
 
-1. **Character-generation fix** (findings 1 and 1b) — *(shipped as 0408 for the
+1. **Character-generation fix** (findings 1 and 1b) — _(shipped as 0408 for the
    aptitude half; the lifespan half is still open and has moved to 0211's
-   mortality model, see finding 1b)*
+   mortality model, see finding 1b)_
 2. **0301 → 0303** — the ledger and real living expenses, which retire 0210's
    placeholder, make every existing price real, give treatment a cost and give
-   inheritance something to inherit. *(shipped)*
-3. **0304 → 0310** — the rest of Financial Life. *(shipped)*
+   inheritance something to inherit. _(shipped)_
+3. **0304 → 0310** — the rest of Financial Life. _(shipped)_
 4. **0401 → 0407** — career and education depth: reachability, systemic career
    offers, the catalog tripled, college's own systemic offer, the professional
    and vocational tiers with the license that makes them mean something, and a
-   first job that arrives on its own. *(shipped)*
-5. **Adult event volume** (findings 3, 4, 4b and 5) — *(shipped as 0409 for
+   first job that arrives on its own. _(shipped)_
+5. **Adult event volume** (findings 3, 4, 4b and 5) — _(shipped as 0409 for
    work, health and loss, and 0410 for `family`, which turned out to be a door
-   rather than a catalog)*
-5b. **Adult friendship** (findings 2b and 2d) — *(DONE: 0412 built the
+   rather than a catalog)_
+   5b. **Adult friendship** (findings 2b and 2d) — _(DONE: 0412 built the
    mechanism — the curve warmth never had, and the systemic side of
    `interact.ts` — and 0413 wrote the content and found the cliff at eighteen
    underneath it. The leftover is finding 2e: the same window needs the OTHER
-   adult categories.)*
-5c. **An adult who develops** (finding 2) — *(shipped as 0411 for work and 0415
-   for a child, illness and hard years; the hobby is finding 2g)*
-5d. **An adult who can join something** (finding 2g, with 2b's leftover and
-   0211's adult-athlete gap) — *(shipped as 0416, for everybody rather than
-   adults: nobody at any age had ever joined anything)*
-6. **Why a wide body buys a narrow lifespan** (finding 1b's leftover) — *(shipped
+   adult categories.)_
+   5c. **An adult who develops** (finding 2) — _(shipped as 0411 for work and 0415
+   for a child, illness and hard years; the hobby is finding 2g)_
+   5d. **An adult who can join something** (finding 2g, with 2b's leftover and
+   0211's adult-athlete gap) — _(shipped as 0416, for everybody rather than
+   adults: nobody at any age had ever joined anything)_
+6. **Why a wide body buys a narrow lifespan** (finding 1b's leftover) — _(shipped
    as 0417: not the Gompertz term, but a healing ratchet after sixty and age
-   counted twice. Nobody got old, and now two in five reach eighty-five.)*
-7. **v0.05 onward** in spec order. *(0501 Homes shipped.)*
-8. **Partners' income** (finding 9) — *(shipped as 0502, A household of two.)*
-9. **0503 → 0508.** *(0503 A landlord, 0504 Vehicles, 0505 Vehicle modifications, 0506 Renovations & collections and 0507 Auctions shipped. 0508 Will & Estate, which closes v0.05, was deferred by Payton on 3 October and moves after v0.06.)*
-10. **0601 → 0606.** *(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments is next, then 0508 Will & Estate whenever Payton wants it.)*
+   counted twice. Nobody got old, and now two in five reach eighty-five.)_
+7. **v0.05 onward** in spec order. _(0501 Homes shipped.)_
+8. **Partners' income** (finding 9) — _(shipped as 0502, A household of two.)_
+9. **0503 → 0508.** _(0503 A landlord, 0504 Vehicles, 0505 Vehicle modifications, 0506 Renovations & collections and 0507 Auctions shipped. 0508 Will & Estate, which closes v0.05, was deferred by Payton on 3 October and moves after v0.06.)_
+10. **0601 → 0606.** _(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments is next, then 0508 Will & Estate whenever Payton wants it.)_

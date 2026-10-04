@@ -178,11 +178,7 @@ export function keepableWith(
  *    `personality.loyalty` on an NPC has ever had outside romance. Half a
  *    friendship is somebody else ringing you.
  */
-export function keepUpOdds(
-  person: Acquaintance,
-  charisma: number,
-  extraversion: number,
-): number {
+export function keepUpOdds(person: Acquaintance, charisma: number, extraversion: number): number {
   const span = 100 - WORTH_KEEPING;
   const closeness = Math.max(0, Math.min(1, (person.relationship - WORTH_KEEPING) / span));
   const openness = (charisma - 50) / 50 + (extraversion - 50) / 50;

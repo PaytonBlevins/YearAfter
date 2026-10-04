@@ -270,7 +270,9 @@ describe('0501 — the market and the verbs', () => {
     expect(Number(estateOf(after).assets) - assetsBefore).toBe(cheapest.askingPrice * 100);
     // Net worth did not fall: cash became a house.
     expect(
-      Number(estateOf(after).investments) + Number(after.player.cash) + Number(estateOf(after).assets ?? 0),
+      Number(estateOf(after).investments) +
+        Number(after.player.cash) +
+        Number(estateOf(after).assets ?? 0),
     ).toBe(before);
     expect(buyHome(after, cheapest.id, 'cash').ok).toBe(false);
 

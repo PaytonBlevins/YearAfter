@@ -93,7 +93,12 @@ const RICH = topUp(BASE, 400_000);
 const FIXED = topUp(BASE, 60_000 - Math.floor(Number(BASE.player.cash) / 100));
 const cashOf = (state: GameState): number => Math.round(Number(state.player.cash) / 100);
 
-const loanOn = (businessId: string, balance: number, productId = 'loan.smallbiz', termLeft = 10): HeldLoan => ({
+const loanOn = (
+  businessId: string,
+  balance: number,
+  productId = 'loan.smallbiz',
+  termLeft = 10,
+): HeldLoan => ({
   productId,
   principal: dollars(balance),
   balance: dollars(balance),
@@ -114,8 +119,14 @@ const established = (from: GameState = RICH, typeId = 'biz.cleaning'): GameState
         ...business,
         openedYear: state.world.year - 4,
         last: {
-          year: state.world.year - 1, revenue: 300_000, costs: 260_000, profit: 40_000,
-          drawn: 20_000, injected: 0, turnedAway: 0, idle: 0,
+          year: state.world.year - 1,
+          revenue: 300_000,
+          costs: 260_000,
+          profit: 40_000,
+          drawn: 20_000,
+          injected: 0,
+          turnedAway: 0,
+          idle: 0,
         },
       },
     ],
@@ -140,7 +151,10 @@ describe('0603 — what is for sale', () => {
 
   it('offers nothing to a child', () => {
     expect(businessesForSale(createNewGame({ seed: 'for-sale-child' }))).toEqual([]);
-    const refused = buyBusiness(createNewGame({ seed: 'for-sale-child' }), 'biz:2030:clothing:for0');
+    const refused = buyBusiness(
+      createNewGame({ seed: 'for-sale-child' }),
+      'biz:2030:clothing:for0',
+    );
     expect(refused.ok ? undefined : refused.error).toBe('too-young');
   });
 
@@ -163,7 +177,11 @@ describe('0603 — what is for sale', () => {
     expect(next.loans).toHaveLength(0);
     expect(businessesForSale(next).map((row) => row.id)).not.toContain(listing.id);
     expect(result.value.entry.text).toMatch(/Bought .* for \$261,446\./);
-    expect(next.finance.transactions.some((row) => row.category === 'property' && row.source === `Bought ${listing.name}`)).toBe(true);
+    expect(
+      next.finance.transactions.some(
+        (row) => row.category === 'property' && row.source === `Bought ${listing.name}`,
+      ),
+    ).toBe(true);
   });
 
   it('refuses what is not for sale, what cannot be afforded, and a fourth business', () => {
@@ -173,7 +191,10 @@ describe('0603 — what is for sale', () => {
     const refused = buyBusiness(poor, businessesForSale(poor)[0]!.id);
     expect(refused.ok ? undefined : refused.error).toBe('cannot-afford');
     expect(BUY_REFUSAL_LABELS['cannot-afford']).toMatch(/enough/);
-    const owning = { ...RICH, businesses: [0, 1, 2].map((n) => ({ ...established().businesses[0]!, id: `biz:x${n}` })) };
+    const owning = {
+      ...RICH,
+      businesses: [0, 1, 2].map((n) => ({ ...established().businesses[0]!, id: `biz:x${n}` })),
+    };
     const full = buyBusiness(owning, 'biz:2030:clothing:for0');
     expect(full.ok ? undefined : full.error).toBe('too-many');
   });
@@ -200,16 +221,25 @@ describe('0603 — borrowing for it', () => {
     expect(Number(next.loans[0]!.balance)).toBe(11_320_000);
     expect(next.loans[0]!.termLeft).toBe(10);
     const rows = next.finance.transactions.filter((row) => row.year === 2030);
-    const borrowed = rows.find((row) => row.category === 'debt' && /Small Business Loan — to buy/.test(row.source));
+    const borrowed = rows.find(
+      (row) => row.category === 'debt' && /Small Business Loan — to buy/.test(row.source),
+    );
     expect(Number(borrowed?.amount)).toBe(11_320_000);
     const paid = rows.find((row) => row.source === `Bought ${listing.name}`);
     expect(Number(paid?.amount)).toBe(-14_156_400);
     expect(result.value.entry.text).toMatch(/\$113,200 of it borrowed/);
-    expect(viewOf(next, next.businesses[0]!)!.loan).toMatchObject({ name: 'Small Business Loan', owed: 113_200, termLeft: 10 });
+    expect(viewOf(next, next.businesses[0]!)!.loan).toMatchObject({
+      name: 'Small Business Loan',
+      owed: 113_200,
+      termLeft: 10,
+    });
   });
 
   it('brings a request for more than the lender will write down to what they offered', () => {
-    const result = buyBusiness(FIXED, listing.id, { productId: 'loan.smallbiz', amount: 10_000_000 });
+    const result = buyBusiness(FIXED, listing.id, {
+      productId: 'loan.smallbiz',
+      amount: 10_000_000,
+    });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(Number(result.value.state.loans[0]!.balance)).toBe(11_320_000);
@@ -254,7 +284,10 @@ describe('0603 — borrowing for it', () => {
     const unaided = openBusiness(mine, 'biz.accounting');
     expect(unaided.ok ? undefined : unaided.error).toBe('cannot-afford');
 
-    const opened = openBusiness(mine, 'biz.accounting', { productId: 'loan.smallbiz', amount: 31_500 });
+    const opened = openBusiness(mine, 'biz.accounting', {
+      productId: 'loan.smallbiz',
+      amount: 31_500,
+    });
     expect(opened.ok).toBe(true);
     if (!opened.ok) return;
     expect(cashOf(opened.value.state)).toBe(11_500);
@@ -313,7 +346,7 @@ describe('0603 — the business pays its own loan', () => {
     expect(year.transactions.some((row) => /loan payment/.test(row.source))).toBe(false);
   });
 
-  it('pays the draw after the bank, so a loan makes the owner\'s year smaller', () => {
+  it("pays the draw after the bank, so a loan makes the owner's year smaller", () => {
     const business = mature();
     const free = runBusinessesYear({ ...input, businesses: [business], loans: [], available: 0 });
     const owing = runBusinessesYear({
@@ -398,12 +431,20 @@ describe('0603 — the business pays its own loan', () => {
     const row = (s: GameState) => s.loans.find((loan) => loan.businessId === id);
     expect(Number(row(next)!.balance)).toBeLessThan(2_000_000);
     expect(row(next)!.termLeft).toBe(9);
-    expect(next.finance.transactions.some((t) => t.year === 2031 && /Small Business Loan — payment/.test(t.source))).toBe(false);
+    expect(
+      next.finance.transactions.some(
+        (t) => t.year === 2031 && /Small Business Loan — payment/.test(t.source),
+      ),
+    ).toBe(false);
 
     // The business is gone; the loan is the person's.
     const orphaned = { ...state, businesses: [], loans: [loanOn('biz:gone', 20_000)] };
     const after = advanceYear(orphaned).state;
-    expect(after.finance.transactions.some((t) => t.year === 2031 && /Small Business Loan — payment/.test(t.source))).toBe(true);
+    expect(
+      after.finance.transactions.some(
+        (t) => t.year === 2031 && /Small Business Loan — payment/.test(t.source),
+      ),
+    ).toBe(true);
     expect(after.loans.find((loan) => loan.businessId === 'biz:gone')?.termLeft).toBe(9);
   });
 });
@@ -422,7 +463,14 @@ describe('0603 — getting out with a lender to pay', () => {
     expect(sold.value.state.loans).toHaveLength(0);
     expect(cashOf(sold.value.state)).toBe(before + offer.proceeds - 10_000);
     expect(sold.value.entry.text).toMatch(/\$10,000 of it went to the bank/);
-    expect(sold.value.state.finance.transactions.some((t) => t.category === 'debt' && Number(t.amount) === -1_000_000 && /settled on the sale/.test(t.source))).toBe(true);
+    expect(
+      sold.value.state.finance.transactions.some(
+        (t) =>
+          t.category === 'debt' &&
+          Number(t.amount) === -1_000_000 &&
+          /settled on the sale/.test(t.source),
+      ),
+    ).toBe(true);
   });
 
   it('takes the whole sale for a loan bigger than it, and leaves the rest owed', () => {
@@ -475,7 +523,13 @@ describe('0603 — what a lender is shown', () => {
     expect(businessProfitOf(with3([30_000, 60_000, 90_000]))).toBe(60_000);
     expect(businessProfitOf(with3([-50_000, -10_000, 20_000]))).toBe(0);
     expect(businessProfitOf(with3([]))).toBe(0);
-    const two = { ...state, businesses: [{ ...one, profits: [40_000] }, { ...one, id: 'biz:b', profits: [-90_000] }] };
+    const two = {
+      ...state,
+      businesses: [
+        { ...one, profits: [40_000] },
+        { ...one, id: 'biz:b', profits: [-90_000] },
+      ],
+    };
     expect(businessProfitOf(two)).toBe(40_000);
   });
 
@@ -491,15 +545,21 @@ describe('0603 — what a lender is shown', () => {
     const paid = payLoan(both, 'loan.smallbiz', 20_000, 'biz:second');
     expect(paid.ok).toBe(true);
     if (!paid.ok) return;
-    const balances = paid.value.state.loans.map((loan) => [loan.businessId, Number(loan.balance) / 100]);
-    expect(balances).toEqual([[first.id, 50_000], ['biz:second', 60_000]]);
+    const balances = paid.value.state.loans.map((loan) => [
+      loan.businessId,
+      Number(loan.balance) / 100,
+    ]);
+    expect(balances).toEqual([
+      [first.id, 50_000],
+      ['biz:second', 60_000],
+    ]);
     // Clearing one leaves the other exactly where it was.
     const cleared = payLoan(both, 'loan.smallbiz', 50_000, first.id);
     if (!cleared.ok) throw new Error('could not clear');
     expect(cleared.value.title).toBe('Cleared');
-    expect(cleared.value.state.loans.map((loan) => [loan.businessId, Number(loan.balance) / 100])).toEqual([
-      ['biz:second', 80_000],
-    ]);
+    expect(
+      cleared.value.state.loans.map((loan) => [loan.businessId, Number(loan.balance) / 100]),
+    ).toEqual([['biz:second', 80_000]]);
     // And one that is not tied to a business cannot be reached by naming a business.
     const missing = payLoan(both, 'loan.smallbiz', 1_000);
     expect(missing.ok ? undefined : missing.error).toBe('noSuchLoan');
@@ -512,7 +572,8 @@ describe('0603 — a lender is paid at a death too', () => {
     for (let i = 0; i < 12 && tried < 1; i += 1) {
       let state = established(topUp(liveTo(`biz-owed-${i}`, 30), 400_000), 'biz.cafe');
       let guard = 0;
-      while (state.player.alive && (guard += 1) < 90) state = answerEverything(advanceYear(state).state);
+      while (state.player.alive && (guard += 1) < 90)
+        state = answerEverything(advanceYear(state).state);
       const heir = heirsIn(state.family)[0];
       const business = state.businesses[0];
       if (state.player.alive || !heir || !business) continue;
@@ -524,7 +585,11 @@ describe('0603 — a lender is paid at a death too', () => {
       if (!clear || !owing) continue;
       tried += 1;
       const gift = (s: GameState): number =>
-        Number(s.finance.transactions.find((row) => row.category === 'gift' && /business/i.test(row.source))?.amount ?? 0) / 100;
+        Number(
+          s.finance.transactions.find(
+            (row) => row.category === 'gift' && /business/i.test(row.source),
+          )?.amount ?? 0,
+        ) / 100;
       expect(gift(clear)).toBeGreaterThan(20_000);
       expect(gift(clear) - gift(owing)).toBe(20_000);
     }

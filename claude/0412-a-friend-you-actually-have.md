@@ -1,8 +1,8 @@
 # Ticket 0412 — a friend you actually have
 
 Roadmap item 5b, recommended next by 0411, and made of two findings: **2b**
-*"warmth is grown by a button, and there is a trough at twenty"* and **2d** *"the
-`friendship` category has six events for an adult, all of them about romance."*
+_"warmth is grown by a button, and there is a trough at twenty"_ and **2d** _"the
+`friendship` category has six events for an adult, all of them about romance."_
 
 2d is exactly true. 2b is true and was measured too narrowly — the trough is not
 about being twenty, and it happens three times. And at the other end of the same
@@ -13,17 +13,17 @@ mechanism there was a second failure nothing had noticed at all.
 A player who answers every question the game raises and never opens a screen,
 90 lives:
 
-| age | share with NO friend | closest friend, median |
-|---|---|---|
-| 12 | 10.0% | 57 |
-| **14** | **84.4%** | 44 |
-| 17 | 11.1% | 56 |
-| 18 | 31.1% | 52 |
-| **19** | **88.9%** | 44 |
-| **20** | **87.8%** | 42 |
-| 21 | 68.9% | 47 |
-| 22 | 37.8% | 51 |
-| 25 | 11.1% | 67 |
+| age    | share with NO friend | closest friend, median |
+| ------ | -------------------- | ---------------------- |
+| 12     | 10.0%                | 57                     |
+| **14** | **84.4%**            | 44                     |
+| 17     | 11.1%                | 56                     |
+| 18     | 31.1%                | 52                     |
+| **19** | **88.9%**            | 44                     |
+| **20** | **87.8%**            | 42                     |
+| 21     | 68.9%                | 47                     |
+| 22     | 37.8%                | 51                     |
+| 25     | 11.1%                | 67                     |
 
 Three teeth, not one. The cause is not adulthood: **a friendship in this build
 was a function of how long the current room had been open.** A new cast starts at
@@ -40,12 +40,12 @@ nothing between "in the same room" and gone.
 
 The half no finding had noticed, at the other end of the same mechanism:
 
-| closest platonic friend | p10 | median | p90 | at exactly 100 |
-|---|---|---|---|---|
-| age 22 | 42 | 51 | 61 | 0% |
-| age 30 | 66 | 93 | 100 | 32.2% |
-| **age 40** | **100** | **100** | **100** | **91.0%** |
-| age 45 | 100 | 100 | 100 | 90.9% |
+| closest platonic friend | p10     | median  | p90     | at exactly 100 |
+| ----------------------- | ------- | ------- | ------- | -------------- |
+| age 22                  | 42      | 51      | 61      | 0%             |
+| age 30                  | 66      | 93      | 100     | 32.2%          |
+| **age 40**              | **100** | **100** | **100** | **91.0%**      |
+| age 45                  | 100     | 100     | 100     | 90.9%          |
 
 **Warmth was the one number in this build that never went through a curve.**
 `remember` added its delta raw and so did the year-in-the-same-room step, which
@@ -59,8 +59,8 @@ decent-but-not-best adult friend. You were in the room or you were nobody.
 That is CORE_RULES 13.70 in a third system. 13.66 caught the flat push through
 `curvedDelta` in school; 0411 caught the one-way ratchet in the event catalog;
 this is the same shape in `relationship`, and `curvedDelta`'s own note is the
-argument against it word for word — *a stat everyone maxes is a stat that says
-nothing.*
+argument against it word for word — _a stat everyone maxes is a stat that says
+nothing._
 
 ## And the catalog
 
@@ -82,7 +82,7 @@ Three things, and the first two are one mechanism seen from both ends.
 **A curve on warmth** (`curvedWarmth`), the same shape as `curvedDelta`: full
 strength at or below 50, tapering to nothing at 100. One-sided, and the asymmetry
 is the point rather than an omission — a loss stays at full strength because
-`driftRate` already owns the cooling curve with the *opposite* shape on purpose
+`driftRate` already owns the cooling curve with the _opposite_ shape on purpose
 (a friendship that has cooled cools faster), and because softening a loss would
 quietly disarm `fall-out`, whose whole job is to be able to end something. Not
 applied to `romanceYear`, which has had its own pivot since 0207.
@@ -142,18 +142,18 @@ the step is the arithmetic rather than the slot.
 
 Same 90 seeds, before and after:
 
-| | before | after |
-|---|---|---|
-| share with no friend at 14 | **84.4%** | **31.1%** |
-| share with no friend at 19 | **88.9%** | **51.1%** |
-| share with no friend at 20 | **87.8%** | **60.0%** |
-| closest friend at 45, p10 / med / p90 | **100 / 100 / 100** | **84 / 95 / 96** |
-| closest friend at 45 pinned at the cap | **90.9%** | **0.0%** |
-| pooled platonic warmth at 40, p10 / med | 34 / **100** | 35 / **83** |
-| pooled at 40, share at or above 90 | 64.9% | 33.4% |
-| adult years naming somebody | 19.5% | 33.1% |
-| share of the circle at 26 met since school | — | 89.2% |
-| lives still holding somebody from before 17, at 26 | — | 46.0% |
+|                                                    | before              | after            |
+| -------------------------------------------------- | ------------------- | ---------------- |
+| share with no friend at 14                         | **84.4%**           | **31.1%**        |
+| share with no friend at 19                         | **88.9%**           | **51.1%**        |
+| share with no friend at 20                         | **87.8%**           | **60.0%**        |
+| closest friend at 45, p10 / med / p90              | **100 / 100 / 100** | **84 / 95 / 96** |
+| closest friend at 45 pinned at the cap             | **90.9%**           | **0.0%**         |
+| pooled platonic warmth at 40, p10 / med            | 34 / **100**        | 35 / **83**      |
+| pooled at 40, share at or above 90                 | 64.9%               | 33.4%            |
+| adult years naming somebody                        | 19.5%               | 33.1%            |
+| share of the circle at 26 met since school         | —                   | 89.2%            |
+| lives still holding somebody from before 17, at 26 | —                   | 46.0%            |
 
 The turnover numbers have no "before" because the question could not arise: a
 friendship that had left the room had nothing holding it, so there was almost
@@ -168,7 +168,7 @@ which shifts every downstream draw in every played life. Four of these were
 latent defects that a different set of lives finally exercised.
 
 - **`advance.test.ts` found five interaction lines that never name the person.**
-  *"It was fine. It was exactly fine, all afternoon, and you both felt it."* —
+  _"It was fine. It was exactly fine, all afternoon, and you both felt it."_ —
   on somebody's page, as their memory of you. Wrong since 0206, and invisible for
   six tickets because nothing but a button had ever written one of these memories
   and a simulated life never presses a button. Two of the five also broke writing
@@ -191,8 +191,8 @@ latent defects that a different set of lives finally exercised.
   doing the old thing under the fixed one's name.** That is the worst version of
   it, because the name is what a reader checks. New rule **13.72**.
 - **`life-offer.test.ts` asserted the wrong wedding floor, and 0410 wrote it.**
-  It reasoned *"one year at seeing, two at together, one at engaged, all counted
-  from adulthood"* and concluded 22. The ladder's real floor is **21**: `together`
+  It reasoned _"one year at seeing, two at together, one at engaged, all counted
+  from adulthood"_ and concluded 22. The ladder's real floor is **21**: `together`
   is a stage a sixteen-year-old may hold, so `yearsShort` counts that year from
   `since` rather than from adulthood and a couple can arrive at eighteen having
   already served it. It passed for two tickets because no school couple had ever
@@ -202,7 +202,7 @@ latent defects that a different set of lives finally exercised.
 - **`adult-social.test.ts` was measuring a circle with the age of its oldest
   member.** Both its absolute claims used `min(metAtAge)`, and about two lives in
   five now keep ONE person from before seventeen — so the mean of the minimum
-  fell to 14.4 while the thing the threshold is about got *better*: 89.2% of the
+  fell to 14.4 while the thing the threshold is about got _better_: 89.2% of the
   circle at twenty-six is people met since school. A lifelong friend is not
   0207b's bug; 0207b's bug was that there was no turnover at all. Third
   instrument for that claim, the first two both proxies, and this one is
@@ -230,7 +230,7 @@ latent defects that a different set of lives finally exercised.
 is a 28-point improvement and it is not solved. The remaining cause is real and
 out of scope: a character who has left school has work and the street and nothing
 else, because `education.activities` only exists while they are at school — the
-same gap 0211 measured as *"nobody over eighteen is an athlete in this build"*.
+same gap 0211 measured as _"nobody over eighteen is an athlete in this build"_.
 Until an adult can join something, the years between the class ending and the
 work crew warming up have two doors instead of three.
 

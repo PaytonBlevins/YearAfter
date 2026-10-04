@@ -27,11 +27,7 @@ import {
   STATE_PENSION_AT,
   UNLOCKS_AT,
 } from '@yearafter/finance';
-import {
-  benefitOfCurrentJob,
-  contributionPreview,
-  retirementRefusal,
-} from '@yearafter/simulation';
+import { benefitOfCurrentJob, contributionPreview, retirementRefusal } from '@yearafter/simulation';
 import {
   ActionButton,
   Card,
@@ -64,9 +60,7 @@ export function RetirementScreen() {
 
   const pension =
     retirement.serviceYears > 0
-      ? Math.round(
-          (Number(retirement.finalPensionablePay) / 100) * 0.016 * retirement.serviceYears,
-        )
+      ? Math.round((Number(retirement.finalPensionablePay) / 100) * 0.016 * retirement.serviceYears)
       : 0;
 
   return (
@@ -282,8 +276,8 @@ export function RetirementScreen() {
       ) : null}
 
       <Text style={styles.note}>
-        This never shows up as its own line on your finances — it is part of what you are worth,
-        the same as anything else you own.
+        This never shows up as its own line on your finances — it is part of what you are worth, the
+        same as anything else you own.
       </Text>
     </ScrollView>
   );

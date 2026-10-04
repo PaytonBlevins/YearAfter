@@ -116,7 +116,11 @@ describe('0412 — who a year of silence would cost', () => {
       peer({ id: asNpcId('npc:teach'), kind: 'teacher', relationship: clampStat(60) as StatValue }),
       peer({ id: asNpcId('npc:cold'), relationship: clampStat(WORTH_KEEPING - 1) as StatValue }),
       peer({ id: asNpcId('npc:gone'), relationship: clampStat(60) as StatValue, endedAtAge: 17 }),
-      peer({ id: asNpcId('npc:seen'), relationship: clampStat(60) as StatValue, lastContactAge: 18 }),
+      peer({
+        id: asNpcId('npc:seen'),
+        relationship: clampStat(60) as StatValue,
+        lastContactAge: 18,
+      }),
     ];
     const keepable = keepableWith(people, 18).map((person) => String(person.id));
     expect(keepable).toEqual(['npc:out']);
@@ -174,9 +178,10 @@ describe('0412 — what an unchosen year is worth', () => {
     const hangOut = INTERACTIONS.find((entry) => entry.id === 'hang-out')!;
     const gained = (at: number) => curvedWarmth(at, keptUpWarmth(hangOut.onGood));
 
-    expect(gained(FRIENDSHIP_THRESHOLD), 'at the friendship line, ringing holds it').toBeGreaterThan(
-      driftRate(FRIENDSHIP_THRESHOLD),
-    );
+    expect(
+      gained(FRIENDSHIP_THRESHOLD),
+      'at the friendship line, ringing holds it',
+    ).toBeGreaterThan(driftRate(FRIENDSHIP_THRESHOLD));
     expect(gained(85), 'and at eighty-five it cannot hold it').toBeLessThan(driftRate(85));
   });
 
@@ -195,8 +200,10 @@ describe('0412 — what an unchosen year is worth', () => {
         if (!way) continue;
         expect(way.weight, `${way.id} is heavy`).toBe('light');
         expect(way.kind === 'peer' || way.kind === 'both').toBe(true);
-        if (way.minRelationship !== undefined) expect(warmth).toBeGreaterThanOrEqual(way.minRelationship);
-        if (way.maxRelationship !== undefined) expect(warmth).toBeLessThanOrEqual(way.maxRelationship);
+        if (way.minRelationship !== undefined)
+          expect(warmth).toBeGreaterThanOrEqual(way.minRelationship);
+        if (way.maxRelationship !== undefined)
+          expect(warmth).toBeLessThanOrEqual(way.maxRelationship);
       }
     }
   });

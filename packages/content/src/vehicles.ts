@@ -199,7 +199,10 @@ export interface VehicleMod {
   readonly blurb: string;
 }
 
-const modCatalog = modsData as unknown as { readonly version: number; readonly entries: readonly VehicleMod[] };
+const modCatalog = modsData as unknown as {
+  readonly version: number;
+  readonly entries: readonly VehicleMod[];
+};
 
 export const VEHICLE_MODS: readonly VehicleMod[] = modCatalog.entries;
 

@@ -1,8 +1,8 @@
 # Ticket 0415 — a life that shapes you
 
-Roadmap finding 2c, 0411's leftover: *"study, a hobby, raising a child and being
+Roadmap finding 2c, 0411's leftover: _"study, a hobby, raising a child and being
 ill are all things that change a person, and none of them touch a stat in
-adulthood."*
+adulthood."_
 
 ## Measured first, paired per life from twenty-five to fifty
 
@@ -10,14 +10,14 @@ adulthood."*
 self so this measures development and not who ends up where (0411's cohort
 mistake):
 
-| | willpower | discipline |
-|---|---|---|
-| eight+ years raising a small child | +13.1 | −3.0 |
-| never | +12.4 | −2.8 |
-| five+ years seriously ill | +12.2 | −4.3 |
-| never | +12.9 | −2.3 |
-| five+ years running on empty | **+15.7** | −0.8 |
-| never | +11.9 | −3.3 |
+|                                    | willpower | discipline |
+| ---------------------------------- | --------- | ---------- |
+| eight+ years raising a small child | +13.1     | −3.0       |
+| never                              | +12.4     | −2.8       |
+| five+ years seriously ill          | +12.2     | −4.3       |
+| never                              | +12.9     | −2.3       |
+| five+ years running on empty       | **+15.7** | −0.8       |
+| never                              | +11.9     | −3.3       |
 
 Raising a child for a decade and being seriously ill for five years left a person
 exactly where they would have been anyway. And the last row is backwards: five
@@ -33,10 +33,10 @@ Measuring that last row showed why it was backwards. **Willpower** — the stat
 `resilience` reads to decide how hard a year lands — was a one-way ratchet in
 adulthood:
 
-| willpower | 18 | 30 | 45 | 60 |
-|---|---|---|---|---|
+| willpower          | 18       | 30       | 45       | 60           |
+| ------------------ | -------- | -------- | -------- | ------------ |
 | p10 / median / p90 | 54/71/85 | 67/79/89 | 78/88/92 | **88/92/94** |
-| sd | 11.4 | 8.6 | 5.3 | **2.8** |
+| sd                 | 11.4     | 8.6      | 5.3      | **2.8**      |
 
 **Not one life in 150 had lower willpower at forty-five than at eighteen.** That's
 0411's Charisma collapse (sd 9.7 → 3.8) again, on the one stat 0411 didn't list.
@@ -47,12 +47,12 @@ out came from the last two tickets' content (0413's friendship tranche and 0414'
 family and ordinary-life events). The tell was where they sat — on both outcomes
 of a hard choice:
 
-- *"You set a date and had to enforce it, which neither of you has completely got
-  over"* — +3.
-- *"You told nobody and got on with it. It worked, right up until the day it
-  didn't"* — +4.
-- *"{kid} stayed four months. You love {kidThem} and you were extremely glad when
-  it ended"* — +2.
+- _"You set a date and had to enforce it, which neither of you has completely got
+  over"_ — +3.
+- _"You told nobody and got on with it. It worked, right up until the day it
+  didn't"_ — +4.
+- _"{kid} stayed four months. You love {kidThem} and you were extremely glad when
+  it ended"_ — +2.
 
 When the hard thing works and when it fails pay the same number, the number isn't
 measuring what happened. It's a fee for being asked, and a fee paid every year is
@@ -101,26 +101,26 @@ total is held to one point per stat.
 
 Same 200 seeds:
 
-| | before | after |
-|---|---|---|
-| willpower sd at 18 / 45 / 60 | 11.4 / 5.3 / **2.8** | 11.4 / 9.4 / **8.1** |
-| willpower p10 at 60 | 88 | **70** |
-| willpower gain 18→45, median | +16 | +7 |
-| lives with lower willpower at 45 than at 18 | **0%** | 4% |
-| discipline 25→50: raising a small child vs never | −3.0 vs −2.8 | **+0.8 vs −2.8** |
-| willpower 25→50: five+ strained years vs none | **+15.7 vs +11.9** | +5.2 vs +7.6 |
-| willpower 25→50: five+ years ill vs never | +12.2 vs +12.9 | +5.8 vs +7.1 |
+|                                                  | before               | after                |
+| ------------------------------------------------ | -------------------- | -------------------- |
+| willpower sd at 18 / 45 / 60                     | 11.4 / 5.3 / **2.8** | 11.4 / 9.4 / **8.1** |
+| willpower p10 at 60                              | 88                   | **70**               |
+| willpower gain 18→45, median                     | +16                  | +7                   |
+| lives with lower willpower at 45 than at 18      | **0%**               | 4%                   |
+| discipline 25→50: raising a small child vs never | −3.0 vs −2.8         | **+0.8 vs −2.8**     |
+| willpower 25→50: five+ strained years vs none    | **+15.7 vs +11.9**   | +5.2 vs +7.6         |
+| willpower 25→50: five+ years ill vs never        | +12.2 vs +12.9       | +5.8 vs +7.1         |
 
 And per year, on the test file's own 150 lives:
 
-| willpower per year | catalog audit alone | both halves |
-|---|---|---|
-| a second struggling year | +0.26 | **−0.59** |
-| a calm year | +0.28 | +0.30 |
-| discipline 25→50, raising vs never | −2.6 vs −1.0 | **+2.5 vs −1.1** |
+| willpower per year                 | catalog audit alone | both halves      |
+| ---------------------------------- | ------------------- | ---------------- |
+| a second struggling year           | +0.26               | **−0.59**        |
+| a calm year                        | +0.28               | +0.30            |
+| discipline 25→50, raising vs never | −2.6 vs −1.0        | **+2.5 vs −1.1** |
 
 The middle column shows why both halves are needed. Fixing the catalog stopped
-hard years paying *more*, but they still paid the same as easy ones; only the
+hard years paying _more_, but they still paid the same as easy ones; only the
 system can take something away.
 
 Smarts, Charisma and Discipline spreads at sixty move by less than a point either
@@ -158,7 +158,7 @@ ages reaching `lifeShaping` from real played states.
   There's nothing in adult state for a hobby to be. `education.activities` only
   exists while a character is at school, which is the same gap as 2b's leftover
   ("twenty is still the loneliest year": an adult has work and the street and no
-  third door) and 0211's *"nobody over eighteen is an athlete."* Three findings,
+  third door) and 0211's _"nobody over eighteen is an athlete."_ Three findings,
   one missing mechanism: **an adult who can join something.** Logged as finding
   2g.
 - **The fraying half of illness rarely fires**, because hardly anybody is below

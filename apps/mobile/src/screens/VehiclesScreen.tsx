@@ -434,9 +434,7 @@ export function VehicleScreen() {
           title={(vehicle.mods ?? []).length > 0 ? 'Change something' : 'Take it to a shop'}
           subtitle="Wheels, paint, exhaust, the engine"
           affordance="navigate"
-          onPress={() =>
-            push({ screen: 'carMods', title: 'Modifications', vehicleId: vehicle.id })
-          }
+          onPress={() => push({ screen: 'carMods', title: 'Modifications', vehicleId: vehicle.id })}
         />
       </Card>
 
@@ -496,7 +494,9 @@ export function CarModsScreen() {
       </Text>
       {slots.map((view) => (
         <Fragment key={view.slot}>
-          <SectionHeading note={view.fitted?.name}>{VEHICLE_MOD_SLOT_LABELS[view.slot]}</SectionHeading>
+          <SectionHeading note={view.fitted?.name}>
+            {VEHICLE_MOD_SLOT_LABELS[view.slot]}
+          </SectionHeading>
           <Card>
             {view.options.map((option, index) => {
               const added = option.worthAfter - worth;

@@ -6,20 +6,20 @@ the event catalog had never heard of either.
 
 ## What was there
 
-| | before | after |
-|---|---|---|
-| events that can fire at age 40 | **26** of 374 | **93** of 444 |
-| of those, decisions | **0** | 13 |
-| about work | **0** | 26 |
-| about a diagnosis | **0** | 22 |
-| about losing somebody | **0** | 19 |
-| adult feed lines that repeat inside one life | **50%** | 23% |
+|                                              | before        | after         |
+| -------------------------------------------- | ------------- | ------------- |
+| events that can fire at age 40               | **26** of 374 | **93** of 444 |
+| of those, decisions                          | **0**         | 13            |
+| about work                                   | **0**         | 26            |
+| about a diagnosis                            | **0**         | 22            |
+| about losing somebody                        | **0**         | 19            |
+| adult feed lines that repeat inside one life | **50%**       | 23%           |
 
 The entire adult library was eight events named `adult.placeholder.1` through
 `.8` — twenty-four lines covering ages eighteen to death. Measured across sixty
 lives, half of every adult's feed was a line that character had already seen:
-*"Same job, same apartment, same weekends"* six times in one life, *"Quiet
-year"* four times. And an adult was never asked an authored question at all —
+_"Same job, same apartment, same weekends"_ six times in one life, _"Quiet
+year"_ four times. And an adult was never asked an authored question at all —
 the only decisions they got were the systemic doors 0402, 0405 and 0407 built.
 
 ## The part that was not about writing
@@ -69,7 +69,7 @@ intensities, and outcomes that can land well or badly:
 
 The generator and validator rejected eleven drafts between them: five labels too
 long for a phone, three money effects whose text did not name the amount, a
-`{adultThey}` starting a sentence, a VAGUE construction, and *"fortnight"* —
+`{adultThey}` starting a sentence, a VAGUE construction, and _"fortnight"_ —
 which rule 7 names explicitly and I wrote anyway. All fixed at source.
 
 ## Verified
@@ -82,7 +82,7 @@ which rule 7 names explicitly and I wrote anyway. All fixed at source.
   **zero** loss events at the unbereaved.
 
 A played-population audit was tried first for the health gate and could not
-answer it: the health phase runs *after* events in the same year and can clear a
+answer it: the health phase runs _after_ events in the same year and can clear a
 condition, so a character legitimately asked about their diagnosis in March
 reads as perfectly well in December. That is a measurement artifact, not a leak,
 and the gate is asserted where it lives instead.
@@ -91,15 +91,15 @@ and the gate is asserted where it lives instead.
 
 - **`health.test.ts` inverted its athlete-injury ratio again.** It detected
   injuries with a regex — `hurt|fall|accident|came off` — standing in for "the
-  health phase reported one". 0405 caught that regex matching *"starting in the
-  fall"* in a college acceptance. 0409 wrote the first adult injury lines
+  health phase reported one". 0405 caught that regex matching _"starting in the
+  fall"_ in a college acceptance. 0409 wrote the first adult injury lines
   ("Hurt your back lifting something stupid") and every one landed in the bucket
-  labelled *"a classmate who joined nothing"*.
+  labelled _"a classmate who joined nothing"_.
 
   Two things came out of fixing it. The regex is gone — `HURT_LINES` is exported
   from the health phase and the test matches the phase's own lines, so copy
   edits move both sides together. And bucketing all eighty years of a life under
-  a test called *"a school athlete... a classmate"* was itself the shortcut:
+  a test called _"a school athlete... a classmate"_ was itself the shortcut:
   restricting it to school years revealed that the old, comfortable 14.8× ratio
   was partly an artifact of 7,600 injury-free adult years padding the
   denominator. The honest signal is cleaner than the old one — **40 injuries in
@@ -126,7 +126,7 @@ and the gate is asserted where it lives instead.
 
 Repetition is 23%, not zero, and it should not be zero: an adult year that
 genuinely resembles the last one is a real thing and the eight placeholder
-events still cover it. What has changed is that it is no longer the *only*
+events still cover it. What has changed is that it is no longer the _only_
 thing. The remaining repeats are concentrated in `random`, which is the category
 0409 did not touch.
 

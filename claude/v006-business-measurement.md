@@ -14,19 +14,19 @@ the game asked and looked at who could start a business, with what money.
 Liquid money is cash plus the portfolio plus the pension, in dollars, at the
 end of each year. The "working" column counts a year with any earned income.
 
-| age | 20–24 | 25–34 | 35–44 | 45–54 | 55–64 | 65+ |
-|---|---|---|---|---|---|---|
-| liquid p25 | 10,785 | 15,519 | 20,062 | 30,648 | 34,063 | 30,097 |
-| liquid p50 | 22,093 | 35,716 | 54,005 | 74,682 | 88,921 | 93,965 |
-| liquid p75 | 37,629 | 74,375 | 112,460 | 170,256 | 229,431 | 230,580 |
-| liquid p90 | 65,183 | 147,096 | 232,553 | 283,900 | 380,767 | 365,664 |
-| liquid p99 | 105,088 | 241,752 | 400,569 | 624,341 | 736,119 | 748,943 |
-| ≥ $25,000 | 44% | 62% | 71% | 79% | 81% | 80% |
-| ≥ $100,000 | 1% | 19% | 28% | 40% | 47% | 48% |
-| ≥ $500,000 | 0% | 0% | 0% | 3% | 6% | 6% |
-| ≥ $2,000,000 | 0% | 0% | 0% | 0% | 0% | 0% |
-| earned p50 | 32,659 | 42,215 | 68,852 | 97,356 | 91,600 | 79,165 |
-| earned p99 | 82,762 | 115,128 | 151,433 | 172,215 | 193,163 | 146,053 |
+| age          | 20–24   | 25–34   | 35–44   | 45–54   | 55–64   | 65+     |
+| ------------ | ------- | ------- | ------- | ------- | ------- | ------- |
+| liquid p25   | 10,785  | 15,519  | 20,062  | 30,648  | 34,063  | 30,097  |
+| liquid p50   | 22,093  | 35,716  | 54,005  | 74,682  | 88,921  | 93,965  |
+| liquid p75   | 37,629  | 74,375  | 112,460 | 170,256 | 229,431 | 230,580 |
+| liquid p90   | 65,183  | 147,096 | 232,553 | 283,900 | 380,767 | 365,664 |
+| liquid p99   | 105,088 | 241,752 | 400,569 | 624,341 | 736,119 | 748,943 |
+| ≥ $25,000    | 44%     | 62%     | 71%     | 79%     | 81%     | 80%     |
+| ≥ $100,000   | 1%      | 19%     | 28%     | 40%     | 47%     | 48%     |
+| ≥ $500,000   | 0%      | 0%      | 0%      | 3%      | 6%      | 6%      |
+| ≥ $2,000,000 | 0%      | 0%      | 0%      | 0%      | 0%      | 0%      |
+| earned p50   | 32,659  | 42,215  | 68,852  | 97,356  | 91,600  | 79,165  |
+| earned p99   | 82,762  | 115,128 | 151,433 | 172,215 | 193,163 | 146,053 |
 
 What that says:
 
@@ -46,14 +46,14 @@ What that says:
 
 ## What the real world says (to calibrate against)
 
-| fact | figure | source |
-|---|---|---|
-| Establishments still open after 1 / 2 / 5 / 10 years | 79.6% / 68.9% / 50.6% / 34.7% | BLS, establishments born March 2013 |
-| Firms with no employees | 81.9% of 34.75M small businesses | SBA Office of Advocacy FAQ 2024 |
-| Firms with paid employees | 18.1%, 6.27M | same |
-| Share of private-sector workers at small businesses | 45.9% | same |
-| Self-employed, 65 and over | 16.3% (2023), up from 13.0% | same |
-| Self-employed, under 30 | 10.5% (2023) | same |
+| fact                                                 | figure                           | source                              |
+| ---------------------------------------------------- | -------------------------------- | ----------------------------------- |
+| Establishments still open after 1 / 2 / 5 / 10 years | 79.6% / 68.9% / 50.6% / 34.7%    | BLS, establishments born March 2013 |
+| Firms with no employees                              | 81.9% of 34.75M small businesses | SBA Office of Advocacy FAQ 2024     |
+| Firms with paid employees                            | 18.1%, 6.27M                     | same                                |
+| Share of private-sector workers at small businesses  | 45.9%                            | same                                |
+| Self-employed, 65 and over                           | 16.3% (2023), up from 13.0%      | same                                |
+| Self-employed, under 30                              | 10.5% (2023)                     | same                                |
 
 Two targets follow. A new business should have about an even chance of
 reaching year five. Most of the failures are early: a fifth gone in the first
@@ -77,14 +77,14 @@ year, a third by the end of the second.
 
 ## The breakdown
 
-| ticket | what | spec |
-|---|---|---|
-| **0601 The business engine** | Opening, supplier and COGS, a price slider, Low / Medium / High / Big Bucks payroll, automatic staffing, demand, brand reputation, profit, valuation and sale. A representative catalog of twelve. Assets → Businesses | 393, 398–400, 404, 849–878, 1356 |
-| 0602 Catalog and expansion | The rest of spec 396's list, a real wealth gate, expanding a business | 396, 912, 1356 |
-| 0603 Business finance | The `business` loan type 0307 left open, buying an existing business, acquisition economics that stop scale exploits | 1857, 1392 |
-| 0604 Business events and heirs | Weighted events tuned for fun, competition that never dominates, the economy's effect on demand, a business at a death | 413, 1392, 1222 |
-| 0605 Private investments | Large returns that can fail or lock the money up, opportunity capacity, scaled to wealth | 1383, 1860 |
-| 0606 Commercial real estate | Retail, office and warehouse space, integrated with 0503's landlord | 1708, 1863 |
+| ticket                         | what                                                                                                                                                                                                                   | spec                             |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| **0601 The business engine**   | Opening, supplier and COGS, a price slider, Low / Medium / High / Big Bucks payroll, automatic staffing, demand, brand reputation, profit, valuation and sale. A representative catalog of twelve. Assets → Businesses | 393, 398–400, 404, 849–878, 1356 |
+| 0602 Catalog and expansion     | The rest of spec 396's list, a real wealth gate, expanding a business                                                                                                                                                  | 396, 912, 1356                   |
+| 0603 Business finance          | The `business` loan type 0307 left open, buying an existing business, acquisition economics that stop scale exploits                                                                                                   | 1857, 1392                       |
+| 0604 Business events and heirs | Weighted events tuned for fun, competition that never dominates, the economy's effect on demand, a business at a death                                                                                                 | 413, 1392, 1222                  |
+| 0605 Private investments       | Large returns that can fail or lock the money up, opportunity capacity, scaled to wealth                                                                                                                               | 1383, 1860                       |
+| 0606 Commercial real estate    | Retail, office and warehouse space, integrated with 0503's landlord                                                                                                                                                    | 1708, 1863                       |
 
 0601 takes valuation and sale because an engine without a way out is a trap. It
 takes a representative twelve rather than the whole catalog because the spec
@@ -108,14 +108,14 @@ roadmap.
 150 lives, net worth (cash + portfolio + homes + cars + valuables + business,
 less debts), dollars, at the end of each year:
 
-| age | 20–24 | 25–34 | 35–44 | 45–54 | 55–64 | 65+ |
-|---|---|---|---|---|---|---|
-| p50 | 29,797 | 51,009 | 105,672 | 237,996 | 376,100 | 499,563 |
-| p90 | 69,748 | 139,935 | 278,120 | 494,757 | 737,497 | 948,116 |
-| p99 | 123,497 | 231,403 | 393,454 | 696,533 | 1,017,667 | 1,267,864 |
-| ≥ $500,000 | 0% | 0% | 0% | 10% | 35% | 50% |
-| ≥ $1,000,000 | 0% | 0% | 0% | 0% | 1% | 7% |
-| ≥ $3,000,000 | 0% | 0% | 0% | 0% | 0% | 0% |
+| age          | 20–24   | 25–34   | 35–44   | 45–54   | 55–64     | 65+       |
+| ------------ | ------- | ------- | ------- | ------- | --------- | --------- |
+| p50          | 29,797  | 51,009  | 105,672 | 237,996 | 376,100   | 499,563   |
+| p90          | 69,748  | 139,935 | 278,120 | 494,757 | 737,497   | 948,116   |
+| p99          | 123,497 | 231,403 | 393,454 | 696,533 | 1,017,667 | 1,267,864 |
+| ≥ $500,000   | 0%      | 0%      | 0%      | 10%     | 35%       | 50%       |
+| ≥ $1,000,000 | 0%      | 0%      | 0%      | 0%      | 1%        | 7%        |
+| ≥ $3,000,000 | 0%      | 0%      | 0%      | 0%      | 0%        | 0%        |
 
 A typical 35–44-year-old (about $105,000) sees businesses opening at up to
 $175,000. Nobody without a business reaches the manufacturing, trucking or
@@ -150,11 +150,11 @@ Thirty-one types, 300 businesses a type, ten years, a spread of economies
 (8% strong expansion, 17% growth, 50% normal, 12% slowdown, 9% recession, 4%
 severe), and an owner who covers a loss out of half the startup.
 
-| | 1 year | 2 | 5 | 10 |
-|---|---|---|---|---|
-| BLS | 80% | 69% | 51% | 35% |
-| 0603 engine | 96.3 | 88.9 | 81.5 | 78.5 |
-| with events and a rival | 96.0 | 87.7 | 78.7 | 75.3 |
+|                         | 1 year | 2    | 5    | 10   |
+| ----------------------- | ------ | ---- | ---- | ---- |
+| BLS                     | 80%    | 69%  | 51%  | 35%  |
+| 0603 engine             | 96.3   | 88.9 | 81.5 | 78.5 |
+| with events and a rival | 96.0   | 87.7 | 78.7 | 75.3 |
 
 The gap to BLS did not close. Four things were tried to close it (more
 events, larger losses, a lost-client event, a lost lease) and survival stayed in

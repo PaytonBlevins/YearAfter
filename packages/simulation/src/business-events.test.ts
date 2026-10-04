@@ -213,9 +213,11 @@ describe('0604 — a year with something in it', () => {
   });
 
   it('keeps a reputation inside nought and a hundred however the news lands', () => {
-    const low = runOne(cafe({ reputation: 0 }), seedWhere('bad-review', cafe({ reputation: 0 }))).businesses[0]!;
+    const low = runOne(cafe({ reputation: 0 }), seedWhere('bad-review', cafe({ reputation: 0 })))
+      .businesses[0]!;
     expect(low.reputation).toBeGreaterThanOrEqual(0);
-    const high = runOne(cafe({ reputation: 100 }), seedWhere('write-up', cafe({ reputation: 100 }))).businesses[0]!;
+    const high = runOne(cafe({ reputation: 100 }), seedWhere('write-up', cafe({ reputation: 100 })))
+      .businesses[0]!;
     expect(high.reputation).toBeLessThanOrEqual(100);
   });
 
@@ -258,7 +260,8 @@ describe('0604 — a rival', () => {
     for (let i = 0; i < 80; i += 1) {
       const seed = `fade-${i}`;
       const fresh = runOne(cafe({ rival: { since: YEAR - 1, bite: 0.1 } }), seed).businesses[0]!;
-      const spent = runOne(cafe({ rival: { since: YEAR - (RIVAL_YEARS - 1), bite: 0.1 } }), seed).businesses[0]!;
+      const spent = runOne(cafe({ rival: { since: YEAR - (RIVAL_YEARS - 1), bite: 0.1 } }), seed)
+        .businesses[0]!;
       // A rival on its second year is still there unless the news was that it closed.
       if (fresh.last!.event !== 'rival-closes') expect(fresh.rival, seed).toBeDefined();
       else expect(fresh.rival, seed).toBeUndefined();
@@ -305,7 +308,9 @@ describe('0604 — the economy, said out loud', () => {
     const last = result.businesses[0]!.last!;
     expect(last.economy).toBeLessThan(0.9);
     expect(last.economy).toBeGreaterThan(0.7);
-    expect(result.lines.some((line) => /downturn/i.test(line) && /Chez Nous/.test(line))).toBe(true);
+    expect(result.lines.some((line) => /downturn/i.test(line) && /Chez Nous/.test(line))).toBe(
+      true,
+    );
     const percent = /about (\d+)%/.exec(result.lines.find((line) => /downturn/i.test(line)) ?? '');
     expect(Number(percent?.[1])).toBe(Math.round((1 - last.economy!) * 100));
   });
@@ -326,7 +331,9 @@ describe('0604 — the economy, said out loud', () => {
     };
     const result = runOne(grand, 'boom', 'strongExpansion');
     expect(result.businesses[0]!.last!.economy).toBeGreaterThan(1.05);
-    expect(result.lines.some((line) => /good economy/i.test(line) && /The Grand/.test(line))).toBe(true);
+    expect(result.lines.some((line) => /good economy/i.test(line) && /The Grand/.test(line))).toBe(
+      true,
+    );
   });
 
   it('is felt by the trades that feel it: a recession is harder on a jeweller than a cleaner', () => {
@@ -367,11 +374,10 @@ function deadOwner(): { dead: GameState; heirId: string } {
     if (!opened.ok) continue;
     state = opened.value.state;
     let guard = 0;
-    while (state.player.alive && (guard += 1) < 90) state = answerEverything(advanceYear(state).state);
+    while (state.player.alive && (guard += 1) < 90)
+      state = answerEverything(advanceYear(state).state);
     if (state.player.alive || state.businesses.length === 0) continue;
-    const heir = heirsIn(state.family).find(
-      (member) => state.world.year - member.birthYear >= 18,
-    );
+    const heir = heirsIn(state.family).find((member) => state.world.year - member.birthYear >= 18);
     if (!heir) continue;
     memo = { dead: state, heirId: heir.id };
     return memo;
@@ -431,7 +437,9 @@ describe('0604 — an heir and the business', () => {
     expect(sold.businesses).toEqual([]);
     expect(sold.loans).toEqual([]);
     expect(
-      sold.finance.transactions.some((row) => row.category === 'gift' && /business/i.test(row.source)),
+      sold.finance.transactions.some(
+        (row) => row.category === 'gift' && /business/i.test(row.source),
+      ),
     ).toBe(true);
   });
 
@@ -449,7 +457,9 @@ describe('0604 — an heir and the business', () => {
     const next = continueAsChild(young, heirId, { keepBusinesses: true })!;
     expect(next.businesses).toEqual([]);
     expect(
-      next.finance.transactions.some((row) => row.category === 'gift' && /business/i.test(row.source)),
+      next.finance.transactions.some(
+        (row) => row.category === 'gift' && /business/i.test(row.source),
+      ),
     ).toBe(true);
   });
 

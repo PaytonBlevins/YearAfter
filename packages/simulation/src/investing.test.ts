@@ -152,7 +152,6 @@ function richEnough(seed: string, dollars: number, from = 40, until = 78): GameS
   return best;
 }
 
-
 /**
  * A life played long enough to have money to invest (Ticket 0409).
  *
@@ -725,9 +724,7 @@ describe('paying somebody for advice', () => {
     expect(expected).toBeGreaterThan(0);
 
     const after = advanceYear(state).state;
-    const charged = after.finance.transactions.filter((row) =>
-      row.source.includes(paid.name),
-    );
+    const charged = after.finance.transactions.filter((row) => row.source.includes(paid.name));
     /*
       Verified once by printing it: this character hires adv.independent with a
       $90,471 portfolio and pays $181. The early return above is a real branch —

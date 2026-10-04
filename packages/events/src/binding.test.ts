@@ -53,7 +53,7 @@ const contextWith = (people: readonly EventPerson[]): EventContext =>
   }) as unknown as EventContext;
 
 /** A source that always takes the first option, so the choice is the assertion. */
-const first = { pick: <T,>(values: readonly T[]): T => values[0] as T };
+const first = { pick: <T>(values: readonly T[]): T => values[0] as T };
 
 describe('0413 — a line about a friend names a friend', () => {
   it('binds a friend over an acquaintance, whatever the draw order', () => {

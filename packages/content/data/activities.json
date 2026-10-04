@@ -8,10 +8,7 @@
       "blurb": "Six miles before most people are awake.",
       "hoursPerWeek": 6,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ]
+        "stages": ["middle", "high"]
       },
       "tryout": {
         "label": "Try out",
@@ -34,10 +31,7 @@
       "blurb": "Practice every night, games on Fridays.",
       "hoursPerWeek": 8,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ],
+        "stages": ["middle", "high"],
         "needsParent": true
       },
       "tryout": {
@@ -61,9 +55,7 @@
       "blurb": "Two-a-days in August. Everyone knows you by October.",
       "hoursPerWeek": 10,
       "requires": {
-        "stages": [
-          "high"
-        ],
+        "stages": ["high"],
         "needsParent": true
       },
       "tryout": {
@@ -89,17 +81,8 @@
       "annualCost": 180,
       "costSource": "swim team fees and a season of goggles",
       "requires": {
-        "stages": [
-          "elementary",
-          "middle",
-          "high"
-        ],
-        "wealthAny": [
-          "modest",
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "stages": ["elementary", "middle", "high"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
       },
       "tryout": {
         "label": "Try out",
@@ -123,11 +106,7 @@
       "annualCost": 95,
       "costSource": "league registration and a pair of cleats",
       "requires": {
-        "stages": [
-          "elementary",
-          "middle",
-          "high"
-        ],
+        "stages": ["elementary", "middle", "high"],
         "needsParent": true
       },
       "tryout": {
@@ -150,9 +129,7 @@
       "blurb": "Cutting weight is a normal Tuesday.",
       "hoursPerWeek": 9,
       "requires": {
-        "stages": [
-          "high"
-        ]
+        "stages": ["high"]
       },
       "tryout": {
         "label": "Try out",
@@ -175,10 +152,7 @@
       "blurb": "Spring season. Bus rides and a stopwatch.",
       "hoursPerWeek": 6,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ]
+        "stages": ["middle", "high"]
       },
       "tryout": {
         "label": "Try out",
@@ -203,16 +177,8 @@
       "annualCost": 216,
       "costSource": "a rented clarinet at $18 a month",
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ],
-        "wealthAny": [
-          "modest",
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ],
+        "stages": ["middle", "high"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"],
         "needsParent": true
       },
       "effects": {
@@ -230,11 +196,7 @@
       "blurb": "Six quiet weeks, then three of everything at once.",
       "hoursPerWeek": 8,
       "requires": {
-        "stages": [
-          "elementary",
-          "middle",
-          "high"
-        ],
+        "stages": ["elementary", "middle", "high"],
         "needsParent": true
       },
       "tryout": {
@@ -257,11 +219,7 @@
       "blurb": "Two concerts a year and a lot of standing on risers.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": [
-          "elementary",
-          "middle",
-          "high"
-        ]
+        "stages": ["elementary", "middle", "high"]
       },
       "effects": {
         "charisma": 3,
@@ -277,10 +235,7 @@
       "blurb": "Turpentine, and nobody hurrying you along.",
       "hoursPerWeek": 3,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ]
+        "stages": ["middle", "high"]
       },
       "effects": {
         "happiness": 4,
@@ -296,12 +251,8 @@
       "blurb": "Before school, for people who already play.",
       "hoursPerWeek": 6,
       "requires": {
-        "stages": [
-          "high"
-        ],
-        "talentsAny": [
-          "music"
-        ]
+        "stages": ["high"],
+        "talentsAny": ["music"]
       },
       "tryout": {
         "label": "Audition",
@@ -324,11 +275,7 @@
       "blurb": "Two hours a week and a slow, permanent improvement.",
       "hoursPerWeek": 2,
       "requires": {
-        "stages": [
-          "elementary",
-          "middle",
-          "high"
-        ]
+        "stages": ["elementary", "middle", "high"]
       },
       "effects": {
         "smarts": 4,
@@ -346,10 +293,7 @@
       "annualCost": 25,
       "costSource": "Science Olympiad registration, covered by the booster club",
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ],
+        "stages": ["middle", "high"],
         "statAtLeast": {
           "smarts": 55
         }
@@ -368,9 +312,7 @@
       "blurb": "Weekend tournaments in other schools' cafeterias.",
       "hoursPerWeek": 6,
       "requires": {
-        "stages": [
-          "high"
-        ],
+        "stages": ["high"],
         "statAtLeast": {
           "charisma": 50
         },
@@ -399,16 +341,8 @@
       "annualCost": 140,
       "costSource": "robotics team parts and entry fees",
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ],
-        "wealthAny": [
-          "modest",
-          "comfortable",
-          "affluent",
-          "wealthy"
-        ]
+        "stages": ["middle", "high"],
+        "wealthAny": ["modest", "comfortable", "affluent", "wealthy"]
       },
       "effects": {
         "smarts": 5,
@@ -424,10 +358,7 @@
       "blurb": "Before school. Nobody knows it exists.",
       "hoursPerWeek": 3,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ],
+        "stages": ["middle", "high"],
         "statAtLeast": {
           "smarts": 60
         }
@@ -445,10 +376,7 @@
       "blurb": "Deadlines in February that nobody warned you about.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ]
+        "stages": ["middle", "high"]
       },
       "effects": {
         "discipline": 3,
@@ -464,10 +392,7 @@
       "blurb": "You have to be elected. You can lose.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ],
+        "stages": ["middle", "high"],
         "statAtLeast": {
           "charisma": 58
         }
@@ -492,9 +417,7 @@
       "blurb": "A deadline every two weeks, forever.",
       "hoursPerWeek": 5,
       "requires": {
-        "stages": [
-          "high"
-        ]
+        "stages": ["high"]
       },
       "effects": {
         "smarts": 3,
@@ -511,10 +434,7 @@
       "blurb": "Saturday mornings at the food bank.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ]
+        "stages": ["middle", "high"]
       },
       "effects": {
         "happiness": 4,
@@ -533,10 +453,7 @@
       "annualCost": 70,
       "costSource": "scout dues and a uniform shirt",
       "requires": {
-        "stages": [
-          "elementary",
-          "middle"
-        ],
+        "stages": ["elementary", "middle"],
         "needsParent": true
       },
       "effects": {
@@ -554,10 +471,7 @@
       "blurb": "Improv games in a carpeted room, twice a week.",
       "hoursPerWeek": 4,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ]
+        "stages": ["middle", "high"]
       },
       "effects": {
         "charisma": 4,
@@ -573,10 +487,7 @@
       "blurb": "Tuesdays in the library, one box of paperbacks.",
       "hoursPerWeek": 2,
       "requires": {
-        "stages": [
-          "elementary",
-          "middle"
-        ]
+        "stages": ["elementary", "middle"]
       },
       "effects": {
         "smarts": 4,
@@ -592,10 +503,7 @@
       "blurb": "A room at lunch, no explaining required.",
       "hoursPerWeek": 2,
       "requires": {
-        "stages": [
-          "middle",
-          "high"
-        ]
+        "stages": ["middle", "high"]
       },
       "effects": {
         "happiness": 4,
@@ -613,9 +521,7 @@
       "annualCost": 150,
       "costSource": "rec league fees",
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {
@@ -634,9 +540,7 @@
       "blurb": "Tuesday nights, and a long one on Sundays.",
       "hoursPerWeek": 3,
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {
@@ -655,9 +559,7 @@
       "blurb": "Tuesdays in a church hall. Nobody checks.",
       "hoursPerWeek": 2,
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {
@@ -675,9 +577,7 @@
       "blurb": "Two shows a year and a set nobody finishes.",
       "hoursPerWeek": 5,
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "tryout": {
@@ -702,9 +602,7 @@
       "blurb": "Four people, one garage, almost no gigs.",
       "hoursPerWeek": 3,
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {
@@ -725,9 +623,7 @@
       "annualCost": 450,
       "costSource": "evening class fees",
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {
@@ -745,9 +641,7 @@
       "blurb": "One book a month, mostly read.",
       "hoursPerWeek": 1,
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {
@@ -765,9 +659,7 @@
       "blurb": "Tuesday trivia at a bar, the same four people.",
       "hoursPerWeek": 2,
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {
@@ -786,9 +678,7 @@
       "blurb": "A food bank, Saturday mornings.",
       "hoursPerWeek": 3,
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {
@@ -809,9 +699,7 @@
       "annualCost": 60,
       "costSource": "a plot at the community garden",
       "requires": {
-        "stages": [
-          "adult"
-        ],
+        "stages": ["adult"],
         "ageMin": 18
       },
       "effects": {

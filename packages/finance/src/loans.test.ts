@@ -310,7 +310,9 @@ describe('what is not built yet', () => {
     const built = new Set(LOAN_PRODUCTS.map((product) => product.type));
     expect([...built].sort()).toEqual(['lineOfCredit', 'personal', 'wealthPrivate']);
     // And the business ones live apart, because they are not applied for here.
-    expect([...new Set(BUSINESS_LOAN_PRODUCTS.map((product) => product.type))]).toEqual(['business']);
+    expect([...new Set(BUSINESS_LOAN_PRODUCTS.map((product) => product.type))]).toEqual([
+      'business',
+    ]);
     // Nothing is shipped for a type still on the not-built list, which is the
     // other half of the same promise.
     const waiting: readonly string[] = LOAN_TYPES_NOT_YET_BUILT.map((row) => row.type);

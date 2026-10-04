@@ -4,13 +4,7 @@
     {
       "id": "store.jeweler",
       "name": "Halden & Rowe Jewelers",
-      "kinds": [
-        "ring",
-        "necklace",
-        "chain",
-        "bracelet",
-        "earrings"
-      ],
+      "kinds": ["ring", "necklace", "chain", "bracelet", "earrings"],
       "size": 6,
       "means": 0,
       "blurb": "A glass counter, a bell over the door, and a man who knows your ring size by looking."
@@ -18,9 +12,7 @@
     {
       "id": "store.watches",
       "name": "The Watch Room",
-      "kinds": [
-        "watch"
-      ],
+      "kinds": ["watch"],
       "size": 6,
       "means": 0,
       "blurb": "Every brand under one roof, and a waiting list for the ones people want."
@@ -28,13 +20,7 @@
     {
       "id": "store.maison",
       "name": "Maison Vellard",
-      "kinds": [
-        "watch",
-        "ring",
-        "necklace",
-        "bracelet",
-        "earrings"
-      ],
+      "kinds": ["watch", "ring", "necklace", "bracelet", "earrings"],
       "size": 5,
       "means": 150000,
       "blurb": "Appointment only. They bring the pieces to you."
@@ -42,9 +28,7 @@
     {
       "id": "store.gallery",
       "name": "Northlight Gallery",
-      "kinds": [
-        "art"
-      ],
+      "kinds": ["art"],
       "size": 6,
       "means": 0,
       "blurb": "White walls, small labels, and prices you have to ask for."
@@ -52,12 +36,7 @@
     {
       "id": "store.antiques",
       "name": "Old Hollow Antiques & Curiosities",
-      "kinds": [
-        "antique",
-        "historical",
-        "curio",
-        "mythical"
-      ],
+      "kinds": ["antique", "historical", "curio", "mythical"],
       "size": 7,
       "means": 0,
       "blurb": "Three floors of other people's things. The owner says everything has a story."
@@ -71,9 +50,7 @@
       "brand": "Casiot",
       "price": 120,
       "holds": "fashion",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": "Survives anything. Including fashion."
     },
@@ -84,9 +61,7 @@
       "brand": "Casiot",
       "price": 70,
       "holds": "fashion",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": "Gold-tone, a calculator's worth of buttons."
     },
@@ -97,9 +72,7 @@
       "brand": "Timexa",
       "price": 90,
       "holds": "fashion",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -110,9 +83,7 @@
       "brand": "Fossell",
       "price": 180,
       "holds": "fashion",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -123,9 +94,7 @@
       "brand": "Seyko",
       "price": 550,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": "An automatic movement for the price of a dinner out."
     },
@@ -136,9 +105,7 @@
       "brand": "Seyko",
       "price": 750,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -149,9 +116,7 @@
       "brand": "Tissoe",
       "price": 725,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -162,9 +127,7 @@
       "brand": "Hamiltone",
       "price": 595,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -175,9 +138,7 @@
       "brand": "Orchard",
       "price": 800,
       "holds": "fashion",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": "Tells the time, your heart rate, and everyone your messages."
     },
@@ -188,9 +149,7 @@
       "brand": "Tagg Heuser",
       "price": 5500,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -201,9 +160,7 @@
       "brand": "Tagg Heuser",
       "price": 7450,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": "The square one from the racing film."
     },
@@ -214,9 +171,7 @@
       "brand": "Tudar",
       "price": 4200,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -227,9 +182,7 @@
       "brand": "Longinez",
       "price": 2700,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -240,9 +193,7 @@
       "brand": "Orys",
       "price": 2400,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -253,9 +204,7 @@
       "brand": "Breitlong",
       "price": 9000,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": ""
     },
@@ -266,9 +215,7 @@
       "brand": "Grand Seyko",
       "price": 6200,
       "holds": "watch",
-      "stores": [
-        "store.watches"
-      ],
+      "stores": ["store.watches"],
       "rarity": "common",
       "blurb": "A dial like fresh snow, and a second hand that glides."
     },
@@ -279,10 +226,7 @@
       "brand": "Omegon",
       "price": 7600,
       "holds": "watch",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": "The one that went to the Moon."
     },
@@ -293,10 +237,7 @@
       "brand": "Omegon",
       "price": 5900,
       "holds": "watch",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -307,10 +248,7 @@
       "brand": "Cartrier",
       "price": 3400,
       "holds": "watch",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -321,10 +259,7 @@
       "brand": "Cartrier",
       "price": 7950,
       "holds": "watch",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -335,10 +270,7 @@
       "brand": "Rolux",
       "price": 9400,
       "holds": "sought",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": "The one people mean when they say \"a Rolux.\""
     },
@@ -349,10 +281,7 @@
       "brand": "Rolux",
       "price": 10250,
       "holds": "sought",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": "A two-year waiting list. Worth more the day it's on your wrist."
     },
@@ -363,10 +292,7 @@
       "brand": "Rolux",
       "price": 10900,
       "holds": "sought",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -377,9 +303,7 @@
       "brand": "Rolux",
       "price": 15100,
       "holds": "sought",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": "Nobody walks in and buys one. Somehow you did."
     },
@@ -390,9 +314,7 @@
       "brand": "Rolux",
       "price": 38500,
       "holds": "watch",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -403,10 +325,7 @@
       "brand": "IWK",
       "price": 13900,
       "holds": "watch",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -417,10 +336,7 @@
       "brand": "Jaegar-LeCoultray",
       "price": 9100,
       "holds": "watch",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": "It flips over. Polo players needed that once."
     },
@@ -431,10 +347,7 @@
       "brand": "Panarai",
       "price": 8700,
       "holds": "watch",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -445,10 +358,7 @@
       "brand": "Zenyth",
       "price": 9800,
       "holds": "watch",
-      "stores": [
-        "store.watches",
-        "store.maison"
-      ],
+      "stores": ["store.watches", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -459,9 +369,7 @@
       "brand": "Blancpane",
       "price": 17500,
       "holds": "watch",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -472,9 +380,7 @@
       "brand": "Audemar Pigot",
       "price": 31000,
       "holds": "sought",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": "Eight screws on an octagon bezel. Recognized across a room."
     },
@@ -485,9 +391,7 @@
       "brand": "Patrek Phillon",
       "price": 33000,
       "holds": "watch",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -498,9 +402,7 @@
       "brand": "Patrek Phillon",
       "price": 35000,
       "holds": "sought",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": "Retail is a formality. Resale is the price."
     },
@@ -511,9 +413,7 @@
       "brand": "Vacheran Constantine",
       "price": 29900,
       "holds": "watch",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -524,9 +424,7 @@
       "brand": "A. Langer & Sohn",
       "price": 42000,
       "holds": "watch",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -537,9 +435,7 @@
       "brand": "Richard Millon",
       "price": 250000,
       "holds": "sought",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": "Weighs nothing. Costs a house."
     },
@@ -550,9 +446,7 @@
       "brand": "Patrek Phillon",
       "price": 650000,
       "holds": "sought",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": "A perpetual calendar, a minute repeater, and a two-year build."
     },
@@ -563,9 +457,7 @@
       "brand": "",
       "price": 120,
       "holds": "fashion",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -576,9 +468,7 @@
       "brand": "",
       "price": 650,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -589,10 +479,7 @@
       "brand": "",
       "price": 1800,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -603,9 +490,7 @@
       "brand": "",
       "price": 2400,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": "Engraved with your initials, if you want them."
     },
@@ -616,9 +501,7 @@
       "brand": "",
       "price": 1600,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -629,9 +512,7 @@
       "brand": "",
       "price": 4200,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -642,10 +523,7 @@
       "brand": "",
       "price": 7800,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -656,10 +534,7 @@
       "brand": "",
       "price": 28000,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -670,9 +545,7 @@
       "brand": "",
       "price": 62000,
       "holds": "precious",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -683,9 +556,7 @@
       "brand": "",
       "price": 180000,
       "holds": "precious",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": "Heavy enough to notice when you shake hands."
     },
@@ -696,10 +567,7 @@
       "brand": "Tiffard & Co.",
       "price": 18500,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": "The little blue box does a lot of the work."
     },
@@ -710,10 +578,7 @@
       "brand": "Cartrier",
       "price": 2900,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": "A gold nail, bent into a ring."
     },
@@ -724,10 +589,7 @@
       "brand": "",
       "price": 6500,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -738,9 +600,7 @@
       "brand": "",
       "price": 14000,
       "holds": "precious",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -751,9 +611,7 @@
       "brand": "",
       "price": 140,
       "holds": "fashion",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -764,9 +622,7 @@
       "brand": "",
       "price": 1900,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -777,9 +633,7 @@
       "brand": "",
       "price": 480,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -790,9 +644,7 @@
       "brand": "",
       "price": 1700,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -803,10 +655,7 @@
       "brand": "",
       "price": 5200,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -817,9 +666,7 @@
       "brand": "",
       "price": 38000,
       "holds": "precious",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": "Ten carats, in a line, all the way around."
     },
@@ -830,10 +677,7 @@
       "brand": "Van Cleaf",
       "price": 5800,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": "Four-leaf clovers in gold and onyx."
     },
@@ -844,9 +688,7 @@
       "brand": "",
       "price": 24000,
       "holds": "precious",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": "Your name, in diamonds, the size of your palm."
     },
@@ -857,9 +699,7 @@
       "brand": "",
       "price": 150,
       "holds": "fashion",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -870,9 +710,7 @@
       "brand": "",
       "price": 1400,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -883,9 +721,7 @@
       "brand": "",
       "price": 4600,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -896,10 +732,7 @@
       "brand": "",
       "price": 14500,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": "Heavy. You feel it when you turn your head."
     },
@@ -910,9 +743,7 @@
       "brand": "",
       "price": 42000,
       "holds": "precious",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -923,10 +754,7 @@
       "brand": "",
       "price": 3200,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -937,9 +765,7 @@
       "brand": "",
       "price": 1100,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -950,9 +776,7 @@
       "brand": "",
       "price": 180,
       "holds": "fashion",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -963,9 +787,7 @@
       "brand": "",
       "price": 95,
       "holds": "fashion",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -976,9 +798,7 @@
       "brand": "",
       "price": 1600,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -989,10 +809,7 @@
       "brand": "",
       "price": 6400,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1003,9 +820,7 @@
       "brand": "",
       "price": 26000,
       "holds": "precious",
-      "stores": [
-        "store.maison"
-      ],
+      "stores": ["store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1016,10 +831,7 @@
       "brand": "Cartrier",
       "price": 7350,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": "Screws shut. Comes with its own little screwdriver."
     },
@@ -1030,9 +842,7 @@
       "brand": "",
       "price": 40,
       "holds": "fashion",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1043,9 +853,7 @@
       "brand": "",
       "price": 85,
       "holds": "fashion",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1056,9 +864,7 @@
       "brand": "",
       "price": 420,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1069,9 +875,7 @@
       "brand": "",
       "price": 1100,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1082,9 +886,7 @@
       "brand": "",
       "price": 3300,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1095,10 +897,7 @@
       "brand": "",
       "price": 12000,
       "holds": "precious",
-      "stores": [
-        "store.jeweler",
-        "store.maison"
-      ],
+      "stores": ["store.jeweler", "store.maison"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1109,9 +908,7 @@
       "brand": "",
       "price": 600,
       "holds": "precious",
-      "stores": [
-        "store.jeweler"
-      ],
+      "stores": ["store.jeweler"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1122,9 +919,7 @@
       "brand": "",
       "price": 450,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1135,9 +930,7 @@
       "brand": "",
       "price": 3800,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1148,9 +941,7 @@
       "brand": "",
       "price": 2600,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1161,9 +952,7 @@
       "brand": "",
       "price": 6500,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1174,9 +963,7 @@
       "brand": "",
       "price": 1800,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1187,9 +974,7 @@
       "brand": "",
       "price": 2200,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1200,9 +985,7 @@
       "brand": "",
       "price": 9500,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1213,9 +996,7 @@
       "brand": "",
       "price": 14000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1226,9 +1007,7 @@
       "brand": "",
       "price": 28000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1239,9 +1018,7 @@
       "brand": "",
       "price": 45000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1252,9 +1029,7 @@
       "brand": "",
       "price": 36000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1265,9 +1040,7 @@
       "brand": "",
       "price": 52000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1278,9 +1051,7 @@
       "brand": "",
       "price": 64000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": "It glows pink and hums slightly."
     },
@@ -1291,9 +1062,7 @@
       "brand": "",
       "price": 75000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1304,9 +1073,7 @@
       "brand": "",
       "price": 18000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1317,9 +1084,7 @@
       "brand": "",
       "price": 180000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1330,9 +1095,7 @@
       "brand": "",
       "price": 260000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1343,9 +1106,7 @@
       "brand": "",
       "price": 340000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1356,9 +1117,7 @@
       "brand": "",
       "price": 120000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1369,9 +1128,7 @@
       "brand": "",
       "price": 420000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "common",
       "blurb": "Bright, flat and instantly familiar. That's the point."
     },
@@ -1382,9 +1139,7 @@
       "brand": "",
       "price": 2400000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "rare",
       "blurb": ""
     },
@@ -1395,9 +1150,7 @@
       "brand": "",
       "price": 4800000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "rare",
       "blurb": ""
     },
@@ -1408,9 +1161,7 @@
       "brand": "",
       "price": 9500000,
       "holds": "art",
-      "stores": [
-        "store.gallery"
-      ],
+      "stores": ["store.gallery"],
       "rarity": "very rare",
       "blurb": ""
     },
@@ -1421,9 +1172,7 @@
       "brand": "",
       "price": 2800,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1434,9 +1183,7 @@
       "brand": "",
       "price": 18000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1447,9 +1194,7 @@
       "brand": "",
       "price": 12500,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1460,9 +1205,7 @@
       "brand": "",
       "price": 6400,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1473,9 +1216,7 @@
       "brand": "",
       "price": 9000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1486,9 +1227,7 @@
       "brand": "",
       "price": 48000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "uncommon",
       "blurb": ""
     },
@@ -1499,9 +1238,7 @@
       "brand": "",
       "price": 22000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1512,9 +1249,7 @@
       "brand": "",
       "price": 3600,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1525,9 +1260,7 @@
       "brand": "",
       "price": 4200,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1538,9 +1271,7 @@
       "brand": "",
       "price": 15500,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1551,9 +1282,7 @@
       "brand": "",
       "price": 1400,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1564,9 +1293,7 @@
       "brand": "",
       "price": 900,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1577,9 +1304,7 @@
       "brand": "",
       "price": 7800,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1590,9 +1315,7 @@
       "brand": "",
       "price": 85000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "rare",
       "blurb": ""
     },
@@ -1603,9 +1326,7 @@
       "brand": "",
       "price": 6800,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1616,9 +1337,7 @@
       "brand": "",
       "price": 38000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "uncommon",
       "blurb": ""
     },
@@ -1629,9 +1348,7 @@
       "brand": "",
       "price": 26000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "uncommon",
       "blurb": ""
     },
@@ -1642,9 +1359,7 @@
       "brand": "",
       "price": 14000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "uncommon",
       "blurb": ""
     },
@@ -1655,9 +1370,7 @@
       "brand": "",
       "price": 11000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1668,9 +1381,7 @@
       "brand": "",
       "price": 18500,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "uncommon",
       "blurb": ""
     },
@@ -1681,9 +1392,7 @@
       "brand": "",
       "price": 9500,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1694,9 +1403,7 @@
       "brand": "",
       "price": 650,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1707,9 +1414,7 @@
       "brand": "",
       "price": 3900,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1720,9 +1425,7 @@
       "brand": "",
       "price": 42000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "uncommon",
       "blurb": ""
     },
@@ -1733,9 +1436,7 @@
       "brand": "",
       "price": 16000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1746,9 +1447,7 @@
       "brand": "",
       "price": 5200,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1759,9 +1458,7 @@
       "brand": "",
       "price": 34000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "uncommon",
       "blurb": ""
     },
@@ -1772,9 +1469,7 @@
       "brand": "",
       "price": 22000,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "uncommon",
       "blurb": "Sixty-six million years old, and still sharp."
     },
@@ -1785,9 +1480,7 @@
       "brand": "",
       "price": 3300,
       "holds": "antique",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1798,9 +1491,7 @@
       "brand": "",
       "price": 350,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": "The signature is on the beak."
     },
@@ -1811,9 +1502,7 @@
       "brand": "",
       "price": 120,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1824,9 +1513,7 @@
       "brand": "",
       "price": 480,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": "The seller swore it was real. The seller winked."
     },
@@ -1837,9 +1524,7 @@
       "brand": "",
       "price": 1600,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1850,9 +1535,7 @@
       "brand": "",
       "price": 900,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1863,9 +1546,7 @@
       "brand": "",
       "price": 650,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": "Comes with an album of it at forty landmarks."
     },
@@ -1876,9 +1557,7 @@
       "brand": "",
       "price": 2800,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1889,9 +1568,7 @@
       "brand": "",
       "price": 1200,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1902,9 +1579,7 @@
       "brand": "",
       "price": 3500,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1915,9 +1590,7 @@
       "brand": "",
       "price": 9500,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1928,9 +1601,7 @@
       "brand": "",
       "price": 750,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1941,9 +1612,7 @@
       "brand": "",
       "price": 1100,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1954,9 +1623,7 @@
       "brand": "",
       "price": 6200,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1967,9 +1634,7 @@
       "brand": "",
       "price": 400,
       "holds": "curio",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "common",
       "blurb": ""
     },
@@ -1980,9 +1645,7 @@
       "brand": "",
       "price": 1200000,
       "holds": "mythical",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "mythical",
       "blurb": "Always slightly damp. Nobody can explain it."
     },
@@ -1993,9 +1656,7 @@
       "brand": "",
       "price": 250000,
       "holds": "mythical",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "mythical",
       "blurb": "Still closed. Keep it that way."
     },
@@ -2006,9 +1667,7 @@
       "brand": "",
       "price": 40000,
       "holds": "mythical",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "mythical",
       "blurb": "Mines through anything, apparently."
     },
@@ -2019,9 +1678,7 @@
       "brand": "",
       "price": 800000,
       "holds": "mythical",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "mythical",
       "blurb": ""
     },
@@ -2032,9 +1689,7 @@
       "brand": "",
       "price": 2000000,
       "holds": "mythical",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "mythical",
       "blurb": "It turns nothing into gold. You've tried."
     },
@@ -2045,9 +1700,7 @@
       "brand": "",
       "price": 1500000,
       "holds": "mythical",
-      "stores": [
-        "store.antiques"
-      ],
+      "stores": ["store.antiques"],
       "rarity": "mythical",
       "blurb": "The stone came too. It's in the garage."
     }

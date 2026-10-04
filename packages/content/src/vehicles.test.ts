@@ -169,7 +169,9 @@ describe('0505 — the modification catalog', () => {
     for (const slot of VEHICLE_MOD_SLOTS) expect(slots.has(slot), slot).toBe(true);
     // Spec 1885 removes body styling and interiors by name.
     for (const mod of VEHICLE_MODS) {
-      expect(/body kit|spoiler|interior|seat|steering wheel|bumper/i.test(mod.name), mod.name).toBe(false);
+      expect(/body kit|spoiler|interior|seat|steering wheel|bumper/i.test(mod.name), mod.name).toBe(
+        false,
+      );
     }
     // Concise: a handful of options, not a parts catalog.
     expect(VEHICLE_MODS.length).toBeLessThanOrEqual(24);

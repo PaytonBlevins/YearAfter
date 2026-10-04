@@ -150,9 +150,7 @@ function live(seed: string): Life {
 
     state = answerAll(advanceYear(state).state);
 
-    const hurt = state.player.timeline
-      .slice(before)
-      .some((entry) => wasHurt(entry.text));
+    const hurt = state.player.timeline.slice(before).some((entry) => wasHurt(entry.text));
     /*
       THE ATHLETE COMPARISON IS A SCHOOL COMPARISON (Ticket 0409).
 

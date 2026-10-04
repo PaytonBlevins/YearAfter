@@ -144,7 +144,10 @@ export const collegeSupportOf = (state: GameState, program?: Major): number => {
   */
   const kind = program?.kind;
   if (kind === 'graduate') return 0;
-  if (kind === undefined && (nextDegreeFor(state) === 'postgrad' || state.education.stage === 'postgrad')) {
+  if (
+    kind === undefined &&
+    (nextDegreeFor(state) === 'postgrad' || state.education.stage === 'postgrad')
+  ) {
     return 0;
   }
   if (state.education.stage === 'postgrad') return 0;
@@ -195,10 +198,7 @@ export function cannotEnrolAnything(state: GameState): CollegeError | undefined 
 }
 
 /** The stage, age and catalogue checks both questions share. */
-function structuralBlock(
-  state: GameState,
-  open: readonly Major[],
-): CollegeError | undefined {
+function structuralBlock(state: GameState, open: readonly Major[]): CollegeError | undefined {
   const { education, player } = state;
   if (
     education.stage === 'college' ||
@@ -409,12 +409,14 @@ function pick(lines: readonly string[], key: string, age: number): string {
 }
 
 const acceptedLine = (state: GameState, major: Major, kind: ProgramKind): string => {
-  const lines = kind === 'graduate' ? POSTGRAD_IN : kind === 'vocational' ? TRADE_IN : ACCEPTED_LINES;
+  const lines =
+    kind === 'graduate' ? POSTGRAD_IN : kind === 'vocational' ? TRADE_IN : ACCEPTED_LINES;
   return fill(pick(lines, `college:${major.id}`, state.player.age), major);
 };
 
 const rejectedLine = (state: GameState, major: Major, kind: ProgramKind): string => {
-  const lines = kind === 'graduate' ? POSTGRAD_NO : kind === 'vocational' ? TRADE_NO : REJECTED_LINES;
+  const lines =
+    kind === 'graduate' ? POSTGRAD_NO : kind === 'vocational' ? TRADE_NO : REJECTED_LINES;
   return fill(pick(lines, `nocollege:${major.id}`, state.player.age), major);
 };
 
@@ -428,7 +430,10 @@ const rejectedLine = (state: GameState, major: Major, kind: ProgramKind): string
 const fill = (line: string, major: Major): string =>
   line
     .replace(/\{major\}/g, major.name.toLowerCase())
-    .replace(/\{years\}/g, major.years === 1 ? 'A year' : `${NUMBER_WORDS[major.years] ?? major.years} years`);
+    .replace(
+      /\{years\}/g,
+      major.years === 1 ? 'A year' : `${NUMBER_WORDS[major.years] ?? major.years} years`,
+    );
 
 const NUMBER_WORDS: Readonly<Record<number, string>> = {
   1: 'One',

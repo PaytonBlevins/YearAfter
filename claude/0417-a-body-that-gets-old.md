@@ -1,8 +1,8 @@
 # Ticket 0417 — a body that gets old
 
-Roadmap finding 1b's leftover, open since 0408: *"median age at death still moves
+Roadmap finding 1b's leftover, open since 0408: _"median age at death still moves
 only about four years across the whole range of birth health... the Gompertz age
-term dominates whatever the multiplier says."*
+term dominates whatever the multiplier says."_
 
 The finding was right about the symptom and wrong about the cause. The Gompertz
 curve wasn't too strong. The model was counting age twice, and a debt that was
@@ -12,14 +12,14 @@ supposed to heal never did after sixty.
 
 300 played lives, answering every question:
 
-| | before |
-|---|---|
-| median age at death | 72 |
-| reached eighty-five | **3%** |
-| median death, frailest fifth / most robust fifth | 70 / 76 |
-| median health at seventy | **28** (the age curve alone said 55) |
-| median deficit — illness not yet healed — at seventy | **25** |
-| deaths per thousand a year at 70 / 75 / 80 | **125 / 191 / 313** |
+|                                                      | before                               |
+| ---------------------------------------------------- | ------------------------------------ |
+| median age at death                                  | 72                                   |
+| reached eighty-five                                  | **3%**                               |
+| median death, frailest fifth / most robust fifth     | 70 / 76                              |
+| median health at seventy                             | **28** (the age curve alone said 55) |
+| median deficit — illness not yet healed — at seventy | **25**                               |
+| deaths per thousand a year at 70 / 75 / 80           | **125 / 191 / 313**                  |
 
 A US period life table puts those last three at roughly 20, 31 and 51, and about
 two in five twenty-year-olds reach eighty-five. The game was killing its old
@@ -29,14 +29,14 @@ through the same collapse, it didn't matter what body you were born with.
 ## Two causes
 
 **1. Healing was a ratchet from sixty.** 0211 gave health a flat 3.4 points of
-healing a year and wrote in its docblock that without it *"the model would be a
-ratchet, and a ratchet reaches zero."* But illness gets likelier every year from
+healing a year and wrote in its docblock that without it _"the model would be a
+ratchet, and a ratchet reaches zero."_ But illness gets likelier every year from
 thirty-five and flat healing doesn't. Somewhere in the sixties the two cross, and
 the deficit only grows from there:
 
-| age | 40 | 50 | 60 | 70 | 80 |
-|---|---|---|---|---|---|
-| median deficit | 4 | 8 | 15 | 25 | 33 |
+| age            | 40  | 50  | 60  | 70  | 80  |
+| -------------- | --- | --- | --- | --- | --- |
+| median deficit | 4   | 8   | 15  | 25  | 33  |
 
 More than half the health a seventy-year-old had lost was illness that never
 healed, and the arithmetic was the same for every body. New rule **13.83**: a
@@ -69,17 +69,17 @@ twice, the population landed near the life table without tuning.
 
 The test file's 300 seeds, old model against new:
 
-| | before | after |
-|---|---|---|
-| median age at death | 72 | **82** |
-| p10 / p90 | 61 / 81 | 67 / 94 |
-| reached eighty-five | **3%** | **41%** |
-| median death, frailest / most robust fifth | 70 / 76 | 77 / 85 |
-| median health at seventy | 31 | 44 |
-| median deficit at seventy | 23 | 8 |
-| deaths a year per thousand, across the seventies | 134 | 40 |
-| deaths a year per thousand, across the eighties | too few reached them | 89 |
-| life table, roughly (seventies / eighties) | 25 / 75 | |
+|                                                  | before               | after   |
+| ------------------------------------------------ | -------------------- | ------- |
+| median age at death                              | 72                   | **82**  |
+| p10 / p90                                        | 61 / 81              | 67 / 94 |
+| reached eighty-five                              | **3%**               | **41%** |
+| median death, frailest / most robust fifth       | 70 / 76              | 77 / 85 |
+| median health at seventy                         | 31                   | 44      |
+| median deficit at seventy                        | 23                   | 8       |
+| deaths a year per thousand, across the seventies | 134                  | 40      |
+| deaths a year per thousand, across the eighties  | too few reached them | 89      |
+| life table, roughly (seventies / eighties)       | 25 / 75              |         |
 
 Still a little high in the seventies — the player collects real conditions, and
 the multiplier they carry is genuine. But it's now about 1.5× the world's rate,

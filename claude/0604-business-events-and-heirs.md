@@ -10,19 +10,19 @@ has something happen to it, drawn by weight from nineteen events. About half
 of all years are quiet (spec 413: "constant disasters should not be normal");
 of the years with news, the good weighs about as much as the bad.
 
-| good | bad |
-|---|---|
-| a big order | a slow stretch |
-| a good write-up | something breaks |
-| regulars send friends | a key person leaves |
-| a steady customer renews | a supplier puts its prices up |
-| a better price from a supplier | a bad run of reviews |
-| the landlord cuts the rent | theft and damage |
-| a one-off job that pays well | a dispute that costs |
-| a competitor closes | a big client lost |
-| | the lease isn't renewed |
-| | the rent goes up |
-| | a rival opens |
+| good                           | bad                           |
+| ------------------------------ | ----------------------------- |
+| a big order                    | a slow stretch                |
+| a good write-up                | something breaks              |
+| regulars send friends          | a key person leaves           |
+| a steady customer renews       | a supplier puts its prices up |
+| a better price from a supplier | a bad run of reviews          |
+| the landlord cuts the rent     | theft and damage              |
+| a one-off job that pays well   | a dispute that costs          |
+| a competitor closes            | a big client lost             |
+|                                | the lease isn't renewed       |
+|                                | the rent goes up              |
+|                                | a rival opens                 |
 
 Each does one or two of five things to the year: multiplies demand, the goods,
 or the lease, adds a one-off cost (or brings money in) sized to the business
@@ -84,11 +84,11 @@ Measured first, on the engine as 0603 left it, with a harness that owns each
 type for ten years under a spread of economies and an owner who covers a loss
 out of half the startup (300 businesses a type, 31 types):
 
-| | 1 year | 2 | 5 | 10 |
-|---|---|---|---|---|
-| BLS | 80% | 69% | 51% | 35% |
-| 0603 engine | 96.3 | 88.9 | 81.5 | 78.5 |
-| **0604** | 96.0 | 87.7 | **78.7** | **75.3** |
+|             | 1 year | 2    | 5        | 10       |
+| ----------- | ------ | ---- | -------- | -------- |
+| BLS         | 80%    | 69%  | 51%      | 35%      |
+| 0603 engine | 96.3   | 88.9 | 81.5     | 78.5     |
+| **0604**    | 96.0   | 87.7 | **78.7** | **75.3** |
 
 Events cost a mature owner **under 1%** of pay on average, with a rival not
 counted (0.99 of what it earned without them, from an even sweep of every

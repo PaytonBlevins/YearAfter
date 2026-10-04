@@ -214,7 +214,10 @@ const DRAWINGS: Record<IconName, Drawing> = {
     <>
       <Circle cx={9.2} cy={8.4} r={3.2} strokeWidth={strokeWidth} />
       <Path d="M3.4 19.8a5.8 5.8 0 0 1 11.6 0" strokeWidth={strokeWidth} />
-      <Path d="M16.4 13.6v-7a1.4 1.4 0 0 1 1.4-1.4h2.4a1.4 1.4 0 0 1 1.4 1.4v7" strokeWidth={strokeWidth} />
+      <Path
+        d="M16.4 13.6v-7a1.4 1.4 0 0 1 1.4-1.4h2.4a1.4 1.4 0 0 1 1.4 1.4v7"
+        strokeWidth={strokeWidth}
+      />
       <Path d="M17.6 11.2l1.4-1.8 1.4 1.2" strokeWidth={strokeWidth} />
     </>
   ),

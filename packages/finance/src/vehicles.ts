@@ -369,7 +369,9 @@ export function vehicleYear(
   // Ticket 0505: a tune and an engine upgrade work a car harder; better
   // brakes and a Tarbus conversion keep it out of trouble.
   const strain = strainOf(vehicle);
-  let maintenance = Math.round(maintenanceFor(model, trim, age, vehicle.condition, rolls.upkeep) * strain);
+  let maintenance = Math.round(
+    maintenanceFor(model, trim, age, vehicle.condition, rolls.upkeep) * strain,
+  );
   let event: VehicleYearResult['event'];
   let repairCost = 0;
   let accident = vehicle.accident;
@@ -442,7 +444,9 @@ export function monthlyCostOf(
   worldYear: number,
 ): number {
   const age = Math.max(0, worldYear - vehicle.modelYear);
-  const upkeep = Math.round(maintenanceFor(facts.model, facts.trim, age, vehicle.condition) * strainOf(vehicle));
+  const upkeep = Math.round(
+    maintenanceFor(facts.model, facts.trim, age, vehicle.condition) * strainOf(vehicle),
+  );
   const loan = vehicle.loan;
   const payment = loan
     ? mortgagePaymentFor(
@@ -523,7 +527,12 @@ const findModIn = (id: string): VehicleMod | undefined => findVehicleMod(id);
  * one), and a conversion that covers other slots takes off whatever was in
  * them — Tarbus fits its own wheels and exhaust.
  */
-export function withMod(vehicle: OwnedVehicle, mod: VehicleMod, cost: number, year: number): OwnedVehicle {
+export function withMod(
+  vehicle: OwnedVehicle,
+  mod: VehicleMod,
+  cost: number,
+  year: number,
+): OwnedVehicle {
   const clears = new Set<VehicleModSlot>([mod.slot, ...(mod.covers ?? [])]);
   const kept = (vehicle.mods ?? []).filter((entry) => {
     const fitted = findModIn(entry.modId);
@@ -580,7 +589,10 @@ export function vehicleWorthOf(
 
 /** How much harder the fitted modifications work the car. */
 export const strainOf = (vehicle: OwnedVehicle): number =>
-  (vehicle.mods ?? []).reduce((product, entry) => product * (findModIn(entry.modId)?.strain ?? 1), 1);
+  (vehicle.mods ?? []).reduce(
+    (product, entry) => product * (findModIn(entry.modId)?.strain ?? 1),
+    1,
+  );
 
 /** How much the fitted modifications cut the chance of a crash. */
 export const gripOf = (vehicle: OwnedVehicle): number =>

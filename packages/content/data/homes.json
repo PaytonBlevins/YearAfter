@@ -5,23 +5,11 @@
       "id": "home.condo",
       "name": "Condo",
       "noun": "a condo",
-      "beds": [
-        1,
-        2
-      ],
-      "baths": [
-        1,
-        2
-      ],
-      "price": [
-        190000,
-        330000
-      ],
+      "beds": [1, 2],
+      "baths": [1, 2],
+      "price": [190000, 330000],
       "expenseRate": 0.026,
-      "age": [
-        2,
-        45
-      ],
+      "age": [2, 45],
       "weight": 5,
       "means": 0,
       "units": 1,
@@ -37,23 +25,11 @@
       "id": "home.townhouse",
       "name": "Townhouse",
       "noun": "a townhouse",
-      "beds": [
-        2,
-        3
-      ],
-      "baths": [
-        1,
-        3
-      ],
-      "price": [
-        260000,
-        420000
-      ],
+      "beds": [2, 3],
+      "baths": [1, 3],
+      "price": [260000, 420000],
       "expenseRate": 0.022,
-      "age": [
-        0,
-        40
-      ],
+      "age": [0, 40],
       "weight": 4,
       "means": 0,
       "units": 1,
@@ -69,23 +45,11 @@
       "id": "home.starter",
       "name": "Starter House",
       "noun": "a small house",
-      "beds": [
-        2,
-        3
-      ],
-      "baths": [
-        1,
-        2
-      ],
-      "price": [
-        230000,
-        380000
-      ],
+      "beds": [2, 3],
+      "baths": [1, 2],
+      "price": [230000, 380000],
       "expenseRate": 0.023,
-      "age": [
-        25,
-        80
-      ],
+      "age": [25, 80],
       "weight": 5,
       "means": 0,
       "units": 1,
@@ -101,23 +65,11 @@
       "id": "home.family",
       "name": "Family House",
       "noun": "a family house",
-      "beds": [
-        3,
-        4
-      ],
-      "baths": [
-        2,
-        3
-      ],
-      "price": [
-        360000,
-        620000
-      ],
+      "beds": [3, 4],
+      "baths": [2, 3],
+      "price": [360000, 620000],
       "expenseRate": 0.02,
-      "age": [
-        5,
-        60
-      ],
+      "age": [5, 60],
       "weight": 5,
       "means": 0,
       "units": 1,
@@ -133,23 +85,11 @@
       "id": "home.large",
       "name": "Large House",
       "noun": "a large house",
-      "beds": [
-        4,
-        5
-      ],
-      "baths": [
-        3,
-        4
-      ],
-      "price": [
-        600000,
-        1100000
-      ],
+      "beds": [4, 5],
+      "baths": [3, 4],
+      "price": [600000, 1100000],
       "expenseRate": 0.019,
-      "age": [
-        0,
-        40
-      ],
+      "age": [0, 40],
       "weight": 2,
       "means": 120000,
       "units": 1,
@@ -165,23 +105,11 @@
       "id": "home.luxury",
       "name": "Luxury Home",
       "noun": "a luxury home",
-      "beds": [
-        5,
-        6
-      ],
-      "baths": [
-        4,
-        6
-      ],
-      "price": [
-        1300000,
-        3200000
-      ],
+      "beds": [5, 6],
+      "baths": [4, 6],
+      "price": [1300000, 3200000],
       "expenseRate": 0.017,
-      "age": [
-        0,
-        25
-      ],
+      "age": [0, 25],
       "weight": 1,
       "means": 600000,
       "units": 1,
@@ -197,23 +125,11 @@
       "id": "home.estate",
       "name": "Estate",
       "noun": "an estate",
-      "beds": [
-        6,
-        9
-      ],
-      "baths": [
-        6,
-        10
-      ],
-      "price": [
-        4000000,
-        14000000
-      ],
+      "beds": [6, 9],
+      "baths": [6, 10],
+      "price": [4000000, 14000000],
       "expenseRate": 0.016,
-      "age": [
-        0,
-        100
-      ],
+      "age": [0, 100],
       "weight": 1,
       "means": 4000000,
       "units": 1,
@@ -229,23 +145,11 @@
       "id": "home.duplex",
       "name": "Duplex",
       "noun": "a duplex",
-      "beds": [
-        4,
-        6
-      ],
-      "baths": [
-        2,
-        4
-      ],
-      "price": [
-        330000,
-        620000
-      ],
+      "beds": [4, 6],
+      "baths": [2, 4],
+      "price": [330000, 620000],
       "expenseRate": 0.024,
-      "age": [
-        10,
-        90
-      ],
+      "age": [10, 90],
       "weight": 4,
       "means": 150000,
       "units": 2,
@@ -261,23 +165,11 @@
       "id": "home.apartments-small",
       "name": "Small Apartment Building",
       "noun": "a small apartment building",
-      "beds": [
-        5,
-        10
-      ],
-      "baths": [
-        5,
-        7
-      ],
-      "price": [
-        780000,
-        1350000
-      ],
+      "beds": [5, 10],
+      "baths": [5, 7],
+      "price": [780000, 1350000],
       "expenseRate": 0.026,
-      "age": [
-        15,
-        80
-      ],
+      "age": [15, 80],
       "weight": 3,
       "means": 350000,
       "units": 5,
@@ -293,23 +185,11 @@
       "id": "home.apartments-medium",
       "name": "Apartment Building",
       "noun": "an apartment building",
-      "beds": [
-        10,
-        20
-      ],
-      "baths": [
-        10,
-        14
-      ],
-      "price": [
-        1500000,
-        2600000
-      ],
+      "beds": [10, 20],
+      "baths": [10, 14],
+      "price": [1500000, 2600000],
       "expenseRate": 0.026,
-      "age": [
-        10,
-        70
-      ],
+      "age": [10, 70],
       "weight": 2,
       "means": 800000,
       "units": 10,
@@ -325,23 +205,11 @@
       "id": "home.apartments-large",
       "name": "Apartment Complex",
       "noun": "an apartment complex",
-      "beds": [
-        25,
-        50
-      ],
-      "baths": [
-        25,
-        35
-      ],
-      "price": [
-        3800000,
-        6500000
-      ],
+      "beds": [25, 50],
+      "baths": [25, 35],
+      "price": [3800000, 6500000],
       "expenseRate": 0.027,
-      "age": [
-        5,
-        60
-      ],
+      "age": [5, 60],
       "weight": 1,
       "means": 2000000,
       "units": 25,

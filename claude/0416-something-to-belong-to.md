@@ -1,6 +1,6 @@
 # Ticket 0416 — something to belong to
 
-Roadmap finding 2g, from 0415: *"An adult cannot join anything."* Three findings
+Roadmap finding 2g, from 0415: _"An adult cannot join anything."_ Three findings
 had one cause: 2c's hobby had nothing to be, 2b's "twenty is the loneliest year"
 left an adult with two ways to meet people instead of three, and 0211 found
 nobody over eighteen was an athlete.
@@ -9,12 +9,12 @@ nobody over eighteen was an athlete.
 
 120 played lives, answering every question the game asks:
 
-| | before |
-|---|---|
-| lives that EVER joined anything, at any age | **0 of 120** |
-| share in an activity, at any age from 0 to 85 | **0%** |
-| adult years in a sport | **0%** |
-| people met as an adult "through something you do" | **0** |
+|                                                   | before       |
+| ------------------------------------------------- | ------------ |
+| lives that EVER joined anything, at any age       | **0 of 120** |
+| share in an activity, at any age from 0 to 85     | **0%**       |
+| adult years in a sport                            | **0%**       |
+| people met as an adult "through something you do" | **0**        |
 
 The finding said adults. It was everybody. Every verb in `joining.ts` and
 `tryout.ts` sits behind the Clubs & Teams screen, and nothing ever calls them on
@@ -84,15 +84,15 @@ an unanswerable `activity.offer`, the same as v30 did for 0410.
 
 Same 120 seeds, door on and off:
 
-| | before | after |
-|---|---|---|
-| lives ever in anything | **0 / 120** | 120 / 120 |
-| in something at 12 / 14 / 16 | 0% | 77% / 70% / 75% |
-| adults in a pursuit at 30 / 40 / 60 | 0% | 31% / 41% / 39% |
-| adult years in a sport | **0%** | 7.0% |
-| people met as an adult through something they do | **0** | 730 |
-| no friend at 14 / 19 / 20 | 23% / 53% / **58%** | 11% / 28% / **30%** |
-| adult years spent struggling | 14.0% | 14.6% |
+|                                                  | before              | after               |
+| ------------------------------------------------ | ------------------- | ------------------- |
+| lives ever in anything                           | **0 / 120**         | 120 / 120           |
+| in something at 12 / 14 / 16                     | 0%                  | 77% / 70% / 75%     |
+| adults in a pursuit at 30 / 40 / 60              | 0%                  | 31% / 41% / 39%     |
+| adult years in a sport                           | **0%**              | 7.0%                |
+| people met as an adult through something they do | **0**               | 730                 |
+| no friend at 14 / 19 / 20                        | 23% / 53% / **58%** | 11% / 28% / **30%** |
+| adult years spent struggling                     | 14.0%               | 14.6%               |
 
 On the test file's own 100 lives, adult pursuits end at 13.5% per year held.
 Hours from a pursuit barely move adult stress.
@@ -103,7 +103,7 @@ still the peak, because an eighteen-year-old has only just been offered anything
 ## Five tests broke, and none of them was this ticket's code
 
 - **`guardians.test.ts` found a real bug, dormant for twelve tickets.** The
-  standing activity-fee line printed *"Another $70 went on scout dues"* every
+  standing activity-fee line printed _"Another $70 went on scout dues"_ every
   year from a child's second season. It also re-announced a paid club's fees as
   news the year after joining a free one. Neither had ever been reached, because
   no life a test played had joined anything. It now rotates by age, and "first
@@ -112,10 +112,10 @@ still the peak, because an eighteen-year-old has only just been offered anything
   character would be single at twenty-two. Now that adults have somewhere to meet
   people, that seed wasn't single. The harness now finds a single adult rather
   than hoping for one (13.72).
-- **Two extreme-value instruments** — each life's *closest* friend and each
-  life's *earliest* person. More friends makes the maximum higher and the minimum
+- **Two extreme-value instruments** — each life's _closest_ friend and each
+  life's _earliest_ person. More friends makes the maximum higher and the minimum
   lower, whatever happens to each friendship. Every friendship at fifty-five was
-  actually *wider* than before. Replaced by each life's median friendship and a
+  actually _wider_ than before. Replaced by each life's median friendship and a
   share. New rule **13.80**. The first replacement couldn't see 0412's bug when
   it was restored, so it was replaced again before shipping.
 - **`floor.test.ts`'s 3% band was sitting inside its own noise.** Two disjoint

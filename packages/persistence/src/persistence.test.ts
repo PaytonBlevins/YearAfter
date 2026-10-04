@@ -1562,7 +1562,12 @@ describe('Ticket 0406 — a question survives being saved', () => {
     const live: GameState = {
       ...fromSave(save),
       vehicles,
-      vehicleOffer: { listingId: 'car:2040:lot.new-1:0', how: 'loan', age: 30, eventId: 'vehicle.offer' },
+      vehicleOffer: {
+        listingId: 'car:2040:lot.new-1:0',
+        how: 'loan',
+        age: 30,
+        eventId: 'vehicle.offer',
+      },
       inspected: ['car:2040:lot.online:4'],
       pending,
     };
@@ -1582,7 +1587,9 @@ describe('Ticket 0406 — a question survives being saved', () => {
     if (!migrated.ok) return;
     expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
     expect(migrated.value.vehicles).toEqual([]);
-    expect(migrated.value.pending.some((decision) => decision.eventId === 'vehicle.offer')).toBe(false);
+    expect(migrated.value.pending.some((decision) => decision.eventId === 'vehicle.offer')).toBe(
+      false,
+    );
   });
 
   it('round-trips a car with its modifications, and carries a v34 save forward', () => {
@@ -1696,7 +1703,9 @@ describe('Ticket 0406 — a question survives being saved', () => {
     if (!migrated.ok) return;
     expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
     expect(migrated.value.valuables).toEqual([]);
-    expect(migrated.value.pending.some((decision) => decision.eventId === 'home.renovate')).toBe(false);
+    expect(migrated.value.pending.some((decision) => decision.eventId === 'home.renovate')).toBe(
+      false,
+    );
   });
 
   it('round-trips the auction diary and a fake not yet found out, and carries a v36 save forward', () => {
@@ -1705,7 +1714,11 @@ describe('Ticket 0406 — a question survives being saved', () => {
     const { save } = newSave('AUCTIONS');
     const live: GameState = {
       ...fromSave(save),
-      auctions: { year: 2044, visits: { 'auction.hartwell': 2, 'auction.storage': 1 }, bids: ['lot:2044:auction.hartwell:2:3'] },
+      auctions: {
+        year: 2044,
+        visits: { 'auction.hartwell': 2, 'auction.storage': 1 },
+        bids: ['lot:2044:auction.hartwell:2:3'],
+      },
       valuables: [
         {
           id: 'lot:2044:auction.hartwell:2:3',
@@ -1855,8 +1868,15 @@ describe('Ticket 0406 — a question survives being saved', () => {
           profits: [31_000, 33_000, 35_000],
           branches: [],
           last: {
-            year: 2044, revenue: 260_000, costs: 225_000, profit: 35_000, drawn: 14_000,
-            injected: 0, turnedAway: 0, idle: 0.1, repaid: 17_500,
+            year: 2044,
+            revenue: 260_000,
+            costs: 225_000,
+            profit: 35_000,
+            drawn: 14_000,
+            injected: 0,
+            turnedAway: 0,
+            idle: 0.1,
+            repaid: 17_500,
           },
         },
       ],
@@ -1896,9 +1916,17 @@ describe('Ticket 0406 — a question survives being saved', () => {
           branches: [],
           rival: { since: 2043, bite: 0.11 },
           last: {
-            year: 2044, revenue: 480_000, costs: 445_000, profit: 35_000, drawn: 14_000,
-            injected: 0, turnedAway: 0, idle: 0.1,
-            event: 'slow-stretch', economy: 0.95, rivalTook: 0.0825,
+            year: 2044,
+            revenue: 480_000,
+            costs: 445_000,
+            profit: 35_000,
+            drawn: 14_000,
+            injected: 0,
+            turnedAway: 0,
+            idle: 0.1,
+            event: 'slow-stretch',
+            economy: 0.95,
+            rivalTook: 0.0825,
           },
         },
       ],
@@ -1911,7 +1939,10 @@ describe('Ticket 0406 — a question survives being saved', () => {
     expect(back.businesses[0]!.last?.rivalTook).toBe(0.0825);
     expect(written.version).toBe(CURRENT_SAVE_VERSION);
     // And a business with no rival comes back with no `rival` key at all, not an undefined one.
-    const quiet = toSave({ ...live, businesses: [{ ...live.businesses[0]!, rival: undefined }] }, { id: asSaveId('s-biz-quiet') });
+    const quiet = toSave(
+      { ...live, businesses: [{ ...live.businesses[0]!, rival: undefined }] },
+      { id: asSaveId('s-biz-quiet') },
+    );
     const quietBack = fromSave(JSON.parse(JSON.stringify(quiet)));
     expect('rival' in quietBack.businesses[0]!).toBe(false);
   });

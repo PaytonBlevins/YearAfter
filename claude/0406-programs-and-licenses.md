@@ -1,8 +1,8 @@
 # Ticket 0406 — schools, and the paper they hand you
 
-Review, after playing 0405: *"This seems pretty bare. I dont see medical
+Review, after playing 0405: _"This seems pretty bare. I dont see medical
 school, dentist, vet school, law school, postgrad, anything like that. I dont
-have any engineering options, trade schools, anything."*
+have any engineering options, trade schools, anything."_
 
 All true, and the shape of it was worse than the list. 0403 grew the job
 catalogue to sixteen tracks and nobody came back to the eight majors 0210b
@@ -20,11 +20,11 @@ fine arts qualified you to practice medicine, for three tickets, because
 
 **53 programs in three tiers**, replacing the eight majors:
 
-| tier | count | length | what finishing gives you |
-|---|---|---|---|
-| Trade & certificate | 14 | 1–2 yrs | a license, and no change of level |
-| Undergraduate | 24 | 4 yrs | `university` |
-| Graduate & professional | 15 | 1–4 yrs | `postgraduate`, and often a license |
+| tier                    | count | length  | what finishing gives you            |
+| ----------------------- | ----- | ------- | ----------------------------------- |
+| Trade & certificate     | 14    | 1–2 yrs | a license, and no change of level   |
+| Undergraduate           | 24    | 4 yrs   | `university`                        |
+| Graduate & professional | 15    | 1–4 yrs | `postgraduate`, and often a license |
 
 Medical, veterinary, dental and pharmacy school, law school, architecture,
 MBA, MSW, MPA, MEd, MFA, an engineering master's, nurse practitioner, public
@@ -61,9 +61,9 @@ only ever runs on the next one.
 
 ## The screen
 
-Spec 1336: *"Do not make inventories so large that search/filtering is
+Spec 1336: _"Do not make inventories so large that search/filtering is
 necessary. Use curated inventories, contextual gating, and yearly refreshes
-instead."* So not the dropdown the review asked for — a dropdown is a filter
+instead."_ So not the dropdown the review asked for — a dropdown is a filter
 with the filtering left to the player. Two things instead:
 
 - **`programsOpenTo` gates the list** before it reaches the screen. Nobody
@@ -84,16 +84,16 @@ and a header quoting one of them would be wrong about eighteen.
 A player who pursues one profession, 60 lives each, student loan taken when
 short:
 
-| | qualified | ended up working that track |
-|---|---|---|
-| doctor | 21/60 | 22/60 |
-| lawyer | 39/60 | 19/60 |
-| dentist | 27/60 | 10/60 |
-| veterinarian | 27/60 | 8/60 |
-| pharmacist | 32/60 | 4/60 |
-| architect | 44/60 | 3/60 |
-| electrician | 57/60 | — |
-| dental hygienist | 58/60 | — |
+|                  | qualified | ended up working that track |
+| ---------------- | --------- | --------------------------- |
+| doctor           | 21/60     | 22/60                       |
+| lawyer           | 39/60     | 19/60                       |
+| dentist          | 27/60     | 10/60                       |
+| veterinarian     | 27/60     | 8/60                        |
+| pharmacist       | 32/60     | 4/60                        |
+| architect        | 44/60     | 3/60                        |
+| electrician      | 57/60     | —                           |
+| dental hygienist | 58/60     | —                           |
 
 The trade rows qualify almost always and rarely end up in the trade, which is
 the harness rather than the game: it only applies for work while unemployed,

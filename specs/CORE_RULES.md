@@ -846,7 +846,7 @@ one, because "public vacation" is grammatical.
 So:
 
 - **Scope a copy rule to the sense, not the word.** `on holiday`, `summer
-  holidays`, `family holiday` — the phrases where the British sense actually
+holidays`, `family holiday` — the phrases where the British sense actually
   lives. Never the bare stem when the stem is ambiguous. The table already knew
   this: it declines to flag `trial`, for exactly this reason, in a comment
   written three tickets earlier and not generalised.
@@ -870,11 +870,11 @@ same bug wearing different clothes:
   whole employment model was built on a distinction between school leavers and
   graduates that the build could not make.
 - **`alive: false` on a family member** (found here) — read by the stress model
-  since 0205, written by nothing. The comment beside it said *"a member who is
-  `alive: false` is somebody who died while the player watched"*, which had
+  since 0205, written by nothing. The comment beside it said _"a member who is
+  `alive: false` is somebody who died while the player watched"_, which had
   never once been true.
 - **`character.records`** (found here) — declared in Sprint Zero with the
-  comment *"structured history for dynasty records and the death summary"*,
+  comment _"structured history for dynasty records and the death summary"_,
   initialized to `[]`, and still empty eleven tickets later. The 3–5 highlights
   spec 1284 asks for were supposed to come from it.
 
@@ -908,8 +908,8 @@ So two calls to `advanceYear(state)` on the same object are **not** two runs fro
 the same starting point. The second continues on streams the first consumed.
 
 Ticket 0212 found a test asserting exactly the wrong thing because of this. It
-claimed to prove that mashing a spent button does not spend a draw — *"the seed
-still means something"* — and did it by advancing one state, then mashing that
+claimed to prove that mashing a spent button does not spend a draw — _"the seed
+still means something"_ — and did it by advancing one state, then mashing that
 same state and advancing it again. It was comparing year N with year N+1. It
 passed for two tickets because, with seven writers, the two years happened to
 produce the same sentences; adding an eighth moved the cursor and the assertion
@@ -1036,14 +1036,14 @@ which is luck, not design, and luck that any future refactor could spend.
 Ticket 0302, and the defect was mine, written while implementing the rule that
 was supposed to prevent this class of thing.
 
-Spec 1678 says *"opening cash + cash in − cash out = closing cash. Any mismatch
-fails validation."* So I wrote a function that walked the ledger a year at a
+Spec 1678 says _"opening cash + cash in − cash out = closing cash. Any mismatch
+fails validation."_ So I wrote a function that walked the ledger a year at a
 time, computed each year's opening, inflow and outflow from the transactions,
 added them up, and checked the identity held.
 
 It held. It would have held for **every ledger that has ever existed or ever
 will**, including a corrupt one, because all four numbers came from the same
-rows. Opening plus in minus out *is* closing when you define all four by summing
+rows. Opening plus in minus out _is_ closing when you define all four by summing
 the same list. It was a tautology with a `ok: boolean` on it, and it would have
 sat in the suite looking exactly like coverage.
 
@@ -1084,7 +1084,7 @@ went red as intended. The third stayed green — and the reason was not the chec
 seed happened to have an open question at the year the test stopped. The
 corruption was never examined. Nothing in the test said so.
 
-The control test in the same file — *"lets an honest year through"* — would have
+The control test in the same file — _"lets an honest year through"_ — would have
 passed for precisely the same empty reason, and it is the test whose entire job
 is to prove the other three are not passing vacuously.
 
@@ -1262,10 +1262,10 @@ Credit standing gained a utilisation term the moment cards existed, weighted at
 unused card is a well-managed card. Then a population that applied for every
 card on offer, every year, was measured against one that never applied at all:
 
-|  | Excellent | Good | Fair |
-|---|---|---|---|
-| never applies | 31% | 43% | 21% |
-| takes every card | **44%** | 46% | **5%** |
+|                  | Excellent | Good | Fair   |
+| ---------------- | --------- | ---- | ------ |
+| never applies    | 31%       | 43%  | 21%    |
+| takes every card | **44%**   | 46%  | **5%** |
 
 Holding cards you never use made you creditworthy. No money changed hands, no
 decision was made, and a fifth of a credit standing was available for pressing a
@@ -1288,14 +1288,14 @@ of a credit line is the line, not a number it buys you.
 
 ### 13.49 A gate that has never been the binding one has not been tested
 
-*Ticket 0307.* Loan underwriting has two gates: a credit standing and an income.
+_Ticket 0307._ Loan underwriting has two gates: a credit standing and an income.
 Both were real rules, both were wired up, both had tests, and the tests passed.
 Then the population was asked which one was actually stopping anybody:
 
-| | rows refused |
-|---|---|
-| refused on standing | 26,550 |
-| ...that would also have failed the income gate behind it | **26,550** |
+|                                                          | rows refused |
+| -------------------------------------------------------- | ------------ |
+| refused on standing                                      | 26,550       |
+| ...that would also have failed the income gate behind it | **26,550**   |
 
 Every one. Not most, not 95% — all of them, across 120 lives and roughly 5,000
 adult years. The credit gate had never once been the thing holding the door,
@@ -1321,19 +1321,19 @@ until that ticket lands the gate is untested rather than tested.
 
 ### 13.50 If waiting is free, no loan can ever be worth taking
 
-*Ticket 0307.* The student loan is the ticket's whole reason for existing:
+_Ticket 0307._ The student loan is the ticket's whole reason for existing:
 cash at eighteen is $0 at every percentile including the maximum, and a college
 place costs $7,436 a year. It was built, measured, bounded, and it works. Then
 the same 120 seeds were played twice — once with the loan available, once
 without — and scored only on the 112 lives where money was genuinely the thing
 in the way:
 
-| | any degree | postgraduate | cash at death | first enrolled |
-|---|---|---|---|---|
-| no loan available | 100 | 88 | $20,709 | age 21 |
-| loan available | **91** | **73** | **$10,801** | age 18 |
+|                   | any degree | postgraduate | cash at death | first enrolled |
+| ----------------- | ---------- | ------------ | ------------- | -------------- |
+| no loan available | 100        | 88           | $20,709       | age 21         |
+| loan available    | **91**     | **73**       | **$10,801**   | age 18         |
 
-Borrowing to go to college made people *less* educated and *half* as rich. It
+Borrowing to go to college made people _less_ educated and _half_ as rich. It
 is not composition — same seeds, same people, paired.
 
 The mechanism is in the last column. Blocked at eighteen and offered nothing, a
@@ -1360,7 +1360,7 @@ free.
 
 ### 13.51 A test that pins a list catches a wrong deletion and never a missing one
 
-*Ticket 0308.* This build guards its unfinished edges with declared lists —
+_Ticket 0308._ This build guards its unfinished edges with declared lists —
 `UNWRITTEN_CATEGORIES`, `NOT_YET_OWNED`, `LOAN_TYPES_NOT_YET_BUILT`,
 `CREDIT_INPUTS_NOT_YET_BUILT` — each naming the ticket that retires it, each
 with a test asserting its contents so that "the ticket which finally writes one
@@ -1369,10 +1369,10 @@ has to come here and delete a line".
 The device has been described that way four times and it does not work. The
 test asserts what the list currently holds, so:
 
-| | |
-|---|---|
-| a line deleted when it should not have been | **red** |
-| a line left behind that should have gone | **green** |
+|                                             |           |
+| ------------------------------------------- | --------- |
+| a line deleted when it should not have been | **red**   |
+| a line left behind that should have gone    | **green** |
 
 Ticket 0307 built cards and loans and left `{ key: 'liabilities', arrives:
 '0307' }` in `NOT_YET_OWNED`. For a whole ticket the dashboard told players
@@ -1427,7 +1427,7 @@ for (const row of NOT_YET_OWNED) expect(stillAhead(row.arrives)).toBe(true);
 > also gave bonds a maturity date, which is the first instrument in this build
 > where money is genuinely away until a date.
 
-*Ticket 0308, and the other half of 13.50.*
+_Ticket 0308, and the other half of 13.50._
 
 That rule found that a student loan makes its own target worse off, because
 waiting is free: blocked at eighteen, a character saves and enrols at
@@ -1438,10 +1438,10 @@ to invest" a real question — and found it does not exist either.
 Measured across 800 lives, five strategies, two player types, two of which hold
 literally zero cash by construction:
 
-| | shortfall years | card-debt years | years at $0 cash |
-|---|---|---|---|
-| every strategy, careerist | **0%** | **0%** | 3% |
-| every strategy, drifter | **0%** | **0%** | 8% |
+|                           | shortfall years | card-debt years | years at $0 cash |
+| ------------------------- | --------------- | --------------- | ---------------- |
+| every strategy, careerist | **0%**          | **0%**          | 3%               |
+| every strategy, drifter   | **0%**          | **0%**          | 8%               |
 
 Characters do run out of money. It costs them nothing, because a year's income
 is posted before that year's costs are paid. Being broke on the first of
@@ -1471,7 +1471,7 @@ Both were designed around a pressure the build does not apply.
 
 ### 13.53 Running out of money is a discount, and a zero you did not derive is not a measurement
 
-*Ticket 0308b.* Two findings, and the second one is about how the first was
+_Ticket 0308b._ Two findings, and the second one is about how the first was
 missed for two milestones.
 
 **Hardship pays.** 0303 gives a household that cannot afford its life a cliff:
@@ -1480,11 +1480,11 @@ there is family, and the year's charge is capped at what they actually have.
 Every part of that is right on its own. Together they mean that running out of
 money makes life CHEAPER and nothing else. Measured over 80 paired seeds:
 
-| | lifetime living cost | standard (med) | net worth (med) | happiness (med) |
-|---|---|---|---|---|
-| never invests | $2,541,128 | $43,388 | $203,110 | 78 |
-| keeps a buffer | $2,383,415 | $40,092 | $1,049,193 | 78 |
-| invests every dollar | **$2,111,197** | $36,404 | **$2,330,577** | **17** |
+|                      | lifetime living cost | standard (med) | net worth (med) | happiness (med) |
+| -------------------- | -------------------- | -------------- | --------------- | --------------- |
+| never invests        | $2,541,128           | $43,388        | $203,110        | 78              |
+| keeps a buffer       | $2,383,415           | $40,092        | $1,049,193      | 78              |
+| invests every dollar | **$2,111,197**       | $36,404        | **$2,330,577**  | **17**          |
 
 The player who empties their current account every year spends **$430,000 less
 on living across a lifetime** and ends up twelve times richer. Hardship is a
@@ -1493,8 +1493,8 @@ cheaper life frees more cash, which gets invested, which keeps them in hardship.
 
 It is not unpunished — happiness collapses from 78 to 17 through stress, which
 is a real cost and the reason this is a trade-off rather than a pure exploit.
-But the trade should be *"a cheap miserable life against a comfortable one"*,
-not *"a cheap miserable life that also makes you rich"*.
+But the trade should be _"a cheap miserable life against a comfortable one"_,
+not _"a cheap miserable life that also makes you rich"_.
 
 **And the measurement that missed it.** 13.52 concluded being broke was free
 from two numbers: `shortfall` years at 0% and card-debt years at 0%, across 800
@@ -1515,28 +1515,28 @@ disconfirmed.
 
 ### 13.54 Ask which account a rule reads, not just which number
 
-*Ticket 0308b.* 13.53's subsidy — invest everything, live $430,000 cheaper —
+_Ticket 0308b._ 13.53's subsidy — invest everything, live $430,000 cheaper —
 turned out to be one mistake made twice, in two functions, three lines apart.
 Both read `wealth`, and `wealth` was the cash balance:
 
 ```ts
-standardTargetFor(input.afterTaxIncome, input.wealth)   // what life you drift toward
-const affordable = input.afterTaxIncome + input.wealth  // what you can pay for it
+standardTargetFor(input.afterTaxIncome, input.wealth); // what life you drift toward
+const affordable = input.afterTaxIncome + input.wealth; // what you can pay for it
 ```
 
 Fixing only the second took the gap from $430,000 to $189,251 and stopped,
 because the first was still quietly deciding that a character with two million
 in an index fund should drift toward the standard of living of somebody with
 nothing. Fixing both took it to **-$183,925** — the all-in player now spends
-*more*, which is correct, because a millionaire lives like a millionaire
+_more_, which is correct, because a millionaire lives like a millionaire
 wherever they keep it.
 
-| | lifetime living | net worth (med) | happiness |
-|---|---|---|---|
-| never invests | $2,546,159 | $201,238 | 78 |
-| keeps a buffer | $2,604,554 | $705,403 | 78 |
-| invests every dollar | $2,730,084 | $1,418,485 | 23 |
-| all into bonds | $2,556,281 | $597,716 | 20 |
+|                      | lifetime living | net worth (med) | happiness |
+| -------------------- | --------------- | --------------- | --------- |
+| never invests        | $2,546,159      | $201,238        | 78        |
+| keeps a buffer       | $2,604,554      | $705,403        | 78        |
+| invests every dollar | $2,730,084      | $1,418,485      | 23        |
+| all into bonds       | $2,556,281      | $597,716        | 20        |
 
 - **A variable named for a quantity hides which account it came from.**
   `wealth` sounds like everything somebody is worth and held only their current
@@ -1550,7 +1550,7 @@ wherever they keep it.
 
 ### 13.55 A model with no memory of a peak can never give one back
 
-*Ticket 0308d.* The market shipped in 0308c destroyed value permanently. An
+_Ticket 0308d._ The market shipped in 0308c destroyed value permanently. An
 index of every stock, rebased to 100 the year before a severe recession begins:
 
 ```
@@ -1587,7 +1587,7 @@ could return it.
 
 ### 13.56 A signal is only real where its mechanism runs
 
-*Ticket 0309.* The obvious advisor rule is "recommend what is trading below its
+_Ticket 0309._ The obvious advisor rule is "recommend what is trading below its
 own trend", and 0308d's mean reversion is exactly the mechanism that would make
 it pay. Measured over 6,000 market years it **loses to a coin flip**: a single
 call goes up 41.9% of the time against 56% for a name picked at random.
@@ -1624,7 +1624,7 @@ looked fine in every test that did not compare it against a control.
 
 ### 13.57 A lever is inert until it crosses the threshold the consumer applies
 
-*Ticket 0310.* Nobody in this build had ever retired. Measured across 120 played
+_Ticket 0310._ Nobody in this build had ever retired. Measured across 120 played
 lives, **100% of characters alive at 65, 70 AND 75 were still holding a job**,
 with median pay climbing the whole way from $60,403 at forty to $126,789 at
 seventy-five. The cause was one clamp: `capacityFor` ramped a child up to
@@ -1637,10 +1637,10 @@ seventy-year-old's stress went to 17 — and `RELEVANCE_THRESHOLD` in
 design, so an ordinary childhood is never quietly taxed. The lever was moving a
 number the consuming system deliberately ignores.
 
-| | stress w/r | happiness w/r |
-|---|---|---|
-| at 0.42, age 70 | 17 / 1 | 81 / 82 |
-| at 0.9, age 70 | 70 / 1 | **62 / 82** |
+|                 | stress w/r | happiness w/r |
+| --------------- | ---------- | ------------- |
+| at 0.42, age 70 | 17 / 1     | 81 / 82       |
+| at 0.9, age 70  | 70 / 1     | **62 / 82**   |
 
 - **Reading the lever's own output proves nothing.** Stress moved from 1 to 17,
   which is a seventeenfold change and entirely worthless. The only reading that
@@ -1662,7 +1662,7 @@ number the consuming system deliberately ignores.
 
 ### 13.58 A lever measured on a population it cannot apply to has not been measured
 
-*Ticket 0401.* v0.04's spec asks for 150–250 job titles. Measured first: one
+_Ticket 0401._ v0.04's spec asks for 150–250 job titles. Measured first: one
 life saw **13 of the 49 jobs that already existed**, and **20 of the 49 were
 never shown to a single character across 100 played lives**. So the milestone
 was not content volume, and three candidate levers were measured over one fixed
@@ -1670,12 +1670,12 @@ corpus of 3,471 working life-years to decide which one opened the funnel.
 
 Two of the three came back **identical to the control, to the digit**:
 
-| lever | distinct shown | eligible/yr | per life (median) |
-|---|---|---|---|
-| CONTROL | 30 | 13.4 | 15 |
-| A reserved step-up slots | 30 | 13.4 | 15 |
-| **B a degree opens a ladder** | **30** | **13.4** | **15** |
-| D transferable experience | 31 | 21.0 | 24 |
+| lever                         | distinct shown | eligible/yr | per life (median) |
+| ----------------------------- | -------------- | ----------- | ----------------- |
+| CONTROL                       | 30             | 13.4        | 15                |
+| A reserved step-up slots      | 30             | 13.4        | 15                |
+| **B a degree opens a ladder** | **30**         | **13.4**    | **15**            |
+| D transferable experience     | 31             | 21.0        | 24                |
 
 Lever A was weak for a reason worth knowing: there is usually no step-up in the
 eligible set to reserve a slot for, so reserving one does nothing. Lever B was
@@ -1687,8 +1687,8 @@ A lever that grants something to graduates, measured on a population with no
 graduates, returns the control by construction.
 
 - **An identical result is a different signal from a small one.** A lever that
-  moves a number by 2% is weak. A lever that reproduces the control *to the
-  digit* is not being exercised, and the next step is to check its precondition
+  moves a number by 2% is weak. A lever that reproduces the control _to the
+  digit_ is not being exercised, and the next step is to check its precondition
   rather than to tune it.
 - **Check the population before believing the sweep.** One count — how many rows
   the lever could possibly apply to — would have caught it before the table was
@@ -1700,9 +1700,9 @@ graduates, returns the control by construction.
 
 ### 13.59 When the gate moves, the ruler moves with it
 
-*Ticket 0401, the same afternoon.* The listing-composition counter classified
+_Ticket 0401, the same afternoon._ The listing-composition counter classified
 each of the six openings as a step-up or a cold start by comparing `job.rung`
-against the **raw held rung**. 0401 moved the gate onto an *effective* rung.
+against the **raw held rung**. 0401 moved the gate onto an _effective_ rung.
 Rerunning it, step-ups read **1.30 → 0.61** and cold starts **4.69 → 2.61** — a
 mechanic that had apparently made the problem worse. The three buckets no longer
 summed to six, which is the only reason it was caught: a rung-1 job on an
@@ -1718,7 +1718,7 @@ untouched track was now neither.
 
 ### 13.60 The price you wrote down is not the price that is charged
 
-*Ticket 0402.* An arriving job offer had to cost something or it was a promotion
+_Ticket 0402._ An arriving job offer had to cost something or it was a promotion
 with a button on it. The cost was designed and documented: taking a job resets
 performance to a stranger's 38–52, the same reset `applyFor` charges, which
 should mean a rough couple of years and a real risk of being let go. The
@@ -1727,10 +1727,10 @@ docblock said so. The player-facing prompt said so.
 Paired seeds — the same life lived twice, answering every offer the opposite
 way — said otherwise:
 
-| across 176 offers taken | taking | declining |
-|---|---|---|
-| let go | 53 | 46 |
-| **promoted** | **173** | **306** |
+| across 176 offers taken | taking  | declining |
+| ----------------------- | ------- | --------- |
+| let go                  | 53      | 46        |
+| **promoted**            | **173** | **306**   |
 
 **Seven extra firings across 176 job changes.** The designed cost was worth
 almost nothing, because `firingChance` does not notice two soft years — 13.57
@@ -1738,8 +1738,8 @@ again, from inside the thing being built rather than from upstream of it.
 
 The cost that actually bites was in the same table and nobody designed it:
 taking an offer costs about three quarters of a promotion, because `since`
-resets and `promotionChance` scales with years served. The real trade is *a
-raise now against the ladder you were already on.*
+resets and `promotionChance` scales with years served. The real trade is _a
+raise now against the ladder you were already on._
 
 - **A cost is a measurement, not a declaration.** Writing the reset and calling
   it the price is the same error as writing a lever and calling it tuned. The
@@ -1755,7 +1755,7 @@ raise now against the ladder you were already on.*
 
 ### 13.61 A rung competes with itself before it competes with anything else
 
-*Ticket 0403.* The job catalog tripled — 49 jobs to 147, eleven tracks to
+_Ticket 0403._ The job catalog tripled — 49 jobs to 147, eleven tracks to
 sixteen — mostly by widening rungs rather than lengthening ladders, on the
 theory that a wider rung is a different door into the same career and a longer
 ladder is a rarer promotion. Trades' rung 2 got widened furthest: electrician,
@@ -1791,7 +1791,7 @@ before ever reaching the rung that leads to the top.
 
 ### 13.62 A coverage guarantee is a population question, not a weighting one
 
-*Ticket 0403, the same afternoon.* Even after 13.61's fix, one rare job — a
+_Ticket 0403, the same afternoon._ Even after 13.61's fix, one rare job — a
 different one each time the catalog or the draw's weights changed — still
 went unseen across the reachability guard's 60 played lives. Every candidate
 was real: eligible to at least one life, honestly reachable, no duplicate
@@ -1821,7 +1821,7 @@ anybody in it.
 
 ### 13.63 A test's own shortcuts are measured against a population too
 
-*Ticket 0405.* Giving college a systemic offer — the same door 0402 built for
+_Ticket 0405._ Giving college a systemic offer — the same door 0402 built for
 a job — routed most of two other tests' populations through college for the
 first time, and both broke, neither one because the mechanic was wrong.
 
@@ -1901,8 +1901,8 @@ shows the row and the game believes the player could have had it.
 
 ### 13.65 A test can pin a defect in place as firmly as a feature
 
-`offers.test.ts` carried an assertion called *"never arrives for somebody with
-no job, or somebody who has stopped"*. It was precise, it was well commented, it
+`offers.test.ts` carried an assertion called _"never arrives for somebody with
+no job, or somebody who has stopped"_. It was precise, it was well commented, it
 passed for four tickets, and the first half of it was a guarantee that an
 unemployed adult would never be offered work — which was the single line that
 left 250 of 250 passive lives unemployable and 248 of them dead with nothing.
@@ -2034,8 +2034,8 @@ if (state.pending.length > 0) return state;
 
 and 0402 wrote down exactly why it was safe:
 
-> *"Measured, that risks nothing — an adult year contains zero authored
-> decisions, because every one in the catalog stops at seventeen."*
+> _"Measured, that risks nothing — an adult year contains zero authored
+> decisions, because every one in the catalog stops at seventeen."_
 
 That sentence was true when it was written and false eighteen months of tickets
 later. 0409 wrote thirteen adult decisions, in a different package, and nothing
@@ -2104,10 +2104,10 @@ ratchet.
 
 The result is not inflation, because the curve catches that. It is **agreement**:
 
-| Charisma, 200 lives | age 18 | age 30 | age 45 |
-|---|---|---|---|
-| p10 / p90 | 58 / 85 | 73 / 90 | **84 / 94** |
-| sd | 9.7 | 6.5 | **3.8** |
+| Charisma, 200 lives | age 18  | age 30  | age 45      |
+| ------------------- | ------- | ------- | ----------- |
+| p10 / p90           | 58 / 85 | 73 / 90 | **84 / 94** |
+| sd                  | 9.7     | 6.5     | **3.8**     |
 
 Everybody climbs until the curve stops them, and the curve stops everybody in
 the same place. At forty-five all seven of the commonest career tracks produced
@@ -2205,7 +2205,7 @@ of reading the same sentence about the same applications twice.
 0412 gave eligibility `hasFriend` and `friendshipYearsAtLeast`, so an event could
 finally require a friend. 0413 wrote thirty of them — and `{kid}` still bound
 whichever peer the draw landed on. For a working adult the circle is mostly
-colleagues, so *"you and {kid} have been friends since school"* would have named
+colleagues, so _"you and {kid} have been friends since school"_ would have named
 somebody met eleven months ago.
 
 This is 0207's `partnered` bug one level down, and it is the shape to watch every
@@ -2278,7 +2278,7 @@ reachable family catalog was exactly zero. Not thin. Zero, across 4,367 years.
 Every previous measurement missed it, and each for a defensible reason: 0409
 counted events at forty (where parents-of-children carry the number), 0410 fixed
 `family` by building the door to having children, and 0413 measured the cliff at
-eighteen by category *total* rather than by what one kind of character can see.
+eighteen by category _total_ rather than by what one kind of character can see.
 
 - **Measure a category against the POPULATION it is supposed to serve, not the
   catalog.** "Family has ninety-one events" and "a childless adult has none" are
@@ -2292,9 +2292,9 @@ eighteen by category *total* rather than by what one kind of character can see.
 
 ### 13.78 Four copies of a table is three too many, and the drift is silent
 
-Roadmap finding 7 has been open since 0209: *"the token-guard table lives in four
+Roadmap finding 7 has been open since 0209: _"the token-guard table lives in four
 places — the generator (Python), the content test, the validator and the
-renderer."* 0414 found out what that costs. The generator has known
+renderer."_ 0414 found out what that costs. The generator has known
 `{motherName}` and `{fatherName}` since 0203b; the TypeScript test's copy never
 had them.
 
@@ -2321,9 +2321,9 @@ fixed exactly this shape for Charisma and did not list Willpower.
 
 The cause was in how three content tickets authored it. The adult catalog held
 **seventy-one willpower effects and not one loss**, and the tell is where they
-sat: on BOTH outcomes of a hard choice. *"You set a date and had to enforce it,
-which neither of you has completely got over"* paid +3. *"You told nobody and got
-on with it. It worked, right up until the day it didn't"* paid +4. When the hard
+sat: on BOTH outcomes of a hard choice. _"You set a date and had to enforce it,
+which neither of you has completely got over"_ paid +3. _"You told nobody and got
+on with it. It worked, right up until the day it didn't"_ paid +4. When the hard
 thing works and when it fails pay the same stat, the stat is not measuring what
 happened — it is a fee for having been asked, and a fee collected every year is a
 ratchet (13.70).
@@ -2347,7 +2347,7 @@ without anything they guard having changed:
 
 - `friendship.test.ts` took p90 − p10 of each life's **closest** friend at
   fifty-five and read 8 against a line of 8. Every friendship at that age was
-  actually *wider* than before (p10/p90 61/96 against 71/96, with fewer at the
+  actually _wider_ than before (p10/p90 61/96 against 71/96, with fewer at the
   ceiling). But the median adult now had four friends instead of three, and the
   warmest of four is warmer than the warmest of three even when all of them come
   from the same distribution.
@@ -2424,9 +2424,9 @@ pinned high, so a strong body and a frail one were charged alike.
 ### 13.83 A flat counterweight to a rising load is a ratchet that has not started yet
 
 0211 gave health a flat 3.4 points of healing a year, and its docblock said
-exactly what that was for: *"what makes an acute illness a dip rather than a
+exactly what that was for: _"what makes an acute illness a dip rather than a
 debt... without this the model would be a ratchet, and a ratchet reaches
-zero."* True at thirty. But illness gets likelier every year from thirty-five
+zero."_ True at thirty. But illness gets likelier every year from thirty-five
 and the healing does not, so the two lines cross somewhere in the sixties. From
 there the deficit only grows: median 4 at forty, 15 at sixty, 25 at seventy, 33
 at eighty. The ratchet the comment ruled out was there all along, starting at
@@ -2639,7 +2639,6 @@ tuned it wrong; nobody could have seen it from where they were looking.
   because the test read the constant it guarded (the overhead share, the branch
   opening maturity). Numbers are stated as numbers.
 
-
 ### 13.96 If money must not be spendable on anything else, never let it be money
 
 0307 chose not to earmark a loan: a rule that follows cash around is a chore
@@ -2681,7 +2680,6 @@ that finds it.
 - **Round to the cent before flooring.** And test shares on round prices, not
   on the generated ones that happen to miss.
 
-
 ### 13.99 A rule that excludes nothing is not a rule
 
 "A key person left" needed wages to be 15% of revenue. All thirty-one types
@@ -2721,4 +2719,3 @@ and a debt whose thing is gone is personal and dropped as before.
   (its worth, not what the parent put in).
 - **A default that changes behavior breaks old tests honestly.** Two death
   tests that assumed a sale now ask for the sale; they were not loosened.
-

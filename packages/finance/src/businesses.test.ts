@@ -56,7 +56,9 @@ import {
 const NORMAL = { year: 2012, market: 'normal' as const, shock: 0, stat: 50, hands: 1 };
 
 /** A business that has had time to staff itself and find its customers. */
-const mature = (typeId: string): { business: OwnedBusiness; type: (typeof BUSINESS_TYPES)[number] } => {
+const mature = (
+  typeId: string,
+): { business: OwnedBusiness; type: (typeof BUSINESS_TYPES)[number] } => {
   const type = findBusinessType(typeId)!;
   return {
     type,
@@ -125,7 +127,9 @@ describe('a year of trading', () => {
         }
         return businessYear(priced, type, NORMAL).profit;
       };
-      const best = PRICE_STEPS.reduce((top, price) => (profitAt(price) > profitAt(top) ? price : top));
+      const best = PRICE_STEPS.reduce((top, price) =>
+        profitAt(price) > profitAt(top) ? price : top,
+      );
       expect(best, type.id).toBeGreaterThanOrEqual(85);
       expect(best, type.id).toBeLessThanOrEqual(135);
       // And moving the slider is worth something, not everything: the best
@@ -137,7 +141,10 @@ describe('a year of trading', () => {
 
   it('lets no single dial win across the board, once the manager has staffed to match', () => {
     /** The headcount the default manager settles on for this setup. */
-    const settled = (business: OwnedBusiness, type: (typeof BUSINESS_TYPES)[number]): OwnedBusiness => {
+    const settled = (
+      business: OwnedBusiness,
+      type: (typeof BUSINESS_TYPES)[number],
+    ): OwnedBusiness => {
       let next = business;
       for (let round = 0; round < 8; round += 1) {
         const year = businessYear(next, type, NORMAL);
@@ -370,15 +377,44 @@ describe('staffing and the small pieces', () => {
 describe('Ticket 0602 — the rest of the catalog', () => {
   it('has types in every sector spec 396 names, and none it removed', () => {
     const ids = BUSINESS_TYPES.map((type) => type.id);
-    for (const wanted of ['law', 'marketing', 'realestate', 'jewelry', 'electronics', 'furniture',
-      'specialty', 'resort', 'electrical', 'plumbing', 'roofing', 'gaming', 'media', 'production',
-      'apparelmfg', 'electronicsmfg', 'specialtymfg', 'trucking', 'vehiclerental']) {
+    for (const wanted of [
+      'law',
+      'marketing',
+      'realestate',
+      'jewelry',
+      'electronics',
+      'furniture',
+      'specialty',
+      'resort',
+      'electrical',
+      'plumbing',
+      'roofing',
+      'gaming',
+      'media',
+      'production',
+      'apparelmfg',
+      'electronicsmfg',
+      'specialtymfg',
+      'trucking',
+      'vehiclerental',
+    ]) {
       expect(ids, wanted).toContain(`biz.${wanted}`);
     }
     // Spec 396 removed these. Nothing in the catalog may be named for one.
     const names = BUSINESS_TYPES.map((type) => type.name.toLowerCase()).join('|');
-    for (const gone of ['consulting', 'staffing', 'wealth management', 'pet services', 'childcare',
-      'catering', 'general contractor', 'app studio', 'courier', 'logistics', 'event company']) {
+    for (const gone of [
+      'consulting',
+      'staffing',
+      'wealth management',
+      'pet services',
+      'childcare',
+      'catering',
+      'general contractor',
+      'app studio',
+      'courier',
+      'logistics',
+      'event company',
+    ]) {
       expect(names, gone).not.toContain(gone);
     }
   });
@@ -422,8 +458,14 @@ describe('Ticket 0602 — locations', () => {
     ...mature(typeId).business,
     branches,
     last: {
-      year: 2011, revenue: 500_000, costs: 400_000, profit: 100_000, drawn: 50_000,
-      injected: 0, turnedAway: 0, idle: 0,
+      year: 2011,
+      revenue: 500_000,
+      costs: 400_000,
+      profit: 100_000,
+      drawn: 50_000,
+      injected: 0,
+      turnedAway: 0,
+      idle: 0,
     },
   });
 
@@ -507,17 +549,22 @@ describe('Ticket 0602 — locations', () => {
     const { type } = mature('biz.cafe');
     const ok = owned('biz.cafe');
     expect(expansionRefusal(ok, type, 2012, 1e9)).toBeUndefined();
-    expect(expansionRefusal(owned('biz.cafe', [2012, 2013, 2014]), type, 2030, 1e9)).toBe('at-limit');
+    expect(expansionRefusal(owned('biz.cafe', [2012, 2013, 2014]), type, 2030, 1e9)).toBe(
+      'at-limit',
+    );
     expect(expansionRefusal(ok, type, 2000 + EXPAND_AFTER_YEARS - 1, 1e9)).toBe('too-new');
     expect(expansionRefusal(owned('biz.cafe', [2011]), type, 2012, 1e9)).toBe('too-new');
-    expect(
-      expansionRefusal({ ...ok, last: { ...ok.last!, profit: -1 } }, type, 2012, 1e9),
-    ).toBe('not-earning');
+    expect(expansionRefusal({ ...ok, last: { ...ok.last!, profit: -1 } }, type, 2012, 1e9)).toBe(
+      'not-earning',
+    );
     expect(expansionRefusal({ ...ok, last: undefined }, type, 2012, 1e9)).toBe('not-earning');
     expect(expansionRefusal(ok, type, 2012, branchCostFor(type) - 1)).toBe('cannot-afford');
-    expect(Object.keys(EXPAND_REFUSAL_LABELS).sort()).toEqual(
-      ['at-limit', 'cannot-afford', 'not-earning', 'too-new'],
-    );
+    expect(Object.keys(EXPAND_REFUSAL_LABELS).sort()).toEqual([
+      'at-limit',
+      'cannot-afford',
+      'not-earning',
+      'too-new',
+    ]);
   });
 
   it('closes the newest door for part of what its fittings are worth', () => {
@@ -540,8 +587,17 @@ describe('Ticket 0602 — locations', () => {
       }
       return businessYear(next, type, { ...NORMAL, year: 2030 }).profit;
     };
-    for (const id of ['biz.cleaning', 'biz.landscaping', 'biz.salon', 'biz.cafe', 'biz.fitness',
-      'biz.autorepair', 'biz.restaurant', 'biz.clothing', 'biz.hvac']) {
+    for (const id of [
+      'biz.cleaning',
+      'biz.landscaping',
+      'biz.salon',
+      'biz.cafe',
+      'biz.fitness',
+      'biz.autorepair',
+      'biz.restaurant',
+      'biz.clothing',
+      'biz.hvac',
+    ]) {
       const { business, type } = mature(id);
       const alone = settle(business, type);
       const one = settle({ ...business, branches: [2000] }, type);

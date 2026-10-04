@@ -280,12 +280,7 @@
       "feeBasis": 0,
       "flatFee": 0,
       "minimumPortfolio": 0,
-      "reasons": [
-        "concentrated",
-        "noFloor",
-        "idleCash",
-        "steady"
-      ],
+      "reasons": ["concentrated", "noFloor", "idleCash", "steady"],
       "picks": 2,
       "sharpness": 0,
       "concentratedAt": 0.45,

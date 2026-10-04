@@ -8,12 +8,12 @@ hole larger than the one 0413 had just closed.
 
 For an ordinary character — employed, single, childless, not bereaved, well:
 
-| category | at 12 | at 17 | at 18 | at 40 |
-|---|---|---|---|---|
-| family | 6 | 5 | **0** | **0** |
-| random | 48 | 37 | 5 (all placeholders) | 7 (all placeholders) |
-| talent | 2 | 2 | **0** | **0** |
-| friendship | 38 | 38 | 11 | 32 |
+| category   | at 12 | at 17 | at 18                | at 40                |
+| ---------- | ----- | ----- | -------------------- | -------------------- |
+| family     | 6     | 5     | **0**                | **0**                |
+| random     | 48    | 37    | 5 (all placeholders) | 7 (all placeholders) |
+| talent     | 2     | 2     | **0**                | **0**                |
+| friendship | 38    | 38    | 11                   | 32                   |
 
 `family` is the second-biggest category in the catalog and it was **a total zero
 by construction**. Of its ninety-one events, eighty carry an `ageMax` below
@@ -35,7 +35,7 @@ point of it is people having children rather than people having families.
 
 Four previous measurements missed this, each defensibly. 0409 counted events at
 forty, where parents-of-children carry the number. 0410 "fixed family" by
-building the door to *having* children. 0413 measured the cliff by category
+building the door to _having_ children. 0413 measured the cliff by category
 total. New rule **13.77**: measure a category against the population it serves,
 not against the catalog.
 
@@ -53,14 +53,14 @@ against it.
 came from, and **twenty-four ordinary-life events** for the category that was
 nothing but placeholders.
 
-| | before | after |
-|---|---|---|
-| childless adult years holding a family event | **0.0%** | **47.2%** |
-| family share of what fires at 18 / 30 / 40 | 0% / 1.9% / 12.4% | 18.1% / 22.5% / 25.8% |
-| placeholder share across 18–30 | 17.5% at 18 | **2.8%** |
-| adult family decisions | **0** | 4 (33+ firings) |
-| distinct events fired at 18 / 40 | 20 / 89 | **31 / 111** |
-| largest single category share of an adult year | **46.9%** (friendship at 20) | **31.3%** |
+|                                                | before                       | after                 |
+| ---------------------------------------------- | ---------------------------- | --------------------- |
+| childless adult years holding a family event   | **0.0%**                     | **47.2%**             |
+| family share of what fires at 18 / 30 / 40     | 0% / 1.9% / 12.4%            | 18.1% / 22.5% / 25.8% |
+| placeholder share across 18–30                 | 17.5% at 18                  | **2.8%**              |
+| adult family decisions                         | **0**                        | 4 (33+ firings)       |
+| distinct events fired at 18 / 40               | 20 / 89                      | **31 / 111**          |
+| largest single category share of an adult year | **46.9%** (friendship at 20) | **31.3%**             |
 
 That last row is finding 2e's own second half, and it is fixed the right way
 round. After 0413, friendship was 49% of everything that fired at twenty against
@@ -72,17 +72,17 @@ touching a single friendship weight.
 The adult mix now reads like childhood's:
 
 | age | family | friendship | career | health | loss | random |
-|---|---|---|---|---|---|---|
-| 12 | 16.5% | 27.4% | — | — | — | 27.4% |
-| 20 | 24.0% | 21.2% | 20.3% | 0.9% | — | 33.6% |
-| 30 | 22.5% | 26.4% | 20.3% | 6.6% | 1.8% | 22.5% |
-| 40 | 25.8% | 23.6% | 17.9% | 8.3% | 3.1% | 21.4% |
+| --- | ------ | ---------- | ------ | ------ | ---- | ------ |
+| 12  | 16.5%  | 27.4%      | —      | —      | —    | 27.4%  |
+| 20  | 24.0%  | 21.2%      | 20.3%  | 0.9%   | —    | 33.6%  |
+| 30  | 22.5%  | 26.4%      | 20.3%  | 6.6%   | 1.8% | 22.5%  |
+| 40  | 25.8%  | 23.6%      | 17.9%  | 8.3%   | 3.1% | 21.4%  |
 
 ## Two things the checks found
 
 - **The token-guard table had been wrong for eleven tickets.** One line —
-  *"{father} slipped you $200 at the car and told you not to tell
-  {motherName}"* — was accepted by the generator and rejected by the content
+  _"{father} slipped you $200 at the car and told you not to tell
+  {motherName}"_ — was accepted by the generator and rejected by the content
   test, because the generator has known `{motherName}` and `{fatherName}` since
   0203b and the TypeScript copy never had them. Roadmap finding 7 has named this
   table as living in four places since 0209; this is what it costs. A duplicated
@@ -90,7 +90,7 @@ The adult mix now reads like childhood's:
   drifted entry. New rule **13.78**.
 - **`{parent}` is not `{mother}`.** The generator refused eleven lines that said
   `{mother}` under `requires: ["anyParent"]` — correctly, because that
-  requirement guarantees *a* parent and not *which*. They read `{parent}` now
+  requirement guarantees _a_ parent and not _which_. They read `{parent}` now
   ("Mom" or "Dad" as the household has it) with `{parentThey}` pronouns, which is
   precisely what that token exists for and what the 0203b pronoun work built.
 
@@ -101,8 +101,8 @@ The catalog is **543 events** and the approved target since 0203 has been
 
 Raised to 700, with the reasoning written down in both places. The ceiling is
 from a ticket where this catalog was a childhood and 500 was more than anybody
-could review; the spec's own v0.10 target is *"roughly 2,000–5,000+ event text
-variants by pre-beta"*, so a number that stops the build at 543 is stopping it
+could review; the spec's own v0.10 target is _"roughly 2,000–5,000+ event text
+variants by pre-beta"_, so a number that stops the build at 543 is stopping it
 doing the thing it is for. That is CORE_RULES 13.68 — a guard whose
 justification expired. What keeps a catalog this size honest is the generator's
 self-checks, the validator and the reachability tests, and all three scale. The
@@ -128,7 +128,7 @@ fifty-eight talent events carry an `ageMax` below eighteen, so whatever a
 character is good at stops existing the day they leave school — measured at
 **0.0% of what fires at every adult age**. It is the same total-zero shape as
 family was, and it is left alone on purpose: adult talent is what v0.07 Creator
-& Fame and v0.08 Entertainment & Sports are *for*, and 0211 already recorded that
+& Fame and v0.08 Entertainment & Sports are _for_, and 0211 already recorded that
 adult athletics is blocked on `education.activities` being school-only. Writing
 thirty adult talent events now would pre-empt two milestones and make them
 harder. It is logged as finding 2f.

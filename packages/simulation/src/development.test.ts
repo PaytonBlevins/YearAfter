@@ -119,7 +119,7 @@ describe('0411 — an adult who develops', () => {
     const moved = changeIn('discipline').filter((delta) => delta !== 0).length;
     expect(
       moved / PAIRED.length,
-      "share of lives whose Discipline is not exactly where it was at eighteen",
+      'share of lives whose Discipline is not exactly where it was at eighteen',
     ).toBeGreaterThan(0.6);
   });
 

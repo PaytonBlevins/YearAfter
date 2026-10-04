@@ -50,7 +50,14 @@ import {
   type NewTransaction,
   type OwnedHome,
 } from '@yearafter/finance';
-import { emptyLetting, goingRentOf, unitYear, bestApplicant, AGENT_SHARE, type Tenant } from '@yearafter/finance';
+import {
+  emptyLetting,
+  goingRentOf,
+  unitYear,
+  bestApplicant,
+  AGENT_SHARE,
+  type Tenant,
+} from '@yearafter/finance';
 import { findLoanProduct, yearlyPaymentFor } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 import { incomeOf, standingFor } from './cards';
@@ -148,7 +155,8 @@ function listingsOf(
     }
     const age = between(kind.age, unit(state, `${key}:age`));
     const condition = conditionFor(age, unit(state, `${key}:condition`));
-    const raw = between(kind.price, unit(state, `${key}:price`)) * index * CONDITION_PRICE[condition];
+    const raw =
+      between(kind.price, unit(state, `${key}:price`)) * index * CONDITION_PRICE[condition];
     const askingPrice = Math.max(10_000, Math.round(raw / 1_000) * 1_000);
     const listing: HomeListing = {
       id: `home:${state.world.year}:${slotPrefix}${slot}`,
@@ -202,7 +210,9 @@ export const rentalListings = (state: GameState): readonly HomeListing[] =>
   );
 
 const anyListing = (state: GameState, listingId: string): HomeListing | undefined =>
-  [...homeListings(state), ...rentalListings(state)].find((candidate) => candidate.id === listingId);
+  [...homeListings(state), ...rentalListings(state)].find(
+    (candidate) => candidate.id === listingId,
+  );
 
 /* -------------------------------------------------------------------------- */
 /* Buying                                                                      */
@@ -239,8 +249,12 @@ const listedRentOf = (listing: HomeListing): number => {
   const kind = findHomeKind(listing.kindId);
   if (!kind) return 0;
   return (
-    goingRentOf(dollars(listing.askingPrice), kind.rentYield, regionCostIndexOf(listing.regionKey), kind.units) *
-    kind.units
+    goingRentOf(
+      dollars(listing.askingPrice),
+      kind.rentYield,
+      regionCostIndexOf(listing.regionKey),
+      kind.units,
+    ) * kind.units
   );
 };
 
@@ -255,10 +269,7 @@ export const mortgageOfferFor = (state: GameState, listing: HomeListing): Mortga
   );
 
 export type BuyHomeError =
-  | 'no-such-listing'
-  | 'already-owned'
-  | 'cannot-afford'
-  | 'mortgage-refused';
+  'no-such-listing' | 'already-owned' | 'cannot-afford' | 'mortgage-refused';
 
 export const BUY_HOME_ERROR_LABELS: Readonly<Record<BuyHomeError, string>> = {
   'no-such-listing': "That one isn't for sale any more.",
@@ -273,7 +284,12 @@ export interface BoughtHome {
   readonly entry: TimelineEntry;
 }
 
-function line(state: GameState, text: string, key: string, kind: 'milestone' | 'passive'): TimelineEntry {
+function line(
+  state: GameState,
+  text: string,
+  key: string,
+  kind: 'milestone' | 'passive',
+): TimelineEntry {
   const sequence = state.player.timeline.filter((entry) => entry.age === state.player.age).length;
   return createTimelineEntry({
     age: state.player.age,
@@ -347,7 +363,8 @@ export function buyHome(
       : `${listing.name} in ${listing.regionName}, bought outright`,
   });
 
-  const first = state.homes.length === 0 && !state.player.records.some((r) => r.category === 'property');
+  const first =
+    state.homes.length === 0 && !state.player.records.some((r) => r.category === 'property');
   const text = mortgage
     ? `Bought ${listing.noun} for ${money(listing.askingPrice)}, with ${money(paid)} down and a mortgage for the rest.`
     : `Bought ${listing.noun} for ${money(listing.askingPrice)}, outright.`;
@@ -365,7 +382,11 @@ export function buyHome(
         ? appendRecord(
             state.player.records,
             stampRecord(
-              { category: 'property', label: `Bought a first home — ${listing.name}`, referenceId: listing.kindId },
+              {
+                category: 'property',
+                label: `Bought a first home — ${listing.name}`,
+                referenceId: listing.kindId,
+              },
               state.player.age,
               state.world.year,
             ),
@@ -413,8 +434,8 @@ function sold(state: GameState, home: OwnedHome, forced: boolean, pressed = fals
     : pressed
       ? `Sold ${noun} because the payments had become more than the year could carry. ${money(sale.proceeds)} was left after the mortgage.`
       : sale.repaid > 0
-      ? `Sold ${noun} for ${money(sale.price)}. After the mortgage and the fees, ${money(sale.proceeds)} was yours.`
-      : `Sold ${noun} for ${money(sale.price)}. After the fees, ${money(sale.proceeds)} was yours.`;
+        ? `Sold ${noun} for ${money(sale.price)}. After the mortgage and the fees, ${money(sale.proceeds)} was yours.`
+        : `Sold ${noun} for ${money(sale.price)}. After the fees, ${money(sale.proceeds)} was yours.`;
   const entry = line(
     state,
     text,
@@ -466,11 +487,7 @@ export interface HomesYear {
  * takes it first, through `foreclose`, so it is not charged for a year it was
  * never going to see out.
  */
-export function runHomesYear(
-  homes: readonly OwnedHome[],
-  year: number,
-  seed: string,
-): HomesYear {
+export function runHomesYear(homes: readonly OwnedHome[], year: number, seed: string): HomesYear {
   const move = marketMoveIn(year);
   const transactions: NewTransaction[] = [];
   const lines: string[] = [];
@@ -500,7 +517,9 @@ export function runHomesYear(
     if (result.worn && result.home.condition === 'poor') {
       lines.push(`The ${name} is starting to show its age. Everything needs doing at once.`);
     }
-    const let_ = home.letting ? lettingYear({ ...result.home, letting: home.letting }, year, seed, name) : undefined;
+    const let_ = home.letting
+      ? lettingYear({ ...result.home, letting: home.letting }, year, seed, name)
+      : undefined;
     if (let_) {
       transactions.push(...let_.transactions);
       if (let_.line) lines.push(let_.line);
@@ -557,11 +576,19 @@ function lettingYear(
 
   const transactions: NewTransaction[] = [];
   if (collected > 0) {
-    transactions.push({ category: 'assetIncome', amount: dollars(collected), source: `Rent from the ${name}` });
+    transactions.push({
+      category: 'assetIncome',
+      amount: dollars(collected),
+      source: `Rent from the ${name}`,
+    });
     if (home.letting.managed) {
       const fee = Math.round(collected * AGENT_SHARE);
       if (fee > 0) {
-        transactions.push({ category: 'housing', amount: dollars(-fee), source: `Letting agent for the ${name}` });
+        transactions.push({
+          category: 'housing',
+          amount: dollars(-fee),
+          source: `Letting agent for the ${name}`,
+        });
       }
     }
   }
@@ -677,7 +704,11 @@ export function withHomeOffer(state: GameState, alive: boolean, roof: number): G
   });
   if (!candidate) return state;
 
-  const offer: HomeOffer = { listingId: candidate.id, age: state.player.age, eventId: HOME_EVENT_ID };
+  const offer: HomeOffer = {
+    listingId: candidate.id,
+    age: state.player.age,
+    eventId: HOME_EVENT_ID,
+  };
   const prompts = [
     `${cap(candidate.noun)} came up for ${money(candidate.askingPrice)}. The bank would lend on it.`,
     `You looked at ${candidate.noun} for ${money(candidate.askingPrice)} and couldn't stop thinking about it.`,
@@ -718,7 +749,10 @@ export function answerHomeOffer(
   const note = (text: string) => {
     const entry = line(cleared, text, 'home:offer', 'passive');
     return ok({
-      state: { ...cleared, player: { ...cleared.player, timeline: appendToTimeline(cleared.player.timeline, entry) } },
+      state: {
+        ...cleared,
+        player: { ...cleared.player, timeline: appendToTimeline(cleared.player.timeline, entry) },
+      },
       entry,
     });
   };
@@ -733,11 +767,17 @@ export const yearlyCostOf = (listing: HomeListing, offer: MortgageOffer): number
   offer.yearlyPayment + listing.annualExpense;
 
 /** The years left and the yearly payment on an owned home's mortgage, for the screen. */
-export function mortgageLineOf(home: OwnedHome): { readonly payment: number; readonly termLeft: number } | undefined {
+export function mortgageLineOf(
+  home: OwnedHome,
+): { readonly payment: number; readonly termLeft: number } | undefined {
   if (!home.mortgage) return undefined;
   const product = findMortgageProduct(home.mortgage.productId);
   return {
-    payment: mortgagePaymentFor(product?.apr ?? 0.065, Number(home.mortgage.balance) / 100, home.mortgage.termLeft),
+    payment: mortgagePaymentFor(
+      product?.apr ?? 0.065,
+      Number(home.mortgage.balance) / 100,
+      home.mortgage.termLeft,
+    ),
     termLeft: home.mortgage.termLeft,
   };
 }

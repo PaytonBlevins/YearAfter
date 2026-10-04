@@ -63,9 +63,9 @@ export function LoansScreen() {
                         ? 'Behind on it'
                         : loan.businessId
                           ? `${state.businesses.find((row) => row.id === loan.businessId)?.name ?? 'A business you no longer run'} · ${money(yearly)} a year, ${loan.termLeft} to go`
-                        : product.termYears > 0
-                          ? `${money(yearly)} a year, ${loan.termLeft} to go`
-                          : `${money(yearly)} a year while it runs`
+                          : product.termYears > 0
+                            ? `${money(yearly)} a year, ${loan.termLeft} to go`
+                            : `${money(yearly)} a year while it runs`
                     }
                     value={money(owed)}
                     meta={`${Math.round(product.apr * 1000) / 10}% · ${product.lender}`}
@@ -220,8 +220,8 @@ export function LoansScreen() {
       ) : null}
 
       <Text style={styles.note}>
-        Loans for a business aren't here: they're offered when you open, enlarge or buy one, and
-        the business pays them back.
+        Loans for a business aren't here: they're offered when you open, enlarge or buy one, and the
+        business pays them back.
       </Text>
 
       <Text style={styles.note}>

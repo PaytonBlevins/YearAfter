@@ -202,9 +202,7 @@ describe('the primer', () => {
 describe('the price book the page reads', () => {
   it('has moved by the time the page is drawn', () => {
     const prices = bookAfter(6, 77);
-    const moved = INSTRUMENTS.filter(
-      (row) => priceOf(prices, row.id) !== row.priceCents,
-    );
+    const moved = INSTRUMENTS.filter((row) => priceOf(prices, row.id) !== row.priceCents);
     expect(moved.length).toBeGreaterThan(INSTRUMENTS.length / 2);
   });
 });

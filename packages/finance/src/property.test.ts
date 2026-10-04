@@ -73,9 +73,9 @@ describe('0501 — a mortgage', () => {
     expect(mortgageFor(250_000, buyer({ cash: 2_000 }), 6_000).because).toBe('deposit');
     // Enough for the low-deposit product but not the income for it: the answer
     // is income, not the conventional product's bigger deposit.
-    expect(
-      mortgageFor(250_000, buyer({ cash: 15_000, income: 30_000 }), 6_000).because,
-    ).toBe('income');
+    expect(mortgageFor(250_000, buyer({ cash: 15_000, income: 30_000 }), 6_000).because).toBe(
+      'income',
+    );
     expect(mortgageFor(250_000, buyer({ income: 20_000 }), 6_000).because).toBe('income');
     expect(mortgageFor(250_000, buyer({ standing: 'poor' }), 6_000).because).toBe('standing');
     expect(mortgageFor(250_000, buyer({ age: 17 }), 6_000).because).toBe('tooYoung');

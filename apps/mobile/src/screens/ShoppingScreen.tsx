@@ -11,7 +11,13 @@
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { COLLECTION_SHELF_LABELS, findValuableStore } from '@yearafter/content';
-import { collectionOf, openStores, openVenues, storeStock, visitsLeft } from '@yearafter/simulation';
+import {
+  collectionOf,
+  openStores,
+  openVenues,
+  storeStock,
+  visitsLeft,
+} from '@yearafter/simulation';
 import { useNavigation } from '../navigation/navigation';
 import { ActionButton, Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';

@@ -5,7 +5,7 @@ reopen, redesign, or quietly drift from them in a later ticket. If a ticket seem
 to require breaking one, stop and raise it.
 
 The canonical spec is `specs/MASTER_SPEC.md` in the repo; this file records
-decisions made *since* the spec, during review.
+decisions made _since_ the spec, during review.
 
 ---
 

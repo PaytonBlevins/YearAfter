@@ -1,8 +1,8 @@
 # Ticket 0408 — a population worth simulating
 
 The roadmap has carried this as finding 1 since 0211 and it has been the first
-line of the suggested order ever since: *"This build cannot produce a poor
-student."* School performance at sixteen ran p10 67, median 78, **minimum 50
+line of the suggested order ever since: _"This build cannot produce a poor
+student."_ School performance at sixteen ran p10 67, median 78, **minimum 50
 across 500 lives**. Everything downstream inherited the flatness, and 0406 and
 0407 made it acute — with college offered and work offered, 91% of lives
 finished a degree.
@@ -25,17 +25,17 @@ to a child on forty Smarts and 0.6× to one on seventy, so school handed its
 biggest gains to the students least able to use them, every year, for thirteen
 years. An equalising curve applied to aptitude equalises aptitude.
 
-| | before | after |
-|---|---|---|
-| Smarts at birth, p10 / median | 44 / 56 | 38 / 55 |
-| **Smarts at eighteen, minimum** | **56** | **34** |
-| Smarts at eighteen, p10 | 70 | 54 |
-| school performance at 16, minimum | 50 | 26 |
-| school performance at 16, sd | 7.7 | **17.4** |
-| dropped out | 13/500 | 36/500 |
-| failed out of college | 81/500 | 106/500 |
-| finished no qualification at all | 14/500 | 38/500 |
-| finished a degree | 457/500 | 412/500 |
+|                                   | before  | after    |
+| --------------------------------- | ------- | -------- |
+| Smarts at birth, p10 / median     | 44 / 56 | 38 / 55  |
+| **Smarts at eighteen, minimum**   | **56**  | **34**   |
+| Smarts at eighteen, p10           | 70      | 54       |
+| school performance at 16, minimum | 50      | 26       |
+| school performance at 16, sd      | 7.7     | **17.4** |
+| dropped out                       | 13/500  | 36/500   |
+| failed out of college             | 81/500  | 106/500  |
+| finished no qualification at all  | 14/500  | 38/500   |
+| finished a degree                 | 457/500 | 412/500  |
 
 Nobody in this game was below average as an adult. Now the bottom of the
 distribution is a real place.
@@ -50,17 +50,17 @@ distribution is a real place.
   wider band. sd 9 → 15.
 - School's Smarts gain scales with aptitude. Coarse bands rather than a rate,
   because `curvedDelta` rounds to whole points and a fractional rate would
-  quietly floor to zero. Effort still moves everybody, and is worth *more* to a
+  quietly floor to zero. Effort still moves everybody, and is worth _more_ to a
   struggling student than the passage of time is — spec 1821 keeps Study Harder
   as the player's lever.
 
 **And a third, which the measurement turned up on the way.** `frailtyFactor`
-returned 1 for anybody at or above the healthy-adult mark: *"being well is not a
-bonus, it is the baseline."* That was a reasonable call when nobody was
+returned 1 for anybody at or above the healthy-adult mark: _"being well is not a
+bonus, it is the baseline."_ That was a reasonable call when nobody was
 meaningfully robust. With a wider roll it became the finding instead — across a
 sixty-eight point range of birth health, median age at death moved **four
 years**, and not monotonically. That is the same shape 0212 recorded for NPCs
-(*"4.9 years, which is another way of saying constitution did not exist"*) and
+(_"4.9 years, which is another way of saying constitution did not exist"_) and
 fixed for NPCs only. The multiplier is two-sided now, bounded, and the
 sudden-death floor is clamped out of its reach — a strong constitution buys odds
 against what accumulates and nothing against a car crash.
@@ -101,7 +101,7 @@ Licenses held now run median 1, p90 3.
 
 ## And one I nearly reported that did not exist
 
-My first probe said *"failed out of college: 0 of 500"* and I had most of a
+My first probe said _"failed out of college: 0 of 500"_ and I had most of a
 paragraph written about a dead branch before checking it. The branch fires 195
 times in 200 lives. The probe scanned `timeline.slice(-3)` each year — a sliding
 three-entry window, and a year can write more than three entries, so it walked
@@ -120,7 +120,7 @@ document as a finding.
 - **`advance.test.ts` pinned zero maxed stats.** Right while the roll topped out
   at 88 and clustered hard — "inflation is gone" and "nobody is exceptional"
   were the same measurement. Now a proportion, because what 0203 protected
-  against is a stat *everybody* maxes.
+  against is a stat _everybody_ maxes.
 - **`advance.test.ts` compared two random draws.** "The second term is worth less
   than the first" is not something the model promises: `studyHarder` scales a
   random magnitude, so a lucky second term beats an unlucky first whatever the

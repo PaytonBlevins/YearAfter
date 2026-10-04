@@ -107,9 +107,7 @@ export type EventTone = 'good' | 'bad';
 /** Who an event can happen to. A shop with no staff has nobody who can leave. */
 export type EventNeeds = 'supplier' | 'people' | 'fittings';
 
-export type EventEffect =
-  | 'rivalOpens'
-  | 'rivalCloses';
+export type EventEffect = 'rivalOpens' | 'rivalCloses';
 
 export interface BusinessEvent {
   readonly id: string;
@@ -167,7 +165,7 @@ export const BUSINESS_EVENTS: readonly BusinessEvent[] = [
     weight: 2,
     needs: 'people',
     demand: [1.05, 1.1],
-    line: "A steady customer renewed with {name} for another year, at a better rate.",
+    line: 'A steady customer renewed with {name} for another year, at a better rate.',
   },
   {
     id: 'better-price',
@@ -308,7 +306,8 @@ const FITTINGS_SHARE = 0.3;
 /** Whether the event can happen to this kind of business at all. */
 export function canHappenTo(event: BusinessEvent, type: BusinessType, rivalLive: boolean): boolean {
   if (event.needs === 'supplier' && !type.supplier) return false;
-  if (event.needs === 'people' && (type.staff * type.wage) / type.revenue < PEOPLE_SHARE) return false;
+  if (event.needs === 'people' && (type.staff * type.wage) / type.revenue < PEOPLE_SHARE)
+    return false;
   if (event.needs === 'fittings' && type.assetShare < FITTINGS_SHARE) return false;
   // One rival at a time, and nobody to see off when there is none.
   if (event.effect === 'rivalOpens' && rivalLive) return false;
@@ -339,7 +338,8 @@ export function weightOf(event: BusinessEvent, type: BusinessType, context: Even
   const hard = context.market === 'recession' || context.market === 'severeRecession';
   const hardest = context.market === 'severeRecession';
   const good = context.market === 'growth' || context.market === 'strongExpansion';
-  if (event.id === 'slow-stretch') weight *= hardest ? 2.2 : hard ? 1.6 : context.market === 'slowdown' ? 1.25 : 1;
+  if (event.id === 'slow-stretch')
+    weight *= hardest ? 2.2 : hard ? 1.6 : context.market === 'slowdown' ? 1.25 : 1;
   if (event.effect === 'rivalOpens') weight *= hard ? 0.5 : good ? 1.2 : 1;
   if (event.effect === 'rivalCloses') weight *= hard ? 2 : 1;
   if (event.id === 'big-order') weight *= good ? 1.3 : hard ? 0.75 : 1;
@@ -381,8 +381,13 @@ export function drawEvent(
     if (left < 0) return { event: BUSINESS_EVENTS[index]!, size: clampUnit(draws.size) };
   }
   // A draw of exactly 1 after rounding: the last event with any weight.
-  const last = weights.map((weight, index) => (weight > 0 ? index : -1)).filter((index) => index >= 0).pop();
-  return last === undefined ? undefined : { event: BUSINESS_EVENTS[last]!, size: clampUnit(draws.size) };
+  const last = weights
+    .map((weight, index) => (weight > 0 ? index : -1))
+    .filter((index) => index >= 0)
+    .pop();
+  return last === undefined
+    ? undefined
+    : { event: BUSINESS_EVENTS[last]!, size: clampUnit(draws.size) };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -403,8 +408,11 @@ export interface YearModifiers {
 
 export const NO_MODIFIERS: YearModifiers = { demand: 1, cogs: 1, overhead: 1, extra: 0 };
 
-const between = (range: readonly [number, number] | undefined, size: number, none: number): number =>
-  range === undefined ? none : range[0] + (range[1] - range[0]) * clampUnit(size);
+const between = (
+  range: readonly [number, number] | undefined,
+  size: number,
+  none: number,
+): number => (range === undefined ? none : range[0] + (range[1] - range[0]) * clampUnit(size));
 
 export function modifiersFor(happened: HappenedEvent | undefined): YearModifiers {
   if (!happened) return NO_MODIFIERS;

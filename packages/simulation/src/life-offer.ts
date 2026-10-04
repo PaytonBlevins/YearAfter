@@ -197,7 +197,9 @@ function romanceStep(
     .filter((person) => person.kind === 'peer')
     .filter((person) => person.relationship >= WORTH_ASKING)
     .map((person) => ({ person, move: furthestStep(person, age, cash) }))
-    .filter((entry): entry is { person: Acquaintance; move: RomanceMove } => entry.move !== undefined);
+    .filter(
+      (entry): entry is { person: Acquaintance; move: RomanceMove } => entry.move !== undefined,
+    );
 
   /*
     FINISH WHAT YOU STARTED BEFORE STARTING SOMETHING ELSE (measured).
@@ -393,9 +395,15 @@ export function romanceDecision(
     category: 'friendship',
     age: offer.age,
     year,
-    prompt: pick(lines, `romanceoffer:${person.id}:${move.id}`, offer.age).replace(/\{name\}/g, name),
+    prompt: pick(lines, `romanceoffer:${person.id}:${move.id}`, offer.age).replace(
+      /\{name\}/g,
+      name,
+    ),
     choices: [
-      { id: GO_AHEAD, label: (ROMANCE_LABELS[move.id] ?? move.label).replace(/them/g, person.firstName) },
+      {
+        id: GO_AHEAD,
+        label: (ROMANCE_LABELS[move.id] ?? move.label).replace(/them/g, person.firstName),
+      },
       { id: LEAVE_IT, label: 'Leave it for now' },
     ],
     names: {},
@@ -447,8 +455,14 @@ function pick(lines: readonly string[], key: string, age: number): string {
 }
 
 const DECLINED: Readonly<Record<'romance' | 'child', readonly string[]>> = {
-  romance: ['Thought about saying something to {name}. Didn’t.', 'Left it where it was with {name}.'],
-  child: ['Talked about it with {name} and agreed to leave it a while.', 'Not this year, you both said.'],
+  romance: [
+    'Thought about saying something to {name}. Didn’t.',
+    'Left it where it was with {name}.',
+  ],
+  child: [
+    'Talked about it with {name} and agreed to leave it a while.',
+    'Not this year, you both said.',
+  ],
 };
 
 /* -------------------------------------------------------------------------- */

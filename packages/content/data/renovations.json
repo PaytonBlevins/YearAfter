@@ -176,12 +176,7 @@
       "upkeep": 0,
       "beds": 1,
       "redoAfter": 0,
-      "kinds": [
-        "home.family",
-        "home.large",
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.family", "home.large", "home.luxury", "home.estate"],
       "blurb": "Room for one more, where the lot allows it.",
       "needs": "reno.bedroom-1",
       "phrase": "one more bedroom"
@@ -268,13 +263,7 @@
       "upkeep": 1200,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.starter",
-        "home.family",
-        "home.large",
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.starter", "home.family", "home.large", "home.luxury", "home.estate"],
       "blurb": "A hot tub on the deck.",
       "phrase": "a hot tub"
     },
@@ -290,13 +279,7 @@
       "upkeep": 3000,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.starter",
-        "home.family",
-        "home.large",
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.starter", "home.family", "home.large", "home.luxury", "home.estate"],
       "blurb": "An in-ground pool. Summer is different now.",
       "phrase": "a pool"
     },
@@ -312,10 +295,7 @@
       "upkeep": 6000,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.luxury", "home.estate"],
       "blurb": "The edge disappears into the view.",
       "phrase": "an infinity pool"
     },
@@ -331,11 +311,7 @@
       "upkeep": 0,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.large",
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.large", "home.luxury", "home.estate"],
       "blurb": "Racks for a thousand bottles, kept at fifty-five degrees.",
       "phrase": "a wine cellar"
     },
@@ -351,11 +327,7 @@
       "upkeep": 800,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.large",
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.large", "home.luxury", "home.estate"],
       "blurb": "A half court, lights and a real hoop.",
       "phrase": "a basketball court"
     },
@@ -371,10 +343,7 @@
       "upkeep": 2500,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.luxury", "home.estate"],
       "blurb": "A full court, fenced and lit.",
       "phrase": "a tennis court"
     },
@@ -390,10 +359,7 @@
       "upkeep": 3000,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.luxury", "home.estate"],
       "blurb": "Two lanes in the basement. Nobody believes you until they see it.",
       "phrase": "a bowling alley"
     },
@@ -409,10 +375,7 @@
       "upkeep": 3000,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.luxury",
-        "home.estate"
-      ],
+      "kinds": ["home.luxury", "home.estate"],
       "blurb": "A dome on the roof and a telescope worth more than a car.",
       "phrase": "an observatory"
     },
@@ -428,9 +391,7 @@
       "upkeep": 8000,
       "beds": 0,
       "redoAfter": 0,
-      "kinds": [
-        "home.estate"
-      ],
+      "kinds": ["home.estate"],
       "blurb": "A hedge maze. Somebody has to trim it.",
       "phrase": "a hedge maze"
     }

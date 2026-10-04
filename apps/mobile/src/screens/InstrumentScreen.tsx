@@ -249,11 +249,7 @@ export function InstrumentScreen() {
  * same sentence tell a player nothing about what to change. Every line here
  * names the number that has to move.
  */
-function refusalFor(
-  code: string | undefined,
-  cash: number,
-  smallest: number,
-): string | undefined {
+function refusalFor(code: string | undefined, cash: number, smallest: number): string | undefined {
   switch (code) {
     case undefined:
       return undefined;

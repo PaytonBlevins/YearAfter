@@ -49,7 +49,6 @@ export const NOT_YET_OWNED: readonly {
   // `assets` came off in Ticket 0501: a home is the first thing a character can
   // own that is neither cash nor an investment. The list is empty now, and it
   // stays declared so the device survives for whatever spec 19 adds next.
-
   // `credit` came off in 0305. `liabilities` and `investments` came off in
   // 0308 — but `liabilities` should have come off in 0307, which built cards
   // and loans and left this line here claiming they had not arrived. See
