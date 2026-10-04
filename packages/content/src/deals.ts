@@ -50,7 +50,8 @@ export const DEAL_KINDS: readonly DealKind[] = [
   {
     id: 'startup',
     label: 'Early-stage startup',
-    blurb: 'A small stake in a company that has only just begun. Most go nowhere; a few change everything.',
+    blurb:
+      'A small stake in a company that has only just begun. Most go nowhere; a few change everything.',
     minTicket: 5_000,
     gate: 15_000,
     lockYears: [3, 6],
@@ -69,7 +70,8 @@ export const DEAL_KINDS: readonly DealKind[] = [
   {
     id: 'lending',
     label: 'Private loan',
-    blurb: 'Money lent to a borrower the banks passed on. It pays every year, and now and then a borrower doesn't pay back.',
+    blurb:
+      "Money lent to a borrower the banks passed on. It pays every year, and now and then a borrower doesn't pay back.",
     minTicket: 10_000,
     gate: 30_000,
     lockYears: [1, 5],
@@ -85,7 +87,8 @@ export const DEAL_KINDS: readonly DealKind[] = [
   {
     id: 'localBusiness',
     label: 'A stake in a local business',
-    blurb: 'A share of a business in town, with a say in nothing and a claim on some of the profit when it is sold.',
+    blurb:
+      'A share of a business in town, with a say in nothing and a claim on some of the profit when it is sold.',
     minTicket: 25_000,
     gate: 75_000,
     lockYears: [3, 6],
@@ -94,17 +97,18 @@ export const DEAL_KINDS: readonly DealKind[] = [
     yearlyYield: 0,
     canSellEarly: true,
     outcomes: [
-      { weight: 0.3, multiple: [0, 0] },
-      { weight: 0.15, multiple: [0.2, 0.9] },
-      { weight: 0.3, multiple: [1, 2] },
-      { weight: 0.2, multiple: [2, 4] },
-      { weight: 0.05, multiple: [4, 8] },
+      { weight: 0.28, multiple: [0, 0] },
+      { weight: 0.12, multiple: [0.2, 0.9] },
+      { weight: 0.28, multiple: [1, 2] },
+      { weight: 0.22, multiple: [2, 4] },
+      { weight: 0.1, multiple: [4, 8] },
     ],
   },
   {
     id: 'realEstate',
     label: 'A property syndicate',
-    blurb: 'A share of a building bought by a group. Rent is reinvested; you are paid when it is sold.',
+    blurb:
+      'A share of a building bought by a group. Rent is reinvested; you are paid when it is sold.',
     minTicket: 25_000,
     gate: 75_000,
     lockYears: [5, 7],
@@ -114,9 +118,9 @@ export const DEAL_KINDS: readonly DealKind[] = [
     canSellEarly: true,
     outcomes: [
       { weight: 0.08, multiple: [0.4, 0.9] },
-      { weight: 0.45, multiple: [1.1, 1.5] },
-      { weight: 0.4, multiple: [1.5, 2.2] },
-      { weight: 0.07, multiple: [2.2, 3] },
+      { weight: 0.35, multiple: [1.2, 1.6] },
+      { weight: 0.42, multiple: [1.7, 2.5] },
+      { weight: 0.15, multiple: [2.5, 3.5] },
     ],
   },
   {
@@ -141,7 +145,8 @@ export const DEAL_KINDS: readonly DealKind[] = [
   {
     id: 'fund',
     label: 'A private fund',
-    blurb: 'Money pooled with other investors and run by a firm. Ten years, and no way to ask for it back.',
+    blurb:
+      'Money pooled with other investors and run by a firm. Ten years, and no way to ask for it back.',
     minTicket: 250_000,
     gate: 750_000,
     lockYears: [8, 10],
@@ -151,13 +156,70 @@ export const DEAL_KINDS: readonly DealKind[] = [
     canSellEarly: false,
     outcomes: [
       { weight: 0.05, multiple: [0.4, 0.8] },
-      { weight: 0.1, multiple: [0.9, 1.1] },
-      { weight: 0.35, multiple: [1.4, 2.2] },
-      { weight: 0.35, multiple: [2.2, 3.4] },
-      { weight: 0.15, multiple: [3.4, 5.6] },
+      { weight: 0.08, multiple: [0.9, 1.1] },
+      { weight: 0.3, multiple: [1.5, 2.4] },
+      { weight: 0.37, multiple: [2.4, 3.8] },
+      { weight: 0.2, multiple: [3.8, 6] },
     ],
   },
 ] as const;
 
 export const findDealKind = (id: string): DealKind | undefined =>
   DEAL_KINDS.find((kind) => kind.id === id);
+
+/**
+ * What a deal of each kind is called. A few to a kind, picked by a stable key
+ * (CORE_RULES 13.17: more names than repeats). Plain nouns, no real firms.
+ */
+export const DEAL_NAMES: Readonly<Record<DealKindId, readonly string[]>> = {
+  startup: [
+    'Brightwater Labs',
+    'Kestrel Software',
+    'Fernhill Robotics',
+    'Lanternfish',
+    'Tidewell Health',
+    'Copperleaf',
+    'Open Orchard',
+    'Quill & Anchor',
+  ],
+  lending: [
+    'a bridge loan to a builder',
+    'a loan to a delivery company',
+    'a loan to a family restaurant',
+    'a loan to a landlord',
+    'a loan to a dental practice',
+    'a loan to a farm supplier',
+  ],
+  localBusiness: [
+    'a share of a bakery chain',
+    'a share of a car wash',
+    'a share of a brewery',
+    'a share of a gym',
+    'a share of a print shop',
+    'a share of a landscaping firm',
+  ],
+  realEstate: [
+    'a self-storage block',
+    'a small apartment building',
+    'a strip of shops',
+    'a medical office',
+    'a warehouse by the rail line',
+    'a student housing block',
+  ],
+  growth: [
+    'Harbor Freight Tech',
+    'Northgate Foods',
+    'Cedar Analytics',
+    'Blue Mesa Energy',
+    'Sable Logistics',
+    'Pinecrest Medical',
+  ],
+  fund: [
+    'a growth fund',
+    'a buyout fund',
+    'a venture fund',
+    'a real-assets fund',
+    'a mid-market fund',
+    'a secondaries fund',
+  ],
+};

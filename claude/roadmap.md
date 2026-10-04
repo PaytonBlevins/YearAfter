@@ -544,14 +544,14 @@ start a business, so this block has no doors. 0508 Will & Estate was **skipped
 on Payton's say-so on 3 October 2026** and is still to be built; it moves after
 this block.
 
-|                                    |                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0601 The business engine**       | **DONE.** Opening, supplier / COGS, a price slider, four payroll tiers, automatic staffing, demand, brand reputation, profit, valuation and sale; twelve businesses; Assets → Businesses. Survival (≈81% at five years against BLS 51%) waits on 0604                                                               |
-| **0602 Catalog and expansion**     | **DONE.** Nineteen more businesses (thirty-one of spec 396's thirty-seven; six wait on music, acting, gambling, sports and private lending), a marketplace gated on net worth, and up to four locations per business. Fixed three 0601 calibration holes found on the way (price slider, pay level, staffing speed) |
-| **0603 Business finance**          | **DONE.** Two business loans (Small Business, Commercial Term) written straight into an opening, a new door or a purchase and never paid out as cash; a for-sale list of established businesses priced above their worth; the business pays its own loan. Private Lending Firm moves to 0605                        |
-| **0604 Business events and heirs** | **DONE.** Nineteen weighted events a year at most (half the years are quiet), a rival that opens in crowded trades and fades over three years, the economy's effect said out loud, and an heir who keeps the business and its lender. Five-year survival 81.5% → 78.7% (BLS 51%); recorded, not forced              |
-| 0605 Private investments           | Large returns that can fail or lock money up, opportunity capacity                                                                                                                                                                                                                                                  |
-| 0606 Commercial real estate        | Retail, office and warehouse space, joined to 0503's landlord                                                                                                                                                                                                                                                       |
+|                                    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0601 The business engine**       | **DONE.** Opening, supplier / COGS, a price slider, four payroll tiers, automatic staffing, demand, brand reputation, profit, valuation and sale; twelve businesses; Assets → Businesses. Survival (≈81% at five years against BLS 51%) waits on 0604                                                                                                                                                                                                                                                    |
+| **0602 Catalog and expansion**     | **DONE.** Nineteen more businesses (thirty-one of spec 396's thirty-seven; six wait on music, acting, gambling, sports and private lending), a marketplace gated on net worth, and up to four locations per business. Fixed three 0601 calibration holes found on the way (price slider, pay level, staffing speed)                                                                                                                                                                                      |
+| **0603 Business finance**          | **DONE.** Two business loans (Small Business, Commercial Term) written straight into an opening, a new door or a purchase and never paid out as cash; a for-sale list of established businesses priced above their worth; the business pays its own loan. Private Lending Firm moves to 0605                                                                                                                                                                                                             |
+| **0604 Business events and heirs** | **DONE.** Nineteen weighted events a year at most (half the years are quiet), a rival that opens in crowded trades and fades over three years, the economy's effect said out loud, and an heir who keeps the business and its lender. Five-year survival 81.5% → 78.7% (BLS 51%); recorded, not forced                                                                                                                                                                                                   |
+| **0605 Private investments**       | **ENGINE DONE; screens in progress (second agent).** Six kinds of deal (start-up, private loan, local-business stake, property syndicate, growth company, fund), offered to the soft wealth bands (from $15,000 liquid to $750,000), money away for 1–10 years, an outcome fixed at the cheque, capacity limits on every cheque, early sale only where the kind allows it, tax through the ordinary progressive rate, sold on into the estate at a death. Save v40. `claude/0605-private-investments.md` |
+| 0606 Commercial real estate        | Retail, office and warehouse space, joined to 0503's landlord                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## v0.07 Creator & Fame
 
@@ -1053,6 +1053,25 @@ the catalog, not inside an events ticket.
 
 ---
 
+### Found by 0605
+
+**42. A plain index fund beats every private deal, and idle cash earns nothing.**
+Measured on 150 forty-year-olds given $500,000 and played to seventy: holding
+the money in cash ends at a median of $765,000; putting it in the first
+broad index fund ends at $3.4 million; taking every private deal offered at
+the largest cheque allowed ends at $1.7 million (p90 $4.6 million). Deals are
+capped by the round and by half the person's money, so most of the capital
+sits idle in the deals-only run, and cash earns 0%. Neither is a 0605
+defect: the deal tables give 8–13% a year on the illiquid kinds after the
+tuning, and the capacity limit is spec 1383's. But a player who finds the
+index fund never needs a private deal, and nothing in the game makes cash
+cost anything. Belongs to a rates/economy ticket; recorded rather than forced.
+
+**43. Dividends and coupons are still untaxed.** `assetIncome` from the
+portfolio is posted with no tax row; 0605's deal interest and gains are taxed
+through the progressive rate. The two are now inconsistent. Fix in the same
+ticket as 42.
+
 ## Suggested order
 
 1. **Character-generation fix** (findings 1 and 1b) — _(shipped as 0408 for the
@@ -1085,4 +1104,4 @@ the catalog, not inside an events ticket.
 7. **v0.05 onward** in spec order. _(0501 Homes shipped.)_
 8. **Partners' income** (finding 9) — _(shipped as 0502, A household of two.)_
 9. **0503 → 0508.** _(0503 A landlord, 0504 Vehicles, 0505 Vehicle modifications, 0506 Renovations & collections and 0507 Auctions shipped. 0508 Will & Estate, which closes v0.05, was deferred by Payton on 3 October and moves after v0.06.)_
-10. **0601 → 0606.** _(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments is next, then 0508 Will & Estate whenever Payton wants it.)_
+10. **0601 → 0606.** _(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments' engine shipped (screens in progress), then 0508 Will & Estate whenever Payton wants it.)_

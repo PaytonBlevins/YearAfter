@@ -2719,3 +2719,32 @@ and a debt whose thing is gone is personal and dropped as before.
   (its worth, not what the parent put in).
 - **A default that changes behavior breaks old tests honestly.** Two death
   tests that assumed a sale now ask for the sale; they were not loosened.
+
+### 13.102 A guard the catalog makes unreachable is not a guard: assert the catalog fact
+
+0605's offers had `if (maxTicket < kind.minTicket) continue;` and the
+placement had a one-year-deal check on the warning. The sabotage run removed
+each and nothing failed, because no catalog entry could reach either
+(a cap is at least 1.5 cheques; a warning needs two years). Same family as
+13.99. The fix is not a test that tries to reach the branch, which can't be
+written; it is to remove the branch and assert the catalog fact that made it
+unreachable, so an edit that breaks the fact fails in the catalog test, in the
+place it was done.
+
+- **Two survivors out of fifty were both of this kind.** Count them before
+  reaching for a new test.
+
+### 13.103 A test whose loop may be empty proves nothing: assert the loop ran
+
+"A taken offer is never offered again" iterated over the offers of one
+seed. That seed had none, so the test passed with the rule deleted. Loop over
+many seeds and assert how many cases were actually checked, or the green is
+vacuous.
+
+### 13.104 Don't let a warning be a free exit
+
+A deal that shows the player a signal before it fails (0605's "word gets out")
+must price a sale after the signal at what the deal will return. Otherwise the
+signal is a guaranteed escape and the risk it advertises isn't one. The same
+price is used when an estate sells at a death. A test asserts the sale after the
+warning never beats holding.

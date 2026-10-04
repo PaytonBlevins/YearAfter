@@ -1,7 +1,7 @@
 # 0605 — Private investments
 
-**Status: IN PROGRESS. Contract commit only (types, catalog, save v40, stubs).**
-Engine, calibration and screens follow. Spec 1383, 1140, 1860, 1233, 912.
+**Status: ENGINE DONE (4 October 2026). Save v40. Screens, deal wording and an independent
+sabotage pass belong to the second agent and are open.** Spec 1383, 1140, 1860, 1233, 912.
 
 ## Measured first
 
@@ -77,11 +77,76 @@ is three cheques (soft band, spec 1140).
   `placeInDeal(state, offerId, amount)`, `sellDealEarly(state, dealId)`.
 - `GameState.deals`, save **v40** (migration 39, `deals: []`).
 
-Stubs return `[]` / `notBuilt` until the engine commit.
+Changes since the contract commit: `placeDeal` takes the `seed`; `DealYear` is
+`{deal, interest, returned, note?}`; the timeline wording is `DEAL_LINES` / `dealLine`
+in `content/src/deal-lines.ts` (the second agent's file); `DEAL_NAMES` is in
+`content/src/deals.ts`; `estateSaleOf` and `defaultYearOf` were added.
+
+## What the engine does
+
+- `dealOffersFor` (finance): up to two offers a year, half of slots, tilted by
+  the economy (a crash brings 40% as many, a boom 120%); the kind and size of a
+  slot never depend on the person's money, only whether it is shown, so paying
+  for one deal doesn't change what the other is. Cheques are in $500 steps, at
+  most the lesser of the share of the round and half of what they hold.
+- `placeDeal`: refuses below the minimum, above the cap, beyond cash, a full
+  book (eight live deals), or an offer already taken. The outcome and
+  its multiple are drawn once, from the seed and the offer id.
+- `dealYear`: a lender pays 9% a year on the cheque and stops, at its default
+  year (half-way), if it was going to default. Others are quiet until the year
+  before a bad end, when "word gets out" (one note). At the end the cheque
+  comes back at its multiple, the economy scaling the gain only.
+- `secondaryOffer`: only for kinds that can be sold on, from a year after the
+  cheque, 35% off. Once the warning has been given a buyer prices it at what it
+  will return, so the warning is not a free exit (CORE_RULES 13.104).
+- Simulation: the cheque and the principal are `investment` rows, interest and
+  gains `assetIncome`, tax through `taxRate` on top of wage and business draw
+  (`dealTaxOn`). Live deals count in `estateOf` at the cheque. At a death every
+  live deal is sold on at the discount into the heir's opening books.
+
+## Calibration
+
+Outcome tables (share of deals, per dollar returned); the start-up row is the
+Angel Resource Institute's study of 245 exits, the rest are product judgment.
+
+| kind                 | min   | gate  | lock | mean multiple    | yearly | notes                                |
+| -------------------- | ----- | ----- | ---- | ---------------- | ------ | ------------------------------------ |
+| start-up             | $5k   | $15k  | 3–6  | 2.6x             | ~23%   | 70% under 1x, 45% wiped, 10% at 10x+ |
+| private loan         | $10k  | $30k  | 1–5  | 1.0x + 9% a year | 9%     | 4% default, 0–50% back               |
+| local-business stake | $25k  | $75k  | 3–6  | 1.75x            | ~13%   | 28% wiped                            |
+| property syndicate   | $25k  | $75k  | 5–7  | 1.87x            | ~11%   | 8% lose part                         |
+| growth company       | $100k | $300k | 5–8  | 2.14x            | ~12%   | 10% wiped                            |
+| fund                 | $250k | $750k | 8–10 | 2.8x             | ~12%   | no early exit                        |
+
+Measured after (150 forty-year-olds with $500,000 given, played to seventy,
+taking every offer at the largest cheque): net worth median $1.7M, p90 $4.6M,
+about 20 deals a life. Cash alone ends at a median $765k; an index fund ends at
+$3.4M (finding 42). Nobody prints money, and nobody is pushed into deals either.
+
+## Sabotage
+
+Fifty mutations; forty-two caught the first time, eight survived. Two were
+guards the catalog makes unreachable (a cap below the minimum; a warning on a
+one-year deal): removed, with the catalog fact asserted instead (13.102). One
+was a vacuous loop (13.103). The rest were genuine gaps: the kind skew, the
+first-year interest, cash versus portfolio on the cheque, and the tax base
+(twice). All now caught.
 
 ## Not yet done
 
-Engine bodies, `advanceYear` integration, ledger/tax lines (finding 34: a
-lender's interest is not earned income), estate, net-worth wiring, the
-`INVESTMENTS_NOT_YET_BUILT` 'private' row, the screen, calibration and the
-sabotage run.
+The second agent: the Investments screen's deals section, store wiring, the
+removal of the 'private' row from `INVESTMENTS_NOT_YET_BUILT`, deal wording in
+`content/src/deal-lines.ts`, and an independent sabotage pass.
+Also not done by anyone: the Investment Firm and Private Lending Firm
+businesses (0602/0603 deferred them here), and the economy-driven delay of an
+exit (outcomes are scaled by the market at the end, not postponed).
+
+## Findings added
+
+42 (index fund versus deals, cash earns nothing) and 43 (portfolio income is
+untaxed), in the roadmap.
+
+## Tests
+
+`finance/private-deals.test.ts` (33, new), `simulation/deals.test.ts` (21,
+new), `persistence` +1 (v39 to v40). Finance 318 to 351, simulation 516 to 537.

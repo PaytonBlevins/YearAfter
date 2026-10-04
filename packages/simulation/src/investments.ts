@@ -51,6 +51,7 @@ import {
   vehiclesValue,
   valuablesValue,
   businessesValue,
+  dealsValue,
   willTakeYou,
   type Estate,
   type Recommendation,
@@ -89,7 +90,10 @@ export const estateOf = (state: GameState): Estate => ({
     // dollars before adding them and knocked $4 off a $20,000 portfolio — a
     // test caught it, and only because it checked the exact figure rather than
     // "roughly right". Money in this build is integer cents everywhere.
-    Number(portfolioWorth(state.prices, state.portfolio)) + Number(state.retirement.balance),
+    // Ticket 0605: and the private deals, each at what was put in (a live deal's outcome is hidden).
+    Number(portfolioWorth(state.prices, state.portfolio)) +
+      Number(state.retirement.balance) +
+      dealsValue(state.deals),
   ),
   /*
     Ticket 0501. What the homes are worth now, and what is still owed on them.

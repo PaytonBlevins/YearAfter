@@ -85,6 +85,7 @@ import { markVehiclesMissed, repossess, runVehiclesYear, withVehicleOffer } from
 import { withRenovationOffer } from './renovations';
 import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
+import { runDealsYear } from './deals';
 import { foundOut } from './auctions';
 import { residenceOf } from './rentals';
 import { INSTRUMENTS, SECTORS, costIndexOf, findActivity } from '@yearafter/content';
@@ -383,6 +384,13 @@ export function advanceYear(state: GameState): AdvanceResult {
     stat: (type) => averageStat(worked.stats as unknown as Record<string, number>, type),
   });
   const businessTax = businessTaxOn(employment.earned, businessesYear.drawn);
+  // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
+  const dealsYear = runDealsYear({
+    deals: state.deals,
+    year: nextYear,
+    market,
+    otherIncome: employment.earned + businessesYear.drawn,
+  });
   const businessNet = businessesYear.drawn - businessTax;
 
   const living = runLiving({
@@ -576,6 +584,10 @@ export function advanceYear(state: GameState): AdvanceResult {
     (index) => `t:${nextYear}:biz:${index}`,
   );
   write(
+    dealsYear.lines.map((text) => ({ kind: 'passive' as const, text })),
+    (index) => `t:${nextYear}:deals:${index}`,
+  );
+  write(
     foundOut(state.valuables, valuablesNext).map((text) => ({ kind: 'passive' as const, text })),
     (index) => `t:${nextYear}:fakes:${index}`,
   );
@@ -614,6 +626,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     ...vehiclesYear.transactions,
     // Ticket 0601. What a business paid its owner, and the tax on it; money put in or got out.
     ...businessesYear.transactions,
+    ...dealsYear.transactions,
     ...(businessTax > 0
       ? [
           {
@@ -1125,6 +1138,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     valuables: valuablesNext,
     // Ticket 0601. What each business sold and kept, and who it is run by now.
     businesses: businessesYear.businesses,
+    // Ticket 0605. Private deals after the year.
+    deals: dealsYear.deals,
     // Ticket 0504. The same short year puts a financed car behind.
     vehicles: markVehiclesMissed(
       vehiclesYear.vehicles,

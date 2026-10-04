@@ -75,6 +75,7 @@ import {
   OPEN_FROM_AGE,
   TRANSITION_REPUTATION,
   businessSaleOf,
+  estateSaleOf,
   businessValueFor,
   cashFrom,
   post,
@@ -165,6 +166,20 @@ function inheritedLedger(
       category: 'gift',
       amount: dollars(businesses),
       source: `The sale of ${state.player.firstName}'s ${state.businesses.length === 1 ? 'business' : 'businesses'}`,
+    }).ledger;
+  }
+  // Ticket 0605. And any private deals still running: sold on to another investor at the usual
+  // discount, whatever the kind, because an heir cannot wait out a ten-year fund. The proceeds are
+  // the estate's; the heir does not keep the deals themselves.
+  const deals = state.deals.reduce(
+    (sum, deal) => sum + Number(estateSaleOf(deal, state.world.year)),
+    0,
+  );
+  if (deals > 0) {
+    books = post(books, state.world.year, heirAge, {
+      category: 'gift',
+      amount: cents(deals),
+      source: `The sale of ${state.player.firstName}'s private deals`,
     }).ledger;
   }
   return books;
