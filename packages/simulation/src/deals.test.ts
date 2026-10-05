@@ -5,7 +5,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { DEAL_KINDS } from '@yearafter/content';
-import { reconcile, type PrivateDeal } from '@yearafter/finance';
+import { taxRate } from '@yearafter/careers';
+import { reconcile, type MarketState, type PrivateDeal } from '@yearafter/finance';
 import { advanceYear } from './advance';
 import { netWorthOf } from './businesses';
 import { continueAsChild, heirsIn } from './continue';
@@ -15,6 +16,7 @@ import type { GameState } from './game-state';
 import { estateOf, invest } from './investments';
 import { INSTRUMENTS } from '@yearafter/content';
 import { createNewGame } from './new-game';
+import { openBusiness } from './businesses';
 import { cents } from '@yearafter/core';
 
 function answerEverything(state: GameState): GameState {
@@ -388,5 +390,315 @@ describe('0605 — at a death', () => {
     };
     const net = estateOf(ended);
     expect(Number(net.investments)).toBe(Number(estateOf({ ...ended, deals: [] }).investments));
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Found by the second agent's sabotage run                                    */
+/* -------------------------------------------------------------------------- */
+
+const at = (state: GameState, year: number, market?: MarketState): GameState => ({
+  ...state,
+  world: { ...state.world, year },
+  ...(market ? { market } : {}),
+});
+
+describe('0605 — what is offered is this character’s, this year’s and this economy’s', () => {
+  it('never offers a child anything, however rich, in any year', () => {
+    const child = topUp(createNewGame({ seed: 'deals-rich-child' }), 3_000_000);
+    expect(child.player.age).toBeLessThan(18);
+    for (let year = child.world.year; year < child.world.year + 150; year += 1) {
+      expect(dealMarket(at(child, year))).toEqual([]);
+    }
+  });
+
+  it('pins what one character is offered, by seed and by year', () => {
+    const row = (year: number) =>
+      dealMarket(at(RICH, year)).map(
+        (o) => `${o.id}|${o.kindId}|${o.name}|${o.maxTicket}|${o.lockYears}`,
+      );
+    expect(RICH.world.year).toBe(2040);
+    expect(row(2040)).toEqual([]);
+    expect(row(2041)).toEqual(['deal:2041:0|startup|Lanternfish|39500|5']);
+    expect(row(2043)).toEqual(['deal:2043:0|realEstate|a strip of shops|257000|7']);
+    // The id says which year it belongs to.
+    for (let year = 2040; year < 2060; year += 1) {
+      for (const offer of dealMarket(at(RICH, year)))
+        expect(offer.id.startsWith(`deal:${year}:`)).toBe(true);
+    }
+  });
+
+  it('brings fewer in a recession than in a boom, for the same life', () => {
+    const count = (market: MarketState) => {
+      let n = 0;
+      for (let year = 2040; year < 2240; year += 1) n += dealMarket(at(RICH, year, market)).length;
+      return n;
+    };
+    expect(count('severeRecession')).toBeLessThan(count('strongExpansion') * 0.7);
+  });
+
+  it('fixes the outcome from this character’s seed, and keeps it', () => {
+    const place = (year: number) => {
+      const s = at(RICH, year);
+      const offer = dealMarket(s)[0]!;
+      const placed = placeInDeal(s, offer.id, offer.minTicket);
+      if (!placed.ok) throw new Error('refused');
+      return placed.value.deals[0]!.multiple;
+    };
+    expect(place(2041)).toBe(0.2);
+    expect(place(2042)).toBe(0.83);
+  });
+});
+
+describe('0605 — several deals at once', () => {
+  const two = (() => {
+    const first = withOffer('startup');
+    const one = placeInDeal(first.state, first.offerId, first.min);
+    if (!one.ok) throw new Error('refused');
+    const second = withOffer('realEstate', {
+      ...one.value,
+      world: { ...one.value.world, year: first.state.world.year + 1 },
+    });
+    const both = placeInDeal(second.state, second.offerId, second.min);
+    if (!both.ok) throw new Error('refused');
+    return { state: both.value, firstId: first.offerId, secondId: second.offerId };
+  })();
+
+  it('keeps the first when a second is placed, and gives each its own timeline line', () => {
+    expect(two.state.deals).toHaveLength(2);
+    expect(two.state.deals[0]!.id).toBe(two.firstId);
+    const lines = two.state.player.timeline.filter((e) =>
+      /deal|Deal|stake|cheque|put/.test(e.text),
+    );
+    const ids = lines.map((e) => e.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.some((id) => id.includes(two.firstId))).toBe(true);
+    expect(ids.some((id) => id.includes(two.secondId))).toBe(true);
+  });
+
+  it('writes the line in the year and at the age it was written, one after another', () => {
+    const first = withOffer('startup');
+    const one = placeInDeal(first.state, first.offerId, first.min);
+    if (!one.ok) throw new Error('refused');
+    const entry = one.value.player.timeline.find((e) => e.id.includes(first.offerId))!;
+    expect(entry.year).toBe(first.state.world.year);
+    expect(entry.age).toBe(first.state.player.age);
+    // A second line in the same year takes the next sequence number.
+    const sameYearOffers = dealMarket(one.value);
+    const another = sameYearOffers.find((o) => o.id !== first.offerId);
+    if (another) {
+      const both = placeInDeal(one.value, another.id, another.minTicket);
+      if (!both.ok) throw new Error('refused');
+      const next = both.value.player.timeline.find((e) => e.id.includes(another.id))!;
+      expect(next.sequence).toBe(entry.sequence + 1);
+    }
+  });
+
+  it('writes the same year’s two lines with different ids and the next sequence', () => {
+    // Offers in one year: slot 0 and slot 1 may both come. Find a year where they do.
+    for (let year = 2040; year < 2400; year += 1) {
+      const s = at(RICH, year);
+      const offers = dealMarket(s);
+      if (offers.length < 2) continue;
+      const a = placeInDeal(s, offers[0]!.id, offers[0]!.minTicket);
+      if (!a.ok) continue;
+      const b = placeInDeal(a.value, offers[1]!.id, offers[1]!.minTicket);
+      if (!b.ok) continue;
+      const mine = b.value.player.timeline.filter(
+        (e) => e.year === year && /deal:placed/.test(e.id),
+      );
+      expect(mine).toHaveLength(2);
+      expect(mine[0]!.id).not.toBe(mine[1]!.id);
+      expect(mine[1]!.sequence).toBe(mine[0]!.sequence + 1);
+      return;
+    }
+    throw new Error('no year brought two offers');
+  });
+
+  it('sells the one asked for, and settles only that one', () => {
+    const base = withOffer('realEstate');
+    const placed = placeInDeal(base.state, base.offerId, base.min);
+    if (!placed.ok) throw new Error('refused');
+    const mine = placed.value.deals[0]!;
+    const other: PrivateDeal = {
+      ...mine,
+      id: 'deal:other',
+      name: 'A different stake',
+      put: cents(5_000_000),
+    };
+    const state = {
+      ...placed.value,
+      world: { ...placed.value.world, year: mine.since + 2 },
+      deals: [other, mine],
+    };
+    const sold = sellDealEarly(state, mine.id);
+    expect(sold.ok).toBe(true);
+    if (!sold.ok) return;
+    expect(sold.value.deals.find((d) => d.id === mine.id)!.status).toBe('settled');
+    expect(sold.value.deals.find((d) => d.id === 'deal:other')).toEqual(other);
+    // The cash that came in is the price of THIS deal, not the first one's.
+    const price = Math.round(Number(mine.put) * 0.65);
+    expect(Number(sold.value.player.cash) - Number(state.player.cash)).toBe(price);
+  });
+
+  it('leaves the state it was given alone', () => {
+    const base = withOffer('realEstate');
+    const placed = placeInDeal(base.state, base.offerId, base.min);
+    if (!placed.ok) throw new Error('refused');
+    const state = {
+      ...placed.value,
+      world: { ...placed.value.world, year: placed.value.deals[0]!.since + 2 },
+    };
+    for (const row of state.deals) Object.freeze(row);
+    Object.freeze(state.deals);
+    const sold = sellDealEarly(state, state.deals[0]!.id);
+    expect(sold.ok).toBe(true);
+    expect(state.deals[0]!.status).toBe('live');
+  });
+});
+
+describe('0605 — tax, exactly', () => {
+  it('is the progressive rate on the whole, less what the wage alone would have paid, to the dollar', () => {
+    let fractional = 0;
+    for (let other = 0; other <= 400_000; other += 13_337) {
+      for (let earned = 1; earned <= 300_000; earned += 7_919) {
+        const whole = other + earned;
+        const raw = taxRate(whole) * whole - taxRate(other) * other;
+        if (raw - Math.floor(raw) >= 0.5) fractional += 1;
+        expect(dealTaxOn(other, earned)).toBe(Math.max(0, Math.round(raw)));
+      }
+    }
+    // The grid reached cases a floor would have got wrong.
+    expect(fractional).toBeGreaterThan(20);
+  });
+
+  it('taxes interest once and winnings once, on what was earned', () => {
+    const lender: PrivateDeal = {
+      id: 'l',
+      kindId: 'lending',
+      name: 'A loan',
+      put: cents(10_000_000),
+      since: 2040,
+      matures: 9999,
+      multiple: 1,
+      paid: cents(0),
+      status: 'live',
+    };
+    const winner: PrivateDeal = {
+      id: 'w',
+      kindId: 'startup',
+      name: 'A win',
+      put: cents(1_000_000),
+      since: 2040,
+      matures: 2050,
+      multiple: 4,
+      paid: cents(0),
+      status: 'live',
+    };
+    const year = (deals: readonly PrivateDeal[], other: number) =>
+      runDealsYear({ deals, year: 2050, market: 'normal', otherIncome: other });
+    const interestOnly = year([lender], 80_000);
+    expect(interestOnly.earned).toBe(9_000);
+    const taxRow = (r: ReturnType<typeof year>) =>
+      Math.abs(Number(r.transactions.find((t) => t.source === 'Tax on deal income')?.amount ?? 0)) /
+      100;
+    expect(taxRow(interestOnly)).toBe(dealTaxOn(80_000, 9_000));
+    const winOnly = year([winner], 80_000);
+    // $10,000 put in, 4x back, the gain is $30,000 on the normal economy's tilt of 1.
+    expect(winOnly.earned).toBe(30_000);
+    expect(taxRow(winOnly)).toBe(dealTaxOn(80_000, 30_000));
+    const both = year([lender, winner], 80_000);
+    expect(both.earned).toBe(39_000);
+    expect(taxRow(both)).toBe(dealTaxOn(80_000, 39_000));
+  });
+
+  it('pays out less of a win in a recession, through the year a life runs', () => {
+    const winner: PrivateDeal = {
+      id: 'w',
+      kindId: 'startup',
+      name: 'A win',
+      put: cents(1_000_000),
+      since: 2040,
+      matures: 2050,
+      multiple: 4,
+      paid: cents(0),
+      status: 'live',
+    };
+    const earned = (market: MarketState) =>
+      runDealsYear({ deals: [winner], year: 2050, market, otherIncome: 0 }).earned;
+    expect(earned('severeRecession')).toBeLessThan(earned('normal'));
+    expect(earned('normal')).toBeLessThan(earned('strongExpansion'));
+  });
+
+  it('counts a business owner’s draw as income the deals are taxed on top of', () => {
+    const owner = (() => {
+      const state = topUp(liveTo('deals-owner', 30), 400_000);
+      const opened = openBusiness(state, 'biz.accounting');
+      if (!opened.ok) throw new Error('could not open');
+      return opened.value.state;
+    })();
+    const lent = holding('lending', { multiple: 1, matures: 9999 }).state;
+    const withDeal = (base: GameState): GameState => ({
+      ...base,
+      deals: lent.deals.map((d) => ({ ...d, since: base.world.year - 3 })),
+    });
+    const taxOn = (state: GameState) => {
+      const next = advanceYear(state).state;
+      const row = next.finance.transactions.find(
+        (r) => r.year === next.world.year && r.source === 'Tax on deal income',
+      );
+      return Math.abs(Number(row?.amount ?? 0));
+    };
+    const plain = topUp(liveTo('deals-owner', 30), 400_000);
+    expect(owner.businesses.length).toBe(1);
+    expect(taxOn(withDeal(owner))).toBeGreaterThan(taxOn(withDeal(plain)));
+  });
+});
+
+describe('0605 — the estate, exactly', () => {
+  const dead = (() => {
+    for (let i = 0; i < 20; i += 1) {
+      let state = topUp(liveTo(`deals-dies2-${i}`, 40), 800_000);
+      const offered = withOffer('startup', state);
+      const placed = placeInDeal(offered.state, offered.offerId, offered.min);
+      if (!placed.ok) continue;
+      state = {
+        ...placed.value,
+        deals: placed.value.deals.map((d) => ({ ...d, matures: 9999, multiple: 3 })),
+      };
+      let guard = 0;
+      while (state.player.alive && (guard += 1) < 90)
+        state = answerEverything(advanceYear(state).state);
+      const heir = heirsIn(state.family)[0];
+      if (!state.player.alive && heir) return { dead: state, heirId: heir.id };
+    }
+    throw new Error('nobody died holding a deal');
+  })();
+
+  const giftOf = (state: GameState) =>
+    Number(
+      continueAsChild(state, dead.heirId)!.finance.transactions.find(
+        (row) => row.category === 'gift' && /private deals/.test(row.source),
+      )?.amount ?? 0,
+    );
+
+  it('sells a deal that is about to go bad at what it will return, in the year of the death', () => {
+    const live = dead.dead.deals.find((d) => d.status === 'live')!;
+    const bad = { ...live, multiple: 0.2, matures: dead.dead.world.year + 1 };
+    const state = { ...dead.dead, deals: [bad] };
+    expect(giftOf(state)).toBe(Math.round(Number(bad.put) * 0.2 * 0.65));
+    // Two years from the end the word has not got out: the cheque, less the discount.
+    const early = { ...live, multiple: 0.2, matures: dead.dead.world.year + 2 };
+    expect(giftOf({ ...dead.dead, deals: [early] })).toBe(Math.round(Number(early.put) * 0.65));
+  });
+
+  it('leaves out every deal that had already ended, lost or settled', () => {
+    const live = dead.dead.deals.find((d) => d.status === 'live')!;
+    const closed: PrivateDeal[] = [
+      { ...live, id: 'c1', status: 'settled' },
+      { ...live, id: 'c2', status: 'lost' },
+    ];
+    const state = { ...dead.dead, deals: [live, ...closed] };
+    expect(giftOf(state)).toBe(Math.round(Number(live.put) * 0.65));
   });
 });

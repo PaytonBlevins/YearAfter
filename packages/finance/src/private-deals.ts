@@ -266,6 +266,13 @@ export function dealYear(deal: PrivateDeal, year: number, market: MarketState): 
     const m = deal.multiple > 1 ? 1 + (deal.multiple - 1) * gain : deal.multiple;
     const back = cents(Math.round(Number(deal.put) * m));
     const status = deal.multiple < 1 ? 'lost' : 'settled';
+    /*
+      A lender is paid the year's interest in the year the loan ends, with the
+      cheque. It was left out of the first version, so a one-year loan paid
+      nothing at all and every loan paid one year less than it said (found by the
+      second agent's sabotage run, F52).
+    */
+    const interest = lends ? cents(Math.round(Number(deal.put) * kind.yearlyYield)) : cents(0);
     const note: DealNote = lends
       ? 'repaid'
       : deal.multiple === 0
@@ -273,7 +280,12 @@ export function dealYear(deal: PrivateDeal, year: number, market: MarketState): 
         : deal.multiple < 1
           ? 'settledDown'
           : 'settledUp';
-    return { deal: { ...deal, status }, interest: cents(0), returned: back, note };
+    return {
+      deal: { ...deal, status, paid: cents(Number(deal.paid) + Number(interest)) },
+      interest,
+      returned: back,
+      note,
+    };
   }
 
   if (lends) {

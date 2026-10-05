@@ -1,8 +1,35 @@
-# YearAfter — handoff for a second coding agent
+# YearAfter — handoff for the second coding agent (Agent B)
 
-Written 4 October 2026. State: everything through ticket 0604 is on `origin/main`
-(`08632af`), save version v39, 427 tracked files. Repo:
+Written 4 October 2026, scope rewritten 5 October 2026. State: tickets through 0606's engine
+are built (0605 and 0606 engines are on `origin/main` or about to be), save version v40. Repo:
 https://github.com/PaytonBlevins/YearAfter.git (public).
+
+## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
+
+You are **Agent B**. Your job is narrow and does not include building tickets:
+
+1. **The notes.** All the project's written material: the ticket docs in
+   `claude/`, `claude/roadmap.md` (findings and the order list), `claude/build-status.md`
+   (Project only), `claude/approved-decisions.md`, this handoff, and anything
+   Payton calls "notes" from now on. That means existing notes first (tidy,
+   reconcile, fix what contradicts the code or each other, fill gaps you can
+   fill from the repo), then every new note Payton hands you.
+2. **The 0605 and 0606 screens.** Mobile screens, store wiring and the timeline /
+   deal wording for Private investments (0605) and Commercial real estate (0606).
+   The engines are finished and tested; the contracts are described in
+   `claude/0605-private-investments.md` and `claude/0606-commercial-real-estate.md`
+   ("For the screens").
+
+You do **not** build tickets, change engine code, change the save format, or
+change balance numbers. **Agent A** (the original Claude session) builds every
+other ticket end to end: measurement, engine, save, calibration, tests,
+sabotage-verification, its own ticket doc, roadmap row and CORE_RULES lessons,
+then `pnpm verify`. There is no per-ticket hand-off any more, no contract commit
+for you to wait on, and no cross-review relay. Payton decides what comes next.
+
+If a note or a screen exposes a bug or a design question in the engine, write it
+down as a finding (roadmap "Found by …") and tell Payton. Don't fix it in the
+engine yourself.
 
 ## 1. What this is
 
@@ -16,7 +43,7 @@ pnpm 10.28 + Turborepo, node >= 20.
 2. `specs/ARCHITECTURE.md` — package layout and dependency direction.
 3. `claude/approved-decisions.md` — settled product decisions. Do not reopen.
 4. `claude/roadmap.md` — the roadmap (reproduced in full below the handoff in
-   the copy you were given). Findings 1–41 and the order list are at its end.
+   Findings and the order list are at its end.
 5. The ticket doc for the area you touch (`claude/06xx-*.md`, most recent first).
 6. `specs/CORE_RULES.md` (~2,700 lines, numbered rules 13.x are lessons from
    earlier tickets). Grep it by topic; the last ones (13.99–13.101) are the
@@ -71,67 +98,55 @@ original visual identity. Full text: `claude/approved-decisions.md`.
 
 ## 6. Current state and open items
 
-- Next in order: **0605 Private investments**, then 0606 Commercial real estate.
-  Do not start either without Payton's go-ahead. **0508 Will & Estate** was
-  deferred by Payton and is still to be built (after v0.06).
-- Open findings: 28–36 (playtest after 0507) and 37–41 (business calibration:
+- Done on the engine side: everything through **0605 Private investments** (save
+  v40) and **0606 Commercial real estate** (no save bump). Screens for both are
+  yours (section 7).
+- **0508 Will & Estate** was deferred by Payton and is still to be built, by Agent A.
+- Open findings: 28–36 (playtest after 0507), 37–41 (business calibration:
   survival 78.7% vs BLS 51%, profit swings, cheap trades too profitable, a
-  child's inherited business). See roadmap.
-- CI `pnpm format:check` is probably red until Prettier is run and committed:
-  `pnpm exec prettier --write "**/*.{ts,tsx,js,mjs,json,md,yml}"`.
+  child's inherited business), 42–43 (0605: an index fund beats private deals,
+  portfolio income untaxed) and 44–46 (0606: tenant costs, the first-year clamp,
+  no renovation and no own-business tenants). See the roadmap.
 - `packages/finance/src/investments.test.ts` is deleted in the tree; intent not
   confirmed with Payton. Ask before restoring or relying on it.
-- Mobile screens for 0602–0604 are typechecked but not run on a device.
+- Mobile screens for 0602–0606 are typechecked but not run on a device.
 - `pnpm mobile -- --clear` starts Expo with a clean cache (not `pnpm mobile clear`).
+- **Never run Prettier over `packages/content/data`.** `pnpm validate:content`
+  requires those JSON files to match their Python generators byte for byte, and
+  Prettier rewrites them. Regenerate with `python3 scripts/generate-<name>.py`
+  if one was touched.
 
-## 7. How two agents work on every ticket (the pipeline)
+## 7. What you do, in order
 
-**Agent A** (the original Claude session) owns the engine, the save format and
-the calibration. **Agent B** (you, if you are the second agent) owns the screens,
-the content and the independent verification. Both work on every ticket; neither
-waits for the other to finish a whole ticket.
+1. **Notes, existing.** Read every `claude/*.md`. Reconcile them with the code
+   and with each other (status lines, the ticket table, the "Suggested order",
+   stale "next ticket" text, findings numbering). Fix wording, not decisions:
+   `approved-decisions.md` and every product value stay as written. Write what
+   you changed and anything you could not reconcile as a short note, and ask
+   Payton about the latter.
+2. **0605 screens.** The Investments screen's deals section (offers, cheque,
+   held deals, sell on), store wiring in `gameStore.tsx`, removal of the
+   'private' row from `INVESTMENTS_NOT_YET_BUILT`, and deal wording in
+   `content/src/deal-lines.ts`. Branch `feat/0605-screens`.
+3. **0606 screens.** The commercial listings section on the homes screen, the
+   business tenant rows on the rental screen (trade, revenue, staff, lease end),
+   and the wording for the new timeline lines. Branch `feat/0606-screens`.
+4. **Notes, new.** Whatever Payton gives you. Same rule: you write down what he
+   decides; you do not decide.
 
-For each ticket:
-
-1. **A measures** (step 2 of section 5) and posts the numbers.
-2. **A publishes the contract commit** to `main` quickly: the new types, the save
-   fields, function signatures (stub bodies are fine), and the balance
-   constants. Merge before anything else. B does not start until it is on `main`.
-   After it merges, A changes the contract only after telling B in the PR.
-3. **A builds** the engine logic, the save migration, the calibration and the
-   engine tests.
-4. **B builds against the contract at the same time:** mobile screens and store
-   wiring, content and event text (validator rules in section 3), on-device
-   checks, and a draft of the ticket doc.
-5. **B sabotage-verifies A's engine tests** (section 5, step 4) and reports
-   survivors in the PR. A fixes the tests, not B.
-6. **A writes the final ticket doc, roadmap row and CORE_RULES lessons.**
-7. **Overlap:** while B finishes ticket N, A is already measuring ticket N+1.
-   Never sit idle: if blocked, pick the next light item (playtest findings,
-   Prettier, on-device checks) and say so in the PR.
-
-Rules
-
-- Claim before you start. `claude/CLAIMS.md` records who owns each ticket and who
-  holds each save version number. Take the next number there, in its own tiny
-  commit to `main`, before using it.
-- Cross-review: each agent reviews the other's PR (verify output and sabotage
-  results). Payton merges.
-- Calibration judgment, product-judgment values and anything in
-  `approved-decisions.md` stay with A or Payton. B proposes; it does not decide.
-- Shared hot files (`CORE_RULES.md`, `roadmap.md`, `packages/*/src/index.ts`,
-  `gameStore.tsx`, save migrations, `tools/content-validator/validate.mjs`,
-  `TICKET` in `packages/finance/src/summary.ts`): small separate commits, rebase
-  often. A writes the final ticket doc and roadmap row.
+For 2 and 3: stay inside `apps/mobile`, `packages/content/src/deal-lines.ts` and
+docs. If a screen needs an engine function that isn't there, don't write it;
+tell Payton and Agent A. Run `pnpm verify` before each PR. The screens' tests
+are yours to write and to mutate against (the sabotage loop in section 5, step 4
+applies to your tests, not to the engine's).
 
 ## 8. Git
 
 - `main` stays green and stable. Never force-push `main`. Never rewrite pushed history.
-- One agent per branch. Branch names: `feat/0605-engine` (A) and
-  `feat/0605-screens` (B), or `fix/`, `refactor/`, `test/`, `content/`,
-  `balance/`, `docs/`. Commit messages use the same prefixes:
-  `feat(finance): 0605 …`.
-- Pull requests into `main`; Payton merges.
+- One agent per branch. Your branches: `feat/0605-screens`, `feat/0606-screens`,
+  `docs/<topic>`. Commit prefixes: `feat(mobile): …`, `docs: …`, `content: …`.
+- Pull requests into `main`; Payton merges. Agent A commits engine work to `main`
+  directly through Payton; rebase onto `origin/main` before you open a PR.
 
 ```
 git clone https://github.com/PaytonBlevins/YearAfter.git && cd YearAfter
@@ -157,17 +172,16 @@ Gotchas
   format:check, typecheck, test, validate:content. The pnpm version comes from
   `packageManager` (don't add `version:` to the action).
 - Update `pnpm-lock.yaml` in the same commit as any dependency change.
-- **Prettier first:** one agent runs Prettier across the repo and merges it before
-  either of you branches, or every branch conflicts with it.
+- Shared hot files (`CORE_RULES.md`, `roadmap.md`, `packages/*/src/index.ts`,
+  `gameStore.tsx`, save migrations, `tools/content-validator/validate.mjs`,
+  `TICKET` in `packages/finance/src/summary.ts`): small separate commits, rebase
+  often. You may edit `roadmap.md` and docs; you may not edit `CORE_RULES.md`,
+  save migrations, the validator or `TICKET` (Agent A's), except to fix a typo.
+- `claude/CLAIMS.md` still records who owns what. Add a row for your screens and
+  notes work in its own tiny commit before starting.
 
-## 9. First ticket on the pipeline: 0605 Private investments
-
-Payton has not yet given the go-ahead for 0605. Do not start until he does.
-When he does: A measures and posts the contract commit; B waits for it. 0606
-Commercial real estate follows, then 0508 Will & Estate (deferred by Payton).
-
-## 10. The Claude Project
+## 9. The Claude Project
 
 Ticket docs also live in the Claude Project "YearAfter" (`claude/…` paths). After
-each ticket the doc, roadmap and CORE_RULES are mirrored there.
-`claude/build-status.md` exists only in the Project.
+each doc change, mirror it there. `claude/build-status.md` exists only in the
+Project.

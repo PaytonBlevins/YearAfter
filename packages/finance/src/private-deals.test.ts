@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { cents } from '@yearafter/core';
-import { DEAL_KINDS, findDealKind } from '@yearafter/content';
+import { DEAL_KINDS, DEAL_NAMES, findDealKind, type DealKindId } from '@yearafter/content';
 import {
   CHEQUE_STEP,
   MAX_DEALS,
@@ -192,6 +192,78 @@ describe('0605 — what is offered', () => {
   });
 });
 
+describe('0605 — what is offered, exactly', () => {
+  it('pins what a seed and a year bring, so a key cannot drift by a year', () => {
+    const row = (seed: string, year: number) =>
+      dealOffersFor(rich({ seed, year })).map(
+        (o) => `${o.id}|${o.kindId}|${o.name}|${o.round}|${o.maxTicket}|${o.lockYears}`,
+      );
+    expect(row('golden', 2050)).toEqual(['deal:2050:1|startup|Tidewell Health|419000|62500|4']);
+    expect(row('golden', 2051)).toEqual(['deal:2051:1|startup|Brightwater Labs|1636500|245000|6']);
+    expect(row('other', 2050)).toEqual([
+      'deal:2050:0|lending|a loan to a landlord|709000|177000|3',
+      'deal:2050:1|lending|a loan to a landlord|383500|95500|2',
+    ]);
+  });
+
+  it('shows a kind at exactly its gate and not a dollar under', () => {
+    for (const kind of DEAL_KINDS) {
+      const at = manyOffers(30, { kinds: [kind], liquid: kind.gate });
+      const under = manyOffers(30, { kinds: [kind], liquid: kind.gate - 1 });
+      expect(at.length).toBeGreaterThan(20);
+      expect(under).toEqual([]);
+    }
+  });
+
+  it('sizes every round within its kind’s own range, and every cap by the exact rule', () => {
+    const offers = manyOffers(40);
+    expect(offers.length).toBeGreaterThan(300);
+    for (const offer of offers) {
+      const kind = findDealKind(offer.kindId)!;
+      // Rounded to the step, so allow it either side of the range.
+      expect(offer.round).toBeGreaterThanOrEqual(
+        kind.minTicket * kind.roundMultiple[0] - CHEQUE_STEP,
+      );
+      expect(offer.round).toBeLessThanOrEqual(kind.minTicket * kind.roundMultiple[1] + CHEQUE_STEP);
+      const capacity = Math.min(
+        offer.round * kind.maxShareOfRound,
+        5_000_000 * MAX_SHARE_OF_LIQUID,
+      );
+      expect(offer.maxTicket).toBe(Math.floor(capacity / CHEQUE_STEP) * CHEQUE_STEP);
+    }
+    // Rich enough, a cheque can be bigger than the smallest one.
+    expect(offers.filter((o) => o.maxTicket > o.minTicket).length).toBeGreaterThan(
+      offers.length * 0.9,
+    );
+  });
+
+  it('draws every lock-up in the kind’s range, and none outside it', () => {
+    for (const kind of DEAL_KINDS) {
+      const seen = new Set<number>();
+      for (const offer of manyOffers(60, { kinds: [kind] })) seen.add(offer.lockYears);
+      const [low, high] = kind.lockYears;
+      expect([...seen].sort((a, b) => a - b)).toEqual(
+        Array.from({ length: high - low + 1 }, (_, i) => low + i),
+      );
+    }
+  });
+
+  it('names a deal from its own kind’s list, and not always the same one', () => {
+    const byKind = new Map<string, Set<string>>();
+    for (const offer of manyOffers(60)) {
+      const names = DEAL_NAMES[offer.kindId as DealKindId];
+      expect(names).toContain(offer.name);
+      (byKind.get(offer.kindId) ?? byKind.set(offer.kindId, new Set()).get(offer.kindId)!).add(
+        offer.name,
+      );
+    }
+    for (const kind of DEAL_KINDS) {
+      const names = DEAL_NAMES[kind.id];
+      if (names.length > 1) expect(byKind.get(kind.id)!.size).toBeGreaterThan(1);
+    }
+  });
+});
+
 describe('0605 — writing the cheque', () => {
   const held: readonly PrivateDeal[] = [];
   const place = (offer: DealOffer, amount: number, over = {}) =>
@@ -247,6 +319,54 @@ describe('0605 — writing the cheque', () => {
       if (made.ok) results.add(made.value.multiple);
     }
     expect(results.size).toBeGreaterThan(10);
+  });
+
+  it('writes down what the offer was: its id, kind and name', () => {
+    const offer = offerFor('realEstate', { id: 'deal:2050:1', name: 'Harbor Row Apartments' });
+    const made = place(offer, offer.minTicket);
+    expect(made.ok).toBe(true);
+    if (!made.ok) return;
+    expect(made.value.id).toBe('deal:2050:1');
+    expect(made.value.kindId).toBe('realEstate');
+    expect(made.value.name).toBe('Harbor Row Apartments');
+  });
+
+  it('draws the same outcome whatever the cheque, since the cheque cannot change the company', () => {
+    const offer = offerFor('startup');
+    for (let i = 0; i < 20; i += 1) {
+      const small = place(offer, offer.minTicket, { seed: `same${i}` });
+      const large = place(offer, offer.maxTicket, { seed: `same${i}` });
+      if (!small.ok || !large.ok) throw new Error('could not place');
+      expect(large.value.multiple).toBe(small.value.multiple);
+    }
+  });
+
+  it('takes the biggest cheque, and one equal to everything they hold', () => {
+    const offer = offerFor('startup');
+    expect(place(offer, offer.maxTicket).ok).toBe(true);
+    expect(place(offer, offer.minTicket, { liquid: offer.minTicket }).ok).toBe(true);
+  });
+
+  it('refuses a cheque that is not a number', () => {
+    const offer = offerFor('startup');
+    for (const amount of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+      expect(place(offer, amount).ok).toBe(false);
+    }
+  });
+
+  it('counts only live deals against the book, so ended ones make room', () => {
+    const offer = offerFor('startup');
+    for (const status of ['settled', 'lost'] as const) {
+      const ended = Array.from({ length: MAX_DEALS }, (_, i) => deal({ id: `e${i}`, status }));
+      expect(place(offer, offer.minTicket, { held: ended }).ok).toBe(true);
+      expect(dealOffersFor(rich({ held: ended, seed: 'room' })).length).toBeGreaterThanOrEqual(0);
+    }
+    // Seven live and one lost is still room for one more; eight live is not.
+    const sevenLive = [
+      ...Array.from({ length: MAX_DEALS - 1 }, (_, i) => deal({ id: `l${i}` })),
+      deal({ id: 'gone', status: 'lost' }),
+    ];
+    expect(place(offer, offer.minTicket, { held: sevenLive }).ok).toBe(true);
   });
 
   it('draws start-ups the way the angel data says: most lose, one in ten wins big', () => {
@@ -428,6 +548,63 @@ describe('0605 — a year of a deal', () => {
   });
 });
 
+describe('0605 — a year of a deal, at its edges', () => {
+  it('pays a lender the year’s interest in the year the loan ends, with the cheque', () => {
+    const loan = deal({ kindId: 'lending', multiple: 1, since: 2050, matures: 2055 });
+    const done = dealYear(loan, 2055, 'normal');
+    expect(Number(done.interest)).toBe(90_000);
+    expect(Number(done.returned)).toBe(1_000_000);
+    expect(Number(done.deal.paid)).toBe(90_000);
+    // So a loan of N years pays N years of interest in all.
+    let paid = 0;
+    let held = loan;
+    for (let year = 2051; year <= 2055; year += 1) {
+      const result = dealYear(held, year, 'normal');
+      paid += Number(result.interest);
+      held = result.deal;
+    }
+    expect(paid).toBe(5 * 90_000);
+    expect(Number(held.paid)).toBe(paid);
+  });
+
+  it('pays a one-year loan its interest, which it paid nothing before', () => {
+    const oneYear = deal({ kindId: 'lending', multiple: 1, since: 2050, matures: 2051 });
+    const done = dealYear(oneYear, 2051, 'normal');
+    expect(Number(done.interest)).toBe(90_000);
+    expect(done.note).toBe('repaid');
+    // A one-year loan that was never going to be repaid defaults in its only year, with no interest.
+    const bad = dealYear(
+      deal({ kindId: 'lending', multiple: 0.3, since: 2050, matures: 2051 }),
+      2051,
+      'normal',
+    );
+    expect(Number(bad.interest)).toBe(0);
+    expect(bad.note).toBe('defaulted');
+  });
+
+  it('pays no interest at the end of a deal that is not a loan', () => {
+    const done = dealYear(deal({ kindId: 'startup', multiple: 3 }), 2055, 'normal');
+    expect(Number(done.interest)).toBe(0);
+    expect(Number(done.deal.paid)).toBe(0);
+  });
+
+  it('puts the default of a loan half way, rounding up for an odd term', () => {
+    const at = (term: number) =>
+      defaultYearOf(deal({ kindId: 'lending', since: 2050, matures: 2050 + term }));
+    expect([1, 2, 3, 4, 5, 6, 7].map(at)).toEqual([2051, 2051, 2052, 2052, 2053, 2053, 2054]);
+  });
+
+  it('does not touch a deal whose kind it no longer knows', () => {
+    const odd = deal({ kindId: 'discontinued', since: 2050, matures: 2053 });
+    for (const year of [2051, 2052, 2053, 2060]) {
+      const result = dealYear(odd, year, 'normal');
+      expect(result.deal).toEqual(odd);
+      expect(Number(result.returned)).toBe(0);
+      expect(Number(result.interest)).toBe(0);
+    }
+  });
+});
+
 describe('0605 — selling on', () => {
   const sellable = (over: Partial<PrivateDeal> = {}) =>
     deal({ kindId: 'realEstate', multiple: 1.5, ...over });
@@ -467,6 +644,37 @@ describe('0605 — selling on', () => {
   it('sells a dead person’s deals whatever the kind, with the same pricing', () => {
     expect(Number(estateSaleOf(deal(), 2052))).toBe(650_000);
     expect(Number(estateSaleOf(deal({ multiple: 0.1, matures: 2053 }), 2052))).toBe(65_000);
+    expect(Number(estateSaleOf(deal({ status: 'settled' }), 2052))).toBe(0);
+  });
+});
+
+describe('0605 — selling on, at its edges', () => {
+  const sellable = (over: Partial<PrivateDeal> = {}) =>
+    deal({ kindId: 'realEstate', multiple: 1.5, ...over });
+
+  it('lets a deal be sold in the first year it is allowed, not a year later', () => {
+    expect(secondaryOffer(sellable(), 2051).ok).toBe(true);
+    expect(secondaryOffer(sellable(), 2050).ok).toBe(false);
+  });
+
+  it('will not sell a deal that has already ended, lost or settled', () => {
+    for (const status of ['settled', 'lost'] as const) {
+      expect(secondaryOffer(sellable({ status }), 2053)).toEqual({
+        ok: false,
+        error: { kind: 'notOffered' },
+      });
+    }
+  });
+
+  it('rounds the sale to the cent, not down', () => {
+    // 1,000,001 cents at 65% is 650,000.65: round up.
+    const price = secondaryOffer(sellable({ put: cents(1_000_001) }), 2052);
+    expect(price.ok && Number(price.value)).toBe(650_001);
+    expect(Number(estateSaleOf(deal({ put: cents(1_000_001) }), 2052))).toBe(650_001);
+  });
+
+  it('gives an estate nothing for a deal that is lost, as for one that is settled', () => {
+    expect(Number(estateSaleOf(deal({ status: 'lost' }), 2052))).toBe(0);
     expect(Number(estateSaleOf(deal({ status: 'settled' }), 2052))).toBe(0);
   });
 });

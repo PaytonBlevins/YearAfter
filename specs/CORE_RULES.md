@@ -2748,3 +2748,50 @@ must price a sale after the signal at what the deal will return. Otherwise the
 signal is a guaranteed escape and the risk it advertises isn't one. The same
 price is used when an estate sells at a death. A test asserts the sale after the
 warning never beats holding.
+
+### 13.105 A value threaded through three layers needs a test at the outermost one
+
+0606 passed the economy from `advanceYear` to `runHomesYear` to the lease
+rules to the first-year share. Every pure function had a test for it. The
+sabotage run still found three places where the argument was dropped (the
+screen's applicants, the mass search, `advanceYear` itself) because nothing
+exercised the seam. Test through the outermost caller: many lives, group by
+the state the economy landed on, and assert the groups differ.
+
+- **Threshold:** the bigger the gap, the stronger the assertion, or the noise
+  hides it. A recession's effect through failures alone was too small to see in
+  500 lives; the first year of a lease was not.
+
+### 13.106 A filter on a flag is two filters
+
+`mortgageFor` kept products by `(product.investment ?? false) !== (purpose ===
+'rental')`. Adding a third purpose meant a commercial product also had to be
+kept off houses and a house product off warehouses; one direction of the new
+rule was missing for a ticket and no test noticed. When a product has a purpose,
+test both directions: each purpose gets only its own product, and its own
+product is offered to no other purpose.
+
+### 13.107 Set a yield from what the model realizes, not from the table
+
+0606's kinds list a vacancy. The model realized 3-4 points less occupancy than
+the list (failures pay half a year, a re-let takes the agent a year). Yields
+set from the table landed a full point under the market's cap rates. Measure
+the realized occupancy through the same function a life calls, then set the
+yield, and make the test assert the realized net yield, not the table.
+
+### 13.108 Assert the total a convention adds up to, not just the year it is paid
+
+0605's lender interest was asserted year by year (9% in year two, 9% in year
+three) and never summed, so the missing payment in the year a loan ends was
+invisible: every test passed with a one-year loan paying nothing. The second
+agent's pass found it as a mutation that "survived" because the original
+behavior was never pinned. For anything paid over a term, add a test that
+sums the whole term and compares it with rate × years, including the shortest
+term in the catalog.
+
+### 13.109 An independent audit is for correctness, not for every ticket
+
+A second agent re-ran every test against its own mutations and found one real
+engine bug and about forty missing assertions. That is worth a pass per
+subsystem. It is not worth a relay per ticket: the fixes were quick, the
+hand-offs were slow. Audit in batches, after the screens exist.

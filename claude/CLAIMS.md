@@ -1,14 +1,15 @@
 # Claims
 
 One line per ticket and per save version. Edit in its own small commit to `main`
-before starting work. A = engine, save, calibration. B = screens, content,
-verification.
+before starting work. A = every ticket end to end (engine, save, calibration, tests, own docs). B = all notes, plus the 0605 and 0606 screens only.
 
-| Ticket                   | Agent A                            | Agent B                                   | Status                                      |
-| ------------------------ | ---------------------------------- | ----------------------------------------- | ------------------------------------------- |
-| 0605 Private investments | Claude (engine, save, calibration) | second agent (screens, content, sabotage) | contract commit written; engine in progress |
+| Ticket                      | Agent A                                  | Agent B                                           | Status                    |
+| --------------------------- | ---------------------------------------- | ------------------------------------------------- | ------------------------- |
+| 0605 Private investments    | Claude (engine, save, calibration; done) | second agent (screens, wording)                   | engine done; screens open |
+| 0606 Commercial real estate | Claude (engine, calibration; done)       | second agent (screens, wording)                   | engine done; screens open |
+| Notes, existing and new     | —                                        | second agent (all notes and docs, from 5 October) | not started               |
 
-| Save version | Held by | Ticket                 |
-| ------------ | ------- | ---------------------- |
-| v39          | shipped | 0604 (no bump)         |
-| v40          | Agent A | 0605 (contract commit) |
+| Save version | Held by | Ticket                   |
+| ------------ | ------- | ------------------------ |
+| v39          | shipped | 0604 (no bump)           |
+| v40          | shipped | 0605 (0606 adds no bump) |

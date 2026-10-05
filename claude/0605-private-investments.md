@@ -1,7 +1,7 @@
 # 0605 — Private investments
 
-**Status: ENGINE DONE (4 October 2026). Save v40. Screens, deal wording and an independent
-sabotage pass belong to the second agent and are open.** Spec 1383, 1140, 1860, 1233, 912.
+**Status: ENGINE DONE (4 October 2026); independent sabotage pass DONE (5 October). Save v40.
+Screens and deal wording belong to the second agent and are open.** Spec 1383, 1140, 1860, 1233, 912.
 
 ## Measured first
 
@@ -109,14 +109,14 @@ in `content/src/deal-lines.ts` (the second agent's file); `DEAL_NAMES` is in
 Outcome tables (share of deals, per dollar returned); the start-up row is the
 Angel Resource Institute's study of 245 exits, the rest are product judgment.
 
-| kind                 | min   | gate  | lock | mean multiple    | yearly | notes                                |
-| -------------------- | ----- | ----- | ---- | ---------------- | ------ | ------------------------------------ |
-| start-up             | $5k   | $15k  | 3–6  | 2.6x             | ~23%   | 70% under 1x, 45% wiped, 10% at 10x+ |
-| private loan         | $10k  | $30k  | 1–5  | 1.0x + 9% a year | 9%     | 4% default, 0–50% back               |
-| local-business stake | $25k  | $75k  | 3–6  | 1.75x            | ~13%   | 28% wiped                            |
-| property syndicate   | $25k  | $75k  | 5–7  | 1.87x            | ~11%   | 8% lose part                         |
-| growth company       | $100k | $300k | 5–8  | 2.14x            | ~12%   | 10% wiped                            |
-| fund                 | $250k | $750k | 8–10 | 2.8x             | ~12%   | no early exit                        |
+| kind                 | min   | gate  | lock | mean multiple                           | yearly | notes                                |
+| -------------------- | ----- | ----- | ---- | --------------------------------------- | ------ | ------------------------------------ |
+| start-up             | $5k   | $15k  | 3–6  | 2.6x                                    | ~23%   | 70% under 1x, 45% wiped, 10% at 10x+ |
+| private loan         | $10k  | $30k  | 1–5  | 1.0x + 9% a year (the year it ends too) | 9%     | 4% default, 0–50% back               |
+| local-business stake | $25k  | $75k  | 3–6  | 1.75x                                   | ~13%   | 28% wiped                            |
+| property syndicate   | $25k  | $75k  | 5–7  | 1.87x                                   | ~11%   | 8% lose part                         |
+| growth company       | $100k | $300k | 5–8  | 2.14x                                   | ~12%   | 10% wiped                            |
+| fund                 | $250k | $750k | 8–10 | 2.8x                                    | ~12%   | no early exit                        |
 
 Measured after (150 forty-year-olds with $500,000 given, played to seventy,
 taking every offer at the largest cheque): net worth median $1.7M, p90 $4.6M,
@@ -132,11 +132,27 @@ was a vacuous loop (13.103). The rest were genuine gaps: the kind skew, the
 first-year interest, cash versus portfolio on the cheque, and the tax base
 (twice). All now caught.
 
+### Independent pass (second agent, 5 October)
+
+129 mutations: 89 caught, 40 survived (42 distinct changes once I split two
+that shared a line). One was a real bug in the engine, not a test gap: **a
+lender was paid no interest in the year the loan ended**, so a one-year loan
+(1-in-5 of private loans) paid nothing and every loan paid one year short of
+what its blurb says. Fixed in `dealYear` (interest, and `paid`, in the
+maturity year; none for a default). The rest were gaps in the tests: gate and
+cheque boundaries, NaN cheques, ended deals counting against the book, the RNG
+keys (pinned with golden offers), the lock-up and round ranges, held name / id
+/ kind, selling the deal asked for and settling only that one, input
+immutability, tax rounding and double counting, the draw in the tax base, the
+economy reaching the offers and the year, the timeline ids / sequence / year,
+and the estate (year of repricing, closed deals left out). All 42 are caught by
+new tests (finance 33 → 52, simulation 21 → 36 in the deals files).
+
 ## Not yet done
 
 The second agent: the Investments screen's deals section, store wiring, the
 removal of the 'private' row from `INVESTMENTS_NOT_YET_BUILT`, deal wording in
-`content/src/deal-lines.ts`, and an independent sabotage pass.
+`content/src/deal-lines.ts`.
 Also not done by anyone: the Investment Firm and Private Lending Firm
 businesses (0602/0603 deferred them here), and the economy-driven delay of an
 exit (outcomes are scaled by the market at the end, not postponed).
