@@ -127,6 +127,15 @@ export interface Tenant {
   readonly work: WorkHistory;
   readonly household: number;
   readonly evictions: number;
+  /**
+   * Ticket 0606. Present when the tenant is a business: its trade (`biz.*`) and the world year its
+   * lease ends. For a business `income` is its yearly revenue, `household` its staff, `work` how
+   * long it has traded (`new` is under two years) and `evictions` the leases it has defaulted on.
+   */
+  readonly trade?: string;
+  readonly leaseEnds?: number;
+  /** Ticket 0606. The yearly rent the lease was signed at, whole dollars. Fixed until renewal. */
+  readonly rent?: number;
 }
 
 export type TenantTraits = Omit<Tenant, 'id' | 'name' | 'since'>;

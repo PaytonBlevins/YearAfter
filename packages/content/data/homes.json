@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "entries": [
     {
       "id": "home.condo",
@@ -15,6 +15,9 @@
       "units": 1,
       "rental": false,
       "rentYield": 0.065,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "A unit on the fourth floor with a view of the next building.",
         "Two rooms and a balcony nobody has used since it was built.",
@@ -35,6 +38,9 @@
       "units": 1,
       "rental": false,
       "rentYield": 0.063,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "End of a terrace, with a yard the size of a parking space.",
         "Three floors and a lot of stairs.",
@@ -55,6 +61,9 @@
       "units": 1,
       "rental": false,
       "rentYield": 0.07,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "Small, old, and in better shape than the listing photos.",
         "A porch, a garden gone to seed, and a boiler with opinions.",
@@ -75,6 +84,9 @@
       "units": 1,
       "rental": false,
       "rentYield": 0.06,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "A proper yard and a street where kids still ride bikes.",
         "Four bedrooms, one of them currently full of boxes.",
@@ -95,6 +107,9 @@
       "units": 1,
       "rental": false,
       "rentYield": 0.05,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "A double garage and a room nobody has decided what to use for.",
         "Big enough that you could lose somebody in it for an afternoon.",
@@ -115,6 +130,9 @@
       "units": 1,
       "rental": false,
       "rentYield": 0.04,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "Glass on three sides and a pool that runs off the edge of the view.",
         "Gated, with a drive long enough to need a second opinion.",
@@ -135,6 +153,9 @@
       "units": 1,
       "rental": false,
       "rentYield": 0.03,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "Acres, a gatehouse, and staff quarters that are nicer than most homes.",
         "A house with wings, and a map in the hall to find them.",
@@ -155,6 +176,9 @@
       "units": 2,
       "rental": true,
       "rentYield": 0.078,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "Two front doors, two meters, one roof to worry about.",
         "Upstairs and downstairs, with a shared yard nobody mows.",
@@ -175,6 +199,9 @@
       "units": 5,
       "rental": true,
       "rentYield": 0.082,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "Five apartments over a laundromat that isn't part of the sale.",
         "A brick walk-up with five buzzers and one working.",
@@ -195,6 +222,9 @@
       "units": 10,
       "rental": true,
       "rentYield": 0.084,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "Ten units, a parking lot and a dumpster with a reputation.",
         "Three floors, ten doors and an elevator inspected last year.",
@@ -215,10 +245,105 @@
       "units": 25,
       "rental": true,
       "rentYield": 0.087,
+      "commercial": false,
+      "vacancy": 0.0,
+      "leaseYears": [1, 1],
       "blurbs": [
         "Twenty-five units, a pool, and a sign out front waiting for a new name.",
         "Two buildings facing each other across a parking lot.",
         "A complex with its own mailroom and a maintenance shed."
+      ]
+    },
+    {
+      "id": "home.corner-shop",
+      "name": "Corner Shop Building",
+      "noun": "a corner building with two shops",
+      "beds": [0, 0],
+      "baths": [0, 0],
+      "price": [250000, 520000],
+      "expenseRate": 0.012,
+      "age": [10, 90],
+      "weight": 3,
+      "means": 100000,
+      "units": 2,
+      "rental": true,
+      "rentYield": 0.095,
+      "commercial": true,
+      "vacancy": 0.05,
+      "leaseYears": [3, 5],
+      "blurbs": [
+        "Two shopfronts on a corner, one with a bakery you can smell from the car.",
+        "A narrow corner block with a shop below and one beside it.",
+        "Two storefronts and a flat roof that was patched last spring."
+      ]
+    },
+    {
+      "id": "home.retail-strip",
+      "name": "Shopping Strip",
+      "noun": "a small shopping strip",
+      "beds": [0, 0],
+      "baths": [0, 0],
+      "price": [700000, 1900000],
+      "expenseRate": 0.013,
+      "age": [5, 60],
+      "weight": 2,
+      "means": 280000,
+      "units": 5,
+      "rental": true,
+      "rentYield": 0.093,
+      "commercial": true,
+      "vacancy": 0.057,
+      "leaseYears": [5, 7],
+      "blurbs": [
+        "Five storefronts and a parking lot with good light.",
+        "A low strip of shops with one big sign out front.",
+        "Five units in a row, three of them let to the same family."
+      ]
+    },
+    {
+      "id": "home.warehouse",
+      "name": "Warehouse",
+      "noun": "a warehouse",
+      "beds": [0, 0],
+      "baths": [0, 0],
+      "price": [900000, 3200000],
+      "expenseRate": 0.01,
+      "age": [5, 50],
+      "weight": 2,
+      "means": 400000,
+      "units": 3,
+      "rental": true,
+      "rentYield": 0.082,
+      "commercial": true,
+      "vacancy": 0.071,
+      "leaseYears": [3, 7],
+      "blurbs": [
+        "Three bays, a loading dock each, and a yard behind the fence.",
+        "A tilt-up building by the rail line with high doors.",
+        "Concrete floors, tall ceilings and a landlord who isn't paid to decorate."
+      ]
+    },
+    {
+      "id": "home.office",
+      "name": "Office Building",
+      "noun": "an office building",
+      "beds": [0, 0],
+      "baths": [0, 0],
+      "price": [1400000, 6500000],
+      "expenseRate": 0.018,
+      "age": [5, 60],
+      "weight": 1,
+      "means": 700000,
+      "units": 8,
+      "rental": true,
+      "rentYield": 0.118,
+      "commercial": true,
+      "vacancy": 0.12,
+      "leaseYears": [3, 5],
+      "blurbs": [
+        "Eight suites over a lobby with a fountain that works.",
+        "A mid-rise with a view and some empty floors.",
+        "Four floors of suites, and a garage under them."
       ]
     }
   ]

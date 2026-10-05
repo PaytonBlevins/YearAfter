@@ -551,7 +551,7 @@ this block.
 | **0603 Business finance**          | **DONE.** Two business loans (Small Business, Commercial Term) written straight into an opening, a new door or a purchase and never paid out as cash; a for-sale list of established businesses priced above their worth; the business pays its own loan. Private Lending Firm moves to 0605                                                                                                                                                                                                             |
 | **0604 Business events and heirs** | **DONE.** Nineteen weighted events a year at most (half the years are quiet), a rival that opens in crowded trades and fades over three years, the economy's effect said out loud, and an heir who keeps the business and its lender. Five-year survival 81.5% → 78.7% (BLS 51%); recorded, not forced                                                                                                                                                                                                   |
 | **0605 Private investments**       | **ENGINE DONE; screens in progress (second agent).** Six kinds of deal (start-up, private loan, local-business stake, property syndicate, growth company, fund), offered to the soft wealth bands (from $15,000 liquid to $750,000), money away for 1–10 years, an outcome fixed at the cheque, capacity limits on every cheque, early sale only where the kind allows it, tax through the ordinary progressive rate, sold on into the estate at a death. Save v40. `claude/0605-private-investments.md` |
-| 0606 Commercial real estate        | Retail, office and warehouse space, joined to 0503's landlord                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **0606 Commercial real estate**    | **ENGINE DONE; screens in progress (second agent).** Four kinds (corner shop building, shopping strip, warehouse, office building) let to businesses of matching trades on 3-7 year leases at a fixed rent, a commercial lender (7.25%, 25 years, 30% down, to $8M), tenants that fail and applicants that thin out with the economy, net yields 5.7-7.4%. No save bump. `claude/0606-commercial-real-estate.md`                                                                                         |
 
 ## v0.07 Creator & Fame
 
@@ -1072,6 +1072,24 @@ portfolio is posted with no tax row; 0605's deal interest and gains are taxed
 through the progressive rate. The two are now inconsistent. Fix in the same
 ticket as 42.
 
+### Found by 0606
+
+**44. Rent is only half of what a landlord's tenant owes.** Property tax and
+upkeep are charged as a share of value, so a commercial building's expense does
+not rise when its tenants fail or leave, and a vacant building costs no more
+than a full one (no empty-unit utilities, insurance or leasing costs). The
+yields were set net of the kind's expense rate only. Belongs to a tenant-costs
+pass if landlords come out too safe in play.
+
+**45. A severe recession and a recession cost an office the same first year.**
+The empty time after a new lease is capped at one year, and an office's
+unclamped gap is already close to it. Failures and applicant counts still
+separate the two states; the first-year share does not. Recorded, not forced.
+
+**46. Commercial buildings cannot be renovated, and the player's own businesses
+cannot rent from them.** Both are natural next steps (a business with a
+location in your warehouse pays you rent) and neither is in spec 0606's scope.
+
 ## Suggested order
 
 1. **Character-generation fix** (findings 1 and 1b) — _(shipped as 0408 for the
@@ -1104,4 +1122,4 @@ ticket as 42.
 7. **v0.05 onward** in spec order. _(0501 Homes shipped.)_
 8. **Partners' income** (finding 9) — _(shipped as 0502, A household of two.)_
 9. **0503 → 0508.** _(0503 A landlord, 0504 Vehicles, 0505 Vehicle modifications, 0506 Renovations & collections and 0507 Auctions shipped. 0508 Will & Estate, which closes v0.05, was deferred by Payton on 3 October and moves after v0.06.)_
-10. **0601 → 0606.** _(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments' engine shipped (screens in progress), then 0508 Will & Estate whenever Payton wants it.)_
+10. **0601 → 0606.** _(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments' and 0606 Commercial real estate's engines shipped (screens in progress), then 0508 Will & Estate whenever Payton wants it.)_

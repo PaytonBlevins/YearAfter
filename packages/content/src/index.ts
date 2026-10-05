@@ -175,3 +175,4 @@ export * from './auctions';
 export * from './businesses';
 export * from './deals';
 export * from './deal-lines';
+export * from './commercial';

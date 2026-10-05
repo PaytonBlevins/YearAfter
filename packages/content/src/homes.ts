@@ -43,6 +43,15 @@ export interface HomeKind {
    * squared — so a dear region yields less.
    */
   readonly rentYield: number;
+  /** Ticket 0606. Let to businesses on leases of several years, not to households by the year. */
+  readonly commercial: boolean;
+  /**
+   * Ticket 0606. The share of a year a unit stands empty in an ordinary economy. The economy moves
+   * it. 0 for residential, which has its own table in `finance/rental.ts`.
+   */
+  readonly vacancy: number;
+  /** Ticket 0606. The shortest and longest lease a business signs, in years. [1, 1] for residential. */
+  readonly leaseYears: readonly [number, number];
   readonly blurbs: readonly string[];
 }
 

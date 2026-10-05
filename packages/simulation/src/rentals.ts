@@ -17,13 +17,22 @@
  */
 
 import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
-import { NAME_CULTURES, findHomeKind, regionCostIndexOf } from '@yearafter/content';
-import { err, mixedUnit, ok, type Result } from '@yearafter/core';
+import {
+  COMMERCIAL_TRADES,
+  NAME_CULTURES,
+  findBusinessType,
+  findHomeKind,
+  regionCostIndexOf,
+} from '@yearafter/content';
+import { err, mixedUnit, ok, stablePick, type Result } from '@yearafter/core';
 import {
   GOING_RATE,
   annualExpenseOf,
   bestApplicant,
+  commercialApplicantCount,
+  commercialTraits,
   emptyLetting,
+  leaseLengthOf,
   goingRentOf,
   rentLevelOf,
   rentalEconomics,
@@ -32,6 +41,7 @@ import {
   findMortgageProduct,
   mortgagePaymentFor,
   type Letting,
+  type MarketState,
   type OwnedHome,
   type RentalEconomics,
   type Tenant,
@@ -45,6 +55,10 @@ import type { GameState } from './game-state';
 /** A duplex or an apartment building: owned to let, never lived in. */
 export const isRentalKind = (home: Pick<OwnedHome, 'kindId'>): boolean =>
   findHomeKind(home.kindId)?.rental ?? false;
+
+/** Ticket 0606. A shop, warehouse or office: let to businesses on leases. */
+export const isCommercialKind = (home: Pick<OwnedHome, 'kindId'>): boolean =>
+  findHomeKind(home.kindId)?.commercial ?? false;
 
 /** The home the character lives in, if they own one. */
 export const residenceOf = (homes: readonly OwnedHome[]): OwnedHome | undefined =>
@@ -85,15 +99,46 @@ function nameFrom(key: string): string {
  * Who answers the listing for one empty unit in `year`, for a lease starting
  * the year after. How many is the rent setting's to decide (spec 954–978:
  * very high rent reduces applicants).
+ *
+ * Ticket 0606: for a commercial building they are businesses, signing a lease
+ * of several years at today's rent, and how many answer follows the economy.
  */
 export function applicantsAt(
   seed: string,
   home: OwnedHome,
   unitIndex: number,
   year: number,
+  market: MarketState = 'normal',
 ): readonly Tenant[] {
   const level = rentLevelOf(home.letting?.level ?? GOING_RATE);
   const rentYear = askingRentOf(home);
+  const kind = findHomeKind(home.kindId);
+  if (kind?.commercial) {
+    const trades = COMMERCIAL_TRADES[kind.id] ?? [];
+    const found: Tenant[] = [];
+    const count = commercialApplicantCount(level.level, market);
+    for (let i = 0; i < count; i += 1) {
+      const key = `${seed}:${home.id}:${unitIndex}:${year}:applicant:${i}`;
+      const trade = stablePick(trades, `${key}:trade`) ?? 'biz.specialty';
+      const names = findBusinessType(trade)?.names ?? [];
+      found.push({
+        id: `tenant:${home.id}:${unitIndex}:${year}:${i}`,
+        name: stablePick(names, `${key}:name`) ?? 'A local business',
+        since: year + 1,
+        ...commercialTraits(rentYear, [
+          mixedUnit(`${key}:income`),
+          mixedUnit(`${key}:credit`),
+          mixedUnit(`${key}:work`),
+          mixedUnit(`${key}:household`),
+          mixedUnit(`${key}:evictions`),
+        ]),
+        trade,
+        rent: rentYear,
+        leaseEnds: year + leaseLengthOf(kind.leaseYears, mixedUnit(`${key}:lease`)),
+      });
+    }
+    return found;
+  }
   const out: Tenant[] = [];
   for (let i = 0; i < level.applicants; i += 1) {
     const key = `${seed}:${home.id}:${unitIndex}:${year}:applicant:${i}`;
@@ -122,7 +167,7 @@ export function applicantsFor(
 ): readonly Tenant[] {
   const home = state.homes.find((candidate) => candidate.id === homeId);
   if (!home?.letting || home.letting.tenants[unitIndex] !== null) return [];
-  return applicantsAt(state.rng.getSeed(), home, unitIndex, state.world.year);
+  return applicantsAt(state.rng.getSeed(), home, unitIndex, state.world.year, state.market);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -302,7 +347,7 @@ export function fillEmptyUnits(
   home.letting.tenants.forEach((tenant, index) => {
     if (tenant !== null) return;
     const best = bestApplicant(
-      applicantsAt(state.rng.getSeed(), home, index, state.world.year),
+      applicantsAt(state.rng.getSeed(), home, index, state.world.year, state.market),
       rentYear,
     );
     if (!best) return;

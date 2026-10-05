@@ -27,7 +27,7 @@ import {
   regionOf,
   type HomeKind,
 } from '@yearafter/content';
-import { applicantsAt, askingRentOf, residenceOf } from './rentals';
+import { applicantsAt, askingRentOf, isCommercialKind, residenceOf } from './rentals';
 import { dollars, err, mixedUnit, ok, type Result } from '@yearafter/core';
 import {
   CONDITION_PRICE,
@@ -56,6 +56,10 @@ import {
   unitYear,
   bestApplicant,
   AGENT_SHARE,
+  commercialUnitYear,
+  firstYearShare,
+  leaseLengthOf,
+  type MarketState,
   type Tenant,
 } from '@yearafter/finance';
 import { findLoanProduct, yearlyPaymentFor } from '@yearafter/finance';
@@ -93,6 +97,8 @@ export interface HomeListing {
   readonly units: number;
   /** Ticket 0503. A duplex or an apartment building, owned to let. */
   readonly rental: boolean;
+  /** Ticket 0606. A shop, warehouse or office, let to businesses. Also `rental`. */
+  readonly commercial: boolean;
 }
 
 /**
@@ -179,6 +185,7 @@ function listingsOf(
       expenseRate: kind.expenseRate,
       units: kind.units,
       rental: kind.rental,
+      commercial: kind.commercial,
     };
     listings.push(listing);
   }
@@ -204,13 +211,29 @@ export const homeListings = (state: GameState): readonly HomeListing[] =>
 export const rentalListings = (state: GameState): readonly HomeListing[] =>
   listingsOf(
     state,
-    HOME_KINDS.filter((kind) => kind.rental),
+    HOME_KINDS.filter((kind) => kind.rental && !kind.commercial),
     RENTAL_LISTINGS_A_YEAR,
     'r',
   );
 
+/** Ticket 0606. Commercial buildings for sale a year, apart from the homes and the rentals. */
+export const COMMERCIAL_LISTINGS_A_YEAR = 2;
+
+/**
+ * Ticket 0606. This year's shops, warehouses and offices, behind the same
+ * hidden gate. Their own list, so the residential lists keep their size and
+ * their picks, and nobody is shown a warehouse they could never afford.
+ */
+export const commercialListings = (state: GameState): readonly HomeListing[] =>
+  listingsOf(
+    state,
+    HOME_KINDS.filter((kind) => kind.commercial),
+    COMMERCIAL_LISTINGS_A_YEAR,
+    'c',
+  );
+
 const anyListing = (state: GameState, listingId: string): HomeListing | undefined =>
-  [...homeListings(state), ...rentalListings(state)].find(
+  [...homeListings(state), ...rentalListings(state), ...commercialListings(state)].find(
     (candidate) => candidate.id === listingId,
   );
 
@@ -242,7 +265,11 @@ export function buyerOf(state: GameState): HomeBuyer {
  * investment. The first house they live in is a home.
  */
 export const purposeOf = (state: GameState, listing: HomeListing): MortgagePurpose =>
-  listing.rental || residenceOf(state.homes) !== undefined ? 'rental' : 'home';
+  listing.commercial
+    ? 'commercial'
+    : listing.rental || residenceOf(state.homes) !== undefined
+      ? 'rental'
+      : 'home';
 
 /** The going rent a lender would count on a listing, all units, whole dollars a year. */
 const listedRentOf = (listing: HomeListing): number => {
@@ -487,7 +514,12 @@ export interface HomesYear {
  * takes it first, through `foreclose`, so it is not charged for a year it was
  * never going to see out.
  */
-export function runHomesYear(homes: readonly OwnedHome[], year: number, seed: string): HomesYear {
+export function runHomesYear(
+  homes: readonly OwnedHome[],
+  year: number,
+  seed: string,
+  market: MarketState = 'normal',
+): HomesYear {
   const move = marketMoveIn(year);
   const transactions: NewTransaction[] = [];
   const lines: string[] = [];
@@ -518,7 +550,7 @@ export function runHomesYear(homes: readonly OwnedHome[], year: number, seed: st
       lines.push(`The ${name} is starting to show its age. Everything needs doing at once.`);
     }
     const let_ = home.letting
-      ? lettingYear({ ...result.home, letting: home.letting }, year, seed, name)
+      ? lettingYear({ ...result.home, letting: home.letting }, year, seed, name, market)
       : undefined;
     if (let_) {
       transactions.push(...let_.transactions);
@@ -546,8 +578,10 @@ function lettingYear(
   year: number,
   seed: string,
   name: string,
+  market: MarketState,
 ): { letting: NonNullable<OwnedHome['letting']>; transactions: NewTransaction[]; line?: string } {
   const rentYear = askingRentOf(home);
+  if (isCommercialKind(home)) return commercialLettingYear(home, year, seed, name, market);
   let collected = 0;
   let left = 0;
   let evicted = 0;
@@ -604,6 +638,104 @@ function lettingYear(
         ? many
           ? `${left === 1 ? 'A tenant' : `${left} tenants`} moved out of the ${name}.`
           : `The tenant at the ${name} moved out.`
+        : undefined;
+  return { letting: { ...home.letting, tenants }, transactions, ...(line ? { line } : {}) };
+}
+
+/**
+ * Ticket 0606 — a year of letting a shop, a warehouse or an office.
+ *
+ * Rent is the lease's own until it ends. A business that fails stops paying
+ * having paid half the year and is gone; one that reaches the end of its lease
+ * renews at today's rent or leaves. A new lease pays a part of its first year
+ * (fit-out, empty weeks) that the economy lengthens. An agent re-lets at the
+ * end of the year, for the same share of what was collected.
+ */
+function commercialLettingYear(
+  home: OwnedHome & { readonly letting: NonNullable<OwnedHome['letting']> },
+  year: number,
+  seed: string,
+  name: string,
+  market: MarketState,
+): { letting: NonNullable<OwnedHome['letting']>; transactions: NewTransaction[]; line?: string } {
+  const kind = findHomeKind(home.kindId);
+  const rentYear = askingRentOf(home);
+  const lease = kind?.leaseYears ?? [3, 5];
+  const share = firstYearShare(
+    kind?.vacancy ?? 0,
+    (lease[0] + lease[1]) / 2,
+    market,
+    home.letting.level,
+  );
+  let collected = 0;
+  let left = 0;
+  let failed = 0;
+  let lastLeft: string | undefined;
+  let lastFailed: string | undefined;
+  const tenants: (Tenant | null)[] = home.letting.tenants.map((tenant, index) => {
+    const result = commercialUnitYear({
+      tenant,
+      year,
+      rentYear,
+      level: home.letting.level,
+      firstShare: share,
+      market,
+      payRoll: mixedUnit(`${seed}:${home.id}:${index}:${year}:pays`),
+      renewRoll: mixedUnit(`${seed}:${home.id}:${index}:${year}:renews`),
+    });
+    collected += result.collected;
+    if (result.outcome === 'left') {
+      left += 1;
+      lastLeft = tenant?.name;
+    }
+    if (result.outcome === 'failed') {
+      failed += 1;
+      lastFailed = tenant?.name;
+    }
+    if (result.outcome === 'renewed' && tenant) {
+      const length = leaseLengthOf(lease, mixedUnit(`${seed}:${home.id}:${index}:${year}:term`));
+      return { ...tenant, rent: rentYear, leaseEnds: year + length };
+    }
+    return result.outcome === 'stayed' ? tenant : null;
+  });
+
+  if (home.letting.managed) {
+    tenants.forEach((tenant, index) => {
+      if (tenant !== null) return;
+      const best = bestApplicant(applicantsAt(seed, home, index, year, market), rentYear);
+      if (best) tenants[index] = best;
+    });
+  }
+
+  const transactions: NewTransaction[] = [];
+  if (collected > 0) {
+    transactions.push({
+      category: 'assetIncome',
+      amount: dollars(collected),
+      source: `Rent from the ${name}`,
+    });
+    if (home.letting.managed) {
+      const fee = Math.round(collected * AGENT_SHARE);
+      if (fee > 0) {
+        transactions.push({
+          category: 'housing',
+          amount: dollars(-fee),
+          source: `Letting agent for the ${name}`,
+        });
+      }
+    }
+  }
+
+  const many = home.letting.tenants.length > 1;
+  const line =
+    failed > 0
+      ? many && failed > 1
+        ? `${failed} businesses at the ${name} went under and stopped paying.`
+        : `${lastFailed ?? 'A tenant'} went under and stopped paying rent at the ${name}.`
+      : !home.letting.managed && left > 0
+        ? many && left > 1
+          ? `${left} tenants didn't renew at the ${name}.`
+          : `${lastLeft ?? 'A tenant'} didn't renew at the ${name}.`
         : undefined;
   return { letting: { ...home.letting, tenants }, transactions, ...(line ? { line } : {}) };
 }

@@ -51,7 +51,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = ROOT / "packages" / "content" / "data" / "homes.json"
 
-CATALOG_VERSION = 2
+CATALOG_VERSION = 3
 
 KINDS: list[dict] = []
 
@@ -71,6 +71,9 @@ def K(
     units: int = 1,
     rental: bool = False,
     rent_yield: float,
+    commercial: bool = False,
+    vacancy: float = 0.0,
+    lease: tuple[int, int] = (1, 1),
     blurbs: list[str],
 ) -> None:
     """
@@ -85,6 +88,10 @@ def K(
     `units`   how many households it lets to. One for a house.
     `rental`  owned to let, never lived in (0503).
     `rent_yield` a year's rent at the going rate over the price, index 1.00.
+    `commercial` (0606) let to businesses, on leases of several years. Always also `rental`.
+    `vacancy` the share of a year a commercial unit stands empty in an ordinary economy
+              (the economy moves it); 0 for residential, which has its own table.
+    `lease`   the shortest and longest lease a business signs, in years.
     """
     KINDS.append(
         {
@@ -101,6 +108,9 @@ def K(
             "units": units,
             "rental": rental,
             "rentYield": rent_yield,
+            "commercial": commercial,
+            "vacancy": vacancy,
+            "leaseYears": list(lease),
             "blurbs": blurbs,
         }
     )
@@ -196,6 +206,54 @@ K("home.apartments-large", "Apartment Complex", "an apartment complex",
 
 
 # =============================================================================
+# Commercial property (Ticket 0606). Let to businesses, never lived in.
+#
+# Yields are set so that net operating income over value lands where the 2025
+# surveys put each sector: shopping centers 6.0-6.5% (CBRE grocery-anchored),
+# industrial 5.0-5.75% (prime logistics), office 7.5-8% (prime CBD) with a
+# vacancy near 20% (Cushman & Wakefield Q3 2025: office 20.7%, industrial 7.1%,
+# retail 5.7% in Q4). The model's realized occupancy runs 3-4 points under the
+# kind's `vacancy` (a failed tenant pays half a year, a re-let takes the
+# agent a year to fill, a new lease starts rent-light), so the gross yield is
+# set from MEASURED occupancy, with the agent's 8% taken out, not the table:
+#   net = gross * occupancy * .92 - expense, targeting
+#   corner shop 6.8%, strip 6.4%, warehouse 5.7%, office 7.4%.
+# =============================================================================
+
+K("home.corner-shop", "Corner Shop Building", "a corner building with two shops",
+  beds=(0, 0), baths=(0, 0), price=(250_000, 520_000), expense=0.012, age=(10, 90), weight=3,
+  means=100_000, units=2, rental=True, rent_yield=0.095,
+  commercial=True, vacancy=0.05, lease=(3, 5),
+  blurbs=["Two shopfronts on a corner, one with a bakery you can smell from the car.",
+          "A narrow corner block with a shop below and one beside it.",
+          "Two storefronts and a flat roof that was patched last spring."])
+
+K("home.retail-strip", "Shopping Strip", "a small shopping strip",
+  beds=(0, 0), baths=(0, 0), price=(700_000, 1_900_000), expense=0.013, age=(5, 60), weight=2,
+  means=280_000, units=5, rental=True, rent_yield=0.093,
+  commercial=True, vacancy=0.057, lease=(5, 7),
+  blurbs=["Five storefronts and a parking lot with good light.",
+          "A low strip of shops with one big sign out front.",
+          "Five units in a row, three of them let to the same family."])
+
+K("home.warehouse", "Warehouse", "a warehouse",
+  beds=(0, 0), baths=(0, 0), price=(900_000, 3_200_000), expense=0.010, age=(5, 50), weight=2,
+  means=400_000, units=3, rental=True, rent_yield=0.082,
+  commercial=True, vacancy=0.071, lease=(3, 7),
+  blurbs=["Three bays, a loading dock each, and a yard behind the fence.",
+          "A tilt-up building by the rail line with high doors.",
+          "Concrete floors, tall ceilings and a landlord who isn't paid to decorate."])
+
+K("home.office", "Office Building", "an office building",
+  beds=(0, 0), baths=(0, 0), price=(1_400_000, 6_500_000), expense=0.018, age=(5, 60), weight=1,
+  means=700_000, units=8, rental=True, rent_yield=0.118,
+  commercial=True, vacancy=0.12, lease=(3, 5),
+  blurbs=["Eight suites over a lobby with a fountain that works.",
+          "A mid-rise with a view and some empty floors.",
+          "Four floors of suites, and a garage under them."])
+
+
+# =============================================================================
 # Self-checks
 # =============================================================================
 
@@ -218,13 +276,21 @@ def check() -> None:
             problems.append(f"{kid}: a home under $50,000 is not a home in this catalog")
         if not (0.005 <= k["expenseRate"] <= 0.05):
             problems.append(f"{kid}: expense rate {k['expenseRate']} is outside 0.5%-5%")
-        if k["rental"] and k["units"] not in (1, 2, 5, 10, 25):
+        if k["rental"] and not k["commercial"] and k["units"] not in (1, 2, 5, 10, 25):
             problems.append(f"{kid}: spec 145 fixes rental buildings at 2, 5, 10 or 25 units")
+        if k["commercial"] and not (k["rental"] and 1 <= k["units"] <= 10):
+            problems.append(f"{kid}: a commercial kind is a rental of one to ten units")
+        if k["commercial"] and not (0.02 <= k["vacancy"] <= 0.35):
+            problems.append(f"{kid}: vacancy {k['vacancy']} is outside 2%-35%")
+        if k["commercial"] and not (1 <= k["leaseYears"][0] <= k["leaseYears"][1] <= 10):
+            problems.append(f"{kid}: lease years {k['leaseYears']} are outside 1-10")
+        if not k["commercial"] and (k["vacancy"] != 0 or k["leaseYears"] != [1, 1]):
+            problems.append(f"{kid}: only commercial kinds carry a vacancy and a lease")
         if not k["rental"] and k["units"] != 1:
             problems.append(f"{kid}: a home somebody lives in is one household")
         if not (0.02 <= k["rentYield"] <= 0.12):
             problems.append(f"{kid}: rent yield {k['rentYield']} is outside 2%-12%")
-        if k["baths"][1] > k["beds"][1] * 2:
+        if k["baths"][1] > k["beds"][1] * 2 and not k["commercial"]:
             problems.append(f"{kid}: more than two bathrooms a bedroom")
         if len(k["blurbs"]) < 3:
             problems.append(f"{kid}: needs at least 3 blurbs so listings do not repeat")

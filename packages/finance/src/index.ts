@@ -32,6 +32,7 @@ export * from './retirement';
 /* Ticket 0501 — owning a home, and the mortgage that pays for it. */
 export * from './property';
 export * from './rental';
+export * from './commercial';
 export * from './vehicles';
 export * from './renovations';
 export * from './valuables';

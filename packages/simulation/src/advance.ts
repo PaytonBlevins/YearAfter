@@ -337,7 +337,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     posted with the tax and the treatment rather than after the cards: a
     mortgage is paid before a credit card's minimum, the same order as rent.
   */
-  const homesYear = runHomesYear(state.homes, nextYear, state.rng.getSeed());
+  const homesYear = runHomesYear(state.homes, nextYear, state.rng.getSeed(), market);
   /*
     Ticket 0504 — a year of every car they own: wear, servicing and repairs,
     the loan payment. Committed outgoings like the mortgage, and the living

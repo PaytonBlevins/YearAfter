@@ -247,7 +247,7 @@ export const childMonthlyCost = (standard: number, locationIndex: number, share:
  *
  * With this, a stale entry fails: see `stillAhead`. CORE_RULES 13.51.
  */
-export const TICKET = '0605';
+export const TICKET = '0606';
 
 /**
  * Whether a promised arrival is still in the future.

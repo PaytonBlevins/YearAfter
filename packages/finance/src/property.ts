@@ -176,6 +176,8 @@ export interface MortgageProduct {
    * for the home itself.
    */
   readonly investment?: boolean;
+  /** Ticket 0606. Lends on commercial property only, and on nothing else. */
+  readonly commercial?: boolean;
 }
 
 /**
@@ -231,6 +233,22 @@ export const MORTGAGE_PRODUCTS: readonly MortgageProduct[] = [
     maxPrincipal: 5_000_000,
     investment: true,
   },
+  /*
+    Ticket 0606. A commercial mortgage runs shorter, wants 30% down and prices about
+    three quarters of a point over an investment-property loan. It lends on shops,
+    warehouses and offices, which the investment loan was only standing in for.
+  */
+  {
+    id: 'mortgage.commercial',
+    name: 'Commercial Mortgage',
+    lender: 'Ashcroft Commercial',
+    apr: 0.0725,
+    termYears: 25,
+    minDown: 0.3,
+    needs: 'good',
+    maxPrincipal: 8_000_000,
+    commercial: true,
+  },
 ];
 
 /**
@@ -246,6 +264,9 @@ export const MAX_MORTGAGES = 5;
  * underwriting uses 75%, leaving a quarter for vacancy and upkeep.
  */
 export const RENT_COUNTED = 0.75;
+
+/** Ticket 0606. A commercial lender counts less of the rent: a unit stands empty longer. */
+export const COMMERCIAL_RENT_COUNTED = 0.7;
 
 export const findMortgageProduct = (id: string): MortgageProduct | undefined =>
   MORTGAGE_PRODUCTS.find((product) => product.id === id);
@@ -292,7 +313,7 @@ export interface HomeBuyer {
 }
 
 /** Ticket 0503. What the buyer means to do with it. */
-export type MortgagePurpose = 'home' | 'rental';
+export type MortgagePurpose = 'home' | 'rental' | 'commercial';
 
 export type MortgageRefusal =
   | 'tooYoung'
@@ -349,7 +370,13 @@ export function mortgageFor(
     return { ...none, because: 'tooManyMortgages' };
   }
   // Ticket 0503: a rental's own rent helps carry it, at the lender's discount.
-  const income = buyer.income + (purpose === 'rental' ? rentYear * RENT_COUNTED : 0);
+  const income =
+    buyer.income +
+    (purpose === 'rental'
+      ? rentYear * RENT_COUNTED
+      : purpose === 'commercial'
+        ? rentYear * COMMERCIAL_RENT_COUNTED
+        : 0);
 
   /*
     Each product either approves or fails for one reason, and the refusal
@@ -374,7 +401,9 @@ export function mortgageFor(
     }
   };
   for (const product of MORTGAGE_PRODUCTS) {
-    if ((product.investment ?? false) !== (purpose === 'rental')) continue;
+    // A commercial loan lends on commercial property only; a commercial property takes nothing else.
+    if ((product.commercial ?? false) !== (purpose === 'commercial')) continue;
+    if (!product.commercial && (product.investment ?? false) !== (purpose === 'rental')) continue;
     const floor = Math.ceil(price * product.minDown);
     const down = Math.max(floor, Math.min(Math.round(price * TARGET_DOWN), spare));
     const principal = price - down;

@@ -1867,6 +1867,67 @@ describe('Ticket 0406 — a question survives being saved', () => {
     expect(migrated.value.deals).toEqual([]);
   });
 
+  it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {
+    // Ticket 0606. No version bump: `trade`, `leaseEnds` and `rent` are optional on a tenant. Losing
+    // `rent` on a reload would reprice a lease at today's rate; losing `leaseEnds` would end it.
+    const { save } = newSave('LEASE');
+    const base = fromSave(save);
+    const shop: GameState = {
+      ...base,
+      homes: [
+        {
+          id: 'home:2010:c0',
+          kindId: 'home.retail-strip',
+          beds: 0,
+          baths: 0,
+          builtYear: 1995,
+          condition: 'good',
+          regionKey: 'OH',
+          regionName: 'Ohio',
+          purchasePrice: dollars(900_000),
+          boughtYear: 2010,
+          value: dollars(900_000),
+          expenseRate: 0.013,
+          behindYears: 0,
+          mortgage: {
+            productId: 'mortgage.commercial',
+            principal: dollars(630_000),
+            balance: dollars(630_000),
+            termLeft: 25,
+          },
+          letting: {
+            level: 1,
+            managed: true,
+            tenants: [
+              {
+                id: 'tenant:home:2010:c0:0:2009:1',
+                name: 'Main Street Cuts',
+                since: 2010,
+                income: 410_000,
+                credit: 'good',
+                work: 'steady',
+                household: 4,
+                evictions: 0,
+                trade: 'biz.salon',
+                rent: 31_200,
+                leaseEnds: 2016,
+              },
+              null,
+            ],
+          },
+        },
+      ],
+    };
+    const written = toSave(shop, { id: asSaveId('s-lease') });
+    const reloaded = fromSave(JSON.parse(JSON.stringify(written)));
+    expect(reloaded.homes).toEqual(shop.homes);
+    expect(reloaded.homes[0]!.letting!.tenants[0]).toMatchObject({
+      trade: 'biz.salon',
+      rent: 31_200,
+      leaseEnds: 2016,
+    });
+  });
+
   it('keeps which business a loan was borrowed for, and what the business paid last year', () => {
     // Ticket 0603. A business loan with no `businessId` would be serviced twice, by the
     // business and then by the household; one with no `repaid` would lose the dashboard line.

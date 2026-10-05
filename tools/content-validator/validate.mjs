@@ -1277,7 +1277,7 @@ if (existsSync(activitiesPath)) {
 // `TICKET` is the most recent ticket to ship. Bump it when one does.
 // ---------------------------------------------------------------------------
 {
-  const TICKET = '0605';
+  const TICKET = '0606';
   // Tickets the player chose to skip over for now. They are still ahead, in
   // spirit, whatever their number says; each is built before its row is wired.
   const DEFERRED = new Set(['0508']);
