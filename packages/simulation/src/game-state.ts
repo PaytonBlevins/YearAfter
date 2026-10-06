@@ -21,7 +21,10 @@ import {
   EMPTY_HOMES,
   EMPTY_VEHICLES,
   EMPTY_BUSINESSES,
+  EMPTY_CHANNELS,
   EMPTY_DEALS,
+  type Channel,
+  type Representation,
   type PrivateDeal,
   EMPTY_VALUABLES,
   EMPTY_LEDGER,
@@ -302,6 +305,12 @@ export interface GameState {
   readonly businesses: readonly OwnedBusiness[];
   /** Ticket 0605. The private deals the character has made. Always present from v40. */
   readonly deals: readonly PrivateDeal[];
+  /** Ticket 0701. The channels the character makes things for. Always present from v41. */
+  readonly channels: readonly Channel[];
+  /** Ticket 0701. How well known the character is, 0–100. Always present from v41. */
+  readonly fame: number;
+  /** Ticket 0704. A manager or an agent, never both. Absent: nobody. */
+  readonly representation?: Representation;
   /** Live RNG registry. Serialised into the save on every write. */
   readonly rng: Rng;
 }
@@ -506,6 +515,9 @@ export interface CreateGameStateOptions {
   readonly auctions?: AuctionDiary;
   readonly businesses?: readonly OwnedBusiness[];
   readonly deals?: readonly PrivateDeal[];
+  readonly channels?: readonly Channel[];
+  readonly fame?: number;
+  readonly representation?: Representation;
 }
 
 export const createGameState = (
@@ -546,6 +558,9 @@ export const createGameState = (
   ...(options.auctions ? { auctions: options.auctions } : {}),
   businesses: options.businesses ?? EMPTY_BUSINESSES,
   deals: options.deals ?? EMPTY_DEALS,
+  channels: options.channels ?? EMPTY_CHANNELS,
+  fame: options.fame ?? 0,
+  ...(options.representation !== undefined ? { representation: options.representation } : {}),
   pending: options.pending ?? [],
   rng,
 });

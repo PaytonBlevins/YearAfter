@@ -89,6 +89,11 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     businesses: state.businesses,
     // Ticket 0605, the ninth, in the same breath as the field.
     deals: state.deals,
+    // Ticket 0701, the tenth, in the same breath as the field.
+    channels: state.channels,
+    fame: state.fame,
+    // Ticket 0704. Omitted when nobody is hired: no version bump, and an older save loads as it is.
+    ...(state.representation !== undefined ? { representation: state.representation } : {}),
     // Omitted entirely when nobody is hired, which is what every other optional
     // field in this document does and what the migration relies on.
     ...(state.advisorId !== undefined ? { advisorId: state.advisorId } : {}),
@@ -131,6 +136,9 @@ export function fromSave(save: CurrentSaveGame): GameState {
     ...(save.auctions !== undefined ? { auctions: save.auctions } : {}),
     businesses: save.businesses,
     deals: save.deals,
+    channels: save.channels,
+    fame: save.fame,
+    ...(save.representation !== undefined ? { representation: save.representation } : {}),
     retirement: save.retirement,
     pending: save.pending,
   });

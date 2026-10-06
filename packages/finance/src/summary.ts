@@ -179,6 +179,8 @@ export function summariseFinances(
     Number(totalFor(ledger, 'commission', year)) +
     // Ticket 0601: what a business paid its owner is earned, and so is the tax on it.
     Number(totalFor(ledger, 'business', year)) +
+    // Ticket 0701: what a channel earned, net of its upkeep, is earned and taxed.
+    Math.max(0, Number(totalFor(ledger, 'creator', year))) +
     Number(totalFor(ledger, 'partner', year));
   const tax = -Number(totalFor(ledger, 'tax', year));
   const taxRate = earned > 0 ? Math.max(0, Math.min(1, tax / earned)) : 0;
@@ -247,7 +249,7 @@ export const childMonthlyCost = (standard: number, locationIndex: number, share:
  *
  * With this, a stale entry fails: see `stillAhead`. CORE_RULES 13.51.
  */
-export const TICKET = '0606';
+export const TICKET = '0704';
 
 /**
  * Whether a promised arrival is still in the future.

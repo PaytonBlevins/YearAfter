@@ -560,6 +560,20 @@ this block.
 > rankings, collaborations, creator groups, **one visible Fame bar**, and the
 > two-stage celebrity interaction system.
 
+Six tickets, built one at a time with a stop between each. Anyone 14 or older
+can open a channel (a podcast or newsletter needs 16); talent helps growth but
+is never a gate. Measured against real creator figures (vidIQ July 2026,
+Twitch/Substack/podcast industry data) before any code.
+
+| Ticket                                     | What it covers                                                                                                                                                                                                                                                                   |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0701 Fame and the creator foundation**   | **DONE (engine).** Six platforms, fifteen categories, channels with a luck draw fixed at opening, long-tail audiences, income per platform, upkeep, tax on the net, one Fame bar 0–100, save v41. `claude/0701-fame-and-creator-foundation.md`                                   |
+| **0702 Video, streaming, podcasts**        | **DONE (engine).** Own curves for streaming and podcasts, charts #1000→#1, trends you can read, sponsorship offers (Accept / Request More / Decline), and an hours cost for effort (resolves finding 47). `claude/0702-video-streaming-podcasts.md`                              |
+| **0703 Photo, short-form, subscription**   | **DONE (engine).** Brand deals on all six platforms, viral posts on short-form and photo, a paid tier with a chosen price, conversion that falls with list size and payers who build up slowly, and Request More as a fair gamble. `claude/0703-photo-shortform-subscription.md` |
+| **0704 Collaborations and creator groups** | **DONE (engine).** Collaborations with friends, peers and bigger names (a repeat is worth half), creator groups that take 10–30% for faster growth, and a manager or an agent, never both. `claude/0704-collaborations-groups-representation.md` |
+| **0705 The celebrity world**               | Two-stage interaction with famous NPCs, ranks #1000→#1, and what fame does to the rest of a life.                                                                                                                                                                                |
+| **0706 Fame and creator events**           | The events catalog and the calibration pass for the block (including the cost of effort, finding 47).                                                                                                                                                                            |
+
 ## v0.08 Entertainment & Sports
 
 > Acting (talent, lessons, character development, agent, roles, career
@@ -1089,6 +1103,98 @@ separate the two states; the first-year share does not. Recorded, not forced.
 **46. Commercial buildings cannot be renovated, and the player's own businesses
 cannot rent from them.** Both are natural next steps (a business with a
 location in your warehouse pays you rent) and neither is in spec 0606's scope.
+
+**47. Effort has no cost except upkeep, so heavy effort always wins.** _(Resolved in
+0702.)_ A channel's hours (light 2, regular 5, heavy 9 a week) now reach the
+hidden workload, so one channel is livable and four heavy ones are a bad year.
+Tested through a full year. 0706's calibration should still check that light and
+regular are sometimes the right choice for the money.
+
+**48. Fame feeds nothing yet.** The bar is computed and saved but nothing reads it.
+Its readers arrive in 0705 (the celebrity world) and 0706 (events). Until then
+it is a number on the state, with no screen.
+
+**49. A child can earn what a retiree cannot.** A lucky 14-year-old channel pays
+real money with no guardian, trust or tax rule beyond the ordinary self-
+employment tax. Measured: a 3-million-subscriber channel nets about $1.75M a
+year and its household's standard of living follows. It is rare (about one
+channel in 700 ever reaches a million), but it is reachable.
+
+**50. The top places are very rare.** A channel's luck is fixed at opening, so
+number one needs a draw near one in four million on video. Measured over six
+years at quality 1: 0.005% of video channels reach the top 100, 0.075% of
+streams. Spec 949 wants strong play to make the top more attainable; right now
+play moves a channel only along its own curve. Revisit in 0705, where ranks
+matter.
+
+**51. The podcast tail runs under its anchors.** After six years the model sits
+roughly 10–25% under the published download percentiles at the top. Left as is:
+podcasts are the platform where a small, loyal show is the point.
+
+**52. Request More is always worse than Accept.** _(Resolved in 0703.)_ It is now
+65% for +60%, worth 1.04 of the offer on average, on every platform's deals.
+
+**53. Taking a deal costs almost nothing.** Trust is a flat 1.5% (0.5% for a
+podcast) of the audience, which beside a deal worth thousands is small, so
+Accept is nearly always right. Brand fit, the category and repeated deals in a
+year are the natural prices; 0706 can add them with the events.
+
+**54. Photo, short-form and subscription audiences are not measured.** No usable
+population curve was found for Instagram or TikTok creators; the available
+samples are of big accounts (Mention: 24% past 10,000; Pew: creators Americans
+follow). The three keep 0701's curve scaled by `discover`. Measured at six years,
+quality 1: 0.10% of photo channels pass a million, 0.23% of short-form, 0.06% of
+subscriptions. Revisit if a real distribution turns up.
+
+**55. Photo brand money is counted twice.** A photo channel's income already
+includes 20 routine brand posts a year at the going rate; a named campaign adds
+four posts at 1.5 times it on top, about 30% more. Cutting `BRAND_POSTS` would fix
+it but moves 0701's pinned photo income; left for 0706's calibration.
+
+**56. The newsletter sponsorship rate is a guess.** $30 per thousand readers an
+issue is set near the podcast's $25. No source was found.
+
+**57. Retention only shapes the lag.** The share who pay settles at the
+conversion rate whatever the retention is, so retention changes how fast payers
+build up and how fast they collapse when a list shrinks, but not what a settled
+list earns. Real newsletters are held up by a flow of new readers. A flow model
+would make churn matter in steady state; it needs a flow of new readers per year,
+which the audience model does not have.
+
+**58. Two sources disagree about conversion.** Substack's median is 3%; a 2026
+publisher sample has 0.62%. Conversion here is 3% for lists up to 10,000, falling
+25% per tenfold past it, never under 1.2%.
+
+**59. The 0704 numbers are a judgement inside sourced ranges.** The manager's 15%
+and the agent's 10% sit in the market's 15–20% and 10–20%; the group cuts of 10, 20
+and 30% sit in the range for networks. The effects they buy (a manager grows a
+channel 1.2 times, a group `1 + 1.3 × cut`, an agent's deals pay 1.1 times and come
+1.3 times as often, 30% off what strangers charge) have no source. They were set so
+that each is a real trade, and measured (below). The agent's cut applies only to
+deals, which is an assumption about how agents are paid.
+
+**60. A group is about money-neutral by design.** Growth times what is left after the
+cut comes to 0.95–1.06 across 10–30%. Measured over six years it is +3% at 10%, +2%
+at 20% and -2% at 30% on mean net income, and +14% to +40% on median audience. It
+is worth taking for the audience and the brand calls and costs money at the top
+cut. If it should be worth taking for the money too, raise `GROUP_GROWTH_PER_CUT`.
+
+**61. Manager against agent is untested end to end.** A manager is +3.5–4% on mean
+net income and gives back 30% of the week; an agent adds 5–24% of channel income
+through deals if every offer is taken, more as deals are a bigger share of the
+income (short-form). The comparison was computed from separate runs, not one
+character living both ways, and trust costs of taking every deal were not counted.
+Revisit in 0706's calibration.
+
+**62. What a stranger charges to appear, and the size of a friend's following, are
+guesses.** Strangers are 0.3 to 5 times the channel, charging $0.015 a follower of
+theirs above 1.5 times its size, never under $25. A friend's following is 100 to
+50,000, drawn once per friend; most real friends are not creators at all. Only the
+direction (collaborations help small channels most, repeats help less) is sourced.
+
+**63. A creator house is only a label.** No shared household, no co-residence, and
+nothing on the Relationships screen, which stays a private world (spec 1316). If a
+house should matter to where the character lives, it is a 0705 or 0706 question.
 
 ## Suggested order
 

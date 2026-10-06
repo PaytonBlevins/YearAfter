@@ -86,6 +86,7 @@ import { withRenovationOffer } from './renovations';
 import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
 import { runDealsYear } from './deals';
+import { creatorWeek, runCreatorsYear } from './creators';
 import { foundOut } from './auctions';
 import { residenceOf } from './rentals';
 import { INSTRUMENTS, SECTORS, costIndexOf, findActivity } from '@yearafter/content';
@@ -384,12 +385,27 @@ export function advanceYear(state: GameState): AdvanceResult {
     stat: (type) => averageStat(worked.stats as unknown as Record<string, number>, type),
   });
   const businessTax = businessTaxOn(employment.earned, businessesYear.drawn);
+  /*
+    Ticket 0701 — a year of every channel. After the business draw because the
+    tax on what a channel paid depends on everything earned before it, and
+    BEFORE living for the reason a business draw is (CORE_RULES 13.90): the
+    household lives on what it actually has.
+  */
+  const creatorsYear = runCreatorsYear({
+    channels: state.channels,
+    fame: state.fame,
+    year: nextYear,
+    stats: worked.stats as unknown as Record<string, number>,
+    talents: state.player.talents as unknown as Record<string, boolean>,
+    ...(state.representation === undefined ? {} : { representation: state.representation }),
+  });
+  const creatorTax = businessTaxOn(employment.earned + businessesYear.drawn, creatorsYear.net);
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
   const dealsYear = runDealsYear({
     deals: state.deals,
     year: nextYear,
     market,
-    otherIncome: employment.earned + businessesYear.drawn,
+    otherIncome: employment.earned + businessesYear.drawn + creatorsYear.net,
   });
   const businessNet = businessesYear.drawn - businessTax;
 
@@ -422,7 +438,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     // What the job left after tax. Zero for anybody not working, which is the
     // case this whole phase exists to make cost something. Ticket 0502: and
     // what the partner's did, because a household lives on both.
-    afterTaxIncome: employment.takeHome + partnered.net + businessNet,
+    afterTaxIncome:
+      employment.takeHome + partnered.net + businessNet + (creatorsYear.net - creatorTax),
     wealth: Math.floor(Number(state.player.cash) / 100),
     /*
       Ticket 0308b. What the cards would actually lend, which is part of what a
@@ -486,6 +503,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     // calendar. Working nights with three children is a way to have a bad year,
     // and they read about it afterwards rather than being warned.
     workDemand: employment.demand,
+    // Ticket 0702. A channel takes hours too, and nothing draws the player a calendar for them either.
+    creatorHours: creatorWeek(state),
   });
 
   // Health LAST of all, and the order is argued in `phases/health.ts`: it needs
@@ -584,6 +603,10 @@ export function advanceYear(state: GameState): AdvanceResult {
     (index) => `t:${nextYear}:biz:${index}`,
   );
   write(
+    creatorsYear.lines.map((text) => ({ kind: 'passive' as const, text })),
+    (index) => `t:${nextYear}:creator:${index}`,
+  );
+  write(
     dealsYear.lines.map((text) => ({ kind: 'passive' as const, text })),
     (index) => `t:${nextYear}:deals:${index}`,
   );
@@ -627,6 +650,17 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0601. What a business paid its owner, and the tax on it; money put in or got out.
     ...businessesYear.transactions,
     ...dealsYear.transactions,
+    // Ticket 0701. What the channels paid, what keeping them cost, and the tax on the net.
+    ...creatorsYear.transactions,
+    ...(creatorTax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-creatorTax),
+            source: 'Tax on creator income',
+          },
+        ]
+      : []),
     ...(businessTax > 0
       ? [
           {
@@ -1140,6 +1174,9 @@ export function advanceYear(state: GameState): AdvanceResult {
     businesses: businessesYear.businesses,
     // Ticket 0605. Private deals after the year.
     deals: dealsYear.deals,
+    // Ticket 0701. Channels and fame after the year.
+    channels: creatorsYear.channels,
+    fame: creatorsYear.fame,
     // Ticket 0504. The same short year puts a financed car behind.
     vehicles: markVehiclesMissed(
       vehiclesYear.vehicles,

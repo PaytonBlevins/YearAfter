@@ -849,6 +849,8 @@ export function earnedIncomeOf(state: GameState): number {
         entry.category === 'commission' ||
         // Ticket 0601: what a business paid its owner is earned.
         entry.category === 'business' ||
+        // Ticket 0701: what a channel paid is earned.
+        entry.category === 'creator' ||
         entry.category === 'partner' ||
         entry.category === 'oddJob' ||
         entry.category === 'assetIncome'),

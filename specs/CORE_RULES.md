@@ -2795,3 +2795,114 @@ A second agent re-ran every test against its own mutations and found one real
 engine bug and about forty missing assertions. That is worth a pass per
 subsystem. It is not worth a relay per ticket: the fixes were quick, the
 hand-offs were slow. Audit in batches, after the screens exist.
+
+### 13.110 Pin a fitted distribution to the published shares, not to its own inputs
+
+0701's audiences are drawn from a curve fitted to four published shares of video
+channels (41%, 8%, 1.3%, 0.13% past a thousand, ten thousand, a hundred thousand
+and a million). Testing the curve at its anchors only proves the arithmetic. The
+test that matters runs twenty thousand channels through six years with the real
+growth rule and asserts the shares that come out, with bounds a little wider than
+the source. Calibrate through the function a life calls (13.107), then assert
+what it realizes.
+
+### 13.111 If a rule only differs at a boundary, put it in a function you can call at the boundary
+
+The milestone, monetization and slump notes were first written inline in the
+year function. Sabotage changed `<` to `<=` in all of them and nothing failed,
+because no whole-year test lands an audience exactly on a mark. Extracting
+`noteFor(previous, audience, paysAt)` made every boundary a one-line assertion.
+When a mutation on an edge survives, extract the edge before writing a cleverer
+integration test.
+
+### 13.112 A clamp whose bound cannot be reached is dead code
+
+Sabotage found two: a lower clamp on quality that skill's own clamp already
+made unreachable, and an outer max on a fall that a step never exceeds. A
+mutation of the bound survived because there was nothing to catch. Prove the
+bound is reachable or delete it, and write the argument in a comment where the
+clamp used to be.
+
+### 13.113 A new income is a list of readers
+
+13.90 said that when a new income reaches the household, every reader of income
+must be told. 0701 had eight: the summary's tax rate, the car dealer's earned
+income, the loan officer's earned income, the tax stacking order, the deals' tax
+base, the household's standard of living, the lender's `incomeOf`, and the
+timeline. Write the list in the ticket doc, then one test per reader. The
+survivors were exactly the readers without one.
+
+### 13.114 "The numbers feed it" is a claim; a test through the whole year is the proof
+
+0702 measured that a channel's hours raised the hidden workload and wrote it in
+the plan. Sabotage then deleted the hours from the stress phase, and again from
+the call in the year, and every test still passed. Nothing had run a year with
+channels and read the stress that came out. Whenever a new input is wired into
+an existing phase, the test is two lives that differ only in that input, run
+through `advanceYear`, asserting the output moves in the right direction and by
+how much more for more.
+
+### 13.115 When a choice never wins, it is not a choice
+
+Sponsorship pay was first a single video's worth, smaller than the trust cost on
+a fast-growing channel, so Accept lost money and no one would take it. The deal
+became a campaign of three. Then Request More turned out to average 58.5% of an
+offer, so it never wins either (roadmap finding 52). Before shipping a decision,
+compute what each answer is worth to a player who knows the table. If one
+dominates, say so in the ticket, and fix it or have the owner decide.
+
+### 13.116 Two draws that share a key are one draw
+
+A brand and a rate that both read the same hash would always pair the same
+brand with the same pay. Sabotage swapped the key and nothing noticed. Pin a
+draw by recomputing it in the test from its own key, so a key change fails.
+
+### 13.117 A rule written twice is one rule with a hole
+
+The payment threshold was a comparison in `channelIncome` and a second one,
+copied, in the subscription branch of the year. Sabotage changed the second `<`
+and nothing failed, because the boundary was tested only through the first. When
+the same condition guards two paths, extract it (`paysFrom`) and test the edge
+once, on the function both call.
+
+### 13.118 Prove a choice has an interior best by finding two contexts with different answers
+
+A price for a newsletter is only a choice if the best price is not the same
+everywhere. 0703 pins the best tier for three categories (business premium, music
+cheap, the usual standard) and asserts the argmax differs. A formula that looks
+like a trade-off can have a corner solution that always wins; a table of what each
+option earns in different places is the test.
+
+### 13.119 A year that did not advance looks like a system at rest
+
+A test advanced two years and found the second year's numbers identical to the
+first, which looked like a model that had settled. The second advance had done
+nothing: a decision was waiting, and `advanceYear` returns the same state while
+one is. Any multi-year test must answer pending decisions between years and
+assert that the year moved before it asserts anything about what changed.
+
+### 13.120 A test that checks a constant against itself pins nothing
+
+Thirteen of 0704's first-pass survivors were numbers asserted against the constant
+that set them: `expect(offers.length).toBeLessThanOrEqual(MAX_COLLAB_OFFERS)`
+cannot fail when someone changes `MAX_COLLAB_OFFERS`. A number that is a design
+decision is pinned by writing it out in the test (`toBe(2)`), and a range is pinned
+by showing both ends are reached, not only that nothing leaves it. A clamp no
+input reaches (a floor of 50 on a partner whose offer needs 113) is dead code:
+remove it rather than test it.
+
+### 13.121 A new field on the state must survive `fromSave(toSave(x))`
+
+`representation` was written to the save, read back from it and validated, and the
+reload still lost it, because `createGameState` builds the state field by field
+and had never heard of it. Only a round trip through the loader finds that. Every
+new optional field on `GameState` gets a test that sets it, saves, loads and reads
+it back, and a test that an absent one stays absent.
+
+### 13.122 Prove an effect on its own path, not through a total
+
+A manager gives back a third of the week, and the test said a heavy life was less
+stressful with one. It still passed with the hours cut disconnected, because a
+manager also grows the channels, and more money lowers stress too. When an effect
+has a rival explanation, extract the quantity it changes (`creatorWeek`) and test
+that directly, then test only that the total moves the right way.

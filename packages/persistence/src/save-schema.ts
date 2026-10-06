@@ -26,7 +26,9 @@ import type {
   OwnedValuable,
   OwnedBusiness,
   PrivateDeal,
+  Channel,
   PriceBook,
+  Representation,
   RetirementState,
 } from '@yearafter/finance';
 import type { HealthState } from '@yearafter/health';
@@ -46,7 +48,7 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 40;
+export const CURRENT_SAVE_VERSION = 41;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -83,6 +85,10 @@ export type { WorldState };
  * could let anything, so the migration has nothing to write; the version is
  * bumped so a build that cannot read a tenant refuses the save rather than
  * dropping them.
+ *
+ * v41 added `channels` and `fame` — what the character makes things for, and how well
+ * known it has made them (Ticket 0701). Every save before it has neither, so the migration
+ * writes an empty list and zero.
  *
  * v40 added `deals` — the private deals the character has made (Ticket 0605).
  * Every save before it holds none, so the migration writes an empty list.
@@ -167,7 +173,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 40;
+  readonly version: 41;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -271,6 +277,12 @@ export interface SaveGameV18 {
   readonly businesses: readonly OwnedBusiness[];
   /** Ticket 0605. The private deals the character has made. Always present from v40. */
   readonly deals: readonly PrivateDeal[];
+  /** Ticket 0701. The channels the character makes things for. Always present from v41. */
+  readonly channels: readonly Channel[];
+  /** Ticket 0701. How well known the character is, 0–100. Always present from v41. */
+  readonly fame: number;
+  /** Ticket 0704. A manager or an agent, never both. Omitted when nobody is hired; no version bump. */
+  readonly representation?: Representation;
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

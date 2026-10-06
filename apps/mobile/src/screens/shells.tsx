@@ -986,7 +986,9 @@ export function ActivitiesScreen() {
             subtitle: 'Casino, racing, lottery',
             ticket: '0902',
           },
-          { icon: 'social', title: 'Social Media', ticket: '0701' },
+          // Tickets 0701–0704 built the creator engine without a screen. The door arrives with the
+          // celebrity world (0705), which is the first v0.07 ticket with something to look at.
+          { icon: 'social', title: 'Social Media', ticket: '0705' },
           { icon: 'pets', title: 'Pets', affordance: 'action', ticket: '1001' },
           { icon: 'nightlife', title: 'Nightlife', affordance: 'action', ticket: '1002' },
           { icon: 'vacation', title: 'Vacation', ticket: '1003' },

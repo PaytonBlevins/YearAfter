@@ -985,6 +985,16 @@ const migrations: Readonly<Record<number, Migration>> = {
     deals: Array.isArray(save['deals']) ? save['deals'] : [],
     version: 40,
   }),
+  /**
+   * v40 -> v41: Ticket 0701 — channels and fame. Nobody before it made anything for an
+   * audience, so every older save gets no channels and no fame.
+   */
+  40: (save) => ({
+    ...save,
+    channels: Array.isArray(save['channels']) ? save['channels'] : [],
+    fame: typeof save['fame'] === 'number' ? save['fame'] : 0,
+    version: 41,
+  }),
 };
 
 /**
@@ -1213,6 +1223,14 @@ export function validateCurrentSave(
     require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
     // Ticket 0605. And for the private deals.
     require('deals', candidate['deals'], Array.isArray(candidate['deals'])),
+    // Ticket 0701. And for the channels, and a number for fame.
+    require('channels', candidate['channels'], Array.isArray(candidate['channels'])),
+    require('fame', candidate['fame'], typeof candidate['fame'] === 'number'),
+    // Ticket 0704. Optional, but if it is there it has to be one of the two.
+    require('representation', candidate['representation'], candidate['representation'] ===
+      undefined ||
+      candidate['representation'] === 'manager' ||
+      candidate['representation'] === 'agent'),
   ].filter((problem): problem is string => problem !== null);
 
   if (problems.length > 0) {

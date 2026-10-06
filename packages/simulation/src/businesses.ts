@@ -329,7 +329,9 @@ export function earnedOf(state: GameState): number {
   return Math.round(
     (Number(totalFor(state.finance, 'salary', year)) +
       Number(totalFor(state.finance, 'commission', year)) +
-      Number(totalFor(state.finance, 'partner', year))) /
+      Number(totalFor(state.finance, 'partner', year)) +
+      // Ticket 0701: what a channel paid, net of keeping it going.
+      Math.max(0, Number(totalFor(state.finance, 'creator', year)))) /
       100,
   );
 }
