@@ -18,7 +18,8 @@ checks and review remain pending; general life-event wording stays last.
 "return to this" findings, **engine, save and balance included**, and asked that nothing else be worked
 until they are done. Read `claude/playtest-rules-brief.md` first. For P1–P16 in that brief it overrides
 section 0 and the CORE_RULES, migration and validator limits in section 8. Outside that list, section 0
-still applies. v0.08 and 0508 wait.
+still applies. 0508 waits. Agent A built v0.08 ticket 0801 (the sports engine) in parallel and took save v44, now
+shipped; your saves start at v45.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

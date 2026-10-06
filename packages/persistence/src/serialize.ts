@@ -96,6 +96,8 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     ...(state.representation !== undefined ? { representation: state.representation } : {}),
     // Ticket 0705, the eleventh, in the same breath as the field.
     celebrities: state.celebrities,
+    // Ticket 0801, the twelfth, in the same breath as the field.
+    sports: state.sports,
     // Omitted entirely when nobody is hired, which is what every other optional
     // field in this document does and what the migration relies on.
     ...(state.advisorId !== undefined ? { advisorId: state.advisorId } : {}),
@@ -142,6 +144,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     fame: save.fame,
     ...(save.representation !== undefined ? { representation: save.representation } : {}),
     celebrities: save.celebrities,
+    sports: save.sports,
     retirement: save.retirement,
     pending: save.pending,
   });

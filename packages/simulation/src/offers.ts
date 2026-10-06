@@ -270,6 +270,8 @@ export function withAnyOffer(state: GameState, alive: boolean): GameState {
   if (!alive) return state;
   if (hasSystemicOffer(state)) return state;
   if (state.retirement.retiredAtAge !== undefined) return state;
+  // Ticket 0801. Somebody who plays for a living is not between jobs. No draw is spent on it.
+  if (state.sports.career?.stage === 'pro') return state;
 
   const held = state.employment.job;
   /*

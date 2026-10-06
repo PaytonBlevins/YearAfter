@@ -4,7 +4,7 @@
 complete; v0.05 tickets 0501–0507 are built, with 0508 Will & Estate deferred by
 Payton. The 0601–0606 and 0701–0704 engines are on `origin/main` at
 `0d23cc5`. The 0605/0606 screens and native-device checks remain open; v0.07
-screens are unassigned, and 0705/0706 are not built. Save **v41**.
+screens are unassigned, and 0705/0706 are not built. Save **v41**. _(Update 6 Oct: 0705–0708 and v0.07 shipped; 0801 sports engine built, save **v44**.)_
 **Agent B's order:** existing notes, 0605 screens, 0606 screens, then new notes
 from Payton. Agent A owns every other ticket end to end; Payton decides the
 next ticket. See `claude/HANDOFF.md` §0 and §7.
@@ -604,10 +604,15 @@ recreational pursuits, including sports, and feeds those participants into the
 health phase's athlete branch. v0.08's professional sports engine remains future
 work; the school-only adult-athlete gap recorded by 0211 is historical.
 
-**6 October 2026: measured and a breakdown proposed (0801–0809), nothing built.**
-No professional sports or entertainment job exists among the 169, and athletic talent
-has no door after eighteen. Waiting for Payton to approve the order and five decisions.
-See `claude/v008-entertainment-measurement.md`.
+**6 October 2026: measured and a breakdown proposed (0801–0809). 0801 is built (engine only).**
+No professional sports or entertainment job existed among the 169, and athletic talent
+had no door after eighteen. Payton approved the order and answered the decisions; 0801 was then
+built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sports-engine.md`.
+
+| Ticket                                      | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0801 The sports engine, with basketball** | **DONE (engine).** School team → scholarship offer at graduation → college seasons → the draft → a contract (Accept / Ask for more / Turn it down) → pro seasons, injuries, titles, reputation and fame → retirement. Odds are Payton's: reaching the pros from a team is 95% with talent and hard work, 75% with talent alone, 60% with hard work alone and about 3% with neither; 45% / 20% / 10% of those become stars. Every draw is a hash, so a life with no sport replays exactly as before. Save v44 (`sports`). No screens (0809). |
+| 0802–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -1354,6 +1359,35 @@ week" and not as a second job.
 **82. Nothing shows the 0706 events or the 0705 history.** The Fame screen lists the people you know now,
 not everyone you have met, and an event is still one line on the timeline (finding 72).
 
+**83. Going pro is common for anyone on a team, and the team is the gate.** With the odds as given,
+94% of talented hard workers on a team reach a contract, and about 59% of players with no talent who work
+hard do. Only 1.3% of passive lives are ever on a basketball team, so 5 in 2,000 (0.25%) go pro. Real life
+is about 0.04% from high school. That is a design choice (Payton's numbers), not a defect.
+
+**84. The star share for no talent and no hard work is 0.5%, and nobody chose it.** Payton gave 45%, 20%
+and 10%. It is the one number in the table that is mine. Superstars are one in four stars.
+
+**85. The rest of the pro career is a judgement.** The pay ladder (fringe $1.3 million, anchored to the
+2025-26 league minimum), career lengths, the 13% yearly injury chance, the 3.3% base title chance, the
+hard-work threshold (two of three sessions, half of seasons), the scholarship cut-off (form 62 for full) and
+the 0.4 / 0.6 split between the recruiting and draft doors have no source. Real careers are about four and a
+half seasons; the game's are longer.
+
+**86. Playing pay is taxed at the business rate**, on top of everything else earned that year. That is a
+little high for the top tier (a payroll tax would be flatter) and was kept for one rule rather than two.
+
+**87. The Career screen can still hire a pro.** Job offers are suppressed for a pro, but the Apply
+button on the Career screen is not gated on the sports career. Signing a rookie contract resigns any
+held job; applying while a pro is not blocked.
+
+**88. There is no early declaration.** The draft is rolled when college ends, however it ends. Leaving
+a degree early is the only way to go early, and the game does not say so. It is also why a dropout can be
+drafted.
+
+**89. There are no screens.** `skillsOf`, `careerOf`, `careerLabel`, `reputationOf`, `trainSport` and the
+pending scholarship or contract question are what 0809 reads. Nothing shows a season, a team or a past
+career.
+
 ## Suggested order
 
 This is the historical delivery order with current status annotations, not an
@@ -1405,3 +1439,6 @@ Agent A's next ticket.
     They show loss/reserve and loan scenarios and confirmed exit actions. B1's
     accept/decline rescue engine and survival measurement remain open with Agent A;
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
+
+12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, shipped as
+    an engine only; Payton chose screens in 0809. Next is chosen by Payton.)_

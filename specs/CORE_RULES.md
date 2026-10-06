@@ -2991,3 +2991,44 @@ a sentence, a default or a boundary nothing pinned: the collaboration text for a
 swap (three different states needed, not one), "Nobody has asked this year" when only a group has,
 rounding of a fractional dollar, age 15 against 16. A line a player reads is pinned by a test that
 names the line, and a fixture for a branch is checked to reach it (13.126).
+
+### 13.134 A conditional odd is only as big as the gate in front of it
+
+Payton's table for 0801 was "of the players on their teams": 95%, 75%, 60% and 3% reach the pros. Built as asked
+and measured on lives that make the team at seventeen, it comes out at 92%, 71–76%, 63% and 3.1%. Measured on
+lives that only press Advance, 5 in 2,000 (0.25%) go pro, because only 1.3% are ever on a basketball team. My
+earlier guess of 6% had multiplied the table by the share of lives on _any_ team. Before promising a share of a
+population, measure the gate in front of the condition (here: making the team and staying on it), not just the
+condition.
+
+### 13.135 A phase that needs what an earlier phase deletes must read the state the year started in
+
+Graduating from high school sets `education.activities` to `[]`, so by the time anything downstream could ask
+"were they on the basketball team in their last year?" the answer had been erased. `runSportsYear` takes
+`before` (the year's starting state) as well as the school year's result, and reads the team, the practice and
+the stage change from the first and the credentials from the second. A new phase that depends on a field
+another phase clears needs the old state passed in, and a test where the field is cleared in the same year.
+
+### 13.136 A harness variable named `MODE` is vitest's own
+
+A measurement script read `process.env.MODE ?? 'work'` and the run reported "test none" for every row: vitest
+sets `MODE=test`, so the whole run played the idle branch and produced numbers that looked like a finding (hard
+work did nothing). Name harness variables after what they are (`PLAY`, `SEEDP`) and print the variable in the
+output's first line so a wrong value is visible.
+
+### 13.137 A fixture has to reach the branch, and the survivor list tells you which ones did not
+
+Eight of 46 breakages in 0801 survived the first run, and every one was a fixture that could not reach the line:
+a partial scholarship whose parents happened to cover the rest (so the top-up never ran), a run of 400 seasons that
+held no injured title, a career with no title to put on the record, a control life that was never offered a job
+(so "no offer for a pro" proved nothing), a lenient `['retired', 'injury']` assertion. 13.126 and 13.129 said the
+same; the fix each time was to choose the fixture by the condition ("a partial scholarship the parents cannot
+make up") and assert the condition holds before asserting the behaviour.
+
+### 13.138 A state a new rule leaves behind is a bug waiting in an old one
+
+A first pro contract is a full-time job, and nothing said so: a life that had taken a teaching-assistant job in
+college signed with a team and went on drawing both salaries. The sabotage run did not find it; reading a
+printed life did (`job true` beside `stage pro`). When a new state means "this is what they do for a living",
+list every other state that means the same and decide what ends it (here: signing ends the job; a systemic job
+offer is not raised for a pro; the Career screen's own Apply is still open, finding 87).

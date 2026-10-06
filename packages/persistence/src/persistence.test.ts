@@ -30,6 +30,28 @@ const play = (state: GameState, years: number): GameState => {
   return current;
 };
 
+/** A pro career, as the engine would write it. Ticket 0801. */
+const CAREER = {
+  sportId: 'basketball',
+  stage: 'pro',
+  startedAge: 14,
+  seasons: 6,
+  hardSeasons: 3,
+  form: 71,
+  trainedAtAge: 25,
+  trainedCount: 2,
+  reputation: 38,
+  titles: 0,
+  team: 'Harbor City Gulls',
+  tier: 'starter',
+  peak: 'starter',
+  breakout: 2,
+  proSeasons: 3,
+  endAge: 32,
+  pick: 14,
+  contract: { salary: 6_000_000, yearsLeft: 1, rookie: false },
+} as const;
+
 const newSave = (seed = 'SAVE-TEST') => {
   const state = play(createNewGame({ seed, startYear: 2000 }), 12);
   return { state, save: toSave(state, { id: asSaveId(`save-${seed}`) }) };
@@ -2154,7 +2176,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(43);
+    expect(CURRENT_SAVE_VERSION).toBe(44);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {
@@ -2170,6 +2192,106 @@ describe('Ticket 0406 — a question survives being saved', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.celebrities.work).toEqual(work);
+  });
+
+  it('opens a v43 save with no sporting life, and keeps everything else (0801)', () => {
+    const { save } = newSave('SPORTS-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.sports;
+    old.version = 43;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.sports).toEqual({ past: [] });
+    expect(result.value.celebrities).toEqual(save.celebrities);
+    expect(result.value.fame).toBe(save.fame);
+  });
+
+  it('keeps a sporting life a v43 save somehow already carries (0801)', () => {
+    const { save } = newSave('SPORTS-KEEP');
+    const old = JSON.parse(JSON.stringify(save));
+    const sports = { past: [], career: { ...CAREER } };
+    old.sports = sports;
+    old.version = 43;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.sports).toEqual(sports);
+  });
+
+  it('round-trips a career, a contract on the table and a past career (0801)', () => {
+    const { save } = newSave('SPORTS-ROUND');
+    const base = fromSave(save);
+    const state: GameState = {
+      ...base,
+      sports: {
+        past: [
+          {
+            sportId: 'basketball',
+            startedAge: 14,
+            endedAge: 30,
+            seasons: 14,
+            titles: 1,
+            reputation: 44,
+            reached: 'pro',
+            bestTier: 'star',
+            how: 'retired',
+          },
+        ],
+        career: CAREER,
+        offer: {
+          kind: 'contract',
+          sportId: 'basketball',
+          team: 'Harbor City Gulls',
+          salary: 3_200_000,
+          years: 3,
+          rookie: false,
+          asked: true,
+          age: 26,
+          eventId: 'sports.offer',
+        },
+      },
+    };
+    const again = fromSave(toSave(state, { id: save.id }));
+    expect(again.sports).toEqual(state.sports);
+  });
+
+  it('refuses a malformed sporting life (0801)', () => {
+    const { save } = newSave('SPORTS-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    expect(migrateSave({ ...raw, sports: { past: [] } }).ok).toBe(true);
+    expect(migrateSave({ ...raw, sports: { past: [], career: CAREER } }).ok).toBe(true);
+    const offer = {
+      kind: 'scholarship',
+      sportId: 'basketball',
+      team: 'Ridgemont State Bobcats',
+      aid: 12000,
+      cover: 'full',
+      majorId: 'x',
+      age: 18,
+      eventId: 'sports.offer',
+    };
+    const bad: unknown[] = [
+      undefined,
+      null,
+      7,
+      [],
+      { career: CAREER },
+      { past: 'none' },
+      { past: [], career: 'none' },
+      { past: [], career: { ...CAREER, stage: 'amateur' } },
+      { past: [], career: { ...CAREER, sportId: 4 } },
+      { past: [], career: { ...CAREER, form: 'good' } },
+      { past: [], career: { ...CAREER, seasons: 'many' } },
+      { past: [], offer },
+      { past: [], career: CAREER, offer: { ...offer, kind: 'trade' } },
+      { past: [], career: CAREER, offer: 4 },
+    ];
+    for (const sports of bad) {
+      const result = migrateSave({ ...raw, sports });
+      expect(result.ok, JSON.stringify(sports)).toBe(false);
+    }
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {

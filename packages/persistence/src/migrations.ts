@@ -1029,6 +1029,17 @@ const migrations: Readonly<Record<number, Migration>> = {
       version: 43,
     };
   },
+  /**
+   * v43 -> v44: Ticket 0801 — a sporting life. Nobody before it played past school, so every
+   * older save gets no career, none past and no question. What a v43 save already carries is
+   * kept. No RNG, no clock.
+   */
+  43: (save) => ({
+    ...save,
+    sports:
+      typeof save['sports'] === 'object' && save['sports'] !== null ? save['sports'] : { past: [] },
+    version: 44,
+  }),
 };
 
 /**
@@ -1178,6 +1189,31 @@ function channelPublishingOk(value: unknown): boolean {
       Number.isSafeInteger(row['gained'])
     );
   });
+}
+
+function sportsOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const sports = value as Record<string, unknown>;
+  if (!Array.isArray(sports['past'])) return false;
+  const career = sports['career'];
+  if (career !== undefined) {
+    if (typeof career !== 'object' || career === null) return false;
+    const row = career as Record<string, unknown>;
+    if (typeof row['sportId'] !== 'string') return false;
+    if (row['stage'] !== 'school' && row['stage'] !== 'college' && row['stage'] !== 'pro') {
+      return false;
+    }
+    if (typeof row['form'] !== 'number' || typeof row['seasons'] !== 'number') return false;
+  }
+  const offer = sports['offer'];
+  if (offer !== undefined) {
+    if (typeof offer !== 'object' || offer === null) return false;
+    const kind = (offer as Record<string, unknown>)['kind'];
+    if (kind !== 'scholarship' && kind !== 'contract') return false;
+    // A question with nobody to ask about is a save that cannot be answered.
+    if (career === undefined) return false;
+  }
+  return true;
 }
 
 function celebritiesOk(value: unknown): boolean {
@@ -1349,6 +1385,8 @@ export function validateCurrentSave(
     require('fame', candidate['fame'], typeof candidate['fame'] === 'number'),
     // Ticket 0705. A record of connections, people seen and the year a stranger was last answered.
     require('celebrities', candidate['celebrities'], celebritiesOk(candidate['celebrities'])),
+    // Ticket 0801. A record of past careers, however short, and optionally a career and a question.
+    require('sports', candidate['sports'], sportsOk(candidate['sports'])),
     // Ticket 0704. Optional, but if it is there it has to be one of the two.
     require('representation', candidate['representation'], candidate['representation'] ===
       undefined ||

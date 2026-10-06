@@ -151,7 +151,9 @@ export const collegeSupportOf = (state: GameState, program?: Major): number => {
     return 0;
   }
   if (state.education.stage === 'postgrad') return 0;
-  return state.parenting.collegeSupport ?? 0;
+  // Ticket 0801. A sports scholarship is aid too, and it is read here so the affordability gate sees it.
+  const aid = state.sports.career?.stage === 'college' ? (state.sports.career.aid ?? 0) : 0;
+  return (state.parenting.collegeSupport ?? 0) + aid;
 };
 
 /**

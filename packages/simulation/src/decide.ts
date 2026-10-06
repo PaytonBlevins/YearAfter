@@ -29,6 +29,7 @@ import { answerPursuitOffer, isPursuitOfferDecision } from './pursuit-offer';
 import { answerHomeOffer, isHomeOfferDecision } from './homes';
 import { answerVehicleOffer, isVehicleOfferDecision } from './vehicles';
 import { answerRenovationOffer, isRenovationOfferDecision } from './renovations';
+import { answerSportsOffer, isSportsOfferDecision } from './sports';
 import { RngDomains } from './rng/rng';
 
 export type DecisionError =
@@ -126,6 +127,15 @@ export function decide(
   // Ticket 0506. The seventh: the house needs work.
   if (isRenovationOfferDecision(eventId)) {
     const answered = answerRenovationOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  // Ticket 0801. The eighth: a scholarship, a draft pick, a contract.
+  if (isSportsOfferDecision(eventId)) {
+    const answered = answerSportsOffer(state, choiceId);
     if (!answered.ok) {
       return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
     }

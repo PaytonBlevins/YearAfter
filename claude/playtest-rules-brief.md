@@ -1,10 +1,9 @@
 # Playtest rule changes and "return to this" — brief for Agent B
 
 **Written 6 October 2026 from a conversation with Payton, addressed to Agent B (Codex). This list is
-the only thing you work on until Payton says otherwise.** Do not start 0508 Will & Estate, v0.08
-Entertainment & Sports, or any other ticket. Payton chose v0.08 as the next milestone and then
-asked for this list to be cleared first, so v0.08 waits (its proposal is in
-`claude/v008-entertainment-measurement.md`; do not act on it).
+the only thing you work on until Payton says otherwise.** Do not start 0508 Will & Estate or any other ticket. v0.08 is Agent A's, and Payton has started
+its first ticket (0801) alongside this list; do not build any of it (its proposal is in
+`claude/v008-entertainment-measurement.md`).
 
 ## Your role, and what Payton has authorized
 
@@ -27,8 +26,12 @@ the next. He pushes in batches. Where a rule decision is not covered below and i
 choice (a number that changes how the game plays, a new screen's shape), **propose the value and ask**,
 as you did with the posting limits. Do not decide it silently.
 
-No other agent is building on this list at the same time. Agent A (a Claude session) is paused on it, and
-v0.08 waits. If Agent A is asked to do anything on these files in the meantime, `CLAIMS.md` shows it.
+**Update, 6 October (later): Payton started v0.08 ticket 0801 (the sports engine) in parallel.** Agent A
+holds **save v44** for it (`CLAIMS.md`). **Your saves are numbered from v45 onward, in the order your
+tickets land.** Do not take v44. If you already have, tell Payton before pushing and renumber. Agent A
+touches the shared files (roadmap, `CORE_RULES.md`, `packages/*/src/index.ts`, `gameStore.tsx`,
+migrations, `TICKET`) only in small separate commits; rebase often. Agent A moves `TICKET` to `'0801'`
+when 0801 ships, and you leave it alone.
 
 ## Read these first, in this order
 

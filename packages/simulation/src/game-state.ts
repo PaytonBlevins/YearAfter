@@ -48,6 +48,7 @@ import {
   type RetirementState,
 } from '@yearafter/finance';
 import { EMPTY_CELEBRITIES, type CelebrityState } from './celebrity-state';
+import { EMPTY_SPORTS, type SportsState } from './sports-state';
 import { Rng } from './rng/rng';
 
 /** World state that outlives any single character (spec 818–827 continuation). */
@@ -314,6 +315,11 @@ export interface GameState {
   readonly representation?: Representation;
   /** Ticket 0705. The famous people the character has met, and what came of it. Always present from v42. */
   readonly celebrities: CelebrityState;
+  /**
+   * Ticket 0801. A sporting life: the career in progress, the ones that ended, and a question the
+   * sport is asking. Always present from v44.
+   */
+  readonly sports: SportsState;
   /** Live RNG registry. Serialised into the save on every write. */
   readonly rng: Rng;
 }
@@ -479,7 +485,9 @@ export const hasSystemicOffer = (state: GameState): boolean =>
   state.pursuitOffer !== undefined ||
   state.homeOffer !== undefined ||
   state.vehicleOffer !== undefined ||
-  state.renovationOffer !== undefined;
+  state.renovationOffer !== undefined ||
+  // Ticket 0801. A scholarship or a contract the sport is asking about.
+  state.sports.offer !== undefined;
 
 export const createWorldState = (year: number, generation = 1): WorldState => ({
   year,
@@ -522,6 +530,7 @@ export interface CreateGameStateOptions {
   readonly fame?: number;
   readonly representation?: Representation;
   readonly celebrities?: CelebrityState;
+  readonly sports?: SportsState;
 }
 
 export const createGameState = (
@@ -566,6 +575,7 @@ export const createGameState = (
   fame: options.fame ?? 0,
   ...(options.representation !== undefined ? { representation: options.representation } : {}),
   celebrities: options.celebrities ?? EMPTY_CELEBRITIES,
+  sports: options.sports ?? EMPTY_SPORTS,
   pending: options.pending ?? [],
   rng,
 });
