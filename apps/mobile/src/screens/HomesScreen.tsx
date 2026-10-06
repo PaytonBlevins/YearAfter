@@ -264,7 +264,7 @@ function lettingLine(owned: OwnedHome): string {
         : 'Empty'
       : `${numbers.let} of ${numbers.units} let`;
   const agent = owned.letting?.managed ? ' · agent' : '';
-  return `${filled} · ${money(numbers.rentPerUnitMonth)} a month${numbers.units > 1 ? ' each' : ''}${agent}`;
+  return `${filled} · ${money(numbers.rentPerUnitMonth)} gross a month${numbers.units > 1 ? ' each' : ''}${agent}`;
 }
 
 const styles = StyleSheet.create({
