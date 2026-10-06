@@ -15,10 +15,11 @@
  *
  * WHAT GOES IN ONE AND WHAT DOES NOT.
  *
- * This is for things the PLAYER PRESSED. A year passing writes its lines to the
+ * This answers player actions and, since playtest A9, an earned graduation
+ * milestone. Other passive year lines stay in the feed. A year passing writes its lines to the
  * feed and always will — spec 725–770 makes the feed the story of a life, and
  * putting a modal in front of every passive line would be a slideshow. The rule
- * is: if they tapped it and it had an outcome, answer them here.
+ * is: answer a completed action here, and mark an earned graduation once.
  *
  * The shape is the same as `DecisionCard`'s, deliberately, because they are the
  * two halves of one conversation: a question in a card, an answer in a card.

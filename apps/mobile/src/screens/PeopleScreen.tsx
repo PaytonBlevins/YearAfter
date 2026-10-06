@@ -69,10 +69,7 @@ export function PeopleScreen() {
   if (people.length === 0) {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <EmptyState
-          title="Nobody yet"
-          body="School is where this starts. Come back once there is a class to be in."
-        />
+        <EmptyState title="Nobody yet" body="You'll meet people when you start school." />
       </ScrollView>
     );
   }
@@ -93,7 +90,7 @@ export function PeopleScreen() {
         {friends.length === 0 ? (
           <ListRow
             title="Nobody yet"
-            subtitle="Friendship is something you do, not something you have."
+            subtitle="You haven't made any friends yet. Open someone's page to get to know them."
             affordance="none"
           />
         ) : (
@@ -164,9 +161,8 @@ export function PeopleScreen() {
 
       <View style={styles.note}>
         <Text style={styles.noteText}>
-          Hang around with somebody as often as you like — it is worth less each time. The things
-          you cannot do twice in a year are the ones that matter. People you stop seeing drift, and
-          the ones who last are the ones you kept up.
+          Spend time together to build a friendship. Some actions are limited each year; unavailable
+          choices explain why. Friendships can fade if you stop keeping in touch.
         </Text>
       </View>
     </ScrollView>

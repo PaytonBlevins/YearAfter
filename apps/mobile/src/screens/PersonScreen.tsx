@@ -14,7 +14,6 @@ import { Fragment } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   bondOf,
-  chanceOf,
   contactWith,
   displayName,
   fullName,
@@ -25,7 +24,6 @@ import {
   moveUnavailable,
   movesFor,
   notableMemories,
-  romanceChance,
   ROMANCE_STAGE_LABELS,
   type Acquaintance,
   type Interaction,
@@ -57,7 +55,7 @@ export function PersonScreen() {
   if (!person) {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <EmptyState title="Nobody here" body="This person is no longer in the save." />
+        <EmptyState title="Nobody here" body="This person is no longer in your contacts." />
       </ScrollView>
     );
   }
@@ -138,7 +136,7 @@ export function PersonScreen() {
 
       {around ? (
         <>
-          <SectionHeading note={lightLeft(spent.light) === 0 ? 'seen enough of you' : undefined}>
+          <SectionHeading note={lightLeft(spent.light) === 0 ? 'try again next year' : undefined}>
             What you can do
           </SectionHeading>
           <Card>
@@ -149,7 +147,6 @@ export function PersonScreen() {
                   interaction={interaction}
                   person={person}
                   spent={spent}
-                  charisma={state.player.stats.charisma}
                   onPress={() => interactWith(person.id, interaction.id)}
                 />
               </Fragment>
@@ -191,7 +188,6 @@ export function PersonScreen() {
                       interaction={interaction}
                       person={person}
                       spent={spent}
-                      charisma={state.player.stats.charisma}
                       onPress={() => interactWith(person.id, interaction.id)}
                     />
                   </Fragment>
@@ -230,8 +226,7 @@ export function PersonScreen() {
       {!around ? (
         <View style={styles.note}>
           <Text style={styles.noteText}>
-            Not somebody you see any more. They stay here because a childhood you can look back on
-            has to include the people who left it.
+            You don't see this person anymore. You can still look back at your memories together.
           </Text>
         </View>
       ) : null}
@@ -243,21 +238,19 @@ export function PersonScreen() {
  * One row on the menu.
  *
  * A heavy thing already used this year is disabled and says why. A light thing
- * shows how well it is likely to go — and, once the year has been spent on this
- * person, that the returns have gone. The player is never left pressing
+ * explains what it does — and, once the year has been spent on this person,
+ * that the returns have gone. The player is never left pressing
  * something that quietly does nothing.
  */
 function InteractionRow({
   interaction,
   person,
   spent,
-  charisma,
   onPress,
 }: {
   interaction: Interaction;
   person: Acquaintance;
   spent: YearContact;
-  charisma: number;
   onPress: () => void;
 }) {
   const heavyUsed = interaction.weight === 'heavy' && spent.heavy > 0;
@@ -265,18 +258,15 @@ function InteractionRow({
   const blocked = heavyUsed || worn;
 
   const subtitle = heavyUsed
-    ? 'Not something you can do twice in a year.'
+    ? "You've already used your once-a-year interaction with this person. Try again next year."
     : worn
-      ? `${displayName(person)} has seen plenty of you this year.`
+      ? `You've reached this year's limit for spending time with ${displayName(person)}. Try again next year.`
       : interaction.blurb;
 
   return (
     <ListRow
       title={interaction.label}
       subtitle={subtitle}
-      // The odds, in words. Spec 786-795: enough to make a decision with, never
-      // the formula that produced it.
-      value={blocked ? undefined : oddsLabel(chanceOf(interaction, person, charisma))}
       affordance={blocked ? 'none' : 'action'}
       disabled={blocked}
       onPress={blocked ? undefined : onPress}
@@ -311,32 +301,15 @@ function RomanceRow({
   const blocked = heavyUsed || worn || why !== undefined;
 
   const subtitle = heavyUsed
-    ? 'Not something you can do twice in a year.'
+    ? "You've already used your once-a-year interaction with this person. Try again next year."
     : worn
-      ? `${displayName(person)} has heard plenty from you this year.`
+      ? `You've reached this year's limit for spending time with ${displayName(person)}. Try again next year.`
       : (why ?? move.blurb);
-
-  // Ending it is a decision, not a gamble, so it shows no odds — a "Long shot"
-  // beside "End it" would be nonsense.
-  const value = blocked
-    ? undefined
-    : move.certain
-      ? undefined
-      : oddsLabel(
-          romanceChance(
-            person,
-            state.player.personality,
-            state.player.stats.charisma,
-            state.player.stats.looks,
-            move.base,
-          ),
-        );
 
   return (
     <ListRow
       title={move.label}
       subtitle={subtitle}
-      value={value}
       affordance={blocked ? 'none' : 'action'}
       disabled={blocked}
       onPress={blocked ? undefined : onPress}
@@ -349,21 +322,6 @@ function describe(person: Acquaintance, playerAge: number): string {
   if (!isCurrent(person)) return `${bond} · not any more`;
   if (person.kind === 'teacher') return `${person.subject ?? 'Teacher'} · ${bond}`;
   return `${bond} · ${howLong(person, playerAge)}`;
-}
-
-/**
- * The odds in words.
- *
- * A percentage would be a formula on screen, which spec 786–795 rules out, and
- * it would also be a lie about how well anybody knows their own chances of a
- * joke landing.
- */
-function oddsLabel(chance: number): string {
-  if (chance >= 0.85) return 'Safe';
-  if (chance >= 0.65) return 'Likely';
-  if (chance >= 0.45) return 'Even';
-  if (chance >= 0.25) return 'Unlikely';
-  return 'Long shot';
 }
 
 const styles = StyleSheet.create({

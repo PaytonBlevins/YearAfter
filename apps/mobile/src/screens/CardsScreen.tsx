@@ -50,10 +50,7 @@ export function CardsScreen() {
   if (state.player.age < CREDIT_FROM_AGE) {
     return (
       <ScrollView contentContainerStyle={styles.content}>
-        <EmptyState
-          title="Not yet"
-          body="Nobody gives a card to somebody your age. This starts at eighteen."
-        />
+        <EmptyState title="Not yet" body="You can apply for a credit card once you're eighteen." />
       </ScrollView>
     );
   }
@@ -147,19 +144,19 @@ export function CardsScreen() {
 function whyNot(because: string | undefined): string {
   switch (because) {
     case 'tooManyCards':
-      return 'You already hold five';
+      return 'You already have five credit cards';
     case 'alreadyHeld':
-      return 'You have this one';
+      return 'You already have this card';
     case 'standing':
-      return 'Your credit is not there yet';
+      return "Your credit doesn't meet this card's requirements yet";
     case 'income':
-      return 'You do not earn enough';
+      return 'Your income is too low for this card';
     case 'tooMuchOwed':
-      return 'You have all the credit they will extend';
+      return "You've reached the total credit limit lenders will offer you";
     case 'noDeposit':
-      return 'You cannot put up the deposit';
+      return "You don't have enough cash for the deposit";
     default:
-      return 'Not available to you';
+      return "You can't get this card right now";
   }
 }
 

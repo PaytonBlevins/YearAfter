@@ -31,8 +31,6 @@ import {
   isInSchool,
   joinedActivities,
   levelOf,
-  yearsNeeded,
-  findMajor,
   letterGrade,
   schoolLabel,
   activityStageOf,
@@ -70,6 +68,8 @@ import {
   SectionHeading,
   type RowAffordance,
 } from '../components';
+import { EnrolledProgramRow } from './ProgramScreen';
+import { StudentDebtRow } from './StudentDebtRow';
 import { useGame } from '../stores/gameStore';
 import { useNavigation, type Route } from '../navigation/navigation';
 import { colors, spacing, typography } from '../theme/theme';
@@ -209,6 +209,13 @@ export function CareerScreen() {
   return (
     <Screen>
       <WhereYouAre />
+      {isAtCollege(state.education) && state.employment.job ? (
+        <Card>
+          <EnrolledProgramRow />
+          <RowDivider />
+          <StudentDebtRow />
+        </Card>
+      ) : null}
       <WhatYouCanDo />
       <Elsewhere />
     </Screen>
@@ -278,23 +285,13 @@ function WhereYouAre() {
 
   /* -- Studying for a degree ------------------------------------------------ */
   if (atCollege) {
-    const major = education.majorId ? findMajor(education.majorId) : undefined;
-    const year = (education.collegeYear ?? 0) + 1;
-    // Ticket 0406: per-program, because a CPA year and a medical degree are
-    // both here now and the two-constant version was wrong about both.
-    const total = yearsNeeded(education);
     return (
       <>
         <SectionHeading>Studying</SectionHeading>
         <Card>
-          <ListRow
-            icon="school"
-            title={major?.name ?? 'Your degree'}
-            subtitle={`Year ${year} of ${total}`}
-            value={letterGrade(education.performance)}
-            meta={`${gradePointAverage(education.performance).toFixed(1)} GPA`}
-            affordance="none"
-          />
+          <EnrolledProgramRow />
+          <RowDivider />
+          <StudentDebtRow />
         </Card>
       </>
     );
@@ -375,7 +372,7 @@ function WhereYouAre() {
  * every year of a working life. See CORE_RULES 13.29.
  */
 function WhatYouCanDo() {
-  const { state, studyHarder, workHarderAt, quitJob, leaveStudies } = useGame();
+  const { state, studyHarder, workHarderAt, quitJob } = useGame();
   const { push } = useNavigation();
   if (!state) return null;
   const { education } = state;
@@ -427,7 +424,7 @@ function WhatYouCanDo() {
     );
   }
 
-  if (atSchool || atCollege) {
+  if (atSchool) {
     rows.push(
       <ListRow
         key="study"
@@ -463,7 +460,12 @@ function WhatYouCanDo() {
 
   if (atCollege) {
     rows.push(
-      <ListRow key="leave" title="Leave the program" affordance="action" onPress={leaveStudies} />,
+      <ListRow
+        key="program"
+        title="Open your program"
+        affordance="navigate"
+        onPress={() => push({ screen: 'program', title: 'Your program' })}
+      />,
     );
   }
 

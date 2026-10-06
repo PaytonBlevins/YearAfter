@@ -58,6 +58,13 @@ export function MagazineScreen() {
         <View style={styles.rule} />
         <Text style={styles.dateline}>{briefing.dateline}</Text>
 
+        <Text style={styles.footer}>
+          The lead describes the economy. Other stories come from this year's price changes, not
+          company news. Sector stories group investments; you buy individual holdings, not a sector.
+          Averages can hide gains and losses within the group. Check each holding's price and
+          history before buying or selling.
+        </Text>
+
         {briefing.stories.map((story, index) => (
           <View key={story.id} style={index === 0 ? styles.leadStory : styles.story}>
             {index > 0 ? <View style={styles.hairline} /> : null}
@@ -74,7 +81,7 @@ export function MagazineScreen() {
           market resting.
         */}
         {briefing.stories.length === 0 ? (
-          <Text style={styles.storyText}>Nothing much happened. It does not always.</Text>
+          <Text style={styles.storyText}>No market stories to show this year.</Text>
         ) : null}
 
         {briefing.yours ? (
@@ -86,7 +93,7 @@ export function MagazineScreen() {
         ) : null}
       </View>
 
-      <SectionHeading>What you are looking at</SectionHeading>
+      <SectionHeading>What you're looking at</SectionHeading>
       <Card>
         {PRIMER.map((row, index) => (
           <View key={row.kind} style={styles.primerRow}>
@@ -98,7 +105,7 @@ export function MagazineScreen() {
       </Card>
 
       <Text style={styles.footer}>
-        Nothing on this page is a forecast. It is a record of the year that just finished, which is
+        Nothing on this page is a forecast. It's a record of the year that just finished, which is
         the only thing anybody actually knows.
       </Text>
     </ScrollView>

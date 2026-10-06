@@ -33,6 +33,8 @@ export type ScreenKey =
   | 'cards'
   /** Ticket 0307. What you owe, and what anybody would lend you. */
   | 'loans'
+  /** Playtest A11: all current debt, linked to its own payment screens. */
+  | 'debt'
   | 'homes'
   /** Ticket 0503. One property you let: its rent, its agent, its tenants. */
   | 'rental'
@@ -81,6 +83,8 @@ export type ScreenKey =
   | 'jobOffer'
   /** Ticket 0210b. What is on offer to study, and what it costs. */
   | 'college'
+  /** Playtest A8: the program already being studied. */
+  | 'program'
   /**
    * Ticket 0210. The people at work.
    *

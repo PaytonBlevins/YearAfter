@@ -76,10 +76,11 @@ export function RentalScreen() {
         <SectionHeading>What it would let for</SectionHeading>
         <Card>
           <ListRow
-            title="Rent at the going rate"
+            title="Gross rent at the going rate"
             value={`${money(numbers.rentPerUnitMonth)} a month`}
+            subtitle="Before property costs; per unit"
             affordance="none"
-            compact
+            wrap
           />
           {numbers.mortgageMonth > 0 ? (
             <ListRow
@@ -90,12 +91,26 @@ export function RentalScreen() {
             />
           ) : null}
           <ListRow
-            title="Upkeep and taxes"
-            value={`${money(numbers.upkeepYear)} a year`}
+            title="Property tax and upkeep"
+            value={`${money(numbers.upkeepYear / 12)} a month`}
+            meta={`${money(numbers.upkeepYear)} a year for the whole property`}
             affordance="none"
             compact
           />
+          <RowDivider />
+          <ListRow
+            title="Rent after costs if fully occupied"
+            value={`${money((numbers.profitYear + numbers.fullYear) / 12)} a month`}
+            subtitle="Before income tax; no agent included"
+            affordance="none"
+            wrap
+          />
         </Card>
+        <Text style={styles.note}>
+          Rent is what tenants pay, before your mortgage, property tax and upkeep. The estimate
+          assumes every unit pays for a full year. Empty units or missed rent leave you with less.
+          Hiring an agent adds a fee.
+        </Text>
         <Text style={styles.note}>
           {lived
             ? "You'd move out and rent somewhere yourself."
@@ -121,8 +136,8 @@ export function RentalScreen() {
       <SectionHeading note={home.regionName}>{kind?.name ?? 'Property'}</SectionHeading>
       <Card>
         <ListRow
-          title={numbers.units === 1 ? 'Rent' : 'Rent per unit'}
-          subtitle={level.label}
+          title={numbers.units === 1 ? 'Gross rent' : 'Gross rent per unit'}
+          subtitle={`${level.label} · before property costs`}
           value={`${money(numbers.rentPerUnitMonth)} a month`}
           affordance="none"
           wrap
@@ -148,28 +163,43 @@ export function RentalScreen() {
           />
         ) : null}
         <ListRow
-          title="Upkeep and taxes"
-          value={`${money(numbers.upkeepYear)} a year`}
+          title="Property tax and upkeep"
+          value={`${money(numbers.upkeepYear / 12)} a month`}
+          meta={`${money(numbers.upkeepYear)} a year for the whole property`}
           affordance="none"
           compact
         />
         {home.letting.managed ? (
           <ListRow
             title="Letting agent"
-            value={`${money(numbers.agentYear)} a year`}
+            value={`${money(numbers.agentYear / 12)} a month`}
+            meta={`${money(numbers.agentYear)} a year at current occupancy`}
             affordance="none"
             compact
           />
         ) : null}
         <RowDivider />
         <ListRow
-          title="A year as it stands"
-          subtitle="With today's tenants, after everything"
-          value={money(numbers.profitYear)}
+          title="Projected rent after property costs"
+          subtitle="Before income tax; quoted rent and current occupancy"
+          value={`${money(numbers.profitYear / 12)} a month`}
+          meta={`${money(numbers.profitYear)} a year`}
           affordance="none"
           wrap
         />
       </Card>
+
+      <Text style={styles.note}>
+        Rent is what tenants pay, before your mortgage, property tax, upkeep and any agent fee.
+        Costs are for the whole property, not each unit. This is an estimate, not rent already
+        collected. Empty units and missed payments can change the result.
+      </Text>
+      {numbers.profitYear < 0 ? (
+        <Text style={styles.note}>
+          At this quoted rent and occupancy, you're about {money(-numbers.profitYear / 12)} short a
+          month before income tax. Review the rent, empty units and agent fee.
+        </Text>
+      ) : null}
 
       <SectionHeading>The rent</SectionHeading>
       <Card>

@@ -37,6 +37,7 @@
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import {
+  homesValue,
   NOT_YET_OWNED,
   portfolioGain,
   summariseFinances,
@@ -63,6 +64,7 @@ export function FinancesScreen() {
     shipped (CORE_RULES 13.51).
   */
   const books = summariseFinances(state.finance, state.world.year, estateOf(state));
+  const property = homesValue(state.homes);
   const credit = standingFor(state);
   const owed = totalOwed(state.cards);
   const borrowed = totalBorrowed(state.loans);
@@ -133,6 +135,14 @@ export function FinancesScreen() {
           one question, so they are three rows of one card.
         */}
         <ListRow
+          title="Debt"
+          subtitle="Loans, cards, mortgages and car loans"
+          value={money(Number(books.liabilities))}
+          onPress={() => push({ screen: 'debt', title: 'Debt' })}
+          wrap
+        />
+        <RowDivider />
+        <ListRow
           title="Credit"
           subtitle="What a lender would see"
           value={credit.label}
@@ -178,13 +188,13 @@ export function FinancesScreen() {
           owned property is worth now. The mortgage is counted in net worth
           above, so this row is the house and the net-worth row is the equity.
         */}
-        {Number(books.assets) > 0 ? (
+        {Number(property) > 0 ? (
           <>
             <RowDivider />
             <ListRow
               title="Property"
-              subtitle="What your home is worth now"
-              value={money(Number(books.assets))}
+              subtitle="What your properties are worth now"
+              value={money(Number(property))}
               onPress={() => push({ screen: 'homes', title: 'Homes' })}
             />
           </>
