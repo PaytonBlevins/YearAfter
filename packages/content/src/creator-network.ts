@@ -15,6 +15,9 @@ export type GroupKind = (typeof GROUP_KINDS)[number];
 export const GROUP_KIND_BY_PLATFORM: Readonly<Record<string, GroupKind>> = {
   video: 'group',
   stream: 'team',
+  kick: 'team',
+  facebook: 'house',
+  twitter: 'house',
   podcast: 'network',
   photo: 'house',
   shortform: 'house',

@@ -58,7 +58,15 @@ function liveTo(seed: string, age: number): GameState {
   let state = createNewGame({ seed });
   let guard = 0;
   while (state.player.alive && state.player.age < age && (guard += 1) < 80) {
-    state = answerEverything(advanceYear(state).state);
+    state = answerEverything(
+      advanceYear({
+        ...state,
+        channels: state.channels.map((channel) => ({
+          ...channel,
+          publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
+        })),
+      }).state,
+    );
   }
   return state;
 }
@@ -96,6 +104,7 @@ function creator(audience: number, over: Partial<Channel> = {}): GameState {
       luck: 0.99999,
       audience,
       peak: audience,
+      publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
       ...over,
     })),
   };
@@ -470,7 +479,15 @@ describe('a manager or an agent, in the game', () => {
       let state = createNewGame({ seed });
       let guard = 0;
       while (state.player.alive && (guard += 1) < 90) {
-        state = answerEverything(advanceYear(state).state);
+        state = answerEverything(
+          advanceYear({
+            ...state,
+            channels: state.channels.map((channel) => ({
+              ...channel,
+              publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
+            })),
+          }).state,
+        );
       }
       const heir = heirsIn(state.family)[0];
       if (!state.player.alive && heir) {
@@ -494,7 +511,10 @@ describe('what it does to a year', () => {
   const big: Channel = { ...creator(200_000).channels[0]! };
   const run = (channels: readonly Channel[], representation?: 'manager' | 'agent') =>
     runCreatorsYear({
-      channels,
+      channels: channels.map((channel) => ({
+        ...channel,
+        publishing: { year: 2040, count: 12, kind: 'gameplay', gained: 0 },
+      })),
       fame: 0,
       year: 2041,
       stats,
@@ -513,7 +533,7 @@ describe('what it does to a year', () => {
     expect(row.category).toBe('creator');
     const cut = Math.round(managed.gross * MANAGER_CUT);
     expect(Number(row.amount)).toBe(-cut * 100);
-    expect(managed.net).toBe(Math.max(0, managed.gross - 150 - cut));
+    expect(managed.net).toBe(Math.max(0, managed.gross - cut));
     expect(plain.transactions.some((t) => t.source === "Your manager's share")).toBe(false);
   });
 
@@ -613,6 +633,7 @@ describe('the year, in the game (0704)', () => {
         luck: 0.99999,
         audience: 50_000,
         peak: 50_000,
+        publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
       })),
     });
   };
@@ -658,7 +679,16 @@ describe('the year, in the game (0704)', () => {
     if (!hired.ok) throw new Error('not hired');
     let state = hired.value;
     const start = state.world.year;
-    for (let i = 0; i < 3; i += 1) state = answerEverything(advanceYear(state).state);
+    for (let i = 0; i < 3; i += 1)
+      state = answerEverything(
+        advanceYear({
+          ...state,
+          channels: state.channels.map((channel) => ({
+            ...channel,
+            publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
+          })),
+        }).state,
+      );
     expect(state.world.year).toBe(start + 3);
     expect(state.channels[0]!.group?.name).toBe(joined.found.offer.name);
     expect(state.representation).toBe('manager');

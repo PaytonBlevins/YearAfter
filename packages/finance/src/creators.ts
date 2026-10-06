@@ -32,6 +32,8 @@ import {
 export const CREATOR_FROM_AGE = 14;
 /** The most channels one person keeps going. Attention is the limit, not money. */
 export const MAX_CHANNELS = 4;
+/** Twelve meaningful publishing actions per account per game year; prevents tap farming. */
+export const POSTS_PER_YEAR = 12;
 
 export const EFFORTS = ['light', 'regular', 'heavy'] as const;
 export type Effort = (typeof EFFORTS)[number];
@@ -115,6 +117,13 @@ export interface Channel {
   readonly group?: GroupMembership;
   /** Ticket 0704. How many times it has worked with each person, by partner id: repeats count for less. */
   readonly collabs?: Readonly<Record<string, number>>;
+  /** Optional on older saves. Manual posts persist so reloading cannot replenish attempts. */
+  readonly publishing?: {
+    readonly year: number;
+    readonly count: number;
+    readonly kind: string;
+    readonly gained: number;
+  };
 }
 
 /** Ticket 0704. A creator house, gaming team, video group or podcast network a channel belongs to. */
@@ -160,8 +169,6 @@ export function whyNotOpen(input: {
   )
     return { kind: 'alreadyHaveOne' };
   if (input.held.length >= MAX_CHANNELS) return { kind: 'tooMany', limit: MAX_CHANNELS };
-  if (input.liquid < platform.startCost)
-    return { kind: 'notEnoughMoney', needed: platform.startCost };
   return undefined;
 }
 
@@ -514,6 +521,8 @@ export function channelYear(input: {
   readonly quality: number;
   /** Ticket 0704. A multiplier on where the channel is headed, from a manager or a group. 1 for none. */
   readonly boost?: number;
+  /** Live games publish through explicit commands; default remains the growth model for calibration. */
+  readonly manual?: boolean;
 }): ChannelYear {
   const { channel } = input;
   const platform = platformOf(channel);
@@ -522,8 +531,17 @@ export function channelYear(input: {
     return { channel, income: cents(0), cost: cents(0), notes: [] };
   }
   const target = targetAudience(channel, input.quality, input.year, input.boost ?? 1);
-  const drifted = nextAudience(channel, target);
-  const gained = viralGain(channel, input.quality, input.year, drifted);
+  const posted = channel.publishing?.year === input.year - 1 ? channel.publishing.count : 0;
+  const drifted = input.manual
+    ? posted > 0
+      ? channel.audience +
+        Math.round(
+          (nextAudience(channel, target) - channel.audience) * Math.min(1, posted / POSTS_PER_YEAR),
+        )
+      : Math.round(channel.audience * (1 - platform.churn))
+    : nextAudience(channel, target);
+  const gained =
+    input.manual && posted === 0 ? 0 : viralGain(channel, input.quality, input.year, drifted);
   const audience = drifted + gained;
   const average = Math.round((channel.audience + audience) / 2);
   const tier = channel.tier ?? 'standard';
@@ -536,7 +554,9 @@ export function channelYear(input: {
         ? 0
         : memberIncome(((channel.paid ?? 0) + paid) / 2, tier)
       : channelIncome(platform, category, average, channel.effort, tier);
-  const income = worked * 100 + Number(channel.owed ?? 0);
+  const income =
+    Math.round(worked * (input.manual ? Math.min(1, posted / POSTS_PER_YEAR) : 1)) * 100 +
+    Number(channel.owed ?? 0);
   const cost = upkeepOf(platform, channel.effort);
   const moved: Channel = { ...channel, audience };
   const rank = chartRank(moved);
@@ -714,13 +734,32 @@ export const creatorHours = (channels: readonly Channel[], factor = 1): number =
 
 /** Fame is 0–100. A channel's audience counts for the platform's `reach`. */
 export const MAX_FAME = 100;
+/** Playtest pacing anchors, not a claim about real-world celebrity. Weighted audience → fame. */
+export const FAME_AUDIENCE_ANCHORS = [
+  [10_000, 3],
+  [100_000, 15],
+  [1_000_000, 40],
+  [10_000_000, 65],
+  [100_000_000, 90],
+  [400_000_000, 100],
+] as const;
 
 export function fameTarget(channels: readonly Channel[]): number {
   const reach = channels.reduce(
     (sum, channel) => sum + channel.audience * (platformOf(channel)?.reach ?? 0),
     0,
   );
-  return Math.min(MAX_FAME, Math.max(0, Math.round(20 * Math.log10(1 + reach / 1000))));
+  const [firstAudience, firstFame] = FAME_AUDIENCE_ANCHORS[0];
+  if (reach < firstAudience) return Math.max(0, Math.floor((firstFame * reach) / firstAudience));
+  for (let i = 1; i < FAME_AUDIENCE_ANCHORS.length; i += 1) {
+    const low = FAME_AUDIENCE_ANCHORS[i - 1];
+    const high = FAME_AUDIENCE_ANCHORS[i];
+    if (low && high && reach <= high[0]) {
+      const fraction = Math.log(reach / low[0]) / Math.log(high[0] / low[0]);
+      return Math.round(low[1] + fraction * (high[1] - low[1]));
+    }
+  }
+  return MAX_FAME;
 }
 
 /** Fame climbs by half the gap each year and falls by a seventh of it, never below the target. */

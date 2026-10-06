@@ -45,7 +45,7 @@ export type CreatorLineKind =
 export const CREATOR_LINES: Readonly<Record<CreatorLineKind, readonly string[]>> = {
   opened: [
     'You started {name} on {platform}. Nobody was watching yet.',
-    'You put up the first post for {name}. It got a handful of views.',
+    'You opened {name} on {platform}. Your account is ready for its first post.',
   ],
   monetized: [
     '{name} crossed the line where {platform} starts paying. The first real money is coming.',

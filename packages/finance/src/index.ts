@@ -45,3 +45,5 @@ export * from './sponsorships';
 export * from './groups';
 export * from './representation';
 export * from './collaborations';
+
+export * from './manual-posts';

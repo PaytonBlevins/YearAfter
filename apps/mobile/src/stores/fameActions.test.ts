@@ -120,25 +120,24 @@ describe('newEntries', () => {
 });
 
 describe('starting, tuning and closing a channel', () => {
-  it('starts one: it is in the list, paid for, written down, and answered with a card', () => {
+  it('starts one: it is in the list, free, written down, and answered with a card', () => {
     const result = done(
       applyCreatorAction(RICH, { type: 'open', platformId: 'video', categoryId: 'comedy' }),
     );
     expect(result.state.channels).toHaveLength(1);
     expect(result.state.channels[0]!.platformId).toBe('video');
-    // Video's gear is $600; the player had $50,000.
-    expect(Number(result.state.player.cash)).toBe(Number(RICH.player.cash) - 60_000);
+    // Creating an account never changes the bank balance.
+    expect(Number(result.state.player.cash)).toBe(Number(RICH.player.cash));
     expect(result.outcome).toMatchObject({ title: 'Channel started', tone: 'good' });
     expect(result.outcome!.body).toBe(result.entries[0]!.text);
   });
 
   it('refuses with the reason in words, and changes nothing', () => {
     const broke = withCash(ADULT, 100);
-    expect(
-      refused(
-        applyCreatorAction(broke, { type: 'open', platformId: 'video', categoryId: 'comedy' }),
-      ),
-    ).toBe("Not enough money | You need $600 for that, and you don't have it. | bad");
+    const free = done(
+      applyCreatorAction(broke, { type: 'open', platformId: 'video', categoryId: 'comedy' }),
+    );
+    expect(free.state.player.cash).toBe(broke.player.cash);
     const four = {
       ...RICH,
       channels: ['a', 'b', 'c', 'd'].map((id, i) =>

@@ -22,6 +22,7 @@ import {
   hireRepresentation,
   leaveGroup,
   openChannel,
+  postToChannel,
   setChannelEffort,
   setPaidTier,
   type GameState,
@@ -30,6 +31,7 @@ import type { Outcome } from '../components/OutcomeCard';
 
 /** Every verb a creator has, as one value so the store has one action for them. */
 export type CreatorAction =
+  | { readonly type: 'post'; readonly channelId: string; readonly kind: string }
   | { readonly type: 'open'; readonly platformId: string; readonly categoryId: string }
   | { readonly type: 'effort'; readonly channelId: string; readonly effort: Effort }
   | { readonly type: 'tier'; readonly channelId: string; readonly tier: PaidTier }
@@ -97,6 +99,10 @@ export function refusalText(refusal: {
       return `You can only keep ${refusal.limit ?? 4} channels going at once.`;
     case 'notEnoughMoney':
       return `You need ${dollarsText(refusal.needed ?? 0)} for that, and you don't have it.`;
+    case 'postingLimit':
+      return "You've posted enough on this account this year. You can post again next year.";
+    case 'noSuchPost':
+      return "That kind of post doesn't fit this platform.";
     case 'noSuchChannel':
       return "That channel isn't there any more.";
     case 'notSubscription':
@@ -151,6 +157,23 @@ const failed = (error: Failure & Record<string, unknown>): Refused =>
 
 export function applyCreatorAction(state: GameState, action: CreatorAction): Attempt {
   switch (action.type) {
+    case 'post': {
+      const result = postToChannel(state, action.channelId, action.kind);
+      if (!result.ok) return failed(result.error);
+      const entries = newEntries(state, result.value);
+      const gained =
+        result.value.channels.find((row) => row.id === action.channelId)?.publishing?.gained ?? 0;
+      return {
+        ok: true,
+        state: result.value,
+        entries,
+        outcome: {
+          title: 'Post published',
+          body: wrote(entries, 'Your post is live.'),
+          tone: gained > 0 ? 'good' : gained < 0 ? 'bad' : 'neutral',
+        },
+      };
+    }
     case 'open': {
       const result = openChannel(state, action.platformId, action.categoryId);
       if (!result.ok) return failed(result.error);

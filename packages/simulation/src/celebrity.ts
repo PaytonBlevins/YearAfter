@@ -515,7 +515,7 @@ export type ConnectionRefusal =
   | { readonly kind: 'notBigEnough' };
 
 /** Platforms with somebody to put on: a talking show. */
-export const SHOW_PLATFORMS: readonly string[] = ['video', 'stream', 'podcast'];
+export const SHOW_PLATFORMS: readonly string[] = ['video', 'stream', 'kick', 'podcast'];
 
 /** Where a figure's following would be, as a creator's audience, for what a joint piece brings. */
 export const fameAudience = (fame: number): number => Math.round(1000 * (10 ** (fame / 20) - 1));

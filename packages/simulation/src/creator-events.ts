@@ -177,7 +177,7 @@ export function effectOf(plan: EventPlan, input: EventInput): EventEffect {
   if (entry !== undefined && def.cost !== undefined && platform !== undefined) {
     cost = Math.max(
       def.costFloor ?? 0,
-      Math.round(platform.startCost * between(def.cost, unit('cost'))),
+      Math.round(platform.equipmentCost * between(def.cost, unit('cost'))),
     );
   }
   const lines = def.lines;

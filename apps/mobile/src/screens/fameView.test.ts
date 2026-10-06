@@ -70,7 +70,9 @@ describe('a channel, in words', () => {
   });
 
   it('puts it on the chart only where there is one and it is on it', () => {
-    expect(rankLine(channelOf('a', 50000, 'podcast', 'comedy'))).toBe('#88 on the Podcast chart');
+    expect(rankLine(channelOf('a', 50000, 'podcast', 'comedy'))).toBe(
+      '#88 on the Amazon Music Podcasts chart',
+    );
     // Video has no chart, and a tiny podcast is nowhere near one.
     expect(rankLine(channelOf('a', 200000))).toBeUndefined();
     expect(rankLine(channelOf('a', 3, 'podcast', 'comedy'))).toBeUndefined();

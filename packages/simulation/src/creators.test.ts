@@ -41,6 +41,7 @@ import {
 import { decide } from './decide';
 import type { GameState } from './game-state';
 import { createNewGame } from './new-game';
+import { postToChannel } from './manual-posts';
 import { earnedIncomeOf } from './vehicles';
 
 function answerEverything(state: GameState): GameState {
@@ -87,14 +88,25 @@ const withCash = (state: GameState, dollars: number): GameState => {
   return { ...state, finance: books, player: { ...state.player, cash: books.balance } };
 };
 
-const opened = (state: GameState, platformId = 'video', categoryId = 'gaming'): GameState => {
+const withPublishedChannel = (
+  state: GameState,
+  platformId = 'video',
+  categoryId = 'gaming',
+): GameState => {
   const result = openChannel(withCash(state, 5_000), platformId, categoryId);
   if (!result.ok) throw new Error(`refused: ${result.error.kind}`);
-  return result.value;
+  // Annual accounting fixtures represent a full year of explicit publishing.
+  return {
+    ...result.value,
+    channels: result.value.channels.map((channel) => ({
+      ...channel,
+      publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
+    })),
+  };
 };
 
 describe('opening a channel', () => {
-  it('takes the gear money at once, writes it down, and starts at nobody', () => {
+  it('creates a free account, writes it down, and starts at nobody', () => {
     const before = withCash(ADULT, 5_000);
     const result = openChannel(before, 'video', 'gaming');
     expect(result.ok).toBe(true);
@@ -103,29 +115,26 @@ describe('opening a channel', () => {
     expect(next.channels).toHaveLength(1);
     expect(next.channels[0]!.audience).toBe(0);
     expect(next.channels[0]!.since).toBe(before.world.year);
-    const cost = findPlatform('video')!.startCost;
-    expect(Number(next.player.cash)).toBe(Number(before.player.cash) - cost * 100);
-    const row = next.finance.transactions.at(-1)!;
-    expect(row.category).toBe('spending');
-    expect(Number(row.amount)).toBe(-cost * 100);
-    expect(row.source).toContain(next.channels[0]!.name);
+    expect(next.player.cash).toBe(before.player.cash);
+    expect(next.finance).toEqual(before.finance);
     expect(next.player.timeline.at(-1)!.text).toContain(next.channels[0]!.name);
     expect(before.channels).toHaveLength(0);
   });
 
   it('leaves the books reconciling', () => {
-    expect(reconcile(opened(ADULT).finance).ok).toBe(true);
+    expect(reconcile(withPublishedChannel(ADULT).finance).ok).toBe(true);
   });
 
-  it('refuses the young, the broke, a repeat, and an unsuitable pairing, and changes nothing', () => {
+  it('refuses the young, a repeat, and an unsuitable pairing, and changes nothing', () => {
     const kid = liveTo('creators-child', 13);
     expect(whyNotChannel(withCash(kid, 5_000), 'video', 'gaming')).toEqual({
       kind: 'tooYoung',
       age: 14,
     });
     const broke = openChannel(withCash(ADULT, 10), 'video', 'gaming');
-    expect(broke).toEqual({ ok: false, error: { kind: 'notEnoughMoney', needed: 600 } });
-    const once = opened(ADULT);
+    expect(broke.ok).toBe(true);
+    if (broke.ok) expect(broke.value.player.cash).toBe(withCash(ADULT, 10).player.cash);
+    const once = withPublishedChannel(ADULT);
     expect(openChannel(once, 'video', 'gaming')).toEqual({
       ok: false,
       error: { kind: 'alreadyHaveOne' },
@@ -146,7 +155,7 @@ describe('opening a channel', () => {
   });
 
   it('cannot reroll its luck by closing and reopening in the same year, but a later year is new', () => {
-    const first = opened(ADULT);
+    const first = withPublishedChannel(ADULT);
     const closed = closeChannel(first, first.channels[0]!.id);
     if (!closed.ok) throw new Error('close refused');
     const again = openChannel(withCash(closed.value, 5_000), 'video', 'gaming');
@@ -161,7 +170,7 @@ describe('opening a channel', () => {
 
 describe('effort and closing', () => {
   it('sets effort on one channel and leaves the other alone', () => {
-    const two = opened(opened(ADULT), 'stream', 'gaming');
+    const two = withPublishedChannel(withPublishedChannel(ADULT), 'stream', 'gaming');
     const [a, b] = two.channels;
     const result = setChannelEffort(two, a!.id, 'heavy');
     if (!result.ok) throw new Error('refused');
@@ -171,7 +180,7 @@ describe('effort and closing', () => {
   });
 
   it('refuses a channel that is not there', () => {
-    const one = opened(ADULT);
+    const one = withPublishedChannel(ADULT);
     expect(setChannelEffort(one, 'nope', 'light')).toEqual({
       ok: false,
       error: { kind: 'noSuchChannel' },
@@ -180,7 +189,7 @@ describe('effort and closing', () => {
   });
 
   it('closes one, removes only it, and says so on the timeline', () => {
-    const two = opened(opened(ADULT), 'stream', 'gaming');
+    const two = withPublishedChannel(withPublishedChannel(ADULT), 'stream', 'gaming');
     const gone = two.channels[0]!;
     const result = closeChannel(two, gone.id);
     if (!result.ok) throw new Error('refused');
@@ -217,10 +226,11 @@ describe('what skill and talent do', () => {
 
 describe('a year of channels', () => {
   const big: Channel = {
-    ...opened(ADULT).channels[0]!,
+    ...withPublishedChannel(ADULT).channels[0]!,
     luck: 0.99999,
     audience: 200_000,
     peak: 200_000,
+    publishing: { year: 2039, count: 12, kind: 'gameplay', gained: 0 },
   };
   const year = (channels: readonly Channel[], fame = 0) =>
     runCreatorsYear({
@@ -231,23 +241,19 @@ describe('a year of channels', () => {
       talents: {},
     });
 
-  it('posts what a channel earned and, separately, what keeping it cost', () => {
+  it('posts creator earnings without a forced equipment bill', () => {
     const result = year([big]);
-    const rows = result.transactions;
-    const income = rows.find((row) => Number(row.amount) > 0)!;
-    const upkeep = rows.find((row) => Number(row.amount) < 0)!;
-    expect(income.category).toBe('creator');
-    expect(upkeep.category).toBe('creator');
-    expect(upkeep.source).toContain('Upkeep');
-    expect(Number(upkeep.amount)).toBe(-15_000);
-    expect(result.gross).toBe(Math.round(Number(income.amount) / 100));
-    expect(result.net).toBe(result.gross - 150);
+    const income = result.transactions.find((row) => Number(row.amount) > 0);
+    expect(income?.category).toBe('creator');
+    expect(result.transactions.some((row) => Number(row.amount) < 0)).toBe(false);
+    expect(result.gross).toBe(Math.round(Number(income?.amount) / 100));
+    expect(result.net).toBe(result.gross);
   });
 
-  it('posts only the upkeep for a channel under the threshold, and taxes nothing', () => {
+  it('posts nothing and taxes nothing for a channel under the threshold', () => {
     const small = { ...big, luck: 0, audience: 0, peak: 0 };
     const result = year([small]);
-    expect(result.transactions).toHaveLength(1);
+    expect(result.transactions).toHaveLength(0);
     expect(result.gross).toBe(0);
     expect(result.net).toBe(0);
   });
@@ -291,11 +297,17 @@ describe('a year of channels', () => {
 describe('the year, in the game', () => {
   const lucky = (state: GameState, audience: number): GameState => ({
     ...state,
-    channels: state.channels.map((c) => ({ ...c, luck: 0.99999, audience, peak: audience })),
+    channels: state.channels.map((c) => ({
+      ...c,
+      luck: 0.99999,
+      audience,
+      peak: audience,
+      publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
+    })),
   });
 
   it('adds a channel to the year’s income and taxes its net, on top of nothing else, for somebody who has no job', () => {
-    const state = lucky(opened(TEEN), 200_000);
+    const state = lucky(withPublishedChannel(TEEN), 200_000);
     const next = advanceYear(state).state;
     const year = next.world.year;
     const rows = next.finance.transactions.filter((row) => row.year === year);
@@ -312,19 +324,24 @@ describe('the year, in the game', () => {
     expect(reconcile(next.finance).ok).toBe(true);
   });
 
-  it('pays nothing and taxes nothing for a channel nobody has found, but still costs upkeep', () => {
-    const state = opened(TEEN);
+  it('pays nothing and taxes nothing for a channel nobody has found, without forced upkeep', () => {
+    const state = withPublishedChannel(TEEN);
     const next = advanceYear(state).state;
     const rows = next.finance.transactions.filter((row) => row.year === next.world.year);
     expect(rows.some((r) => r.source === 'Tax on creator income')).toBe(false);
-    expect(rows.filter((r) => r.category === 'creator').map((r) => Number(r.amount))).toEqual([
-      -15_000,
-    ]);
+    expect(rows.filter((r) => r.category === 'creator').map((r) => Number(r.amount))).toEqual([]);
   });
 
   it('grows an audience over several years, raises fame, and keeps both when saved and moved on', () => {
-    let state = lucky(opened(TEEN), 1_000);
-    for (let i = 0; i < 4; i += 1) state = answerEverything(advanceYear(state).state);
+    let state = lucky(withPublishedChannel(TEEN), 1_000);
+    for (let i = 0; i < 4; i += 1) {
+      const channel = state.channels[0];
+      if (channel) {
+        const posted = postToChannel(state, channel.id, 'gameplay');
+        if (posted.ok) state = posted.value;
+      }
+      state = answerEverything(advanceYear(state).state);
+    }
     expect(state.channels[0]!.audience).toBeGreaterThan(1_000);
     expect(state.fame).toBeGreaterThan(0);
     expect(state.channels[0]!.peak).toBeGreaterThanOrEqual(state.channels[0]!.audience);
@@ -333,13 +350,13 @@ describe('the year, in the game', () => {
 
   it('lets the household live on what a channel brought in', () => {
     const base = advanceYear(TEEN).state;
-    const rich = advanceYear(lucky(opened(TEEN), 1_000_000)).state;
+    const rich = advanceYear(lucky(withPublishedChannel(TEEN), 1_000_000)).state;
     const spent = (s: GameState) => -Number(totalFor(s.finance, 'living', s.world.year));
     expect(spent(rich)).toBeGreaterThanOrEqual(spent(base));
   });
 
   it('counts a channel as earned income for the year, for a lender and for a car dealer', () => {
-    const next = advanceYear(lucky(opened(TEEN), 200_000)).state;
+    const next = advanceYear(lucky(withPublishedChannel(TEEN), 200_000)).state;
     const net = Number(totalFor(next.finance, 'creator', next.world.year)) / 100;
     expect(earnedIncomeOf(next)).toBeGreaterThanOrEqual(Math.round(net));
     expect(earnedOf(next)).toBeGreaterThanOrEqual(Math.round(net));
@@ -347,14 +364,14 @@ describe('the year, in the game', () => {
   });
 
   it('is the same on every reload: the same seed gives the same channel year', () => {
-    const a = advanceYear(lucky(opened(TEEN), 5_000)).state;
-    const b = advanceYear(lucky(opened(TEEN), 5_000)).state;
+    const a = advanceYear(lucky(withPublishedChannel(TEEN), 5_000)).state;
+    const b = advanceYear(lucky(withPublishedChannel(TEEN), 5_000)).state;
     expect(a.channels).toEqual(b.channels);
     expect(a.fame).toBe(b.fame);
   });
 
   it('pays what the platform’s own table says at the audience reached', () => {
-    const state = lucky(opened(TEEN), 50_000);
+    const state = lucky(withPublishedChannel(TEEN), 50_000);
     const next = advanceYear(state).state;
     const channel = next.channels[0]!;
     const platform = findPlatform('video')!;
@@ -388,7 +405,7 @@ describe('the year, in the game: what reaches the tax, the household and the pag
     state.finance.transactions.filter((r) => r.year === state.world.year);
 
   it('stacks a channel on top of a wage: the tax is on the net, over what the job paid', () => {
-    const next = advanceYear(grown(opened(ADULT), 3_000_000)).state;
+    const next = advanceYear(grown(withPublishedChannel(ADULT), 3_000_000)).state;
     const year = next.world.year;
     const wage =
       (Number(totalFor(next.finance, 'salary', year)) +
@@ -402,7 +419,7 @@ describe('the year, in the game: what reaches the tax, the household and the pag
   });
 
   it('stacks it on a deal too: what a deal earned is taxed over what the channel paid', () => {
-    const base = grown(opened(ADULT), 3_000_000);
+    const base = grown(withPublishedChannel(ADULT), 3_000_000);
     const deal: PrivateDeal = {
       id: 'deal:test',
       kindId: 'startup',
@@ -428,13 +445,13 @@ describe('the year, in the game: what reaches the tax, the household and the pag
 
   it('lets the household live on a channel’s money: a big one raises the standard of living a great deal', () => {
     const plain = advanceYear(withCash(ADULT, 5_000)).state;
-    const rich = advanceYear(grown(opened(ADULT), 3_000_000)).state;
+    const rich = advanceYear(grown(withPublishedChannel(ADULT), 3_000_000)).state;
     const living = (s: GameState) => -Number(totalFor(s.finance, 'living', s.world.year));
     expect(living(rich)).toBeGreaterThan(living(plain) * 5);
   });
 
   it('sets the standard of living by what the household kept after tax, the channel’s tax included', () => {
-    const start = grown(opened(ADULT), 3_000_000);
+    const start = grown(withPublishedChannel(ADULT), 3_000_000);
     const next = advanceYear(start).state;
     const year = next.world.year;
     const wage =
@@ -456,14 +473,14 @@ describe('the year, in the game: what reaches the tax, the household and the pag
   });
 
   it('keeps the books balanced through a very big year', () => {
-    const next = advanceYear(grown(opened(ADULT), 3_000_000)).state;
+    const next = advanceYear(grown(withPublishedChannel(ADULT), 3_000_000)).state;
     expect(reconcile(next.finance).ok).toBe(true);
   });
 
   it('runs a channel’s year on the new year and on the maker’s stats, to the person', () => {
     // Stats at the top do not move in a working year (the 0203 curve tapers to nothing at 100),
     // so the quality the engine used is knowable from outside.
-    const base = grown(opened(ADULT), 4_000, { luck: 0.9 });
+    const base = grown(withPublishedChannel(ADULT), 4_000, { luck: 0.9 });
     const state: GameState = {
       ...base,
       player: { ...base.player, stats: { ...base.player.stats, charisma: 100, willpower: 100 } },
@@ -489,7 +506,7 @@ describe('the year, in the game: what reaches the tax, the household and the pag
   });
 
   it('lets a better maker’s channel grow further than a worse one’s, from the same start', () => {
-    const start = grown(opened(ADULT, 'video', 'comedy'), 4_000, { luck: 0.9 });
+    const start = grown(withPublishedChannel(ADULT, 'video', 'comedy'), 4_000, { luck: 0.9 });
     const withStats = (value: number): GameState => ({
       ...start,
       player: {
@@ -503,7 +520,7 @@ describe('the year, in the game: what reaches the tax, the household and the pag
   });
 
   it('lets a talent help the category that names it, and nobody else’s', () => {
-    const start = grown(opened(ADULT, 'video', 'comedy'), 4_000, { luck: 0.9 });
+    const start = grown(withPublishedChannel(ADULT, 'video', 'comedy'), 4_000, { luck: 0.9 });
     const talented = (on: boolean): GameState => ({
       ...start,
       player: { ...start.player, talents: { ...start.player.talents, acting: on } },
@@ -511,7 +528,7 @@ describe('the year, in the game: what reaches the tax, the household and the pag
     expect(advanceYear(talented(true)).state.channels[0]!.audience).toBeGreaterThan(
       advanceYear(talented(false)).state.channels[0]!.audience,
     );
-    const gaming = grown(opened(ADULT, 'video', 'gaming'), 4_000, { luck: 0.9 });
+    const gaming = grown(withPublishedChannel(ADULT, 'video', 'gaming'), 4_000, { luck: 0.9 });
     const gamingWith = {
       ...gaming,
       player: { ...gaming.player, talents: { ...gaming.player.talents, acting: true } },
@@ -526,14 +543,14 @@ describe('the year, in the game: what reaches the tax, the household and the pag
   });
 
   it('writes the year’s news about a channel onto the timeline', () => {
-    const next = advanceYear(grown(opened(ADULT), 700)).state;
+    const next = advanceYear(grown(withPublishedChannel(ADULT), 700)).state;
     const entry = next.player.timeline.find((e) => e.id === `t:${next.world.year}:creator:0`);
     expect(entry).toBeDefined();
     expect(entry!.text).toContain(next.channels[0]!.name);
   });
 
   it('says nothing and posts nothing for a channel whose platform is gone', () => {
-    const ghost: Channel = { ...opened(ADULT).channels[0]!, platformId: 'gone' };
+    const ghost: Channel = { ...withPublishedChannel(ADULT).channels[0]!, platformId: 'gone' };
     const result = runCreatorsYear({
       channels: [ghost],
       fame: 0,
@@ -546,10 +563,16 @@ describe('the year, in the game: what reaches the tax, the household and the pag
   });
 
   it('gives a better maker a bigger audience in the same year', () => {
-    const channel: Channel = { ...opened(ADULT).channels[0]!, luck: 0.9, audience: 4_000 };
+    const channel: Channel = {
+      ...withPublishedChannel(ADULT).channels[0]!,
+      luck: 0.9,
+      audience: 4_000,
+    };
     const run = (value: number) =>
       runCreatorsYear({
-        channels: [channel],
+        channels: [
+          { ...channel, publishing: { year: 2039, count: 12, kind: 'gameplay', gained: 0 } },
+        ],
         fame: 0,
         year: 2040,
         stats: { charisma: value, willpower: value },
@@ -581,7 +604,7 @@ describe('a new life', () => {
   });
 });
 
-const ADULT_CHANNELS = opened(ADULT).channels;
+const ADULT_CHANNELS = withPublishedChannel(ADULT).channels;
 const lucky0 = (state: GameState): GameState => state;
 
 /* ===================== Ticket 0702 ===================== */
@@ -589,7 +612,13 @@ const lucky0 = (state: GameState): GameState => state;
 describe('sponsorships, in the game', () => {
   const big = (state: GameState, audience = 400_000): GameState => ({
     ...state,
-    channels: state.channels.map((c) => ({ ...c, luck: 0.99999, audience, peak: audience })),
+    channels: state.channels.map((c) => ({
+      ...c,
+      luck: 0.99999,
+      audience,
+      peak: audience,
+      publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
+    })),
   });
   /** The same life in a year that brings an offer. The year is only a number to the engine. */
   const withOffer = (from: GameState): GameState => {
@@ -601,11 +630,11 @@ describe('sponsorships, in the game', () => {
   };
 
   it('lists the offers on every channel, and none for a channel too small to be asked', () => {
-    const small = opened(ADULT);
+    const small = withPublishedChannel(ADULT);
     for (let year = small.world.year; year < small.world.year + 50; year += 1) {
       expect(sponsorOffers({ ...small, world: { ...small.world, year } })).toEqual([]);
     }
-    const state = withOffer(big(opened(ADULT)));
+    const state = withOffer(big(withPublishedChannel(ADULT)));
     const listed = sponsorOffers(state);
     expect(listed.length).toBeGreaterThan(0);
     expect(listed.every((row) => row.channel.id === state.channels[0]!.id)).toBe(true);
@@ -618,7 +647,7 @@ describe('sponsorships, in the game', () => {
   });
 
   it('refuses an offer that is not on the table, and one already answered', () => {
-    const state = withOffer(big(opened(ADULT)));
+    const state = withOffer(big(withPublishedChannel(ADULT)));
     expect(answerSponsorOffer(state, 'sp:nope', 'accept')).toEqual({
       ok: false,
       error: { kind: 'notOffered' },
@@ -634,7 +663,7 @@ describe('sponsorships, in the game', () => {
   });
 
   it('declining writes a line and changes nothing else', () => {
-    const state = withOffer(big(opened(ADULT)));
+    const state = withOffer(big(withPublishedChannel(ADULT)));
     const row = sponsorOffers(state)[0]!;
     const result = answerSponsorOffer(state, row.offer.id, 'decline');
     if (!result.ok) throw new Error('refused');
@@ -646,7 +675,7 @@ describe('sponsorships, in the game', () => {
   });
 
   it('accepting moves no money now, keeps it owed, and costs some trust', () => {
-    const state = withOffer(big(opened(ADULT)));
+    const state = withOffer(big(withPublishedChannel(ADULT)));
     const row = sponsorOffers(state)[0]!;
     const result = answerSponsorOffer(state, row.offer.id, 'accept');
     if (!result.ok) throw new Error('refused');
@@ -667,7 +696,7 @@ describe('sponsorships, in the game', () => {
   });
 
   it('lists the offers of the year it is, as the engine derives them', () => {
-    const state = withOffer(big(opened(ADULT)));
+    const state = withOffer(big(withPublishedChannel(ADULT)));
     const channel = state.channels[0]!;
     expect(sponsorOffers(state).map((row) => row.offer)).toEqual(
       sponsorOffersFor({ seed: state.rng.getSeed(), year: state.world.year, channel }),
@@ -679,7 +708,7 @@ describe('sponsorships, in the game', () => {
   });
 
   it('answers one channel’s offer and leaves the others as they were', () => {
-    const base = opened(opened(ADULT), 'podcast', 'comedy');
+    const base = withPublishedChannel(withPublishedChannel(ADULT), 'podcast', 'comedy');
     const state = withOffer(big(base));
     expect(state.channels).toHaveLength(2);
     const row = sponsorOffers(state)[0]!;
@@ -692,7 +721,7 @@ describe('sponsorships, in the game', () => {
   });
 
   it('asking for more either raises the pay by 60% or loses the deal, and says which', () => {
-    const state = withOffer(big(opened(ADULT)));
+    const state = withOffer(big(withPublishedChannel(ADULT)));
     let raised = 0;
     let walked = 0;
     for (let i = 0; i < 60; i += 1) {
@@ -730,7 +759,7 @@ describe('sponsorships, in the game', () => {
   });
 
   it('pays what is owed with the year’s income, taxes it with the rest, and clears the books of it', () => {
-    const state = withOffer(big(opened(ADULT)));
+    const state = withOffer(big(withPublishedChannel(ADULT)));
     const row = sponsorOffers(state)[0]!;
     const took = answerSponsorOffer(state, row.offer.id, 'accept');
     if (!took.ok) throw new Error('refused');
@@ -762,7 +791,7 @@ describe('sponsorships, in the game', () => {
 
 describe('charts and trends, in the game', () => {
   it('lists where each channel stands, if it is on a chart', () => {
-    const state = opened(opened(ADULT), 'photo', 'lifestyle');
+    const state = withPublishedChannel(withPublishedChannel(ADULT), 'photo', 'lifestyle');
     const big: GameState = {
       ...state,
       channels: state.channels.map((c) => ({ ...c, audience: 6_000_000 })),
@@ -783,8 +812,8 @@ describe('charts and trends, in the game', () => {
 
   it('writes the line the year a channel reaches the chart, with the place in it', () => {
     const state: GameState = {
-      ...opened(ADULT),
-      channels: opened(ADULT).channels.map((c) => ({
+      ...withPublishedChannel(ADULT),
+      channels: withPublishedChannel(ADULT).channels.map((c) => ({
         ...c,
         luck: 0.9999999,
         audience: 5_000_000,
@@ -818,7 +847,7 @@ describe('what channels ask of a life', () => {
       ['photo', 'lifestyle'],
       ['shortform', 'comedy'],
     ] as const) {
-      state = opened(state, platform, category);
+      state = withPublishedChannel(state, platform, category);
     }
     const with_ = (effort: 'light' | 'heavy'): GameState => ({
       ...state,
@@ -829,8 +858,24 @@ describe('what channels ask of a life', () => {
       let light = with_('light');
       let heavy = with_('heavy');
       for (let i = 0; i < years; i += 1) {
-        light = answerEverything(advanceYear(light).state);
-        heavy = answerEverything(advanceYear(heavy).state);
+        light = answerEverything(
+          advanceYear({
+            ...light,
+            channels: light.channels.map((channel) => ({
+              ...channel,
+              publishing: { year: light.world.year, count: 12, kind: 'gameplay', gained: 0 },
+            })),
+          }).state,
+        );
+        heavy = answerEverything(
+          advanceYear({
+            ...heavy,
+            channels: heavy.channels.map((channel) => ({
+              ...channel,
+              publishing: { year: heavy.world.year, count: 12, kind: 'gameplay', gained: 0 },
+            })),
+          }).state,
+        );
       }
       if (heavy.player.stress.level > light.player.stress.level) heavier += 1;
     }
@@ -853,8 +898,14 @@ describe('what channels ask of a life', () => {
       ['photo', 'lifestyle'],
     ];
     for (const [platform, category] of picks.slice(0, count))
-      state = opened(state, platform, category);
-    return state;
+      state = withPublishedChannel(state, platform, category);
+    return {
+      ...state,
+      channels: state.channels.map((channel) => ({
+        ...channel,
+        publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
+      })),
+    };
   };
 
   it('counts every channel’s hours, and the hours are what reach the stress model', () => {
@@ -877,7 +928,7 @@ describe('what channels ask of a life', () => {
 });
 
 describe('the other three platforms, in the game (0703)', () => {
-  const subscription = (): GameState => opened(ADULT, 'subscription', 'business');
+  const subscription = (): GameState => withPublishedChannel(ADULT, 'subscription', 'business');
   const grown = (state: GameState, over: object = {}): GameState => ({
     ...state,
     channels: state.channels.map((c) => ({
@@ -901,7 +952,7 @@ describe('the other three platforms, in the game (0703)', () => {
       ok: false,
       error: { kind: 'noSuchChannel' },
     });
-    const video = opened(ADULT);
+    const video = withPublishedChannel(ADULT);
     expect(setPaidTier(video, video.channels[0]!.id, 'low')).toEqual({
       ok: false,
       error: { kind: 'notSubscription' },
@@ -909,7 +960,7 @@ describe('the other three platforms, in the game (0703)', () => {
   });
 
   it('changes only the channel it was asked about', () => {
-    const two = opened(subscription(), 'video', 'gaming');
+    const two = withPublishedChannel(subscription(), 'video', 'gaming');
     const target = two.channels.find((c) => c.platformId === 'subscription')!;
     const set = setPaidTier(two, target.id, 'low');
     if (!set.ok) throw new Error('refused');
@@ -946,11 +997,15 @@ describe('the other three platforms, in the game (0703)', () => {
   });
 
   it('writes the line when a post takes off, in the year it does', () => {
-    const base = opened(ADULT, 'shortform', 'comedy');
+    const base = withPublishedChannel(ADULT, 'shortform', 'comedy');
     for (let year = 2030; year < 2300; year += 1) {
       const state: GameState = {
         ...grown(base, { audience: 20_000 }),
         world: { ...base.world, year },
+        channels: grown(base, { audience: 20_000 }).channels.map((channel) => ({
+          ...channel,
+          publishing: { year, count: 12, kind: 'reel', gained: 0 },
+        })),
       };
       const next = advanceYear(state).state;
       const viral = next.channels[0]!.viralYear;
@@ -977,7 +1032,7 @@ describe('the other three platforms, in the game (0703)', () => {
       ['shortform', 'comedy', 2_000_000],
       ['subscription', 'writing', 200_000],
     ] as const) {
-      const state = opened(ADULT, platform, category);
+      const state = withPublishedChannel(ADULT, platform, category);
       const sized = {
         ...state,
         channels: state.channels.map((c) => ({ ...c, audience, peak: audience })),

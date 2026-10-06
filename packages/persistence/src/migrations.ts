@@ -13,6 +13,7 @@ import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
 import {
   SUBSISTENCE,
+  POSTS_PER_YEAR,
   reconcile,
   reconcileByYear,
   standardTargetFor,
@@ -1156,6 +1157,29 @@ function workOk(value: unknown): boolean {
 }
 
 /** Ticket 0705. The shape of the record of famous people: lists, a number, and a name and a warmth on each tie. */
+/** Optional publishing records extend v43 without discarding older accounts. */
+function channelPublishingOk(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  return value.every((channel: unknown) => {
+    if (typeof channel !== 'object' || channel === null) return true;
+    const publishing = (channel as Record<string, unknown>)['publishing'];
+    if (publishing === undefined) return true;
+    if (typeof publishing !== 'object' || publishing === null || Array.isArray(publishing))
+      return false;
+    const row = publishing as Record<string, unknown>;
+    return (
+      Number.isSafeInteger(row['year']) &&
+      Number.isSafeInteger(row['count']) &&
+      typeof row['count'] === 'number' &&
+      row['count'] >= 0 &&
+      row['count'] <= POSTS_PER_YEAR &&
+      typeof row['kind'] === 'string' &&
+      row['kind'].length > 0 &&
+      Number.isSafeInteger(row['gained'])
+    );
+  });
+}
+
 function celebritiesOk(value: unknown): boolean {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const record = value as Record<string, unknown>;
@@ -1321,7 +1345,7 @@ export function validateCurrentSave(
     // Ticket 0605. And for the private deals.
     require('deals', candidate['deals'], Array.isArray(candidate['deals'])),
     // Ticket 0701. And for the channels, and a number for fame.
-    require('channels', candidate['channels'], Array.isArray(candidate['channels'])),
+    require('channels', candidate['channels'], channelPublishingOk(candidate['channels'])),
     require('fame', candidate['fame'], typeof candidate['fame'] === 'number'),
     // Ticket 0705. A record of connections, people seen and the year a stranger was last answered.
     require('celebrities', candidate['celebrities'], celebritiesOk(candidate['celebrities'])),

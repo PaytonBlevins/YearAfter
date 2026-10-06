@@ -1381,3 +1381,11 @@ Agent A's next ticket.
 
 11. **0701 → 0708.** _(0701–0707 shipped; 0708 built the screens for all of v0.07.
     The next ticket is chosen by Payton.)_
+
+    **6 October Social Media playtest follow-up:** Payton assigned Agent B free
+    account creation, real platform display names, manual platform-specific posts
+    and lower small-audience fame. Built on `feat/manual-social-posting`; see
+    `playtest-manual-social-posting.md`. Engine and optional save-field changes
+    are explicitly authorized for this request. Review/device checks pending;
+    twelve actions per account/year and new fame anchors need playtesting.
+    General life-event wording remains deferred until last.

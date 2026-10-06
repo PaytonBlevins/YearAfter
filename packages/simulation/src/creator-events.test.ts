@@ -52,6 +52,7 @@ function channel(
     audience,
     peak: audience,
     effort,
+    publishing: { year: YEAR - 1, count: 12, kind: 'vlog', gained: 0 },
   };
 }
 
@@ -301,7 +302,7 @@ describe('what an event does', () => {
   });
 
   it('costs a share of the platform’s start-up cost when gear fails, never under the floor', () => {
-    const start = findPlatform('video')!.startCost;
+    const start = findPlatform('video')!.equipmentCost;
     for (let n = 0; n < 40; n += 1) {
       const i = input({ key: `g${n}`, channels: [entry(big)] });
       const effect = effectOf(
@@ -588,6 +589,13 @@ describe('news in the game', () => {
       const set = setChannelEffort(state, state.channels[0]!.id, 'heavy');
       if (set.ok) state = set.value;
       for (let year = 0; year < 8 && state.player.alive; year += 1) {
+        state = {
+          ...state,
+          channels: state.channels.map((channel) => ({
+            ...channel,
+            publishing: { year: state.world.year, count: 12, kind: 'vlog', gained: 0 },
+          })),
+        };
         const before = state.player.timeline.length;
         const happy = state.player.stats.happiness;
         state = answerEverything(advanceYear(state).state);
@@ -651,7 +659,7 @@ describe('0706 sabotage closers', () => {
   });
 
   it('draws gear costs across the whole range, and never under the floor even on a cheap platform', () => {
-    const start = findPlatform('video')!.startCost;
+    const start = findPlatform('video')!.equipmentCost;
     const costs = new Set<number>();
     for (let n = 0; n < 60; n += 1) {
       const i = input({ key: `gc${n}`, channels: [entry(channel('video', 'gaming', 5_000))] });

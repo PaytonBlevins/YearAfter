@@ -72,7 +72,7 @@ describe('Social Media', () => {
     const state = one();
     const r = await on(<SocialMediaScreen />, state);
     const row = rowsOf(r).find((candidate) => candidate.props.title === state.channels[0]!.name)!;
-    expect(row.props.subtitle).toBe('Video · 12,000 subscribers');
+    expect(row.props.subtitle).toBe('YouTube · 12,000 subscribers · Open to post');
     await act(() => row.props.onPress());
     expect(push).toHaveBeenCalledWith({
       screen: 'channel',
@@ -202,7 +202,7 @@ describe('one channel', () => {
       title: 'x',
       channelId: 'ch:one',
     });
-    expect(rowTitled(r, 'Video').props.value).toBe('12,000 subscribers');
+    expect(rowTitled(r, 'YouTube').props.value).toBe('12,000 subscribers');
     expect(rowTitled(r, 'Biggest it has been').props.value).toBe('30,000');
     expect(rowTitled(r, 'Earned so far').props.value).toBe('$0');
   });
@@ -303,16 +303,16 @@ describe('one channel', () => {
 });
 
 describe('starting a channel', () => {
-  it('lists every platform with what getting set up costs', async () => {
+  it('lists every real platform with free signup', async () => {
     const r = await on(<NewChannelScreen />, RICH, { screen: 'newChannel', title: 'x' });
     expect(rowsOf(r).map((row) => [row.props.title, row.props.value])).toEqual(
-      PLATFORMS.map((p) => [p.name, `$${p.startCost.toLocaleString('en-US')}`]),
+      PLATFORMS.map((p) => [p.name, 'Free']),
     );
-    expect(PLATFORMS).toHaveLength(6);
-    await act(() => rowTitled(r, 'Podcast').props.onPress());
+    expect(PLATFORMS).toHaveLength(9);
+    await act(() => rowTitled(r, 'Amazon Music Podcasts').props.onPress());
     expect(push).toHaveBeenCalledWith({
       screen: 'newChannel',
-      title: 'Podcast',
+      title: 'Amazon Music Podcasts',
       platformId: 'podcast',
     });
   });
@@ -320,9 +320,9 @@ describe('starting a channel', () => {
   it('shuts a platform a fourteen-year-old is too young for', async () => {
     const teen = { ...RICH, player: { ...RICH.player, age: 14 } };
     const r = await on(<NewChannelScreen />, teen, { screen: 'newChannel', title: 'x' });
-    expect(rowTitled(r, 'Podcast').props.disabled).toBe(true);
-    expect(rowTitled(r, 'Podcast').props.subtitle).toBe('You have to be 16');
-    expect(rowTitled(r, 'Video').props.disabled).toBe(false);
+    expect(rowTitled(r, 'Amazon Music Podcasts').props.disabled).toBe(true);
+    expect(rowTitled(r, 'Amazon Music Podcasts').props.subtitle).toBe('You have to be 16');
+    expect(rowTitled(r, 'YouTube').props.disabled).toBe(false);
   });
 
   it('lists what could be made, with the reason beside what cannot, and opens the one pressed', async () => {
@@ -347,15 +347,15 @@ describe('starting a channel', () => {
     expect(pop).toHaveBeenCalledTimes(2);
   });
 
-  it('says when there is not the money', async () => {
+  it('allows signup with no money', async () => {
     const r = await on(<NewChannelScreen />, withCash(ADULT, 10), {
       screen: 'newChannel',
       title: 'x',
       platformId: 'video',
     });
     for (const row of rowsOf(r)) {
-      expect(row.props.disabled).toBe(true);
-      expect(row.props.subtitle).toBe("You need $600 for that, and you don't have it.");
+      expect(row.props.disabled).toBe(false);
+      expect(row.props.onPress).toBeDefined();
     }
   });
 });
@@ -448,7 +448,7 @@ describe('on offer, more carefully', () => {
     const r = await on(<SocialMediaScreen />, { ...RICH, channels: [podcast, grouped] });
     const rows = rowsOf(r).filter((row) => row.props.meta !== undefined);
     expect(rows.map((row) => row.props.meta)).toEqual([
-      '#88 on the Podcast chart',
+      '#88 on the Amazon Music Podcasts chart',
       'In Backlot Society',
     ]);
   });
@@ -486,7 +486,7 @@ describe('one channel, more carefully', () => {
     };
     const r = await on(<ChannelScreen />, state, route('ch:pod'));
     const chart = rowTitled(r, 'On the chart');
-    expect(chart.props.value).toBe('#88 on the Podcast chart');
+    expect(chart.props.value).toBe('#88 on the Amazon Music Podcasts chart');
     expect(chart.props.subtitle).toBe('In the top 100');
     expect(rowTitled(r, "What's in fashion").props.subtitle).toBe('Comedy: doing well');
   });
@@ -509,11 +509,11 @@ describe('one channel, more carefully', () => {
     });
   });
 
-  it('says how much there is to spend', async () => {
+  it('explains that signup is free', async () => {
     const r = await on(<NewChannelScreen />, withCash(ADULT, 1_234), {
       screen: 'newChannel',
       title: 'x',
     });
-    expect(textsOf(r).join(' ')).toContain('You have $1,234.');
+    expect(textsOf(r).join(' ')).toContain('Creating an account is free.');
   });
 });

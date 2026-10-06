@@ -83,8 +83,8 @@ export function SocialMediaScreen() {
       <SectionHeading note={`Up to ${MAX_CHANNELS} at a time`}>Your channels</SectionHeading>
       {channels.length === 0 ? (
         <Text style={styles.note}>
-          You haven't started anything yet. Pick a platform and what you'd make there. It costs
-          something to get set up, and you start with nobody watching.
+          You haven't started anything yet. Pick a platform and what you'd make there. Creating an
+          account is free, and you start with nobody watching.
         </Text>
       ) : (
         <Card>
@@ -96,7 +96,7 @@ export function SocialMediaScreen() {
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
                   title={channel.name}
-                  subtitle={`${platform?.name ?? 'Channel'} · ${audienceLine(channel)}`}
+                  subtitle={`${platform?.name ?? 'Channel'} · ${audienceLine(channel)} · Open to post`}
                   meta={channel.group ? `In ${channel.group.name}` : place}
                   onPress={() =>
                     push({ screen: 'channel', title: channel.name, channelId: channel.id })

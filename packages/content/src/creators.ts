@@ -24,6 +24,9 @@ export const PLATFORM_IDS = [
   'shortform',
   'podcast',
   'subscription',
+  'kick',
+  'facebook',
+  'twitter',
 ] as const;
 export type PlatformId = (typeof PLATFORM_IDS)[number];
 
@@ -41,8 +44,10 @@ export interface Platform {
   readonly monetization: Monetization;
   /** Youngest age to open one. */
   readonly minAge: number;
-  /** Whole dollars to get started: a camera, a microphone, a capture card. */
+  /** Opening an account is free. Optional equipment is not a signup charge. */
   readonly startCost: number;
+  /** Typical replacement equipment cost for damage events; never charged to create an account. */
+  readonly equipmentCost: number;
   /** Audience at which the platform starts paying (its partner threshold). */
   readonly paysAt: number;
   /** How hard it is to be found here, against 1 for video. 1 for a platform with its own curve. */
@@ -260,17 +265,18 @@ export const CREATOR_CATEGORIES: readonly CreatorCategory[] = [
   },
 ];
 
-export const PLATFORMS: readonly Platform[] = [
+const BASE_PLATFORMS: readonly Platform[] = [
   {
     id: 'video',
     lift: 1.5,
-    name: 'Video',
+    name: 'YouTube',
     audienceWord: 'subscribers',
     audienceOne: 'subscriber',
     blurb: 'Long videos on a channel. Ads pay once a channel is big enough.',
     monetization: 'ads',
     minAge: 14,
-    startCost: 600,
+    startCost: 0,
+    equipmentCost: 600,
     paysAt: 1_000,
     discover: 1,
     // About 4 million channels are tracked: the 1,000th of them has about 5.6 million subscribers.
@@ -299,13 +305,14 @@ export const PLATFORMS: readonly Platform[] = [
   {
     id: 'stream',
     lift: 2.5,
-    name: 'Streaming',
+    name: 'Twitch',
     audienceWord: 'followers',
     audienceOne: 'follower',
     blurb: 'Live, on a channel of your own. Subscribers, tips and ads.',
     monetization: 'live',
     minAge: 14,
-    startCost: 900,
+    startCost: 0,
+    equipmentCost: 900,
     paysAt: 50,
     discover: 1,
     // Twitch: about 5% of 127,000 active streamers average more than 5 viewers (StreamsCharts, 2022);
@@ -330,13 +337,14 @@ export const PLATFORMS: readonly Platform[] = [
   {
     id: 'photo',
     lift: 1.5,
-    name: 'Photo and lifestyle',
+    name: 'Instagram',
     audienceWord: 'followers',
     audienceOne: 'follower',
     blurb: 'Pictures and short posts. Brands pay for what you show.',
     monetization: 'brands',
     minAge: 14,
-    startCost: 300,
+    startCost: 0,
+    equipmentCost: 300,
     paysAt: 1_000,
     discover: 1.1,
     trustCost: 0.015,
@@ -349,13 +357,14 @@ export const PLATFORMS: readonly Platform[] = [
   {
     id: 'shortform',
     lift: 2.0,
-    name: 'Short-form video',
+    name: 'TikTok',
     audienceWord: 'followers',
     audienceOne: 'follower',
     blurb: 'Clips under a minute. Easy to be seen, hard to be paid.',
     monetization: 'shortAds',
     minAge: 14,
-    startCost: 150,
+    startCost: 0,
+    equipmentCost: 150,
     paysAt: 10_000,
     discover: 1.6,
     trustCost: 0.015,
@@ -381,13 +390,14 @@ export const PLATFORMS: readonly Platform[] = [
   {
     id: 'podcast',
     lift: 2.5,
-    name: 'Podcast',
+    name: 'Amazon Music Podcasts',
     audienceWord: 'listeners',
     audienceOne: 'listener',
     blurb: 'A show people listen to. Sponsors pay by the listen.',
     monetization: 'sponsors',
     minAge: 16,
-    startCost: 500,
+    startCost: 0,
+    equipmentCost: 500,
     paysAt: 500,
     discover: 1,
     // Buzzsprout, July 2026, 112,701 active shows, downloads of an episode in its first seven days:
@@ -425,13 +435,14 @@ export const PLATFORMS: readonly Platform[] = [
   {
     id: 'subscription',
     lift: 1.2,
-    name: 'Subscription',
+    name: 'Substack',
     audienceWord: 'readers',
     audienceOne: 'reader',
     blurb: 'A newsletter or a members-only page. A few of the free readers pay.',
     monetization: 'members',
     minAge: 16,
-    startCost: 100,
+    startCost: 0,
+    equipmentCost: 100,
     paysAt: 100,
     discover: 0.4,
     trustCost: 0.015,
@@ -440,6 +451,30 @@ export const PLATFORMS: readonly Platform[] = [
     reach: 0.4,
     categories: ['education', 'writing', 'commentary', 'business', 'cooking', 'fitness', 'tech'],
   },
+];
+
+// These platforms reuse an existing simulation model; they are separate accounts with stable IDs.
+const twitch = BASE_PLATFORMS.find((platform) => platform.id === 'stream');
+const instagram = BASE_PLATFORMS.find((platform) => platform.id === 'photo');
+export const PLATFORMS: readonly Platform[] = [
+  ...BASE_PLATFORMS,
+  ...(twitch ? [{ ...twitch, id: 'kick' as const, name: 'Kick' }] : []),
+  ...(instagram
+    ? [
+        {
+          ...instagram,
+          id: 'facebook' as const,
+          name: 'Facebook',
+          blurb: 'Photos, videos and updates for your community.',
+        },
+        {
+          ...instagram,
+          id: 'twitter' as const,
+          name: 'X (Twitter)',
+          blurb: 'Short updates, threads and conversations.',
+        },
+      ]
+    : []),
 ];
 
 const PLATFORM_BY_ID = new Map(PLATFORMS.map((platform) => [platform.id as string, platform]));

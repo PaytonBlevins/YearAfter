@@ -94,9 +94,9 @@ const make = (over: Partial<Channel> = {}): Channel => ({
 });
 
 describe('the catalog', () => {
-  it('lists six platforms with unique ids, and every category they name exists', () => {
-    expect(PLATFORMS).toHaveLength(6);
-    expect(new Set(PLATFORMS.map((p) => p.id)).size).toBe(6);
+  it('lists nine platforms with unique ids, and every category they name exists', () => {
+    expect(PLATFORMS).toHaveLength(9);
+    expect(new Set(PLATFORMS.map((p) => p.id)).size).toBe(9);
     for (const platform of PLATFORMS) {
       expect(platform.categories.length).toBeGreaterThanOrEqual(5);
       for (const id of platform.categories) expect(findCreatorCategory(id)).toBeDefined();
@@ -119,7 +119,7 @@ describe('the catalog', () => {
   it('keeps a platform no easier to open than the youngest age allows', () => {
     for (const platform of PLATFORMS) {
       expect(platform.minAge).toBeGreaterThanOrEqual(CREATOR_FROM_AGE);
-      expect(platform.startCost).toBeGreaterThan(0);
+      expect(platform.startCost).toBe(0);
       expect(platform.paysAt).toBeGreaterThan(0);
       expect(platform.ceiling).toBeGreaterThan(platform.paysAt);
     }
@@ -183,13 +183,9 @@ describe('who may open a channel', () => {
     expect(whyNotOpen({ ...ok, held })).toEqual({ kind: 'tooMany', limit: 4 });
   });
 
-  it('wants exactly the start-up cost: one dollar short is refused, the cost itself is not', () => {
-    const cost = findPlatform('video')!.startCost;
-    expect(whyNotOpen({ ...ok, liquid: cost - 1 })).toEqual({
-      kind: 'notEnoughMoney',
-      needed: cost,
-    });
-    expect(whyNotOpen({ ...ok, liquid: cost })).toBeUndefined();
+  it('opens accounts for free even with no personal cash', () => {
+    expect(whyNotOpen({ ...ok, liquid: 0 })).toBeUndefined();
+    expect(whyNotOpen({ ...ok, liquid: -1 })).toBeUndefined();
   });
 });
 
@@ -477,11 +473,11 @@ describe('what an audience pays', () => {
     expect(photoRatio).toBeLessThan(13);
   });
 
-  it('keeps upkeep a quarter of the start-up cost at regular effort', () => {
+  it('free accounts have no mandatory equipment upkeep', () => {
     const video = findPlatform('video')!;
-    expect(upkeepOf(video, 'regular')).toBe(150);
-    expect(upkeepOf(video, 'light')).toBe(75);
-    expect(upkeepOf(video, 'heavy')).toBe(240);
+    expect(upkeepOf(video, 'regular')).toBe(0);
+    expect(upkeepOf(video, 'light')).toBe(0);
+    expect(upkeepOf(video, 'heavy')).toBe(0);
   });
 
   it('uses every effort', () => {
@@ -490,7 +486,7 @@ describe('what an audience pays', () => {
 });
 
 describe('a year on one channel', () => {
-  it('moves the audience, pays on the average of the year, and costs upkeep', () => {
+  it('moves the audience, pays on the average of the year, and has no mandatory upkeep', () => {
     const start = make({ luck: 0.99999, audience: 5_000, peak: 5_000 });
     const result = channelYear({ channel: start, year: 2031, quality: 1 });
     expect(result.channel.audience).toBeGreaterThan(5_000);
@@ -498,7 +494,7 @@ describe('a year on one channel', () => {
     const category = findCreatorCategory('gaming')!;
     const average = Math.round((5_000 + result.channel.audience) / 2);
     expect(Number(result.income)).toBe(channelIncome(platform, category, average, 'regular') * 100);
-    expect(Number(result.cost)).toBe(15_000);
+    expect(Number(result.cost)).toBe(0);
     expect(result.channel.peak).toBe(result.channel.audience);
   });
 
@@ -523,10 +519,10 @@ describe('a year on one channel', () => {
     expect(JSON.stringify(start)).toBe(copy);
   });
 
-  it('pays nothing and says nothing of a channel nobody has found, and still costs upkeep', () => {
+  it('pays nothing and says nothing of a channel nobody has found, and has no signup-derived upkeep', () => {
     const result = channelYear({ channel: make({ luck: 0, audience: 0 }), year: 2031, quality: 1 });
     expect(Number(result.income)).toBe(0);
-    expect(Number(result.cost)).toBe(15_000);
+    expect(Number(result.cost)).toBe(0);
     expect(result.note).toBeUndefined();
   });
 
@@ -589,10 +585,10 @@ describe('fame', () => {
     expect(fameTarget([make({ audience: 0 })])).toBe(0);
   });
 
-  it('puts a thousand subscribers at 6, a million at 60, and caps at 100', () => {
-    expect(fameTarget([make({ audience: 1_000 })])).toBe(6);
-    expect(fameTarget([make({ audience: 100_000 })])).toBe(40);
-    expect(fameTarget([make({ audience: 1_000_000 })])).toBe(60);
+  it('keeps small audiences unknown, gives 10k about 3%, and caps at 100', () => {
+    expect(fameTarget([make({ audience: 1_000 })])).toBe(0);
+    expect(fameTarget([make({ audience: 100_000 })])).toBe(15);
+    expect(fameTarget([make({ audience: 1_000_000 })])).toBe(40);
     expect(fameTarget([make({ audience: 100_000_000_000 })])).toBe(100);
   });
 
@@ -604,8 +600,8 @@ describe('fame', () => {
       make({ platformId: 'shortform', categoryId: 'comedy', audience: 100_000 }),
     ]);
     expect(podcast).toBeGreaterThan(clips);
-    expect(podcast).toBe(Math.round(20 * Math.log10(1 + (100_000 * 1.3) / 1000)));
-    expect(clips).toBe(Math.round(20 * Math.log10(1 + (100_000 * 0.7) / 1000)));
+    expect(podcast).toBe(18);
+    expect(clips).toBe(13);
   });
 
   it('adds up across channels', () => {
@@ -615,7 +611,7 @@ describe('fame', () => {
       make({ id: 'b', categoryId: 'comedy', audience: 10_000 }),
     ]);
     expect(two).toBeGreaterThan(one);
-    expect(two).toBe(Math.round(20 * Math.log10(1 + 20_000 / 1000)));
+    expect(two).toBe(7);
   });
 
   it('climbs by half the gap, rounded up, and falls by a seventh, at least one', () => {

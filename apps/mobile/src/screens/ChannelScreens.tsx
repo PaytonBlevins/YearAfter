@@ -6,10 +6,16 @@
  * on one screen: a platform, then what you would make there.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
-import { findCreatorCategory, findPlatform, PLATFORMS } from '@yearafter/content';
-import { EFFORTS, PAID_TIERS, chartRank } from '@yearafter/finance';
+import { findCreatorCategory, findPlatform, PLATFORMS, postFormatsFor } from '@yearafter/content';
+import {
+  EFFORTS,
+  PAID_TIERS,
+  chartRank,
+  POSTS_PER_YEAR,
+  publishingCount,
+} from '@yearafter/finance';
 import { whyNotChannel } from '@yearafter/simulation';
 import {
   ActionButton,
@@ -40,6 +46,12 @@ export function ChannelScreen() {
   const { state, creating } = useGame();
   const { current, pop } = useNavigation();
   const [confirming, setConfirming] = useState(false);
+  const [posting, setPosting] = useState(false);
+  const [postKind, setPostKind] = useState<string | undefined>();
+  useEffect(() => {
+    setPosting(false);
+    setPostKind(undefined);
+  }, [current?.channelId]);
   if (!state) return null;
   const channel = state.channels.find((row) => row.id === current?.channelId);
   if (channel === undefined) {
@@ -101,7 +113,64 @@ export function ChannelScreen() {
         ) : null}
       </Card>
 
-      <SectionHeading note="From next year">How hard you work at it</SectionHeading>
+      <SectionHeading>Account activities</SectionHeading>
+      <Card>
+        <ListRow
+          title="Post"
+          subtitle={`Choose what to publish · ${publishingCount(channel, state.world.year)} of ${POSTS_PER_YEAR} posts this year`}
+          affordance="action"
+          onPress={() => setPosting(!posting)}
+          wrap
+        />
+      </Card>
+      {posting ? (
+        <Card style={{ padding: spacing.md }}>
+          <SectionHeading>What would you post?</SectionHeading>
+          {postFormatsFor(channel.platformId).map((option) => (
+            <ListRow
+              key={option.id}
+              title={option.name}
+              subtitle={option.blurb}
+              value={postKind === option.id ? 'Selected' : undefined}
+              affordance="action"
+              onPress={() => setPostKind(option.id)}
+              wrap
+            />
+          ))}
+          <Text style={styles.note}>
+            Choose a format, then publish it. Posts can bring people in, fall flat or lose
+            followers. Advancing the year doesn't post for you.
+          </Text>
+          <ActionButton
+            label="Publish post"
+            disabled={!postKind || publishingCount(channel, state.world.year) >= POSTS_PER_YEAR}
+            onPress={() => {
+              if (postKind) {
+                creating({ type: 'post', channelId: channel.id, kind: postKind });
+                setPosting(false);
+              }
+            }}
+          />
+          {publishingCount(channel, state.world.year) >= POSTS_PER_YEAR ? (
+            <Text style={styles.note}>
+              You've posted enough on this account this year. Come back next year.
+            </Text>
+          ) : null}
+          <ActionButton label="Cancel" variant="quiet" onPress={() => setPosting(false)} />
+        </Card>
+      ) : null}
+      {channel.publishing?.year === state.world.year ? (
+        <Text style={styles.note}>
+          Last post: {channel.publishing.gained > 0 ? '+' : ''}
+          {channel.publishing.gained.toLocaleString('en-US')}{' '}
+          {platform?.audienceWord ?? 'followers'}.
+        </Text>
+      ) : null}
+      <Text style={styles.note}>
+        Sponsorships, collaborations and representation are on Social Media. Each account's posts
+        are your choice.
+      </Text>
+      <SectionHeading note="For your next post">How hard you work at it</SectionHeading>
       <Card>
         {EFFORTS.map((effort, index) => (
           <Divided key={effort} first={index === 0}>
@@ -204,14 +273,12 @@ export function NewChannelScreen() {
   const { current, push, pop } = useNavigation();
   if (!state) return null;
   const platform = current?.platformId === undefined ? undefined : findPlatform(current.platformId);
-  const liquid = Math.floor(Number(state.player.cash) / 100);
 
   if (platform === undefined) {
     return (
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.note}>
-          Each place is a different kind of audience, and costs a different amount to get set up.
-          You have {money(liquid)}.
+          Each platform has its own audience. Creating an account is free. You choose what to post.
         </Text>
         <Card>
           {PLATFORMS.map((option, index) => {
@@ -221,7 +288,7 @@ export function NewChannelScreen() {
                 <ListRow
                   title={option.name}
                   subtitle={young ? `You have to be ${option.minAge}` : option.blurb}
-                  value={money(option.startCost)}
+                  value="Free"
                   disabled={young}
                   onPress={
                     young
@@ -246,8 +313,7 @@ export function NewChannelScreen() {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.note}>
-        {platform.blurb} Getting set up costs {money(platform.startCost)}, and you start with
-        nobody.
+        {platform.blurb} Creating this account is free, and you start with nobody.
       </Text>
       <SectionHeading>What would you make?</SectionHeading>
       <Card>

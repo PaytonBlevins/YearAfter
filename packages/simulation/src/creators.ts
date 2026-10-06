@@ -33,7 +33,6 @@ import {
   managerShare,
   newChannel,
   nextFame,
-  post,
   whyNotOpen,
   withEffort,
   type Channel,
@@ -121,7 +120,7 @@ export function whyNotChannel(
   });
 }
 
-/** Start a channel. The gear is paid for at once; the audience starts at nobody. */
+/** Creating an account is free; the audience starts at nobody. */
 export function openChannel(
   state: GameState,
   platformId: string,
@@ -129,18 +128,12 @@ export function openChannel(
 ): Result<GameState, ChannelRefusal> {
   const refusal = whyNotChannel(state, platformId, categoryId);
   if (refusal !== undefined) return err(refusal);
-  const platform = findPlatform(platformId)!;
   const channel = newChannel({
     seed: state.rng.getSeed(),
     id: `ch:${state.world.year}:${platformId}:${categoryId}`,
     platformId,
     categoryId,
     year: state.world.year,
-  });
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'spending',
-    amount: dollars(-platform.startCost),
-    source: `Setting up ${channel.name}`,
   });
   const entry = entryFor(
     state,
@@ -149,11 +142,9 @@ export function openChannel(
   );
   return ok({
     ...state,
-    finance: books.ledger,
     channels: [...state.channels, channel],
     player: {
       ...state.player,
-      cash: books.ledger.balance,
       timeline: appendToTimeline(state.player.timeline, entry),
     },
   });
@@ -225,7 +216,12 @@ export function closeChannel(
 
 /** The hours a week the character's channels ask of them: a manager gives a third of it back. */
 export const creatorWeek = (state: GameState): number =>
-  creatorHours(state.channels, hoursFactor(state.representation));
+  creatorHours(
+    state.channels.filter(
+      (channel) => channel.publishing?.year === state.world.year && channel.publishing.count > 0,
+    ),
+    hoursFactor(state.representation),
+  );
 
 /** What a year of channels did: the channels after it, fame, the money, and the words. */
 export interface CreatorsYear {
@@ -266,6 +262,7 @@ export function runCreatorsYear(input: {
   const grossOf: number[] = [];
   const channels = input.channels.map((channel) => {
     const result = channelYear({
+      manual: true,
       channel,
       year: input.year,
       quality: qualityOf(input.stats, input.talents, channel.categoryId),

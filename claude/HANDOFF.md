@@ -5,6 +5,15 @@ Written 4 October 2026, scope rewritten 5 October 2026. State refreshed against
 The 0605/0606 screens remain unmerged; v0.07 screens are not assigned. Save v41. Repo:
 https://github.com/PaytonBlevins/YearAfter.git (public).
 
+**6 October playtest update:** Payton explicitly assigned Agent B the Social Media
+changes on `feat/manual-social-posting`: free accounts, real platform names,
+small-audience fame pacing and player-chosen posts. This includes the required
+creator engine changes and optional publishing metadata validation; it is a narrow
+exception to section 0's original scope. Built against main `9925d30` (0708,
+save v43). See `playtest-manual-social-posting.md` for behavior, test results,
+balance choices and integration with the separate purchase-payment PR. Device
+checks and review remain pending; general life-event wording stays last.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:

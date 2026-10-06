@@ -53,3 +53,5 @@ export * from './celebrity-world';
 export * from './celebrity-state';
 export * from './celebrity';
 export * from './fame-work';
+
+export * from './manual-posts';
