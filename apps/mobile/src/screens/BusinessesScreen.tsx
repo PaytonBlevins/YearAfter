@@ -30,6 +30,7 @@ import {
   reportedProfitOf,
   reputationWord,
   startupCostFor,
+  type SupplierGrade,
 } from '@yearafter/finance';
 import { findBusinessType } from '@yearafter/content';
 import {
@@ -59,6 +60,15 @@ const money = (amount: number): string => {
 };
 
 const dollarsOf = (amount: bigint | number): number => Math.round(Number(amount) / 100);
+
+// These describe the existing supplier trade-off; they do not promise profit.
+const SUPPLIER_DESCRIPTIONS: Readonly<Record<SupplierGrade, string>> = {
+  budget:
+    'Cheaper supplies with lower quality. You keep costs down, but customers may choose somewhere else.',
+  standard: 'Ordinary supplies at the usual cost. A middle ground on quality and price.',
+  premium:
+    'Better supplies that cost more. They can help bring customers in, but extra sales may not cover the cost.',
+};
 
 /* -------------------------------------------------------------------------- */
 /* Paying for it (ticket 0603)                                                 */
@@ -500,14 +510,25 @@ export function BusinessScreen() {
 
       {type.supplier ? (
         <>
-          <SectionHeading>What you buy in</SectionHeading>
-          <Card style={styles.pad}>
-            <Choices
-              options={SUPPLIER_GRADES}
-              value={business.supplier}
-              label={(grade) => SUPPLIER_LABELS[grade]}
-              onPick={(supplier) => tuneBusiness(business.id, { kind: 'supplier', supplier })}
-            />
+          <SectionHeading>Suppliers</SectionHeading>
+          <Text style={styles.note}>
+            Choose the supplies you buy. Their quality and cost affect what you sell and who wants
+            it. The finished product or service also depends on your staff.
+          </Text>
+          <Card>
+            {SUPPLIER_GRADES.map((supplier, index) => (
+              <Fragment key={supplier}>
+                {index > 0 ? <RowDivider /> : null}
+                <ListRow
+                  title={SUPPLIER_LABELS[supplier]}
+                  subtitle={SUPPLIER_DESCRIPTIONS[supplier]}
+                  value={business.supplier === supplier ? 'Chosen' : 'Choose'}
+                  affordance="action"
+                  onPress={() => tuneBusiness(business.id, { kind: 'supplier', supplier })}
+                  wrap
+                />
+              </Fragment>
+            ))}
           </Card>
         </>
       ) : null}

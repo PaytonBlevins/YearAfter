@@ -80,5 +80,6 @@ A1 goes with 0705 and 0706, not with this list.
 - **A4:** Implemented on `feat/playtest-a4-a12`; people actions retain their descriptions, refusals and commands without odds labels. Jobs and college are unchanged.
 - **A12:** Implemented on the same branch; Property uses the combined current value of owned properties and stays hidden when there are none. Other assets still count toward net worth.
 - Both await PR review and a native-device check. Verification and remaining gates: `claude/playtest-a4-a12.md`.
-- Next independent screen item: **A2**, explaining the existing supplier choices. **A3** needs B1's failure/warning contract; **A7** pairs with **B15**, not the iced-out watches in B14. **A5** still needs examples of the wording Payton means. **A10** still needs the spec decision already recorded above.
+- **A2:** Implemented on the same branch; each supplier grade now explains cost, quality and the effect on customers, with the current choice marked. See `claude/playtest-a2.md`.
+- **A3** needs B1's failure/warning contract; **A7** pairs with **B15**, not the iced-out watches in B14. **A5** still needs examples of the wording Payton means. **A10** still needs the spec decision already recorded above.
 - Explicit card payment options apply to every eligible purchase, including future vacations, up to the card's available credit. This is recorded in PR #2; it needs Agent A's purchase/payment contract before screens can offer it.
