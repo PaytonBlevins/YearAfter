@@ -32,6 +32,13 @@ If a note or a screen exposes a bug or a design question in the engine, write it
 down as a finding (roadmap "Found by …") and tell Payton. Don't fix it in the
 engine yourself.
 
+**Business-warning batch, authorized by Payton on 6 October:** Agent B is building
+playtest A3's screen warnings on `feat/playtest-business-warnings`. They use the
+existing settlement and loan readers and existing exit confirmations. B1's
+injection/decline commands and pre-failure decision remain unbuilt with Agent A;
+this batch does not authorize changing the engine or survival balance. Results:
+`claude/playtest-business-warnings.md`.
+
 ## 1. What this is
 
 A mobile, tap-by-tap life simulation (BitLife-style taxonomy, original visual

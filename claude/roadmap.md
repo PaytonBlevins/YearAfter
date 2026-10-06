@@ -579,14 +579,16 @@ can open a channel (a podcast or newsletter needs 16); talent helps growth but
 is never a gate. Measured against real creator figures (vidIQ July 2026,
 Twitch/Substack/podcast industry data) before any code.
 
-| Ticket                                     | What it covers                                                                                                                                                                                                                                                                                                         |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0701 Fame and the creator foundation**   | **DONE (engine).** Six platforms, fifteen categories, channels with a luck draw fixed at opening, long-tail audiences, income per platform, upkeep, tax on the net, one Fame bar 0–100, save v41. `claude/0701-fame-and-creator-foundation.md`                                                                         |
-| **0702 Video, streaming, podcasts**        | **DONE (engine).** Own curves for streaming and podcasts, charts #1000→#1, trends you can read, sponsorship offers (Accept / Request More / Decline), and an hours cost for effort (resolves finding 47). `claude/0702-video-streaming-podcasts.md`                                                                    |
-| **0703 Photo, short-form, subscription**   | **DONE (engine).** Brand deals on all six platforms, viral posts on short-form and photo, a paid tier with a chosen price, conversion that falls with list size and payers who build up slowly, and Request More as a fair gamble. `claude/0703-photo-shortform-subscription.md`                                       |
-| **0704 Collaborations and creator groups** | **DONE (engine).** Collaborations with friends, peers and bigger names (a repeat is worth half), creator groups that take 10–30% for faster growth, and a manager or an agent, never both. `claude/0704-collaborations-groups-representation.md`                                                                       |
-| **0705 The celebrity world**               | **DONE (engine).** A persistent roster of fictional public figures (derived from the seed, nothing saved), a rare yearly chance meeting, six things to do to a stranger, a second menu for people you now know, and a warm connection becoming an ordinary friend. Save v42. `claude/0705-the-celebrity-world.md`      |
-| **0706 Fame and creator events**           | **DONE (engine).** Twenty-three events (good, bad and about being known, one a year at most, about half of years), a per-platform rank lift so a player's channel is not an average abandoned one, and higher connection chances for a celebrity answered well. No save bump. `claude/0706-fame-and-creator-events.md` |
+| Ticket                                     | What it covers                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **0701 Fame and the creator foundation**   | **DONE (engine).** Six platforms, fifteen categories, channels with a luck draw fixed at opening, long-tail audiences, income per platform, upkeep, tax on the net, one Fame bar 0–100, save v41. `claude/0701-fame-and-creator-foundation.md`                                                                                                                                                                                                                                                         |
+| **0702 Video, streaming, podcasts**        | **DONE (engine).** Own curves for streaming and podcasts, charts #1000→#1, trends you can read, sponsorship offers (Accept / Request More / Decline), and an hours cost for effort (resolves finding 47). `claude/0702-video-streaming-podcasts.md`                                                                                                                                                                                                                                                    |
+| **0703 Photo, short-form, subscription**   | **DONE (engine).** Brand deals on all six platforms, viral posts on short-form and photo, a paid tier with a chosen price, conversion that falls with list size and payers who build up slowly, and Request More as a fair gamble. `claude/0703-photo-shortform-subscription.md`                                                                                                                                                                                                                       |
+| **0704 Collaborations and creator groups** | **DONE (engine).** Collaborations with friends, peers and bigger names (a repeat is worth half), creator groups that take 10–30% for faster growth, and a manager or an agent, never both. `claude/0704-collaborations-groups-representation.md`                                                                                                                                                                                                                                                       |
+| **0705 The celebrity world**               | **DONE (engine).** A persistent roster of fictional public figures (derived from the seed, nothing saved), a rare yearly chance meeting, six things to do to a stranger, a second menu for people you now know, and a warm connection becoming an ordinary friend. Save v42. `claude/0705-the-celebrity-world.md`                                                                                                                                                                                      |
+| **0706 Fame and creator events**           | **DONE (engine).** Twenty-three events (good, bad and about being known, one a year at most, about half of years), a per-platform rank lift so a player's channel is not an average abandoned one, and higher connection chances for a celebrity answered well. No save bump. `claude/0706-fame-and-creator-events.md`                                                                                                                                                                                 |
+| **0707 Fame opportunities**                | **DONE (engine).** A photoshoot, a commercial, a talk show and a guest-star part, each offered once a year from a level of fame, paid by the going rate for a post at that fame (anchored to influencer tiers and the SAG-AFTRA day rate), settled with the year's creator income. Save v43. `claude/0707-fame-opportunities.md`                                                                                                                                                                       |
+| **0708 Social Media and Fame screens**     | **DONE.** The first screens for any of 0701–0707: a Social Media screen (channels, sponsorships, collaborations, groups, manager or agent), one-channel and start-a-channel screens, a Fame screen (exact fame, this year's offers, people you know) with the second menu for one famous person, a Fame bar on the Life screen once fame is above 0, and the card for a chance meeting. No engine or save change. Mobile 81 → 200 tests; 170 mutations. `claude/0708-social-media-and-fame-screens.md` |
 
 ## v0.08 Entertainment & Sports
 
@@ -1156,8 +1158,9 @@ choice. Left as a trade between money and happiness; not changed.
 **48. Fame feeds nothing yet.** _(Partly resolved in 0705.)_ Fame now raises how often a
 famous stranger crosses your path (`1 + fame/25`), how well your answers land (up to +35
 points) and how often a good answer leaves a connection (up to double). Nothing else
-reads it: 0706's seven events about being known read it (fame 8 and up), and the bar
-still has no screen.
+reads it: 0706's seven events about being known read it (fame 8 and up), and 0707's four
+opportunities read it (6 and up). The bar has its screen since 0708: the Fame bar on the Life screen
+opens the Fame screen.
 
 **49. A child can earn what a retiree cannot.** A lucky 14-year-old channel pays
 real money with no guardian, trust or tax rule beyond the ordinary self-
@@ -1263,9 +1266,9 @@ the `ADULT_CIRCLE` (4) peers the circle tops up to, so a famous friend is one fe
 friend met in the ordinary way. That is probably right (a real friend is a real friend) but
 it was not measured. They do die as dead (`alive: false`).
 
-**66. There are no screens for any of it.** No encounter prompt, no connection list, no
-second menu and no Social Media tab. The Activities row points at 0801 so it stays shut.
-Everything a screen needs is exported (see the 0705 doc). Screens are unassigned.
+**66. There are no screens for any of it.** _(Resolved in 0708.)_ No encounter prompt, no connection list, no
+second menu and no Social Media tab existed. 0708 built the meeting card, the people-you-know list, the
+second menu and the Social Media screen, and the Activities row is open.
 
 **67. Connection rate is judged, not sourced, and the mix a player chooses was not
 measured.** _(Raised in 0706.)_ 0705's 0.27 connections a life was from every meeting answered
@@ -1299,6 +1302,46 @@ character's collaborations. They are simple on purpose; deeper reads belong with
 
 **72. Nothing shows an event but its line on the timeline.** There is no event screen and no
 history of past events. A player sees one sentence in the year's summary. See finding 66.
+
+**73. The fame opportunities are anchored, but their size is a judgement.** The going rate for a
+post follows published influencer tiers and the multiples (6, 12, 1 and 4 posts' worth), the
+floors, the levels (6, 12, 20, 28) and the chances (35%, rising a point a point of fame, to 85%) are
+set so the middle is a supplement and the top is large. Only the day-performer floor ($1,283) and the
+per-post tiers are sourced.
+
+**74. From fame 60 up, work pays about 0.8 times what the channel earns, and is not capped.**
+Measured over 100 ten-year creators: 0.3 times the channel's net at fame 30–49, and at 50 and up
+(19 creator-years, a few past 80) $975,563 a year against $337,827. Spec 1372 says not to cap
+success, only a mechanic that prints money; this is once a year each and four things, but it is the
+biggest single income at the very top. Watch it if a playtest finds a famous life too easy.
+
+**75. Opportunities cost nothing and cannot go wrong.** A week on a set takes no time from anything
+else, a talk show cannot go badly, and nothing is refused for a better offer. They are a yes-or-no
+once a year. If fame work should be a choice with a price (a conflict with a job, a bad appearance
+that costs fame), it is a design decision the engine would need.
+
+**76. Acting, modeling and music will overlap.** v0.08 gives careers their own roles, agents and
+reputations. 0707 is what a creator's name alone is offered; v0.08 should reuse the floors and the
+rate (`postRate`) rather than invent a second scale, and decide whether a guest-star part here and a
+role there are the same thing.
+
+**77. The meeting cannot be postponed.** The card shows over whatever screen the player is on and the
+only way off it is one of the six answers (ignoring is one). That matches the decision card, but there is
+no "later". It is lost at the year's turn.
+
+**78. Collaborate, invite and endorse choose for the player.** The engine takes a target and the screen
+does not ask, so it is the biggest channel or the first business. Add a picker if a playtest finds it matters.
+
+**79. The Fame bar is on the Life screen only**, as asked, so Career and Assets do not show it.
+
+**80. A channel shows what it has earned in all, before costs, and not what it earned last year.** That is
+the only figure the channel stores; a year's income is in the ledger rows and no screen shows it by channel.
+
+**81. Creator hours are hidden** (spec 661), so four channels at heavy effort reads as "takes a lot of your
+week" and not as a second job.
+
+**82. Nothing shows the 0706 events or the 0705 history.** The Fame screen lists the people you know now,
+not everyone you have met, and an event is still one line on the timeline (finding 72).
 
 ## Suggested order
 
@@ -1336,6 +1379,11 @@ Agent A's next ticket.
 9. **0503 → 0508.** _(0503 A landlord, 0504 Vehicles, 0505 Vehicle modifications, 0506 Renovations & collections and 0507 Auctions shipped. 0508 Will & Estate, which closes v0.05, was deferred by Payton on 3 October and moves after v0.06.)_
 10. **0601 → 0606.** _(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments' and 0606 Commercial real estate's engines shipped (0605 screen patch prepared but not merged; 0606 screens open), then 0508 Will & Estate whenever Payton wants it.)_
 
-11. **0701 → 0706.** _(0701–0704 engines shipped; v0.07 screens are unassigned.
-    0705 The celebrity world and 0706 Fame and creator events remain future
-    work, with the next ticket chosen by Payton.)_
+11. **0701 → 0708.** _(0701–0707 shipped; 0708 built the screens for all of v0.07.
+    The next ticket is chosen by Payton.)_
+
+**Playtest A3 — business failure warnings (6 October).** Existing-rule warnings
+are built on `feat/playtest-business-warnings`, pending review/device checks.
+They show loss/reserve and loan scenarios and confirmed exit actions. B1's
+accept/decline rescue engine and survival measurement remain open with Agent A;
+a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.

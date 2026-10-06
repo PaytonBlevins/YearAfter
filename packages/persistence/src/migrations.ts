@@ -1004,9 +1004,30 @@ const migrations: Readonly<Record<number, Migration>> = {
     celebrities:
       typeof save['celebrities'] === 'object' && save['celebrities'] !== null
         ? save['celebrities']
-        : { ties: [], met: [], answeredYear: 0 },
+        : { ties: [], met: [], answeredYear: 0, work: { year: 0, done: [] } },
     version: 42,
   }),
+  /**
+   * v42 -> v43: Ticket 0707 — what has been said yes to this year. Nothing has been, in any
+   * older save, so the record is empty for year 0. What a v42 save already carries is kept.
+   */
+  42: (save) => {
+    const old =
+      typeof save['celebrities'] === 'object' && save['celebrities'] !== null
+        ? (save['celebrities'] as Record<string, unknown>)
+        : { ties: [], met: [], answeredYear: 0 };
+    return {
+      ...save,
+      celebrities: {
+        ...old,
+        work:
+          typeof old['work'] === 'object' && old['work'] !== null
+            ? old['work']
+            : { year: 0, done: [] },
+      },
+      version: 43,
+    };
+  },
 };
 
 /**
@@ -1110,6 +1131,30 @@ export function migrateSave(raw: unknown): Result<CurrentSaveGame, MigrationErro
  * unreadable save an expected outcome with a message, and a save that silently
  * fixes its own money is a save that hides how much it invented.
  */
+/** Ticket 0707. What was said yes to this year: a year, and a list of what it was and what it pays. */
+function workOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => typeof n === 'number' && Number.isInteger(n);
+  const done = record['done'];
+  return (
+    whole(record['year']) &&
+    Array.isArray(done) &&
+    done.every((job) => {
+      if (typeof job !== 'object' || job === null) return false;
+      const entry = job as Record<string, unknown>;
+      return (
+        typeof entry['id'] === 'string' &&
+        typeof entry['outlet'] === 'string' &&
+        whole(entry['pay']) &&
+        (entry['pay'] as number) >= 0 &&
+        whole(entry['fame']) &&
+        whole(entry['mood'])
+      );
+    })
+  );
+}
+
 /** Ticket 0705. The shape of the record of famous people: lists, a number, and a name and a warmth on each tie. */
 function celebritiesOk(value: unknown): boolean {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
@@ -1145,7 +1190,8 @@ function celebritiesOk(value: unknown): boolean {
     }) &&
     Array.isArray(met) &&
     met.every((id) => typeof id === 'string') &&
-    whole(record['answeredYear'])
+    whole(record['answeredYear']) &&
+    workOk(record['work'])
   );
 }
 

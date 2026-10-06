@@ -32,4 +32,4 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | v39          | shipped | 0604 (no bump)           |
 | v40          | shipped | 0605 (0606 adds no bump) |
 
-| A3 Business failure warnings | Codex / Agent B | `feat/playtest-business-warnings` | claimed: screen warnings using existing settlement/loan rules; B1 rescue-choice engine remains with Agent A |
+| A3 Business failure warnings | Codex / Agent B | `feat/playtest-business-warnings` | screen warnings built; review/device pending; B1 rescue-choice engine remains with Agent A |

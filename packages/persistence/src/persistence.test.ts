@@ -2045,7 +2045,15 @@ describe('Ticket 0406 — a question survives being saved', () => {
     };
     const live: GameState = {
       ...base,
-      celebrities: { ties: [tie], met: ['acting:1990:1', 'music:1975:0'], answeredYear: 2005 },
+      celebrities: {
+        ties: [tie],
+        met: ['acting:1990:1', 'music:1975:0'],
+        answeredYear: 2005,
+        work: {
+          year: 2005,
+          done: [{ id: 'photoshoot', outlet: 'Juniper Row magazine', pay: 340, fame: 1, mood: 1 }],
+        },
+      },
     };
     const written = toSave(live, { id: asSaveId('s-celeb') });
     expect(written.celebrities).toEqual(live.celebrities);
@@ -2063,8 +2071,13 @@ describe('Ticket 0406 — a question survives being saved', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
-    expect(result.value.celebrities).toEqual({ ties: [], met: [], answeredYear: 0 });
-    expect(CURRENT_SAVE_VERSION).toBeGreaterThanOrEqual(42);
+    expect(result.value.celebrities).toEqual({
+      ties: [],
+      met: [],
+      answeredYear: 0,
+      work: { year: 0, done: [] },
+    });
+    expect(CURRENT_SAVE_VERSION).toBeGreaterThanOrEqual(43);
   });
 
   it('refuses a save whose celebrities are malformed (0705)', () => {
@@ -2083,7 +2096,8 @@ describe('Ticket 0406 — a question survives being saved', () => {
       doneYear: 2005,
       done: [],
     };
-    const good = { ties: [tie], met: [], answeredYear: 0 };
+    const JOB = { id: 'photoshoot', outlet: 'Juniper Row magazine', pay: 340, fame: 1, mood: 1 };
+    const good = { ties: [tie], met: [], answeredYear: 0, work: { year: 0, done: [] } };
     expect(migrateSave({ ...raw, celebrities: good }).ok).toBe(true);
     const bad: unknown[] = [
       undefined,
@@ -2104,11 +2118,58 @@ describe('Ticket 0406 — a question survives being saved', () => {
       { ...good, ties: [{ ...tie, done: [1] }] },
       { ...good, ties: [{ ...tie, promoted: 'yes' }] },
       { ...good, ties: [{ ...tie, birthYear: 1990.5 }] },
+      // Ticket 0707: what was said yes to this year.
+      { ties: good.ties, met: good.met, answeredYear: 0 },
+      { ...good, work: null },
+      { ...good, work: [] },
+      { ...good, work: { year: 'now', done: [] } },
+      { ...good, work: { year: 2005.5, done: [] } },
+      { ...good, work: { year: 2005, done: 'photoshoot' } },
+      { ...good, work: { year: 2005, done: [null] } },
+      { ...good, work: { year: 2005, done: [{ ...JOB, id: 4 }] } },
+      { ...good, work: { year: 2005, done: [{ ...JOB, outlet: 4 }] } },
+      { ...good, work: { year: 2005, done: [{ ...JOB, pay: -1 }] } },
+      { ...good, work: { year: 2005, done: [{ ...JOB, pay: 340.5 }] } },
+      { ...good, work: { year: 2005, done: [{ ...JOB, fame: 1.5 }] } },
+      { ...good, work: { year: 2005, done: [{ ...JOB, mood: 'happy' }] } },
     ];
     for (const celebrities of bad) {
       const result = migrateSave({ ...raw, celebrities });
       expect(result.ok, JSON.stringify(celebrities)).toBe(false);
     }
+  });
+
+  it('opens a v42 save with nothing said yes to, and keeps who it had met (0707)', () => {
+    const { save } = newSave('WORK-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    old.celebrities = { ties: [], met: ['acting:1990:1'], answeredYear: 2003 };
+    old.version = 42;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.celebrities).toEqual({
+      ties: [],
+      met: ['acting:1990:1'],
+      answeredYear: 2003,
+      work: { year: 0, done: [] },
+    });
+    expect(CURRENT_SAVE_VERSION).toBe(43);
+  });
+
+  it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {
+    const { save } = newSave('WORK-KEEP');
+    const old = JSON.parse(JSON.stringify(save));
+    const work = {
+      year: 2011,
+      done: [{ id: 'talkShow', outlet: 'Couch Night', pay: 900, fame: 2, mood: 1 }],
+    };
+    old.celebrities = { ties: [], met: [], answeredYear: 0, work };
+    old.version = 42;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.celebrities.work).toEqual(work);
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {

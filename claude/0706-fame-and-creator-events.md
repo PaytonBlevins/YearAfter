@@ -109,7 +109,7 @@ A good answer to a stranger leaves a connection with a chance of its own. Compli
 ## What it is not
 
 - **No screens.** The Social Media row on the Activities screen now points at 0801 so it
-  stays shut (0706 is the current ticket and a door pointing at now would open).
+  stays shut (0706 is the current ticket and a door pointing at now would open). 0707 later moved it to 0708.
 - **No change to the sourced audience curves.** The lift moves who gets which luck, not
   what an audience of a given luck is.
 - **No fix for 53, 55, 61** (below).

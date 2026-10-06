@@ -9,7 +9,13 @@
  */
 
 import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
-import { SPONSOR_KIND, creatorLine, findCreatorCategory, findPlatform } from '@yearafter/content';
+import {
+  SPONSOR_KIND,
+  creatorLine,
+  findCreatorCategory,
+  findFameWork,
+  findPlatform,
+} from '@yearafter/content';
 import { dollars, err, ok, stablePick, type Result } from '@yearafter/core';
 import {
   answerSponsor,
@@ -40,6 +46,7 @@ import {
   type SponsorOffer,
   type TrendRow,
 } from '@yearafter/finance';
+import type { FameWorkDone } from './celebrity-state';
 import type { GameState } from './game-state';
 import { drawCreatorEvent, effectOf, type EventEffect } from './creator-events';
 
@@ -245,6 +252,8 @@ export function runCreatorsYear(input: {
   readonly talents: Readonly<Record<string, boolean>>;
   /** Ticket 0704. Whoever looks after the business side, if anybody. */
   readonly representation?: Representation;
+  /** Ticket 0707. What was said yes to this year (photoshoots and the rest), paid with the year. */
+  readonly work?: readonly FameWorkDone[];
   /** Ticket 0706. The save's seed and the generation, for the year's news. Absent: no news. */
   readonly seed?: string;
   readonly generation?: number;
@@ -359,6 +368,20 @@ export function runCreatorsYear(input: {
       }
       lines.push(event.text);
     }
+  }
+  /*
+    Ticket 0707 — what was said yes to this year. Paid with the year's income, so it is taxed with
+    it and a manager takes their share of it; its fame and its mood arrive with the year's.
+  */
+  for (const job of input.work ?? []) {
+    gross += job.pay;
+    fameShift += job.fame;
+    mood += job.mood;
+    transactions.push({
+      category: 'creator',
+      amount: dollars(job.pay),
+      source: `${findFameWork(job.id)?.label ?? 'Appearance'}: ${job.outlet}`,
+    });
   }
   const managerKept = managerShare(input.representation, gross);
   if (managerKept > 0) {

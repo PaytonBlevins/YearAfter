@@ -41,10 +41,14 @@ import { DoctorScreen } from '../screens/DoctorScreen';
 import { DetailCard } from '../components/DetailCard';
 import { EndOfLifeCard } from '../components/EndOfLifeCard';
 import { GraduationNotice } from '../components/GraduationNotice';
+import { MeetingNotice } from '../components/MeetingCard';
 import { ProgramScreen } from '../screens/ProgramScreen';
 import { OutcomeCard } from '../components/OutcomeCard';
 import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
+import { ChannelScreen, NewChannelScreen } from '../screens/ChannelScreens';
+import { ConnectionScreen, FameScreen } from '../screens/FameScreens';
+import { SocialMediaScreen } from '../screens/SocialMediaScreen';
 import { FamilyScreen } from '../screens/FamilyScreen';
 import { SchoolActivitiesScreen } from '../screens/SchoolActivitiesScreen';
 import { ActivityScreen } from '../screens/ActivityScreen';
@@ -121,6 +125,11 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   college: CollegeScreen,
   program: ProgramScreen,
   colleagues: ColleaguesScreen,
+  socialMedia: SocialMediaScreen,
+  channel: ChannelScreen,
+  newChannel: NewChannelScreen,
+  fame: FameScreen,
+  connection: ConnectionScreen,
   debug: DebugScreen,
 };
 
@@ -283,6 +292,8 @@ export function Shell() {
         only lived on the screen they pressed it on would be lost.
         A pending decision wins — time being stopped is the more urgent fact.
       */}
+      {/* Ticket 0708. Under the graduation notice, so an earned milestone is read first. */}
+      <MeetingNotice />
       <GraduationNotice />
       {!decision && outcome ? <OutcomeCard outcome={outcome} onDismiss={dismissOutcome} /> : null}
 

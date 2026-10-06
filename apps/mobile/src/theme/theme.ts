@@ -48,6 +48,10 @@ const palette = {
   statCharisma: '#C2683A',
   statWillpower: '#7A5BAF',
   statDiscipline: '#417C86',
+
+  // Ticket 0708. Fame is not one of the seven stats (CORE_RULES 3), so it has its own colour:
+  // a gold that is not any of theirs, for a bar that only exists once there is something to show.
+  fame: '#B8941F',
 } as const;
 
 export const colors = {

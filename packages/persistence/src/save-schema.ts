@@ -49,7 +49,7 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 42;
+export const CURRENT_SAVE_VERSION = 43;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -86,6 +86,11 @@ export type { WorldState };
  * could let anything, so the migration has nothing to write; the version is
  * bumped so a build that cannot read a tenant refuses the save rather than
  * dropping them.
+ *
+ * v43 added `celebrities.work` — what the character has said yes to this year (a photoshoot, a
+ * commercial, a talk show, a guest-star part), which settles with the year's creator income
+ * (Ticket 0707). Every save before it has said yes to nothing, so the migration writes an
+ * empty record for year 0.
  *
  * v42 added `celebrities` — the famous people the character has met, who it is still in touch
  * with, and the year a stranger was last answered (Ticket 0705). Every save before it has met
@@ -178,7 +183,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 42;
+  readonly version: 43;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;

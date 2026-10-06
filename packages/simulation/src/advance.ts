@@ -87,6 +87,7 @@ import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
 import { runDealsYear } from './deals';
 import { creatorWeek, runCreatorsYear } from './creators';
+import { workToSettle } from './fame-work';
 import { runCelebrityYear } from './celebrity';
 import { foundOut } from './auctions';
 import { residenceOf } from './rentals';
@@ -401,6 +402,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     ...(state.representation === undefined ? {} : { representation: state.representation }),
     seed: state.rng.getSeed(),
     generation: state.world.generation,
+    work: workToSettle(state),
   });
   const creatorTax = businessTaxOn(employment.earned + businessesYear.drawn, creatorsYear.net);
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
