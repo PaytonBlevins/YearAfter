@@ -11,13 +11,15 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 ## Playtest work authorized by Payton on 6 October
 
-| Item                              | Agent           | Branch                    | Status                      |
-| --------------------------------- | --------------- | ------------------------- | --------------------------- |
-| A4 People-action odds labels      | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
-| A12 Property row without a home   | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
-| A2 Business supplier explanations | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
-| A6 Clear investment headlines     | Codex / Agent B | `feat/playtest-news-debt` | implemented; review pending |
-| A11 Findable debt overview        | Codex / Agent B | `feat/playtest-news-debt` | implemented; review pending |
+| Item                              | Agent           | Branch                             | Status                      |
+| --------------------------------- | --------------- | ---------------------------------- | --------------------------- |
+| A4 People-action odds labels      | Codex / Agent B | `feat/playtest-a4-a12`             | implemented; review pending |
+| A12 Property row without a home   | Codex / Agent B | `feat/playtest-a4-a12`             | implemented; review pending |
+| A2 Business supplier explanations | Codex / Agent B | `feat/playtest-a4-a12`             | implemented; review pending |
+| A6 Clear investment headlines     | Codex / Agent B | `feat/playtest-news-debt`          | implemented; review pending |
+| A11 Findable debt overview        | Codex / Agent B | `feat/playtest-news-debt`          | implemented; review pending |
+| A8 Enrolled-program screen        | Codex / Agent B | `feat/playtest-college-graduation` | claimed; in progress        |
+| A9 Graduation moment              | Codex / Agent B | `feat/playtest-college-graduation` | claimed; follows A8         |
 
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |
