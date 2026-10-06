@@ -114,6 +114,14 @@ import type { BidTier, Payroll, SupplierGrade } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
+import {
+  applyConnection,
+  applyCreatorAction,
+  applyFameWork,
+  applyMeeting,
+  type Attempt,
+  type CreatorAction,
+} from './fameActions';
 import type { Detail } from '../components/DetailCard';
 import type { Outcome } from '../components/OutcomeCard';
 import type { Result } from '@yearafter/core';
@@ -260,6 +268,14 @@ interface GameContextValue {
   /** Spec 61: the one parenting decision — answer what a child asked for. */
   readonly answerChildAsk: (yes: boolean) => void;
   readonly kickChildOut: (childId: string) => void;
+  /** Ticket 0708. Everything a creator does, one verb at a time. */
+  readonly creating: (action: CreatorAction) => void;
+  /** Ticket 0708. Say yes to something a name gets you offered. */
+  readonly doFameWork: (workId: string) => void;
+  /** Ticket 0708. Do something with somebody famous you know. */
+  readonly connectWith: (tieId: string, actionId: string, targetId?: string) => void;
+  /** Ticket 0708. What you do when you meet somebody famous. */
+  readonly meetThem: (actionId: string) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   /**
    * Ticket 0212. Carry on as one of your children.
@@ -1438,6 +1454,52 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  /* ---- Ticket 0708: creators and fame ------------------------------------ */
+
+  /**
+   * One path for every fame and creator verb. A refusal is shown as a card, not hidden in
+   * `saveError`, because "you don't have the money for the gear" is something the player has to
+   * read at the moment they pressed the button.
+   */
+  const commit = useCallback(
+    (make: (current: GameState) => Attempt) => {
+      setState((current) => {
+        if (!current) return current;
+        const attempt = make(current);
+        if (!attempt.ok) {
+          setOutcome(attempt.outcome);
+          return current;
+        }
+        if (attempt.outcome) setOutcome(attempt.outcome);
+        if (attempt.entries.length > 0) {
+          const written = attempt.entries;
+          setLastEntries((entries) => [...entries, ...written]);
+        }
+        if (saveId) persist(attempt.state, saveId, settings);
+        return attempt.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const creating = useCallback(
+    (action: CreatorAction) => commit((current) => applyCreatorAction(current, action)),
+    [commit],
+  );
+  const doFameWork = useCallback(
+    (workId: string) => commit((current) => applyFameWork(current, workId)),
+    [commit],
+  );
+  const connectWith = useCallback(
+    (tieId: string, actionId: string, targetId?: string) =>
+      commit((current) => applyConnection(current, tieId, actionId, targetId)),
+    [commit],
+  );
+  const meetThem = useCallback(
+    (actionId: string) => commit((current) => applyMeeting(current, actionId)),
+    [commit],
+  );
+
   const interactWith = useCallback(
     (personId: string, interactionId: string) => {
       setState((current) => {
@@ -1627,6 +1689,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       startAdoption,
       answerChildAsk,
       kickChildOut,
+      creating,
+      doFameWork,
+      connectWith,
+      meetThem,
       startNewLife,
       continueAs,
       updateSettings,
@@ -1700,6 +1766,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       startAdoption,
       answerChildAsk,
       kickChildOut,
+      creating,
+      doFameWork,
+      connectWith,
+      meetThem,
       startNewLife,
       continueAs,
       updateSettings,

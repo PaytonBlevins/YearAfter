@@ -2959,3 +2959,35 @@ reach the thing it calibrated away from.
 fixture was above its curve and shrank every year; the peak was never close. Print the
 values the assertion reads, and count the cases that reached it (13.126). Here the fix was a
 small channel that grows.
+
+### 13.130 When you add a field to saved state, find every place that rebuilds the record by hand
+
+0705 wrote the record of famous people out field by field when a stranger was answered
+(`{ ties, met, answeredYear }`). Adding `work` for 0707 compiled everywhere else, and it was
+TypeScript's required-field check that found the one place that would have thrown it away the
+first time somebody famous was met. Make the new field required, let the compiler list every
+literal, and replace any that rebuilds a record with a spread of the old one. Then test that a
+neighbouring action keeps the field.
+
+### 13.131 A sabotage harness that matches the first occurrence after a heading mutates what that heading names
+
+`('W06', file, 'Ticket 0707', "category: 'creator'", ...)` mutated the first `category: 'creator'`
+after the first mention of "Ticket 0707", which was in the comment on an input field, not in the new
+code. It reported a survivor that was really a different line. Scope each breakage to the unique
+thing it is about (here `for (const job of input.work`), and when Prettier reformats a line, a
+breakage that stops matching must be re-pointed, not dropped.
+
+### 13.132 A table of words keyed by an engine `kind` collides when two unions share one
+
+`tooYoung` is a channel's refusal (it carries the age you need) and a flirt's (it carries nothing, and
+can mean either person). One sentence for both said "You have to be 14 to start one here" on a
+twelve-year-old's flirt button. When a screen turns refusals into words, render every union that feeds
+the table through the screen that shows it, with a state that triggers it, not just the table.
+
+### 13.133 Copy and defaults are behaviour: break them and see
+
+A sabotage run over the 0708 screens found 24 gaps in a suite that passed first time, nearly all of them
+a sentence, a default or a boundary nothing pinned: the collaboration text for a friend, a charge and a
+swap (three different states needed, not one), "Nobody has asked this year" when only a group has,
+rounding of a fractional dollar, age 15 against 16. A line a player reads is pinned by a test that
+names the line, and a fixture for a branch is checked to reach it (13.126).

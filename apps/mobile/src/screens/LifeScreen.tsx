@@ -20,11 +20,14 @@ import { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { groupByAge, type TimelineEntry } from '@yearafter/character';
 import { describeCity } from '@yearafter/content';
+import { FameBar } from '../components/FameBar';
+import { useNavigation } from '../navigation/navigation';
 import { useGame } from '../stores/gameStore';
 import { colors, layout, radii, spacing, typography } from '../theme/theme';
 
 export function LifeScreen() {
   const { state, lastEntries } = useGame();
+  const { push } = useNavigation();
   const scrollRef = useRef<ScrollView>(null);
 
   const timeline = state?.player.timeline ?? [];
@@ -43,38 +46,44 @@ export function LifeScreen() {
   const birthYear = state.player.birthYear;
 
   return (
-    <ScrollView
-      ref={scrollRef}
-      style={styles.scroll}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.birth}>
-        <Text style={styles.birthText}>
-          Born {birthYear} · {describeCity(state.player.birthLocation.cityId)}
-        </Text>
-      </View>
-
-      {sections.map((section) => (
-        <View key={section.age} style={styles.section}>
-          <View style={styles.ageHeader}>
-            <Text style={styles.ageLabel}>Age {section.age}</Text>
-            <View style={styles.ageRule} />
-            <Text style={styles.ageYear}>{birthYear + section.age}</Text>
-          </View>
-
-          {section.entries.map((entry) => (
-            <FeedRow key={entry.id} entry={entry} isNew={newestIds.has(entry.id)} />
-          ))}
-        </View>
-      ))}
-
-      {timeline.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyText}>Tap Advance to begin.</Text>
-        </View>
+    <View style={styles.page}>
+      {/* Ticket 0708. Only once there is any fame, however it was got; tapping it opens the Fame screen. */}
+      {state.fame > 0 ? (
+        <FameBar fame={state.fame} onPress={() => push({ screen: 'fame', title: 'Fame' })} />
       ) : null}
-    </ScrollView>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.birth}>
+          <Text style={styles.birthText}>
+            Born {birthYear} · {describeCity(state.player.birthLocation.cityId)}
+          </Text>
+        </View>
+
+        {sections.map((section) => (
+          <View key={section.age} style={styles.section}>
+            <View style={styles.ageHeader}>
+              <Text style={styles.ageLabel}>Age {section.age}</Text>
+              <View style={styles.ageRule} />
+              <Text style={styles.ageYear}>{birthYear + section.age}</Text>
+            </View>
+
+            {section.entries.map((entry) => (
+              <FeedRow key={entry.id} entry={entry} isNew={newestIds.has(entry.id)} />
+            ))}
+          </View>
+        ))}
+
+        {timeline.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>Tap Advance to begin.</Text>
+          </View>
+        ) : null}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -106,6 +115,7 @@ function markerColor(entry: TimelineEntry): string {
 }
 
 const styles = StyleSheet.create({
+  page: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: spacing.xl },
 

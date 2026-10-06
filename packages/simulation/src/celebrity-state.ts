@@ -36,12 +36,40 @@ export interface CelebrityTie {
   readonly endedBecause?: 'lost touch' | 'died';
 }
 
+/**
+ * Ticket 0707. One thing said yes to this year (a photoshoot, a commercial, a talk show, a
+ * guest-star part), with what it was worth when it was agreed. The pay is settled with the
+ * year's creator income so it is taxed with it; the fame and the mood are added then too.
+ */
+export interface FameWorkDone {
+  readonly id: string;
+  /** Who it was for, as the offer read. */
+  readonly outlet: string;
+  /** Whole dollars. */
+  readonly pay: number;
+  readonly fame: number;
+  readonly mood: number;
+}
+
+/** What has been said yes to, and in which year, so none of it can be done twice in one. */
+export interface FameWorkState {
+  readonly year: number;
+  readonly done: readonly FameWorkDone[];
+}
+
 export interface CelebrityState {
   readonly ties: readonly CelebrityTie[];
   /** Everybody already met as a stranger, so the same face is not a new meeting twice. */
   readonly met: readonly string[];
   /** The year a stranger was last answered. 0 for never. */
   readonly answeredYear: number;
+  /** Ticket 0707. What the character has said yes to this year. */
+  readonly work: FameWorkState;
 }
 
-export const EMPTY_CELEBRITIES: CelebrityState = { ties: [], met: [], answeredYear: 0 };
+export const EMPTY_CELEBRITIES: CelebrityState = {
+  ties: [],
+  met: [],
+  answeredYear: 0,
+  work: { year: 0, done: [] },
+};

@@ -110,6 +110,16 @@ export type ScreenKey =
   | 'renovate'
   /** Ticket 0507. One auction venue. */
   | 'auction'
+  /** Ticket 0708. Your channels, what is on offer for them, and who looks after them. */
+  | 'socialMedia'
+  /** Ticket 0708. One channel: how it is going, how hard you work at it, and its price or group. */
+  | 'channel'
+  /** Ticket 0708. Start a channel on one platform. */
+  | 'newChannel'
+  /** Ticket 0708. How known you are, and what that gets you offered. */
+  | 'fame'
+  /** Ticket 0708. One famous person you know: what you can do with them. */
+  | 'connection'
   | 'debug';
 
 export interface Route {
@@ -143,6 +153,9 @@ export interface Route {
   readonly venueId?: string;
   /** Which business this screen is (0601). */
   readonly businessId?: string;
+  /** Which channel (0708), or which platform's categories to list. */
+  readonly channelId?: string;
+  readonly platformId?: string;
 }
 
 type Stacks = Record<World, Route[]>;

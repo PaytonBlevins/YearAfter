@@ -417,6 +417,7 @@ export function answerEncounter(
         timeline,
       },
       celebrities: {
+        ...state.celebrities,
         ties: tie === undefined ? state.celebrities.ties : [...state.celebrities.ties, tie],
         met: [...state.celebrities.met, figure.id].slice(-60),
         answeredYear: encounter.year,

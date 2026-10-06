@@ -1136,7 +1136,12 @@ describe('a year passing', () => {
 describe('in the game', () => {
   it('a new character has met nobody', () => {
     expect(createNewGame({ seed: 'celeb-new' }).celebrities).toEqual(EMPTY_CELEBRITIES);
-    expect(EMPTY_CELEBRITIES).toEqual({ ties: [], met: [], answeredYear: 0 });
+    expect(EMPTY_CELEBRITIES).toEqual({
+      ties: [],
+      met: [],
+      answeredYear: 0,
+      work: { year: 0, done: [] },
+    });
   });
 
   it('a year in the game carries the connections forward, and cools the ones nobody kept up', () => {
