@@ -14,6 +14,12 @@ save v43). See `playtest-manual-social-posting.md` for behavior, test results,
 balance choices and integration with the separate purchase-payment PR. Device
 checks and review remain pending; general life-event wording stays last.
 
+**6 October: your scope is widened for one list.** Payton assigned you the playtest rule changes and the
+"return to this" findings, **engine, save and balance included**, and asked that nothing else be worked
+until they are done. Read `claude/playtest-rules-brief.md` first. For P1–P16 in that brief it overrides
+section 0 and the CORE_RULES, migration and validator limits in section 8. Outside that list, section 0
+still applies. v0.08 and 0508 wait.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:

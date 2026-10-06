@@ -604,6 +604,11 @@ recreational pursuits, including sports, and feeds those participants into the
 health phase's athlete branch. v0.08's professional sports engine remains future
 work; the school-only adult-athlete gap recorded by 0211 is historical.
 
+**6 October 2026: measured and a breakdown proposed (0801–0809), nothing built.**
+No professional sports or entertainment job exists among the 169, and athletic talent
+has no door after eighteen. Waiting for Payton to approve the order and five decisions.
+See `claude/v008-entertainment-measurement.md`.
+
 ## v0.09 Military, Intelligence, Politics & Crime
 
 > Military branches/ranks/pay/benefits/deployments/discharges. FBI/CIA/military-
@@ -1395,8 +1400,8 @@ Agent A's next ticket.
     are explicitly authorized for this request. Review/device checks pending;
     twelve actions per account/year and new fame anchors need playtesting.
     General life-event wording remains deferred until last.
-**Playtest A3 — business failure warnings (6 October).** Existing-rule warnings
-are built on `feat/playtest-business-warnings`, pending review/device checks.
-They show loss/reserve and loan scenarios and confirmed exit actions. B1's
-accept/decline rescue engine and survival measurement remain open with Agent A;
-a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
+    **Playtest A3 — business failure warnings (6 October).** Existing-rule warnings
+    are built on `feat/playtest-business-warnings`, pending review/device checks.
+    They show loss/reserve and loan scenarios and confirmed exit actions. B1's
+    accept/decline rescue engine and survival measurement remain open with Agent A;
+    a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.

@@ -68,6 +68,22 @@ decisions made _since_ the spec, during review.
   correct (spec 531: preventive care matters little and is never a chore). Not
   to be turned into a systemic door. Roadmap finding 1c is closed.
 
+## Playtest rules work (decided 6 October 2026)
+
+Payton cleared the rules and "return to this" notes in `claude/playtest-backlog.md` to be worked
+before v0.08 and 0508, one ticket at a time with a stop between each. The brief is
+`claude/playtest-rules-brief.md`. Agent B (Codex) builds it, engine and save included, for this list only.
+
+- **A failing business asks each time (B1).** A warning card says what rescuing costs and the player
+  chooses to put money in or not; declining means the business closes or is sold. The automatic draw
+  on the player's bank when a business fails (0603) is to be removed.
+- **Living costs: fix the curve, then add lifestyle tiers (finding 32).** The default becomes sensible
+  first. Frugal / Comfortable / Lavish follow, as a way to spend more on purpose. **This overrides
+  spec 1166's removal of a tier selector by name.** The car's yearly cost becomes a dollar amount
+  scaled to the car and no longer a share of the living bill (finding 33).
+- **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
+  account creation for channels.
+
 ## Reference material
 
 BitLife screenshots supplied by the product owner, saved at
