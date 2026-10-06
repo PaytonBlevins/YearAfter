@@ -230,9 +230,9 @@ export function FinancesScreen() {
         <RowDivider />
         <ListRow
           title="Monthly outflow"
-          subtitle={outflow > 0 ? 'Everything going out, a month at a time' : undefined}
+          subtitle="Recorded spending, averaged over twelve months"
           value={outflow > 0 ? money(outflow) : 'Nothing going out'}
-          affordance="none"
+          onPress={() => push({ screen: 'outflow', title: 'Monthly outflow' })}
         />
       </Card>
 

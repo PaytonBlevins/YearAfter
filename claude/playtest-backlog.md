@@ -83,6 +83,7 @@ A1 goes with 0705 and 0706, not with this list.
 - Both await PR review and a native-device check. Verification and remaining gates: `claude/playtest-a4-a12.md`.
 - **A2:** Implemented on the same branch; each supplier grade now explains cost, quality and the effect on customers, with the current choice marked. See `claude/playtest-a2.md`.
 - **A3** has existing-rule screen warnings (see the batch below); accepting or declining a rescue still needs B1's engine contract; **A7** cost visibility can proceed independently; profitability pairs with **B15**, not the iced-out watches in B14. **A5** has money/business and people-screen passes; Payton explicitly deferred life-event wording until last. **A10** still needs the spec decision already recorded above.
+- **A3** needs B1's failure/warning contract; **A7** cost visibility can proceed independently; profitability pairs with **B15**, not the iced-out watches in B14. **A5** has money/business and people-screen passes; Payton explicitly deferred life-event wording until last. **A10** uses linked cost sources selected by Payton, retaining spec 20.
 - Explicit card payment options apply to every eligible purchase, including future vacations, up to the card's available credit. This is recorded in PR #2; it needs Agent A's purchase/payment contract before screens can offer it.
 
 ### Next batch — investment news and debt
@@ -96,7 +97,7 @@ A1 goes with 0705 and 0706, not with this list.
 - **A8:** Enrolled-program screen on `feat/playtest-college-graduation`: actual length, progress, grades, tuition, family help, personal share, tuition debt, Study Harder and confirmed leaving. Career opens it for working students too.
 - **A9:** Graduation notice celebrates newly earned diplomas, degrees and licenses; names career paths and tuition debt; waits behind other overlays and does not replay a loaded save. A stage change alone is not success: failing out and insufficient tuition also set `graduated`.
 - Both await review and native-device checks. Detailed results: `claude/playtest-college-graduation.md`. Review after PR #4.
-- Remaining screen notes need input/contracts: A1 (0705/0706), A3 (B1), A5 (life-event wording deferred until last), A10 (spec 20 decision). Rules/B items stay with Agent A.
+- Remaining screen notes need input/contracts: A1 (0705/0706), A3 (B1), A5 (life-event wording deferred until last). Rules/B items stay with Agent A.
 
 ### Next batch — rental cost visibility
 
@@ -121,3 +122,8 @@ examples; vacations must support the same payment choice when implemented. A13/B
 
 - **A3:** Cash warnings are implemented on `feat/playtest-business-warnings`: the business list flags trouble and the dashboard explains a repeat-loss rescue estimate, loan gap, arrears and existing management/exit choices. Sale and closure require separate confirmation. Review/device checks remain pending.
 - **B1 is still open:** main still takes rescue money automatically. There is no injection/decline command or pause before actual failure. These screens describe the existing rules and mark the figures as scenarios; they do not claim the rescue-choice requirement is built. Details: `claude/playtest-business-warnings.md`.
+### A10 — linked monthly-outflow sources
+
+- Payton chose a linked cost-sources view, retaining spec 20: explain the total and keep detailed costs on existing entity screens. Monthly outflow now opens even when zero and shows the same recorded yearly spending divided by twelve.
+- Conditional links open debt, family/children, homes, vehicles, an enrolled program and businesses. The view distinguishes current details from recorded spending; no category amounts or transaction ledger are shown. Built on `feat/playtest-outflow-sources`, pending review/device checks. Details: `claude/playtest-outflow-sources.md`. Earlier batches are now merged into main.
+- Life-event wording remains deferred until last. A1, A3 and purchase-card choices still need Agent A's contracts.
