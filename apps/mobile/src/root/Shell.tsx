@@ -16,6 +16,7 @@ import { DecisionCard } from '../components/DecisionCard';
 import { FinancesScreen } from '../screens/FinancesScreen';
 import { CreditScreen } from '../screens/CreditScreen';
 import { CardsScreen } from '../screens/CardsScreen';
+import { OutflowScreen } from '../screens/OutflowScreen';
 import { DebtScreen } from '../screens/DebtScreen';
 import { LoansScreen } from '../screens/LoansScreen';
 import { HomesScreen } from '../screens/HomesScreen';
@@ -86,6 +87,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   cards: CardsScreen,
   loans: LoansScreen,
   debt: DebtScreen,
+  outflow: OutflowScreen,
   homes: HomesScreen,
   businesses: BusinessesScreen,
   business: BusinessScreen,

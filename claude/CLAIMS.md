@@ -27,7 +27,7 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | A5 People-screen spoken copy | Codex / Agent B | `feat/playtest-people-copy` | people pass built; events deferred; review pending |
 
-| A10 Linked outflow sources | Codex / Agent B | `feat/playtest-outflow-sources` | claimed; linked sources selected by Payton |
+| A10 Linked outflow sources | Codex / Agent B | `feat/playtest-outflow-sources` | built; linked sources selected; review/device pending |
 
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |

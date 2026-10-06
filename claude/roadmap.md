@@ -864,6 +864,12 @@ goes. One option that keeps the spirit of spec 20: tapping it lists each cause
 as a link (living costs, tax, loans, cards, children, homes, cars) rather than a
 month-by-month statement.
 
+A10 update, 6 October: Payton selected linked cost sources, keeping detailed
+costs on their existing entity screens under spec 20. Built on
+`feat/playtest-outflow-sources`; review/device checks pending. The total remains
+recorded spending in the current game year divided by twelve, not a forecast.
+See `claude/playtest-outflow-sources.md`.
+
 Payton's case was $60,000 a year, renting, no car, and about $5,000 a month
 going out. Measured on 150 lives, a single renter on $55,000–$65,000 runs about
 **$4,700 a month**. About **$1,100 of that is income tax**, which the outflow
