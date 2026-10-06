@@ -96,6 +96,13 @@ export type TransactionCategory =
    */
   | 'business'
   /**
+   * Ticket 0701. What a channel paid its maker, and what keeping it going cost
+   * (a negative row, so the net is what counts). Earned and taxed like a wage;
+   * a lender counts it like one. Not `business`, which is what a company paid
+   * its owner out of money the company kept (spec 23).
+   */
+  | 'creator'
+  /**
    * Ticket 0502. What a partner brought home: their pay, or their pension once
    * they retire. Not `salary`, because the player did not earn it and the
    * Career screen's numbers are about the player's own work. The household

@@ -1867,6 +1867,163 @@ describe('Ticket 0406 — a question survives being saved', () => {
     expect(migrated.value.deals).toEqual([]);
   });
 
+  it('gives a v40 save no channels and no fame, and keeps what a v41 save holds', () => {
+    // Ticket 0701. Losing `luck` on a reload would reroll a channel's whole future; losing
+    // `fame` would make a star anonymous the moment they closed the app.
+    const { save } = newSave('CHANNELS');
+    const live: GameState = {
+      ...fromSave(save),
+      fame: 37,
+      channels: [
+        {
+          id: 'ch:2044:video:gaming',
+          platformId: 'video',
+          categoryId: 'gaming',
+          name: 'Pixel Drift',
+          since: 2044,
+          audience: 12_345,
+          peak: 20_000,
+          effort: 'heavy',
+          luck: 0.9731,
+          earned: dollars(4_321),
+        },
+      ],
+    };
+    const written = toSave(live, { id: asSaveId('s-channels') });
+    expect(written.version).toBe(CURRENT_SAVE_VERSION);
+    expect(fromSave(written).channels).toEqual(live.channels);
+    expect(fromSave(written).fame).toBe(37);
+
+    const old = JSON.parse(JSON.stringify(written));
+    old.version = 40;
+    delete old.channels;
+    delete old.fame;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.value.channels).toEqual([]);
+    expect(migrated.value.fame).toBe(0);
+  });
+
+  it('keeps what a channel earned and answered, and who pays, through a save (0702, 0703)', () => {
+    // Losing `paid` on a reload would send a newsletter's payers back to nothing; losing `owed`
+    // would lose money already agreed; losing `viralYear` would call the fall after a hit a slump.
+    const { save } = newSave('CHANNELS2');
+    const live: GameState = {
+      ...fromSave(save),
+      channels: [
+        {
+          id: 'ch:2044:subscription:business',
+          platformId: 'subscription',
+          categoryId: 'business',
+          name: 'Ledger Notes',
+          since: 2044,
+          audience: 54_321,
+          peak: 60_000,
+          effort: 'regular',
+          luck: 0.91,
+          earned: dollars(12_000),
+          bestRank: 840,
+          owed: dollars(1_600),
+          answered: ['sp:2046:ch:2044:subscription:business:0'],
+          paid: 1_876,
+          tier: 'premium',
+          viralYear: 2045,
+        },
+      ],
+    };
+    const written = toSave(live, { id: asSaveId('s-channels2') });
+    const back = fromSave(JSON.parse(JSON.stringify(written)));
+    expect(back.channels).toEqual(live.channels);
+    expect(migrateSave(JSON.parse(JSON.stringify(written))).ok).toBe(true);
+  });
+
+  it('keeps channels and fame a v40 save somehow already carries, rather than wiping them', () => {
+    const { save } = newSave('CHANNELS-KEEP');
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 40;
+    old.channels = [{ id: 'ch:2044:video:gaming' }];
+    old.fame = 12;
+    const migrated = migrateSave(old);
+    expect(migrated.ok).toBe(true);
+    if (!migrated.ok) return;
+    expect(migrated.value.channels).toEqual([{ id: 'ch:2044:video:gaming' }]);
+    expect(migrated.value.fame).toBe(12);
+  });
+
+  it('refuses a current save whose channels are not a list or whose fame is not a number', () => {
+    const { save } = newSave('CHANNELS-BAD');
+    const badChannels = migrateSave({ ...JSON.parse(JSON.stringify(save)), channels: 'none' });
+    expect(badChannels.ok).toBe(false);
+    const badFame = migrateSave({ ...JSON.parse(JSON.stringify(save)), fame: 'famous' });
+    expect(badFame.ok).toBe(false);
+    expect(migrateSave(JSON.parse(JSON.stringify(save))).ok).toBe(true);
+  });
+
+  it('keeps a group and who a channel has worked with through a save (0704)', () => {
+    // Losing `group` on a reload would hand back a share of income and the reach with it for free;
+    // losing `collabs` would let the same guest work as well the fifth time as the first.
+    const { save } = newSave('NETWORK');
+    const live: GameState = {
+      ...fromSave(save),
+      channels: [
+        {
+          id: 'ch:2044:video:gaming',
+          platformId: 'video',
+          categoryId: 'gaming',
+          name: 'Late Night Lobby',
+          since: 2044,
+          audience: 41_000,
+          peak: 44_000,
+          effort: 'regular',
+          luck: 0.8,
+          earned: dollars(30_000),
+          group: {
+            id: 'gp:2046:ch:2044:video:gaming',
+            kind: 'group',
+            name: 'The Loft',
+            cut: 0.2,
+            since: 2046,
+          },
+          collabs: { 'p:ch:2044:video:gaming:3': 2, 'f:friend-7': 1 },
+          answered: ['gp:2046:ch:2044:video:gaming', 'co:2046:ch:2044:video:gaming:0'],
+        },
+      ],
+    };
+    const written = toSave(live, { id: asSaveId('s-network') });
+    const back = fromSave(JSON.parse(JSON.stringify(written)));
+    expect(back.channels).toEqual(live.channels);
+    expect(migrateSave(JSON.parse(JSON.stringify(written))).ok).toBe(true);
+  });
+
+  it('keeps a manager or an agent through a save, and writes nothing for nobody (0704)', () => {
+    const { save } = newSave('REP');
+    const base = fromSave(save);
+    for (const kind of ['manager', 'agent'] as const) {
+      const written = toSave({ ...base, representation: kind }, { id: asSaveId(`s-${kind}`) });
+      expect(written.representation).toBe(kind);
+      expect(fromSave(JSON.parse(JSON.stringify(written))).representation).toBe(kind);
+      expect(migrateSave(JSON.parse(JSON.stringify(written))).ok).toBe(true);
+    }
+    const none = toSave(base, { id: asSaveId('s-none') });
+    expect('representation' in none).toBe(false);
+    expect('representation' in fromSave(JSON.parse(JSON.stringify(none)))).toBe(false);
+  });
+
+  it('refuses a save whose representation is neither one of the two nor missing (0704)', () => {
+    const { save } = newSave('REP-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    for (const bad of ['both', 'editor', 7, null, true, ['manager']]) {
+      const result = migrateSave({ ...raw, representation: bad });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(JSON.stringify(result.error)).toContain('representation');
+    }
+    expect(migrateSave({ ...raw, representation: 'manager' }).ok).toBe(true);
+    expect(migrateSave({ ...raw, representation: 'agent' }).ok).toBe(true);
+    expect(migrateSave(raw).ok).toBe(true);
+  });
+
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {
     // Ticket 0606. No version bump: `trade`, `leaseEnds` and `rent` are optional on a tenant. Losing
     // `rent` on a reload would reprice a lease at today's rate; losing `leaseEnds` would end it.

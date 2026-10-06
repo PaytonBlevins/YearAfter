@@ -40,3 +40,8 @@ export * from './auctions';
 export * from './businesses';
 export * from './business-events';
 export * from './private-deals';
+export * from './creators';
+export * from './sponsorships';
+export * from './groups';
+export * from './representation';
+export * from './collaborations';

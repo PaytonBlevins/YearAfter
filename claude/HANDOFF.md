@@ -1,7 +1,8 @@
 # YearAfter — handoff for the second coding agent (Agent B)
 
-Written 4 October 2026, scope rewritten 5 October 2026. State: the 0605 and 0606
-engines are on `origin/main` at `d64f507`; their screens are not merged. Save version v40. Repo:
+Written 4 October 2026, scope rewritten 5 October 2026. State refreshed against
+`origin/main` at `0d23cc5`: the 0605/0606 and 0701–0704 engines are built.
+The 0605/0606 screens remain unmerged; v0.07 screens are not assigned. Save v41. Repo:
 https://github.com/PaytonBlevins/YearAfter.git (public).
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
@@ -45,7 +46,7 @@ pnpm 10.28 + Turborepo, node >= 20.
 4. `claude/roadmap.md` — the roadmap. Findings and the order list are at its end.
 5. The ticket doc for the area you touch (`claude/06xx-*.md`, most recent first).
 6. `specs/CORE_RULES.md` (numbered rules 13.x are lessons from earlier tickets).
-   Grep it by topic; the latest rules at `d64f507` are 13.108–13.109.
+   Grep it by topic; the latest rules at `0d23cc5` are 13.110–13.122.
 7. `specs/MASTER_SPEC.md` — the source of truth; every ticket cites line ranges.
 
 ## 3. Architecture in brief
@@ -56,7 +57,7 @@ pnpm 10.28 + Turborepo, node >= 20.
   education <- simulation <- persistence <- apps/mobile. Also finance, health,
   careers, social, parenting, stress. `tools/content-validator` checks content.
 - `advanceYear` is calculate -> validate -> commit, in phase modules.
-- Saves are a versioned JSON document with tested migrations (now v40). Any
+- Saves are a versioned JSON document with tested migrations (now v41). Any
   change to saved shape needs a version bump and a migration test. Optional
   fields can avoid a bump (0604 did).
 - Randomness: never `Math.random()`. Use the RNG registry's domain streams, keyed
@@ -96,17 +97,25 @@ original visual identity. Full text: `claude/approved-decisions.md`.
 
 ## 6. Current state and open items
 
-- Done on the engine side: everything through **0605 Private investments** (save
-  v40) and **0606 Commercial real estate** (no save bump). Screens for both are
-  yours (section 7).
+- The **0605 Private investments** and **0606 Commercial real estate** engines
+  are built. The 0605 screen patch is prepared but unmerged; it still needs
+  latest-engine integration and device checks. 0606 screens remain open. Both
+  are yours (section 7).
+- **0701–0704 Creator & Fame** engines are also built on `main`: channels and
+  fame, platform growth and deals, paid tiers, collaborations, groups and
+  representation. 0701 raised the save to **v41**; 0702–0704 do not bump it.
+  Their screens are unassigned; 0705 and 0706 remain future tickets for Agent A,
+  when Payton says so.
 - **0508 Will & Estate** was deferred by Payton and is still to be built, by Agent A.
 - Open findings: 28–36 (playtest after 0507), 37–41 (business calibration:
   survival 78.7% vs BLS 51%, profit swings, cheap trades too profitable, a
   child's inherited business), 42–43 (0605: an index fund beats private deals,
   portfolio income untaxed) and 44–46 (0606: tenant costs, the first-year clamp,
-  no renovation and no own-business tenants). See the roadmap.
-- `packages/finance/src/investments.test.ts` is deleted in the tree; intent not
-  confirmed with Payton. Ask before restoring or relying on it.
+  no renovation and no own-business tenants). Creator findings 47–63 are now
+  recorded too; 47 and 52 are resolved, with the remaining questions retained
+  for later work. See the roadmap.
+- `packages/finance/src/investments.test.ts` is present again on `main` at
+  `0d23cc5`; the earlier missing-file question no longer describes this tree.
 - Mobile screens for 0602–0606 are typechecked but not run on a device.
 - `pnpm mobile -- --clear` starts Expo with a clean cache (not `pnpm mobile clear`).
 - **Never run Prettier over `packages/content/data`.** `pnpm validate:content`
@@ -182,4 +191,6 @@ Gotchas
 
 Ticket docs also live in the Claude Project "YearAfter" (`claude/…` paths). After
 each doc change, mirror it there. `claude/build-status.md` exists only in the
-Project.
+Project. Payton confirmed that the other notes referenced but absent from this
+checkout also live there; they are not lost. Repository reconciliation does
+not imply that their Project copies have been read or mirrored.

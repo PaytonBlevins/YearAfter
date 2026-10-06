@@ -47,3 +47,5 @@ export * from './phases/social';
 export * from './phases/stress';
 export * from './businesses';
 export * from './deals';
+export * from './creators';
+export * from './network';

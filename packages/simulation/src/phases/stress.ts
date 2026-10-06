@@ -49,6 +49,8 @@ export interface StressPhaseInput {
    * number the player never sees and leaves as a sentence about their year.
    */
   readonly workDemand?: number;
+  /** Ticket 0702. Discretionary hours a week the character's channels take. */
+  readonly creatorHours?: number;
 }
 
 /**
@@ -86,7 +88,7 @@ export function runStress(input: StressPhaseInput): StressPhaseOutput {
   const previous = input.player.stress.level;
 
   const sources = stressSources({
-    hours: input.hours + (input.workDemand ?? 0) * HOURS_PER_DEMAND,
+    hours: input.hours + (input.workDemand ?? 0) * HOURS_PER_DEMAND + (input.creatorHours ?? 0),
     capacity: input.capacity,
     household: input.family,
     ...(input.atSchool ? { behaviour: input.education.behaviour } : {}),
