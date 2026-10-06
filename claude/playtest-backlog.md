@@ -83,3 +83,9 @@ A1 goes with 0705 and 0706, not with this list.
 - **A2:** Implemented on the same branch; each supplier grade now explains cost, quality and the effect on customers, with the current choice marked. See `claude/playtest-a2.md`.
 - **A3** needs B1's failure/warning contract; **A7** pairs with **B15**, not the iced-out watches in B14. **A5** still needs examples of the wording Payton means. **A10** still needs the spec decision already recorded above.
 - Explicit card payment options apply to every eligible purchase, including future vacations, up to the card's available credit. This is recorded in PR #2; it needs Agent A's purchase/payment contract before screens can offer it.
+
+### Next batch — investment news and debt
+
+- **A6:** All 128 headline texts rewritten on `feat/playtest-news-debt`, preserving ids and conditions. Stories identify average or individual price direction and the relevant holding; the newspaper explains sectors, evidence and the forecast limit. Specific company causes are unavailable in the engine and are not invented.
+- **A11:** Debt overview gathers cards, loans, mortgages and car loans. Finances opens it; Career shows a student's tuition-loan balance and a link. Existing payment screens and rules are unchanged.
+- Both await review and native-device checks. Detailed results: `claude/playtest-news-debt.md`. The branch follows PR #3; next independent candidates are A8 and A9.

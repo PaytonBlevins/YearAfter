@@ -70,6 +70,7 @@ import {
   SectionHeading,
   type RowAffordance,
 } from '../components';
+import { StudentDebtRow } from './StudentDebtRow';
 import { useGame } from '../stores/gameStore';
 import { useNavigation, type Route } from '../navigation/navigation';
 import { colors, spacing, typography } from '../theme/theme';
@@ -209,6 +210,11 @@ export function CareerScreen() {
   return (
     <Screen>
       <WhereYouAre />
+      {isAtCollege(state.education) && state.employment.job ? (
+        <Card>
+          <StudentDebtRow />
+        </Card>
+      ) : null}
       <WhatYouCanDo />
       <Elsewhere />
     </Screen>
@@ -295,6 +301,8 @@ function WhereYouAre() {
             meta={`${gradePointAverage(education.performance).toFixed(1)} GPA`}
             affordance="none"
           />
+          <RowDivider />
+          <StudentDebtRow />
         </Card>
       </>
     );

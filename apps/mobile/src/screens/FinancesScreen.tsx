@@ -135,6 +135,14 @@ export function FinancesScreen() {
           one question, so they are three rows of one card.
         */}
         <ListRow
+          title="Debt"
+          subtitle="Loans, cards, mortgages and car loans"
+          value={money(Number(books.liabilities))}
+          onPress={() => push({ screen: 'debt', title: 'Debt' })}
+          wrap
+        />
+        <RowDivider />
+        <ListRow
           title="Credit"
           subtitle="What a lender would see"
           value={credit.label}

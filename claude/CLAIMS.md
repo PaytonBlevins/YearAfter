@@ -16,8 +16,8 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | A4 People-action odds labels      | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
 | A12 Property row without a home   | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
 | A2 Business supplier explanations | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
-| A6 Clear investment headlines     | Codex / Agent B | `feat/playtest-news-debt` | claimed; in progress        |
-| A11 Findable debt overview        | Codex / Agent B | `feat/playtest-news-debt` | claimed; follows A6         |
+| A6 Clear investment headlines     | Codex / Agent B | `feat/playtest-news-debt` | implemented; review pending |
+| A11 Findable debt overview        | Codex / Agent B | `feat/playtest-news-debt` | implemented; review pending |
 
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |

@@ -6,896 +6,896 @@
       "slot": "lead",
       "when": "severeRecession",
       "tone": "bad",
-      "text": "Markets Post Worst Year In Living Memory"
+      "text": "Deep Recession Puts Pressure On Shares And Funds"
     },
     {
       "id": "hl.lead.severeRecession.2",
       "slot": "lead",
       "when": "severeRecession",
       "tone": "bad",
-      "text": "Panic Selling Wipes Out A Decade Of Gains"
+      "text": "Shares Face A Deep Recession; Check Your Holdings"
     },
     {
       "id": "hl.lead.severeRecession.3",
       "slot": "lead",
       "when": "severeRecession",
       "tone": "bad",
-      "text": "The Crash Nobody Wanted To Name Has A Name Now"
+      "text": "Deep Recession Raises The Stakes For Stockholders"
     },
     {
       "id": "hl.lead.severeRecession.4",
       "slot": "lead",
       "when": "severeRecession",
       "tone": "bad",
-      "text": "Savers Wake Up To Half The Money They Went To Bed With"
+      "text": "Stock And Fund Holders Face A Severe Downturn"
     },
     {
       "id": "hl.lead.severeRecession.5",
       "slot": "lead",
       "when": "severeRecession",
       "tone": "bad",
-      "text": "Trading Floors Empty As The Bottom Keeps Moving"
+      "text": "A Severe Downturn Tests Share And Fund Holdings"
     },
     {
       "id": "hl.lead.severeRecession.6",
       "slot": "lead",
       "when": "severeRecession",
       "tone": "bad",
-      "text": "A Generation Learns What A Real Crash Looks Like"
+      "text": "Deep Recession: Compare Your Investments With Cash"
     },
     {
       "id": "hl.lead.severeRecession.7",
       "slot": "lead",
       "when": "severeRecession",
       "tone": "bad",
-      "text": "Every Sector Red, And No Floor In Sight"
+      "text": "A Deep Slump Makes Stock And Fund Risk Matter More"
     },
     {
       "id": "hl.lead.severeRecession.8",
       "slot": "lead",
       "when": "severeRecession",
       "tone": "bad",
-      "text": "The Year The Market Stopped Pretending"
+      "text": "Severe Recession: Review What Your Funds Hold"
     },
     {
       "id": "hl.lead.recession.1",
       "slot": "lead",
       "when": "recession",
       "tone": "bad",
-      "text": "Markets Slide As The Downturn Takes Hold"
+      "text": "Recession Puts Pressure On Shares And Funds"
     },
     {
       "id": "hl.lead.recession.2",
       "slot": "lead",
       "when": "recession",
       "tone": "bad",
-      "text": "Investors Head For The Exits"
+      "text": "Shares Face A Downturn; Check Your Own Results"
     },
     {
       "id": "hl.lead.recession.3",
       "slot": "lead",
       "when": "recession",
       "tone": "bad",
-      "text": "A Bruising Year Ends With Little Cheer"
+      "text": "Recession Tests Stock And Fund Holdings"
     },
     {
       "id": "hl.lead.recession.4",
       "slot": "lead",
       "when": "recession",
       "tone": "bad",
-      "text": "Recession Bites, And Portfolios Feel It"
+      "text": "A Downturn Makes Investment Risk Worth A Look"
     },
     {
       "id": "hl.lead.recession.5",
       "slot": "lead",
       "when": "recession",
       "tone": "bad",
-      "text": "Losses Mount As Buyers Stay Home"
+      "text": "Stockholders Face A Recession; Review Your Holdings"
     },
     {
       "id": "hl.lead.recession.6",
       "slot": "lead",
       "when": "recession",
       "tone": "bad",
-      "text": "The Market Gives Back What It Spent Two Years Earning"
+      "text": "Recession: Compare Your Funds With Your Cash"
     },
     {
       "id": "hl.lead.recession.7",
       "slot": "lead",
       "when": "recession",
       "tone": "bad",
-      "text": "Bad News Keeps Arriving On Schedule"
+      "text": "An Economic Slump Weighs On Shares And Funds"
     },
     {
       "id": "hl.lead.recession.8",
       "slot": "lead",
       "when": "recession",
       "tone": "bad",
-      "text": "Nobody Is Calling The Bottom Yet"
+      "text": "Recession Sets A Tough Backdrop For Stock Prices"
     },
     {
       "id": "hl.lead.slowdown.1",
       "slot": "lead",
       "when": "slowdown",
       "tone": "bad",
-      "text": "Growth Cools And Markets Drift Lower"
+      "text": "Slower Growth Weighs On Share And Fund Prices"
     },
     {
       "id": "hl.lead.slowdown.2",
       "slot": "lead",
       "when": "slowdown",
       "tone": "bad",
-      "text": "A Flat Year With A Downward Lean"
+      "text": "Economic Growth Cools; Check Your Shares And Funds"
     },
     {
       "id": "hl.lead.slowdown.3",
       "slot": "lead",
       "when": "slowdown",
       "tone": "bad",
-      "text": "Momentum Stalls Across The Board"
+      "text": "Stockholders Face A Slower Economy"
     },
     {
       "id": "hl.lead.slowdown.4",
       "slot": "lead",
       "when": "slowdown",
       "tone": "bad",
-      "text": "Traders Call It A Pause. Others Call It Worse"
+      "text": "A Slowdown Tests Stock And Fund Returns"
     },
     {
       "id": "hl.lead.slowdown.5",
       "slot": "lead",
       "when": "slowdown",
       "tone": "bad",
-      "text": "The Rally Runs Out Of Road"
+      "text": "Slower Growth: Compare Your Investment Results"
     },
     {
       "id": "hl.lead.slowdown.6",
       "slot": "lead",
       "when": "slowdown",
       "tone": "bad",
-      "text": "Slower Everywhere, Broken Nowhere"
+      "text": "Shares And Funds Face A Cooling Economy"
     },
     {
       "id": "hl.lead.slowdown.7",
       "slot": "lead",
       "when": "slowdown",
       "tone": "bad",
-      "text": "A Year Of Small Disappointments"
+      "text": "A Cooler Economy Leaves Less Support For Shares"
     },
     {
       "id": "hl.lead.slowdown.8",
       "slot": "lead",
       "when": "slowdown",
       "tone": "bad",
-      "text": "Confidence Thins Without Quite Breaking"
+      "text": "Growth Slows; Your Holdings Still Have Their Own Year"
     },
     {
       "id": "hl.lead.normal.1",
       "slot": "lead",
       "when": "normal",
       "tone": "flat",
-      "text": "An Ordinary Year, And Nobody Complains"
+      "text": "A Normal Economy; Check How Your Holdings Did"
     },
     {
       "id": "hl.lead.normal.2",
       "slot": "lead",
       "when": "normal",
       "tone": "flat",
-      "text": "Markets Grind Higher Without Much Drama"
+      "text": "Shares And Funds Face An Ordinary Economic Year"
     },
     {
       "id": "hl.lead.normal.3",
       "slot": "lead",
       "when": "normal",
       "tone": "flat",
-      "text": "A Quiet Year On The Exchange"
+      "text": "No Boom Or Slump; Compare Your Investment Results"
     },
     {
       "id": "hl.lead.normal.4",
       "slot": "lead",
       "when": "normal",
       "tone": "flat",
-      "text": "No Crisis, No Boom, No Headlines"
+      "text": "A Normal Year Still Leaves Stockholders With Risk"
     },
     {
       "id": "hl.lead.normal.5",
       "slot": "lead",
       "when": "normal",
       "tone": "flat",
-      "text": "Steady As She Goes, Say The Optimists"
+      "text": "An Ordinary Economy; Your Funds Have Their Own Results"
     },
     {
       "id": "hl.lead.normal.6",
       "slot": "lead",
       "when": "normal",
       "tone": "flat",
-      "text": "The Market Ends Roughly Where It Started"
+      "text": "Steady Conditions; Check Your Shares Against Your Funds"
     },
     {
       "id": "hl.lead.normal.7",
       "slot": "lead",
       "when": "normal",
       "tone": "flat",
-      "text": "A Year That Won't Make The History Books"
+      "text": "Normal Growth Sets The Backdrop For Your Investments"
     },
     {
       "id": "hl.lead.normal.8",
       "slot": "lead",
       "when": "normal",
       "tone": "flat",
-      "text": "Dull Isn't The Same As Bad"
+      "text": "No Economic Shock; Individual Holdings Can Still Swing"
     },
     {
       "id": "hl.lead.growth.1",
       "slot": "lead",
       "when": "growth",
       "tone": "good",
-      "text": "Markets Climb Through A Confident Year"
+      "text": "Growing Economy Supports Share And Fund Prices"
     },
     {
       "id": "hl.lead.growth.2",
       "slot": "lead",
       "when": "growth",
       "tone": "good",
-      "text": "Gains Broaden Out Across The Exchange"
+      "text": "Economic Growth Helps Shares; Check Your Own Returns"
     },
     {
       "id": "hl.lead.growth.3",
       "slot": "lead",
       "when": "growth",
       "tone": "good",
-      "text": "A Good Year, And Most Of It Earned"
+      "text": "Shares And Funds Get Support From Economic Growth"
     },
     {
       "id": "hl.lead.growth.4",
       "slot": "lead",
       "when": "growth",
       "tone": "good",
-      "text": "Buyers Return And Prices Follow"
+      "text": "Growth Improves The Backdrop For Stockholders"
     },
     {
       "id": "hl.lead.growth.5",
       "slot": "lead",
       "when": "growth",
       "tone": "good",
-      "text": "Optimism Is Back, And So Are The Numbers"
+      "text": "A Growing Economy Helps Shares, Without A Guarantee"
     },
     {
       "id": "hl.lead.growth.6",
       "slot": "lead",
       "when": "growth",
       "tone": "good",
-      "text": "A Solid Year Nobody Wants To Jinx"
+      "text": "Growth Supports Funds; Their Holdings Still Matter"
     },
     {
       "id": "hl.lead.growth.7",
       "slot": "lead",
       "when": "growth",
       "tone": "good",
-      "text": "Growth Shows Up In The Places It Should"
+      "text": "A Stronger Economy Gives Shares More Support"
     },
     {
       "id": "hl.lead.growth.8",
       "slot": "lead",
       "when": "growth",
       "tone": "good",
-      "text": "Portfolios End The Year Fatter"
+      "text": "Growth: Compare Your Shares And Funds With Cash"
     },
     {
       "id": "hl.lead.strongExpansion.1",
       "slot": "lead",
       "when": "strongExpansion",
       "tone": "good",
-      "text": "Markets Roar Through A Record Year"
+      "text": "A Booming Economy Supports Shares And Funds"
     },
     {
       "id": "hl.lead.strongExpansion.2",
       "slot": "lead",
       "when": "strongExpansion",
       "tone": "good",
-      "text": "The Boom Arrives, And Everyone Is Early"
+      "text": "Strong Growth Helps Shares; Check Your Own Results"
     },
     {
       "id": "hl.lead.strongExpansion.3",
       "slot": "lead",
       "when": "strongExpansion",
       "tone": "good",
-      "text": "Record Highs, And The Champagne To Match"
+      "text": "Shares And Funds Get A Strong Economic Tailwind"
     },
     {
       "id": "hl.lead.strongExpansion.4",
       "slot": "lead",
       "when": "strongExpansion",
       "tone": "good",
-      "text": "A Year Of Fortunes Made In Twelve Months"
+      "text": "A Boom Helps Stockholders, But Risk Remains"
     },
     {
       "id": "hl.lead.strongExpansion.5",
       "slot": "lead",
       "when": "strongExpansion",
       "tone": "good",
-      "text": "Everything Is Up, Which Worries The Careful"
+      "text": "Strong Expansion: Review Your Share And Fund Holdings"
     },
     {
       "id": "hl.lead.strongExpansion.6",
       "slot": "lead",
       "when": "strongExpansion",
       "tone": "good",
-      "text": "The Best Year On The Exchange In Decades"
+      "text": "Boom Helps Share Prices; Gains Aren't Guaranteed"
     },
     {
       "id": "hl.lead.strongExpansion.7",
       "slot": "lead",
       "when": "strongExpansion",
       "tone": "good",
-      "text": "Money Pours In And Prices Cannot Keep Up"
+      "text": "An Economic Boom Helps Shares; Each Holding Can Differ"
     },
     {
       "id": "hl.lead.strongExpansion.8",
       "slot": "lead",
       "when": "strongExpansion",
       "tone": "good",
-      "text": "Nobody Wants To Be The One Who Sold"
+      "text": "Strong Growth: Compare Your Investments With Cash"
     },
     {
       "id": "hl.sector.up.1",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "{sector} Leads The Market Higher"
+      "text": "{sector} Holdings Rise On Average; Check Yours"
     },
     {
       "id": "hl.sector.up.2",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "Money Floods Into {sector}"
+      "text": "Average {sector} Prices Rise; Individual Results Vary"
     },
     {
       "id": "hl.sector.up.3",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "A Banner Year For {sector}"
+      "text": "{sector} Investments Gain On Average This Year"
     },
     {
       "id": "hl.sector.up.4",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "{sector} Outruns Everything Else On The Board"
+      "text": "{sector} Holdings Gain On Average; Review Your Mix"
     },
     {
       "id": "hl.sector.up.5",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "Analysts Fall In Love With {sector} All Over Again"
+      "text": "Average Prices In {sector} Climb This Year"
     },
     {
       "id": "hl.sector.up.6",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "{sector} Posts The Year's Biggest Gains"
+      "text": "{sector} Prices Rise On Average; Check What You Own"
     },
     {
       "id": "hl.sector.up.7",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "Everyone Suddenly Owns {sector}"
+      "text": "Holdings In {sector} Gain On Average"
     },
     {
       "id": "hl.sector.up.8",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "{sector} Rewards The Patient"
+      "text": "{sector} Gains On Average; Look At Individual Prices"
     },
     {
       "id": "hl.sector.up.9",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "The {sector} Trade Works, For Once"
+      "text": "Average {sector} Prices Climb; Your Holdings May Differ"
     },
     {
       "id": "hl.sector.up.10",
       "slot": "sector",
       "when": "up",
       "tone": "good",
-      "text": "{sector} Ends The Year On Top"
+      "text": "{sector} Rises On Average; Compare Your Own Returns"
     },
     {
       "id": "hl.sector.down.1",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "{sector} Takes The Year's Heaviest Losses"
+      "text": "{sector} Holdings Fall On Average; Check Yours"
     },
     {
       "id": "hl.sector.down.2",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "The Bottom Falls Out Of {sector}"
+      "text": "Average {sector} Prices Fall; Individual Results Vary"
     },
     {
       "id": "hl.sector.down.3",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "{sector} Investors Count The Damage"
+      "text": "{sector} Investments Lose Value On Average This Year"
     },
     {
       "id": "hl.sector.down.4",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "Nobody Wants {sector} At Any Price"
+      "text": "{sector} Falls On Average; Review Your Investment Mix"
     },
     {
       "id": "hl.sector.down.5",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "{sector} Drags The Whole Market Down With It"
+      "text": "Average Prices In {sector} Drop This Year"
     },
     {
       "id": "hl.sector.down.6",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "A Miserable Year For Anyone Holding {sector}"
+      "text": "{sector} Prices Fall On Average; Check What You Own"
     },
     {
       "id": "hl.sector.down.7",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "{sector} Gives Back Everything And More"
+      "text": "Holdings In {sector} Lose Value On Average"
     },
     {
       "id": "hl.sector.down.8",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "The {sector} Story Falls Apart"
+      "text": "{sector} Falls On Average; Look At Individual Prices"
     },
     {
       "id": "hl.sector.down.9",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "{sector} Ends The Year At The Bottom Of The Table"
+      "text": "Average {sector} Prices Drop; Your Holdings May Differ"
     },
     {
       "id": "hl.sector.down.10",
       "slot": "sector",
       "when": "down",
       "tone": "bad",
-      "text": "Hard Lessons For The {sector} Faithful"
+      "text": "{sector} Drops On Average; Compare Your Own Returns"
     },
     {
       "id": "hl.mover.up.1",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "{firm} Climbs {pct} And Nobody Saw It Coming"
+      "text": "{firm} Rises {pct}; Check Your Holding"
     },
     {
       "id": "hl.mover.up.2",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "{firm} Is The Year's Biggest Winner, Up {pct}"
+      "text": "{firm} Gains {pct} In The Year Just Finished"
     },
     {
       "id": "hl.mover.up.3",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "A {pct} Year For {firm}"
+      "text": "{firm} Ends The Year Up {pct}"
     },
     {
       "id": "hl.mover.up.4",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "{firm} Shareholders Have A Very Good Year"
+      "text": "{firm} Gains {pct}; Review Its Price History"
     },
     {
       "id": "hl.mover.up.5",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "{firm} Up {pct}, And The Analysts Are Scrambling"
+      "text": "{firm} Rises {pct}; Past Gains Aren't A Forecast"
     },
     {
       "id": "hl.mover.up.6",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "The {firm} Story Everyone Wants A Piece Of"
+      "text": "{firm} Adds {pct}; Check How Much You Hold"
     },
     {
       "id": "hl.mover.up.7",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "{firm} Rewrites Its Own Ceiling, Up {pct}"
+      "text": "{firm} Up {pct}; Compare It With Your Other Holdings"
     },
     {
       "id": "hl.mover.up.8",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "Late To {firm}? So Was Almost Everyone"
+      "text": "{firm} Gains {pct}; New Buyers Pay The New Price"
     },
     {
       "id": "hl.mover.up.9",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "{firm} Adds {pct} And Keeps Going"
+      "text": "{firm} Climbs {pct}; Its Own Price Moved"
     },
     {
       "id": "hl.mover.up.10",
       "slot": "mover",
       "when": "up",
       "tone": "good",
-      "text": "Quiet Until Now: {firm} Gains {pct}"
+      "text": "{firm} Up {pct}; Check Your Own Return"
     },
     {
       "id": "hl.mover.down.1",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "{firm} Falls {pct} In A Brutal Twelve Months"
+      "text": "{firm} Falls {pct}; Check Your Holding"
     },
     {
       "id": "hl.mover.down.2",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "The Wheels Come Off At {firm}"
+      "text": "{firm} Loses {pct} In The Year Just Finished"
     },
     {
       "id": "hl.mover.down.3",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "{firm} Down {pct}, And The Questions Start"
+      "text": "{firm} Ends The Year Down {pct}"
     },
     {
       "id": "hl.mover.down.4",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "A {pct} Fall Leaves {firm} Fighting"
+      "text": "{firm} Drops {pct}; Review Its Price History"
     },
     {
       "id": "hl.mover.down.5",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "{firm} Is The Year's Biggest Loser"
+      "text": "{firm} Falls {pct}; A Rebound Isn't Guaranteed"
     },
     {
       "id": "hl.mover.down.6",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "Financial Rebound Not In The Cards For {firm}"
+      "text": "{firm} Loses {pct}; Check How Much You Hold"
     },
     {
       "id": "hl.mover.down.7",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "{firm} Sheds {pct} And Its Chief Executive"
+      "text": "{firm} Down {pct}; Compare It With Your Other Holdings"
     },
     {
       "id": "hl.mover.down.8",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "What Went Wrong At {firm}"
+      "text": "{firm} Drops {pct}; A Lower Price Still Carries Risk"
     },
     {
       "id": "hl.mover.down.9",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "{firm} Holders Learn A Hard Lesson, Down {pct}"
+      "text": "{firm} Falls {pct}; Its Own Price Moved"
     },
     {
       "id": "hl.mover.down.10",
       "slot": "mover",
       "when": "down",
       "tone": "bad",
-      "text": "Nobody Is Buying The {firm} Turnaround"
+      "text": "{firm} Down {pct}; Check Your Own Return"
     },
     {
       "id": "hl.tier.crypto.up.1",
       "slot": "tier",
       "when": "crypto.up",
       "tone": "good",
-      "text": "Coins Go Vertical, And So Do The Arguments"
+      "text": "Crypto Prices Rise On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.crypto.up.2",
       "slot": "tier",
       "when": "crypto.up",
       "tone": "good",
-      "text": "Crypto Has Another One Of Those Years"
+      "text": "Crypto Holdings Gain On Average This Year"
     },
     {
       "id": "hl.tier.crypto.up.3",
       "slot": "tier",
       "when": "crypto.up",
       "tone": "good",
-      "text": "The Coin Crowd Is Insufferable Again"
+      "text": "Average Crypto Prices Climb; Individual Returns Vary"
     },
     {
       "id": "hl.tier.crypto.up.4",
       "slot": "tier",
       "when": "crypto.up",
       "tone": "good",
-      "text": "Digital Money Doubles, Skeptics Regroup"
+      "text": "Crypto Prices Up On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.crypto.down.1",
       "slot": "tier",
       "when": "crypto.down",
       "tone": "bad",
-      "text": "The Coin Market Folds In On Itself"
+      "text": "Crypto Prices Fall On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.crypto.down.2",
       "slot": "tier",
       "when": "crypto.down",
       "tone": "bad",
-      "text": "Crypto Gives It All Back, Again"
+      "text": "Crypto Holdings Lose Value On Average This Year"
     },
     {
       "id": "hl.tier.crypto.down.3",
       "slot": "tier",
       "when": "crypto.down",
       "tone": "bad",
-      "text": "A Long Quiet Winter For Digital Money"
+      "text": "Average Crypto Prices Drop; Individual Returns Vary"
     },
     {
       "id": "hl.tier.crypto.down.4",
       "slot": "tier",
       "when": "crypto.down",
       "tone": "bad",
-      "text": "The Coins Nobody Mentions At Dinner Anymore"
+      "text": "Crypto Prices Down On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.penny.up.1",
       "slot": "tier",
       "when": "penny.up",
       "tone": "good",
-      "text": "Small Companies Have Their Moment"
+      "text": "Penny Stock Prices Rise On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.penny.up.2",
       "slot": "tier",
       "when": "penny.up",
       "tone": "good",
-      "text": "The Cheap End Of The Market Catches Fire"
+      "text": "Penny Stock Holdings Gain On Average This Year"
     },
     {
       "id": "hl.tier.penny.up.3",
       "slot": "tier",
       "when": "penny.up",
       "tone": "good",
-      "text": "Penny Stocks Pay Off For The Reckless"
+      "text": "Average Penny Stock Prices Climb; Individual Returns Vary"
     },
     {
       "id": "hl.tier.penny.up.4",
       "slot": "tier",
       "when": "penny.up",
       "tone": "good",
-      "text": "Small Names, Big Numbers, For Now"
+      "text": "Penny Stock Prices Up On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.penny.down.1",
       "slot": "tier",
       "when": "penny.down",
       "tone": "bad",
-      "text": "Another Year Of Failures At The Cheap End"
+      "text": "Penny Stock Prices Fall On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.penny.down.2",
       "slot": "tier",
       "when": "penny.down",
       "tone": "bad",
-      "text": "Small Companies Fold In Numbers"
+      "text": "Penny Stock Holdings Lose Value On Average This Year"
     },
     {
       "id": "hl.tier.penny.down.3",
       "slot": "tier",
       "when": "penny.down",
       "tone": "bad",
-      "text": "Penny Stocks Do What Penny Stocks Do"
+      "text": "Average Penny Stock Prices Drop; Individual Returns Vary"
     },
     {
       "id": "hl.tier.penny.down.4",
       "slot": "tier",
       "when": "penny.down",
       "tone": "bad",
-      "text": "The Small End Of The Market Thins Out"
+      "text": "Penny Stock Prices Down On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.bond.up.1",
       "slot": "tier",
       "when": "bond.up",
       "tone": "good",
-      "text": "Bondholders Collect And Sleep Soundly"
+      "text": "Bond Prices Rise On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.bond.up.2",
       "slot": "tier",
       "when": "bond.up",
       "tone": "good",
-      "text": "Government Debt Has A Comfortable Year"
+      "text": "Bond Holdings Gain On Average This Year"
     },
     {
       "id": "hl.tier.bond.up.3",
       "slot": "tier",
       "when": "bond.up",
       "tone": "good",
-      "text": "Boring Money Beats Clever Money"
+      "text": "Average Bond Prices Climb; Individual Returns Vary"
     },
     {
       "id": "hl.tier.bond.up.4",
       "slot": "tier",
       "when": "bond.up",
       "tone": "good",
-      "text": "The Safe End Of The Market Earns Its Keep"
+      "text": "Bond Prices Up On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.bond.down.1",
       "slot": "tier",
       "when": "bond.down",
       "tone": "bad",
-      "text": "Even The Bond Market Has A Bad Year"
+      "text": "Bond Prices Fall On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.bond.down.2",
       "slot": "tier",
       "when": "bond.down",
       "tone": "bad",
-      "text": "Rates Move And Bondholders Pay For It"
+      "text": "Bond Holdings Lose Value On Average This Year"
     },
     {
       "id": "hl.tier.bond.down.3",
       "slot": "tier",
       "when": "bond.down",
       "tone": "bad",
-      "text": "The Safe End Of The Market Isn't Safe This Year"
+      "text": "Average Bond Prices Drop; Individual Returns Vary"
     },
     {
       "id": "hl.tier.bond.down.4",
       "slot": "tier",
       "when": "bond.down",
       "tone": "bad",
-      "text": "Government Debt Loses Its Shine"
+      "text": "Bond Prices Down On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.fund.up.1",
       "slot": "tier",
       "when": "fund.up",
       "tone": "good",
-      "text": "Funds Post Their Best Year In A Decade"
+      "text": "Fund Prices Rise On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.fund.up.2",
       "slot": "tier",
       "when": "fund.up",
       "tone": "good",
-      "text": "Owning A Bit Of Everything Works Out"
+      "text": "Fund Holdings Gain On Average This Year"
     },
     {
       "id": "hl.tier.fund.up.3",
       "slot": "tier",
       "when": "fund.up",
       "tone": "good",
-      "text": "The Patient Money Comes Out Ahead"
+      "text": "Average Fund Prices Climb; Individual Returns Vary"
     },
     {
       "id": "hl.tier.fund.up.4",
       "slot": "tier",
       "when": "fund.up",
       "tone": "good",
-      "text": "A Good Year To Have Owned The Whole Market"
+      "text": "Fund Prices Up On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.fund.down.1",
       "slot": "tier",
       "when": "fund.down",
       "tone": "bad",
-      "text": "Funds Cannot Hide From A Year Like This"
+      "text": "Fund Prices Fall On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.fund.down.2",
       "slot": "tier",
       "when": "fund.down",
       "tone": "bad",
-      "text": "Spreading The Money Only Helped So Much"
+      "text": "Fund Holdings Lose Value On Average This Year"
     },
     {
       "id": "hl.tier.fund.down.3",
       "slot": "tier",
       "when": "fund.down",
       "tone": "bad",
-      "text": "Even The Broad Funds End The Year Down"
+      "text": "Average Fund Prices Drop; Individual Returns Vary"
     },
     {
       "id": "hl.tier.fund.down.4",
       "slot": "tier",
       "when": "fund.down",
       "tone": "bad",
-      "text": "A Year Where Diversifying Softened The Blow"
+      "text": "Fund Prices Down On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.stock.up.1",
       "slot": "tier",
       "when": "stock.up",
       "tone": "good",
-      "text": "Shares Are Where The Money Was This Year"
+      "text": "Stock Prices Rise On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.stock.up.2",
       "slot": "tier",
       "when": "stock.up",
       "tone": "good",
-      "text": "A Strong Year For Anyone Who Owned Companies"
+      "text": "Stock Holdings Gain On Average This Year"
     },
     {
       "id": "hl.tier.stock.up.3",
       "slot": "tier",
       "when": "stock.up",
       "tone": "good",
-      "text": "The Exchange Has A Year Worth Framing"
+      "text": "Average Stock Prices Climb; Individual Returns Vary"
     },
     {
       "id": "hl.tier.stock.up.4",
       "slot": "tier",
       "when": "stock.up",
       "tone": "good",
-      "text": "Company Shares Outrun Everything Safer"
+      "text": "Stock Prices Up On Average; Compare What You Own"
     },
     {
       "id": "hl.tier.stock.down.1",
       "slot": "tier",
       "when": "stock.down",
       "tone": "bad",
-      "text": "A Hard Year To Have Owned Shares"
+      "text": "Stock Prices Fall On Average; Check Your Holdings"
     },
     {
       "id": "hl.tier.stock.down.2",
       "slot": "tier",
       "when": "stock.down",
       "tone": "bad",
-      "text": "Companies Struggle And Shareholders Pay"
+      "text": "Stock Holdings Lose Value On Average This Year"
     },
     {
       "id": "hl.tier.stock.down.3",
       "slot": "tier",
       "when": "stock.down",
       "tone": "bad",
-      "text": "The Exchange Would Rather Forget This One"
+      "text": "Average Stock Prices Drop; Individual Returns Vary"
     },
     {
       "id": "hl.tier.stock.down.4",
       "slot": "tier",
       "when": "stock.down",
       "tone": "bad",
-      "text": "Shares Lose Ground Almost Everywhere"
+      "text": "Stock Prices Down On Average; Compare What You Own"
     }
   ],
   "mastheads": [
