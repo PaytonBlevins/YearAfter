@@ -31,3 +31,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | ------------ | ------- | ------------------------ |
 | v39          | shipped | 0604 (no bump)           |
 | v40          | shipped | 0605 (0606 adds no bump) |
+
+| Social Media playtest changes | Codex / Agent B | `feat/manual-social-posting` | claimed: Payton authorized free accounts, real platform names, lower small-audience fame and manual platform-specific posting; includes required engine/persistence integration |
