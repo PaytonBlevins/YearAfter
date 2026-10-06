@@ -9,6 +9,13 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | 0606 Commercial real estate | Claude (engine, calibration; done)       | second agent (screens, wording)                   | engine done; screens open |
 | Notes, existing and new     | —                                        | second agent (all notes and docs, from 5 October) | not started               |
 
+## Playtest work authorized by Payton on 6 October
+
+| Item | Agent | Branch | Status |
+| --- | --- | --- | --- |
+| A4 People-action odds labels | Codex / Agent B | `feat/playtest-a4-a12` | claimed; in progress |
+| A12 Property row without a home | Codex / Agent B | `feat/playtest-a4-a12` | claimed; follows A4 |
+
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |
 | v39          | shipped | 0604 (no bump)           |
