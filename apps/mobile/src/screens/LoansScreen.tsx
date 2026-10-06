@@ -60,11 +60,11 @@ export function LoansScreen() {
                     title={product.name}
                     subtitle={
                       loan.inArrears
-                        ? 'Behind on it'
+                        ? "You're behind on payments"
                         : loan.businessId
-                          ? `${state.businesses.find((row) => row.id === loan.businessId)?.name ?? 'A business you no longer run'} · ${money(yearly)} a year, ${loan.termLeft} to go`
+                          ? `${state.businesses.find((row) => row.id === loan.businessId)?.name ?? 'A business you no longer run'} · ${money(yearly)} a year, ${loan.termLeft} years left`
                           : product.termYears > 0
-                            ? `${money(yearly)} a year, ${loan.termLeft} to go`
+                            ? `${money(yearly)} a year, ${loan.termLeft} years left`
                             : `${money(yearly)} a year while it runs`
                     }
                     value={money(owed)}
@@ -120,7 +120,7 @@ export function LoansScreen() {
                     ) : (
                       <ListRow
                         title="Pay some off"
-                        subtitle={`You have ${money(cash)} to put at it`}
+                        subtitle={`You have ${money(cash)} available for a payment`}
                         affordance="action"
                         compact
                         onPress={() => setChoosingPay(`${loan.productId}:${loan.businessId ?? ''}`)}
@@ -129,7 +129,7 @@ export function LoansScreen() {
                   ) : (
                     <ListRow
                       title="Pay some off"
-                      subtitle="Nothing spare to put at it"
+                      subtitle="You don't have any cash for an extra payment"
                       affordance="none"
                       compact
                       disabled
@@ -220,12 +220,12 @@ export function LoansScreen() {
       ) : null}
 
       <Text style={styles.note}>
-        Loans for a business aren't here: they're offered when you open, enlarge or buy one, and the
-        business pays them back.
+        Business loans are offered when you open, expand or buy a business. The business pays them
+        back from its own money.
       </Text>
 
       <Text style={styles.note}>
-        The yearly payment comes out with the rent. Paying more than that is up to you.
+        Your scheduled payment comes out automatically each year. You can choose to pay extra.
       </Text>
     </ScrollView>
   );
@@ -253,25 +253,25 @@ const labelFor = (type: string): string =>
 function whyNot(because: string | undefined, product: LoanProduct): string {
   switch (because) {
     case 'tooYoung':
-      return 'You are too young';
+      return "You can borrow once you're eighteen";
     case 'tooManyLoans':
-      return 'You have four running already';
+      return 'You already have four active loans';
     case 'alreadyHeld':
-      return 'You have this one';
+      return 'You already have this loan';
     case 'standing':
-      return `Wants ${CREDIT_LABELS[product.needs].toLowerCase()} credit`;
+      return `Requires ${CREDIT_LABELS[product.needs].toLowerCase()} credit`;
     case 'income':
-      return `Wants ${money(product.needsIncome)} a year coming in`;
+      return `Requires at least ${money(product.needsIncome)} in yearly income`;
     case 'notStudying':
-      return 'For students only';
+      return 'This loan is for education costs';
     case 'tooMuchOwed':
-      return 'You owe as much as they think you can carry';
+      return "Your existing debt is already at the lender's limit";
     case 'fullyDrawn':
-      return 'You have borrowed what the degree costs';
+      return "You've already borrowed the full amount available for your tuition";
     case 'noCollateral':
-      return 'Wants a portfolio to secure it on';
+      return 'You need investments to use as security for this loan';
     default:
-      return 'Not available to you';
+      return "You can't get this loan right now";
   }
 }
 

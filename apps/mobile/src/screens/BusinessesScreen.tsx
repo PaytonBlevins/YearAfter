@@ -125,7 +125,7 @@ function PurchasePanel({
         <>
           <Text style={styles.note}>
             Or borrow part of it. The money goes straight into the purchase, and the business pays
-            it back from its own takings.
+            it back from its own income.
           </Text>
           {approved.map((offer) => (
             <ListRow
@@ -168,7 +168,7 @@ function PurchasePanel({
           ) : null}
         </>
       ) : reasons.length > 0 ? (
-        <Text style={styles.note}>No lender will write this one: {reasons[0]}</Text>
+        <Text style={styles.note}>No lender will approve this loan: {reasons[0]}</Text>
       ) : null}
     </>
   );
@@ -242,8 +242,8 @@ export function BusinessesScreen() {
       ) : (
         <>
           <Text style={styles.note}>
-            What it costs to open is taken from your cash at once. A business keeps its own money;
-            you are paid from what it clears.
+            You pay the startup cost when you open, using your cash and any loan you choose. The
+            business keeps its own money and pays you from its profits.
           </Text>
           <Card>
             {market.map((type, index) => {
@@ -433,12 +433,12 @@ export function BusinessScreen() {
         <ListRow
           title="Profit"
           value={last ? money(last.profit) : '—'}
-          subtitle={last ? 'What the year left, before you were paid' : undefined}
+          subtitle={last ? 'Profit last year, before your owner payment' : undefined}
           affordance="none"
           compact
         />
         <ListRow
-          title="Cash in the till"
+          title="Business cash"
           value={money(dollarsOf(business.cash))}
           affordance="none"
           compact
@@ -477,7 +477,7 @@ export function BusinessScreen() {
         {last?.rivalTook ? (
           <ListRow
             title="A rival nearby"
-            subtitle={`They took about ${Math.round(last.rivalTook * 100)}% of your custom last year, and they take less each year.`}
+            subtitle={`They took about ${Math.round(last.rivalTook * 100)}% of your customer demand last year. Their effect gets smaller each year.`}
             affordance="none"
             wrap
           />
@@ -487,8 +487,8 @@ export function BusinessScreen() {
             title="The economy"
             subtitle={
               last.economy < 1
-                ? `Took about ${Math.round((1 - last.economy) * 100)}% of your custom last year.`
-                : `Brought you about ${Math.round((last.economy - 1) * 100)}% more custom last year.`
+                ? `Took about ${Math.round((1 - last.economy) * 100)}% of your customer demand last year.`
+                : `Brought you about ${Math.round((last.economy - 1) * 100)}% more customer demand last year.`
             }
             affordance="none"
             wrap
@@ -498,8 +498,8 @@ export function BusinessScreen() {
 
       <SectionHeading>Price</SectionHeading>
       <Text style={styles.note}>
-        Dearer earns more on each sale and loses some customers. Cheaper fills the place and thins
-        every sale.
+        Higher prices bring in more per sale, but fewer customers buy. Lower prices attract more
+        customers, but bring in less per sale.
       </Text>
       <Card style={styles.pad}>
         <PriceTrack
@@ -548,7 +548,7 @@ export function BusinessScreen() {
       <Card>
         <ListRow
           title="Hire someone"
-          subtitle={view.canHire ? undefined : "It's as big as this place gets"}
+          subtitle={view.canHire ? undefined : "You've reached this location's staff limit"}
           affordance="action"
           disabled={!view.canHire}
           onPress={view.canHire ? () => tuneBusiness(business.id, { kind: 'hire' }) : undefined}
@@ -557,7 +557,9 @@ export function BusinessScreen() {
         <RowDivider />
         <ListRow
           title="Let someone go"
-          subtitle={view.canLetGo ? undefined : 'It needs everyone it has'}
+          subtitle={
+            view.canLetGo ? undefined : "You're already at the minimum staff this business needs"
+          }
           affordance="action"
           disabled={!view.canLetGo}
           onPress={view.canLetGo ? () => tuneBusiness(business.id, { kind: 'letGo' }) : undefined}
@@ -565,7 +567,7 @@ export function BusinessScreen() {
         />
         <RowDivider />
         <ListRow
-          title="A manager hires and lets go"
+          title="Let a manager handle staffing"
           subtitle={business.autoStaff ? 'On' : 'Off — you decide who works here'}
           affordance="action"
           onPress={() => tuneBusiness(business.id, { kind: 'auto', on: !business.autoStaff })}
@@ -576,12 +578,12 @@ export function BusinessScreen() {
 
       <SectionHeading>Locations</SectionHeading>
       <Text style={styles.note}>
-        A second door brings in more custom, though never as much as the first, and it needs its own
-        lease and its own crew. You can only be at one of them.
+        Another location can bring in more customers, but less than your first location. It needs
+        its own lease and staff. You can only work at one location at a time.
       </Text>
       <Card>
         <ListRow
-          title="Doors open"
+          title="Open locations"
           value={`${view.locations} of ${MAX_LOCATIONS}`}
           affordance="none"
           compact
@@ -592,7 +594,7 @@ export function BusinessScreen() {
           subtitle={
             view.expansionBase
               ? EXPAND_REFUSAL_LABELS[view.expansionBase]
-              : `Costs about ${money(branchCostFor(type))}, and takes a few years to find its feet`
+              : `Costs about ${money(branchCostFor(type))}, and takes a few years to build up customers`
           }
           value={view.expansionBase ? undefined : money(view.branchCost)}
           affordance={view.expansionBase ? 'none' : 'action'}
@@ -653,7 +655,7 @@ export function BusinessScreen() {
               title={view.loan.name}
               subtitle={
                 view.loan.behind
-                  ? 'Behind on it. The balance is growing.'
+                  ? "You're behind on loan payments. The balance is growing."
                   : `${Math.round(view.loan.apr * 1000) / 10}% · about ${money(view.loan.yearly)} a year, ${view.loan.termLeft} to go · the business pays it`
               }
               value={money(view.loan.owed)}

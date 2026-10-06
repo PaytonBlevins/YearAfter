@@ -22,7 +22,7 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | A9 Graduation moment              | Codex / Agent B | `feat/playtest-college-graduation` | implemented; review pending            |
 | A7 Visible rental costs           | Codex / Agent B | `feat/playtest-rental-costs`       | built; review/device pending; B15 open |
 
-| A5 Money/business spoken copy | Codex / Agent B | `feat/playtest-money-copy` | claimed; selected by Payton |
+| A5 Money/business spoken copy | Codex / Agent B | `feat/playtest-money-copy` | money/business pass built; review pending |
 
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |
