@@ -7,7 +7,7 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | --------------------------- | ---------------------------------------- | ------------------------------------------------- | ------------------------- |
 | 0605 Private investments    | Claude (engine, save, calibration; done) | second agent (screens, wording)                   | engine done; screens open |
 | 0606 Commercial real estate | Claude (engine, calibration; done)       | second agent (screens, wording)                   | engine done; screens open |
-| Notes, existing and new     | —                                        | second agent (all notes and docs, from 5 October) | not started               |
+| Notes, existing and new     | —                                        | Codex / Agent B (`docs/card-purchase-options`) | card-purchase clarification in progress |
 
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |
