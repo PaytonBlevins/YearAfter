@@ -55,7 +55,7 @@ export type AcquaintanceKind = 'peer' | 'teacher';
  * relationships stay in their own worlds". A colleague is on the Career screen.
  * They become a friend, and move, only if the friendship outlives the job.
  */
-export type MeetingContext = 'school' | 'neighbourhood' | 'activity' | 'app' | 'work';
+export type MeetingContext = 'school' | 'neighbourhood' | 'activity' | 'app' | 'work' | 'fame';
 
 export const CONTEXT_LABELS: Readonly<Record<MeetingContext, string>> = {
   school: 'from school',
@@ -63,6 +63,8 @@ export const CONTEXT_LABELS: Readonly<Record<MeetingContext, string>> = {
   activity: 'from a club',
   app: 'from an app',
   work: 'from work',
+  // Ticket 0705. A famous person who became a real friend (spec 705).
+  fame: 'through your fame',
 };
 
 /**
@@ -144,6 +146,11 @@ export interface Acquaintance extends Npc {
    * is the job id rather than the title.
    */
   readonly viaJobId?: string;
+  /**
+   * Ticket 0705. The public figure this person is, when they started as a celebrity and became a
+   * friend (spec 705). Their fame is read from the world's roster by this id and is never saved here.
+   */
+  readonly celebrityId?: string;
   /** For a teacher: what they teach, so a row can say "Mrs. Okafor · English". */
   readonly subject?: string;
   /**

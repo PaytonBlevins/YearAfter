@@ -995,6 +995,18 @@ const migrations: Readonly<Record<number, Migration>> = {
     fame: typeof save['fame'] === 'number' ? save['fame'] : 0,
     version: 41,
   }),
+  /**
+   * v41 -> v42: Ticket 0705 — the famous people the character has met. Nobody before it met
+   * one, so every older save has no connections, no one seen and no stranger answered.
+   */
+  41: (save) => ({
+    ...save,
+    celebrities:
+      typeof save['celebrities'] === 'object' && save['celebrities'] !== null
+        ? save['celebrities']
+        : { ties: [], met: [], answeredYear: 0 },
+    version: 42,
+  }),
 };
 
 /**
@@ -1098,6 +1110,45 @@ export function migrateSave(raw: unknown): Result<CurrentSaveGame, MigrationErro
  * unreadable save an expected outcome with a message, and a save that silently
  * fixes its own money is a save that hides how much it invented.
  */
+/** Ticket 0705. The shape of the record of famous people: lists, a number, and a name and a warmth on each tie. */
+function celebritiesOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  const ties = record['ties'];
+  const met = record['met'];
+  const whole = (n: unknown): boolean => typeof n === 'number' && Number.isInteger(n);
+  return (
+    Array.isArray(ties) &&
+    ties.every((tie) => {
+      if (typeof tie !== 'object' || tie === null) return false;
+      const entry = tie as Record<string, unknown>;
+      return (
+        typeof entry['id'] === 'string' &&
+        typeof entry['name'] === 'string' &&
+        (entry['sex'] === 'male' || entry['sex'] === 'female') &&
+        typeof entry['field'] === 'string' &&
+        whole(entry['birthYear']) &&
+        whole(entry['metYear']) &&
+        whole(entry['metAtAge']) &&
+        typeof entry['warmth'] === 'number' &&
+        Number.isFinite(entry['warmth']) &&
+        whole(entry['lastContactYear']) &&
+        whole(entry['doneYear']) &&
+        Array.isArray(entry['done']) &&
+        entry['done'].every((id) => typeof id === 'string') &&
+        (entry['promoted'] === undefined || typeof entry['promoted'] === 'boolean') &&
+        (entry['endedYear'] === undefined || whole(entry['endedYear'])) &&
+        (entry['endedBecause'] === undefined ||
+          entry['endedBecause'] === 'lost touch' ||
+          entry['endedBecause'] === 'died')
+      );
+    }) &&
+    Array.isArray(met) &&
+    met.every((id) => typeof id === 'string') &&
+    whole(record['answeredYear'])
+  );
+}
+
 function ledgerProblems(candidate: Record<string, unknown>): readonly string[] {
   const finance = candidate['finance'] as Record<string, unknown> | undefined;
   if (typeof finance !== 'object' || finance === null) return ['expected finance to be present'];
@@ -1226,6 +1277,8 @@ export function validateCurrentSave(
     // Ticket 0701. And for the channels, and a number for fame.
     require('channels', candidate['channels'], Array.isArray(candidate['channels'])),
     require('fame', candidate['fame'], typeof candidate['fame'] === 'number'),
+    // Ticket 0705. A record of connections, people seen and the year a stranger was last answered.
+    require('celebrities', candidate['celebrities'], celebritiesOk(candidate['celebrities'])),
     // Ticket 0704. Optional, but if it is there it has to be one of the two.
     require('representation', candidate['representation'], candidate['representation'] ===
       undefined ||

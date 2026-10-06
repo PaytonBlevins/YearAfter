@@ -91,6 +91,7 @@ import { EMPTY_HEALTH } from '@yearafter/health';
 import { type OffspringLife } from '@yearafter/parenting';
 import { EMPTY_CIRCLE } from '@yearafter/social';
 import type { FamilyMember, Household } from '@yearafter/relationships';
+import { EMPTY_CELEBRITIES } from './celebrity-state';
 import { createGameState, type GameState } from './game-state';
 import { RngDomains } from './rng/rng';
 import { nameContext, uniqueFirstName } from './social-generator';
@@ -475,6 +476,8 @@ export function continueAsChild(
       events: EMPTY_HISTORY,
       education: educationFrom(life),
       circle: EMPTY_CIRCLE,
+      // Ticket 0705. The people you met belong to the person who met them.
+      celebrities: EMPTY_CELEBRITIES,
       employment: EMPTY_EMPLOYMENT,
       health: { ...EMPTY_HEALTH, vitality: player.stats.health, deficit: 0 },
       /*

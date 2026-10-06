@@ -2024,6 +2024,93 @@ describe('Ticket 0406 — a question survives being saved', () => {
     expect(migrateSave(raw).ok).toBe(true);
   });
 
+  it('keeps who you have met and who you know through a save (0705)', () => {
+    const { save } = newSave('CELEB');
+    const base = fromSave(save);
+    const tie = {
+      id: 'acting:1990:1',
+      name: 'Test Person',
+      sex: 'female' as const,
+      field: 'acting' as const,
+      birthYear: 1990,
+      metYear: 2004,
+      metAtAge: 14,
+      warmth: 47,
+      lastContactYear: 2005,
+      doneYear: 2005,
+      done: ['catchUp'],
+      promoted: true as const,
+      endedYear: 2009,
+      endedBecause: 'died' as const,
+    };
+    const live: GameState = {
+      ...base,
+      celebrities: { ties: [tie], met: ['acting:1990:1', 'music:1975:0'], answeredYear: 2005 },
+    };
+    const written = toSave(live, { id: asSaveId('s-celeb') });
+    expect(written.celebrities).toEqual(live.celebrities);
+    const back = fromSave(JSON.parse(JSON.stringify(written)));
+    expect(back.celebrities).toEqual(live.celebrities);
+    expect(migrateSave(JSON.parse(JSON.stringify(written))).ok).toBe(true);
+  });
+
+  it('opens an older save with nobody met, and says what it was upgraded to (0705)', () => {
+    const { save } = newSave('CELEB-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.celebrities;
+    old.version = 41;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.celebrities).toEqual({ ties: [], met: [], answeredYear: 0 });
+    expect(CURRENT_SAVE_VERSION).toBeGreaterThanOrEqual(42);
+  });
+
+  it('refuses a save whose celebrities are malformed (0705)', () => {
+    const { save } = newSave('CELEB-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const tie = {
+      id: 'acting:1990:1',
+      name: 'Test Person',
+      sex: 'female',
+      field: 'acting',
+      birthYear: 1990,
+      metYear: 2004,
+      metAtAge: 14,
+      warmth: 47,
+      lastContactYear: 2005,
+      doneYear: 2005,
+      done: [],
+    };
+    const good = { ties: [tie], met: [], answeredYear: 0 };
+    expect(migrateSave({ ...raw, celebrities: good }).ok).toBe(true);
+    const bad: unknown[] = [
+      undefined,
+      null,
+      7,
+      [],
+      { ...good, ties: 'none' },
+      { ...good, met: 'none' },
+      { ...good, met: [3] },
+      { ...good, answeredYear: 'never' },
+      { ...good, answeredYear: 1.5 },
+      { ...good, ties: [{ ...tie, warmth: 'warm' }] },
+      { ...good, ties: [{ ...tie, name: 4 }] },
+      { ...good, ties: [{ ...tie, done: 'catchUp' }] },
+      { ...good, ties: [{ ...tie, endedBecause: 'bored', endedYear: 2009 }] },
+      { ...good, ties: [null] },
+      { ...good, ties: [{ ...tie, sex: 'robot' }] },
+      { ...good, ties: [{ ...tie, done: [1] }] },
+      { ...good, ties: [{ ...tie, promoted: 'yes' }] },
+      { ...good, ties: [{ ...tie, birthYear: 1990.5 }] },
+    ];
+    for (const celebrities of bad) {
+      const result = migrateSave({ ...raw, celebrities });
+      expect(result.ok, JSON.stringify(celebrities)).toBe(false);
+    }
+  });
+
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {
     // Ticket 0606. No version bump: `trade`, `leaseEnds` and `rent` are optional on a tenant. Losing
     // `rent` on a reload would reprice a lease at today's rate; losing `leaseEnds` would end it.

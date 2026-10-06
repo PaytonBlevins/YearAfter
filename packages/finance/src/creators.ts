@@ -165,6 +165,38 @@ export function whyNotOpen(input: {
   return undefined;
 }
 
+/**
+ * Ticket 0706 — a player is not an average channel.
+ *
+ * The audience curves are fitted to every channel there is, and most of those are abandoned
+ * after a few posts. Somebody who plays the game is keeping one going, and the playtest said
+ * the result felt too hard (backlog B6): after six years about half of video channels had
+ * ever paid, one stream in ten and one podcast in twelve. The draw is lifted in rank, not in
+ * audience, so the shape of each platform's sourced curve is untouched: a channel that would
+ * have beaten half of all channels now beats about three in four, the lift fades out above
+ * the top quarter, and the very top is exactly as rare as before (spec: more common than
+ * real life, not extremely overinflated; finding 49 is why the top is left alone).
+ *
+ *   share' = share / (1 + (lift - 1) × min(1, share / LUCK_LIFT_BELOW))
+ *
+ * where `share` is the part of channels that did better (1 − luck) and `lift` is the
+ * platform's own (`Platform.lift`, `LUCK_LIFT` when it has none): a stream or a podcast, whose
+ * curves are steep at the bottom, needs more of a lift than video to be felt.
+ */
+export const LUCK_LIFT = 1.5;
+/** Above this share of channels doing better, the full lift applies; below, it fades to nothing. */
+export const LUCK_LIFT_BELOW = 0.25;
+
+/** The unlifted draw for a channel: uniform in [0, 1), fixed by the seed and the channel's id. */
+export const luckDraw = (seed: string, id: string): number =>
+  mixedUnit(`${seed}:channel:${id}:luck`);
+
+export function liftedLuck(draw: number, lift: number = LUCK_LIFT): number {
+  const share = Math.min(1, Math.max(0, 1 - draw));
+  const lifted = share / (1 + (lift - 1) * Math.min(1, share / LUCK_LIFT_BELOW));
+  return 1 - lifted;
+}
+
 /** A new channel. The luck is drawn here, once. The caller has already asked `whyNotOpen`. */
 export function newChannel(input: {
   readonly seed: string;
@@ -174,6 +206,7 @@ export function newChannel(input: {
   readonly year: number;
 }): Channel {
   const category = findCreatorCategory(input.categoryId);
+  const platform = findPlatform(input.platformId);
   const key = `${input.seed}:channel:${input.id}`;
   const names = category?.names ?? ['Untitled'];
   return {
@@ -185,7 +218,7 @@ export function newChannel(input: {
     audience: 0,
     peak: 0,
     effort: 'regular',
-    luck: mixedUnit(`${key}:luck`),
+    luck: liftedLuck(luckDraw(input.seed, input.id), platform?.lift),
     earned: cents(0),
   };
 }

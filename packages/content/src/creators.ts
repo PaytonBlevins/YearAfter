@@ -57,6 +57,13 @@ export interface Platform {
    * Rank 1 is the biggest. Absent: no chart.
    */
   readonly chart?: number;
+  /**
+   * Ticket 0706. How much better a player's channel does than the average one on this platform,
+   * as a lift in rank (see `liftedLuck`). 1 is none; absent is the default. The curves count every
+   * channel there is, abandoned or not, so how steep the bottom of each is decides how much of a
+   * lift a player needs to feel it.
+   */
+  readonly lift?: number;
   /** Share of an audience lost the year a sponsorship is taken: viewers notice. */
   readonly trustCost: number;
   /**
@@ -256,6 +263,7 @@ export const CREATOR_CATEGORIES: readonly CreatorCategory[] = [
 export const PLATFORMS: readonly Platform[] = [
   {
     id: 'video',
+    lift: 1.5,
     name: 'Video',
     audienceWord: 'subscribers',
     audienceOne: 'subscriber',
@@ -290,6 +298,7 @@ export const PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'stream',
+    lift: 2.5,
     name: 'Streaming',
     audienceWord: 'followers',
     audienceOne: 'follower',
@@ -320,6 +329,7 @@ export const PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'photo',
+    lift: 1.5,
     name: 'Photo and lifestyle',
     audienceWord: 'followers',
     audienceOne: 'follower',
@@ -338,6 +348,7 @@ export const PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'shortform',
+    lift: 2.0,
     name: 'Short-form video',
     audienceWord: 'followers',
     audienceOne: 'follower',
@@ -369,6 +380,7 @@ export const PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'podcast',
+    lift: 2.5,
     name: 'Podcast',
     audienceWord: 'listeners',
     audienceOne: 'listener',
@@ -412,6 +424,7 @@ export const PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'subscription',
+    lift: 1.2,
     name: 'Subscription',
     audienceWord: 'readers',
     audienceOne: 'reader',

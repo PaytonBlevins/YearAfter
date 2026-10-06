@@ -2906,3 +2906,56 @@ stressful with one. It still passed with the hours cut disconnected, because a
 manager also grows the channels, and more money lowers stress too. When an effect
 has a rival explanation, extract the quantity it changes (`creatorWeek`) and test
 that directly, then test only that the total moves the right way.
+
+### 13.123 To test a roll, vary the roll's own key, not the state it reads
+
+A test that needs a draw to land, or not to, loops until one does. Looping over years looks
+the same and is wrong: a year changes who is famous and how famous, so the thing under
+test changes with it. 0705 sweeps `world.generation`, which is in the key of every
+meeting and every connection roll and nothing else, and asserts the rate against the odds
+(`rate` within a few points of `connectionOdds`) rather than that one draw came up.
+
+### 13.124 Whatever ends a person ends them everywhere they are listed
+
+A celebrity friend who died was ended in the circle (`endedAtAge`, `endedBecause`) and
+still `alive: true`, because the one place that does it for relatives, `phases/kin.ts`,
+also sets `alive: false` and the new code copied only the call it could see. When a new
+path can end a person, read how the existing paths do it and copy all of it, then test the
+field that was missed, not the one that was copied.
+
+### 13.125 A fixture borrowed from another record carries that record's state
+
+A death test built its friend from `circle.people[0]` and got back `endedAtAge: 14`,
+because that person had already ended at 14 and `endPerson` leaves an ended person alone.
+The failure looked like a bug in the engine. Build a fixture from a clean base and set
+every field the test reads.
+
+### 13.126 A loop that asserts only when something happened passes when nothing did
+
+`for (trial of trials) { const r = answer(trial); if (r.ok) expect(...) }` passes with zero
+results. Several of 0705's first tests survived sabotage this way. Count the cases that
+reached the assertion and assert the count is large enough to mean something, and that
+both branches (landed and missed, connected and not) were reached.
+
+### 13.127 A line that fills in numbers needs a test that matches each token to what supplies it
+
+A gear-failure line said "Replacing it cost $0" because it used `{amount}` (the income an event
+moves) for a cost. No one reads 23 events' worth of lines for this. A content test now takes
+every token in every line and checks that the event has the thing that fills it (a cost token
+needs a cost, a gain token an audience change), and the simulation test refuses `$0` and
+stray braces in what is printed.
+
+### 13.128 When a change lifts what new things start with, say how the old measure still gets its old thing
+
+0706 lifts a new channel's luck so a player's channel is not an average abandoned one. Three of
+0701's tests measured the sourced population by opening channels, and moved with the lift. The
+fix was an explicit unlifted path (`luckDraw`, the raw draw) for the tests that mean "every
+channel there is", not loosening the bounds. A calibration change should leave a way to
+reach the thing it calibrated away from.
+
+### 13.129 A boundary test needs a fixture that can reach the boundary
+
+"An event can lift a channel past its best-ever mark" passed with zero cases because the
+fixture was above its curve and shrank every year; the peak was never close. Print the
+values the assertion reads, and count the cases that reached it (13.126). Here the fix was a
+small channel that grows.

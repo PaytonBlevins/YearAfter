@@ -56,6 +56,10 @@ import {
   creatorQuality,
   fameTarget,
   newChannel,
+  luckDraw,
+  liftedLuck,
+  LUCK_LIFT,
+  LUCK_LIFT_BELOW,
   nextAudience,
   nextFame,
   settledAudience,
@@ -68,6 +72,15 @@ import {
 } from './creators';
 import { EMPTY_LEDGER, postAll } from './ledger';
 import { summariseFinances } from './summary';
+
+/**
+ * A channel with the sourced draw, not the player's: the population tests below check the
+ * published curves, and a player's channel is deliberately lifted off them (0706).
+ */
+const sourced = (input: Parameters<typeof newChannel>[0]) => ({
+  ...newChannel(input),
+  luck: luckDraw(input.seed, input.id),
+});
 
 const make = (over: Partial<Channel> = {}): Channel => ({
   ...newChannel({
@@ -216,23 +229,25 @@ describe('a new channel', () => {
     expect(findCreatorCategory('gaming')!.names).toContain(make().name);
   });
 
-  it('spreads luck across the whole range across many lives', () => {
-    const lucks = Array.from(
-      { length: 2000 },
-      (_, i) =>
-        newChannel({
-          seed: `s${i}`,
-          id: 'x',
-          platformId: 'video',
-          categoryId: 'gaming',
-          year: 2030,
-        }).luck,
-    );
-    const mean = lucks.reduce((a, b) => a + b, 0) / lucks.length;
+  it('spreads the draw across the whole range across many lives', () => {
+    const draws = Array.from({ length: 2000 }, (_, i) => luckDraw(`s${i}`, 'x'));
+    const mean = draws.reduce((a, b) => a + b, 0) / draws.length;
     expect(mean).toBeGreaterThan(0.45);
     expect(mean).toBeLessThan(0.55);
-    expect(Math.min(...lucks)).toBeLessThan(0.02);
-    expect(Math.max(...lucks)).toBeGreaterThan(0.98);
+    expect(Math.min(...draws)).toBeLessThan(0.02);
+    expect(Math.max(...draws)).toBeGreaterThan(0.98);
+  });
+
+  it('gives the channel the lifted draw, from its own platform', () => {
+    for (const [platformId, categoryId] of [
+      ['video', 'gaming'],
+      ['stream', 'gaming'],
+      ['podcast', 'comedy'],
+    ] as const) {
+      const channel = newChannel({ seed: 'lift', id: 'x', platformId, categoryId, year: 2030 });
+      expect(channel.luck).toBe(liftedLuck(luckDraw('lift', 'x'), findPlatform(platformId)!.lift));
+      expect(channel.luck).toBeGreaterThan(luckDraw('lift', 'x') - 1e-12);
+    }
   });
 
   it('changes effort without touching anything else', () => {
@@ -283,7 +298,7 @@ describe('where a channel settles: the long tail', () => {
     let a100k = 0;
     let a1m = 0;
     for (let i = 0; i < lives; i += 1) {
-      let channel = newChannel({
+      let channel = sourced({
         seed: `s${i}`,
         id: 'c',
         platformId: 'video',
@@ -664,10 +679,11 @@ describe('a channel’s luck is its own', () => {
       slot.total += channel.luck;
       slot.count += 1;
     }
+    const all = sums.reduce((a, b) => a + b.total, 0) / sums.reduce((a, b) => a + b.count, 0);
     for (const slot of sums) {
       expect(slot.count).toBeGreaterThan(500);
-      expect(slot.total / slot.count).toBeGreaterThan(0.42);
-      expect(slot.total / slot.count).toBeLessThan(0.58);
+      expect(slot.total / slot.count).toBeGreaterThan(all - 0.06);
+      expect(slot.total / slot.count).toBeLessThan(all + 0.06);
     }
   });
 });
@@ -824,7 +840,7 @@ describe('six years of a stream and a podcast land on their published shares', (
   const run = (platformId: string, categoryId: string, marks: readonly number[]) => {
     const counts = marks.map(() => 0);
     for (let i = 0; i < lives; i += 1) {
-      let channel = newChannel({ seed: `s${i}`, id: 'c', platformId, categoryId, year: 2030 });
+      let channel = sourced({ seed: `s${i}`, id: 'c', platformId, categoryId, year: 2030 });
       const quality = creatorQuality(30 + (i % 50), i % 7 === 0);
       for (let year = 0; year < 6; year += 1) {
         channel = channelYear({ channel, year: 2030 + year, quality }).channel;
@@ -1444,5 +1460,94 @@ describe('paying from the threshold (0703)', () => {
       channelIncome(platform, business, 10_000, 'regular', tier);
     expect([at('low'), at('standard'), at('premium')]).toEqual([30_081, 39_078, 45_063]);
     expect(channelIncome(platform, business, 10_000, 'regular')).toBe(at('standard'));
+  });
+});
+
+describe('0706 — a player is not an average channel', () => {
+  it('lifts a draw in rank by the amount it says, exactly', () => {
+    // Half of channels do better than this one; with a lift of 2 it is a quarter.
+    expect(liftedLuck(0.5, 2)).toBeCloseTo(0.75, 12);
+    // A tenth do better: the lift is 1 + (2 - 1) × (0.1 ÷ 0.25) = 1.4.
+    expect(liftedLuck(0.9, 2)).toBeCloseTo(1 - 0.1 / 1.4, 12);
+    // Above a quarter the whole lift applies.
+    expect(liftedLuck(0.2, 3)).toBeCloseTo(1 - 0.8 / 3, 12);
+    expect(liftedLuck(0, 2)).toBeCloseTo(0.5, 12);
+    expect(liftedLuck(0.75, 3)).toBeCloseTo(1 - 0.25 / 3, 12);
+  });
+
+  it('is nothing at a lift of one, never lowers a draw, and keeps order', () => {
+    let previous = -1;
+    for (let draw = 0; draw <= 1; draw += 0.01) {
+      expect(liftedLuck(draw, 1)).toBeCloseTo(draw, 12);
+      const lifted = liftedLuck(draw, 3);
+      expect(lifted).toBeGreaterThanOrEqual(draw - 1e-12);
+      expect(lifted).toBeGreaterThanOrEqual(previous);
+      expect(lifted).toBeLessThanOrEqual(1);
+      expect(lifted).toBeGreaterThanOrEqual(0);
+      previous = lifted;
+    }
+  });
+
+  it('barely touches the very top', () => {
+    expect(liftedLuck(0.9999, 3)).toBeCloseTo(0.9999, 4);
+    expect(liftedLuck(0.999999, 3)).toBeCloseTo(0.999999, 6);
+    // The best one channel in a hundred moves to about one in 108, at the greatest lift there is.
+    expect(1 - liftedLuck(0.99, 3)).toBeCloseTo(0.01 / 1.08, 10);
+  });
+
+  it('uses the platform’s own lift, and the default when it has none', () => {
+    expect({
+      LUCK_LIFT,
+      LUCK_LIFT_BELOW,
+      video: findPlatform('video')!.lift,
+      stream: findPlatform('stream')!.lift,
+      photo: findPlatform('photo')!.lift,
+      shortform: findPlatform('shortform')!.lift,
+      podcast: findPlatform('podcast')!.lift,
+      subscription: findPlatform('subscription')!.lift,
+    }).toEqual({
+      LUCK_LIFT: 1.5,
+      LUCK_LIFT_BELOW: 0.25,
+      video: 1.5,
+      stream: 2.5,
+      photo: 1.5,
+      shortform: 2,
+      podcast: 2.5,
+      subscription: 1.2,
+    });
+    expect(liftedLuck(0.5)).toBeCloseTo(liftedLuck(0.5, 1.5), 12);
+  });
+
+  it('makes a player’s channel likelier to be paid than the published share, by about what was meant', () => {
+    const shares = (platformId: string, categoryId: string, mode: 'sourced' | 'player') => {
+      const lives = 6_000;
+      let monetized = 0;
+      let top = 0;
+      const platform = findPlatform(platformId)!;
+      for (let i = 0; i < lives; i += 1) {
+        const base = newChannel({ seed: `lift${i}`, id: 'c', platformId, categoryId, year: 2030 });
+        let channel = mode === 'sourced' ? { ...base, luck: luckDraw(`lift${i}`, 'c') } : base;
+        const quality = creatorQuality(30 + (i % 50), i % 7 === 0);
+        for (let year = 0; year < 6; year += 1) {
+          channel = channelYear({ channel, year: 2030 + year, quality }).channel;
+        }
+        if (channel.audience >= platform.paysAt) monetized += 1;
+        if (channel.audience >= platform.paysAt * 1_000) top += 1;
+      }
+      return { monetized: monetized / lives, top: top / lives };
+    };
+    for (const [platformId, categoryId, low, high] of [
+      ['video', 'education', 1.3, 1.8],
+      ['stream', 'gaming', 1.9, 3],
+      ['shortform', 'comedy', 1.5, 2.6],
+      ['podcast', 'comedy', 1.4, 2.4],
+    ] as const) {
+      const sourced = shares(platformId, categoryId, 'sourced');
+      const player = shares(platformId, categoryId, 'player');
+      expect(player.monetized / sourced.monetized, platformId).toBeGreaterThan(low);
+      expect(player.monetized / sourced.monetized, platformId).toBeLessThan(high);
+      // The top is not inflated: a thousand times the paying threshold is as rare as before.
+      expect(player.top, platformId).toBeLessThan(sourced.top * 1.5 + 0.002);
+    }
   });
 });

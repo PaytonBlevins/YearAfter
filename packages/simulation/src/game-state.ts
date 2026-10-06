@@ -47,6 +47,7 @@ import {
   type PriceBook,
   type RetirementState,
 } from '@yearafter/finance';
+import { EMPTY_CELEBRITIES, type CelebrityState } from './celebrity-state';
 import { Rng } from './rng/rng';
 
 /** World state that outlives any single character (spec 818–827 continuation). */
@@ -311,6 +312,8 @@ export interface GameState {
   readonly fame: number;
   /** Ticket 0704. A manager or an agent, never both. Absent: nobody. */
   readonly representation?: Representation;
+  /** Ticket 0705. The famous people the character has met, and what came of it. Always present from v42. */
+  readonly celebrities: CelebrityState;
   /** Live RNG registry. Serialised into the save on every write. */
   readonly rng: Rng;
 }
@@ -518,6 +521,7 @@ export interface CreateGameStateOptions {
   readonly channels?: readonly Channel[];
   readonly fame?: number;
   readonly representation?: Representation;
+  readonly celebrities?: CelebrityState;
 }
 
 export const createGameState = (
@@ -561,6 +565,7 @@ export const createGameState = (
   channels: options.channels ?? EMPTY_CHANNELS,
   fame: options.fame ?? 0,
   ...(options.representation !== undefined ? { representation: options.representation } : {}),
+  celebrities: options.celebrities ?? EMPTY_CELEBRITIES,
   pending: options.pending ?? [],
   rng,
 });

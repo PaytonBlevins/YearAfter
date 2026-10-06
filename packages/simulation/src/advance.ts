@@ -87,6 +87,7 @@ import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
 import { runDealsYear } from './deals';
 import { creatorWeek, runCreatorsYear } from './creators';
+import { runCelebrityYear } from './celebrity';
 import { foundOut } from './auctions';
 import { residenceOf } from './rentals';
 import { INSTRUMENTS, SECTORS, costIndexOf, findActivity } from '@yearafter/content';
@@ -398,6 +399,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     stats: worked.stats as unknown as Record<string, number>,
     talents: state.player.talents as unknown as Record<string, boolean>,
     ...(state.representation === undefined ? {} : { representation: state.representation }),
+    seed: state.rng.getSeed(),
+    generation: state.world.generation,
   });
   const creatorTax = businessTaxOn(employment.earned + businessesYear.drawn, creatorsYear.net);
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
@@ -486,6 +489,18 @@ export function advanceYear(state: GameState): AdvanceResult {
       employment.lines.length +
       living.lines.length,
   );
+  /*
+    Ticket 0705 — the famous people the character has met. After events, because a friend who
+    dies this year is ended in the circle events just returned, and nothing here draws from the
+    random stream.
+  */
+  const celebritiesYear = runCelebrityYear({
+    seed: state.rng.getSeed(),
+    year: nextYear,
+    age: nextAge,
+    celebrities: state.celebrities,
+    circle: events.circle,
+  });
 
   // Stress last: it summarises the year rather than making things happen in it,
   // so it needs the workload education computed, the household events finished
@@ -616,6 +631,7 @@ export function advanceYear(state: GameState): AdvanceResult {
   );
   // Events carry their own id, assigned by the event engine.
   write(events.lines, () => undefined);
+  write(celebritiesYear.lines, (index) => `t:${nextYear}:celeb:${index}`);
   write(health.lines, (index) => `t:${nextYear}:health:${index}`);
   // Last in the year, because it is the line about the year as a whole.
   write(stress.lines, (index) => `t:${nextYear}:stress:${index}`);
@@ -1083,7 +1099,12 @@ export function advanceYear(state: GameState): AdvanceResult {
       raw because that one is a level the phase computed, not a nudge.
     */
     stats: {
-      ...nudgeStats(stress.player.stats, { ...health.statDeltas, ...shaped }),
+      ...nudgeStats(stress.player.stats, {
+        ...health.statDeltas,
+        ...shaped,
+        // Ticket 0706. The year's news about a channel or about being known.
+        ...(creatorsYear.mood === 0 ? {} : { happiness: creatorsYear.mood }),
+      }),
       health: clampStat(health.health),
     },
     // Ticket 0210 takes this over for anybody who is working. Computed AFTER
@@ -1146,7 +1167,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     world: { ...state.world, year: nextYear },
     player,
     family: events.family,
-    circle: events.circle,
+    circle: celebritiesYear.circle,
+    celebrities: celebritiesYear.celebrities,
     parenting: family.parenting,
     employment: employment.employment,
     // Ticket 0211. A pending decision is DISCARDED on the year somebody dies:

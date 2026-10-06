@@ -41,6 +41,7 @@ import {
   type TrendRow,
 } from '@yearafter/finance';
 import type { GameState } from './game-state';
+import { drawCreatorEvent, effectOf, type EventEffect } from './creator-events';
 
 const statOf = (stats: Readonly<Record<string, number>>, key: string): number => {
   const value = stats[key];
@@ -229,6 +230,10 @@ export interface CreatorsYear {
   readonly gross: number;
   /** Whole dollars earned net of upkeep, never below zero: what is taxed. */
   readonly net: number;
+  /** Ticket 0706. Points of happiness the year's news is worth, positive or negative. */
+  readonly mood: number;
+  /** Ticket 0706. What happened to the character this year, if anything did. */
+  readonly event?: EventEffect;
 }
 
 /** A year of every channel held. `year` is the year that is beginning. */
@@ -240,12 +245,16 @@ export function runCreatorsYear(input: {
   readonly talents: Readonly<Record<string, boolean>>;
   /** Ticket 0704. Whoever looks after the business side, if anybody. */
   readonly representation?: Representation;
+  /** Ticket 0706. The save's seed and the generation, for the year's news. Absent: no news. */
+  readonly seed?: string;
+  readonly generation?: number;
 }): CreatorsYear {
   const transactions: NewTransaction[] = [];
   const lines: string[] = [];
   let gross = 0;
   let upkeep = 0;
   let shares = 0;
+  const grossOf: number[] = [];
   const channels = input.channels.map((channel) => {
     const result = channelYear({
       channel,
@@ -256,6 +265,7 @@ export function runCreatorsYear(input: {
     const income = Math.round(Number(result.income) / 100);
     const cost = Math.round(Number(result.cost) / 100);
     gross += income;
+    grossOf.push(income);
     upkeep += cost;
     if (income > 0) {
       transactions.push({
@@ -298,6 +308,58 @@ export function runCreatorsYear(input: {
     }
     return result.channel;
   });
+  /*
+    Ticket 0706 — the year's news. After every channel has had its year, because what
+    happens depends on how big each one is now and on what it earned; before the manager's
+    cut, because a brand job pays commission like any other money.
+  */
+  let channelsNow = channels;
+  let mood = 0;
+  let fameShift = 0;
+  let event: EventEffect | undefined;
+  if (input.seed !== undefined) {
+    const eventInput = {
+      key: `${input.seed}:${input.generation ?? 0}:${input.year}:creator-event`,
+      seed: input.seed,
+      year: input.year,
+      fame: nextFame(input.fame, fameTarget(channels)),
+      channels: channels.map((channel, index) => ({ channel, gross: grossOf[index] ?? 0 })),
+    };
+    const plan = drawCreatorEvent(eventInput);
+    if (plan !== undefined) {
+      event = effectOf(plan, eventInput);
+      mood = event.mood;
+      fameShift = event.fame;
+      if (event.channelId !== undefined && event.audience !== 0) {
+        channelsNow = channels.map((channel) =>
+          channel.id === event!.channelId
+            ? {
+                ...channel,
+                audience: Math.max(0, channel.audience + event!.audience),
+                peak: Math.max(channel.peak, channel.audience + event!.audience),
+              }
+            : channel,
+        );
+      }
+      if (event.income !== 0) {
+        gross += event.income;
+        transactions.push({
+          category: 'creator',
+          amount: dollars(event.income),
+          source: event.incomeSource ?? 'A one-off',
+        });
+      }
+      if (event.cost > 0) {
+        upkeep += event.cost;
+        transactions.push({
+          category: 'creator',
+          amount: dollars(-event.cost),
+          source: event.costSource ?? 'A one-off cost',
+        });
+      }
+      lines.push(event.text);
+    }
+  }
   const managerKept = managerShare(input.representation, gross);
   if (managerKept > 0) {
     shares += managerKept;
@@ -309,12 +371,14 @@ export function runCreatorsYear(input: {
   }
   const net = Math.max(0, gross - upkeep - shares);
   return {
-    channels,
-    fame: nextFame(input.fame, fameTarget(channels)),
+    channels: channelsNow,
+    fame: Math.min(100, Math.max(0, nextFame(input.fame, fameTarget(channelsNow)) + fameShift)),
     transactions,
     lines,
     gross,
     net,
+    mood,
+    ...(event === undefined ? {} : { event }),
   };
 }
 

@@ -565,14 +565,14 @@ can open a channel (a podcast or newsletter needs 16); talent helps growth but
 is never a gate. Measured against real creator figures (vidIQ July 2026,
 Twitch/Substack/podcast industry data) before any code.
 
-| Ticket                                     | What it covers                                                                                                                                                                                                                                                                   |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0701 Fame and the creator foundation**   | **DONE (engine).** Six platforms, fifteen categories, channels with a luck draw fixed at opening, long-tail audiences, income per platform, upkeep, tax on the net, one Fame bar 0–100, save v41. `claude/0701-fame-and-creator-foundation.md`                                   |
-| **0702 Video, streaming, podcasts**        | **DONE (engine).** Own curves for streaming and podcasts, charts #1000→#1, trends you can read, sponsorship offers (Accept / Request More / Decline), and an hours cost for effort (resolves finding 47). `claude/0702-video-streaming-podcasts.md`                              |
-| **0703 Photo, short-form, subscription**   | **DONE (engine).** Brand deals on all six platforms, viral posts on short-form and photo, a paid tier with a chosen price, conversion that falls with list size and payers who build up slowly, and Request More as a fair gamble. `claude/0703-photo-shortform-subscription.md` |
-| **0704 Collaborations and creator groups** | **DONE (engine).** Collaborations with friends, peers and bigger names (a repeat is worth half), creator groups that take 10–30% for faster growth, and a manager or an agent, never both. `claude/0704-collaborations-groups-representation.md` |
-| **0705 The celebrity world**               | Two-stage interaction with famous NPCs, ranks #1000→#1, and what fame does to the rest of a life.                                                                                                                                                                                |
-| **0706 Fame and creator events**           | The events catalog and the calibration pass for the block (including the cost of effort, finding 47).                                                                                                                                                                            |
+| Ticket                                     | What it covers                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0701 Fame and the creator foundation**   | **DONE (engine).** Six platforms, fifteen categories, channels with a luck draw fixed at opening, long-tail audiences, income per platform, upkeep, tax on the net, one Fame bar 0–100, save v41. `claude/0701-fame-and-creator-foundation.md`                                                                         |
+| **0702 Video, streaming, podcasts**        | **DONE (engine).** Own curves for streaming and podcasts, charts #1000→#1, trends you can read, sponsorship offers (Accept / Request More / Decline), and an hours cost for effort (resolves finding 47). `claude/0702-video-streaming-podcasts.md`                                                                    |
+| **0703 Photo, short-form, subscription**   | **DONE (engine).** Brand deals on all six platforms, viral posts on short-form and photo, a paid tier with a chosen price, conversion that falls with list size and payers who build up slowly, and Request More as a fair gamble. `claude/0703-photo-shortform-subscription.md`                                       |
+| **0704 Collaborations and creator groups** | **DONE (engine).** Collaborations with friends, peers and bigger names (a repeat is worth half), creator groups that take 10–30% for faster growth, and a manager or an agent, never both. `claude/0704-collaborations-groups-representation.md`                                                                       |
+| **0705 The celebrity world**               | **DONE (engine).** A persistent roster of fictional public figures (derived from the seed, nothing saved), a rare yearly chance meeting, six things to do to a stranger, a second menu for people you now know, and a warm connection becoming an ordinary friend. Save v42. `claude/0705-the-celebrity-world.md`      |
+| **0706 Fame and creator events**           | **DONE (engine).** Twenty-three events (good, bad and about being known, one a year at most, about half of years), a per-platform rank lift so a player's channel is not an average abandoned one, and higher connection chances for a celebrity answered well. No save bump. `claude/0706-fame-and-creator-events.md` |
 
 ## v0.08 Entertainment & Sports
 
@@ -1104,15 +1104,20 @@ separate the two states; the first-year share does not. Recorded, not forced.
 cannot rent from them.** Both are natural next steps (a business with a
 location in your warehouse pays you rent) and neither is in spec 0606's scope.
 
-**47. Effort has no cost except upkeep, so heavy effort always wins.** _(Resolved in
-0702.)_ A channel's hours (light 2, regular 5, heavy 9 a week) now reach the
-hidden workload, so one channel is livable and four heavy ones are a bad year.
-Tested through a full year. 0706's calibration should still check that light and
-regular are sometimes the right choice for the money.
+**47. Effort has no cost except upkeep, so heavy effort always wins.** _(Partly resolved in
+0702 and 0706.)_ A channel's hours (light 2, regular 5, heavy 9 a week) now reach the
+hidden workload, so one channel is livable and four heavy ones are a bad year. 0706
+measured it for one video channel over six years: mean net light 3,000–5,900 dollars,
+regular 27,000–32,000, heavy 75,000–88,000. Heavy costs about 11 happiness points over the
+six years (41.8 against 52.6) and it alone can have the burnout event. It still wins on
+money by about 2.7 times, so for the money alone light and regular are never the right
+choice. Left as a trade between money and happiness; not changed.
 
-**48. Fame feeds nothing yet.** The bar is computed and saved but nothing reads it.
-Its readers arrive in 0705 (the celebrity world) and 0706 (events). Until then
-it is a number on the state, with no screen.
+**48. Fame feeds nothing yet.** _(Partly resolved in 0705.)_ Fame now raises how often a
+famous stranger crosses your path (`1 + fame/25`), how well your answers land (up to +35
+points) and how often a good answer leaves a connection (up to double). Nothing else
+reads it: 0706's seven events about being known read it (fame 8 and up), and the bar
+still has no screen.
 
 **49. A child can earn what a retiree cannot.** A lucky 14-year-old channel pays
 real money with no guardian, trust or tax rule beyond the ordinary self-
@@ -1124,8 +1129,10 @@ channel in 700 ever reaches a million), but it is reachable.
 number one needs a draw near one in four million on video. Measured over six
 years at quality 1: 0.005% of video channels reach the top 100, 0.075% of
 streams. Spec 949 wants strong play to make the top more attainable; right now
-play moves a channel only along its own curve. Revisit in 0705, where ranks
-matter.
+play moves a channel only along its own curve. Revisited in 0705: ranks matter
+only to the player's own platforms, and fame is low for nearly everyone (finding 64), so the
+top places stay rare. 0706 lifted a player's luck by rank, which barely touches the very
+top by design (a draw of 0.99 is moved by about 7%); the top places are as rare as before.
 
 **51. The podcast tail runs under its anchors.** After six years the model sits
 roughly 10–25% under the published download percentiles at the top. Left as is:
@@ -1137,7 +1144,8 @@ podcasts are the platform where a small, loyal show is the point.
 **53. Taking a deal costs almost nothing.** Trust is a flat 1.5% (0.5% for a
 podcast) of the audience, which beside a deal worth thousands is small, so
 Accept is nearly always right. Brand fit, the category and repeated deals in a
-year are the natural prices; 0706 can add them with the events.
+year are the natural prices. 0706 did not add them (its events do not touch trust);
+still open.
 
 **54. Photo, short-form and subscription audiences are not measured.** No usable
 population curve was found for Instagram or TikTok creators; the available
@@ -1149,7 +1157,8 @@ subscriptions. Revisit if a real distribution turns up.
 **55. Photo brand money is counted twice.** A photo channel's income already
 includes 20 routine brand posts a year at the going rate; a named campaign adds
 four posts at 1.5 times it on top, about 30% more. Cutting `BRAND_POSTS` would fix
-it but moves 0701's pinned photo income; left for 0706's calibration.
+it but moves 0701's pinned photo income. 0706 left it: the lift already moved photo
+income and a second change would have confused the measurement. Still open.
 
 **56. The newsletter sponsorship rate is a guess.** $30 per thousand readers an
 issue is set near the podcast's $25. No source was found.
@@ -1184,7 +1193,9 @@ net income and gives back 30% of the week; an agent adds 5–24% of channel inco
 through deals if every offer is taken, more as deals are a bigger share of the
 income (short-form). The comparison was computed from separate runs, not one
 character living both ways, and trust costs of taking every deal were not counted.
-Revisit in 0706's calibration.
+0706 did not revisit it; the events now add brand jobs, which both pay commission
+(a manager's cut applies to a brand job; an agent's applies only to deals), so the
+comparison has moved slightly. Still open.
 
 **62. What a stranger charges to appear, and the size of a friend's following, are
 guesses.** Strangers are 0.3 to 5 times the channel, charging $0.015 a follower of
@@ -1195,6 +1206,59 @@ direction (collaborations help small channels most, repeats help less) is source
 **63. A creator house is only a label.** No shared household, no co-residence, and
 nothing on the Relationships screen, which stays a private world (spec 1316). If a
 house should matter to where the character lives, it is a 0705 or 0706 question.
+
+**64. Fame is low for nearly everybody, so little reads it.** Measured in 0705: a dedicated
+video creator's 90th-percentile fame was 18 and none of 80 reached the chart. A player's
+fame rarely lifts a meeting or an answer enough to notice. If fame should matter in a normal
+life, how fame is earned has to rise (it is the audience curve, B6 in the playtest
+backlog), not what reads it. 0706 lifted how often a channel pays but not how audience
+becomes fame: fame at year 6 is still median 1–14, 90th percentile 3–25, so the seven events
+about being known fire in only about 2.5% of creator-years. If fame should matter in an
+ordinary life, `fameTarget` (20·log10 of reach) is the lever, and it is not changed.
+
+**65. A famous friend is only an ordinary friend, and takes a seat.** Once warmth reaches 60
+they join the circle (`context 'fame'`, not in the room) and from then on the circle's own
+rules apply: they cool with no contact and can move on like anyone. They also count as one of
+the `ADULT_CIRCLE` (4) peers the circle tops up to, so a famous friend is one fewer new
+friend met in the ordinary way. That is probably right (a real friend is a real friend) but
+it was not measured. They do die as dead (`alive: false`).
+
+**66. There are no screens for any of it.** No encounter prompt, no connection list, no
+second menu and no Social Media tab. The Activities row points at 0801 so it stays shut.
+Everything a screen needs is exported (see the 0705 doc). Screens are unassigned.
+
+**67. Connection rate is judged, not sourced, and the mix a player chooses was not
+measured.** _(Raised in 0706.)_ 0705's 0.27 connections a life was from every meeting answered
+with a compliment and felt low. 0706 raised the connect chances (compliment 0.5, flirt 0.55,
+autograph 0.1, picture 0.2). Per meeting at fame 0 (n = 147, so ±4 points): compliment 36%
+(was 20%), picture 14% (11%), autograph 7.5% (3%), flirt 7%. At 1.7 meetings a life, a
+compliment-only life makes about 0.6 connections. What a real player picks was not measured.
+
+**68. Romance with a famous friend is untested end to end.** The second menu refuses to flirt
+with a friend and points at the ordinary friends list. Whether the ordinary romance machinery
+accepts a person with `context 'fame'` and a `celebrityId` was not exercised. It would be
+simple to find out by starting a romance with one in a test.
+
+**69. The rank lift is a judgement.** Video 1.5, stream 2.5, photo 1.5, short-form 2.0,
+podcast 2.5, subscription 1.2, fading out above the top quarter. The spec says "more common
+than real life, not extremely overinflated" and nothing gives the size. Measured: ever
+net-positive in six years went video 48→65%, stream 10→28%, photo 42→56%, short-form
+14→40%, podcast 8→30%, subscription 62→69%. A living wage is still 0–5%. If playtests
+still say it is too hard (or too easy), these six numbers are the dial.
+
+**70. The event rates and sizes have no source.** The chance (45% a year), the weights, and
+every share (an audience, a year's income, a start-up cost) were set so that about half of
+years are quiet, good and bad weigh about 57 to 43, and no event decides a life. Only the
+direction is sourced (spec 725–770, 1334). A census (48% of creator-years) is what was
+checked, not realism.
+
+**71. Events read the channel and the fame, and nothing else about the person.** Burnout
+checks the effort and not the character's job, age or health; a brand job does not care
+whether the character is a child (finding 49); a shout-out does not know about the
+character's collaborations. They are simple on purpose; deeper reads belong with the screens.
+
+**72. Nothing shows an event but its line on the timeline.** There is no event screen and no
+history of past events. A player sees one sentence in the year's summary. See finding 66.
 
 ## Suggested order
 

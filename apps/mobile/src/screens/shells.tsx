@@ -986,9 +986,11 @@ export function ActivitiesScreen() {
             subtitle: 'Casino, racing, lottery',
             ticket: '0902',
           },
-          // Tickets 0701–0704 built the creator engine without a screen. The door arrives with the
-          // celebrity world (0705), which is the first v0.07 ticket with something to look at.
-          { icon: 'social', title: 'Social Media', ticket: '0705' },
+          // Tickets 0701–0706 built the creator engine, the celebrity world and their events
+          // without a screen. The door stays shut until v0.07's screens are assigned; 0801 is the
+          // next ticket on the roadmap, so that is where it points (0706 is now, and a door that
+          // points at now would open).
+          { icon: 'social', title: 'Social Media', ticket: '0801' },
           { icon: 'pets', title: 'Pets', affordance: 'action', ticket: '1001' },
           { icon: 'nightlife', title: 'Nightlife', affordance: 'action', ticket: '1002' },
           { icon: 'vacation', title: 'Vacation', ticket: '1003' },

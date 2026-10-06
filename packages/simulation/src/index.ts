@@ -49,3 +49,6 @@ export * from './businesses';
 export * from './deals';
 export * from './creators';
 export * from './network';
+export * from './celebrity-world';
+export * from './celebrity-state';
+export * from './celebrity';

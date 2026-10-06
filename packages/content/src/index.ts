@@ -178,5 +178,7 @@ export * from './deal-lines';
 export * from './commercial';
 export * from './creators';
 export * from './creator-lines';
+export * from './creator-events';
 export * from './sponsors';
 export * from './creator-network';
+export * from './celebrity';

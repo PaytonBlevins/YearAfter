@@ -94,6 +94,8 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     fame: state.fame,
     // Ticket 0704. Omitted when nobody is hired: no version bump, and an older save loads as it is.
     ...(state.representation !== undefined ? { representation: state.representation } : {}),
+    // Ticket 0705, the eleventh, in the same breath as the field.
+    celebrities: state.celebrities,
     // Omitted entirely when nobody is hired, which is what every other optional
     // field in this document does and what the migration relies on.
     ...(state.advisorId !== undefined ? { advisorId: state.advisorId } : {}),
@@ -139,6 +141,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     channels: save.channels,
     fame: save.fame,
     ...(save.representation !== undefined ? { representation: save.representation } : {}),
+    celebrities: save.celebrities,
     retirement: save.retirement,
     pending: save.pending,
   });
