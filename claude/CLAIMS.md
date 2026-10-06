@@ -24,7 +24,7 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | A5 Money/business spoken copy | Codex / Agent B | `feat/playtest-money-copy` | money/business pass built; review pending |
 
-| A5 People-screen spoken copy | Codex / Agent B | `feat/playtest-people-copy` | claimed; life-event wording excluded |
+| A5 People-screen spoken copy | Codex / Agent B | `feat/playtest-people-copy` | people pass built; events deferred; review pending |
 
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |

@@ -152,7 +152,7 @@ describe('A4 — people actions without odds labels', () => {
       const row = rows.find((candidate) => candidate.props.title === choice.label);
       expect(row?.props.disabled).toBe(true);
       expect(row?.props.onPress).toBeUndefined();
-      expect(row?.props.subtitle).toMatch(/twice in a year|plenty/);
+      expect(row?.props.subtitle).toMatch(/once-a-year interaction|year.s limit/);
     }
   });
 });

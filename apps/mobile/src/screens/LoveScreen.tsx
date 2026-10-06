@@ -51,7 +51,7 @@ export function LoveScreen() {
   if (stagesFor(age).length === 0) {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <EmptyState title="Not yet" body="There is nothing here for somebody your age." />
+        <EmptyState title="Not yet" body="Dating isn't available at your age yet." />
       </ScrollView>
     );
   }
@@ -125,7 +125,11 @@ export function LoveScreen() {
               // to every player; "you have given it a go" says why the row is
               // greyed out, which is the difference (CORE_RULES 13.29). The
               // heading beside it already carries "once a year".
-              subtitle={usedApp ? 'You have given it a go this year.' : undefined}
+              subtitle={
+                usedApp
+                  ? "You've already tried the dating apps this year. Try again next year."
+                  : undefined
+              }
               affordance={usedApp ? 'none' : 'action'}
               disabled={usedApp}
               onPress={usedApp ? undefined : tryDatingApp}
@@ -136,7 +140,7 @@ export function LoveScreen() {
 
       {crushes.length > 0 ? (
         <>
-          <SectionHeading note="they do not know">Somebody you like</SectionHeading>
+          <SectionHeading note="they don't know yet">Somebody you like</SectionHeading>
           <Card>
             {crushes.map((person, index) => (
               <Fragment key={person.id}>
@@ -201,8 +205,8 @@ export function LoveScreen() {
         <View style={styles.note}>
           <Text style={styles.noteText}>
             {age < CRUSH_AGE + 3
-              ? 'Nobody yet. Most of this starts with somebody you already know.'
-              : 'Nobody at the moment. The people you meet doing other things are the people you meet.'}
+              ? 'No romantic connections yet. You can get to know someone from your contacts.'
+              : 'No romantic connections right now. You can meet people through work, school and activities.'}
           </Text>
         </View>
       ) : null}

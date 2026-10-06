@@ -81,7 +81,7 @@ A1 goes with 0705 and 0706, not with this list.
 - **A12:** Implemented on the same branch; Property uses the combined current value of owned properties and stays hidden when there are none. Other assets still count toward net worth.
 - Both await PR review and a native-device check. Verification and remaining gates: `claude/playtest-a4-a12.md`.
 - **A2:** Implemented on the same branch; each supplier grade now explains cost, quality and the effect on customers, with the current choice marked. See `claude/playtest-a2.md`.
-- **A3** needs B1's failure/warning contract; **A7** cost visibility can proceed independently; profitability pairs with **B15**, not the iced-out watches in B14. **A5** now has a money/business copy pass selected by Payton; broader commentary still needs examples. **A10** still needs the spec decision already recorded above.
+- **A3** needs B1's failure/warning contract; **A7** cost visibility can proceed independently; profitability pairs with **B15**, not the iced-out watches in B14. **A5** has money/business and people-screen passes; Payton explicitly deferred life-event wording until last. **A10** still needs the spec decision already recorded above.
 - Explicit card payment options apply to every eligible purchase, including future vacations, up to the card's available credit. This is recorded in PR #2; it needs Agent A's purchase/payment contract before screens can offer it.
 
 ### Next batch — investment news and debt
@@ -95,7 +95,7 @@ A1 goes with 0705 and 0706, not with this list.
 - **A8:** Enrolled-program screen on `feat/playtest-college-graduation`: actual length, progress, grades, tuition, family help, personal share, tuition debt, Study Harder and confirmed leaving. Career opens it for working students too.
 - **A9:** Graduation notice celebrates newly earned diplomas, degrees and licenses; names career paths and tuition debt; waits behind other overlays and does not replay a loaded save. A stage change alone is not success: failing out and insufficient tuition also set `graduated`.
 - Both await review and native-device checks. Detailed results: `claude/playtest-college-graduation.md`. Review after PR #4.
-- Remaining screen notes need input/contracts: A1 (0705/0706), A3 (B1), A5 (additional commentary examples), A10 (spec 20 decision). Rules/B items stay with Agent A.
+- Remaining screen notes need input/contracts: A1 (0705/0706), A3 (B1), A5 (life-event wording deferred until last), A10 (spec 20 decision). Rules/B items stay with Agent A.
 
 ### Next batch — rental cost visibility
 
@@ -106,3 +106,8 @@ A1 goes with 0705 and 0706, not with this list.
 
 - **A5:** Payton selected a money/business pass. Card and loan refusals use direct wording and keep actual requirements. Business text names price tradeoffs, staffing limits, locations and startup financing plainly. Mechanics and commands are unchanged.
 - This pass is built on `feat/playtest-money-copy`, pending review and native-device checks. Further commentary remains open; this is not a sweep of every event or social screen. Details: `claude/playtest-money-copy.md`. Review after PR #6.
+
+### Next batch — people-screen wording; events last
+
+- **A5:** Person, People and Love explain yearly interaction limits, empty contacts and dating availability directly. Existing actions, grouping and memory text remain unchanged. Built on `feat/playtest-people-copy`, pending review and device checks. Details: `claude/playtest-people-copy.md`. Review after PR #7.
+- **Payton's sequencing instruction:** leave life-event wording until last. This batch does not edit events, outcomes, timeline lines or saved memories. Other pending screen batches still need their contracts or product decisions.

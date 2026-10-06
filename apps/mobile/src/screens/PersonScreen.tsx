@@ -55,7 +55,7 @@ export function PersonScreen() {
   if (!person) {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <EmptyState title="Nobody here" body="This person is no longer in the save." />
+        <EmptyState title="Nobody here" body="This person is no longer in your contacts." />
       </ScrollView>
     );
   }
@@ -136,7 +136,7 @@ export function PersonScreen() {
 
       {around ? (
         <>
-          <SectionHeading note={lightLeft(spent.light) === 0 ? 'seen enough of you' : undefined}>
+          <SectionHeading note={lightLeft(spent.light) === 0 ? 'try again next year' : undefined}>
             What you can do
           </SectionHeading>
           <Card>
@@ -226,8 +226,7 @@ export function PersonScreen() {
       {!around ? (
         <View style={styles.note}>
           <Text style={styles.noteText}>
-            Not somebody you see any more. They stay here because a childhood you can look back on
-            has to include the people who left it.
+            You don't see this person anymore. You can still look back at your memories together.
           </Text>
         </View>
       ) : null}
@@ -259,9 +258,9 @@ function InteractionRow({
   const blocked = heavyUsed || worn;
 
   const subtitle = heavyUsed
-    ? 'Not something you can do twice in a year.'
+    ? "You've already used your once-a-year interaction with this person. Try again next year."
     : worn
-      ? `${displayName(person)} has seen plenty of you this year.`
+      ? `You've reached this year's limit for spending time with ${displayName(person)}. Try again next year.`
       : interaction.blurb;
 
   return (
@@ -302,9 +301,9 @@ function RomanceRow({
   const blocked = heavyUsed || worn || why !== undefined;
 
   const subtitle = heavyUsed
-    ? 'Not something you can do twice in a year.'
+    ? "You've already used your once-a-year interaction with this person. Try again next year."
     : worn
-      ? `${displayName(person)} has heard plenty from you this year.`
+      ? `You've reached this year's limit for spending time with ${displayName(person)}. Try again next year.`
       : (why ?? move.blurb);
 
   return (
