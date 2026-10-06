@@ -159,3 +159,8 @@ being ill are all things that change a person and none of them touch a stat in
 adulthood — the same hole this ticket closed for work, four more times. That is
 the honest next step and it is a content ticket rather than a mechanism one now
 that the mechanism exists.
+
+## Later follow-ups
+
+0415 checked the outside-work gap: college study already moved Smarts, while
+parenting, illness and hard years gained shaping rules. The hobby followed in 0416. The closing list is the pre-0415 finding, not four currently missing systems.

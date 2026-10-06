@@ -29,7 +29,7 @@ having a mortgage.
 
 **Owning.** Each year the house moves with the market, charges its upkeep, and
 may wear down a condition band (8% a year). Nothing restores it yet; that's
-renovation, 0505. Buying and selling are ledger transfers, not income or
+renovation, 0506 after the 0502 renumbering. Buying and selling are ledger transfers, not income or
 outflow. Home value and mortgage debt go into net worth on the Finances screen,
 and home equity goes to the heir.
 
@@ -103,8 +103,15 @@ its finaliser.
 
 ## Still rough
 
-- **Ownership is low** for the reason above. Finding 9.
-- **Condition only goes down.** Renovation is 0505.
+- **Ownership is low** for the reason above. Finding 11.
+- **Condition only went down in this build.** Renovation shipped in 0506.
 - **One home at a time in practice.** The model holds several, but the door
   only asks people who own nothing, and a second home is a rental property,
-  which is 0502.
+  which shipped as 0503 after 0502 was inserted.
+
+## Later follow-ups
+
+0502 added partner earnings and reworked household spending; the statement
+that partners earn nothing is the pre-0502 explanation. 0503 built rental
+property and 0506 built renovations. Finding 11 still records low young
+ownership; this notes pass does not replace the original calibration tables.

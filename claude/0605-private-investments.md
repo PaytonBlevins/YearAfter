@@ -1,7 +1,8 @@
 # 0605 — Private investments
 
 **Status: ENGINE DONE (4 October 2026); independent sabotage pass DONE (5 October). Save v40.
-Screens and deal wording belong to the second agent and are open.** Spec 1383, 1140, 1860, 1233, 912.
+Screens and deal wording belong to Agent B: a patch was prepared against
+`1d6b280`, but is not merged on `main` and needs integration with this engine update.** Spec 1383, 1140, 1860, 1233, 912.
 
 ## Measured first
 
@@ -43,7 +44,8 @@ Minimum cheques $5k / $10k / $25k / $25k / $100k / $250k; shown when liquid mone
 is three cheques (soft band, spec 1140).
 
 - **Offers** are derived from the seed and the year, up to `MAX_OFFERS = 2`,
-  half of years bring any (`OFFER_CHANCE`). Nothing about them is saved.
+  each slot has a 50% normal-economy chance (`OFFER_CHANCE`), before
+  wealth/held-deal filtering; this is not a 50% chance of any offer across both slots. Nothing about them is saved.
 - **Capacity** (spec 1383): a round is a multiple of the minimum cheque; one
   person may take at most `maxShareOfRound` of it and `MAX_SHARE_OF_LIQUID` (half)
   of their liquid money. A tiny deal can't absorb a fortune.
@@ -56,8 +58,9 @@ is three cheques (soft band, spec 1140).
 - **Failure is real** (spec 1383) but not constant (spec 413's tone): the startup
   table loses money 70% of the time because that is what the data says, and pays
   10x or better 10% of the time.
-- **Economy** shifts the odds at the end: a recession lowers the good outcomes'
-  weight and can delay an exit a year (engine commit decides the size).
+- **Economy:** the implemented engine tilts offer occurrence and scales gains
+  at settlement. Changing the fixed outcome weights or delaying an exit was a
+  design proposal, not implemented behavior; the delay remains out of scope below.
 - \* **Net worth** counts a live deal at its cheque (not its hidden outcome). A
   write-off hits net worth only when it happens.
 - \* **A death** with live deals sells them on at the secondary discount, whatever
@@ -87,12 +90,15 @@ in `content/src/deal-lines.ts` (the second agent's file); `DEAL_NAMES` is in
 - `dealOffersFor` (finance): up to two offers a year, half of slots, tilted by
   the economy (a crash brings 40% as many, a boom 120%); the kind and size of a
   slot never depend on the person's money, only whether it is shown, so paying
-  for one deal doesn't change what the other is. Cheques are in $500 steps, at
-  most the lesser of the share of the round and half of what they hold.
+  for one deal doesn't change what the other is. Offer cheque caps are rounded down to $500 steps, at
+  most the lesser of the share of the round and half of what they hold. This
+  does not require the placed amount itself to be a multiple of $500. Eligibility
+  counts cash and portfolio; placement spends bank cash only.
 - `placeDeal`: refuses below the minimum, above the cap, beyond cash, a full
   book (eight live deals), or an offer already taken. The outcome and
   its multiple are drawn once, from the seed and the offer id.
-- `dealYear`: a lender pays 9% a year on the cheque and stops, at its default
+- `dealYear`: a successful lender pays 9% a year on the cheque, including
+  the maturity year with the principal, and stops, at its default
   year (half-way), if it was going to default. Others are quiet until the year
   before a bad end, when "word gets out" (one note). At the end the cheque
   comes back at its multiple, the economy scaling the gain only.
@@ -134,8 +140,10 @@ first-year interest, cash versus portfolio on the cheque, and the tax base
 
 ### Independent pass (second agent, 5 October)
 
-129 mutations: 89 caught, 40 survived (42 distinct changes once I split two
-that shared a line). One was a real bug in the engine, not a test gap: **a
+129 mutations: 89 caught by the combined target tests and 40 survived both
+applicable suites. Finance alone missed two additional mutations that simulation
+caught (held id and held kind), giving 42 per-file coverage misses, not 42
+combined survivors. One was a real bug in the engine, not a test gap: **a
 lender was paid no interest in the year the loan ended**, so a one-year loan
 (1-in-5 of private loans) paid nothing and every loan paid one year short of
 what its blurb says. Fixed in `dealYear` (interest, and `paid`, in the
@@ -145,14 +153,17 @@ keys (pinned with golden offers), the lock-up and round ranges, held name / id
 / kind, selling the deal asked for and settling only that one, input
 immutability, tax rounding and double counting, the draw in the tax base, the
 economy reaching the offers and the year, the timeline ids / sequence / year,
-and the estate (year of repricing, closed deals left out). All 42 are caught by
-new tests (finance 33 → 52, simulation 21 → 36 in the deals files).
+and the estate (year of repricing, closed deals left out). Agent A reports all 42 addressed by
+new tests (finance 33 → 52, simulation 21 → 36 in the deals files). This notes
+pass reads those additions and runs the normal verification gate; it does not
+claim a new independent mutation rerun against them.
 
 ## Not yet done
 
-The second agent: the Investments screen's deals section, store wiring, the
-removal of the 'private' row from `INVESTMENTS_NOT_YET_BUILT`, deal wording in
-`content/src/deal-lines.ts`.
+Agent B's 0605 screen patch contains the Investments deals section, store
+wiring, removal of the 'private' row from `INVESTMENTS_NOT_YET_BUILT` and deal
+wording. These remain unmerged at `d64f507`; integration with the latest engine,
+screen-test sabotage and native-device checks remain open.
 Also not done by anyone: the Investment Firm and Private Lending Firm
 businesses (0602/0603 deferred them here), and the economy-driven delay of an
 exit (outcomes are scaled by the market at the end, not postponed).
@@ -164,5 +175,8 @@ untaxed), in the roadmap.
 
 ## Tests
 
-`finance/private-deals.test.ts` (33, new), `simulation/deals.test.ts` (21,
-new), `persistence` +1 (v39 to v40). Finance 318 to 351, simulation 516 to 537.
+At the original engine commit: `finance/private-deals.test.ts` (33, new),
+`simulation/deals.test.ts` (21, new), `persistence` +1 (v39 to v40); finance
+318 → 351 and simulation 516 → 537. After the independent audit, the two
+deal files contain 52 and 36 tests respectively. Totals above are historical
+unless explicitly marked as the current verification run.

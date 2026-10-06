@@ -133,3 +133,9 @@ thing. The remaining repeats are concentrated in `random`, which is the category
 `family` and `friendship` still stop at twelve and six events able to fire at
 forty. An adult's parents, siblings and friends are as thin as their job was
 before this ticket, and that is the next content gap rather than a new one.
+
+## Later follow-ups
+
+0410 opened the systemic family door; 0413 expanded adult friendship and 0414
+added the childless-adult family and ordinary-life content. The closing "next
+content gap" describes what remained at 0409.

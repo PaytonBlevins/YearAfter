@@ -31,8 +31,8 @@ end of each year. The "working" column counts a year with any earned income.
 What that says:
 
 - **A low-capital business is reachable by most lives, and a high-capital one
-  by nobody.** Four in five adults over 25 hold $25,000, and nothing in the
-  game today puts anyone near $2,000,000. A hotel behind a wealth gate is a
+  by nobody.** The baseline has 62% holding $25,000 at 25–34 and about four in five
+  from 45 onward; no life in this sample reaches $2,000,000 liquid. A hotel behind a wealth gate is a
   gate nobody opens, until a business, an investment or a creator income
   produces the money. That is what the spec wants: "extreme success is
   intended content", and these are the tickets that make it reachable.
@@ -99,7 +99,8 @@ on every machine. The business engine does the same.
 
 Calibration, not measurement, so it lives in `0601-business-engine.md`: survival
 at five years comes out around 81% against 51% (BLS), because nothing yet puts
-competitors or a lost lease into a business's life. 0604 owns that. Finding 36
+competitors or a lost lease into a business's life. 0604 subsequently added
+those causes; its measured gap is recorded below rather than forced. Finding 36
 (`advanceYear` is not pure over its state) was found while testing and is in the
 roadmap.
 

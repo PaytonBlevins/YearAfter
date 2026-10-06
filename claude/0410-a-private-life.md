@@ -191,3 +191,9 @@ Single-parent adoption stays a screen action by design, so a passive player who
 never partners still reaches no children at all. `family.test.ts` covers that
 route deliberately and 0407 had to fix it once already for reaching it by
 accident.
+
+## Later follow-ups
+
+The warmth/keeping-up mechanism identified as "the next one" shipped in 0412.
+0416 later added adult pursuits and reduced the post-school friendship trough
+further. The marriage/child measurements above remain 0410's historical result.

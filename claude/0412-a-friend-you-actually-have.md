@@ -248,3 +248,10 @@ absolute (a +4 gain rounds to nothing above about 95, while a failed year still
 costs), which is what holds it at 96 instead of 100, but somebody you have been
 in a room with for forty years will end up close to the cap. That reads as
 honest rather than broken, and it is worth watching if `WORK_CREW` tenure grows.
+
+## Later follow-ups
+
+The adult friendship content shipped in 0413. Adult pursuits shipped in 0416,
+which measured no friend at twenty falling from 58% to 30% on its sample. The
+"next ticket" and school-only activity limit above describe the 0412 build.
+The thin in-room colleague page remains a recorded limitation.

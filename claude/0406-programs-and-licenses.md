@@ -212,3 +212,10 @@ downstream of the employment floor.
 still has no equivalent, and it is the more load-bearing of the two — a
 character with no job has no money, no living standard, no credit, and nothing
 for the finance systems 0301–0310 to act on.
+
+## Later follow-ups
+
+The "recommended next ticket" below this report shipped as 0407: first-job
+offers made employment reachable without opening the Career screen. The
+zero-employment and zero-postgraduate measurements above are the pre-0407
+baseline, not the current build.

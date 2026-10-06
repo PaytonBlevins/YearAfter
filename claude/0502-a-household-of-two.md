@@ -146,3 +146,9 @@ relabelled to match.
   to return to.)
 - **A partner's death leaves no estate to the player** beyond the pooled cash.
   Belongs in 0508.
+
+## Later follow-ups
+
+0503 rentals now exist; no later young-ownership recalibration is recorded
+here, so finding 11 remains open. The partner-earnings and old-age findings
+remain decisions for Payton/Agent A, and 0508 Will & Estate is still deferred.

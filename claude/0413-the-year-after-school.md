@@ -182,3 +182,10 @@ And the colleague of fifteen years still has a thin page. 0412's keeping-up step
 reaches the complement of the room by design, and this tranche names whoever is
 bound rather than specifically the person you see every day — so what happens
 between two people who share a room all year is still mostly unwritten.
+
+## Later follow-ups
+
+The other-category content identified as "the next content ticket" shipped
+in 0414: family-of-origin events and ordinary-life events. The cliff and mix
+measurements above are the 0413 snapshot; the thin in-room colleague page is
+still a recorded limitation.

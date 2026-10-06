@@ -138,3 +138,10 @@ applicants changing each look, and a building counting as a home.
   look right on screen, which is why they were left. Logged as a finding.
 - **Tenants are never people.** Spec 1316 keeps tenants inside property, so
   they're names on the Rental screen and nothing more. No memories, no events.
+
+## Later follow-ups
+
+0606 has now built the commercial-property engine on these letting verbs.
+Its commercial listings and business-tenant presentation are still open screen
+work; see `0606-commercial-real-estate.md`. The residential measurements above
+remain this ticket's baseline and result.
