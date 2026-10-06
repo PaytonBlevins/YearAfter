@@ -149,10 +149,11 @@ removed the arrears. CORE_RULES 13.97.
   lending _to_ a business, not a business that lends: its income is interest on
   a book of loans that go bad, which is not the demand-and-capacity shape
   every type here shares, and it is the same kind of thing as an Investment
-  Firm (capital put to work, with a risk of losing it). Both now wait for 0605.
-  Thirty-one of spec 396's thirty-seven are built; six wait on 0605, v0.08 and
-  gambling.
-- **Interest is not deductible.** The business pays interest out of its till
+  Firm (capital put to work, with a risk of losing it). 0605 subsequently built private deals rather than either business type.
+  Both remain unbuilt; 0605b is a proposal if wanted, not an approved ticket.
+  Thirty-one of spec 396's thirty-seven are built; six still wait on those
+  lending/investment businesses, v0.08 and gambling.
+- **No tax-loss offset against salary.** The business pays interest out of its till
   before the draw, which lowers the taxable draw, so it is deductible in effect;
   but no tax-loss offset against a salary exists (0601's gap), so a business
   that loses money after interest does not reduce the tax on a job.

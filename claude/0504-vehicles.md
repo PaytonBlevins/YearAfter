@@ -177,3 +177,9 @@ ids).**
   whenever cash leaves a cushion.
 - **Car loan rates are nominal**, the same as finding 14 for mortgages.
 - **Gifts ($$$ vehicle, spec 64)** don't exist yet.
+
+## Later follow-ups
+
+0505 subsequently added the `mods` field, shop flow and modification effects.
+The opening "no field" statement is scoped to the 0504 build. Its financing,
+parent-gift and repossession-shortfall findings remain open.

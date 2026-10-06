@@ -138,3 +138,9 @@ about a hundred. `career` needs a job history, `health` needs a condition and
 `loss` needs a bereavement, and an eighteen-year-old has none of the three. That
 is structural rather than a content gap, and the three categories that CAN reach
 that age now all do.
+
+## Later follow-ups
+
+0416 subsequently added recreational adult pursuits, including sports. Adult
+talent events and professional creator/entertainment/sports careers remain
+future milestone work; adding pursuits did not author that talent tranche.

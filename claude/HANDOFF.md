@@ -1,7 +1,7 @@
 # YearAfter — handoff for the second coding agent (Agent B)
 
-Written 4 October 2026, scope rewritten 5 October 2026. State: tickets through 0606's engine
-are built (0605 and 0606 engines are on `origin/main` or about to be), save version v40. Repo:
+Written 4 October 2026, scope rewritten 5 October 2026. State: the 0605 and 0606
+engines are on `origin/main` at `d64f507`; their screens are not merged. Save version v40. Repo:
 https://github.com/PaytonBlevins/YearAfter.git (public).
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
@@ -42,12 +42,10 @@ pnpm 10.28 + Turborepo, node >= 20.
 1. `specs/AI_CODING_INSTRUCTIONS.md` — how to work. Binding.
 2. `specs/ARCHITECTURE.md` — package layout and dependency direction.
 3. `claude/approved-decisions.md` — settled product decisions. Do not reopen.
-4. `claude/roadmap.md` — the roadmap (reproduced in full below the handoff in
-   Findings and the order list are at its end.
+4. `claude/roadmap.md` — the roadmap. Findings and the order list are at its end.
 5. The ticket doc for the area you touch (`claude/06xx-*.md`, most recent first).
-6. `specs/CORE_RULES.md` (~2,700 lines, numbered rules 13.x are lessons from
-   earlier tickets). Grep it by topic; the last ones (13.99–13.101) are the
-   freshest.
+6. `specs/CORE_RULES.md` (numbered rules 13.x are lessons from earlier tickets).
+   Grep it by topic; the latest rules at `d64f507` are 13.108–13.109.
 7. `specs/MASTER_SPEC.md` — the source of truth; every ticket cites line ranges.
 
 ## 3. Architecture in brief
@@ -58,7 +56,7 @@ pnpm 10.28 + Turborepo, node >= 20.
   education <- simulation <- persistence <- apps/mobile. Also finance, health,
   careers, social, parenting, stress. `tools/content-validator` checks content.
 - `advanceYear` is calculate -> validate -> commit, in phase modules.
-- Saves are a versioned JSON document with tested migrations (now v39). Any
+- Saves are a versioned JSON document with tested migrations (now v40). Any
   change to saved shape needs a version bump and a migration test. Optional
   fields can avoid a bump (0604 did).
 - Randomness: never `Math.random()`. Use the RNG registry's domain streams, keyed

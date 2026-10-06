@@ -171,3 +171,9 @@ ages reaching `lifeShaping` from real played states.
 - **Charisma's median still climbs** 76 → 90 across a life, with sd holding
   because 0411's neglect works. It's the same shape as willpower, just held in
   check. Worth the 13.79 audit the next time a content ticket touches it.
+
+## Later follow-ups
+
+The missing hobby mechanism shipped as 0416: an adult can join a pursuit and
+its first seasons feed `lifeShaping`. The willpower and charisma measurements
+and remaining calibration cautions above are preserved.

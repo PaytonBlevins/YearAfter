@@ -14,8 +14,8 @@ apparel, electronics and specialty manufacturing, trucking and vehicle rental.
 Startups now run from $20,000 to $14 million.
 
 Spec 396 lists thirty-seven. **Six are not built, on purpose**, because each
-needs a system that does not exist yet: Investment Firm (0605, private
-investments), Private Lending Firm (0603 first said it was this ticket's; 0603 moved it to 0605, see that doc), Record Label and
+needs a system that does not exist yet: Investment Firm and Private Lending Firm (originally deferred to 0605;
+0605 built private deals, not these business types; 0605b is a proposal if wanted), Record Label and
 Talent Agency (v0.08, music and acting), Casino (gambling) and Racing Team
 (v0.08, sports). The generator keeps them in a `DEFERRED` table so the list is
 one place.
@@ -94,7 +94,8 @@ salary.
   trades, and unkindly low for the capital-heavy types that lose money for two
   years (trucking, vehicle rental, furniture, production). A strict "quit after
   two bad years" owner leaves those at 0–30%; the game does not quit for you.
-  0604 (events, competition) is where both get tuned.
+  0604 added events and competition; its measured survival gap remains
+  recorded rather than forced. See `0604-business-events-and-heirs.md`.
 - License-gated trades (an electrician or an attorney needs one) and
   location-dependent availability are not modelled. A character with no
   qualification can open a law firm. Left for when licenses and the business

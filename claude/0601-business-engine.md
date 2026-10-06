@@ -87,9 +87,11 @@ and it stayed there on purpose; see `0604-business-events-and-heirs.md`.
 ## Deferred, and why
 
 License-gated trades (an HVAC business wants a trade license, an accounting
-practice a CPA) and location-dependent availability need 0602's catalog and
-gate. Selling at auction, borrowing against a business, buying an existing one
-are 0603. Tax-loss offsets against a salary are not modelled: a loss is just a
+practice a CPA) and location-dependent availability remain unbuilt; 0602 added
+the catalog and net-worth gate but not those qualification/location gates.
+0603 built purchase-linked business loans and buying an existing business; it
+did not build selling a business at auction or general cash borrowing against
+one. Tax-loss offsets against a salary are not modelled: a loss is just a
 loss. Sale proceeds are counted as income by `incomeOf` (finding 35) and are
 not corrected here.
 
@@ -111,6 +113,8 @@ tax satisfies by itself). See CORE_RULES 13.93 and 13.94.
 state object give different results from the second year on, because
 `state.rng` carries live streams that the first call mutates. A fresh game
 built the same way twice is deterministic, which is what every test relies on
-and what a player sees. I have not checked whether loading a save (which
-persists only the seed) continues exactly as the live session would have.
-Worth a test before anything adds undo, "preview a year" or autosave-replay.
+and what a player sees. Saves persist the seed **and live stream states**
+through `rng.snapshot()` / `Rng.restore`; `persistence.test.ts` already checks
+one year's continued timeline entries after a save. Neither establishes input
+immutability or a full multi-year state replay. Those remain worth checking
+before undo, a preview or autosave-replay (roadmap finding 36).

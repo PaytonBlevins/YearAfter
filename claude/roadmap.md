@@ -1,9 +1,12 @@
 # YearAfter — roadmap from here
 
-**Where we are:** **v0.02 Living Character is COMPLETE.** Tickets 0201–0212,
-plus the 0203b/0204b/0206b/0207b/0207c/0207d/0210b/0210c/0211a/0211b/0211c
-rounds. A life is playable start to finish, and the line carries on past it.
-**Next up:** v0.03 Financial Life — 0301 Financial Ledger.
+**Where we are:** v0.03 Financial Life and v0.04 Career & Education Depth are
+complete; v0.05 tickets 0501–0507 are built, with 0508 Will & Estate deferred by
+Payton. The 0601–0606 engines are on `origin/main` at `d64f507`; the 0605 and
+0606 screens and native-device checks remain open. Save **v40**.
+**Agent B's order:** existing notes, 0605 screens, 0606 screens, then new notes
+from Payton. Agent A owns every other ticket end to end; Payton decides the
+next ticket. See `claude/HANDOFF.md` §0 and §7.
 **Source:** `specs/MASTER_SPEC.md` §1285–1404. Everything below is quoted or
 derived from it; where the spec stops itemising tickets, that is marked.
 
@@ -17,15 +20,21 @@ derived from it; where the spec stops itemising tickets, that is marked.
 | **v0.01** 0101–0114       | Theme, header, five-world navigation, timeline, Advance, stat bars, world shells, UI kit, icons                                                                                                                  |
 | **v0.02** 0201–0212       | Character generator, family, events, school, stress, friends, love, children, NPC parents, employment, college, aging and health, a full-catalog voice pass, and **death, mortal NPCs and dynasty continuation** |
 
-**644 tests across 31 files, 27/27 turbo tasks.** 374 events, 49 jobs across 11
-ladders, 66 employers, 8 majors, 12 health conditions, 25 activities, 13 gigs.
-Save at **v17**.
+Later completed milestones: **v0.03** (0301–0310) and **v0.04** (0401–0417).
+**v0.05** has 0501–0507 shipped, with 0508 deferred; **v0.06** has the
+0601–0606 engines shipped, with the 0605/0606 screens open. Their ticket
+tables below remain the detailed status record.
 
-> This section (and the "Where we are" line above it) stopped being updated
-> partway through v0.03 — `claude/build-status.md` carries the current test
-> count, save version and catalog sizes, and is itself the doc that stays
-> current. Treat the numbers on this page as a snapshot of where v0.02 left
-> off, not the build's present state.
+The following is the historical v0.02 verification snapshot: **644 tests across
+31 files, 27/27 turbo tasks**, 374 events, 49 jobs across 11 ladders, 66
+employers, 8 majors, 12 health conditions, 25 activities and 13 gigs; save v17.
+It is not the current build's count or schema version.
+
+Current repository status is summarized above and in the v0.05/v0.06 tables.
+`claude/build-status.md` is a separate Claude Project document, absent from this
+checkout; its contents and synchronization have not been verified in this pass.
+The reconciliation record is `claude/notes-reconciliation.md`. Ticket measurements
+and test totals below describe their respective builds, not a new calibration.
 
 ---
 
@@ -465,6 +474,28 @@ worth at sixty was about what it was at thirty. So homes go first.
   1390's "bargains possible, not guaranteed". Save v37.
   `claude/0507-auctions.md`.
 
+## v0.06 Business & Advanced Wealth
+
+> Reusable business engine: startup cost, supplier, COGS, pricing, payroll tier,
+> employees, demand, brand reputation, profit, expansion, valuation, sale.
+> Business marketplace financially gated **without visible wealth-tier labels**.
+> Private investments and commercial real estate integration.
+
+Measured before it was ticketed — `claude/v006-business-measurement.md`. The pre-0601 sample reaches about four in
+five holding $25,000 from age 45; nobody in that sample holds $2,000,000; nobody passive will
+start a business, so this block has no doors. 0508 Will & Estate was **skipped
+on Payton's say-so on 3 October 2026** and is still to be built; it moves after
+this block.
+
+|                                    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **0601 The business engine**       | **DONE.** Opening, supplier / COGS, a price slider, four payroll tiers, automatic staffing, demand, brand reputation, profit, valuation and sale; twelve businesses; Assets → Businesses. 0604 narrowed five-year survival from 81.5% to 78.7% against BLS 51%; the remaining gap is recorded, not forced                                                                                                                                                                                                          |
+| **0602 Catalog and expansion**     | **DONE.** Nineteen more businesses (thirty-one of spec 396's thirty-seven; six wait on music, acting, gambling, sports and private lending), a marketplace gated on net worth, and up to four locations per business. Fixed three 0601 calibration holes found on the way (price slider, pay level, staffing speed)                                                                                                                                                                                                |
+| **0603 Business finance**          | **DONE.** Two business loans (Small Business, Commercial Term) written straight into an opening, a new door or a purchase and never paid out as cash; a for-sale list of established businesses priced above their worth; the business pays its own loan. Private Lending Firm remains unbuilt; 0605b is only a proposal if wanted                                                                                                                                                                                 |
+| **0604 Business events and heirs** | **DONE.** Nineteen weighted events a year at most (half the years are quiet), a rival that opens in crowded trades and fades over three years, the economy's effect said out loud, and an heir who keeps the business and its lender. Five-year survival 81.5% → 78.7% (BLS 51%); recorded, not forced                                                                                                                                                                                                             |
+| **0605 Private investments**       | **ENGINE DONE; Agent B screen patch prepared but not merged.** Six kinds of deal (start-up, private loan, local-business stake, property syndicate, growth company, fund), offered to the soft wealth bands (from $15,000 liquid to $750,000), money away for 1–10 years, an outcome fixed at the cheque, capacity limits on every cheque, early sale only where the kind allows it, tax through the ordinary progressive rate, sold on into the estate at a death. Save v40. `claude/0605-private-investments.md` |
+| **0606 Commercial real estate**    | **ENGINE DONE; Agent B screens open.** Four kinds (corner shop building, shopping strip, warehouse, office building) let to businesses of matching trades on 3-7 year leases at a fixed rent, a commercial lender (7.25%, 25 years, 30% down, to $8M), tenants that fail and applicants that thin out with the economy, net yields 5.7-7.4%. No save bump. `claude/0606-commercial-real-estate.md`                                                                                                                 |
+
 - **0601 The business engine** — nobody could own anything but a home, cars
   and a collection; Assets → Businesses had said "not built yet" since 0108.
   Twelve businesses from a $20,000 cleaning company to a $5.2 million hotel,
@@ -475,8 +506,9 @@ worth at sixty was about what it was at thirty. So homes go first.
   till and the rest is paid to you as taxed `business` income. Losses come from
   the till, then you, then the doors close. A manager staffs it unless you
   take over. Valuation, a yearly buyer, Sell and Close; businesses count in net
-  worth and pass to an heir as cash. Eighteen sabotages, two passed first time.
-  Known gap: survival is too kind until 0604 (0604 narrowed it, see that doc). Save v38.
+  worth and initially passed to an heir as cash; 0604 subsequently added adult
+  heirs keeping the business. Eighteen sabotages, two passed first time.
+  Known gap: 0604 added causes and narrowed survival slightly; the remaining gap is recorded, not forced. Save v38.
   `claude/0601-business-engine.md`.
 
 - **0602 Catalog and expansion** — nineteen businesses added to twelve: a law
@@ -531,28 +563,6 @@ worth at sixty was about what it was at thirty. So homes go first.
   nothing until a mutation test found it. Forty-nine sabotages, three passed
   first time. No save bump. `claude/0604-business-events-and-heirs.md`.
 
-## v0.06 Business & Advanced Wealth
-
-> Reusable business engine: startup cost, supplier, COGS, pricing, payroll tier,
-> employees, demand, brand reputation, profit, expansion, valuation, sale.
-> Business marketplace financially gated **without visible wealth-tier labels**.
-> Private investments and commercial real estate integration.
-
-Measured before it was ticketed — `claude/v006-business-measurement.md`. Four in
-five adults over 25 hold $25,000; nobody holds $2,000,000; nobody passive will
-start a business, so this block has no doors. 0508 Will & Estate was **skipped
-on Payton's say-so on 3 October 2026** and is still to be built; it moves after
-this block.
-
-|                                    |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0601 The business engine**       | **DONE.** Opening, supplier / COGS, a price slider, four payroll tiers, automatic staffing, demand, brand reputation, profit, valuation and sale; twelve businesses; Assets → Businesses. Survival (≈81% at five years against BLS 51%) waits on 0604                                                                                                                                                                                                                                                    |
-| **0602 Catalog and expansion**     | **DONE.** Nineteen more businesses (thirty-one of spec 396's thirty-seven; six wait on music, acting, gambling, sports and private lending), a marketplace gated on net worth, and up to four locations per business. Fixed three 0601 calibration holes found on the way (price slider, pay level, staffing speed)                                                                                                                                                                                      |
-| **0603 Business finance**          | **DONE.** Two business loans (Small Business, Commercial Term) written straight into an opening, a new door or a purchase and never paid out as cash; a for-sale list of established businesses priced above their worth; the business pays its own loan. Private Lending Firm moves to 0605                                                                                                                                                                                                             |
-| **0604 Business events and heirs** | **DONE.** Nineteen weighted events a year at most (half the years are quiet), a rival that opens in crowded trades and fades over three years, the economy's effect said out loud, and an heir who keeps the business and its lender. Five-year survival 81.5% → 78.7% (BLS 51%); recorded, not forced                                                                                                                                                                                                   |
-| **0605 Private investments**       | **ENGINE DONE; screens in progress (second agent).** Six kinds of deal (start-up, private loan, local-business stake, property syndicate, growth company, fund), offered to the soft wealth bands (from $15,000 liquid to $750,000), money away for 1–10 years, an outcome fixed at the cheque, capacity limits on every cheque, early sale only where the kind allows it, tax through the ordinary progressive rate, sold on into the estate at a death. Save v40. `claude/0605-private-investments.md` |
-| **0606 Commercial real estate**    | **ENGINE DONE; screens in progress (second agent).** Four kinds (corner shop building, shopping strip, warehouse, office building) let to businesses of matching trades on 3-7 year leases at a fixed rent, a commercial lender (7.25%, 25 years, 30% down, to $8M), tenants that fail and applicants that thin out with the economy, net yields 5.7-7.4%. No save bump. `claude/0606-commercial-real-estate.md`                                                                                         |
-
 ## v0.07 Creator & Fame
 
 > Long-form video, streaming, photo/lifestyle, short-form, podcasting,
@@ -569,11 +579,10 @@ this block.
 > Boxing, MMA, then approved Olympic categories. Coaching/commentary routes.
 
 Coach and teammate relationships stay inside sports — spec 1305–1309, the same
-rule that put colleagues on the Career screen. This milestone also closes a gap
-0211 measured: **nobody over eighteen is an athlete in this build**, because
-`education.activities` only exists while a character is at school. Spec 541–543
-puts athletes first in the injury order, and today only schoolchildren can reach
-that branch.
+rule that put colleagues on the Career screen. 0416 already added adult
+recreational pursuits, including sports, and feeds those participants into the
+health phase's athlete branch. v0.08's professional sports engine remains future
+work; the school-only adult-athlete gap recorded by 0211 is historical.
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -620,16 +629,17 @@ qualification at all (was 14). New rule 13.66.
 **1b. And it barely produced a varied BODY either.** — **DONE in 0417** (0408 did
 the generation half). The lifespan half was not the Gompertz term: healing
 ratcheted after sixty and age was counted twice. Constitution is now worth about
-eight years and 41% reach eighty-five. The original finding follows.
-**PARTLY DONE in 0408.**
+eight years and 41% reach eighty-five. The historical 0408 finding follows; its remaining lifespan gap was resolved by 0417.
+**At 0408: PARTLY DONE.**
 Birth health now runs sd 15 rather than 9, and `frailtyFactor` is two-sided so a
 strong constitution is worth something rather than merely not being a penalty.
 But the outcome it was supposed to buy did not arrive: median age at death still
 moves only about four years across the whole range of birth health. Health at
 sixty-five differentiates strongly (23 for the frailest fifth against 57 for the
 most robust) — every quintile is simply below the healthy-adult mark by then, so
-the Gompertz age term dominates whatever the multiplier says. **Still open, and
-it belongs to 0211's mortality model rather than to generation.**
+the original diagnosis attributed the limit to the Gompertz term. At that point
+it was assigned to the mortality model, not generation; 0417 found and fixed
+the healing ratchet and double counting of age instead.
 
 **1c. A passive player never sees a doctor.** — **CLOSED by decision** after
 0417: check-ups stay button-only (spec 531). See `claude/approved-decisions.md`,
@@ -643,23 +653,6 @@ adult events did move converged on a plateau (Charisma sd 9.7 → 3.8) rather th
 developing anybody. A year of work now builds what the track hires for and lets
 the rest go. New rule 13.70.
 
-**2c. And nothing OUTSIDE a job develops anybody.** — **DONE in 0415**, for
-three of the four. Study was already there (0210b's college year). A small child
-and a serious illness now shape a person, both ways, and so does a second year
-running on empty. It found the larger defect underneath: Willpower was a one-way
-ratchet in the adult catalog (71 gains, 0 losses) and collapsed to sd 2.8 by
-sixty. The hobby is 2g.
-
-**2g. An adult cannot join anything.** — **DONE in 0416**, and it was nobody, at
-any age: 0 of 120 lives ever joined anything. The original finding follows.
-0415's leftover, and it is three findings
-with one cause. `education.activities` only exists while a character is at
-school, so an adult has no hobby for 2c to develop them through, no third door
-besides work and the street for 2b's loneliest year, and — 0211's finding — no
-way to be an athlete after eighteen. The mechanism is one thing: an adult who
-can take something up and keep it. **Small enough to be its own ticket**, and
-v0.08's sports engine would build on it rather than replace it.
-
 **2b. Warmth is grown by a button, and there is a trough at twenty.** — **DONE
 in 0412**, and the finding was measured at the wrong scale twice. It is not a
 hole at twenty, it is a sawtooth with a tooth at every change of room: 84.4% of
@@ -670,7 +663,7 @@ the population of adult friendships was bimodal at 34 and 100.
 
 **2b-leftover. Twenty is still the loneliest year in the game** — **mostly DONE in
 0416**: no friend at twenty 58% → 30%, still the peak because an eighteen-year-old
-has only just been asked anything. The original finding: at 60–67% with
+has only just been asked anything. The historical pre-0416 finding: at 60–67% with
 no friend against 87.8% before. The remaining cause is not social: a character
 who has left school has work and the street and nothing else, because
 `education.activities` only exists while they are AT school. That is the same
@@ -678,6 +671,13 @@ gap 0211 measured as _"nobody over eighteen is an athlete in this build"_, it
 belongs to v0.08's sports engine or to a smaller ticket that lets an adult join
 something, and until then the post-school years have two doors instead of
 three.
+
+**2c. And nothing OUTSIDE a job develops anybody.** — **DONE in 0415**, for
+parenting, illness and hard years; **the hobby followed in 0416**. Study was already there (0210b's college year). A small child
+and a serious illness now shape a person, both ways, and so does a second year
+running on empty. It found the larger defect underneath: Willpower was a one-way
+ratchet in the adult catalog (71 gains, 0 losses) and collapsed to sd 2.8 by
+sixty. Finding 2g records the hobby work shipped in 0416.
 
 **2d. And the `friendship` category has six events for an adult, all of them
 about romance.** — **DONE in 0413**, and the finding was true while pointing at
@@ -697,10 +697,20 @@ total-zero of this shape. All **fifty-eight** talent events carry an `ageMax`
 below eighteen, so talent is **0.0% of what fires at every adult age** — whatever
 a character was good at stops existing the day they leave school. 0414 left it
 alone deliberately: adult talent is what **v0.07 Creator & Fame** and **v0.08
-Entertainment & Sports** are for, and 0211 already recorded that adult athletics
-is blocked on `education.activities` being school-only. Writing thirty adult
+Entertainment & Sports** are for. 0416 later added recreational adult athletics;
+the adult talent-event tranche and professional careers remain future work. Writing thirty adult
 talent events now would pre-empt two milestones and make them harder. **This
 belongs to v0.07/v0.08 rather than to a content ticket.**
+
+**2g. An adult cannot join anything.** — **DONE in 0416**, and it was nobody, at
+any age: 0 of 120 lives ever joined anything. The original, pre-0416 finding follows.
+0415's leftover, and it is three findings
+with one cause. `education.activities` only exists while a character is at
+school, so an adult has no hobby for 2c to develop them through, no third door
+besides work and the street for 2b's loneliest year, and — 0211's finding — no
+way to be an athlete after eighteen. The mechanism is one thing: an adult who
+can take something up and keep it. **Small enough to be its own ticket**, and
+v0.08's sports engine would build on it rather than replace it.
 
 **2h. Mind & Body's self-development rows point at a finished milestone.** Gym,
 Meditation, Books/Library, Diet and Walk are spec 1355's and carry a `v0.04`
@@ -741,7 +751,8 @@ to fire at forty went from **26 to 93**, and from zero decisions to thirteen.
 Repetition inside a single adult life went from **50% to 23%**. What remains is
 `family` and `friendship`, still at twelve and six events at forty: an adult's
 parents, siblings and friends are now as thin as their job used to be, and that
-is the next content gap. New rule 13.67. `claude/0409-an-adult-life.md`.
+was the next content gap at 0409. Friendship was expanded in 0413 and the
+childless-adult family library in 0414. New rule 13.67. `claude/0409-an-adult-life.md`.
 
 _(original finding, for the record)_
 The voice pass rewrote 180 strings, and reading a played decade afterwards still
@@ -775,7 +786,8 @@ Belongs in 0508.
 
 **11. Young ownership is low** — about 10% at 25–34 against a US figure near
 37%, while 55+ matches. The door asks 30% of eligible renters a year and the
-deposit is what binds. Worth revisiting once rentals (0503) exist.
+deposit is what binds. 0503 rentals now exist; no later ownership recalibration is recorded here, so
+this finding remains open.
 
 **12. Nobody spends down in old age.** — **Payton: return to this.** Median
 net worth keeps climbing past 75 (~$500,000 against ~$335,000 in the US). The
@@ -786,6 +798,14 @@ never draw their savings down.
 to this.** A partner's earning power is drawn independently of what the player
 earns; in the world the two correlate at about 0.3–0.4 (people tend to partner
 with people in similar work and income).
+
+**14. Mortgage rates are nominal in a constant-dollar economy.** 6.5–7.25% with
+no inflation is a real rate nearly double the world's, so leverage on property
+is worse than it should be — 13.85 applied to the lenders. Left because the
+rates on screen look right; worth a decision.
+
+**15. Nobody passive becomes a landlord.** 0503 built no door: letting property
+is a choice a minority make. Deliberate, but worth confirming.
 
 **16. A partner's earnings are too narrow and too fixed.** — **Payton: return
 to this. Direction given after 0503.** 0502 gave every partner one earning
@@ -798,14 +818,6 @@ and down; some keep the same work and pay their whole career. The rework should
 give a partner a real working life — a much wider spread of earnings, careers
 that can rise, stall or fall, job changes, and some who stay put — rather than
 one number scaled by age. Pairs naturally with finding 13.
-
-**14. Mortgage rates are nominal in a constant-dollar economy.** 6.5–7.25% with
-no inflation is a real rate nearly double the world's, so leverage on property
-is worse than it should be — 13.85 applied to the lenders. Left because the
-rates on screen look right; worth a decision.
-
-**15. Nobody passive becomes a landlord.** 0503 built no door: letting property
-is a choice a minority make. Deliberate, but worth confirming.
 
 ### Payton's playtest notes, after 0503
 
@@ -927,19 +939,18 @@ row (and send it to Homes), and give cars and valuables their own rows, or
 rename the row "Things you own" and send it to the Assets screen. Net worth is
 unaffected.
 
-**31. Credit cards can be applied for but not used.** — **Payton: return to
-this.** `simulation/cards.ts` has apply, pay, and close. `finance/cards.ts`
-has the year's interest and fees. Nothing ever puts a charge on a card, so a
-balance only comes from fees and interest. There's no "pay with card" anywhere
-in the game: not for living costs, a car, a store, an auction, or a renovation.
-Wanted: a card should be a real way to pay. The shape to decide: either each
-purchase screen offers "Pay with card" (limited by available credit, rewards
-and interest then matter), or the game charges a share of ordinary living to
-the card automatically and the player only decides when to pay it off. The
-first is more game; the second is cheaper and leaves 0305/0306's credit
-numbers meaningful. Whichever is chosen, 0306's score and utilization
-numbers need a producer. Related to finding 24 (cars are mostly cash) and 26
-(renovations cash only).
+**31. Credit cards lack an explicit purchase-payment choice.** — **Payton:
+return to this.** The original note said balances could only come from fees and
+interest; that conflicts with the existing code. `advanceYear` calculates the
+year's uncovered costs, calls `drawFrom` on available cards before posting the
+bills, and records the advance as a `debt` row ("Put on the … card"). Cards do
+cover ordinary shortfalls automatically; `finance/cards.ts` updates their balances.
+There is still no per-purchase "Pay with card" control for a car, store,
+auction or renovation. Payton's request that cards be a real way to pay remains
+open; this correction does not choose a new payment model. The original options
+were explicit purchase payment or automatic ordinary-living charges. Any change
+needs its credit/utilization and reward effects measured. Related to findings
+24 (cars mostly cash) and 26 (renovations cash only).
 
 **32. Living costs scale with income to an absurd degree.** — **Payton: return
 to this. He has said lifestyle tiers are acceptable if that is what it takes.**
@@ -993,12 +1004,35 @@ rich owner's bill drops by more than the car adds. That's a second reason
 the high-income number is wrong, in the other direction. It should be a
 dollar amount scaled to the car's real running cost, not a share of the whole bill.
 
+### Found by the v0.06 measurement and 0601
+
+**34. Income readers keep separate category lists.** Found in
+`claude/v006-business-measurement.md`. `incomeOf` counts positive non-debt rows,
+while `earnedIncomeOf`, the summary's tax denominator and business underwriting
+read their own definitions. 0601 added business draw where needed and 0603 kept
+sale proceeds out of business underwriting; the broader consistency audit remains
+open. Historical migration rules describe their own save versions and should not
+be rewritten merely to match today's categories.
+
+**35. Sale proceeds can be read as income.** Also recorded in the v0.06
+measurement. `incomeOf` counts positive `property` transfers, including a home
+or business sale. The finance summary excludes transfers, and car/business
+underwriting use other readers, but the home buyer still uses `incomeOf`.
+Finding 39 records that remaining mortgage seam. This restores the original
+finding number; it does not introduce a new balance decision.
+
 **36. `advanceYear` is not pure over its state.** Found while writing 0601's
 determinism test: two calls from the same state object differ from the second
 year on, because `state.rng` carries live streams the first call mutates. A game
-built fresh the same way twice is identical, which is what tests and players
-see. Not checked: whether a loaded save (seed only) continues exactly as the
-live session would have. Worth a test before undo, "preview a year" or replay.
+built fresh the same way twice is identical. The original note's claim that a
+save persists only the seed is incorrect: `toSave` writes `rng.snapshot()`
+(seed and every live stream), and `fromSave` calls `Rng.restore(save.rng)`.
+`persistence.test.ts` already compares one year's continued timeline entries
+before and after a save. That test does not establish input immutability or a
+full multi-year state replay, so those parts of the finding remain open before
+undo, a preview or replay is built.
+
+### Found by 0603 and 0604
 
 **37. A mature business's profit swings a lot from year to year.** Found while
 tracing a financed roofing company in 0603: $117,000, $121,000, $24,000,
@@ -1006,8 +1040,8 @@ $121,000, $167,000, −$67,000, $137,000, −$15,000. Under the first loan desig
 single bad draw missed a payment and sent the balance on a climb; with the
 business paying its own loan out of a till that holds three months it survives,
 but a typical owner will still see a business that clears six figures one year
-and loses money the next, with no event to explain it. Calibration for 0604,
-where events and competition give the swings a cause.
+and loses money the next, with no event to explain it in the pre-0604 build. 0604 subsequently added
+events and competition; its measured update follows.
 
 _0604: partly answered._ The swings now have named causes the player can read.
 Their size is unchanged (log sd 1.0–1.1 among survivors, before and after): a
@@ -1021,8 +1055,8 @@ buyer (a median 12.5 times its startup, paying back in about four years), and
 the same arithmetic puts most of the small trades at 3–10 times their startup.
 It is 0601's margins and revenue scale, not 0603's pricing, and it means
 starting a small business beats nearly everything else a young adult can do
-with $20,000. Tune with 0604's survival and competition pass, or sooner if it
-shows in play.
+with $20,000. 0604's survival and competition pass did not resolve the proportion; its
+measured update follows. No catalog change is chosen by this note.
 
 _0604: still open._ Competition is hardest on the crowded trades and the median
 five-year pay of a cleaning company fell 13% (2.38 → 2.07 times its startup), but
@@ -1092,9 +1126,12 @@ location in your warehouse pays you rent) and neither is in spec 0606's scope.
 
 ## Suggested order
 
+This is the historical delivery order with current status annotations, not an
+authorization to start the next ticket. Agent B follows HANDOFF §7; Payton sets
+Agent A's next ticket.
+
 1. **Character-generation fix** (findings 1 and 1b) — _(shipped as 0408 for the
-   aptitude half; the lifespan half is still open and has moved to 0211's
-   mortality model, see finding 1b)_
+   aptitude half; the lifespan half shipped as 0417, see finding 1b)_
 2. **0301 → 0303** — the ledger and real living expenses, which retire 0210's
    placeholder, make every existing price real, give treatment a cost and give
    inheritance something to inherit. _(shipped)_
@@ -1109,17 +1146,16 @@ location in your warehouse pays you rent) and neither is in spec 0606's scope.
    5b. **Adult friendship** (findings 2b and 2d) — _(DONE: 0412 built the
    mechanism — the curve warmth never had, and the systemic side of
    `interact.ts` — and 0413 wrote the content and found the cliff at eighteen
-   underneath it. The leftover is finding 2e: the same window needs the OTHER
-   adult categories.)_
+   underneath it. Finding 2e's other-category gap then shipped as 0414.)_
    5c. **An adult who develops** (finding 2) — _(shipped as 0411 for work and 0415
-   for a child, illness and hard years; the hobby is finding 2g)_
+   for a child, illness and hard years; the hobby shipped in 0416 (finding 2g))_
    5d. **An adult who can join something** (finding 2g, with 2b's leftover and
    0211's adult-athlete gap) — _(shipped as 0416, for everybody rather than
    adults: nobody at any age had ever joined anything)_
 6. **Why a wide body buys a narrow lifespan** (finding 1b's leftover) — _(shipped
    as 0417: not the Gompertz term, but a healing ratchet after sixty and age
    counted twice. Nobody got old, and now two in five reach eighty-five.)_
-7. **v0.05 onward** in spec order. _(0501 Homes shipped.)_
+7. **v0.05 onward** in spec order. _(0501–0507 shipped; 0508 is deferred by Payton.)_
 8. **Partners' income** (finding 9) — _(shipped as 0502, A household of two.)_
 9. **0503 → 0508.** _(0503 A landlord, 0504 Vehicles, 0505 Vehicle modifications, 0506 Renovations & collections and 0507 Auctions shipped. 0508 Will & Estate, which closes v0.05, was deferred by Payton on 3 October and moves after v0.06.)_
-10. **0601 → 0606.** _(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments' and 0606 Commercial real estate's engines shipped (screens in progress), then 0508 Will & Estate whenever Payton wants it.)_
+10. **0601 → 0606.** _(0601 The business engine, 0602 Catalog and expansion, 0603 Business finance and 0604 Business events and heirs shipped. 0605 Private investments' and 0606 Commercial real estate's engines shipped (0605 screen patch prepared but not merged; 0606 screens open), then 0508 Will & Estate whenever Payton wants it.)_

@@ -156,7 +156,7 @@ Three things the numbers and the mutation run found, not the first draft:
 
 ## Findings added
 
-40. A heir who can't keep (a child) takes the sale and nothing is held for them
+40. An heir who can't keep (a child) takes the sale and nothing is held for them
     when they come of age; whether a minor should inherit a business under
     management until 18 is 0508's call.
 41. Raising the smallest startups (finding 38) would also change the net-worth
