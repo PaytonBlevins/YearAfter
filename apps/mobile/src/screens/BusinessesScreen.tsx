@@ -9,7 +9,7 @@
  * (CORE_RULES 13.28): the row opens its one button.
  */
 
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   EXPAND_REFUSAL_LABELS,
@@ -51,6 +51,7 @@ import {
 import { useNavigation } from '../navigation/navigation';
 import { ActionButton, Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
+import { BusinessWarning, businessWarning } from '../components/BusinessWarning';
 import { colors, radii, spacing, typography } from '../theme/theme';
 
 const money = (amount: number): string => {
@@ -218,8 +219,24 @@ export function BusinessesScreen() {
                     title={business.name}
                     subtitle={
                       last
-                        ? `${view.type.name}${view.locations > 1 ? ` · ${view.locations} locations` : ''} · ${last.profit >= 0 ? 'made' : 'lost'} ${money(Math.abs(last.profit))} last year`
-                        : `${view.type.name} · opened this year`
+                        ? `${view.type.name}${view.locations > 1 ? ` · ${view.locations} locations` : ''} · ${last.profit >= 0 ? 'made' : 'lost'} ${money(Math.abs(last.profit))} last year${
+                            businessWarning(
+                              business,
+                              view,
+                              state.loans.find((loan) => loan.businessId === business.id),
+                            ).show
+                              ? ' · Cash warning — open to review'
+                              : ''
+                          }`
+                        : `${view.type.name} · opened this year${
+                            businessWarning(
+                              business,
+                              view,
+                              state.loans.find((loan) => loan.businessId === business.id),
+                            ).show
+                              ? ' · Cash warning — open to review'
+                              : ''
+                          }`
                     }
                     value={money(view.worth)}
                     onPress={() =>
@@ -396,6 +413,8 @@ function Choices<T extends string>({
 }
 
 export function BusinessScreen() {
+  const scroll = useRef<ScrollView>(null);
+  const scrollToDecision = useRef(false);
   const { state, tuneBusiness, sellABusiness, closeABusiness, expandABusiness, closeALocation } =
     useGame();
   const { current, pop } = useNavigation();
@@ -419,7 +438,16 @@ export function BusinessScreen() {
   const offer = panel === 'sell' ? offerFor(state, business.id) : undefined;
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView
+      ref={scroll}
+      contentContainerStyle={styles.content}
+      onContentSizeChange={() => {
+        if (scrollToDecision.current) {
+          scrollToDecision.current = false;
+          scroll.current?.scrollToEnd({ animated: true });
+        }
+      }}
+    >
       <Card>
         <ListRow title={type.name} subtitle={type.blurb} affordance="none" wrap />
         <RowDivider />
@@ -452,6 +480,20 @@ export function BusinessScreen() {
         />
       </Card>
 
+      <BusinessWarning
+        business={business}
+        view={view}
+        personalCash={Number(state.player.cash) / 100}
+        loan={state.loans.find((loan) => loan.businessId === business.id)}
+        onSell={() => {
+          scrollToDecision.current = true;
+          setPanel('sell');
+        }}
+        onClose={() => {
+          scrollToDecision.current = true;
+          setPanel('close');
+        }}
+      />
       <SectionHeading>Customers</SectionHeading>
       <Card>
         <ListRow
@@ -722,10 +764,13 @@ export function BusinessScreen() {
           <>
             <Text style={styles.blurb}>
               A buyer offers {money(offer.price)}. After the broker's {money(offer.fee)}, with the
-              till handed over, {money(offer.proceeds)} comes to you.
+              till handed over, {money(offer.proceeds)} is left before repaying any business loan.
+              {view.loan
+                ? ` The lender is owed ${money(view.loan.owed)}; it takes the proceeds first, and any debt left stays with you.`
+                : ''}
             </Text>
             <ActionButton
-              label={`Sell for ${money(offer.proceeds)}`}
+              label={`Sell for ${money(Math.max(0, offer.proceeds - (view.loan?.owed ?? 0)))}`}
               onPress={() => {
                 sellABusiness(business.id);
                 pop();
@@ -743,7 +788,8 @@ export function BusinessScreen() {
         {panel === 'close' ? (
           <>
             <Text style={styles.blurb}>
-              The doors shut, the fittings go for a fraction, and what's in the till is yours.
+              The doors shut and the fittings sell for a fraction. Any business loan is paid first;
+              what's left comes to you, and debt left over stays with you.
             </Text>
             <ActionButton
               label="Close it for good"

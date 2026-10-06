@@ -82,7 +82,7 @@ A1 goes with 0705 and 0706, not with this list.
 - **A12:** Implemented on the same branch; Property uses the combined current value of owned properties and stays hidden when there are none. Other assets still count toward net worth.
 - Both await PR review and a native-device check. Verification and remaining gates: `claude/playtest-a4-a12.md`.
 - **A2:** Implemented on the same branch; each supplier grade now explains cost, quality and the effect on customers, with the current choice marked. See `claude/playtest-a2.md`.
-- **A3** needs B1's failure/warning contract; **A7** cost visibility can proceed independently; profitability pairs with **B15**, not the iced-out watches in B14. **A5** has money/business and people-screen passes; Payton explicitly deferred life-event wording until last. **A10** still needs the spec decision already recorded above.
+- **A3** has existing-rule screen warnings (see the batch below); accepting or declining a rescue still needs B1's engine contract; **A7** cost visibility can proceed independently; profitability pairs with **B15**, not the iced-out watches in B14. **A5** has money/business and people-screen passes; Payton explicitly deferred life-event wording until last. **A10** still needs the spec decision already recorded above.
 - Explicit card payment options apply to every eligible purchase, including future vacations, up to the card's available credit. This is recorded in PR #2; it needs Agent A's purchase/payment contract before screens can offer it.
 
 ### Next batch — investment news and debt
@@ -116,3 +116,8 @@ A1 goes with 0705 and 0706, not with this list.
 Payton clarified finding 31 on 6 October: explicit card payment is required for
 all current and future purchases within available credit. Watches and art were
 examples; vacations must support the same payment choice when implemented. A13/B17 record it; implementation remains unscheduled.
+
+### Next batch — business failure warnings
+
+- **A3:** Cash warnings are implemented on `feat/playtest-business-warnings`: the business list flags trouble and the dashboard explains a repeat-loss rescue estimate, loan gap, arrears and existing management/exit choices. Sale and closure require separate confirmation. Review/device checks remain pending.
+- **B1 is still open:** main still takes rescue money automatically. There is no injection/decline command or pause before actual failure. These screens describe the existing rules and mark the figures as scenarios; they do not claim the rescue-choice requirement is built. Details: `claude/playtest-business-warnings.md`.

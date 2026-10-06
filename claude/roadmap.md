@@ -1389,3 +1389,8 @@ Agent A's next ticket.
     are explicitly authorized for this request. Review/device checks pending;
     twelve actions per account/year and new fame anchors need playtesting.
     General life-event wording remains deferred until last.
+**Playtest A3 — business failure warnings (6 October).** Existing-rule warnings
+are built on `feat/playtest-business-warnings`, pending review/device checks.
+They show loss/reserve and loan scenarios and confirmed exit actions. B1's
+accept/decline rescue engine and survival measurement remain open with Agent A;
+a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
