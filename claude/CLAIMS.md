@@ -11,11 +11,13 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 ## Playtest work authorized by Payton on 6 October
 
-| Item                              | Agent           | Branch                 | Status                      |
-| --------------------------------- | --------------- | ---------------------- | --------------------------- |
-| A4 People-action odds labels      | Codex / Agent B | `feat/playtest-a4-a12` | implemented; review pending |
-| A12 Property row without a home   | Codex / Agent B | `feat/playtest-a4-a12` | implemented; review pending |
-| A2 Business supplier explanations | Codex / Agent B | `feat/playtest-a4-a12` | implemented; review pending |
+| Item                              | Agent           | Branch                    | Status                      |
+| --------------------------------- | --------------- | ------------------------- | --------------------------- |
+| A4 People-action odds labels      | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
+| A12 Property row without a home   | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
+| A2 Business supplier explanations | Codex / Agent B | `feat/playtest-a4-a12`    | implemented; review pending |
+| A6 Clear investment headlines     | Codex / Agent B | `feat/playtest-news-debt` | claimed; in progress        |
+| A11 Findable debt overview        | Codex / Agent B | `feat/playtest-news-debt` | claimed; follows A6         |
 
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |
