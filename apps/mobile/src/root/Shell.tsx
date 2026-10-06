@@ -40,6 +40,8 @@ import { RetirementScreen } from '../screens/RetirementScreen';
 import { DoctorScreen } from '../screens/DoctorScreen';
 import { DetailCard } from '../components/DetailCard';
 import { EndOfLifeCard } from '../components/EndOfLifeCard';
+import { GraduationNotice } from '../components/GraduationNotice';
+import { ProgramScreen } from '../screens/ProgramScreen';
 import { OutcomeCard } from '../components/OutcomeCard';
 import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
@@ -117,6 +119,7 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   jobs: JobsScreen,
   jobOffer: JobOfferScreen,
   college: CollegeScreen,
+  program: ProgramScreen,
   colleagues: ColleaguesScreen,
   debug: DebugScreen,
 };
@@ -280,6 +283,7 @@ export function Shell() {
         only lived on the screen they pressed it on would be lost.
         A pending decision wins — time being stopped is the more urgent fact.
       */}
+      <GraduationNotice />
       {!decision && outcome ? <OutcomeCard outcome={outcome} onDismiss={dismissOutcome} /> : null}
 
       {/*

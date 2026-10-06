@@ -18,8 +18,8 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | A2 Business supplier explanations | Codex / Agent B | `feat/playtest-a4-a12`             | implemented; review pending |
 | A6 Clear investment headlines     | Codex / Agent B | `feat/playtest-news-debt`          | implemented; review pending |
 | A11 Findable debt overview        | Codex / Agent B | `feat/playtest-news-debt`          | implemented; review pending |
-| A8 Enrolled-program screen        | Codex / Agent B | `feat/playtest-college-graduation` | claimed; in progress        |
-| A9 Graduation moment              | Codex / Agent B | `feat/playtest-college-graduation` | claimed; follows A8         |
+| A8 Enrolled-program screen        | Codex / Agent B | `feat/playtest-college-graduation` | implemented; review pending |
+| A9 Graduation moment              | Codex / Agent B | `feat/playtest-college-graduation` | implemented; review pending |
 
 | Save version | Held by | Ticket                   |
 | ------------ | ------- | ------------------------ |

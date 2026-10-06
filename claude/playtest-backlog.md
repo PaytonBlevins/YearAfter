@@ -89,3 +89,10 @@ A1 goes with 0705 and 0706, not with this list.
 - **A6:** All 128 headline texts rewritten on `feat/playtest-news-debt`, preserving ids and conditions. Stories identify average or individual price direction and the relevant holding; the newspaper explains sectors, evidence and the forecast limit. Specific company causes are unavailable in the engine and are not invented.
 - **A11:** Debt overview gathers cards, loans, mortgages and car loans. Finances opens it; Career shows a student's tuition-loan balance and a link. Existing payment screens and rules are unchanged.
 - Both await review and native-device checks. Detailed results: `claude/playtest-news-debt.md`. The branch follows PR #3; next independent candidates are A8 and A9.
+
+### Next batch — college and graduation
+
+- **A8:** Enrolled-program screen on `feat/playtest-college-graduation`: actual length, progress, grades, tuition, family help, personal share, tuition debt, Study Harder and confirmed leaving. Career opens it for working students too.
+- **A9:** Graduation notice celebrates newly earned diplomas, degrees and licenses; names career paths and tuition debt; waits behind other overlays and does not replay a loaded save. A stage change alone is not success: failing out and insufficient tuition also set `graduated`.
+- Both await review and native-device checks. Detailed results: `claude/playtest-college-graduation.md`. Review after PR #4.
+- Remaining screen notes need input/contracts: A1 (0705/0706), A3 (B1), A5 (specific wording), A7 (B15), A10 (spec 20 decision). Rules/B items stay with Agent A.
