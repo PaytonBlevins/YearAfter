@@ -37,7 +37,7 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | Social Media playtest changes | Codex / Agent B | `feat/manual-social-posting` | built: free accounts, real platform names, lower small-audience fame and manual platform-specific posting; required engine/persistence integration; review/device checks pending |
 | A3 Business failure warnings | Codex / Agent B | `feat/playtest-business-warnings` | screen warnings built; review/device pending; B1 rescue-choice engine built by Agent B in P1; review/device pending |
 
-| Playtest rules and "return to this" notes (P1–P16, `claude/playtest-rules-brief.md`) | — (paused on this list) | Codex / Agent B (`feat/purchase-payment-choices` first, then one branch per ticket) | assigned 6 Oct, engine authorized for this list only; P1–P3 built; P4 authorized for measurement; P5–P16 await go-ahead |
+| Playtest rules and "return to this" notes (P1–P16, `claude/playtest-rules-brief.md`) | — (paused on this list) | Codex / Agent B (`feat/purchase-payment-choices` first, then one branch per ticket) | assigned 6 Oct, engine authorized for this list only; P1–P3 built; P4 built with approved strong-expansion exception; P5–P16 await go-ahead |
 
 | P1 Business rescue choices | — | Codex / Agent B (`feat/playtest-p1-business-rescue`) | built; one yearly review, explicit rescue/closure, save v44; tests and sabotage verified; PR pending |
 | v44 | Codex / Agent B | P1 business rescue choices; reserved before implementation, migration and tests built |
@@ -47,4 +47,4 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | P3 Social media success rates | — | Codex / Agent B (`feat/playtest-p3-social-success`) | built after Payton approved measured rank lifts and manual settlement correction; saved luck preserved and validated; save v45 unchanged; 2,598 tests and 28 sabotages pass; baseline content/format blockers recorded; PR #15 targets main, depends on P1 PR #13 then P2 PR #14; review pending |
 
-| P4 Economy effect on businesses | — | Codex / Agent B (`feat/playtest-p4-business-economy`) | claimed and measured; recommend half direct economy strength with matching explanation thresholds; awaiting Payton’s balance approval; production unchanged; stacked on P3 PR #15 while main is beff25a; save remains v45, no new version reserved |
+| P4 Economy effect on businesses | — | Codex / Agent B (`feat/playtest-p4-business-economy`) | built with approved demand reductions, strong expansion kept +9%, lower context thresholds; 2,633 tests and 15 typechecks pass; 26 sabotage mutations caught, none missed; PR in progress; baseline catalog/format blockers remain; stacked on P3 PR #15; save v45 unchanged |

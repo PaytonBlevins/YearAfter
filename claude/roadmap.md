@@ -1482,17 +1482,28 @@ See `playtest-p3-social-success.md`.
 - **Findings 64/69:** keep Payton’s 1,400 → 0 / 10,000 → 3 fame anchors and preserve saved luck.
   Native device checks, Project mirroring and PR review remain open. P4 was subsequently authorized; see its measurement note below.
 
-### Found by P4 — measurement complete, balance proposal pending
+### Playtest P4 — approved economy reduction built (7 October 2026)
 
-Direct economy sensitivity and event odds are separate influences. The proposed half-strength
-business demand effect moves harsh-cycle five-year rescue-policy survival 82.11% → 83.71%,
-ordinary-transition survival 83.44% → 83.55%. A paired mature severe-recession profit hit roughly
-halves (8.75% → 4.28% of catalog revenue). General profit swings stay similar; finding 37 remains
-open. No attempt to force the historical BLS survival comparator or fix cheap-trade margins.
+Full-cyclicality business demand effects are now severe recession −13%, recession −6.5%, slowdown
+−2.5%, normal 0%, growth +2.5%, **strong expansion +9% unchanged**, as Payton requested. The
+lower ledger/screen/timeline thresholds keep contextual explanations visible. Saved historical
+records stay as they were. Industry cyclicality, named events, world transitions, independent
+shocks, business controls and P1 rescue choices remain. No save bump; save v45 and TICKET 0708.
 
-Halving demand without changing the yearly +5% explanation threshold would make the boom line
-unreachable (largest new gain +4.5%). Propose matching half thresholds for ledger, screen and
-annual context. Event odds/damage and world transitions remain. The claim is published on
-`feat/playtest-p4-business-economy`, following P3 #15. No production or save change is made until
-Payton approves the exact proposal. Full method, comparisons and limits: `playtest-p4-business-economy.md`.
-P5 is not started.
+Revised production measurement, 9,300 paired owners across 31 trades: five-year rescue-policy
+survival 82.11% → 83.85% in the harsh cycle, 83.44% → 83.59% under ordinary transitions. The
+paired mature severe profit hit is −8.75% → −4.28% of catalog revenue; boom benefit stays +2.71%.
+All 15 typechecks and 2,633 tests pass; full verify hits nine baseline catalog comparisons.
+Full method, prior proposal, approved exception, tests and sabotage: `playtest-p4-business-economy.md`.
+
+### Found by P4
+
+- **General profit volatility remains (finding 37).** Harsh-cycle mature normalized profit swings
+  shrink slightly; ordinary-transition swings remain similar. This fixes the economy's influence
+  without promising to remove all independent business risk. Cheap-trade startup/profit ratios
+  (finding 38) and acquisition economics are not retuned.
+- **A lower coefficient can leave its explanation behind.** Ordinary growth tops out at +2.5%;
+  its old +5% yearly threshold would hide it even though the boom still has +9%. Ledger, screen
+  and timeline thresholds are now shared/pinned. The exact 1.5% screen boundary and half-percent
+  rounding exposed floating-point cancellation; both signs and neighboring values are tested.
+- Native device checks, Project mirroring and PR review remain open. P5 awaits Payton’s go-ahead.

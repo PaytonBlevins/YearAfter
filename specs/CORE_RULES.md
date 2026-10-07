@@ -3053,3 +3053,19 @@ A saved channel's luck must survive a balance change unchanged. P3's round-trip 
 but invalid numbers and strings also loaded, so the draw was not safe to read. Pin preserved
 values, valid endpoints, malformed types and non-finite numbers. A migration-preservation
 fixture must carry a real valid record, not only an id that bypasses domain validation.
+
+### 13.142 Follow a balance coefficient through its explanation thresholds
+
+P4's proposed halved positive demand effect made the old +5% growth explanation unreachable.
+Keeping the boom at +9% did not restore ordinary growth's message: its new maximum was +2.5%.
+Audit ledger inclusion, screen visibility and timeline thresholds together with the coefficient.
+Pin a modest positive effect and a reduced negative effect, not only the strongest boom or crash.
+The saved result is the account of what happened; never recompute past records with today's dial.
+
+### 13.143 Compare a threshold in the units that define it
+
+At P4's 1.5% display boundary, `1.015 - 1` can be slightly less than `0.015`. Comparing
+multipliers with `1 ± threshold` keeps that exact boundary visible. Whole-percent text also
+needs a unit of float tolerance around one, so the same 1.5% does not say 1% after rounding.
+Test both signs at the boundary and just inside it, and the text as well as the row's presence.
+A constant's literal test cannot prove that its caller uses it.

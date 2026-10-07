@@ -1,9 +1,10 @@
-# P4 — Economy effect on businesses: measured proposal
+# P4 — Economy effect on businesses: approved change
 
-**Status: claimed and measured; awaiting Payton’s balance-value approval. Not implemented.**
+**Status: approved with strong expansion kept at +9%; built and verified; PR pending, baseline content/format gates remain blocked.**
 Agent B, `feat/playtest-p4-business-economy`, 7 October 2026. Claim published separately before
 measurement. Latest `origin/main` is still `beff25a`; this branch follows P1 #13, P2 #14 and P3 #15.
-No production code, balance, save or approved decision has changed for P4.
+Payton approved the proposal with one exception: strong expansion keeps its original +9% demand
+bonus. The other reductions and contextual thresholds are applied; no save shape/version change.
 
 ## Ticket contract
 
@@ -20,12 +21,12 @@ price/payroll/supplier/rescue rule, unrelated volatility, save shape or TICKET c
 
 ### Acceptance after approval
 
-- [ ] Apply the exact approved values and retain differentiated industry sensitivity.
-- [ ] Normal-economy business output remains identical; bad/good conditions still matter.
-- [ ] Ledger, screen and timeline agree on the reduced effect without a new economy dashboard.
-- [ ] P1’s explicit rescue/closure behavior and lender priority remain intact.
-- [ ] Preserve saved business records; deterministic continuation and reconciliation pass.
-- [ ] Repeat calibration on production, tests and at least fifteen independent sabotage mutations.
+- [x] Apply the exact approved values and retain differentiated industry sensitivity.
+- [x] Normal-economy business output remains identical; bad/good conditions still matter.
+- [x] Ledger, screen and timeline agree on the reduced effect without a new economy dashboard.
+- [x] P1’s explicit rescue/closure behavior and lender priority remain intact.
+- [x] Preserve saved business records; deterministic continuation and reconciliation pass.
+- [x] Repeat calibration on production, tests and at least fifteen independent sabotage mutations.
 - [ ] Update findings and CORE_RULES, format changed files, run full `pnpm verify`, PR to main, stop.
 
 ## What the code already does
@@ -39,25 +40,27 @@ event chance (55%), and each year’s independent business shock are different r
 The screen already explains the direct effect from the actual ledger. Its display threshold is
 3%; the yearly downturn/boom lines start at 6% loss / 5% gain. The ledger stores an economy value
 from a 0.5% effect. Halving demand effects while retaining those thresholds would make the positive
-annual economy branch unreachable: even a fully cyclical boom would add only 4.5%. The proposal
-therefore halves the explanation thresholds too, preserving the set of eligible businesses/years for future settlements.
+annual economy branch unreachable in the original all-halved proposal: even a fully cyclical boom would add only 4.5%. The proposal
+therefore halves the explanation thresholds too, keeping reduced effects legible in existing context. Strong expansion remains unchanged in
+demand but uses the approved lower context thresholds, so more booming trades can have an explanation.
 No line wording change or new economy screen is proposed.
 
-## Proposed values — not applied
+## Approved values — applied
 
-Halve **both positive and negative direct business demand effects**. Retain type cyclicality,
+Halve **severe recession, recession, slowdown and growth** direct effects. Keep strong expansion
+at **+9%**, as Payton requested. Retain type cyclicality,
 named-event odds/damage, market-state transitions, volatility, all other business controls and
 P1 rescue choices. Apply to existing and new businesses from their next annual settlement.
 Historical ledger records keep what actually happened in those years. Save stays v45; TICKET 0708.
 
-| Economy state    | Current full-sensitivity demand effect | Proposed effect |
-| ---------------- | -------------------------------------- | --------------- |
-| Severe recession | −26%                                   | −13%            |
-| Recession        | −13%                                   | −6.5%           |
-| Slowdown         | −5%                                    | −2.5%           |
-| Normal           | 0%                                     | 0%              |
-| Growth           | +5%                                    | +2.5%           |
-| Strong expansion | +9%                                    | +4.5%           |
+| Economy state    | Current full-sensitivity demand effect | Approved effect     |
+| ---------------- | -------------------------------------- | ------------------- |
+| Severe recession | −26%                                   | −13%                |
+| Recession        | −13%                                   | −6.5%               |
+| Slowdown         | −5%                                    | −2.5%               |
+| Normal           | 0%                                     | 0%                  |
+| Growth           | +5%                                    | +2.5%               |
+| Strong expansion | +9%                                    | **+9% (unchanged)** |
 
 A cleaner still feels one quarter of those amounts: severe recession becomes −3.25%, rather than
 −6.5%. A hotel feels 90%: −11.7%, rather than −23.4%. Demand is not necessarily actual revenue:
@@ -104,7 +107,7 @@ log SD is not guaranteed by this change. Five-year historical 0604 survival was 
 reproduces P1’s 82.11% control, not 0604’s different population. The historical BLS comparison is
 not a target that justifies forcing closures.
 
-## Survival and profit-swing calibration
+## Pre-approval candidate calibration
 
 Harsh-cycle, rescue-if-affordable, 9,300 paired owners each:
 
@@ -134,7 +137,7 @@ which is expected: independent shocks, staffing and fixed costs are not changed.
 economy-caused swing; it does not promise to resolve all of finding 37’s profit volatility.
 Always-normal candidates exactly match: five-year survival 84.66% rescue / 69.31% decline.
 
-## Direct effect, separated from event odds
+## Pre-approval direct effect, separated from event odds
 
 15,500 paired mature observations per candidate: 31 types × 500 identical shock draws, reputation
 50, normal catalog staffing, one location, luck 1. Compare the same record in normal / severe
@@ -159,24 +162,119 @@ all years, including quiet ones: a slow stretch is 5.72% in normal conditions, 9
 These remain unchanged. A difficult economy still has consequences through those events and the
 reduced direct demand effect. Event damage, youth weighting and competition remain as 0604 left them.
 
-## Recommendation, findings and next work
+## Approved production calibration
 
-Recommend **0.5× direct strength** with matching explanation thresholds. It substantially reduces
-the bad/good economy’s immediate profit effect without removing it or retuning the whole business.
-The 0.25× candidate removes three quarters of the signal; the 0.75× candidate offers a smaller
-reduction. Half strength fits the requested change and preserves ordinary-year economics.
+The pre-approval tables above include a halved boom and remain historical measurement, not
+what was shipped. The final production control repeats the same seeds, ages, budgets and policies
+with severe/recession/slowdown/growth halved and strong expansion unchanged. All **448,189**
+annual comparison records match `runBusinessesYear`; all **21,940** real rescue answers reconcile.
 
-- General year-on-year volatility (finding 37) remains. This is measured, not a hidden follow-up tune.
-- Cheap-trade startup/profit proportions (finding 38), agents/suppliers, business catalog and
-  acquisition economics remain outside P4. No change to rescue policy or debt accounting.
-- Existing and new businesses can use the new coefficient without a save bump; historical records
-  keep their original economy values. Save stays v45. No RNG, new fields or migration proposed.
-- After approval: production configuration/readers, literal and integration tests, save/replay and
-  reconciliation checks, post-change calibration, 15+ sabotage mutations, CORE_RULES, full verify,
-  PR into main and stop before P5. None of those implementation checks is claimed complete now.
-- Nine catalog byte mismatches and 22 historical-note format failures are the existing P3/main
-  baseline. No catalogs or historical notes were reformatted for this measurement pass.
-- Native device checks and Claude Project `project_write` remain unavailable.
+| Economy/policy                              | Before: five-year survival | Approved: five-year survival | Before: ten-year survival | Approved: ten-year survival |
+| ------------------------------------------- | -------------------------- | ---------------------------- | ------------------------- | --------------------------- |
+| Harsh cycle / rescue if affordable          | 82.11%                     | 83.85%                       | 78.77%                    | 80.77%                      |
+| Harsh cycle / decline all                   | 63.04%                     | 67.16%                       | 59.73%                    | 64.15%                      |
+| Always normal / rescue if affordable        | 84.66%                     | 84.66%                       | 81.72%                    | 81.72%                      |
+| Always normal / decline all                 | 69.31%                     | 69.31%                       | 66.45%                    | 66.45%                      |
+| Ordinary transitions / rescue if affordable | 83.44%                     | 83.59%                       | 80.43%                    | 80.76%                      |
+| Ordinary transitions / decline all          | 65.17%                     | 65.61%                       | 62.34%                    | 62.96%                      |
 
-Payton’s approval is required before applying these new balance values, as specified in
-`playtest-rules-brief.md` under “One ticket at a time, then stop.”
+Harsh-cycle rescue-policy median mature absolute profit change is 7.48% → 7.01% of catalog
+revenue; positive-profit log SD 1.179 → 1.167. Ordinary-transition figures are 6.82% → 6.83% and
+1.111 → 1.123. General volatility remains similar; the change softens economic influence.
+Harsh-cycle ten-year review share falls 40.27% → 35.85%, ordinary transitions 37.66% → 37.04%.
+
+The final 15,500 paired mature observations retain the original median boom profit benefit:
+**+2.71% of catalog revenue**, unchanged. Median severe-recession profit change is **−4.28%**,
+compared with the original −8.75%. Direct severe demand loss at median cyclicality is 7.8%,
+compared with 15.6%. Neutral years and named-event odds/damage are unchanged.
+
+## Implementation and tests
+
+Only the business-specific demand coefficients change. Shared finance readers hold the approved
+context thresholds; simulation records the actual multiplier and uses it for loss text, and the
+existing screen reads the saved ledger. No new economy dashboard, save fields, migration, RNG
+draws or world transition changes. Past ledger entries are not recomputed.
+
+A boundary check exposed subtraction rounding: `1.015 - 1` can be slightly below 0.015, hiding
+an exact 1.5% effect. Visibility compares the multiplier with `1 ± threshold` directly. Whole-percent
+copy adds one machine epsilon before rounding, so an exact 1.5% says about 2%, not 1%. Positive
+and negative boundaries and neighboring values are pinned. This is display precision, not another
+balance change. Thresholds remain halved as approved; the +9% strong-expansion coefficient is not.
+
+**35 new tests:** finance 14, simulation 11, persistence 2, mobile 8. They pin all six coefficients,
+industry sensitivity including zero exposure, literal revenue/cost/profit, unchanged normal/boom
+fixtures, threshold boundaries/rounding, live ledger and context, modest growth and ledger effects,
+actual advance using its next market, deterministic replay, explicit rescue and closure with
+reconciliation, historical-save preservation and current-rule continuation, and rendered rows.
+
+Two old assertions described the superseded balance: restaurant recession below 0.95 and severe
+recession between 0.7 and 0.9. They now pin exact approved multipliers **0.961** and **0.922**.
+Strong-expansion assertions and all other controls remain. No tests were deleted or weakened.
+
+## Findings and open checks
+
+- General profit volatility (finding 37) remains; P4 does not promise to resolve every cause.
+- Cheap-trade startup/profit proportions (finding 38), agents/suppliers, catalog and acquisition
+  economics remain outside P4. Rescue policy and debt accounting are unchanged.
+- Existing and new businesses use the new coefficients at settlement. Historical records keep
+  old values. Save v45 and TICKET 0708 stay; no new version is reserved.
+- Full verification and sabotage results are recorded below. PR review remains open.
+- Native device checks and Claude Project `project_write` remain unavailable. P5 is not started.
+
+## Full verification
+
+`pnpm verify`: all 15 package typechecks and **2,633 tests** pass (P3 baseline 2,598 plus 35).
+It ends with the same nine generator/catalog byte mismatches as unchanged `origin/main`:
+activities, advice, auctions, businesses, events-childhood, homes, renovations, valuables and
+vehicles. No catalog reformat is included; the validator’s incidental vehicle-mods rewrite is
+restored. Global format still has the 22 historical-note baseline; changed files are checked
+individually. Actual CI results are recorded after opening the PR.
+
+The first save test imported content directly, which persistence does not depend on. Its fixture
+now gets the real type through the public simulation market, with a consistent funded adult
+ledger. Dependencies and lockfile remain unchanged. The full passing run includes that correction.
+
+## Independent sabotage verification
+
+Tar backup before mutation; each change isolated, tests run, production restored after each.
+All five source files’ final MD5s match their backups. **All 26 mutations caught; none missed
+in the final run.** One initially survived: a negative owner payout. The unfunded fixtures had
+no owner draws, so they could not catch it. Added a funded-owner case that pins a positive income
+transaction, household ledger change and business-plus-owner cash conservation; the same mutation
+then failed an assertion. No production workaround or weaker assertion was used.
+
+A screen-percentage selector initially matched both signs; the uniqueness guard stopped it before
+mutation. It was narrowed to the loss phrase and tested. Every reported catch is an assertion failure,
+not a compiler failure. Selected baseline suites all pass after restoration.
+
+| Mutation                                           | Result |
+| -------------------------------------------------- | ------ |
+| 1. wrong severeRecession demand                    | Caught |
+| 2. wrong recession demand                          | Caught |
+| 3. wrong slowdown demand                           | Caught |
+| 4. wrong normal demand                             | Caught |
+| 5. wrong growth demand                             | Caught |
+| 6. wrong strongExpansion demand                    | Caught |
+| 7. restore old ledger threshold                    | Caught |
+| 8. restore old screen threshold                    | Caught |
+| 9. restore old loss threshold                      | Caught |
+| 10. restore old gain threshold                     | Caught |
+| 11. discard industry cyclicality                   | Caught |
+| 12. reverse demand sign                            | Caught |
+| 13. exclude exact visibility boundaries            | Caught |
+| 14. use subtraction for visibility boundary        | Caught |
+| 15. remove half-percent rounding tolerance         | Caught |
+| 16. force normal live business market              | Caught |
+| 17. omit economy from ledger                       | Caught |
+| 18. restore old downturn trigger in live output    | Caught |
+| 19. restore old growth trigger in live output      | Caught |
+| 20. invent 26 percent loss text                    | Caught |
+| 21. remove annual independent shock                | Caught |
+| 22. pay negative owner draws                       | Caught |
+| 23. restore old screen threshold at call site      | Caught |
+| 24. invent screen percent rather than ledger value | Caught |
+| 25. remove severe slow-stretch event tilt          | Caught |
+| 26. erase historical ledger economy during save    | Caught |
+
+CORE_RULES lessons 13.142–13.143 cover contextual thresholds and exact-boundary precision.
+P5 and general life-event wording remain unstarted.

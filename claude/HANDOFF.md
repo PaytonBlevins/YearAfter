@@ -52,15 +52,16 @@ save v45 remain unchanged. PR #15: https://github.com/PaytonBlevins/YearAfter/pu
 formatting failure and skips later gates. Review, device checks and Project mirroring remain
 open. P4 was subsequently authorized; see its update below.
 
-**P4 measurement update:** Payton authorized P4 on 7 October. Claim published on
-`feat/playtest-p4-business-economy`, following P3 #15 while main remains `beff25a`. Measured
-9,300 paired owners across 31 types and harsh/normal/ordinary transition controls. Halving the
-direct demand effect moves five-year rescue-policy survival from 82.11% to 83.71% in the harsh
-cycle, 83.44% to 83.55% under ordinary transitions. The immediate severe-recession profit hit
-roughly halves; overall profit volatility remains similar. Proposal: half direct strength, retain
-event odds/damage and all other controls, halve contextual explanation thresholds to keep those
-branches visible. Details: `playtest-p4-business-economy.md`. Production is unchanged pending
-Payton’s balance-value approval. Save v45 and TICKET 0708 remain. P5 waits.
+**P4 implementation update:** Payton approved the proposal on 7 October with strong expansion
+kept at **+9%**. Agent B built the other half-strength demand effects and lower context thresholds
+on `feat/playtest-p4-business-economy`, following P3 #15 while main remains `beff25a`. Save v45,
+TICKET 0708, industry cyclicality, event odds/damage, world transitions and P1 rescue choices stay.
+The revised production cohort gives five-year rescue-policy survival 82.11% → 83.85% in the harsh
+cycle and 83.44% → 83.59% under ordinary transitions. The immediate severe profit hit roughly
+halves; the boom benefit and normal-year economics are unchanged. Overall volatility remains
+similar. All 15 typechecks and 2,633 tests pass; full verify hits the nine baseline catalog failures.
+All 26 mutations caught after adding the missing owner-payment case; none missed. PR results: `playtest-p4-business-economy.md`. Native device checks and Project
+mirroring remain open. P5 waits.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

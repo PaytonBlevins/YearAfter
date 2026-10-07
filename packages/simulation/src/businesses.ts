@@ -31,6 +31,9 @@ import type { BusinessRescueCase } from './business-rescue';
 import { pruneBusinessRescue } from './business-rescue-state';
 import { taxRate } from '@yearafter/careers';
 import {
+  BUSINESS_ECONOMY_LEDGER_THRESHOLD,
+  BUSINESS_ECONOMY_LOSS_THRESHOLD,
+  BUSINESS_ECONOMY_GAIN_THRESHOLD,
   BUSINESS_LOAN_PRODUCTS,
   BUSINESS_LOAN_REFUSALS,
   LISTINGS_PER_YEAR,
@@ -50,6 +53,8 @@ import {
   businessSaleOf,
   businessValueFor,
   businessYear,
+  businessEconomyVisible,
+  businessEconomyPercent,
   clampPrice,
   drawEvent,
   eventLineFor,
@@ -1185,7 +1190,9 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
       idle: result.idle,
       ...(paid > 0 ? { repaid: paid } : {}),
       ...(happened ? { event: happened.event.id } : {}),
-      ...(Math.abs(result.economy - 1) >= 0.005 ? { economy: result.economy } : {}),
+      ...(businessEconomyVisible(result.economy, BUSINESS_ECONOMY_LEDGER_THRESHOLD)
+        ? { economy: result.economy }
+        : {}),
       ...(result.rivalTook > 0 ? { rivalTook: result.rivalTook } : {}),
     };
     const { rival: _was, ...bare } = business;
@@ -1201,11 +1208,11 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
     });
 
     if (happened) lines.push(eventLineFor(happened.event, business.name));
-    if (result.economy <= 0.94) {
+    if (result.economy <= 1 - BUSINESS_ECONOMY_LOSS_THRESHOLD) {
       lines.push(
-        `The downturn took about ${Math.round((1 - result.economy) * 100)}% of ${business.name}'s custom.`,
+        `The downturn took about ${businessEconomyPercent(result.economy)}% of ${business.name}'s custom.`,
       );
-    } else if (result.economy >= 1.05) {
+    } else if (result.economy >= 1 + BUSINESS_ECONOMY_GAIN_THRESHOLD) {
       lines.push(`The good economy sent more custom ${business.name}'s way.`);
     }
 

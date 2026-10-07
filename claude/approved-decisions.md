@@ -99,6 +99,13 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   does not give another automatic viral opportunity. Free accounts, manual posting, the twelve-post
   cap, platform income rates and the small-audience fame anchors remain. See
   `playtest-p3-social-success.md` for measurements and verification.
+- **P4 business-economy change approved by Payton, with strong expansion retained:** halve
+  direct severe-recession, recession, slowdown and growth effects to −13%, −6.5%, −2.5% and
+  +2.5% at full cyclicality. Normal stays neutral; **strong expansion stays +9%**. Type
+  cyclicality, named-event odds/damage, world transitions, other business controls and P1 rescue
+  choices remain. Context thresholds halve as proposed: ledger 0.25%, screen 1.5%, annual loss
+  3% and annual gain 2.5%. Existing records retain historical values; future settlements use
+  the new coefficients. No save bump. See `playtest-p4-business-economy.md`.
 - **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
   account creation for channels.
 

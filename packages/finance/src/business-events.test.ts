@@ -459,7 +459,8 @@ describe('what an event does to a year', () => {
     const { business, type } = mature('biz.restaurant');
     expect(businessYear(business, type, NORMAL).economy).toBe(1);
     const slump = businessYear(business, type, { ...NORMAL, market: 'recession' });
-    expect(slump.economy).toBeLessThan(0.95);
+    // P4 approved half recession sensitivity; preserve the exact restaurant effect.
+    expect(slump.economy).toBeCloseTo(0.961, 12);
     const boom = businessYear(business, type, { ...NORMAL, market: 'strongExpansion' });
     expect(boom.economy).toBeGreaterThan(1.03);
   });
