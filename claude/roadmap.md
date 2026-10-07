@@ -1450,17 +1450,32 @@ no calibration claim against BLS is made. See `claude/playtest-p1-business-rescu
 P1 only nets debt of closed businesses from liquid inheritance, without building wills.
 Native device checks remain pending. P2 awaits Payton's go-ahead.
 
-### Found by P3 — measurement and proposal pending
+### Playtest P3 — approved social-success change built (7 October 2026)
 
-- **B6 is not uniformly low.** Manual discovery lets persistent accounts reach small monetization
-  gates. Lifetime success must be separated from early income and full-time earnings.
-- **A six-year check misses mature viral compounding.** The generated-life TikTok four-post
-  policy reaches the $30,000 creator-income benchmark in 83% of the shared-calendar sample;
-  varied calendars give 40%, against 8% for twelve posts. Posting less preserves viral spikes
-  because annual negative drift scales with post count, and the year grants a second viral roll
-  beyond the explicit posts. Its key also omits the life seed. An isolated correction removes
-  the reversed incentive; implementation awaits the measured P3 proposal decision.
-- **Findings 64/69:** preserve Payton’s small-audience fame anchors. Proposed new-account rank
-  lifts are video/photo 3, stream/podcast 5, short-form 3, subscription 2, including the existing
-  platform aliases. Source curves and top-quarter fade stay. Existing saved luck stays fixed.
-  Full measurement, limitations and next work: `playtest-p3-social-success.md`. P3 is not complete.
+New-account rank lifts are video/photo 3, stream/podcast 5, short-form 3, subscription 2,
+including Kick/Facebook/X aliases. Payton approved them after measurement. Manual annual
+settlement now uses full existing negative drift above target and leaves breakout rolls to actual
+posts. Existing saved luck is preserved and malformed luck rejected. Save stays v45, TICKET 0708.
+Free accounts, manual choices, twelve-post cap, income rates, source curves, top-quarter fade and
+small-audience fame anchors are retained. Existing screens consume the engine changes.
+All 15 typechecks and 2,598 tests pass; 28 independent mutations caught, none missed. Nine baseline
+catalog mismatches and 22 historical-note formatting failures remain. See `playtest-p3-social-success.md`.
+
+### Found by P3
+
+- **B6 is not uniformly low.** Manual discovery makes small recurring payments attainable;
+  early income, lifetime traction and full-time earnings are distinct measures. After the approved
+  change, ordinary six-year YouTube pay reaches 100%, TikTok 43.5%; deliberate strong play reaches
+  the $30,000 yearly creator-income benchmark in 9.25% / 2.25%, respectively. A wage here is any
+  year before personal tax and bills, not sustained take-home pay.
+- **A six-year check missed mature viral compounding.** Before P3, four-post TikTok lives reached
+  the wage benchmark in 83% of the shared-calendar sample, against 12% for twelve posts; varied
+  calendars still reversed the incentive (40% against 8%). Full downward drift and removing the
+  extra annual breakout resolve that retention interaction. In the final shared-calendar hobby
+  sample, four/twelve posts reach recurring pay in 80% / 98.33% of lives and wage in 0% / 1.67%.
+- **Streaming and podcast full-time careers remain especially rare.** Strong six-year play reaches
+  wage in 3% on Twitch and 0.5% on podcasts. The approved moderate lifts improve side income;
+  larger tested lifts did not convincingly improve the small tail sample. This remains a known
+  balance limitation, not a new unapproved tuning pass.
+- **Findings 64/69:** keep Payton’s 1,400 → 0 / 10,000 → 3 fame anchors and preserve saved luck.
+  Native device checks, Project mirroring and PR review remain open. P4 awaits Payton’s go-ahead.

@@ -37,7 +37,7 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | Social Media playtest changes | Codex / Agent B | `feat/manual-social-posting` | built: free accounts, real platform names, lower small-audience fame and manual platform-specific posting; required engine/persistence integration; review/device checks pending |
 | A3 Business failure warnings | Codex / Agent B | `feat/playtest-business-warnings` | screen warnings built; review/device pending; B1 rescue-choice engine built by Agent B in P1; review/device pending |
 
-| Playtest rules and "return to this" notes (P1–P16, `claude/playtest-rules-brief.md`) | — (paused on this list) | Codex / Agent B (`feat/purchase-payment-choices` first, then one branch per ticket) | assigned 6 Oct, engine authorized for this list only; P1 and P2 built; P3 authorized; P4–P16 await go-ahead |
+| Playtest rules and "return to this" notes (P1–P16, `claude/playtest-rules-brief.md`) | — (paused on this list) | Codex / Agent B (`feat/purchase-payment-choices` first, then one branch per ticket) | assigned 6 Oct, engine authorized for this list only; P1–P3 built; P4–P16 await go-ahead |
 
 | P1 Business rescue choices | — | Codex / Agent B (`feat/playtest-p1-business-rescue`) | built; one yearly review, explicit rescue/closure, save v44; tests and sabotage verified; PR pending |
 | v44 | Codex / Agent B | P1 business rescue choices; reserved before implementation, migration and tests built |
@@ -45,4 +45,4 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | P2 Living costs and lifestyle tiers | — | Codex / Agent B (`feat/playtest-p2-living-costs`) | built with approved curve, tiers and car allowance; save v45; stacked on P1 pending merge; 2,567 tests and 29 sabotages pass; baseline content/format blockers recorded; PR #14 targets main, depends on P1 PR #13 |
 | v45 | Codex / Agent B | P2 living costs and lifestyle tiers; migration and tests built after P1 v44 |
 
-| P3 Social media success rates | — | Codex / Agent B (`feat/playtest-p3-social-success`) | claimed and measured; rank lifts plus mature-account/viral settlement proposal await Payton’s decision; stacked on P2 while main is beff25a; no production balance or save change |
+| P3 Social media success rates | — | Codex / Agent B (`feat/playtest-p3-social-success`) | built after Payton approved measured rank lifts and manual settlement correction; saved luck preserved and validated; save v45 unchanged; 2,598 tests and 28 sabotages pass; baseline content/format blockers recorded; stacked on P2 PR #14 and P1 PR #13, review pending |

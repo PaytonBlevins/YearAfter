@@ -39,13 +39,15 @@ P2 PR: https://github.com/PaytonBlevins/YearAfter/pull/14 (targets main, depends
 P3 was subsequently authorized by Payton; see its measurement update below. If P1 merges first, rebase P2 onto main and
 drop already-merged P1 commits; do not squash away the separately reserved save versions.
 
-**P3 measurement update:** Payton authorized P3 on 7 October. The claim is published on
-`feat/playtest-p3-social-success`, stacked on P2 while main remains `beff25a`. Manual-play
-measurement corrects B6: small payments are broadly attainable, but full-time earnings stay rare
-on most platforms. A lifetime check found a TikTok runaway/low-output retention interaction.
-An isolated settlement correction and moderate platform rank lifts are measured and proposed
-in `playtest-p3-social-success.md`; production values are unchanged pending Payton’s decision.
-Fame anchors, free accounts, manual posts, TICKET and save v45 remain unchanged. P4 waits.
+**P3 implementation update:** Payton approved the measured proposal on 7 October. Agent B built
+it on `feat/playtest-p3-social-success`, stacked on P2 while main remains `beff25a`. Moderate
+new-account rank lifts improve deliberate play. Full existing downward drift removes the
+low-output viral-retention advantage; live manual settlement no longer grants a second annual
+viral roll. Saved luck stays fixed and corrupt luck is rejected. All 15 typechecks and 2,598 tests
+pass; 28 independent sabotage mutations were caught, none missed. Full verify hits the same nine
+catalog mismatches as an untouched main archive; format has 22 historical-note failures.
+Details: `playtest-p3-social-success.md`. Fame anchors, free accounts, manual posts, TICKET and
+save v45 remain unchanged. Review, device checks and Project mirroring remain open. P4 waits.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

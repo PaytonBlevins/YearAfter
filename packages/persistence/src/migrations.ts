@@ -1181,7 +1181,11 @@ function channelPublishingOk(value: unknown): boolean {
   if (!Array.isArray(value)) return false;
   return value.every((channel: unknown) => {
     if (typeof channel !== 'object' || channel === null) return true;
-    const publishing = (channel as Record<string, unknown>)['publishing'];
+    const record = channel as Record<string, unknown>;
+    const luck = record['luck'];
+    // P3: persisted luck is authoritative, but corrupt luck cannot become a balance input.
+    if (typeof luck !== 'number' || !Number.isFinite(luck) || luck < 0 || luck > 1) return false;
+    const publishing = record['publishing'];
     if (publishing === undefined) return true;
     if (typeof publishing !== 'object' || publishing === null || Array.isArray(publishing))
       return false;

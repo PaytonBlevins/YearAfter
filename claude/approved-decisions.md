@@ -91,6 +91,14 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   with three options and annual estimates. This explicitly overrides MASTER_SPEC section 22 and
   its interface passage removing a tier selector (the brief's “spec 1166”); sections 20–21 still keep
   contextual costs and the backend ledger. See `playtest-p2-living-costs.md`.
+- **P3 social-media proposal approved by Payton:** new-account rank lifts are YouTube 3,
+  Twitch/Kick 5, Instagram/Facebook/X 3, TikTok 3, podcasts 5 and Substack 2. Existing saved
+  luck stays fixed; source curves and the top-quarter fade remain. Active accounts above their
+  target take ordinary downward drift regardless of post count; only positive annual spread
+  scales to output. Explicit publications retain their viral rolls, and live annual settlement
+  does not give another automatic viral opportunity. Free accounts, manual posting, the twelve-post
+  cap, platform income rates and the small-audience fame anchors remain. See
+  `playtest-p3-social-success.md` for measurements and verification.
 - **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
   account creation for channels.
 

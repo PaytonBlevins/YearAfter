@@ -3031,3 +3031,25 @@ P2's first mood merge overwrote activity happiness even when Comfortable added
 zero. Preserve the existing creator/activity contribution before adding the
 new annual nudge. Pin the zero-effect default and simultaneous activity plus
 lifestyle effects, not only a tier in an otherwise empty life.
+
+### 13.139 Less output must not preserve an unrelated windfall
+
+P3 found that scaling negative audience drift by posting count sheltered viral spikes. Four
+posts a year could earn more over a life than twelve. Scale the positive benefit of work to
+output; a loss that is about market churn, rather than work, keeps its own rule. Test the same
+above-target record at one, four and twelve actions, and pin both audience loss and payment.
+
+### 13.140 A short calibration can hide a reversed lifetime incentive
+
+TikTok looked hard to monetize in P3's six-year check, but the casual policy reached a living
+wage in 83% of the shared-calendar lifetime sample. An extra annual viral roll and slow losses
+compounded over decades. Measure early traction, time to recurring pay and lifetime tails;
+repeat across calendars, and compare action policies on paired seeds. Do not raise success
+rates from an early median alone.
+
+### 13.141 Preserving a draw includes rejecting a corrupt draw
+
+A saved channel's luck must survive a balance change unchanged. P3's round-trip test passed,
+but invalid numbers and strings also loaded, so the draw was not safe to read. Pin preserved
+values, valid endpoints, malformed types and non-finite numbers. A migration-preservation
+fixture must carry a real valid record, not only an id that bypasses domain validation.

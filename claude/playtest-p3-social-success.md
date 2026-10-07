@@ -1,6 +1,6 @@
-# P3 — Social media success rates: measured proposal
+# P3 — Social media success rates: approved change built
 
-**Status: claimed and measured; awaiting Payton’s balance decision. Not implemented or complete.**
+**Status: Payton approved the measured proposal; implementation and verification complete, PR pending.**
 Agent B, `feat/playtest-p3-social-success`, 7 October 2026. Main remains `beff25a`; this branch
 is stacked on P2 PR #14 and P1 PR #13. The claim is its own published commit.
 
@@ -10,8 +10,9 @@ request remains the explicit exception to the old automatic-output model.
 
 **Allowed files:** creator configuration, finance and simulation creator/posting APIs, relevant
 mobile/persistence readers and tests if needed, and P3 tracking docs/CORE_RULES lessons.
-**Protected areas:** creator growth and balance are authorized by the P1–P16 brief; production
-values have not changed. Save stays v45 on this stack. TICKET stays 0708. No new screen is proposed.
+**Protected areas:** creator growth and balance are authorized by the P1–P16 brief. The approved
+values below are applied. Save stays v45 on this stack. TICKET stays 0708. Existing screens use the
+engine changes without new controls.
 
 ## Definitions and method
 
@@ -43,7 +44,7 @@ Historical 0702/0703 published anchors and the source-population curves are reta
 measurement is of the game, not a new claim about real services’ success rates. A 400-seed tail
 has limited precision: differences of one or two creators are not meaningful calibration gains.
 
-## Current early outcomes
+## Pre-change early outcomes
 
 Across varied calendars, regular effort and twelve posts, six years:
 
@@ -63,7 +64,7 @@ Getting _some_ pay is not generally rare anymore. The manual discovery floor can
 low-luck persistent accounts over small partner thresholds. Full-time income remains a tail.
 This corrects B6’s unchecked assertion; the old automatic-output figures are not the live game.
 
-## Current generated-life outcomes
+## Pre-change generated-life outcomes
 
 All 540 idle-account lives have zero traction and zero recurring income. Every actively posting
 life reaches 1,000 audience and some recurring income eventually, but this takes decades for
@@ -111,7 +112,7 @@ spread still scales to actual posting. Idle accounts retain ordinary churn and e
 income. Contracted payments remain owed. The old low-level automatic model remains available
 for its source calibration.
 
-## Proposed values — not applied
+## Approved values — applied after Payton’s approval
 
 1. Keep free accounts, manual choices, twelve-post cap, format discovery/risk, platform income
    rates, and the fame anchors (1,400 → 0; 10,000 → 3). No fameTarget change.
@@ -151,11 +152,133 @@ posts give 80% / 100% ever recurring pay, a median first paid year of 5 / 5 amon
 and median peaks of 24,776 / 59,017. None of these 60-seed hobby lives reaches $30k; that is
 a small tail sample, not evidence of an unreachable career (the strong-play cohort does).
 
-## Remaining work after the decision
+## Final production calibration
 
-Production implementation, regressions for the manual/annual interaction, seed independence,
-existing-save behavior, ledger/tax integration and mature-account behavior; calibration across all
-platforms and older lives after the approved change; at least fifteen sabotage mutations; CORE_RULES
-lessons; full pnpm verify; PR into main. No sabotage or verification pass is claimed for P3 yet.
-No save change appears necessary. Native device checks and Claude Project mirroring remain unavailable
-in this environment. P4 and general life-event wording have not started.
+Repeated with the real production functions after implementation. Controlled runs use
+`p3-control-${i}`, 400 seeds/platform, starts 2020 + i % 24, twelve posts per year for six years.
+Generated lives use `p3-life-${i}`, 60 seeds/platform/policy, default birth year 2000 and the actual
+advance pipeline through death or age 110. These are the same paired seed policies as above;
+no favorable-seed search. Six-year income is the year-six amount; wage is any year at $30,000
+before personal tax and living bills, not a guaranteed ongoing career.
+
+| Platform              | Regular: recurring pay | Regular: first paid year | Regular: ever $30k | Regular: year-six median | Strong: ever $30k | Strong: year-six median |
+| --------------------- | ---------------------- | ------------------------ | ------------------ | ------------------------ | ----------------- | ----------------------- |
+| YouTube               | 100%                   | 2                        | 1.75%              | $687                     | 9.25%             | $5,794                  |
+| Twitch                | 100%                   | 1                        | 1.25%              | $848                     | 3%                | $2,034                  |
+| Instagram             | 100%                   | 1                        | 1%                 | $913                     | 5.5%              | $3,384                  |
+| TikTok                | 43.5%                  | 3                        | 0%                 | $0                       | 2.25%             | $1,642                  |
+| Amazon Music Podcasts | 100%                   | 2                        | 0%                 | $978                     | 0.5%              | $3,711                  |
+| Substack              | 100%                   | 1                        | 6.75%              | $4,844                   | 17%               | $9,981                  |
+| Kick                  | 100%                   | 1                        | 0.25%              | $823                     | 0.5%              | $1,903                  |
+| Facebook              | 100%                   | 1                        | 1.25%              | $860                     | 7.25%             | $3,115                  |
+| X (Twitter)           | 100%                   | 1                        | 1%                 | $900                     | 5.75%             | $3,446                  |
+
+The strong-play final figures reproduce the approved proposal. Generated-life results:
+
+| Platform              | Four posts: traction | Four: recurring pay | Four: first paid year | Four: ever $30k | Twelve: traction | Twelve: recurring pay | Twelve: first paid year | Twelve: ever $30k | Twelve: median peak |
+| --------------------- | -------------------- | ------------------- | --------------------- | --------------- | ---------------- | --------------------- | ----------------------- | ----------------- | ------------------- |
+| YouTube               | 100%                 | 100%                | 3                     | 0%              | 100%             | 100%                  | 2                       | 0%                | 6,966               |
+| Twitch                | 41.67%               | 100%                | 1                     | 0%              | 100%             | 100%                  | 1                       | 1.67%             | 1,421               |
+| Instagram             | 100%                 | 100%                | 2                     | 0%              | 100%             | 100%                  | 1                       | 5%                | 17,245              |
+| TikTok                | 100%                 | 80%                 | 14                    | 0%              | 100%             | 98.33%                | 6                       | 1.67%             | 72,649              |
+| Amazon Music Podcasts | 100%                 | 100%                | 3                     | 0%              | 100%             | 100%                  | 2                       | 0%                | 3,016               |
+| Substack              | 100%                 | 100%                | 1                     | 6.67%           | 100%             | 100%                  | 1                       | 23.33%            | 4,980               |
+| Kick                  | 40%                  | 100%                | 1                     | 0%              | 100%             | 100%                  | 1                       | 0%                | 1,481               |
+| Facebook              | 100%                 | 100%                | 2                     | 0%              | 100%             | 100%                  | 1                       | 3.33%             | 15,090              |
+| X (Twitter)           | 100%                 | 100%                | 2                     | 0%              | 100%             | 100%                  | 1                       | 1.67%             | 16,009              |
+
+All 540 idle accounts still have zero traction and zero recurring pay. With twelve posts all
+platforms reach the traction milestone; 59/60 TikTok lives eventually get recurring pay, compared
+with 48/60 at four posts. First-paid medians are conditional on earning: TikTok is six years at
+twelve posts versus fourteen at four. First-paid time can be long in ordinary generated lives;
+these are hobby policies without deliberate optimization. Four-post streams often earn a small
+amount without reaching 1,000 followers. The lifetime and short-run definitions are not interchangeable.
+
+The fixed-calendar final TikTok wage shares are 0% / 1.67% for four/twelve posts, compared with
+83.33% / 11.67% before the correction. The earlier varied-calendar approved-proposal sample
+was 0% / 0%; it is a separate cohort. Small tail counts do not establish a stable population rate.
+
+## Implementation and regression coverage
+
+The production result matches the approved isolated proposal. New accounts draw luck with the
+new lifts; existing saved luck is not recalculated. Manual settlement scales only positive spread
+by output count and uses full existing downward drift above target. It no longer rolls a second
+annual breakout. Seeded explicit publication rolls, risks, ceilings and immediate discovery remain.
+Idle accounts churn without output income; contracted sponsor payments are still owed exactly once.
+The old low-level automatic model remains available for historical source calibration.
+
+No save shape, migration or version change was needed. Round-trip tests exposed a pre-existing
+validator gap: saved luck could be a string, nonfinite number or outside [0, 1]. Validation now
+rejects those corrupt values and accepts both valid endpoints without retuning them. The v40
+carried-channel test had an id-only fake channel; it now carries a valid real channel and retains
+its exact preservation assertions.
+
+There are **31 new tests**: finance 19, simulation 4, persistence 8. They cover literal lifts and
+alias values, saved luck, above-target downward drift for one/four/twelve posts, scaled growth and
+pay, idle churn, sponsor payment, historical peak, explicit seeded breakouts, ceiling, deterministic
+replay, outcome bands, live manual integration, tax/ledger reconciliation and save continuation.
+Existing mobile suites still pass; no screen or store changes were needed.
+
+Existing 0706 lift assertions were updated to the approved values. Its statistical player/source
+ratio bands are tighter measured P3 bounds (video 2.4–2.5, stream 4.6–4.8, short-form 2.9–3.1,
+podcast 4.8–5.1); source calibration and upper-tail guards remain. The old automatic annual viral
+integration case now tests an explicit post breakout, its timeline, unchanged money at posting,
+and no second annual breakout. These changes reflect the approved manual contract; no test was
+removed or assertion weakened.
+
+## Independent sabotage verification
+
+A tar backup was made before mutation. Each mutation was applied alone, selected tests run, and
+production bytes restored. All 28 were caught by test assertions, not merely a compiler error.
+The final MD5s of all five source files matched their pre-mutation backups. **None missed.**
+
+| Mutation                               | Result |
+| -------------------------------------- | ------ |
+| 1. revert video lift                   | Caught |
+| 2. revert stream lift                  | Caught |
+| 3. revert photo lift                   | Caught |
+| 4. revert shortform lift               | Caught |
+| 5. revert podcast lift                 | Caught |
+| 6. revert subscription lift            | Caught |
+| 7. revert Kick lift                    | Caught |
+| 8. revert Facebook lift                | Caught |
+| 9. revert X lift                       | Caught |
+| 10. shelter spikes with fewer posts    | Caught |
+| 11. full spread from one post          | Caught |
+| 12. restore extra annual viral roll    | Caught |
+| 13. read wrong publishing year         | Caught |
+| 14. pay full output for one post       | Caught |
+| 15. stop idle churn                    | Caught |
+| 16. pay sponsors twice                 | Caught |
+| 17. erase historical peak              | Caught |
+| 18. reroll saved luck                  | Caught |
+| 19. automatic live settlement          | Caught |
+| 20. omit seed from explicit viral roll | Caught |
+| 21. double explicit viral chance       | Caught |
+| 22. remove explicit surge              | Caught |
+| 23. remove publication ceiling         | Caught |
+| 24. pay on publication                 | Caught |
+| 25. allow thirteenth post              | Caught |
+| 26. accept nonfinite saved luck        | Caught |
+| 27. reject valid upper luck endpoint   | Caught |
+| 28. accept invalid saved luck          | Caught |
+
+## Verification and open checks
+
+Full `pnpm verify`: all 15 typecheck tasks and all **2,598 tests** passed (P2 baseline 2,567
+plus 31). It then failed nine byte-for-byte generator/catalog comparisons: activities, advice,
+auctions, businesses, events-childhood, homes, renovations, valuables and vehicles. A fresh
+`origin/main` archive at `beff25a` produces the exact same nine failures in this environment.
+No catalog reformat is included; the validator’s incidental vehicle-mods rewrite was restored.
+
+`pnpm format:check` fails on 22 untouched historical Claude notes, the same baseline documented
+by P2. Every P3 changed file is formatted and checked individually. P3 CI status is reported in
+the PR; local full verification is not described as green. Runtime pnpm is 11.25 rather than the
+repo’s pinned 10.28, so dependency auto-refresh was disabled for the verify command; dependencies
+and lockfile were not changed.
+
+CORE_RULES lessons 13.139–13.141 record the low-output windfall, lifetime calibration and corrupt
+saved-draw findings. No fame, free-account, manual-post cap, source curve, income-rate, TICKET or
+save-version change beyond the approved P3 values. Native device checks and Claude Project
+mirroring remain unavailable. PR review and merge remain open. P4 and general life-event wording
+have not started.
