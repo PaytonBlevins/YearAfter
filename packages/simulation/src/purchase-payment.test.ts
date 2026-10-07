@@ -252,7 +252,7 @@ describe('real purchases with a selected card', () => {
       const state = adult(`purchase-collab-${i}`);
       const category = platform.categories[0];
       if (!category) throw new Error('No category');
-      const opened = openChannel(state, platform.id, category, payment);
+      const opened = openChannel(state, platform.id, category);
       if (!opened.ok) throw new Error(JSON.stringify(opened.error));
       const channel = opened.value.channels[0];
       if (!channel) throw new Error('No channel');
@@ -288,17 +288,19 @@ describe('real purchases with a selected card', () => {
     expectPaid(state, result.value.state, quote.cash);
     expect(result.value.state.portfolio[0]?.units).toBe(quote.units);
   });
-  it('pays channel startup with a card while keeping suitability gates', () => {
+  it('opens a channel for free without charging a held card and keeps suitability gates', () => {
     const state = adult();
-    const platform = PLATFORMS.find((row) => row.startCost > 0);
+    const platform = PLATFORMS.find((row) => row.id === 'video');
     if (!platform) throw new Error('No platform');
     const category = platform.categories[0];
     if (!category) throw new Error('No category');
-    const result = openChannel(state, platform.id, category, payment);
+    const result = openChannel(state, platform.id, category);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expectPaid(state, result.value, platform.startCost);
-    expect(openChannel(result.value, platform.id, category, payment).ok).toBe(false);
+    expect(result.value.finance).toEqual(state.finance);
+    expect(result.value.cards).toEqual(state.cards);
+    expect(result.value.player.cash).toBe(state.player.cash);
+    expect(openChannel(result.value, platform.id, category).ok).toBe(false);
   });
   it('keeps private-deal offer and cheque limits while paying with a card', () => {
     const state = cashIn(adult(), 2_000_000);

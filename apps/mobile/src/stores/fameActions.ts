@@ -9,7 +9,13 @@
 
 import type { TimelineEntry } from '@yearafter/character';
 import { findFameWork, type RepresentationKind } from '@yearafter/content';
-import type { Effort, PaidTier, SponsorAnswer } from '@yearafter/finance';
+import {
+  PAYMENT_REFUSAL_LABELS,
+  type Effort,
+  type PaidTier,
+  type PaymentRefusal,
+  type SponsorAnswer,
+} from '@yearafter/finance';
 import {
   answerCollabOffer,
   answerEncounter,
@@ -82,8 +88,13 @@ export function refusalText(refusal: {
   readonly age?: number;
   readonly limit?: number;
   readonly needed?: number;
+  readonly reason?: PaymentRefusal;
 }): string {
   switch (refusal.kind) {
+    case 'payment':
+      return refusal.reason
+        ? PAYMENT_REFUSAL_LABELS[refusal.reason]
+        : 'Check how you are paying and try again.';
     case 'tooYoung':
       // A channel's refusal carries the age it needs; a flirt's does not, and means one of the two.
       return refusal.age === undefined
@@ -148,10 +159,9 @@ export function refusalText(refusal: {
   }
 }
 
-type Failure = { readonly kind: string };
-const failed = (error: Failure & Record<string, unknown>): Refused =>
+const failed = (error: Parameters<typeof refusalText>[0]): Refused =>
   refuse(
-    refusalText(error as Parameters<typeof refusalText>[0]),
+    refusalText(error),
     error.kind === 'notEnoughMoney' ? 'Not enough money' : "That can't be done",
   );
 

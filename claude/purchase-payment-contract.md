@@ -75,7 +75,7 @@ freezing and repayments continue through the existing card engine.
 | Business opening/buying/expansion      | Existing arguments plus `payment?` after `finance?`         | Shared business purchase panel beside loans            |
 | Public investments                     | `invest(state, instrumentId, amount, payment?)`             | Amount entry, actual-unit quote, then selector         |
 | Private deals                          | `placeInDeal(state, offerId, amount, payment?)`             | Engine ready; 0605 screen integration remains separate |
-| Creator startup                        | `openChannel(state, platformId, categoryId, payment?)`      | Engine ready for the other agent's screens             |
+| Creator accounts                       | `openChannel(state, platformId, categoryId)`                | Free signup, no payment choice or ledger entry         |
 | Paid collaborations                    | `answerCollabOffer(state, offerId, answer, payment?)`       | Engine ready for the other agent's screens             |
 | Vacations/future purchases             | Call shared eligibility/payment helpers after domain checks | Future feature owner reuses this contract              |
 
@@ -154,3 +154,47 @@ run independently and every original source SHA-256 was restored:
 Native-device checks remain pending: this environment has neither Android device
 tools nor an iOS simulator. Creator/private-deal screen ownership remains as
 listed above; the engine arguments are ready for those integrations.
+
+## PR #10 integration with the playtest rules brief
+
+Rebased onto `origin/main` at `beff25a` as Payton's first assignment before P1.
+The conflicting claim rows and handoff notes are retained, and finance exports
+both `manual-posts` and `purchase-payment`. The business screen keeps the warning
+batch's scrolling/exit confirmations alongside the purchase-payment controls.
+
+`openChannel` and `whyNotChannel` match main's free account implementation:
+no payment argument, funding transaction, ledger entry or card change.
+`NewChannelScreen` continues to show free creation. Paid collaborations and all
+other existing purchase payment arguments remain. The obsolete paid-startup test
+now asserts unchanged cash, cards and ledger plus the duplicate-account gate;
+no test was deleted. Collaboration fixtures no longer pass a signup payment.
+
+The combination exposed a mobile type error: `PaymentProblem` did not satisfy
+the Social Media action layer's unnecessary string index signature. The reader
+now accepts its actual structural fields and renders payment reasons using the
+shared spoken labels. A new test pins all seven payment refusal messages.
+
+Content validation also caught the trade-in reader subtracting cash mirror
+fields. It now reads the net proceeds from the authoritative ledger balances
+after the existing sale, with payment postings unchanged. Real trade-in payment
+tests still check the remaining price and exact reconciliation.
+
+Full `pnpm verify` passes every typecheck and 2,516 tests (253 mobile), then
+fails the nine generator byte-reproducibility checks. `pnpm format:check` reports
+23 Markdown files, all byte-identical to main. Every changed file passes its
+formatting check, and `git diff --check` passes.
+
+An untouched archive of main `beff25a` reproduces the nine failures. All nine
+generated catalogs parse to exactly the same JSON values as the committed files;
+the differences are layout (for example, compact versus expanded arrays).
+Neither catalogs nor generators are rewritten in this PR. The validator's
+vehicle-mods side effect is restored. This disagrees with the brief's green-main
+statement; GitHub returned no workflow runs or status checks for that main SHA,
+so CI success could not be independently confirmed.
+
+Save v43 and both `TICKET = '0708'` constants are unchanged. The original
+sixteen purchase-payment mutation checks above are historical. Two fresh
+integration mutations (charging free signup and losing payment refusal wording)
+were caught, and source MD5 hashes restored; this is not a fresh full audit.
+No P1 work has started. Claude Project mirroring
+remains unavailable here: no `project_write` capability is exposed.

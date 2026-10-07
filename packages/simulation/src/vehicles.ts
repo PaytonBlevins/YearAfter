@@ -563,7 +563,7 @@ export function buyVehicle(
   // Trade-in proceeds are applied to this purchase, rather than paid out while charging the full card price.
   const tradeCredit =
     payment.kind === 'card' && tradeInId
-      ? Math.min(paid, Math.max(0, Number(current.player.cash - state.player.cash) / 100))
+      ? Math.min(paid, Math.max(0, Number(current.finance.balance - state.finance.balance) / 100))
       : 0;
   const paymentLedger =
     tradeCredit > 0
