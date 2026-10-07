@@ -1,3 +1,4 @@
+import { businessRescueOk } from './business-rescue-validation';
 /**
  * Ticket 0005 — save migrations.
  *
@@ -13,6 +14,7 @@ import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
 import {
   SUBSISTENCE,
+  isLifestyleTier,
   POSTS_PER_YEAR,
   reconcile,
   reconcileByYear,
@@ -1008,6 +1010,23 @@ const migrations: Readonly<Record<number, Migration>> = {
         : { ties: [], met: [], answeredYear: 0, work: { year: 0, done: [] } },
     version: 42,
   }),
+  /** v44 -> v45: P2 defaults the existing life without changing its history or RNG. */
+  44: (save) => {
+    const household = save['household'];
+    return {
+      ...save,
+      household:
+        typeof household === 'object' && household !== null && !Array.isArray(household)
+          ? { ...household, lifestyle: 'comfortable' }
+          : household,
+      version: 45,
+    };
+  },
+  /** v43 -> v44: P1 adds optional rescue quotes without inventing legacy reviews. */
+  43: (save) => {
+    const { businessRescue: _notYetBuilt, ...prior } = save;
+    return { ...prior, version: 44 };
+  },
   /**
    * v42 -> v43: Ticket 0707 — what has been said yes to this year. Nothing has been, in any
    * older save, so the record is empty for year 0. What a v42 save already carries is kept.
@@ -1162,7 +1181,11 @@ function channelPublishingOk(value: unknown): boolean {
   if (!Array.isArray(value)) return false;
   return value.every((channel: unknown) => {
     if (typeof channel !== 'object' || channel === null) return true;
-    const publishing = (channel as Record<string, unknown>)['publishing'];
+    const record = channel as Record<string, unknown>;
+    const luck = record['luck'];
+    // P3: persisted luck is authoritative, but corrupt luck cannot become a balance input.
+    if (typeof luck !== 'number' || !Number.isFinite(luck) || luck < 0 || luck > 1) return false;
+    const publishing = record['publishing'];
     if (publishing === undefined) return true;
     if (typeof publishing !== 'object' || publishing === null || Array.isArray(publishing))
       return false;
@@ -1335,6 +1358,7 @@ export function validateCurrentSave(
       'people'
     ], Array.isArray((candidate['circle'] as Record<string, unknown> | undefined)?.['people'])),
     // Ticket 0501. A list, however short.
+    require('household', candidate['household'], householdOk(candidate['household'])),
     require('homes', candidate['homes'], Array.isArray(candidate['homes'])),
     // Ticket 0504. The same for cars.
     require('vehicles', candidate['vehicles'], Array.isArray(candidate['vehicles'])),
@@ -1342,6 +1366,7 @@ export function validateCurrentSave(
     require('valuables', candidate['valuables'], Array.isArray(candidate['valuables'])),
     // Ticket 0601. And for what is owned and running.
     require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
+    require('businessRescue', candidate['businessRescue'], businessRescueOk(candidate)),
     // Ticket 0605. And for the private deals.
     require('deals', candidate['deals'], Array.isArray(candidate['deals'])),
     // Ticket 0701. And for the channels, and a number for fame.
@@ -1367,4 +1392,24 @@ export function validateCurrentSave(
     return err({ kind: 'corrupt', detail: books.join('; ') });
   }
   return ok(candidate as unknown as CurrentSaveGame);
+}
+
+/** P2: reject malformed living state before a loaded year can use it. */
+function householdOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row['standard'] === 'number' &&
+    Number.isFinite(row['standard']) &&
+    row['standard'] >= SUBSISTENCE &&
+    (row['housing'] === 'withFamily' ||
+      row['housing'] === 'ownPlace' ||
+      row['housing'] === 'owned') &&
+    isLifestyleTier(row['lifestyle']) &&
+    ['leftHomeAt', 'movedBackAt'].every(
+      (key) =>
+        row[key] === undefined ||
+        (typeof row[key] === 'number' && Number.isInteger(row[key]) && row[key] >= 0),
+    )
+  );
 }

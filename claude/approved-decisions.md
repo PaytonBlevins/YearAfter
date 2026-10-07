@@ -81,6 +81,38 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   first. Frugal / Comfortable / Lavish follow, as a way to spend more on purpose. **This overrides
   spec 1166's removal of a tier selector by name.** The car's yearly cost becomes a dollar amount
   scaled to the car and no longer a share of the living bill (finding 33).
+  **P2 proposal approved by Payton:** Comfortable is the default; Frugal buys 80% of discretionary
+  spending above basic needs, Comfortable 100%, Lavish 150%. Annual happiness nudges are −1 / 0 / +2,
+  through the existing stat curve, with no effect at basic needs or in hardship and no Lavish bonus
+  for an unpaid year. Selection itself changes no money, time or stats. The approved default uses
+  marginal after-tax spending of 92% up to $50,000, 40% to $120,000 and 15% above, with wealth pull
+  tapering above $100,000. The embedded car allowance is $1,600 per index-1 single renter, scaled to
+  household/location/housing and capped at real car costs. Lifestyle opens from the Living costs row
+  with three options and annual estimates. This explicitly overrides MASTER_SPEC section 22 and
+  its interface passage removing a tier selector (the brief's “spec 1166”); sections 20–21 still keep
+  contextual costs and the backend ledger. See `playtest-p2-living-costs.md`.
+- **P3 social-media proposal approved by Payton:** new-account rank lifts are YouTube 3,
+  Twitch/Kick 5, Instagram/Facebook/X 3, TikTok 3, podcasts 5 and Substack 2. Existing saved
+  luck stays fixed; source curves and the top-quarter fade remain. Active accounts above their
+  target take ordinary downward drift regardless of post count; only positive annual spread
+  scales to output. Explicit publications retain their viral rolls, and live annual settlement
+  does not give another automatic viral opportunity. Free accounts, manual posting, the twelve-post
+  cap, platform income rates and the small-audience fame anchors remain. See
+  `playtest-p3-social-success.md` for measurements and verification.
+- **P4 business-economy change approved by Payton, with strong expansion retained:** halve
+  direct severe-recession, recession, slowdown and growth effects to −13%, −6.5%, −2.5% and
+  +2.5% at full cyclicality. Normal stays neutral; **strong expansion stays +9%**. Type
+  cyclicality, named-event odds/damage, world transitions, other business controls and P1 rescue
+  choices remain. Context thresholds halve as proposed: ledger 0.25%, screen 1.5%, annual loss
+  3% and annual gain 2.5%. Existing records retain historical values; future settlements use
+  the new coefficients. No save bump. See `playtest-p4-business-economy.md`.
+- **P5 scarce study/training matches approved by Payton:** show twelve eligible listings,
+  reserving two matching the existing studied-major tracks or held-license tracks. When fewer
+  than two matching jobs qualify, show every available match and fill the remaining places
+  with other eligible work. Never duplicate a row or bypass age, education, license or career
+  reach to fill the quota. Hiring odds and first-job offer chance stay. The current/last major
+  and all held licenses supply matching information; no degree-subject history is promised.
+  See `playtest-p5-career-listings.md`.
 - **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
   account creation for channels.
 

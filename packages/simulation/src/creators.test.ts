@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { CREATOR_LINES, SPONSOR_KIND, findPlatform } from '@yearafter/content';
-import { cents } from '@yearafter/core';
+import { cents, mixedUnit } from '@yearafter/core';
 import {
   reconcile,
   totalFor,
@@ -996,34 +996,39 @@ describe('the other three platforms, in the game (0703)', () => {
     expect(second.channels[0]!.paid).not.toBe(first.channels[0]!.paid);
   });
 
-  it('writes the line when a post takes off, in the year it does', () => {
+  it('records an explicit post that takes off when published, without another annual breakout', () => {
     const base = withPublishedChannel(ADULT, 'shortform', 'comedy');
-    for (let year = 2030; year < 2300; year += 1) {
+    const channel = base.channels[0];
+    if (!channel) throw new Error('No channel');
+    for (let year = 2030; year < 5030; year += 1) {
+      const key = `${base.rng.getSeed()}:manual-post:${channel.id}:${year}:0`;
+      if (mixedUnit(`${key}:viral`) >= 0.12 / 12 || mixedUnit(`${key}:reaction`) < 0.15) continue;
       const state: GameState = {
-        ...grown(base, { audience: 20_000 }),
+        ...base,
         world: { ...base.world, year },
-        channels: grown(base, { audience: 20_000 }).channels.map((channel) => ({
-          ...channel,
-          publishing: { year, count: 12, kind: 'reel', gained: 0 },
-        })),
+        channels: [{ ...channel, luck: 0, audience: 20_000, peak: 20_000 }],
       };
-      const next = advanceYear(state).state;
-      const viral = next.channels[0]!.viralYear;
-      const lines = next.player.timeline
-        .filter((e) => e.id?.includes(':creator:'))
-        .map((e) => e.text);
-      if (viral === undefined) {
-        expect(lines.some((text) => /took off|passed around/.test(text))).toBe(false);
-        continue;
-      }
-      expect(viral).toBe(year + 1);
-      // It says how many people it brought, as a figure.
-      expect(lines.some((text) => /(brought in|everywhere:) [\d,]+ new followers/.test(text))).toBe(
-        true,
+      const posted = postToChannel(state, channel.id, 'meme');
+      if (!posted.ok) throw new Error('Post refused');
+      const gained = posted.value.channels[0]?.publishing?.gained;
+      expect(gained).toBeGreaterThan(60_000);
+      expect(posted.value.channels[0]?.publishing?.year).toBe(year);
+      expect(posted.value.player.timeline.at(-1)?.text).toContain(
+        `${gained?.toLocaleString('en-US')} new followers found you`,
       );
+      expect(posted.value.finance).toEqual(state.finance);
+      const next = advanceYear(posted.value).state;
+      expect(next.world.year).toBe(year + 1);
+      expect(next.channels[0]?.viralYear).toBeUndefined();
+      expect(next.channels[0]?.publishing?.count).toBe(1);
+      expect(
+        next.player.timeline
+          .filter((e) => e.id?.includes(':creator:'))
+          .some((e) => /took off|passed around/.test(e.text)),
+      ).toBe(false);
       return;
     }
-    throw new Error('no viral year in 270');
+    throw new Error('No seeded explicit breakout fixture');
   });
 
   it('puts a deal on the table for each of them, and the paid tier does not stop it', () => {

@@ -191,6 +191,16 @@ describe('0308b — the floor and the date', () => {
       );
     }
 
+    // P2: a retained cash buffer must still make this paired population
+    // happier than keeping every spare dollar out of the current account.
+    const happy = (mode: Mode) =>
+      q(
+        (out[mode] ?? []).map((row) => row.happiness),
+        0.5,
+      );
+    expect(happy('balanced')).toBeGreaterThan(happy('allin'));
+    expect(happy('balanced')).toBeGreaterThan(happy('bonds'));
+
     /*
       PER ADULT YEAR, NOT PER LIFETIME (Ticket 0410).
 

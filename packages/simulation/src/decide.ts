@@ -29,9 +29,11 @@ import { answerPursuitOffer, isPursuitOfferDecision } from './pursuit-offer';
 import { answerHomeOffer, isHomeOfferDecision } from './homes';
 import { answerVehicleOffer, isVehicleOfferDecision } from './vehicles';
 import { answerRenovationOffer, isRenovationOfferDecision } from './renovations';
+import { answerBusinessRescue, BUSINESS_RESCUE_EVENT_ID } from './business-rescue';
 import { RngDomains } from './rng/rng';
 
 export type DecisionError =
+  | 'cannot-afford'
   | 'no-such-decision'
   | 'no-such-choice'
   /** The choice exists in the catalog but produced nothing — a content bug. */
@@ -76,6 +78,13 @@ export function decide(
     queue, and each borrower answers its own question. 0405 uses this same
     door for school.
   */
+  if (eventId === BUSINESS_RESCUE_EVENT_ID) {
+    const answered = answerBusinessRescue(state, choiceId);
+    if (!answered.ok)
+      return err(answered.error === 'stale-rescue' ? 'unresolvable' : answered.error);
+    return answered;
+  }
+
   if (isOfferDecision(eventId)) {
     const answered = answerOffer(state, choiceId);
     if (!answered.ok) {

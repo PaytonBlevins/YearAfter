@@ -2579,6 +2579,8 @@ wrong reason.
 
 - **Assert the size the mechanism promises.** The test now asserts the bill
   falls by at least the car's share, which only the mechanism under test can do.
+  P2 explicitly superseded that percentage contract: literal actual-cost and
+  $1,600-cap tests now pin the dollar replacement at multiple income/tier levels.
 - **Sabotage is what finds these.** Three of seventeen sabotages passed the
   first time (this one, a loan that never amortised but still cleared on its
   last year, and repossession after one short year inside a loose band). All
@@ -2991,3 +2993,114 @@ a sentence, a default or a boundary nothing pinned: the collaboration text for a
 swap (three different states needed, not one), "Nobody has asked this year" when only a group has,
 rounding of a fractional dollar, age 15 against 16. A line a player reads is pinned by a test that
 names the line, and a fixture for a branch is checked to reach it (13.126).
+
+### 13.134 A repeated missed payment can lose its warning without losing its debt
+
+P1 found that `runLoanYear.missed` reports entry into arrears, not every unpaid year.
+A rescue gate based on that list ignores a lender already in arrears. Compare the payment
+actually made with the fully funded quote, and test an already-arrears business. Hold the
+quote after the year's interest so answering a saved choice cannot charge interest twice.
+
+### 13.135 Pausing a failure must preserve the hole and the lender
+
+A held rescue can have a negative till. The old wind-down reader clamps the till to zero,
+so closing it without subtracting the trading hole forgives the loss. Apply the hole before
+paying the lender, keep unpaid debt, and prove both ledger flows. Test death in the actual
+annual advance and the heir's liquid inheritance, not just the rescue answer in isolation.
+
+### 13.136 A percentage discount can buy back more than the thing costs
+
+P2 measured a $5,500 car removing $12,000–$14,000 from a high earner's living bill.
+A reference allowance must be denominated in dollars and bounded by the actual
+cost it replaces. Income and voluntary luxury spending cannot expand it. Test
+zero, below-cap, exact-cap and above-cap costs, and expensive cars' combined cost.
+Re-measure the whole-life curve after removing an accidental savings subsidy.
+
+### 13.137 A preference is not a paid benefit
+
+Choosing a lifestyle changes only the saved preference. Its spending and mood
+settle during annual advance, once, through the existing stat curve. Check both
+the living phase's hardship/floor and the final ledger: a large portfolio can
+make living affordable in the phase while an illiquid household still cannot
+pay. Never award Lavish for unpaid spending or a mortgage-squeezed basic-needs
+bill. Switching repeatedly must not change money, time, stats or RNG.
+
+### 13.138 A new stat contribution must preserve the old contributors
+
+P2's first mood merge overwrote activity happiness even when Comfortable added
+zero. Preserve the existing creator/activity contribution before adding the
+new annual nudge. Pin the zero-effect default and simultaneous activity plus
+lifestyle effects, not only a tier in an otherwise empty life.
+
+### 13.139 Less output must not preserve an unrelated windfall
+
+P3 found that scaling negative audience drift by posting count sheltered viral spikes. Four
+posts a year could earn more over a life than twelve. Scale the positive benefit of work to
+output; a loss that is about market churn, rather than work, keeps its own rule. Test the same
+above-target record at one, four and twelve actions, and pin both audience loss and payment.
+
+### 13.140 A short calibration can hide a reversed lifetime incentive
+
+TikTok looked hard to monetize in P3's six-year check, but the casual policy reached a living
+wage in 83% of the shared-calendar lifetime sample. An extra annual viral roll and slow losses
+compounded over decades. Measure early traction, time to recurring pay and lifetime tails;
+repeat across calendars, and compare action policies on paired seeds. Do not raise success
+rates from an early median alone.
+
+### 13.141 Preserving a draw includes rejecting a corrupt draw
+
+A saved channel's luck must survive a balance change unchanged. P3's round-trip test passed,
+but invalid numbers and strings also loaded, so the draw was not safe to read. Pin preserved
+values, valid endpoints, malformed types and non-finite numbers. A migration-preservation
+fixture must carry a real valid record, not only an id that bypasses domain validation.
+
+### 13.142 Follow a balance coefficient through its explanation thresholds
+
+P4's proposed halved positive demand effect made the old +5% growth explanation unreachable.
+Keeping the boom at +9% did not restore ordinary growth's message: its new maximum was +2.5%.
+Audit ledger inclusion, screen visibility and timeline thresholds together with the coefficient.
+Pin a modest positive effect and a reduced negative effect, not only the strongest boom or crash.
+The saved result is the account of what happened; never recompute past records with today's dial.
+
+### 13.143 Compare a threshold in the units that define it
+
+At P4's 1.5% display boundary, `1.015 - 1` can be slightly less than `0.015`. Comparing
+multipliers with `1 ± threshold` keeps that exact boundary visible. Whole-percent text also
+needs a unit of float tolerance around one, so the same 1.5% does not say 1% after rounding.
+Test both signs at the boundary and just inside it, and the text as well as the row's presence.
+A constant's literal test cannot prove that its caller uses it.
+
+### 13.144 A reserved slot cannot manufacture an eligible choice
+
+P5 found that Architectural Studies graduates had one eligible architecture job, not two.
+Count the matching eligible pool before promising a quota. Show all available matches when
+it is scarce, as approved, and fill remaining slots without duplicates or bypassing gates.
+Use the same study/license matcher for curation and calibration; verify hostile draws where
+all unrelated jobs rank ahead of the field, not only favorable random boards.
+
+### 13.145 Weight share is not inclusion probability
+
+Sorting uniform draws divided by weights is a weighted ranking, not a linear slots-times-share
+lottery. Reserving places also changes which pools and slots a candidate competes for. P5
+replaced the starvation guard's linear proxy with conservative sufficient-event bounds for
+both reserved and general selection, retaining the zero-reach and 95% single-life checks.
+Take the larger of overlapping event bounds; adding them can claim a probability above one.
+Test certain scarce-pool inclusion, displaced general slots and empirical inclusion alongside
+the mathematical bound. Preserve historical measurements as measurements, not exact odds.
+
+### 13.146 Exercise both paths through a curated board
+
+Hostile study draws prove that reserved slots survive a crowded general pool. Favorable study
+draws prove that those reserved winners are removed before filling the rest. P5 sabotage found
+that the first case alone missed duplicate winners in the second. Likewise, a board's early
+age return can mask a broken direct-command gate: test eligibility and application commands
+without relying on the screen to keep a child out.
+
+### 13.147 Hold a comparison's causes and fixtures constant
+
+Changing a career board changes seeded lives' income, homes and cohort membership. Literal
+underwriting tests need explicit original income/assets, not newly tuned expected quotes.
+A living-cost comparison should capture the bill before shortfall clamping, with equal income,
+and verify the real annual caller. A parenting-effect check should compare the same parent's
+state with and without that contribution, not changes across different parent/nonparent groups.
+Keep the original effect floors and sabotage the mechanism after repairing the measurement.

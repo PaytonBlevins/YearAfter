@@ -1487,7 +1487,7 @@ describe('0706 — a player is not an average channel', () => {
   it('barely touches the very top', () => {
     expect(liftedLuck(0.9999, 3)).toBeCloseTo(0.9999, 4);
     expect(liftedLuck(0.999999, 3)).toBeCloseTo(0.999999, 6);
-    // The best one channel in a hundred moves to about one in 108, at the greatest lift there is.
+    // The best one channel in a hundred moves to about one in 108, at lift 3.
     expect(1 - liftedLuck(0.99, 3)).toBeCloseTo(0.01 / 1.08, 10);
   });
 
@@ -1504,12 +1504,12 @@ describe('0706 — a player is not an average channel', () => {
     }).toEqual({
       LUCK_LIFT: 1.5,
       LUCK_LIFT_BELOW: 0.25,
-      video: 1.5,
-      stream: 2.5,
-      photo: 1.5,
-      shortform: 2,
-      podcast: 2.5,
-      subscription: 1.2,
+      video: 3,
+      stream: 5,
+      photo: 3,
+      shortform: 3,
+      podcast: 5,
+      subscription: 2,
     });
     expect(liftedLuck(0.5)).toBeCloseTo(liftedLuck(0.5, 1.5), 12);
   });
@@ -1533,13 +1533,14 @@ describe('0706 — a player is not an average channel', () => {
       return { monetized: monetized / lives, top: top / lives };
     };
     for (const [platformId, categoryId, low, high] of [
-      ['video', 'education', 1.3, 1.8],
-      ['stream', 'gaming', 1.9, 3],
-      ['shortform', 'comedy', 1.5, 2.6],
-      ['podcast', 'comedy', 1.4, 2.4],
+      ['video', 'education', 2.4, 2.5],
+      ['stream', 'gaming', 4.6, 4.8],
+      ['shortform', 'comedy', 2.9, 3.1],
+      ['podcast', 'comedy', 4.8, 5.1],
     ] as const) {
       const sourced = shares(platformId, categoryId, 'sourced');
       const player = shares(platformId, categoryId, 'player');
+      // P3's approved lifts replace the earlier 0706 monetization ratios.
       expect(player.monetized / sourced.monetized, platformId).toBeGreaterThan(low);
       expect(player.monetized / sourced.monetized, platformId).toBeLessThan(high);
       // The top is not inflated: a thousand times the paying threshold is as rare as before.
