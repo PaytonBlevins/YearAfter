@@ -1071,7 +1071,7 @@ export function MindBodyScreen() {
           { title: 'Meditation', affordance: 'action', ticket: 'v0.10' },
           { title: 'Martial Arts', ticket: '0809' },
           { title: 'Instruments', ticket: '0806' },
-          { title: 'Acting Lessons', affordance: 'action', ticket: '0805' },
+          { title: 'Acting Lessons', affordance: 'action', ticket: '0809' },
           { title: 'Books / Library', affordance: 'action', ticket: 'v0.10' },
           { title: 'Diet', affordance: 'action', ticket: 'v0.10' },
           { title: 'Walk', affordance: 'action', ticket: 'v0.10' },

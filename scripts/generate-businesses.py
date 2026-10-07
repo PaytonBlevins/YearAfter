@@ -6,7 +6,8 @@ Authoring source for `packages/content/data/businesses.json`. Edit here, run it,
 commit both.
 
 0602 ADDS NINETEEN (the MORE list below), making thirty-one of spec 396's
-thirty-seven; the other six wait on systems that do not exist yet (DEFERRED).
+thirty-seven; 0805 adds the Talent Agency, making thirty-two. The other five wait on
+systems that do not exist yet (DEFERRED).
 
 A REPRESENTATIVE TWELVE, NOT THE CATALOG. Spec 1356–1360: "start with a
 representative business catalog and expand". Twelve spans the range the engine
@@ -376,6 +377,15 @@ MORE: list[dict] = [
         assetShare=0.10, elasticity=3.0, cyclical=0.75, volatility=0.22, ramp=2.2, productShare=0.0,
         skills=["charisma", "smarts"], valueMultiple=2.6,
         names=["Loud & Clear", "Brightline Creative", "Signal Fire", "Open Door Media", "Tall Grass Studio", "Fieldnote Agency"]),
+    # 0805: the one 0602 deferred to acting. It lives on commissions (revenue is the cut it keeps; the small
+    # cogs is deals, travel and showcases). The player's own agent keeps 10% of a fee (0805), a business one a bit more.
+    sized(0.14,
+        id="biz.talentagency", name="Talent Agency", sector="Professional",
+        blurb="You take a cut of every job your clients land. The work dries up when they stop being booked.",
+        startup=80_000, revenue=600_000, cogs=0.05, staff=4, staffMin=1, wage=68_000,
+        assetShare=0.08, elasticity=3.0, cyclical=0.55, volatility=0.28, ramp=3.0, productShare=0.0,
+        skills=["charisma", "smarts"], valueMultiple=2.4,
+        names=["Marquee & Vine", "Northlight Talent", "Greenroom Management", "Backlot Representation", "Callboard Agency", "Second Act Talent"]),
     sized(0.10,
         id="biz.realestate", name="Real Estate Brokerage", sector="Professional",
         blurb="Agents on commission and a name on the signs. When the housing market stops, so do you.",
@@ -508,7 +518,6 @@ DEFERRED: dict[str, str] = {
     # work, with a risk of losing it. They belong in one ticket.
     "Private Lending Firm": "0605 (private investments)",
     "Record Label": "v0.08 (music)",
-    "Talent Agency": "v0.08 (acting)",
     "Casino": "gambling",
     "Racing Team": "v0.08 (sports)",
 }

@@ -1052,6 +1052,30 @@ const migrations: Readonly<Record<number, Migration>> = {
    * No RNG, no clock.
    */
   45: (save) => ({ ...save, version: 46 }),
+  /**
+   * v46 -> v47: Ticket 0805 — acting. Nobody before it could act past a school club, so every older
+   * save gets an empty acting life: the bottom rung, no credits, nothing on the table. What a v46
+   * save already carries is kept. No RNG, no clock.
+   */
+  46: (save) => ({
+    ...save,
+    acting:
+      typeof save['acting'] === 'object' && save['acting'] !== null
+        ? save['acting']
+        : {
+            stageYears: 0,
+            credits: 0,
+            tier: 'local',
+            hits: 0,
+            reputation: 0,
+            awards: 0,
+            idle: 0,
+            offers: [],
+            booked: [],
+            applied: [],
+          },
+    version: 47,
+  }),
 };
 
 /**
@@ -1272,6 +1296,85 @@ function sportsOk(value: unknown): boolean {
   return true;
 }
 
+const ACTING_TIERS_OK = ['local', 'commercial', 'working', 'supporting', 'lead', 'star'];
+const BILLINGS_OK = ['lead', 'supporting', 'bit'];
+
+function roleOk(value: unknown, offered: boolean): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const row = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n);
+  return (
+    typeof row['id'] === 'string' &&
+    typeof row['tier'] === 'string' &&
+    ACTING_TIERS_OK.includes(row['tier']) &&
+    typeof row['billing'] === 'string' &&
+    BILLINGS_OK.includes(row['billing']) &&
+    typeof row['medium'] === 'string' &&
+    typeof row['title'] === 'string' &&
+    whole(row['fee']) &&
+    (row['fee'] as number) >= 0 &&
+    whole(row['days']) &&
+    (row['days'] as number) >= 1 &&
+    whole(row['age']) &&
+    (offered
+      ? (row['source'] === 'asked' || row['source'] === 'applied') &&
+        (row['asked'] === undefined || typeof row['asked'] === 'boolean')
+      : whole(row['bookedAge']))
+  );
+}
+
+function actingOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const acting = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  if (typeof acting['tier'] !== 'string' || !ACTING_TIERS_OK.includes(acting['tier'])) return false;
+  if (acting['best'] !== undefined) {
+    if (typeof acting['best'] !== 'string' || !ACTING_TIERS_OK.includes(acting['best']))
+      return false;
+  }
+  if (
+    !whole(acting['stageYears']) ||
+    !whole(acting['credits']) ||
+    !whole(acting['hits']) ||
+    !whole(acting['awards']) ||
+    !whole(acting['idle']) ||
+    !optionalWhole(acting['seenAge']) ||
+    !optionalWhole(acting['devAtAge']) ||
+    !optionalWhole(acting['devCount'])
+  ) {
+    return false;
+  }
+  const reputation = acting['reputation'];
+  if (typeof reputation !== 'number' || reputation < 0 || reputation > 100) return false;
+  const craft = acting['craft'];
+  if (craft !== undefined && (typeof craft !== 'number' || craft < 0 || craft > 100)) return false;
+  const agent = acting['agent'];
+  if (agent !== undefined) {
+    if (typeof agent !== 'object' || agent === null) return false;
+    if (!Number.isSafeInteger((agent as Record<string, unknown>)['since'])) return false;
+  }
+  const lessons = acting['lessons'];
+  if (lessons !== undefined) {
+    if (typeof lessons !== 'object' || lessons === null) return false;
+    const row = lessons as Record<string, unknown>;
+    if (!Number.isSafeInteger(row['since']) || !whole(row['seasons'])) return false;
+  }
+  if (!Array.isArray(acting['offers']) || !acting['offers'].every((row) => roleOk(row, true))) {
+    return false;
+  }
+  if (!Array.isArray(acting['booked']) || !acting['booked'].every((row) => roleOk(row, false))) {
+    return false;
+  }
+  if (
+    !Array.isArray(acting['applied']) ||
+    !acting['applied'].every((row) => typeof row === 'string')
+  ) {
+    return false;
+  }
+  return acting['appliedAge'] === undefined || Number.isSafeInteger(acting['appliedAge']);
+}
+
 function celebritiesOk(value: unknown): boolean {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const record = value as Record<string, unknown>;
@@ -1443,6 +1546,8 @@ export function validateCurrentSave(
     require('celebrities', candidate['celebrities'], celebritiesOk(candidate['celebrities'])),
     // Ticket 0801. A record of past careers, however short, and optionally a career and a question.
     require('sports', candidate['sports'], sportsOk(candidate['sports'])),
+    // Ticket 0805. Always present from v47: a rung, credits, and the parts on the table and booked.
+    require('acting', candidate['acting'], actingOk(candidate['acting'])),
     // Ticket 0704. Optional, but if it is there it has to be one of the two.
     require('representation', candidate['representation'], candidate['representation'] ===
       undefined ||

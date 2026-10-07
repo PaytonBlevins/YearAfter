@@ -52,6 +52,8 @@ export * from './network';
 export * from './celebrity-world';
 export * from './celebrity-state';
 export * from './celebrity';
+export * from './acting-state';
+export * from './acting';
 export * from './sports-state';
 export * from './sports';
 export * from './fame-work';

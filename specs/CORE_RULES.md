@@ -3114,3 +3114,34 @@ A list other code counts or loops over is not the place to add a different kind 
 The Olympic prizes are what the USOPC pays; the sponsorships, the stipend ladders and the post pay are mine. Both are
 in the same table in `content`, so the ticket doc and the code comment say which is which, and the dial is named. A
 reader who sees a precise figure assumes it is a source.
+
+### 13.150 Calibrate a formula against the measured spread of the stat it reads
+
+The first acting formula centered on 50 and read four character stats on the 0–100 scale, as if they were spread
+across it. They are not: grown characters measure about 56–85. Every character was a gifted actor, 100% of
+the talented reached the top rung and the median career paid $1.3 billion. The fix was to measure the stats first, centre the
+formula on what they actually are (72) and widen it, not to lower thresholds one at a time. Before putting a stat
+into a formula, print its spread.
+
+### 13.151 An optional helper must add to a road and never gate it
+
+Payton's rule for acting: an agent is a factor to take advantage of and success must not depend on one. The agent
+adds a slot, a better chance on an application, a better chance to bargain and an extra two applications a year,
+and costs ten percent of every fee. A life with no agent can be offered work (by being seen) and can apply on its
+own, and the measurement shows both: talent, work and no agent reached a lead or better in 74% of lives against 67%
+with an agent, because the agent's share is a cost. When a helper is added, write the test that a life without it
+reaches the same road.
+
+### 13.152 A test helper that builds a life must fail when it cannot build the one it was asked for
+
+`adult(seed)` returned a child who had died at twelve and every test using it still passed: an unseen child is
+"not seen", has no offers and rejects an application, which is what many tests expected anyway. It was found
+because a mutation (deleting the four-offer cap) survived. A helper that plays a seed forward must check the age and
+that the character is alive, and fall back to the next seed (`name~1`) or throw.
+
+### 13.153 A guard no test can fail is a line to delete, not a test to write
+
+Three guards in 0805 could not change any result, because something else already did the job: a rung check on awards
+(the chance in the table is zero below supporting), a cap on the craft target (the target is always under the
+headroom), and a list of applications that was both cleared and kept at the same age. Each survived the mutation run
+and each was deleted, with a comment where the reason is not obvious. Leave the table as the one source of truth and put an assertion on the table.

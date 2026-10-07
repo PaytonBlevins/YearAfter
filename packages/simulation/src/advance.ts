@@ -41,6 +41,7 @@ import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
 import { withAnyOffer } from './offers';
 import { withCollegeOffer } from './college-offer';
+import { actingOccupation, isActingFullTime, runActingYear, withActingOffer } from './acting';
 import { runSportsYear, sportsOccupation, withSportsOffer } from './sports';
 import { postTitle } from './sports-post';
 import { withLifeOffer } from './life-offer';
@@ -270,6 +271,19 @@ export function advanceYear(state: GameState): AdvanceResult {
     standard: state.household.standard,
   });
 
+  /*
+    Ticket 0805 — an acting life. The parts that were booked last year are shot, judged and paid now, a
+    year's offers are raised for the one to come, and the lessons are billed. Taxed and posted below with
+    the playing pay, because both are earnings the household lives on.
+  */
+  const actingYear = runActingYear({
+    before: state,
+    education: education.education,
+    age: nextAge,
+    year: nextYear,
+    standard: state.household.standard,
+  });
+
   // Then the class. Before events, so an event that fires this year can name
   // somebody who is actually in it — which is the whole of Ticket 0206.
   const social = runSocial({
@@ -443,12 +457,18 @@ export function advanceYear(state: GameState): AdvanceResult {
     employment.earned + businessesYear.drawn + creatorsYear.net,
     sportsYear.pay,
   );
+  // Ticket 0805. A part is pay too: taxed on top of the rest.
+  const actingTax = businessTaxOn(
+    employment.earned + businessesYear.drawn + creatorsYear.net + sportsYear.pay,
+    actingYear.pay,
+  );
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
   const dealsYear = runDealsYear({
     deals: state.deals,
     year: nextYear,
     market,
-    otherIncome: employment.earned + businessesYear.drawn + creatorsYear.net + sportsYear.pay,
+    otherIncome:
+      employment.earned + businessesYear.drawn + creatorsYear.net + sportsYear.pay + actingYear.pay,
   });
   const businessNet = businessesYear.drawn - businessTax;
 
@@ -486,7 +506,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       partnered.net +
       businessNet +
       (creatorsYear.net - creatorTax) +
-      (sportsYear.pay - sportsTax),
+      (sportsYear.pay - sportsTax) +
+      (actingYear.pay - actingTax),
     wealth: Math.floor(Number(state.player.cash) / 100),
     /*
       Ticket 0308b. What the cards would actually lend, which is part of what a
@@ -677,6 +698,25 @@ export function advanceYear(state: GameState): AdvanceResult {
   write(events.lines, () => undefined);
   write(celebritiesYear.lines, (index) => `t:${nextYear}:celeb:${index}`);
   write(sportsYear.lines, (index) => `t:${nextYear}:sports:${index}`);
+  // Acting for a living ends the day job, as playing for a living does (0803, 0804).
+  const actingLeftJob =
+    employment.employment.job !== undefined &&
+    !isActingFullTime(state.acting) &&
+    isActingFullTime(actingYear.acting);
+  write(
+    [
+      ...actingYear.lines,
+      ...(actingLeftJob
+        ? [
+            {
+              kind: 'milestone' as const,
+              text: 'Acting is the living now. That was the end of the day job.',
+            },
+          ]
+        : []),
+    ],
+    (index) => `t:${nextYear}:acting:${index}`,
+  );
   write(health.lines, (index) => `t:${nextYear}:health:${index}`);
   // Last in the year, because it is the line about the year as a whole.
   write(stress.lines, (index) => `t:${nextYear}:stress:${index}`);
@@ -739,6 +779,34 @@ export function advanceYear(state: GameState): AdvanceResult {
             category: 'tax' as const,
             amount: dollars(-sportsTax),
             source: 'Tax on playing pay',
+          },
+        ]
+      : []),
+    // Ticket 0805. What the parts paid, after an agent's share, the lessons, and the tax on the pay.
+    ...(actingYear.pay > 0
+      ? [
+          {
+            category: 'salary' as const,
+            amount: dollars(actingYear.pay),
+            source: 'Acting work',
+          },
+        ]
+      : []),
+    ...(actingYear.fees > 0
+      ? [
+          {
+            category: 'spending' as const,
+            amount: dollars(-actingYear.fees),
+            source: actingYear.feeSource,
+          },
+        ]
+      : []),
+    ...(actingTax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-actingTax),
+            source: 'Tax on acting pay',
           },
         ]
       : []),
@@ -1177,9 +1245,9 @@ export function advanceYear(state: GameState): AdvanceResult {
         ...health.statDeltas,
         ...shaped,
         // Ticket 0706. The year's news about a channel or about being known.
-        ...(creatorsYear.mood + sportsYear.mood === 0
+        ...(creatorsYear.mood + sportsYear.mood + actingYear.mood === 0
           ? {}
-          : { happiness: creatorsYear.mood + sportsYear.mood }),
+          : { happiness: creatorsYear.mood + sportsYear.mood + actingYear.mood }),
       }),
       health: clampStat(health.health + sportsYear.health),
     },
@@ -1189,6 +1257,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0801. Playing for a living is the occupation while it lasts, ahead of any job on the books.
     occupation:
       sportsOccupation(sportsYear.sports.career, sportsYear.sports.post) ??
+      actingOccupation(actingYear.acting) ??
       occupationFor(
         education.education,
         nextAge,
@@ -1237,6 +1306,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       ...businessesYear.records,
       // Ticket 0801. A title is the kind of thing a life is remembered by.
       ...sportsYear.records,
+      // Ticket 0805. A first part, a rise, an award.
+      ...actingYear.records,
     ].reduce<readonly LifeRecord[]>(
       (all, record, index) => appendRecord(all, stampRecord(record, nextAge, nextYear, index)),
       state.player.records,
@@ -1251,7 +1322,22 @@ export function advanceYear(state: GameState): AdvanceResult {
     circle: celebritiesYear.circle,
     celebrities: celebritiesYear.celebrities,
     parenting: family.parenting,
-    employment: employment.employment,
+    employment:
+      actingLeftJob && employment.employment.job
+        ? {
+            ...employment.employment,
+            job: undefined,
+            history: [
+              ...employment.employment.history,
+              {
+                jobId: employment.employment.job.jobId,
+                from: employment.employment.job.since,
+                to: nextAge,
+                because: 'resigned' as const,
+              },
+            ],
+          }
+        : employment.employment,
     // Ticket 0211. A pending decision is DISCARDED on the year somebody dies:
     // a question the character will never answer is not a question, and
     // `advanceYear` already refuses to run while one is open, so leaving it
@@ -1280,8 +1366,9 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0701. Channels and fame after the year.
     channels: creatorsYear.channels,
     // Ticket 0801. Being a pro holds fame up while it lasts; afterwards it fades as any fame does.
-    fame: Math.max(creatorsYear.fame, sportsYear.fame),
+    fame: Math.max(creatorsYear.fame, sportsYear.fame, actingYear.fame),
     sports: sportsYear.sports,
+    acting: actingYear.acting,
     // Ticket 0504. The same short year puts a financed car behind.
     vehicles: markVehiclesMissed(
       vehiclesYear.vehicles,
@@ -1381,7 +1468,10 @@ export function advanceYear(state: GameState): AdvanceResult {
                 withCollegeOffer(
                   // Ticket 0801. Innermost: the scholarship is the question that year, and
                   // `hasSystemicOffer` keeps the generic college offer behind it.
-                  withSportsOffer(repossess(foreclose(next)), health.alive),
+                  withActingOffer(
+                    withSportsOffer(repossess(foreclose(next)), health.alive),
+                    health.alive,
+                  ),
                   health.alive,
                 ),
                 health.alive,

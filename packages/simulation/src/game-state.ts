@@ -48,6 +48,7 @@ import {
   type RetirementState,
 } from '@yearafter/finance';
 import { EMPTY_CELEBRITIES, type CelebrityState } from './celebrity-state';
+import { EMPTY_ACTING, type ActingState } from './acting-state';
 import { EMPTY_SPORTS, type SportsState } from './sports-state';
 import { Rng } from './rng/rng';
 
@@ -320,6 +321,11 @@ export interface GameState {
    * sport is asking. Always present from v44.
    */
   readonly sports: SportsState;
+  /**
+   * Ticket 0805. An acting life: the rung work is coming in at, the parts on the table and booked, an agent,
+   * lessons, a reputation. Always present from v47.
+   */
+  readonly acting: ActingState;
   /** Live RNG registry. Serialised into the save on every write. */
   readonly rng: Rng;
 }
@@ -487,7 +493,9 @@ export const hasSystemicOffer = (state: GameState): boolean =>
   state.vehicleOffer !== undefined ||
   state.renovationOffer !== undefined ||
   // Ticket 0801. A scholarship or a contract the sport is asking about.
-  state.sports.offer !== undefined;
+  state.sports.offer !== undefined ||
+  // Ticket 0805. A part somebody wants the actor for.
+  state.acting.offers.length > 0;
 
 export const createWorldState = (year: number, generation = 1): WorldState => ({
   year,
@@ -531,6 +539,7 @@ export interface CreateGameStateOptions {
   readonly representation?: Representation;
   readonly celebrities?: CelebrityState;
   readonly sports?: SportsState;
+  readonly acting?: ActingState;
 }
 
 export const createGameState = (
@@ -576,6 +585,7 @@ export const createGameState = (
   ...(options.representation !== undefined ? { representation: options.representation } : {}),
   celebrities: options.celebrities ?? EMPTY_CELEBRITIES,
   sports: options.sports ?? EMPTY_SPORTS,
+  acting: options.acting ?? EMPTY_ACTING,
   pending: options.pending ?? [],
   rng,
 });

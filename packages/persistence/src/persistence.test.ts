@@ -2176,7 +2176,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(46);
+    expect(CURRENT_SAVE_VERSION).toBe(47);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {
@@ -2543,6 +2543,119 @@ describe('Ticket 0406 — a question survives being saved', () => {
       eventId: 'sports.offer',
     };
     expect(migrateSave({ ...raw, sports: { past: [], offer: orphan } }).ok).toBe(false);
+  });
+
+  it('opens a v46 save with an empty acting life and moves only the version (0805)', () => {
+    const { save } = newSave('ACTING-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.acting;
+    old.version = 46;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.acting).toEqual({
+      stageYears: 0,
+      credits: 0,
+      tier: 'local',
+      hits: 0,
+      reputation: 0,
+      awards: 0,
+      idle: 0,
+      offers: [],
+      booked: [],
+      applied: [],
+    });
+  });
+
+  it('round-trips an acting life: an agent, lessons, offers on the table and booked parts (0805)', () => {
+    const { save } = newSave('ACTING-ROUND');
+    const base = fromSave(save);
+    const offer = {
+      id: '24:1',
+      tier: 'supporting' as const,
+      billing: 'supporting' as const,
+      medium: 'a feature film',
+      title: 'Salt Flats',
+      fee: 42_000,
+      days: 22,
+      source: 'applied' as const,
+      age: 24,
+      asked: true,
+    };
+    const booked = {
+      id: '23:0',
+      tier: 'working' as const,
+      billing: 'bit' as const,
+      medium: 'a small TV role',
+      title: 'Low Tide',
+      fee: 3_200,
+      days: 3,
+      age: 23,
+      bookedAge: 23,
+    };
+    const acting = {
+      craft: 66,
+      stageYears: 4,
+      seenAge: 23,
+      credits: 11,
+      tier: 'supporting' as const,
+      best: 'supporting' as const,
+      hits: 2,
+      reputation: 31,
+      awards: 1,
+      idle: 0,
+      agent: { since: 22 },
+      lessons: { since: 18, seasons: 5 },
+      devAtAge: 24,
+      devCount: 2,
+      offers: [offer],
+      booked: [booked],
+      appliedAge: 24,
+      applied: ['call:24:0'],
+    };
+    const state: GameState = { ...base, acting };
+    expect(fromSave(toSave(state, { id: save.id })).acting).toEqual(acting);
+  });
+
+  it('refuses an acting life that is not sound (0805)', () => {
+    const { save } = newSave('ACTING-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const good = raw.acting;
+    expect(migrateSave({ ...raw, acting: good }).ok).toBe(true);
+    const part = {
+      id: 'x',
+      tier: 'local',
+      billing: 'lead',
+      medium: 'a student film',
+      title: 'Paper Boats',
+      fee: 0,
+      days: 6,
+      age: 20,
+    };
+    const bad = [
+      null,
+      [],
+      { ...good, tier: 'legend' },
+      { ...good, best: 'legend' },
+      { ...good, credits: -1 },
+      { ...good, credits: 1.5 },
+      { ...good, reputation: 101 },
+      { ...good, craft: 120 },
+      { ...good, agent: { since: 'x' } },
+      { ...good, lessons: { since: 12 } },
+      { ...good, applied: [3] },
+      { ...good, offers: [{ ...part, source: 'asked', billing: 'villain' }] },
+      { ...good, offers: [{ ...part }] },
+      { ...good, booked: [{ ...part }] },
+    ];
+    for (const row of bad) {
+      expect(migrateSave({ ...raw, acting: row }).ok, JSON.stringify(row)).toBe(false);
+    }
+  });
+
+  it('is at version 47 (0805)', () => {
+    expect(CURRENT_SAVE_VERSION).toBe(47);
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {

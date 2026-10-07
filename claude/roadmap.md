@@ -615,7 +615,8 @@ built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sport
 | **0802 The other team sports**              | **DONE (engine).** Football, baseball, soccer and hockey as rows on the 0801 engine: their own leagues, teams, five skills each, positions (a label, derived, never saved), real league minimums at the bottom of each pay ladder, draft sizes (224, 600, 90, 224), career ends and injury factors (football ×1.6 breaks most). Baseball and hockey school teams added. A life on two teams follows the sport it has been playing, else the one it is best at. Same odds as basketball; measured within a few points in every sport. **No save change** (still v44). No screens (0809). |
 | **0803 Individual sports and combat**       | **DONE (engine).** Golf and tennis (school team, scholarship, college, then a tour card and prize money), boxing and MMA (six martial arts studied from ten, three seasons, then a gym puts you on a card at 18–30), all on the 0801 engine with a `format` of team, tour or combat. Fights are decided by skill, not a minigame: a hash per fight against a logistic on form, luck moving a rung. Reaching the pros matches Payton's table; the star share runs above it (finding 97). **Save v45** (Agent B: v46+). No screens (0809).                                                |
 | **0804 Olympics, coaching and commentary**  | **DONE (engine).** Track and field, swimming, gymnastics, wrestling and amateur boxing, studied as a discipline from ten and joined as a national program at 16+, with a Games every fourth year, medals that pay a prize and a sponsorship, and after any career in 0801–0804 a coaching or commentary post whose level the career earned. **Save v46** (Agent B: v47+). No screens (0809).                                                                                                                                                                                            |
-| 0805–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **0805 Acting**                             | **DONE (engine).** Six rungs of acting work from student films to prestige pictures; every part is a lead, a supporting part or a bit part, and is offered to a seen actor or applied for from six casting calls a year (an agent helps and is never needed); lessons, character development, Take / Ask for more / Pass, awards, fame, and the Talent Agency business. **Save v47** (Agent B: v48+). No screens (0809). |
+| 0806–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -1459,7 +1460,25 @@ golf and tennis add about five of twenty-four. A passive life does not start an 
 
 **112. Careers are still long.** Median seasons 11–22 across the five sports.
 
-**113. 0804 took save v46.** Agent B's saves are v47 and onward.
+**113. 0804 took save v46.** Agent B's saves are v47 and onward (0805 then took v47: see 121).
+
+### 0805 findings (114–121)
+
+**114. The ladder above the SAG floor is a game ladder.** Real: SAG-AFTRA day $1,283 and weekly $4,456, BLS actors median $29.05 an hour. The rest of the fee ranges are mine.
+
+**115. Stars are far too common for real life** (23–28% of the talented and committed) and about right for a game that rewards a talent and effort. Dials: `minCraft`, `HITS_TO_RISE.lead`, the star slots.
+
+**116. There is no age cap on rising,** only a thinning of offers from 55. A first-timer of 48 reached lead in a passive life.
+
+**117. Passive lives now sometimes become actors:** 21% of first-answer lives get a credit; 5% reach lead.
+
+**118. The Talent Agency is a catalog row only** (32 business types; two pinned test expectations moved).
+
+**119. Taking every offer makes careers of 150–240 credits.**
+
+**120. Acting for a living ends a day job,** as playing does: from supporting with recent work the header is "Actor", job offers stop and a held job ends with a line. `pnpm verify` found the first version leaving the job (header and death screen disagreed).
+
+**121. 0805 took save v47.** Agent B's saves are v48 and onward. See `claude/0805-acting.md`.
 
 ## Suggested order
 
@@ -1514,5 +1533,5 @@ Agent A's next ticket.
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
 
 12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, 0802 The
-    other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary shipped as engines only; Payton chose screens in 0809.
+    other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting shipped as engines only; Payton chose screens in 0809.
     Next is chosen by Payton.)_
