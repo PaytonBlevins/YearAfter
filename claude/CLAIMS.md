@@ -45,4 +45,4 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | P2 Living costs and lifestyle tiers | — | Codex / Agent B (`feat/playtest-p2-living-costs`) | built with approved curve, tiers and car allowance; save v45; stacked on P1 pending merge; 2,567 tests and 29 sabotages pass; baseline content/format blockers recorded; PR #14 targets main, depends on P1 PR #13 |
 | v45 | Codex / Agent B | P2 living costs and lifestyle tiers; migration and tests built after P1 v44 |
 
-| P3 Social media success rates | — | Codex / Agent B (`feat/playtest-p3-social-success`) | claimed with Payton’s go-ahead; measure manual-posting lives first; stacked on P2 while main is beff25a; no save version reserved |
+| P3 Social media success rates | — | Codex / Agent B (`feat/playtest-p3-social-success`) | claimed and measured; rank lifts plus mature-account/viral settlement proposal await Payton’s decision; stacked on P2 while main is beff25a; no production balance or save change |

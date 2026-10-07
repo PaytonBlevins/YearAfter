@@ -1449,3 +1449,18 @@ no calibration claim against BLS is made. See `claude/playtest-p1-business-rescu
 **Found by P1:** Other personal debts and division of the estate remain 0508 work;
 P1 only nets debt of closed businesses from liquid inheritance, without building wills.
 Native device checks remain pending. P2 awaits Payton's go-ahead.
+
+### Found by P3 — measurement and proposal pending
+
+- **B6 is not uniformly low.** Manual discovery lets persistent accounts reach small monetization
+  gates. Lifetime success must be separated from early income and full-time earnings.
+- **A six-year check misses mature viral compounding.** The generated-life TikTok four-post
+  policy reaches the $30,000 creator-income benchmark in 83% of the shared-calendar sample;
+  varied calendars give 40%, against 8% for twelve posts. Posting less preserves viral spikes
+  because annual negative drift scales with post count, and the year grants a second viral roll
+  beyond the explicit posts. Its key also omits the life seed. An isolated correction removes
+  the reversed incentive; implementation awaits the measured P3 proposal decision.
+- **Findings 64/69:** preserve Payton’s small-audience fame anchors. Proposed new-account rank
+  lifts are video/photo 3, stream/podcast 5, short-form 3, subscription 2, including the existing
+  platform aliases. Source curves and top-quarter fade stay. Existing saved luck stays fixed.
+  Full measurement, limitations and next work: `playtest-p3-social-success.md`. P3 is not complete.
