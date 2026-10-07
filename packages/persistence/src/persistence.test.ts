@@ -2176,7 +2176,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(44);
+    expect(CURRENT_SAVE_VERSION).toBe(45);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {
@@ -2291,6 +2291,125 @@ describe('Ticket 0406 — a question survives being saved', () => {
     for (const sports of bad) {
       const result = migrateSave({ ...raw, sports });
       expect(result.ok, JSON.stringify(sports)).toBe(false);
+    }
+  });
+
+  it('opens a v44 save as it is, with no arts and no record, and moves only the version (0803)', () => {
+    const { save } = newSave('ARTS-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    old.sports = { past: [], career: { ...CAREER } };
+    old.version = 44;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.sports).toEqual({ past: [], career: CAREER });
+    expect('arts' in result.value.sports).toBe(false);
+    expect(result.value.celebrities).toEqual(save.celebrities);
+  });
+
+  it('round-trips the arts being studied, a fighter’s record, and the two new questions (0803)', () => {
+    const { save } = newSave('ARTS-ROUND');
+    const base = fromSave(save);
+    const arts = [
+      {
+        artId: 'boxing',
+        startedAge: 10,
+        seasons: 5,
+        hardSeasons: 4,
+        level: 61,
+        trainedAtAge: 15,
+        trainedCount: 2,
+      },
+      {
+        artId: 'bjj',
+        startedAge: 12,
+        seasons: 3,
+        hardSeasons: 1,
+        level: 44,
+        trainedAtAge: -1,
+        trainedCount: 0,
+      },
+    ];
+    const career = {
+      sportId: 'mma',
+      stage: 'pro' as const,
+      startedAge: 10,
+      seasons: 14,
+      hardSeasons: 9,
+      form: 71,
+      trainedAtAge: 22,
+      trainedCount: 1,
+      reputation: 30,
+      titles: 1,
+      team: 'Harbor Street Gym',
+      tier: 'star' as const,
+      best: 'star' as const,
+      proSeasons: 6,
+      wins: 19,
+      losses: 4,
+    };
+    const past = {
+      sportId: 'boxing',
+      startedAge: 10,
+      endedAge: 34,
+      seasons: 24,
+      titles: 2,
+      reputation: 55,
+      reached: 'pro' as const,
+      bestTier: 'star' as const,
+      wins: 31,
+      losses: 5,
+      how: 'retired' as const,
+    };
+    const state: GameState = { ...base, sports: { arts, career, past: [past] } };
+    const again = fromSave(toSave(state, { id: save.id }));
+    expect(again.sports).toEqual(state.sports);
+    for (const offer of [
+      { kind: 'tour-card', sportId: 'golf', age: 22, eventId: 'sports.offer' },
+      {
+        kind: 'turn-pro',
+        sportId: 'boxing',
+        team: 'Ironbridge Fight Club',
+        age: 18,
+        eventId: 'sports.offer',
+      },
+    ] as const) {
+      const withOffer: GameState = { ...base, sports: { past: [], career: { ...CAREER }, offer } };
+      expect(fromSave(toSave(withOffer, { id: save.id })).sports.offer).toEqual(offer);
+      expect(migrateSave(JSON.parse(JSON.stringify(toSave(withOffer, { id: save.id })))).ok).toBe(
+        true,
+      );
+    }
+  });
+
+  it('refuses a save whose arts are not a list of at most two sound studies (0803)', () => {
+    const { save } = newSave('ARTS-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const study = {
+      artId: 'boxing',
+      startedAge: 10,
+      seasons: 2,
+      hardSeasons: 1,
+      level: 33,
+      trainedAtAge: -1,
+      trainedCount: 0,
+    };
+    expect(migrateSave({ ...raw, sports: { past: [], arts: [study] } }).ok).toBe(true);
+    expect(migrateSave({ ...raw, sports: { past: [], arts: [] } }).ok).toBe(true);
+    const bad: unknown[] = [
+      'boxing',
+      [null],
+      [{ ...study, artId: 7 }],
+      [{ ...study, level: 'high' }],
+      [{ ...study, level: Number.NaN }],
+      [{ ...study, seasons: 1.5 }],
+      [{ ...study, hardSeasons: 'many' }],
+      [study, { ...study, artId: 'bjj' }, { ...study, artId: 'karate' }],
+    ];
+    for (const arts of bad) {
+      const result = migrateSave({ ...raw, sports: { past: [], arts } });
+      expect(result.ok, JSON.stringify(arts)).toBe(false);
     }
   });
 

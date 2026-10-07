@@ -58,6 +58,37 @@ export interface SportCareer {
   readonly endAge?: number;
   readonly pick?: number;
   readonly contract?: ProContract;
+  /**
+   * Fighters only (ticket 0803): the professional record. Whole bouts, as a fight card counts them;
+   * absent on every other career and read as none. `titles` is the belts.
+   */
+  readonly wins?: number;
+  readonly losses?: number;
+  /**
+   * Individual sports only: the best tier this career has reached. A team career knows its best
+   * from the `peak` it was drafted at; a tour or a fight card has no such ceiling, so the best is
+   * kept as it is earned.
+   */
+  readonly best?: CareerTier;
+}
+
+/**
+ * A martial art being studied (ticket 0803), from age ten. The road to boxing and MMA runs through
+ * these: three seasons in a base art is what a gym needs to see (`fightCareerFor` in content).
+ * The level is readable only while the art is studied (spec 9 and 343).
+ */
+export interface ArtStudy {
+  readonly artId: string;
+  readonly startedAge: number;
+  /** Years studied, this one included once it has run. */
+  readonly seasons: number;
+  /** Years in which at least two of the three practice sessions went in. */
+  readonly hardSeasons: number;
+  /** How good, 0–100. */
+  readonly level: number;
+  /** The age practice was last put in, and the sessions that year. At most three. */
+  readonly trainedAtAge: number;
+  readonly trainedCount: number;
 }
 
 /** What is kept of a career once it is over: for the life page now, and for coaching and commentary access later (0804). */
@@ -72,7 +103,20 @@ export interface PastCareer {
   readonly reached: SportStage;
   /** The best tier, if the pros were reached. */
   readonly bestTier?: CareerTier;
-  readonly how: 'declined' | 'left-college' | 'undrafted' | 'retired' | 'injury' | 'unsigned';
+  readonly how:
+    | 'declined'
+    | 'left-college'
+    | 'undrafted'
+    | 'retired'
+    | 'injury'
+    | 'unsigned'
+    /** A tour player who lost their card (ticket 0803). */
+    | 'lost-card'
+    /** A fighter the gym stopped booking (ticket 0803). */
+    | 'released';
+  /** Fighters: the record at the end. Absent otherwise. */
+  readonly wins?: number;
+  readonly losses?: number;
 }
 
 /** A question the sport is asking. Frozen when it was raised (the 0402 lesson). */
@@ -102,9 +146,26 @@ export type SportsOffer =
       readonly asked: boolean;
       readonly age: number;
       readonly eventId: string;
+    }
+  | {
+      /** Golf and tennis (ticket 0803): the right to play the tour. Prize money, and nothing else. */
+      readonly kind: 'tour-card';
+      readonly sportId: string;
+      readonly age: number;
+      readonly eventId: string;
+    }
+  | {
+      /** Boxing and MMA (ticket 0803): a gym will put you on a card. */
+      readonly kind: 'turn-pro';
+      readonly sportId: string;
+      readonly team: string;
+      readonly age: number;
+      readonly eventId: string;
     };
 
 export interface SportsState {
+  /** Martial arts being studied (ticket 0803). Absent is none; at most two at a time. */
+  readonly arts?: readonly ArtStudy[];
   readonly career?: SportCareer;
   readonly past: readonly PastCareer[];
   readonly offer?: SportsOffer;

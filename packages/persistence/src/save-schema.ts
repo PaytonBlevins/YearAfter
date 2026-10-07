@@ -50,7 +50,7 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 44;
+export const CURRENT_SAVE_VERSION = 45;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -87,6 +87,12 @@ export type { WorldState };
  * could let anything, so the migration has nothing to write; the version is
  * bumped so a build that cannot read a tenant refuses the save rather than
  * dropping them.
+ *
+ * v45 added the individual sports (Ticket 0803): `sports.arts` — the martial arts being studied —
+ * a fighter's `wins` and `losses` on a career and on a past one, and two more questions a sport
+ * can ask (a tour card and a gym's offer). All optional and nothing before could write one, so the
+ * migration only bumps the version; the version is bumped so a build that cannot read an art
+ * refuses the save rather than dropping it.
  *
  * v44 added `sports` — the sporting career in progress, the ones that ended, and a question the
  * sport is asking (Ticket 0801). Every save before it has played no sport past school, so the
@@ -188,7 +194,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 44;
+  readonly version: 45;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;

@@ -35,11 +35,9 @@ import {
 import {
   BASE_TITLE_CHANCE,
   BREAKOUT_YEARS,
-  CAREER_ENDING_SHARE,
   COLLEGE_INJURY_CHANCE,
   HARD_WORK_SESSIONS,
   PRO_INJURY_CHANCE,
-  SERIOUS_SHARE,
   SERIOUS_TIER_LOSS_CHANCE,
   TIER_FAME,
   TIER_REPUTATION,
@@ -50,7 +48,6 @@ import {
   draftPickFor,
   findSport,
   isHardWorker,
-  naturalForm,
   peakTierFor,
   recruitChance,
   rookiePay,
@@ -62,7 +59,7 @@ import {
   stepTier,
   type Sport,
 } from '@yearafter/content';
-import { err, mixedUnit, ok, stablePick, type Result } from '@yearafter/core';
+import { err, ok, stablePick, type Result } from '@yearafter/core';
 import {
   PRACTICE_SESSIONS,
   findMajor,
@@ -76,6 +73,33 @@ import type { GameState } from './game-state';
 import { cannotEnrol } from './college';
 import { resign } from './careers';
 import type { CareerTier, PastCareer, SportCareer, SportsOffer, SportsState } from './sports-state';
+import {
+  addSportsRecord,
+  isFullTime,
+  runArtsYear,
+  runIndividualSeason,
+  trainingCeiling,
+  tourCardOffer,
+  turnProOffer,
+  withoutBase,
+} from './sports-individual';
+import {
+  COLLEGE_SERIOUS_LINES,
+  MINOR_INJURY_LINES,
+  SERIOUS_LINES,
+  bestTierOf,
+  healthAdjusted,
+  injuryOf,
+  money,
+  nextForm,
+  pick,
+  positionIn,
+  sportUnit,
+  tierRank,
+  tierWords,
+} from './sports-core';
+
+export { positionIn, sportUnit } from './sports-core';
 
 /** The reserved event id a sports question is raised under. */
 export const SPORTS_OFFER_EVENT_ID = 'sports.offer';
@@ -90,13 +114,6 @@ export const DECLINE = 'decline';
 /* -------------------------------------------------------------------------- */
 /* Draws                                                                       */
 /* -------------------------------------------------------------------------- */
-
-/** A [0, 1) draw about one life, keyed on the seed and a name. No RNG stream is touched. */
-export const sportUnit = (
-  seed: string,
-  generation: number,
-  ...parts: readonly (string | number)[]
-): number => mixedUnit(`sport:${seed}:${generation}:${parts.join(':')}`);
 
 /* -------------------------------------------------------------------------- */
 /* Reading a career                                                            */
@@ -130,16 +147,6 @@ export function skillsOf(
   }));
 }
 
-/**
- * The position a life plays, a label only (0802): drawn from the sport's list by
- * a hash of the life, so it is the same every time, costs no save field, and
- * has no effect on the odds, the pay or the skills.
- */
-export function positionIn(seed: string, generation: number, sport: Sport): string {
-  const list = sport.positions;
-  return list[Math.floor(sportUnit(seed, generation, 'position', sport.id) * list.length)] ?? '';
-}
-
 /** The position of whoever is playing now, or none. For a screen's header. */
 export function positionOf(state: GameState): string | undefined {
   const career = state.sports.career;
@@ -156,6 +163,8 @@ export function careerLabel(career: SportCareer): string {
   const sport = findSport(career.sportId);
   const name = sport?.noun ?? 'sport';
   if (career.stage === 'pro') {
+    // A tour has no club to name: the circuit is the label (ticket 0803).
+    if (sport?.format === 'tour') return sport.league;
     return career.team ? `${career.team}, ${name}` : `Professional ${name}`;
   }
   if (career.stage === 'college')
@@ -173,8 +182,9 @@ export function sportsFameOf(career: SportCareer | undefined): number {
 
 /** The header, for somebody who plays for a living. */
 export function sportsOccupation(career: SportCareer | undefined): string | undefined {
-  if (career?.stage !== 'pro') return undefined;
-  return findSport(career.sportId)?.playerTitle;
+  // A club fighter has a day job, and it is still what the header says (ticket 0803).
+  if (!isFullTime(career)) return undefined;
+  return findSport(career!.sportId)?.playerTitle;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -202,13 +212,15 @@ export function trainSport(
   const done = career.trainedAtAge === age ? career.trainedCount : 0;
   if (done >= PRACTICE_SESSIONS) return err('no-sessions-left');
   const gain = practiceGain(state.player.stats, career.form, done);
+  const sport = findSport(career.sportId);
+  // Work lifts an individual player only so far (ticket 0803); a team player's practice is as it was.
+  const ceiling = sport && sport.format !== 'team' ? trainingCeiling(state) : 100;
   const next: SportCareer = {
     ...career,
-    form: Math.min(100, career.form + gain),
+    form: Math.min(Math.max(career.form, ceiling), career.form + gain),
     trainedAtAge: age,
     trainedCount: done + 1,
   };
-  const sport = findSport(career.sportId);
   const sequence = state.player.timeline.filter((row) => row.age === age).length;
   const entry = createTimelineEntry({
     age,
@@ -240,6 +252,8 @@ export interface SportsYearInput {
   /** The age and the year being reached. */
   readonly age: number;
   readonly year: number;
+  /** The household's standard of living, whole dollars: what an adult's gym dues are weighed against. */
+  readonly standard?: number;
 }
 
 export interface SportsYearLine {
@@ -258,6 +272,9 @@ export interface SportsYearOutput {
   /** What a stat gets from the year: a title is a lift, a serious injury a blow. */
   readonly mood: number;
   readonly health: number;
+  /** Ticket 0803. An adult's martial-arts dues for the year, whole dollars, and what they were for. */
+  readonly fees: number;
+  readonly feeSource: string;
 }
 
 const NONE: SportsYearOutput = {
@@ -268,20 +285,9 @@ const NONE: SportsYearOutput = {
   fame: 0,
   mood: 0,
   health: 0,
+  fees: 0,
+  feeSource: '',
 };
-
-const money = (dollars: number): string => {
-  if (dollars >= 1_000_000) {
-    const millions = dollars / 1_000_000;
-    return `$${millions >= 10 ? Math.round(millions) : Math.round(millions * 10) / 10} million`;
-  }
-  return `$${Math.round(dollars).toLocaleString('en-US')}`;
-};
-
-/** CORE_RULES 13.22: the base holds still for the life, the key moves it. */
-function pick(lines: readonly string[], key: string): string {
-  return stablePick(lines, key) ?? lines[0] ?? '';
-}
 
 export function runSportsYear(input: SportsYearInput): SportsYearOutput {
   const { before, education, age, year } = input;
@@ -308,8 +314,9 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
         reputation: ended.reputation,
         reached: ended.stage,
         ...(ended.stage === 'pro' && ended.tier !== undefined
-          ? { bestTier: bestTierOf(ended) }
+          ? { bestTier: ended.best ?? bestTierOf(ended) }
           : {}),
+        ...(ended.wins !== undefined ? { wins: ended.wins, losses: ended.losses ?? 0 } : {}),
         how,
       };
       sports = { ...sports, past: [...sports.past, past] };
@@ -317,16 +324,36 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
     career = undefined;
   };
 
+  /* ---- martial arts: every art studied has its year (ticket 0803) -------- */
+  const artsYear = runArtsYear(
+    before,
+    age,
+    year,
+    input.standard ?? 0,
+    before.household.housing === 'withFamily',
+  );
+  for (const text of artsYear.lines) lines.push({ kind: 'passive', text });
+  if (artsYear.arts.length > 0) {
+    sports = { ...sports, arts: artsYear.arts };
+  } else {
+    const { arts: _stopped, ...withoutArts } = sports;
+    sports = withoutArts;
+  }
+  // An amateur fighter is a career waiting on an answer, not a school team to be walked away from.
+  const amateur = career?.stage === 'school' && findSport(career.sportId)?.format === 'combat';
+
   /* ---- school: on the team, and what graduating from it brings ---------- */
   if (career === undefined || career.stage === 'school') {
     /*
       A player can be on more than one team (ticket 0802 made five sports real). The road follows the
       one they have been playing, and when they have not started one yet, the one they are best at.
     */
-    const teams = before.education.activities.flatMap((row) => {
-      const found = sportOfActivity(row.activityId);
-      return found ? [{ row, found }] : [];
-    });
+    const teams = amateur
+      ? []
+      : before.education.activities.flatMap((row) => {
+          const found = sportOfActivity(row.activityId);
+          return found ? [{ row, found }] : [];
+        });
     const held =
       career?.stage === 'school'
         ? teams.find((team) => team.found.id === career?.sportId)
@@ -371,7 +398,7 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
           career = undefined;
         }
       }
-    } else if (career?.stage === 'school') {
+    } else if (career?.stage === 'school' && !amateur) {
       // They stopped playing, or were cut. The seasons were real; no road came of them.
       career = undefined;
     }
@@ -406,7 +433,11 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
       health -= 3;
     }
     if (!stillThere && sport) {
-      const drafted = draftOffer(before, career, sport, age);
+      // A tour has no draft: the same table decides who is let in (ticket 0803).
+      const drafted =
+        sport.format === 'tour'
+          ? tourCardOffer(before, career, sport, age)
+          : draftOffer(before, career, sport, age);
       if (drafted) {
         career = drafted.career;
         sports = { ...sports, offer: drafted.offer };
@@ -423,6 +454,20 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
         });
         finish(how, career);
       }
+    }
+  } else if (career.stage === 'pro' && findSport(career.sportId)?.format !== 'team') {
+    /* ---- a tour or a fight card: results decide the year (ticket 0803) -- */
+    const sport = findSport(career.sportId);
+    if (sport) {
+      const season = runIndividualSeason({ before, career, sport, age, year });
+      career = season.career;
+      pay = season.pay;
+      mood += season.mood;
+      health += season.health;
+      lines.push(...season.lines);
+      records.push(...season.records);
+      fame = sportsFameOf(career);
+      if (season.ended) finish(season.ended, career);
     }
   } else if (career.stage === 'pro' && career.contract && career.tier && career.peak) {
     /* ---- the pros: a season, then whatever it left ----------------------- */
@@ -518,38 +563,39 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
     }
   }
 
+  /* ---- a gym wants you (ticket 0803): boxing and MMA have no team to be cut from ---- */
+  if (career === undefined && sports.offer === undefined) {
+    const found = turnProOffer(before, age, artsYear.arts);
+    if (found) {
+      career = found.career;
+      sports = { ...sports, offer: found.offer };
+      lines.push({ kind: 'milestone', text: found.line });
+    }
+  }
+
   const playing = career;
   sports = { ...sports, ...(playing ? { career: playing } : {}) };
   if (!playing) {
     const { career: _gone, ...rest } = sports;
     sports = rest;
   }
-  return { ...NONE, sports, lines, records, pay, fame, mood, health };
+  return {
+    ...NONE,
+    sports,
+    lines,
+    records,
+    pay,
+    fame,
+    mood,
+    health,
+    fees: artsYear.cost,
+    feeSource: artsYear.costSource,
+  };
 }
 
 /* -------------------------------------------------------------------------- */
 /* Pieces of the year                                                          */
 /* -------------------------------------------------------------------------- */
-
-const tierRank = (tier: CareerTier): number =>
-  (['fringe', 'role', 'starter', 'star', 'superstar'] as const).indexOf(tier);
-
-const tierWords = (tier: CareerTier): string =>
-  ({
-    fringe: 'on the edge of the roster',
-    role: 'a role player',
-    starter: 'a starter',
-    star: 'a star',
-    superstar: 'a superstar',
-  })[tier];
-
-function bestTierOf(career: SportCareer): CareerTier {
-  // The peak is what the career reached, so long as it got there; a career cut short is what it was.
-  if (!career.peak) return career.tier ?? 'fringe';
-  return (career.proSeasons ?? 0) >= (career.breakout ?? 1)
-    ? career.peak
-    : (career.tier ?? 'fringe');
-}
 
 /** Where a pro career is by season. A rookie is a step below, the end of a career a step down again. */
 export function tierAt(
@@ -561,35 +607,6 @@ export function tierAt(
 ): CareerTier {
   const risen = proSeasons >= breakout ? peak : stepTier(peak, -1);
   return age >= endAge - 2 ? stepTier(risen, -1) : risen;
-}
-
-function healthAdjusted(chance: number, health: number): number {
-  return Math.max(0.03, Math.min(0.4, chance + (50 - health) * 0.0015));
-}
-
-type Injury = 'none' | 'minor' | 'serious' | 'ending';
-
-function injuryOf(seed: string, gen: number, year: number, chance: number): Injury {
-  if (sportUnit(seed, gen, 'injury', year) >= chance) return 'none';
-  const severity = sportUnit(seed, gen, 'severity', year);
-  if (severity < CAREER_ENDING_SHARE) return 'ending';
-  if (severity < CAREER_ENDING_SHARE + SERIOUS_SHARE) return 'serious';
-  return 'minor';
-}
-
-/** How good they are next year: a pull towards what health and discipline allow, and the years catching up. */
-function nextForm(before: GameState, career: SportCareer, age: number): number {
-  const natural = naturalForm(
-    before.player.stats.health,
-    before.player.stats.discipline,
-    before.player.talents.athletics,
-  );
-  const pull = natural > career.form ? 0.3 : 0.1;
-  const ageing = career.stage === 'pro' ? Math.max(0, age - 30) * 1.2 : 0;
-  return Math.max(
-    0,
-    Math.min(100, Math.round(career.form + (natural - career.form) * pull - ageing)),
-  );
 }
 
 /** The question graduating from a school team asks, if it is asked at all. */
@@ -748,6 +765,14 @@ function offerPrompt(offer: SportsOffer): string {
     const cover = offer.cover === 'full' ? 'a full' : 'a partial';
     return `${offer.team} want you. ${cover[0]!.toUpperCase()}${cover.slice(1)} ${sport?.noun ?? 'sports'} scholarship — ${money(offer.aid)} a year towards ${major?.name.toLowerCase() ?? 'a degree'}.`;
   }
+  if (offer.kind === 'tour-card') {
+    const sport = findSport(offer.sportId);
+    return `The ${sport?.league ?? 'tour'} has a card for you. No salary and no team: prize money, and whatever the results earn.`;
+  }
+  if (offer.kind === 'turn-pro') {
+    const sport = findSport(offer.sportId);
+    return `${offer.team} will put you on a ${sport?.noun ?? 'fight'} card. The first purses are small, and the rest of your life stays where it is.`;
+  }
   const years = `${offer.years} ${offer.years === 1 ? 'year' : 'years'}`;
   if (offer.rookie) {
     return `The ${offer.team} will sign you: ${money(offer.salary)} a year for ${years}.${offer.asked ? ' You have already asked once.' : ''}`;
@@ -760,6 +785,18 @@ function offerChoices(offer: SportsOffer): PendingDecision['choices'] {
     return [
       { id: ACCEPT, label: 'Take the scholarship' },
       { id: DECLINE, label: 'Turn it down' },
+    ];
+  }
+  if (offer.kind === 'tour-card') {
+    return [
+      { id: ACCEPT, label: 'Take the card' },
+      { id: DECLINE, label: 'Turn it down' },
+    ];
+  }
+  if (offer.kind === 'turn-pro') {
+    return [
+      { id: ACCEPT, label: 'Turn pro' },
+      { id: DECLINE, label: 'Stay an amateur' },
     ];
   }
   return [
@@ -926,6 +963,85 @@ export function answerSportsOffer(
     });
   }
 
+  /* ---- the tour card, or a gym's offer (ticket 0803) ----------------- */
+  if (offer.kind === 'tour-card' || offer.kind === 'turn-pro') {
+    const proTour = offer.kind === 'tour-card';
+    if (choiceId === DECLINE) {
+      const past: PastCareer = {
+        sportId: career.sportId,
+        startedAge: career.startedAge,
+        endedAge: offer.age,
+        seasons: career.seasons,
+        titles: 0,
+        reputation: career.reputation,
+        reached: proTour ? 'college' : 'school',
+        how: 'declined',
+        ...(proTour ? {} : { wins: 0, losses: 0 }),
+      };
+      const { career: _c, ...without } = sportsRest;
+      return settle(
+        { ...without, past: [...sportsRest.past, past] },
+        proTour
+          ? `Turned down the ${sport?.leagueShort ?? 'tour'} card.`
+          : `Turned down ${offer.kind === 'turn-pro' ? offer.team : 'the gym'} and stayed an amateur.`,
+        'milestone',
+        proTour ? 'tour:no' : 'pro:no',
+      );
+    }
+    // A tour has no club: the college the player came from stops being their team the day they leave it.
+    const { team: _college, ...careerNoTeam } = career;
+    const signed: SportCareer = {
+      ...(proTour ? careerNoTeam : career),
+      stage: 'pro',
+      tier: 'fringe',
+      proSeasons: 0,
+      ...(offer.kind === 'turn-pro' ? { team: offer.team, wins: 0, losses: 0 } : {}),
+    };
+    // Playing for a living ends the day job. A club fighter's purses are not a living, and the job stays.
+    const living = isFullTime(signed);
+    const left = living && state.employment.job !== undefined ? resign(state) : undefined;
+    const base: GameState = left?.ok
+      ? {
+          ...left.value.state,
+          player: {
+            ...left.value.state.player,
+            timeline: left.value.state.player.timeline.filter(
+              (row) => row.id !== left.value.entry.id,
+            ),
+          },
+        }
+      : state;
+    const arts = sport ? withoutBase(sportsRest.arts ?? [], sport) : (sportsRest.arts ?? []);
+    const { arts: _used, ...restNoArts } = sportsRest;
+    const text = proTour
+      ? `Took the ${sport?.leagueShort ?? 'tour'} card.${left?.ok ? ' That was the end of the day job.' : ''}`
+      : `Signed with ${offer.kind === 'turn-pro' ? offer.team : 'the gym'}. The first fight is in the spring.${left?.ok ? ' That was the end of the day job.' : ''}`;
+    const written = withEntry(base, offer, text, 'milestone', proTour ? 'tour:yes' : 'pro:yes');
+    return ok({
+      entry: written.entry,
+      state: {
+        ...base,
+        player: {
+          ...written.player,
+          records: addSportsRecord(
+            written.player.records,
+            {
+              category: 'career',
+              label: proTour
+                ? `Earned a ${sport?.leagueShort ?? 'tour'} card`
+                : `Turned pro as a ${sport?.noun ?? 'fighter'} fighter`,
+              ...(sport ? { referenceId: sport.id } : {}),
+            },
+            offer.age,
+            state.world.year,
+          ),
+        },
+        sports: { ...restNoArts, ...(arts.length > 0 ? { arts } : {}), career: signed },
+        pending,
+      },
+    });
+  }
+
   /* ---- a contract ----------------------------------------------------- */
   if (choiceId === REQUEST_MORE) {
     const chance = askChance(career, offer);
@@ -1072,23 +1188,6 @@ function askChance(career: SportCareer, offer: SportsOffer): number {
 /* -------------------------------------------------------------------------- */
 /* Copy                                                                        */
 /* -------------------------------------------------------------------------- */
-
-const MINOR_INJURY_LINES: readonly string[] = [
-  'A sprained ankle cost you a few games.',
-  'Missed two weeks with a bruised knee.',
-  'Played through a sore shoulder, and it showed.',
-];
-
-const SERIOUS_LINES: readonly string[] = [
-  'Tore something in your knee and missed the rest of the season.',
-  'A broken foot ended your season in December.',
-  'Surgery in the spring, and a long summer of rehab.',
-];
-
-const COLLEGE_SERIOUS_LINES: readonly string[] = [
-  'An injury ended your season early.',
-  'Missed most of the year with a bad knee.',
-];
 
 const UNDRAFTED_LINES: readonly string[] = [
   'The draft came and went without your name in it.',

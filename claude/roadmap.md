@@ -613,7 +613,8 @@ built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sport
 | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **0801 The sports engine, with basketball** | **DONE (engine).** School team → scholarship offer at graduation → college seasons → the draft → a contract (Accept / Ask for more / Turn it down) → pro seasons, injuries, titles, reputation and fame → retirement. Odds are Payton's: reaching the pros from a team is 95% with talent and hard work, 75% with talent alone, 60% with hard work alone and about 3% with neither; 45% / 20% / 10% of those become stars. Every draw is a hash, so a life with no sport replays exactly as before. Save v44 (`sports`). No screens (0809).                                             |
 | **0802 The other team sports**              | **DONE (engine).** Football, baseball, soccer and hockey as rows on the 0801 engine: their own leagues, teams, five skills each, positions (a label, derived, never saved), real league minimums at the bottom of each pay ladder, draft sizes (224, 600, 90, 224), career ends and injury factors (football ×1.6 breaks most). Baseball and hockey school teams added. A life on two teams follows the sport it has been playing, else the one it is best at. Same odds as basketball; measured within a few points in every sport. **No save change** (still v44). No screens (0809). |
-| 0803–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **0803 Individual sports and combat**       | **DONE (engine).** Golf and tennis (school team, scholarship, college, then a tour card and prize money), boxing and MMA (six martial arts studied from ten, three seasons, then a gym puts you on a card at 18–30), all on the 0801 engine with a `format` of team, tour or combat. Fights are decided by skill, not a minigame: a hash per fight against a logistic on form, luck moving a rung. Reaching the pros matches Payton's table; the star share runs above it (finding 97). **Save v45** (Agent B: v46+). No screens (0809).                                                |
+| 0804–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -1420,6 +1421,29 @@ passive child ends up on one far more often, and the odds given (75% for talent 
 the order they bite: how many lives are talented (9.7%), the 75% for talent without work, and how easy a team
 is to join.
 
+**97. The star share is measured, not set, and it runs above the table.** A tier is the result of a year's
+performance against a field, not a draw. Talent and work gives 61–73% stars of the pros against 45% asked;
+talent only 21–44% against 20%; work only 4–7% against 10%. The dials are `FIELD_STRENGTH` and `TRAINING_CAP`.
+
+**98. 0803 took save v45.** Agent B's saves are v46 and onward.
+
+**99. Careers are still two to three times real length.** Median pro seasons: boxing 17, golf 19, MMA 15,
+tennis 10. The dials are `retireAge` and `declineFrom`.
+
+**100. Martial-art training has no effect on a character and costs no hours.** It is a road to a career and
+nothing else; Mind & Body effects belong to v0.10.
+
+**101. Prize money and purses are gross.** Travel, coach, caddie, camp and manager cuts are not modelled.
+
+**102. A fringe fighter keeps a day job; from role up it is a living.** Job offers keep coming until then.
+
+**103. A child's lessons are not billed, and an adult at home pays nothing.**
+
+**104. A life that never studies an art never reaches a card.** The passive-life pro rate stays about 3.4%;
+golf and tennis add about five of twenty-four. A passive life does not start an art.
+
+**105. A fighter who turns the card down is not asked again,** and any one art but boxing has no pro path alone.
+
 ## Suggested order
 
 This is the historical delivery order with current status annotations, not an
@@ -1472,5 +1496,6 @@ Agent A's next ticket.
     accept/decline rescue engine and survival measurement remain open with Agent A;
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
 
-12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, and 0802 The
-    other team sports shipped as engines only; Payton chose screens in 0809. Next is chosen by Payton.)_
+12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, 0802 The
+    other team sports and 0803 Individual sports and combat shipped as engines only; Payton chose screens in 0809.
+    Next is chosen by Payton.)_

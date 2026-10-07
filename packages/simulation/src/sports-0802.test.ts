@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  SPORTS,
+  TEAM_SPORTS,
   TIERS,
   draftPickFor,
   findActivity,
@@ -38,18 +38,18 @@ import {
   trainSport,
 } from './sports';
 
-const OTHER_SPORTS = SPORTS.filter((sport) => sport.id !== 'basketball');
+const OTHER_SPORTS = TEAM_SPORTS.filter((sport) => sport.id !== 'basketball');
 
 describe('the rows', () => {
   it('has five sports, each with a real school team, five skills and a list of positions', () => {
-    expect(SPORTS.map((sport) => sport.id)).toEqual([
+    expect(TEAM_SPORTS.map((sport) => sport.id)).toEqual([
       'basketball',
       'football',
       'baseball',
       'soccer',
       'hockey',
     ]);
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       expect(findActivity(sport.activityId)?.kind).toBe('sport');
       expect(sportOfActivity(sport.activityId)?.id).toBe(sport.id);
       expect(sport.skills).toHaveLength(5);
@@ -62,7 +62,7 @@ describe('the rows', () => {
   it('has fictional, unique teams, in a league whose letters are not another sport’s', () => {
     const letters = new Set<string>();
     const names = new Set<string>();
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       expect(sport.proTeams.length).toBeGreaterThanOrEqual(24);
       expect(new Set(sport.proTeams).size).toBe(sport.proTeams.length);
       expect(sport.collegeTeams.length).toBeGreaterThanOrEqual(12);
@@ -71,7 +71,7 @@ describe('the rows', () => {
       // None of them is a league that exists.
       expect(['NFL', 'MLB', 'NHL', 'NBA', 'MLS', 'CFL', 'USL']).not.toContain(sport.leagueShort);
     }
-    expect(letters.size).toBe(SPORTS.length);
+    expect(letters.size).toBe(TEAM_SPORTS.length);
   });
 
   it('pays from the real league minimum at the bottom, in a ladder that only goes up', () => {
@@ -84,7 +84,7 @@ describe('the rows', () => {
       soccer: 113_400,
       basketball: 1_272_870,
     };
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       const floor = floors[sport.id]!;
       expect(sport.economy.pay.fringe).toBeGreaterThanOrEqual(floor);
       expect(sport.economy.pay.fringe).toBeLessThan(floor * 1.15);
@@ -108,11 +108,11 @@ describe('the rows', () => {
     expect(retire('football')[1]).toBeLessThan(retire('basketball')[1]);
     expect(retire('baseball')[0]).toBeGreaterThan(retire('basketball')[0]);
     const injury = (id: string) => findSport(id)!.economy.injuryFactor;
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       expect(injury('football')).toBeGreaterThanOrEqual(injury(sport.id));
     }
     // A retirement range never runs backwards, and a better player lasts at least as long.
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       for (let index = 0; index < TIERS.length; index += 1) {
         const [low, high] = sport.economy.retireAge[TIERS[index]!];
         expect(high).toBeGreaterThanOrEqual(low);
@@ -126,7 +126,7 @@ describe('the rows', () => {
 
 describe('the draft', () => {
   it('pays a rookie from the top of that sport’s scale, down to the league minimum, and never below it', () => {
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       const { economy } = sport;
       expect(rookiePay(1, economy)).toBe(Math.max(economy.pay.fringe, economy.rookieTop));
       expect(rookiePay(economy.draftSize, economy)).toBe(economy.pay.fringe);
@@ -147,7 +147,7 @@ describe('the draft', () => {
   });
 
   it('stretches the pick ranges to the size of the draft, and never leaves it', () => {
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       for (const tier of TIERS) {
         for (const unit of [0, 0.25, 0.5, 0.75, 0.999999]) {
           const pick = draftPickFor(tier, unit, sport.economy.draftSize);
@@ -175,7 +175,7 @@ describe('the draft', () => {
 
 describe('a position, which is a label', () => {
   it('is the same for the same life, from the sport’s own list, and costs no save field', () => {
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       const seen = new Set<string>();
       for (let index = 0; index < 400; index += 1) {
         const position = positionIn(`pos-${index}`, 0, sport);
@@ -462,7 +462,7 @@ describe('injuries differ by sport', () => {
 
 describe('renewal and the draft, in each sport’s own money and rounds', () => {
   it('has a draft that is a whole number of rounds', () => {
-    for (const sport of SPORTS) {
+    for (const sport of TEAM_SPORTS) {
       expect(sport.economy.draftSize % sport.economy.firstRound).toBe(0);
     }
     expect(

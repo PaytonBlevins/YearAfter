@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BECOME_STAR,
   REACH_PROS,
-  SPORTS,
+  TEAM_SPORTS,
   TIERS,
   categoryOf,
   draftChance,
@@ -286,7 +286,7 @@ describe('the arithmetic of the odds', () => {
   });
 
   it('is basketball first, and a sport is a row of data', () => {
-    expect(SPORTS.map((sport) => sport.id)).toEqual([
+    expect(TEAM_SPORTS.map((sport) => sport.id)).toEqual([
       'basketball',
       'football',
       'baseball',
@@ -388,9 +388,9 @@ describe('a school team, and graduating from it', () => {
     expect(hasSystemicOffer(state)).toBe(true);
     const question = state.pending.find((row) => row.eventId === SPORTS_OFFER_EVENT_ID)!;
     expect(question.choices.map((choice) => choice.id)).toEqual([ACCEPT, DECLINE]);
-    expect(question.prompt).toContain(offer.team);
     // A full ride goes to a player who is already good; the rest get part of it.
     if (offer.kind !== 'scholarship') throw new Error('expected a scholarship');
+    expect(question.prompt).toContain(offer.team);
     expect(offer.cover).toBe(careerOf(state)!.form >= 62 ? 'full' : 'partial');
     // Time does not pass on an unanswered question.
     expect(advanceYear(state).state).toBe(state);

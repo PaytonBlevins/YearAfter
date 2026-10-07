@@ -1040,6 +1040,12 @@ const migrations: Readonly<Record<number, Migration>> = {
       typeof save['sports'] === 'object' && save['sports'] !== null ? save['sports'] : { past: [] },
     version: 44,
   }),
+  /**
+   * v44 -> v45: Ticket 0803 — the individual sports. `sports.arts`, a fighter's record and the
+   * two new questions are all optional and nothing before could write one, so there is nothing
+   * to write and only the version moves. No RNG, no clock.
+   */
+  44: (save) => ({ ...save, version: 45 }),
 };
 
 /**
@@ -1205,11 +1211,35 @@ function sportsOk(value: unknown): boolean {
     }
     if (typeof row['form'] !== 'number' || typeof row['seasons'] !== 'number') return false;
   }
+  const arts = sports['arts'];
+  if (arts !== undefined) {
+    if (!Array.isArray(arts) || arts.length > 2) return false;
+    const sound = arts.every((row) => {
+      if (typeof row !== 'object' || row === null) return false;
+      const study = row as Record<string, unknown>;
+      return (
+        typeof study['artId'] === 'string' &&
+        typeof study['level'] === 'number' &&
+        Number.isFinite(study['level']) &&
+        Number.isSafeInteger(study['seasons']) &&
+        Number.isSafeInteger(study['hardSeasons']) &&
+        Number.isSafeInteger(study['startedAge'])
+      );
+    });
+    if (!sound) return false;
+  }
   const offer = sports['offer'];
   if (offer !== undefined) {
     if (typeof offer !== 'object' || offer === null) return false;
     const kind = (offer as Record<string, unknown>)['kind'];
-    if (kind !== 'scholarship' && kind !== 'contract') return false;
+    if (
+      kind !== 'scholarship' &&
+      kind !== 'contract' &&
+      kind !== 'tour-card' &&
+      kind !== 'turn-pro'
+    ) {
+      return false;
+    }
     // A question with nobody to ask about is a save that cannot be answered.
     if (career === undefined) return false;
   }

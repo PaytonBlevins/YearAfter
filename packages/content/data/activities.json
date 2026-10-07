@@ -203,6 +203,64 @@
       "leaveText": "Turned in your hockey gear."
     },
     {
+      "id": "act.golf",
+      "name": "Golf",
+      "kind": "sport",
+      "blurb": "Four hours for nine holes and a lot of walking.",
+      "hoursPerWeek": 6,
+      "annualCost": 650,
+      "costSource": "range fees, greens fees and a set of clubs",
+      "requires": {
+        "stages": [
+          "middle",
+          "high"
+        ],
+        "needsParent": true
+      },
+      "tryout": {
+        "label": "Try out",
+        "stat": "discipline"
+      },
+      "tryoutText": "Made the golf team. Nine holes on Tuesdays and a bus to the course.",
+      "cutText": "Didn't make the golf team. Six spots, and a long waiting list.",
+      "effects": {
+        "discipline": 5,
+        "willpower": 3,
+        "happiness": 2
+      },
+      "joinText": "Made the golf team. Nine holes on Tuesdays and a bus to the course.",
+      "leaveText": "Put your clubs in the garage."
+    },
+    {
+      "id": "act.tennis",
+      "name": "Tennis",
+      "kind": "sport",
+      "blurb": "Courts by the school, and wind on every serve.",
+      "hoursPerWeek": 7,
+      "annualCost": 380,
+      "costSource": "court time, strings and a new racquet",
+      "requires": {
+        "stages": [
+          "middle",
+          "high"
+        ],
+        "needsParent": true
+      },
+      "tryout": {
+        "label": "Try out",
+        "stat": "health"
+      },
+      "tryoutText": "Made the tennis team. Challenge matches decide the ladder.",
+      "cutText": "Didn't make the tennis team. You lost a tiebreak you should have won.",
+      "effects": {
+        "health": 4,
+        "discipline": 3,
+        "willpower": 3
+      },
+      "joinText": "Made the tennis team. Challenge matches decide the ladder.",
+      "leaveText": "Left the racquet bag in the car and never took it out."
+    },
+    {
       "id": "act.wrestling",
       "name": "Wrestling",
       "kind": "sport",

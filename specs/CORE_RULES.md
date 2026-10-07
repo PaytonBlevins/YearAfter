@@ -3056,3 +3056,42 @@ Two activities were first added to `activities.json` by hand, and the validator 
 blurbs were too long for a phone (52 characters) and the file "is not what the generator produces". The catalog is
 written by `scripts/generate-activities.py`; edit the script and run it. A hand edit that passes by luck is an
 edit the next regeneration deletes.
+
+### 13.142 A number that was a standing in a squad is not a place in the world
+
+The school model lets three practice sessions a year carry anybody towards 100, because a school activity's
+standing is only where you sit in a squad. Reused for a fighter and a tour player, the first build had every
+player who trained at the top of the sport by twenty-five (a hard-working boxer went 44–1). The cap is
+`TRAINING_CAP` in content: work can lift an individual player a set number of points above what they are like, and
+talent is worth more than work. When a mechanic built for one scale is reused on another, measure where it
+saturates before reading anything built on top of it.
+
+### 13.143 A best-ever statistic over a random walk always flatters
+
+"Best tier reached" is the highest point of a year-by-year walk, so it rises with the length of the career even
+when the player never belonged there. The first calibration gave 85% stars among players whose results hovered
+a tier below. The fix was to make a season's result small next to the gap between tiers (the noise is a fraction of
+a rung), and to say in the ticket that the star share is measured, not asked for. A "peak" that is an output of
+chance needs its noise sized against the spacing before the number is compared with a target.
+
+### 13.144 A bill must not end the thing that makes the bill worth paying
+
+Dues for an art were charged to everybody from eighteen, and the first fighter run lost its boxing on its
+eighteenth birthday, the year the gym would have called: an eighteen-year-old at home had a household standard too
+low to afford the gym. Dues are now billed only to an adult living on their own; a child's or a dependent's are the
+household's and not billed. When a cost starts at an age, look at what the same age starts for everything else it
+touches.
+
+### 13.145 One draw for the life, and a threshold that can move under it
+
+The gym's offer is one hash draw per life, compared each year with a threshold that rises as the student works. A
+life that was refused at eighteen can be accepted at twenty-three if it kept training, and a life that was lucky is
+lucky every time it is replayed. It is not a second roll: the draw never changes. Anywhere a yearly check reads
+a fixed draw against a moving line, the test must replay the same seed twice and expect the same year.
+
+### 13.146 A test for a rule must find a life that reached it, and fail loudly when none does
+
+The first versions of three 0803 tests passed or failed on the seed they happened to use: a seed that never got a
+card made `if (career) {...}` a test of nothing. `firstWith` searches a numbered set of lives for one that
+satisfies a condition and throws if none of 25 does. A conditional assertion inside a branch the data may never
+reach is a test that passes on a broken engine.

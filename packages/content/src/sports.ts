@@ -16,7 +16,28 @@
 /* Sports                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export type SportId = 'basketball' | 'football' | 'baseball' | 'soccer' | 'hockey';
+export type SportId =
+  | 'basketball'
+  | 'football'
+  | 'baseball'
+  | 'soccer'
+  | 'hockey'
+  | 'golf'
+  | 'tennis'
+  | 'boxing'
+  | 'mma';
+
+/**
+ * How a sport is played for a living (ticket 0803).
+ *
+ *   team    a roster: a draft, a contract, a club that pays you (0801, 0802)
+ *   tour    a ranked circuit: a tour card, prize money, and a rank that moves with results (golf, tennis)
+ *   combat  a record: fights decided by skill, purses, and a road that runs through a martial art (boxing, MMA)
+ *
+ * The two individual formats share one rule: nobody is guaranteed a thing. What a player earns is
+ * what the season's results earn it.
+ */
+export type SportFormat = 'team' | 'tour' | 'combat';
 
 export type SportTier = 'fringe' | 'role' | 'starter' | 'star' | 'superstar';
 
@@ -47,19 +68,38 @@ export interface SportEconomy {
   readonly rookieTop: number;
   /** Times the base chance of an injury, in college and the pros. Football breaks people more than golf-like sports. */
   readonly injuryFactor: number;
+  /**
+   * The lowest tier at which playing is a full-time living: a day job ends there, and the
+   * header reads "Professional ...". Below it the player keeps whatever else they do for a
+   * living. Every team and tour player is full time; a club fighter is not.
+   */
+  readonly fullTimeFrom: SportTier;
+  /**
+   * The age a body starts to give back what training built (default 30). Golf holds its players
+   * into their forties; tennis and combat sports do not.
+   */
+  readonly declineFrom?: number;
 }
 
 export interface Sport {
   readonly id: SportId;
+  readonly format: SportFormat;
   readonly name: string;
-  /** The school team in `activities.json` that is this sport's first rung. */
+  /**
+   * The school team in `activities.json` that is this sport's first rung. Empty for a sport with no
+   * school team: boxing and MMA start in a gym, through a martial art (`MARTIAL_ARTS`).
+   */
   readonly activityId: string;
   /** Lower case, for sentences: "a basketball scholarship". */
   readonly noun: string;
   readonly league: string;
   readonly leagueShort: string;
   /** Fictional, as the game's brands are. A city and a nickname. */
+  /**
+   * A team sport's clubs; a fighter's gyms; empty for a tour, which has no club to play for.
+   */
   readonly proTeams: readonly string[];
+  /** Empty for a sport with no college road (boxing, MMA). */
   readonly collegeTeams: readonly string[];
   /**
    * Spec 9 and 343: a sport's skills are visible and trainable ONLY while the
@@ -119,6 +159,7 @@ const BASKETBALL_ECONOMY: SportEconomy = {
   firstRound: 30,
   rookieTop: 12_000_000,
   injuryFactor: 1,
+  fullTimeFrom: 'fringe',
 };
 
 /**
@@ -147,6 +188,7 @@ const FOOTBALL_ECONOMY: SportEconomy = {
   firstRound: 32,
   rookieTop: 12_000_000,
   injuryFactor: 1.6,
+  fullTimeFrom: 'fringe',
 };
 
 /**
@@ -173,6 +215,7 @@ const BASEBALL_ECONOMY: SportEconomy = {
   firstRound: 30,
   rookieTop: 1_500_000,
   injuryFactor: 0.9,
+  fullTimeFrom: 'fringe',
 };
 
 /**
@@ -199,6 +242,7 @@ const SOCCER_ECONOMY: SportEconomy = {
   firstRound: 30,
   rookieTop: 450_000,
   injuryFactor: 1,
+  fullTimeFrom: 'fringe',
 };
 
 /**
@@ -225,11 +269,142 @@ const HOCKEY_ECONOMY: SportEconomy = {
   firstRound: 32,
   rookieTop: 950_000,
   injuryFactor: 1.2,
+  fullTimeFrom: 'fringe',
 };
+
+/**
+ * Golf. A tour has no contract: pay is prize money, and these are a year's winnings at a tier. The PGA
+ * Tour's 2025 average was about $2.3 million a player and its leader took in tens of millions, so a
+ * starter sits near the average and a superstar is far above it. A fringe player is on the edge of
+ * keeping a card, and the year's prize money is about what that costs to chase. Gross: the caddie,
+ * the travel and the coach come out of it in life, and are not modelled here.
+ */
+const GOLF_ECONOMY: SportEconomy = {
+  pay: {
+    fringe: 450_000,
+    role: 1_300_000,
+    starter: 3_200_000,
+    star: 9_000_000,
+    superstar: 30_000_000,
+  },
+  retireAge: {
+    fringe: [29, 34],
+    role: [32, 38],
+    starter: [35, 42],
+    star: [38, 47],
+    superstar: [40, 50],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 0.5,
+  fullTimeFrom: 'fringe',
+  declineFrom: 38,
+};
+
+/**
+ * Tennis. The ATP's 2025 leader won $19.1 million in prize money and the player twentieth on the list
+ * $2.2 million; the third took $6 million, and the fall-off below them is steep. Ranks 100 to 250 make
+ * a living that does not cover a coach and travel, which is why a fringe player's year is small.
+ */
+const TENNIS_ECONOMY: SportEconomy = {
+  pay: {
+    fringe: 120_000,
+    role: 450_000,
+    starter: 1_600_000,
+    star: 6_000_000,
+    superstar: 19_000_000,
+  },
+  retireAge: {
+    fringe: [24, 28],
+    role: [26, 31],
+    starter: [28, 33],
+    star: [30, 35],
+    superstar: [31, 37],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 1,
+  fullTimeFrom: 'fringe',
+  declineFrom: 29,
+};
+
+/**
+ * Boxing. Most professional boxers earn under $50,000 a year, an opponent's first fights pay a thousand
+ * dollars or less, and the top of the sport is a handful of purses in the tens of millions. So the
+ * bottom two tiers are a second job and the top one is not a number in any other sport's range.
+ */
+const BOXING_ECONOMY: SportEconomy = {
+  pay: {
+    fringe: 20_000,
+    role: 90_000,
+    starter: 400_000,
+    star: 3_000_000,
+    superstar: 30_000_000,
+  },
+  retireAge: {
+    fringe: [28, 33],
+    role: [30, 35],
+    starter: [31, 36],
+    star: [33, 38],
+    superstar: [34, 40],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 1.5,
+  fullTimeFrom: 'role',
+  declineFrom: 31,
+};
+
+/**
+ * MMA. The largest promotion pays a newcomer $12,000 to show and $12,000 to win, mid-level fighters
+ * $50,000 to low six figures a fight, and champions about a million a fight or more. A year is two to
+ * three fights, so the tiers run from a regional card up to a champion's share of the gate.
+ */
+const MMA_ECONOMY: SportEconomy = {
+  pay: {
+    fringe: 30_000,
+    role: 110_000,
+    starter: 350_000,
+    star: 1_600_000,
+    superstar: 8_000_000,
+  },
+  retireAge: {
+    fringe: [27, 32],
+    role: [29, 34],
+    starter: [30, 35],
+    star: [31, 36],
+    superstar: [32, 38],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 1.6,
+  fullTimeFrom: 'role',
+  declineFrom: 31,
+};
+
+const FIGHT_GYMS: readonly string[] = [
+  'Ironbridge Fight Club',
+  'Southside Athletic Club',
+  'Harbor Street Gym',
+  'Copperline Boxing',
+  'Redwater Fight House',
+  'Northgate Academy',
+  'Stonefield Gym',
+  'Eastside Ring',
+  'Cedar Hill Athletic',
+  'Union Yard Gym',
+  'Brightline Training Center',
+  'Fairmount Fight Club',
+];
 
 export const SPORTS: readonly Sport[] = [
   {
     id: 'basketball',
+    format: 'team',
     name: 'Basketball',
     activityId: 'act.basketball',
     noun: 'basketball',
@@ -275,6 +450,7 @@ export const SPORTS: readonly Sport[] = [
   },
   {
     id: 'football',
+    format: 'team',
     name: 'Football',
     activityId: 'act.football',
     noun: 'football',
@@ -332,6 +508,7 @@ export const SPORTS: readonly Sport[] = [
   },
   {
     id: 'baseball',
+    format: 'team',
     name: 'Baseball',
     activityId: 'act.baseball',
     noun: 'baseball',
@@ -388,6 +565,7 @@ export const SPORTS: readonly Sport[] = [
   },
   {
     id: 'soccer',
+    format: 'team',
     name: 'Soccer',
     activityId: 'act.soccer',
     noun: 'soccer',
@@ -433,6 +611,7 @@ export const SPORTS: readonly Sport[] = [
   },
   {
     id: 'hockey',
+    format: 'team',
     name: 'Hockey',
     activityId: 'act.hockey',
     noun: 'hockey',
@@ -476,15 +655,133 @@ export const SPORTS: readonly Sport[] = [
     collegeTeams: COLLEGE_TEAMS,
     economy: HOCKEY_ECONOMY,
   },
+  {
+    id: 'golf',
+    format: 'tour',
+    name: 'Golf',
+    activityId: 'act.golf',
+    noun: 'golf',
+    league: 'Continental Golf Tour',
+    leagueShort: 'CGT',
+    playerTitle: 'Professional golfer',
+    skills: [
+      { id: 'driving', name: 'Driving' },
+      { id: 'approach', name: 'Approach play' },
+      { id: 'short-game', name: 'Short game' },
+      { id: 'putting', name: 'Putting' },
+      { id: 'course-management', name: 'Course management' },
+    ],
+    positions: [
+      'Long hitter',
+      'Precision player',
+      'Short-game specialist',
+      'Streaky putter',
+      'Grinder',
+    ],
+    proTeams: [],
+    collegeTeams: COLLEGE_TEAMS,
+    economy: GOLF_ECONOMY,
+  },
+  {
+    id: 'tennis',
+    format: 'tour',
+    name: 'Tennis',
+    activityId: 'act.tennis',
+    noun: 'tennis',
+    league: 'World Tennis Circuit',
+    leagueShort: 'WTC',
+    playerTitle: 'Professional tennis player',
+    skills: [
+      { id: 'serve', name: 'Serve' },
+      { id: 'forehand', name: 'Forehand' },
+      { id: 'backhand', name: 'Backhand' },
+      { id: 'movement', name: 'Movement' },
+      { id: 'mental-game', name: 'Mental game' },
+    ],
+    positions: [
+      'Baseliner',
+      'Serve-and-volleyer',
+      'All-court player',
+      'Counterpuncher',
+      'Big server',
+    ],
+    proTeams: [],
+    collegeTeams: COLLEGE_TEAMS,
+    economy: TENNIS_ECONOMY,
+  },
+  {
+    id: 'boxing',
+    format: 'combat',
+    name: 'Boxing',
+    activityId: '',
+    noun: 'boxing',
+    league: 'Atlantic Boxing Federation',
+    leagueShort: 'ABF',
+    playerTitle: 'Professional boxer',
+    skills: [
+      { id: 'striking', name: 'Striking' },
+      { id: 'defense', name: 'Defense' },
+      { id: 'conditioning', name: 'Conditioning' },
+      { id: 'power', name: 'Power' },
+      { id: 'ring-iq', name: 'Ring IQ' },
+    ],
+    positions: [
+      'Featherweight',
+      'Lightweight',
+      'Welterweight',
+      'Middleweight',
+      'Light heavyweight',
+      'Heavyweight',
+    ],
+    proTeams: FIGHT_GYMS,
+    collegeTeams: [],
+    economy: BOXING_ECONOMY,
+  },
+  {
+    id: 'mma',
+    format: 'combat',
+    name: 'MMA',
+    activityId: '',
+    noun: 'MMA',
+    league: 'Ironcage Fighting League',
+    leagueShort: 'IFL',
+    playerTitle: 'Professional MMA fighter',
+    skills: [
+      { id: 'striking', name: 'Striking' },
+      { id: 'wrestling', name: 'Wrestling' },
+      { id: 'grappling', name: 'Grappling' },
+      { id: 'conditioning', name: 'Conditioning' },
+    ],
+    positions: [
+      'Flyweight',
+      'Lightweight',
+      'Welterweight',
+      'Middleweight',
+      'Light heavyweight',
+      'Heavyweight',
+    ],
+    proTeams: FIGHT_GYMS,
+    collegeTeams: [],
+    economy: MMA_ECONOMY,
+  },
 ];
 
 const SPORTS_BY_ID = new Map(SPORTS.map((sport) => [sport.id, sport]));
 
 export const findSport = (id: string): Sport | undefined => SPORTS_BY_ID.get(id as SportId);
 
+/** Every sport with a roster, a draft and a contract: the first five rows. */
+export const TEAM_SPORTS: readonly Sport[] = SPORTS.filter((sport) => sport.format === 'team');
+
+/** Golf and tennis: a school team, a scholarship, and a tour. */
+export const TOUR_SPORTS: readonly Sport[] = SPORTS.filter((sport) => sport.format === 'tour');
+
+/** Boxing and MMA: no school team; the road runs through a martial art. */
+export const COMBAT_SPORTS: readonly Sport[] = SPORTS.filter((sport) => sport.format === 'combat');
+
 /** The sport a school activity is the first rung of, if any. */
 export const sportOfActivity = (activityId: string): Sport | undefined =>
-  SPORTS.find((sport) => sport.activityId === activityId);
+  activityId === '' ? undefined : SPORTS.find((sport) => sport.activityId === activityId);
 
 /* -------------------------------------------------------------------------- */
 /* The odds                                                                    */
@@ -730,3 +1027,304 @@ export function sportReputationWord(reputation: number): string {
   if (reputation >= 15) return 'a name in the league';
   return 'unknown';
 }
+
+/* -------------------------------------------------------------------------- */
+/* Martial arts (ticket 0803)                                                  */
+/* -------------------------------------------------------------------------- */
+
+/** Payton, 7 October 2026: a child can start from about ten. */
+export const MARTIAL_ART_MIN_AGE = 10;
+
+/** Hours are the limit in life; the game says two at a time. */
+export const MAX_ARTS_AT_ONCE = 2;
+
+/** A beginner is not nothing, and not good. */
+export const ART_START_LEVEL = 20;
+
+/**
+ * The road to a fight career. Nobody is signed before eighteen (Payton), and a fighter who has not
+ * turned pro by thirty is not going to; an art must have been studied for at least three seasons
+ * before it counts as a base.
+ */
+export const TURN_PRO_MIN_AGE = 18;
+export const TURN_PRO_MAX_AGE = 30;
+export const MIN_ART_SEASONS = 3;
+
+export type ArtStyle = 'striking' | 'grappling';
+
+export interface MartialArt {
+  readonly id: string;
+  readonly name: string;
+  readonly style: ArtStyle;
+  /** One line, for the Mind & Body row. */
+  readonly blurb: string;
+  /** What a year costs an adult, whole dollars. A child's lessons are paid by the household and not billed. */
+  readonly annualCost: number;
+  readonly costSource: string;
+  /** The careers it counts towards: boxing for boxing, any of them for MMA. */
+  readonly feeds: readonly SportId[];
+  /** Four things it builds, for the screen. Spec 377: nothing here depends on who teaches it. */
+  readonly skills: readonly SportSkill[];
+  readonly startLine: string;
+  readonly stopLine: string;
+}
+
+/**
+ * Six arts (Payton, 7 October 2026). Wrestling here is the art, and the competitive career is an
+ * Olympic discipline for 0804; Judo is not listed (spec 379).
+ */
+export const MARTIAL_ARTS: readonly MartialArt[] = [
+  {
+    id: 'boxing',
+    name: 'Boxing',
+    style: 'striking',
+    blurb: 'A heavy bag, a jump rope and a coach who counts.',
+    annualCost: 900,
+    costSource: 'gym dues and hand wraps',
+    feeds: ['boxing', 'mma'],
+    skills: [
+      { id: 'striking', name: 'Striking' },
+      { id: 'defense', name: 'Defense' },
+      { id: 'conditioning', name: 'Conditioning' },
+      { id: 'power', name: 'Power' },
+    ],
+    startLine: 'Started boxing. The first month was mostly the jump rope.',
+    stopLine: 'Stopped going to the boxing gym.',
+  },
+  {
+    id: 'muay-thai',
+    name: 'Muay Thai',
+    style: 'striking',
+    blurb: 'Elbows, knees and shins, and a lot of pad work.',
+    annualCost: 1_300,
+    costSource: 'Muay Thai gym dues and shin guards',
+    feeds: ['mma'],
+    skills: [
+      { id: 'striking', name: 'Striking' },
+      { id: 'clinch', name: 'Clinch' },
+      { id: 'conditioning', name: 'Conditioning' },
+      { id: 'power', name: 'Power' },
+    ],
+    startLine: 'Started Muay Thai. Your shins hurt for a week.',
+    stopLine: 'Stopped going to Muay Thai.',
+  },
+  {
+    id: 'bjj',
+    name: 'Brazilian jiu-jitsu',
+    style: 'grappling',
+    blurb: 'Belts the hard way, one tap at a time.',
+    annualCost: 1_500,
+    costSource: 'jiu-jitsu academy dues and a gi',
+    feeds: ['mma'],
+    skills: [
+      { id: 'grappling', name: 'Grappling' },
+      { id: 'escapes', name: 'Escapes' },
+      { id: 'submissions', name: 'Submissions' },
+      { id: 'conditioning', name: 'Conditioning' },
+    ],
+    startLine: 'Started Brazilian jiu-jitsu. You tapped a lot.',
+    stopLine: 'Stopped going to jiu-jitsu. The gi is still in the bag.',
+  },
+  {
+    id: 'wrestling',
+    name: 'Wrestling',
+    style: 'grappling',
+    blurb: 'Takedowns and a mat that smells like a mat.',
+    annualCost: 500,
+    costSource: 'a wrestling club and shoes',
+    feeds: ['mma'],
+    skills: [
+      { id: 'takedowns', name: 'Takedowns' },
+      { id: 'control', name: 'Control' },
+      { id: 'balance', name: 'Balance' },
+      { id: 'conditioning', name: 'Conditioning' },
+    ],
+    startLine: 'Started wrestling. Everyone on the mat was stronger than they looked.',
+    stopLine: 'Stopped wrestling.',
+  },
+  {
+    id: 'karate',
+    name: 'Karate',
+    style: 'striking',
+    blurb: 'Katas, sparring and a belt for every year.',
+    annualCost: 1_100,
+    costSource: 'dojo dues and a uniform',
+    feeds: ['mma'],
+    skills: [
+      { id: 'striking', name: 'Striking' },
+      { id: 'kata', name: 'Form' },
+      { id: 'speed', name: 'Speed' },
+      { id: 'conditioning', name: 'Conditioning' },
+    ],
+    startLine: 'Started karate. The first belt is white and it means nothing.',
+    stopLine: 'Left the dojo.',
+  },
+  {
+    id: 'taekwondo',
+    name: 'Taekwondo',
+    style: 'striking',
+    blurb: 'Kicks, speed and a very clean uniform.',
+    annualCost: 1_100,
+    costSource: 'taekwondo school dues and sparring gear',
+    feeds: ['mma'],
+    skills: [
+      { id: 'striking', name: 'Striking' },
+      { id: 'kicks', name: 'Kicking' },
+      { id: 'speed', name: 'Speed' },
+      { id: 'conditioning', name: 'Conditioning' },
+    ],
+    startLine: 'Started taekwondo. Your kicks were slow, then they weren’t.',
+    stopLine: 'Left the taekwondo school.',
+  },
+];
+
+const ARTS_BY_ID = new Map(MARTIAL_ARTS.map((art) => [art.id, art]));
+
+export const findMartialArt = (id: string): MartialArt | undefined => ARTS_BY_ID.get(id);
+
+export interface ArtProgress {
+  readonly artId: string;
+  readonly level: number;
+  readonly seasons: number;
+}
+
+/**
+ * Which fight career a set of studied arts is a base for, and how good the fighter is at the start.
+ *
+ *   boxing  needs boxing, three seasons in, and starts at that level
+ *   mma     needs a striking art AND a grappling art, three seasons each, and starts at their average
+ *
+ * When both are available the better start wins, and a tie goes to MMA, which is the harder road.
+ * Pure, so it can be read by a screen that wants to say what a student is working towards.
+ */
+export function fightCareerFor(
+  arts: readonly ArtProgress[],
+): { readonly sportId: 'boxing' | 'mma'; readonly form: number } | undefined {
+  const ready = arts.filter((row) => row.seasons >= MIN_ART_SEASONS);
+  const best = (style: ArtStyle): number | undefined => {
+    const levels = ready
+      .filter((row) => findMartialArt(row.artId)?.style === style)
+      .map((row) => row.level);
+    return levels.length > 0 ? Math.max(...levels) : undefined;
+  };
+  const boxer = ready.find((row) => row.artId === 'boxing')?.level;
+  const striker = best('striking');
+  const grappler = best('grappling');
+  const mma =
+    striker !== undefined && grappler !== undefined
+      ? Math.round((striker + grappler) / 2)
+      : undefined;
+  if (mma !== undefined && (boxer === undefined || mma >= boxer)) {
+    return { sportId: 'mma', form: mma };
+  }
+  if (boxer !== undefined) return { sportId: 'boxing', form: boxer };
+  return undefined;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Individual sports: a tour and a fight card (ticket 0803)                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Nobody on a tour or a fight card is promoted by a table. A season's results move a player up or
+ * down, and nothing caps how far: a player who keeps matching the field above them keeps rising.
+ *
+ * `FIELD_STRENGTH` is how good the people a player meets at a tier are, on the same 0–100 scale as
+ * a player's form.
+ */
+export const FIELD_STRENGTH: Readonly<Record<SportTier, number>> = {
+  fringe: 42,
+  role: 53,
+  starter: 64,
+  star: 78,
+  superstar: 92,
+};
+
+/**
+ * How far work can take an individual player above what they are naturally like. The school model
+ * lets three sessions a year carry anybody towards 100, which is right for a standing within a
+ * squad and wrong for a place in the world: measured on the first build, every player who trained
+ * was a superstar by twenty-five. Talent is worth more than work (16 points against this) and work
+ * is worth more than nothing, which is the order of the odds table. Individual sports only; a team
+ * player's practice is unchanged from 0801.
+ */
+export const TRAINING_CAP = 7;
+
+/**
+ * A season's PERFORMANCE is a player's form plus what luck did that year, on the same 0–100 scale
+ * as the fields. A tour player's luck is a draw (`TOUR_NOISE` wide); a fighter's is how far their
+ * actual fights ran ahead of or behind what their form said they should win (`FIGHT_LUCK` a win).
+ * The rung a player is on moves one step a year towards the highest tier whose field they matched,
+ * so a run of luck lifts a player a little and a run of the other kind drops them a little, and
+ * what holds them in place is how good they are.
+ */
+export const TOUR_NOISE = 24;
+export const FIGHT_LUCK = 10;
+
+/** Below the fringe field by this much, a player loses a tour card or a gym's booking. */
+export const OUT_MARGIN = 9;
+
+/** The highest tier a season's performance matched, or `undefined` below the fringe (and under it by `OUT_MARGIN`: out). */
+export function tierForPerformance(performance: number): SportTier {
+  let found: SportTier = 'fringe';
+  for (const tier of ['role', 'starter', 'star', 'superstar'] as const) {
+    if (performance >= FIELD_STRENGTH[tier]) found = tier;
+  }
+  return found;
+}
+
+export const isOut = (performance: number): boolean =>
+  performance < FIELD_STRENGTH.fringe - OUT_MARGIN;
+
+/** The chance of winning a tour event in a season, by tier. Golf and tennis both. */
+export const TOUR_TITLE_CHANCE: Readonly<Record<SportTier, number>> = {
+  fringe: 0,
+  role: 0.02,
+  starter: 0.08,
+  star: 0.22,
+  superstar: 0.45,
+};
+
+/** Of a year's purse: the spread an ordinary year has either side of the tier's figure. */
+export const PURSE_SPREAD: readonly [number, number] = [0.75, 1.25];
+
+/** A tour title adds this share of the tier's year to the purse. */
+export const TITLE_PURSE_SHARE = 0.25;
+
+/** A season missed to a serious injury still pays this share of the year. */
+export const MISSED_SEASON_PURSE = 0.25;
+
+/** The world rank a tier sits in, for a tour sport. A band, not a point: the rank moves within it by year. */
+export const WORLD_RANK_BAND: Readonly<Record<SportTier, readonly [number, number]>> = {
+  superstar: [1, 3],
+  star: [4, 15],
+  starter: [16, 60],
+  role: [61, 140],
+  fringe: [141, 300],
+};
+
+/** Fights in a year, by sport and tier. A club fighter fights more; a champion fights less and is paid for it. */
+export const FIGHTS_PER_YEAR: Readonly<
+  Record<'boxing' | 'mma', Readonly<Record<SportTier, number>>>
+> = {
+  boxing: { fringe: 4, role: 3, starter: 3, star: 2, superstar: 2 },
+  mma: { fringe: 2, role: 2, starter: 3, star: 3, superstar: 2 },
+};
+
+/** The spread of the people a fighter faces around the tier's strength, and how sharply form decides it. */
+export const OPPONENT_SPREAD = 16;
+export const FIGHT_SCALE = 9;
+
+/**
+ * The chance of winning a fight: form against an opponent at this tier, from a unit that decides how
+ * good the opponent is. Decided by skill and nothing else: no number here is a player's choice and
+ * there is no minigame (the ticket's brief).
+ */
+export function fightWinChance(form: number, tier: SportTier, opponentUnit: number): number {
+  const opponent = FIELD_STRENGTH[tier] + (opponentUnit - 0.5) * OPPONENT_SPREAD;
+  return 1 / (1 + Math.exp(-(form - opponent) / FIGHT_SCALE));
+}
+
+/** A world rank within a tier's band, from a unit. Higher tiers are lower numbers. */
+export const worldRankFor = (tier: SportTier, unit: number): number =>
+  between(unit, WORLD_RANK_BAND[tier]);

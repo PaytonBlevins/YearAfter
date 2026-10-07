@@ -1069,7 +1069,7 @@ export function MindBodyScreen() {
         rows={[
           { title: 'Gym', affordance: 'action', ticket: 'v0.10' },
           { title: 'Meditation', affordance: 'action', ticket: 'v0.10' },
-          { title: 'Martial Arts', ticket: '0803' },
+          { title: 'Martial Arts', ticket: '0809' },
           { title: 'Instruments', ticket: '0806' },
           { title: 'Acting Lessons', affordance: 'action', ticket: '0805' },
           { title: 'Books / Library', affordance: 'action', ticket: 'v0.10' },

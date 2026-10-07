@@ -197,6 +197,28 @@ A("act.hockey", "Hockey", "sport", 9,
   join_text="Made the hockey team. Practice is at six, before school.",
   leave_text="Turned in your hockey gear.")
 
+A("act.golf", "Golf", "sport", 6,
+  blurb="Four hours for nine holes and a lot of walking.",
+  stages=["middle", "high"], needs_parent=True,
+  annual_cost=650, cost_source="range fees, greens fees and a set of clubs",
+  tryout="Try out", tryout_stat="discipline",
+  tryout_text="Made the golf team. Nine holes on Tuesdays and a bus to the course.",
+  cut_text="Didn't make the golf team. Six spots, and a long waiting list.",
+  effects={"discipline": 5, "willpower": 3, "happiness": 2},
+  join_text="Made the golf team. Nine holes on Tuesdays and a bus to the course.",
+  leave_text="Put your clubs in the garage.")
+
+A("act.tennis", "Tennis", "sport", 7,
+  blurb="Courts by the school, and wind on every serve.",
+  stages=["middle", "high"], needs_parent=True,
+  annual_cost=380, cost_source="court time, strings and a new racquet",
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the tennis team. Challenge matches decide the ladder.",
+  cut_text="Didn't make the tennis team. You lost a tiebreak you should have won.",
+  effects={"health": 4, "discipline": 3, "willpower": 3},
+  join_text="Made the tennis team. Challenge matches decide the ladder.",
+  leave_text="Left the racquet bag in the car and never took it out.")
+
 A("act.wrestling", "Wrestling", "sport", 9,
   blurb="Cutting weight is a normal Tuesday.",
   stages=["high"],

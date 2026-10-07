@@ -92,7 +92,7 @@ import { workToSettle } from './fame-work';
 import { runCelebrityYear } from './celebrity';
 import { foundOut } from './auctions';
 import { residenceOf } from './rentals';
-import { INSTRUMENTS, SECTORS, costIndexOf, findActivity } from '@yearafter/content';
+import { INSTRUMENTS, SECTORS, costIndexOf, findActivity, findSport } from '@yearafter/content';
 import { nameContext, uniqueFirstName } from './social-generator';
 import { RngDomains } from './rng/rng';
 
@@ -161,7 +161,12 @@ function pensionableBenefit(state: GameState) {
 
 /** What a year's contract pay is called in the ledger: who paid it. */
 function sportsSource(state: GameState, year: { readonly sports: GameState['sports'] }): string {
-  const team = year.sports.career?.team ?? state.sports.career?.team;
+  const career = year.sports.career ?? state.sports.career;
+  const sport = career ? findSport(career.sportId) : undefined;
+  // Ticket 0803. A tour pays prize money and a fight card pays purses; only a team pays a salary.
+  if (sport?.format === 'tour') return `Prize money, ${sport.league}`;
+  if (sport?.format === 'combat') return `Fight purses, ${sport.league}`;
+  const team = career?.team;
   return team ? `Playing for the ${team}` : 'Playing pay';
 }
 
@@ -256,6 +261,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     education: education.education,
     age: nextAge,
     year: nextYear,
+    standard: state.household.standard,
   });
 
   // Then the class. Before events, so an event that fires this year can name
@@ -708,6 +714,16 @@ export function advanceYear(state: GameState): AdvanceResult {
             category: 'salary' as const,
             amount: dollars(sportsYear.pay),
             source: sportsSource(state, sportsYear),
+          },
+        ]
+      : []),
+    // Ticket 0803. An adult's martial-arts dues.
+    ...(sportsYear.fees > 0
+      ? [
+          {
+            category: 'spending' as const,
+            amount: dollars(-sportsYear.fees),
+            source: sportsYear.feeSource,
           },
         ]
       : []),
