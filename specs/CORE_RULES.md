@@ -2579,6 +2579,8 @@ wrong reason.
 
 - **Assert the size the mechanism promises.** The test now asserts the bill
   falls by at least the car's share, which only the mechanism under test can do.
+  P2 explicitly superseded that percentage contract: literal actual-cost and
+  $1,600-cap tests now pin the dollar replacement at multiple income/tier levels.
 - **Sabotage is what finds these.** Three of seventeen sabotages passed the
   first time (this one, a loan that never amortised but still cleared on its
   last year, and repossession after one short year inside a loose band). All
@@ -3005,3 +3007,27 @@ A held rescue can have a negative till. The old wind-down reader clamps the till
 so closing it without subtracting the trading hole forgives the loss. Apply the hole before
 paying the lender, keep unpaid debt, and prove both ledger flows. Test death in the actual
 annual advance and the heir's liquid inheritance, not just the rescue answer in isolation.
+
+### 13.136 A percentage discount can buy back more than the thing costs
+
+P2 measured a $5,500 car removing $12,000–$14,000 from a high earner's living bill.
+A reference allowance must be denominated in dollars and bounded by the actual
+cost it replaces. Income and voluntary luxury spending cannot expand it. Test
+zero, below-cap, exact-cap and above-cap costs, and expensive cars' combined cost.
+Re-measure the whole-life curve after removing an accidental savings subsidy.
+
+### 13.137 A preference is not a paid benefit
+
+Choosing a lifestyle changes only the saved preference. Its spending and mood
+settle during annual advance, once, through the existing stat curve. Check both
+the living phase's hardship/floor and the final ledger: a large portfolio can
+make living affordable in the phase while an illiquid household still cannot
+pay. Never award Lavish for unpaid spending or a mortgage-squeezed basic-needs
+bill. Switching repeatedly must not change money, time, stats or RNG.
+
+### 13.138 A new stat contribution must preserve the old contributors
+
+P2's first mood merge overwrote activity happiness even when Comfortable added
+zero. Preserve the existing creator/activity contribution before adding the
+new annual nudge. Pin the zero-effect default and simultaneous activity plus
+lifestyle effects, not only a tier in an otherwise empty life.

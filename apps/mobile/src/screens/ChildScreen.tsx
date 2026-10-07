@@ -19,7 +19,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { formatMoney } from '@yearafter/core';
 import { CHILD_ASKS, DISTANT, PARENT_AGE } from '@yearafter/parenting';
-import { childMonthlyCost, childShare } from '@yearafter/finance';
+import { childMonthlyCost, childShare, lifestyleStandardFor } from '@yearafter/finance';
 import { costIndexOf } from '@yearafter/content';
 import { npcAge, type FamilyMember } from '@yearafter/relationships';
 import { openAskOf } from '@yearafter/simulation';
@@ -90,7 +90,7 @@ export function ChildScreen() {
             <ListRow
               title={`${formatMoney(
                 childMonthlyCost(
-                  state.household.standard,
+                  lifestyleStandardFor(state.household.standard, state.household.lifestyle),
                   costIndexOf(state.player.currentLocation.cityId),
                   childShare(age),
                 ),

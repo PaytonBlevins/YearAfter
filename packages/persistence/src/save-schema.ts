@@ -50,7 +50,7 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 44;
+export const CURRENT_SAVE_VERSION = 45;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -184,7 +184,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 44;
+  readonly version: 45;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;

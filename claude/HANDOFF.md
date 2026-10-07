@@ -26,8 +26,17 @@ inject-or-close choices and no automatic personal-bank rescue. Death winds down 
 businesses before inheritance; lenders retain priority. Save v44 is reserved for P1.
 This is the narrow P1–P16 engine/save exception in `playtest-rules-brief.md`; older role
 limits below remain historical. Details and verification: `playtest-p1-business-rescue.md`.
-P2 must wait for Payton's next go-ahead. PR #10 was still unmerged on base `beff25a`;
+P2 was subsequently authorized by Payton; see its update below. PR #10 was still unmerged on base `beff25a`;
 P1 was started only after Payton's explicit go-ahead, not an inferred merge.
+
+**P2 update:** Payton approved the measured living curve, Frugal / Comfortable / Lavish spending
+and happiness effects, $1,600 car allowance and Lifestyle screen. Agent B built P2 on
+`feat/playtest-p2-living-costs`, stacked on P1 while `origin/main` remains `beff25a`. Save v45 follows
+P1 v44; keep both migrations. The choice saves immediately, bills on annual advance, and cannot
+farm happiness by switching. Estimates and child-cost copy read the selected lifestyle. TICKET
+remains 0708. Measurement, verification and open issues: `playtest-p2-living-costs.md`.
+P3 waits for Payton's next explicit go-ahead. If P1 merges first, rebase P2 onto main and retarget
+its PR; do not squash away the separately reserved save versions.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

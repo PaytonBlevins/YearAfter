@@ -469,7 +469,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Only the one they live in: a rental's costs are the rental's, against its rent.
     housingCost: homesYear.residenceCost,
     // Ticket 0504. The cars, and whether there is one — owning one means the
-    // living bill stops paying for getting about (`VEHICLE_SHARE`).
+    // living bill stops paying for getting about (a bounded dollar allowance).
     vehicleCost: vehiclesYear.cost,
     ownsVehicle: state.vehicles.length > 0,
   });
@@ -1106,7 +1106,11 @@ export function advanceYear(state: GameState): AdvanceResult {
         ...health.statDeltas,
         ...shaped,
         // Ticket 0706. The year's news about a channel or about being known.
-        ...(creatorsYear.mood === 0 ? {} : { happiness: creatorsYear.mood }),
+        // Preserve the existing creator/activity mood before adding a tier's
+        // paid-year effect. Comfortable must not erase a year of activities.
+        happiness:
+          (creatorsYear.mood === 0 ? (shaped.happiness ?? 0) : creatorsYear.mood) +
+          (living.mood > 0 && money.short < 0 ? 0 : living.mood),
       }),
       health: clampStat(health.health),
     },

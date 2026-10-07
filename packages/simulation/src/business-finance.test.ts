@@ -88,7 +88,28 @@ function liveTo(seed: string, age: number): GameState {
 }
 
 /** Thirty, $52,451 earned last year, $47,353 in the bank, and the year is 2030. */
-const BASE = liveTo('biz-adult', 30);
+// P2 changes when this seeded life buys and finances a car. These tests pin
+// business quotes, not thirty years of living balance: retain the original
+// explicit cash and debt-free $11,200 car so the market/underwriting fixture
+// stays the same. All literal price, deposit, ledger and loan assertions remain.
+const PLAYED_BASE = liveTo('biz-adult', 30);
+const BASE: GameState = {
+  ...topUp(PLAYED_BASE, 47_353 - Math.floor(Number(PLAYED_BASE.player.cash) / 100)),
+  vehicles: [
+    {
+      id: 'car:2026:lot.used-2:3',
+      trimId: 'car.subaro-outbacker.premium',
+      modelYear: 2020,
+      boughtYear: 2026,
+      purchasePrice: dollars(17_300),
+      value: dollars(11_200),
+      condition: 71.8,
+      history: 'full',
+      accident: true,
+      behindYears: 0,
+    },
+  ],
+};
 const RICH = topUp(BASE, 400_000);
 /** Exactly $60,000 in the bank: enough to put a fifth down on one of the listings, not to buy it. */
 const FIXED = topUp(BASE, 60_000 - Math.floor(Number(BASE.player.cash) / 100));

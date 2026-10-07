@@ -14,6 +14,7 @@ import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
 import {
   SUBSISTENCE,
+  isLifestyleTier,
   POSTS_PER_YEAR,
   reconcile,
   reconcileByYear,
@@ -1009,14 +1010,27 @@ const migrations: Readonly<Record<number, Migration>> = {
         : { ties: [], met: [], answeredYear: 0, work: { year: 0, done: [] } },
     version: 42,
   }),
-  /**
-   * v42 -> v43: Ticket 0707 — what has been said yes to this year. Nothing has been, in any
-   * older save, so the record is empty for year 0. What a v42 save already carries is kept.
-   */
+  /** v44 -> v45: P2 defaults the existing life without changing its history or RNG. */
+  44: (save) => {
+    const household = save['household'];
+    return {
+      ...save,
+      household:
+        typeof household === 'object' && household !== null && !Array.isArray(household)
+          ? { ...household, lifestyle: 'comfortable' }
+          : household,
+      version: 45,
+    };
+  },
+  /** v43 -> v44: P1 adds optional rescue quotes without inventing legacy reviews. */
   43: (save) => {
     const { businessRescue: _notYetBuilt, ...prior } = save;
     return { ...prior, version: 44 };
   },
+  /**
+   * v42 -> v43: Ticket 0707 — what has been said yes to this year. Nothing has been, in any
+   * older save, so the record is empty for year 0. What a v42 save already carries is kept.
+   */
   42: (save) => {
     const old =
       typeof save['celebrities'] === 'object' && save['celebrities'] !== null
@@ -1340,6 +1354,7 @@ export function validateCurrentSave(
       'people'
     ], Array.isArray((candidate['circle'] as Record<string, unknown> | undefined)?.['people'])),
     // Ticket 0501. A list, however short.
+    require('household', candidate['household'], householdOk(candidate['household'])),
     require('homes', candidate['homes'], Array.isArray(candidate['homes'])),
     // Ticket 0504. The same for cars.
     require('vehicles', candidate['vehicles'], Array.isArray(candidate['vehicles'])),
@@ -1373,4 +1388,24 @@ export function validateCurrentSave(
     return err({ kind: 'corrupt', detail: books.join('; ') });
   }
   return ok(candidate as unknown as CurrentSaveGame);
+}
+
+/** P2: reject malformed living state before a loaded year can use it. */
+function householdOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row['standard'] === 'number' &&
+    Number.isFinite(row['standard']) &&
+    row['standard'] >= SUBSISTENCE &&
+    (row['housing'] === 'withFamily' ||
+      row['housing'] === 'ownPlace' ||
+      row['housing'] === 'owned') &&
+    isLifestyleTier(row['lifestyle']) &&
+    ['leftHomeAt', 'movedBackAt'].every(
+      (key) =>
+        row[key] === undefined ||
+        (typeof row[key] === 'number' && Number.isInteger(row[key]) && row[key] >= 0),
+    )
+  );
 }

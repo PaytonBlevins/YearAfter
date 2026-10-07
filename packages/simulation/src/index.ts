@@ -57,3 +57,5 @@ export * from './fame-work';
 export * from './manual-posts';
 
 export * from './business-rescue';
+
+export * from './lifestyle';

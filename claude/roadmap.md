@@ -1026,6 +1026,14 @@ balance by age, and 0502 and 0504 each had to re-tune because of it
 two samples again. Note 19 is closely related: the monthly outflow figure counts
 income tax, which makes a high earner's number look larger still.
 
+**P2 implementation:** Payton approved the measured default and explicit Frugal / Comfortable /
+Lavish choices. Built on `feat/playtest-p2-living-costs` (save v45), with a Lifestyle screen linked
+from Living costs, paid-year happiness effects and immediately saved preferences. Measured actual
+$250,000 gross pay leaves $165,000 after $85,000 tax; settled Comfortable living is $82,238 at zero
+liquid wealth and $87,930 at $1m, rather than the historical estimate above. Both 150-life samples
+remain within the existing 55–64 and 65–74 net-worth bands. Details: `playtest-p2-living-costs.md`.
+The explicit tier-selector override is recorded in approved-decisions; no full expense breakdown.
+
 **33. Check the "car cost" while in there.** Payton's car costs $5,500 a year
 and the outflow is $20,000. The car is not the problem (finding 32), but it's
 worth confirming that the $5,500 isn't also being left inside the living bill.
@@ -1034,6 +1042,23 @@ standard that share is about $14,000, which is more than the car costs. So a
 rich owner's bill drops by more than the car adds. That's a second reason
 the high-income number is wrong, in the other direction. It should be a
 dollar amount scaled to the car's real running cost, not a share of the whole bill.
+
+**P2 implementation of 33:** Removed VEHICLE_SHARE. Owning a car replaces an embedded dollar
+allowance capped at actual running costs and $1,600 scaled by location, household and housing,
+independent of income/tier. Expensive car commitments add their real dollars; the living model
+no longer hides the full extra car payment by squeezing it out of generic spending. Mortgage
+squeeze and hardship protection remain. Literal tests replace the superseded 8.5% contract.
+
+### Found by P2
+
+- **Old-age accumulation remains for P15.** At 75+, the two passive samples still have median net
+  worth $497,442 and $447,058. P2 does not introduce a retirement spending horizon.
+- **Business-finance tests coupled quotes to a car-purchase history.** The changed living curve
+  moved a seeded car purchase and introduced an auto loan, changing the business marketplace and
+  lender obligations. P2 stabilizes those tests' original $47,353 cash and debt-free $11,200 car
+  fixture; every literal business quote, loan and ledger assertion stays intact.
+- **Project mirroring and device checks remain open.** No project_write or native device runtime
+  is available in this session; repo docs and real-store component checks are complete.
 
 ### Found by the v0.06 measurement and 0601
 
