@@ -65,15 +65,18 @@ mirroring remain open. PR #16: https://github.com/PaytonBlevins/YearAfter/pull/1
 (targets main, depends on P1 #13, P2 #14 and P3 #15). Implementation CI run 94 confirms the
 same 22-note formatting failure and skips later gates. P5 was subsequently authorized; see its measurement note below.
 
-**P5 measurement update:** Payton authorized P5 on 7 October. Agent B published its separate
-claim on `feat/playtest-p5-career-listings`, following P4 #16 while main remains `beff25a`.
-Twelve listings with two reserved study/training matches were measured, then all prototype
-source restored byte for byte. Played-life median jobs seen rises 93 → 96; passive first-job
-age remains median 17. Two matches are always shown when two are eligible in the program
-corpus. A new Architectural Studies graduate has only one eligible matching job, so the
-recommendation is to show all available matches without bypassing qualification/experience
-gates. That exception awaits Payton's decision. No implementation, save bump, final verify
-or sabotage completion is claimed. Details: `playtest-p5-career-listings.md`. P6 waits.
+**P5 implementation update:** Payton approved the scarce-pool exception on 7 October. Agent B
+built twelve listings with two reserved eligible study/training matches on
+`feat/playtest-p5-career-listings`, following P4 #16 while main remains `beff25a`. Fewer than two
+matches means all available matches plus other eligible work; no qualification/experience
+bypass. Current/last major and held licenses feed curation; hiring odds and first-offer chance
+stay. Save v45 and TICKET 0708 remain. Played-life median jobs seen rises 93 → 96; passive
+first-job age stays median 17. The Jobs screen renders the full board and opens each job's
+existing details. All 15 typechecks and 2,670 tests pass; full verify stops on the nine baseline
+catalog mismatches. All 29 behavior-changing mutations caught after repairing two test gaps;
+one additional equivalent survivor is documented. Formatting still fails 22 historical notes;
+P5's files pass. Details: `playtest-p5-career-listings.md`.
+P6 waits for Payton's go-ahead.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

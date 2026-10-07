@@ -106,6 +106,13 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   choices remain. Context thresholds halve as proposed: ledger 0.25%, screen 1.5%, annual loss
   3% and annual gain 2.5%. Existing records retain historical values; future settlements use
   the new coefficients. No save bump. See `playtest-p4-business-economy.md`.
+- **P5 scarce study/training matches approved by Payton:** show twelve eligible listings,
+  reserving two matching the existing studied-major tracks or held-license tracks. When fewer
+  than two matching jobs qualify, show every available match and fill the remaining places
+  with other eligible work. Never duplicate a row or bypass age, education, license or career
+  reach to fill the quota. Hiring odds and first-job offer chance stay. The current/last major
+  and all held licenses supply matching information; no degree-subject history is promised.
+  See `playtest-p5-career-listings.md`.
 - **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
   account creation for channels.
 

@@ -162,7 +162,16 @@ const median = (values: readonly number[]) => {
 
 /** A thirty-year-old renter with something in the bank — the ordinary buyer. */
 const adult = SAMPLES.find(
-  (state) => state.player.age === 30 && state.homes.length === 0 && state.vehicles.length === 0,
+  // P5 can put the first sampled renter into a richer, indebted career.
+  // Select the test's stated ordinary, debt-free working buyer explicitly;
+  // retain the luxury threshold and every financing assertion unchanged.
+  (state) =>
+    state.player.age === 30 &&
+    state.homes.length === 0 &&
+    state.vehicles.length === 0 &&
+    state.employment.job !== undefined &&
+    state.loans.length === 0 &&
+    carMeansOf(state) < LUXURY_MEANS,
 )!;
 const buyer = topUp(adult, 60_000);
 const rich = topUp(adult, 2_000_000);

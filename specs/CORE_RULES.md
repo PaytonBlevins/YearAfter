@@ -3069,3 +3069,38 @@ multipliers with `1 ± threshold` keeps that exact boundary visible. Whole-perce
 needs a unit of float tolerance around one, so the same 1.5% does not say 1% after rounding.
 Test both signs at the boundary and just inside it, and the text as well as the row's presence.
 A constant's literal test cannot prove that its caller uses it.
+
+### 13.144 A reserved slot cannot manufacture an eligible choice
+
+P5 found that Architectural Studies graduates had one eligible architecture job, not two.
+Count the matching eligible pool before promising a quota. Show all available matches when
+it is scarce, as approved, and fill remaining slots without duplicates or bypassing gates.
+Use the same study/license matcher for curation and calibration; verify hostile draws where
+all unrelated jobs rank ahead of the field, not only favorable random boards.
+
+### 13.145 Weight share is not inclusion probability
+
+Sorting uniform draws divided by weights is a weighted ranking, not a linear slots-times-share
+lottery. Reserving places also changes which pools and slots a candidate competes for. P5
+replaced the starvation guard's linear proxy with conservative sufficient-event bounds for
+both reserved and general selection, retaining the zero-reach and 95% single-life checks.
+Take the larger of overlapping event bounds; adding them can claim a probability above one.
+Test certain scarce-pool inclusion, displaced general slots and empirical inclusion alongside
+the mathematical bound. Preserve historical measurements as measurements, not exact odds.
+
+### 13.146 Exercise both paths through a curated board
+
+Hostile study draws prove that reserved slots survive a crowded general pool. Favorable study
+draws prove that those reserved winners are removed before filling the rest. P5 sabotage found
+that the first case alone missed duplicate winners in the second. Likewise, a board's early
+age return can mask a broken direct-command gate: test eligibility and application commands
+without relying on the screen to keep a child out.
+
+### 13.147 Hold a comparison's causes and fixtures constant
+
+Changing a career board changes seeded lives' income, homes and cohort membership. Literal
+underwriting tests need explicit original income/assets, not newly tuned expected quotes.
+A living-cost comparison should capture the bill before shortfall clamping, with equal income,
+and verify the real annual caller. A parenting-effect check should compare the same parent's
+state with and without that contribution, not changes across different parent/nonparent groups.
+Keep the original effect floors and sabotage the mechanism after repairing the measurement.

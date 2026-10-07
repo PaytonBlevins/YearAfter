@@ -93,8 +93,41 @@ function liveTo(seed: string, age: number): GameState {
 // explicit cash and debt-free $11,200 car so the market/underwriting fixture
 // stays the same. All literal price, deposit, ledger and loan assertions remain.
 const PLAYED_BASE = liveTo('biz-adult', 30);
+// P5's board changes the seed's career and its income. These are literal loan
+// quote tests: hold the previously specified $52,451 earned fixture constant,
+// with a booked correction and matching cash, rather than retuning the quotes.
+const FIXED_EARNINGS = 52_451;
+const INCOME_CORRECTION = FIXED_EARNINGS - earnedOf(PLAYED_BASE);
+const PAY_BASE: GameState = {
+  ...PLAYED_BASE,
+  finance: {
+    ...PLAYED_BASE.finance,
+    balance: dollars(Number(PLAYED_BASE.finance.balance) / 100 + INCOME_CORRECTION),
+    transactions: [
+      ...PLAYED_BASE.finance.transactions.filter(
+        (row) =>
+          row.year !== PLAYED_BASE.world.year ||
+          !['salary', 'commission', 'partner', 'creator'].includes(row.category),
+      ),
+      {
+        id: 'p5-test-fixed-earnings',
+        year: PLAYED_BASE.world.year,
+        age: PLAYED_BASE.player.age,
+        category: 'salary',
+        amount: dollars(FIXED_EARNINGS),
+        source: 'Fixed underwriting fixture',
+      },
+    ],
+  },
+  player: {
+    ...PLAYED_BASE.player,
+    cash: dollars(Number(PLAYED_BASE.player.cash) / 100 + INCOME_CORRECTION),
+  },
+};
 const BASE: GameState = {
-  ...topUp(PLAYED_BASE, 47_353 - Math.floor(Number(PLAYED_BASE.player.cash) / 100)),
+  // The old literal quote fixture was a renter; P5's seed now owns a condo.
+  ...topUp(PAY_BASE, 47_353 - Math.floor(Number(PAY_BASE.player.cash) / 100)),
+  homes: [],
   vehicles: [
     {
       id: 'car:2026:lot.used-2:3',
