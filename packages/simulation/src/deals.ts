@@ -10,6 +10,13 @@
  * at the cheque, so it falls by the unrecovered part when the deal ends.
  */
 
+import {
+  payPurchase,
+  paymentNote,
+  type PurchasePayment,
+  type PaymentProblem,
+} from '@yearafter/finance';
+
 import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
 import { DEAL_KINDS, dealLine } from '@yearafter/content';
 import { dollars, err, ok, stablePick, type Result } from '@yearafter/core';
@@ -72,38 +79,48 @@ function entryFor(state: GameState, text: string, key: string): TimelineEntry {
   });
 }
 
-/** Write a cheque. Money leaves cash at once; the deal is held until it matures. */
+/** Write a cheque with cash or a selected card; the deal is held until it matures. */
 export function placeInDeal(
   state: GameState,
   offerId: string,
   amount: number,
-): Result<GameState, DealRefusal> {
+  payment: PurchasePayment = { kind: 'cash' },
+): Result<GameState, DealRefusal | PaymentProblem> {
   const offer = dealMarket(state).find((row) => row.id === offerId);
   if (!offer) return err({ kind: 'notOffered' });
   const cash = Math.floor(Number(state.player.cash) / 100);
   const made = placeDeal({
     offer,
     amount,
-    liquid: cash,
+    liquid: payment.kind === 'cash' ? cash : Number.POSITIVE_INFINITY,
     held: state.deals,
     year: state.world.year,
     seed: state.rng.getSeed(),
   });
   if (!made.ok) return err(made.error);
   const deal = made.value;
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'investment',
-    amount: dollars(-amount),
-    source: `Private deal — ${deal.name}`,
-  });
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(amount),
+    'investment',
+    `Private deal — ${deal.name}`,
+    payment,
+  );
+  if (!paid.ok) return err({ kind: 'payment', reason: paid.error });
+  const books = paid.value;
   const entry = entryFor(
     state,
-    wording('placed', deal, { years: String(offer.lockYears) }, `deal:placed:${deal.id}`),
+    wording('placed', deal, { years: String(offer.lockYears) }, `deal:placed:${deal.id}`) +
+      paymentNote(payment),
     `deal:placed:${deal.id}`,
   );
   return ok({
     ...state,
     finance: books.ledger,
+    cards: books.cards,
     deals: [...state.deals, deal],
     player: {
       ...state.player,

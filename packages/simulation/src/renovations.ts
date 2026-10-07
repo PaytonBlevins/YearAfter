@@ -13,12 +13,19 @@
  * player's to choose; nobody is asked about a bowling alley.
  */
 
+import {
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  type PurchasePayment,
+  type PaymentRefusal,
+} from '@yearafter/finance';
+
 import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
 import { RENOVATIONS, findHomeKind, findRenovation, type Renovation } from '@yearafter/content';
 import { dollars, err, mixedUnit, ok, type Result } from '@yearafter/core';
 import {
   annualExpenseOf,
-  post,
   renovated,
   renovationCostOf,
   renovationRefusalFor,
@@ -72,9 +79,11 @@ export type RenovateError =
   | 'needs-first'
   | 'already-done'
   | 'too-soon'
-  | 'cannot-afford';
+  | 'cannot-afford'
+  | PaymentRefusal;
 
 export const RENOVATE_ERROR_LABELS: Readonly<Record<RenovateError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
   'no-such-home': "You don't own that place any more.",
   'no-such-renovation': "That isn't something a builder does.",
   'not-for-this-home': "There's no room for that here.",
@@ -104,7 +113,7 @@ const nameOf = (home: OwnedHome): string =>
   (findHomeKind(home.kindId)?.noun ?? 'the place').replace(/^an? /, 'the ');
 
 /**
- * Pay a builder. Cash only, and spending (`housing`): what the home is worth
+ * Pay a builder with cash or a selected card. Spending (`housing`): what the home is worth
  * more for it shows in the home's value, which is the part that is still
  * money.
  */
@@ -112,6 +121,7 @@ export function renovate(
   state: GameState,
   homeId: string,
   renovationId: string,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<RenovatedHome, RenovateError> {
   const home = state.homes.find((candidate) => candidate.id === homeId);
   if (!home) return err('no-such-home');
@@ -120,21 +130,29 @@ export function renovate(
   const refusal = renovationRefusalFor(renovation, home, state.world.year);
   if (refusal) return err(REFUSAL_ERRORS[refusal]);
   const cost = renovationCostOf(renovation, home);
-  if (Number(state.player.cash) / 100 < cost) return err('cannot-afford');
+  if (payment.kind === 'cash' && Number(state.player.cash) / 100 < cost)
+    return err('cannot-afford');
 
   const where = nameOf(home);
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'housing',
-    amount: dollars(-cost),
-    source: `${renovation.name} at ${where}`,
-  });
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(cost),
+    'housing',
+    `${renovation.name} at ${where}`,
+    payment,
+  );
+  if (!paid.ok) return err(paid.error);
+  const books = paid.value;
   const next = renovated(home, renovation, cost, state.world.year);
   const sequence = state.player.timeline.filter((entry) => entry.age === state.player.age).length;
   const entry = createTimelineEntry({
     age: state.player.age,
     year: state.world.year,
     kind: 'passive',
-    text: `Had ${renovation.phrase} put in at ${where}. ${money(cost)}.`,
+    text: `Had ${renovation.phrase} put in at ${where}. ${money(cost)}.` + paymentNote(payment),
     id: `t:${state.world.year}:home:reno:${home.id}:${renovation.id}`,
     sequence,
   });
@@ -142,6 +160,7 @@ export function renovate(
     state: {
       ...state,
       finance: books.ledger,
+      cards: books.cards,
       homes: state.homes.map((candidate) => (candidate.id === home.id ? next : candidate)),
       player: {
         ...state.player,

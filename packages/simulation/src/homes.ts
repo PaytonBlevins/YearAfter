@@ -13,6 +13,14 @@
  */
 
 import {
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  type PurchasePayment,
+  type PaymentRefusal,
+} from '@yearafter/finance';
+
+import {
   appendRecord,
   appendToTimeline,
   createTimelineEntry,
@@ -296,9 +304,10 @@ export const mortgageOfferFor = (state: GameState, listing: HomeListing): Mortga
   );
 
 export type BuyHomeError =
-  'no-such-listing' | 'already-owned' | 'cannot-afford' | 'mortgage-refused';
+  'no-such-listing' | 'already-owned' | 'cannot-afford' | 'mortgage-refused' | PaymentRefusal;
 
 export const BUY_HOME_ERROR_LABELS: Readonly<Record<BuyHomeError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
   'no-such-listing': "That one isn't for sale any more.",
   'already-owned': 'You already own it.',
   'cannot-afford': "You don't have enough to pay for it outright.",
@@ -342,7 +351,9 @@ export function buyHome(
   state: GameState,
   listingId: string,
   how: 'cash' | 'mortgage',
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<BoughtHome, BuyHomeError> {
+  if (how !== 'cash' && payment.kind === 'card') return err('payment-finance-conflict');
   const listing = anyListing(state, listingId);
   if (!listing) return err('no-such-listing');
   if (state.homes.some((home) => home.id === listing.id)) return err('already-owned');
@@ -359,7 +370,7 @@ export function buyHome(
       balance: dollars(offer.principal),
       termLeft: offer.product.termYears,
     };
-  } else if (Number(state.player.cash) / 100 < listing.askingPrice) {
+  } else if (payment.kind === 'cash' && Number(state.player.cash) / 100 < listing.askingPrice) {
     return err('cannot-afford');
   }
 
@@ -382,24 +393,33 @@ export function buyHome(
     ...(listing.rental ? { letting: emptyLetting(listing.units) } : {}),
   };
 
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'property',
-    amount: dollars(-paid),
-    source: mortgage
+  const paymentResult = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(paid),
+
+    'property',
+    mortgage
       ? `Deposit on ${listing.noun} in ${listing.regionName}`
       : `${listing.name} in ${listing.regionName}, bought outright`,
-  });
+    payment,
+  );
+  if (!paymentResult.ok) return err(paymentResult.error);
+  const books = paymentResult.value;
 
   const first =
     state.homes.length === 0 && !state.player.records.some((r) => r.category === 'property');
   const text = mortgage
     ? `Bought ${listing.noun} for ${money(listing.askingPrice)}, with ${money(paid)} down and a mortgage for the rest.`
     : `Bought ${listing.noun} for ${money(listing.askingPrice)}, outright.`;
-  const entry = line(state, text, `home:bought:${listing.id}`, 'milestone');
+  const entry = line(state, text + paymentNote(payment), `home:bought:${listing.id}`, 'milestone');
 
   const next: GameState = {
     ...state,
     finance: books.ledger,
+    cards: books.cards,
     homes: [...state.homes, home],
     player: {
       ...state.player,

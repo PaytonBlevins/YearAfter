@@ -21,6 +21,14 @@
  */
 
 import {
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  type PurchasePayment,
+  type PaymentRefusal,
+} from '@yearafter/finance';
+
+import {
   appendRecord,
   appendToTimeline,
   createTimelineEntry,
@@ -310,9 +318,10 @@ export function inspectionOf(state: GameState, listing: VehicleListing): Inspect
 }
 
 export type InspectError =
-  'no-such-listing' | 'not-inspectable' | 'already-inspected' | 'cannot-afford';
+  'no-such-listing' | 'not-inspectable' | 'already-inspected' | 'cannot-afford' | PaymentRefusal;
 
 export const INSPECT_ERROR_LABELS: Readonly<Record<InspectError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
   'no-such-listing': "That car isn't for sale any more.",
   'not-inspectable': "It's new. There's nothing to inspect.",
   'already-inspected': "You've already had it looked at.",
@@ -323,22 +332,32 @@ export const INSPECT_ERROR_LABELS: Readonly<Record<InspectError, string>> = {
 export function inspectVehicle(
   state: GameState,
   listingId: string,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<{ readonly state: GameState; readonly view: InspectionView }, InspectError> {
   const listing = findVehicleListing(state, listingId);
   if (!listing) return err('no-such-listing');
   if (!listing.inspectable) return err('not-inspectable');
   if ((state.inspected ?? []).includes(listing.id)) return err('already-inspected');
-  if (Number(state.player.cash) / 100 < INSPECTION_FEE) return err('cannot-afford');
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'vehicle',
-    amount: dollars(-INSPECTION_FEE),
-    source: `Inspection on a ${listing.modelYear} ${listing.name}`,
-  });
+  if (payment.kind === 'cash' && Number(state.player.cash) / 100 < INSPECTION_FEE)
+    return err('cannot-afford');
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(INSPECTION_FEE),
+    'vehicle',
+    `Inspection on a ${listing.modelYear} ${listing.name}`,
+    payment,
+  );
+  if (!paid.ok) return err(paid.error);
+  const books = paid.value;
   // Last year's ids can never match a listing again; keep only this year's.
   const thisYear = `car:${state.world.year}:`;
   const next: GameState = {
     ...state,
     finance: books.ledger,
+    cards: books.cards,
     player: { ...state.player, cash: books.ledger.balance },
     inspected: [...(state.inspected ?? []).filter((id) => id.startsWith(thisYear)), listing.id],
   };
@@ -403,9 +422,11 @@ export type BuyVehicleError =
   | 'cannot-afford'
   | 'loan-refused'
   | 'no-such-trade-in'
-  | 'underwater';
+  | 'underwater'
+  | PaymentRefusal;
 
 export const BUY_VEHICLE_ERROR_LABELS: Readonly<Record<BuyVehicleError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
   'no-such-listing': "That car isn't for sale any more.",
   'too-young': "You're too young to buy a car.",
   'cannot-afford': "You don't have enough to pay for it outright.",
@@ -477,7 +498,9 @@ export function buyVehicle(
   listingId: string,
   how: 'cash' | 'loan',
   tradeInId?: string,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<BoughtVehicle, BuyVehicleError> {
+  if (how !== 'cash' && payment.kind === 'card') return err('payment-finance-conflict');
   const listing = findVehicleListing(state, listingId);
   if (!listing) return err('no-such-listing');
   if (state.player.age < SHOP_FROM_AGE) return err('too-young');
@@ -507,7 +530,7 @@ export function buyVehicle(
       balance: dollars(offer.principal),
       termLeft: offer.product.termYears,
     };
-  } else if (Number(current.player.cash) / 100 < price) {
+  } else if (payment.kind === 'cash' && Number(current.player.cash) / 100 < price) {
     return err('cannot-afford');
   }
 
@@ -537,13 +560,34 @@ export function buyVehicle(
   };
 
   const classic = found.model.market === 'classic';
-  const books = post(current.finance, current.world.year, current.player.age, {
-    category: 'property',
-    amount: dollars(-paid),
-    source: loan
+  // Trade-in proceeds are applied to this purchase, rather than paid out while charging the full card price.
+  const tradeCredit =
+    payment.kind === 'card' && tradeInId
+      ? Math.min(paid, Math.max(0, Number(current.finance.balance - state.finance.balance) / 100))
+      : 0;
+  const paymentLedger =
+    tradeCredit > 0
+      ? post(current.finance, current.world.year, current.player.age, {
+          category: 'property',
+          amount: dollars(-tradeCredit),
+          source: `Trade-in credit toward ${described(listing, classic)}`,
+        }).ledger
+      : current.finance;
+  const paymentResult = payPurchase(
+    paymentLedger,
+    current.cards,
+    current.world.year,
+    current.player.age,
+    dollars(paid - tradeCredit),
+
+    'property',
+    loan
       ? `Down payment on ${described(listing, classic)}`
       : `Bought ${described(listing, classic)}`,
-  });
+    payment,
+  );
+  if (!paymentResult.ok) return err(paymentResult.error);
+  const books = paymentResult.value;
 
   const first = !current.player.records.some((record) =>
     record.label.startsWith('Bought a first car'),
@@ -551,11 +595,19 @@ export function buyVehicle(
   const text = loan
     ? `Bought ${described(listing, classic)} for ${money(price)}, with ${money(paid)} down and the rest on finance.`
     : `Bought ${described(listing, classic)} for ${money(price)}.`;
-  const entry = line(current, text, `car:bought:${listing.id}`, 'milestone');
+  const entry = line(
+    current,
+    text +
+      (tradeCredit > 0 ? ` The trade-in covered ${money(tradeCredit)}.` : '') +
+      paymentNote(payment),
+    `car:bought:${listing.id}`,
+    'milestone',
+  );
 
   const next: GameState = {
     ...current,
     finance: books.ledger,
+    cards: books.cards,
     vehicles: [...current.vehicles, vehicle],
     player: {
       ...current.player,

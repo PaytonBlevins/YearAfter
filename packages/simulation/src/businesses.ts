@@ -18,6 +18,14 @@
  */
 
 import {
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  type PurchasePayment,
+  type PaymentRefusal,
+} from '@yearafter/finance';
+
+import {
   appendRecord,
   appendToTimeline,
   createTimelineEntry,
@@ -411,10 +419,11 @@ export interface Financing {
   readonly amount: number;
 }
 
-export type FinanceError = BusinessLoanRefusal | 'no-such-product';
+export type FinanceError = BusinessLoanRefusal | 'no-such-product' | PaymentRefusal;
 
 export const FINANCE_ERROR_LABELS: Readonly<Record<FinanceError, string>> = {
   ...BUSINESS_LOAN_REFUSALS,
+  ...PAYMENT_REFUSAL_LABELS,
   'no-such-product': "That isn't a loan anybody offers.",
 };
 
@@ -525,6 +534,7 @@ export function openBusiness(
   state: GameState,
   typeId: string,
   finance?: Financing,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<OpenedBusiness, OpenRefusal | FinanceError> {
   const type = findBusinessType(typeId);
   if (!type || !businessMarket(state).some((row) => row.id === type.id)) {
@@ -535,31 +545,41 @@ export function openBusiness(
 
   const name = nameFor(state, type);
   const id = `biz:${state.world.year}:${type.id.replace('biz.', '')}:${state.businesses.length}`;
+  if (finance && payment.kind === 'card') return err('payment-finance-conflict');
   const loan = borrowed(state, purchaseFor(state, 'open', cost, 0), id, `to open ${name}`, finance);
   if (!loan.ok) return err(loan.error);
-  if (Number(state.player.cash) / 100 + loan.value.amount < cost) return err('cannot-afford');
+  if (payment.kind === 'cash' && Number(state.player.cash) / 100 + loan.value.amount < cost)
+    return err('cannot-afford');
 
   const luck = luckFrom(normalFrom(`${state.rng.getSeed()}:${id}:luck`));
   const business = newBusiness(type, id, name, state.world.year, luck);
 
-  const books = post(loan.value.ledger, state.world.year, state.player.age, {
-    category: 'property',
-    amount: dollars(-cost),
-    source: `Opened ${name}`,
-  });
+  const paymentResult = payPurchase(
+    loan.value.ledger,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(cost),
+    'property',
+    `Opened ${name}`,
+    payment,
+  );
+  if (!paymentResult.ok) return err(paymentResult.error);
+  const books = paymentResult.value;
   const first =
     state.businesses.length === 0 && !state.player.records.some((r) => r.category === 'business');
   const entry = line(
     state,
     `Opened ${name}, a ${type.name.toLowerCase()}. It took ${money(cost)} to open the doors${
       loan.value.amount > 0 ? `, ${money(loan.value.amount)} of it borrowed` : ''
-    }.`,
+    }.` + paymentNote(payment),
     `biz:opened:${id}`,
     'milestone',
   );
   const next: GameState = {
     ...state,
     finance: books.ledger,
+    cards: books.cards,
     loans: loan.value.loans,
     businesses: [...state.businesses, business],
     player: {
@@ -660,6 +680,7 @@ export function expandBusiness(
   state: GameState,
   id: string,
   finance?: Financing,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<Expanded, ExpandError> {
   const business = findBusiness(state, id);
   const type = business ? findBusinessType(business.typeId) : undefined;
@@ -669,6 +690,7 @@ export function expandBusiness(
   if (refusal) return err(refusal);
 
   const cost = branchCostFor(type);
+  if (finance && payment.kind === 'card') return err('payment-finance-conflict');
   const loan = borrowed(
     state,
     purchaseFor(state, 'expand', cost, 0, id),
@@ -677,19 +699,27 @@ export function expandBusiness(
     finance,
   );
   if (!loan.ok) return err(loan.error);
-  if (Number(state.player.cash) / 100 + loan.value.amount < cost) return err('cannot-afford');
+  if (payment.kind === 'cash' && Number(state.player.cash) / 100 + loan.value.amount < cost)
+    return err('cannot-afford');
 
-  const books = post(loan.value.ledger, state.world.year, state.player.age, {
-    category: 'property',
-    amount: dollars(-cost),
-    source: `Opened another ${business.name}`,
-  });
+  const paymentResult = payPurchase(
+    loan.value.ledger,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(cost),
+    'property',
+    `Opened another ${business.name}`,
+    payment,
+  );
+  if (!paymentResult.ok) return err(paymentResult.error);
+  const books = paymentResult.value;
   const grown = withBranch(business, type, state.world.year);
   const entry = line(
     state,
     `Opened another location of ${business.name}. It took ${money(cost)} to fit out and staff${
       loan.value.amount > 0 ? `, ${money(loan.value.amount)} of it borrowed` : ''
-    }.`,
+    }.` + paymentNote(payment),
     `biz:expanded:${business.id}:${grown.branches.length}`,
     'milestone',
   );
@@ -697,6 +727,7 @@ export function expandBusiness(
     state: {
       ...state,
       finance: books.ledger,
+      cards: books.cards,
       loans: loan.value.loans,
       businesses: state.businesses.map((row) => (row.id === id ? grown : row)),
       player: {
@@ -831,6 +862,7 @@ export function buyBusiness(
   state: GameState,
   listingId: string,
   finance?: Financing,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<OpenedBusiness, BuyRefusal> {
   if (state.player.age < OPEN_FROM_AGE) return err('too-young');
   if (state.businesses.length >= MAX_BUSINESSES) return err('too-many');
@@ -838,6 +870,7 @@ export function buyBusiness(
   const type = listing ? findBusinessType(listing.typeId) : undefined;
   if (!listing || !type) return err('no-such-listing');
 
+  if (finance && payment.kind === 'card') return err('payment-finance-conflict');
   const loan = borrowed(
     state,
     purchaseFor(state, 'buy', listing.ask, reportedProfitOf(listing)),
@@ -846,22 +879,29 @@ export function buyBusiness(
     finance,
   );
   if (!loan.ok) return err(loan.error);
-  if (Number(state.player.cash) / 100 + loan.value.amount < listing.ask)
+  if (payment.kind === 'cash' && Number(state.player.cash) / 100 + loan.value.amount < listing.ask)
     return err('cannot-afford');
 
   const business = businessBought(listing);
-  const books = post(loan.value.ledger, state.world.year, state.player.age, {
-    category: 'property',
-    amount: dollars(-listing.ask),
-    source: `Bought ${listing.name}`,
-  });
+  const paymentResult = payPurchase(
+    loan.value.ledger,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(listing.ask),
+    'property',
+    `Bought ${listing.name}`,
+    payment,
+  );
+  if (!paymentResult.ok) return err(paymentResult.error);
+  const books = paymentResult.value;
   const first =
     state.businesses.length === 0 && !state.player.records.some((r) => r.category === 'business');
   const entry = line(
     state,
     `Bought ${listing.name}, a ${type.name.toLowerCase()} that had been trading for ${listing.years} years, for ${money(listing.ask)}${
       loan.value.amount > 0 ? `, ${money(loan.value.amount)} of it borrowed` : ''
-    }.`,
+    }.` + paymentNote(payment),
     `biz:bought:${listing.id}`,
     'milestone',
   );
@@ -869,6 +909,7 @@ export function buyBusiness(
     state: {
       ...state,
       finance: books.ledger,
+      cards: books.cards,
       loans: loan.value.loans,
       businesses: [...state.businesses, business],
       player: {

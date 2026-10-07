@@ -19,6 +19,9 @@
  * the answer arrives as an outcome card like every other application.
  */
 
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
+import { dollars } from '@yearafter/core';
+
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import {
@@ -65,7 +68,6 @@ export function HomesScreen() {
 
   const listings = homeListings(state);
   const rentals = rentalListings(state);
-  const cash = Math.floor(Number(state.player.cash) / 100);
   const home = residenceOf(state.homes);
   const others = otherPropertyOf(state.homes);
 
@@ -162,7 +164,6 @@ export function HomesScreen() {
     list.map((listing, index) => {
       const offer = mortgageOfferFor(state, listing);
       const owned = state.homes.some((candidate) => candidate.id === listing.id);
-      const outright = cash >= listing.askingPrice;
       return (
         <Fragment key={listing.id}>
           {index > 0 ? <RowDivider /> : null}
@@ -198,15 +199,16 @@ export function HomesScreen() {
                   {offer.because ? MORTGAGE_REFUSAL_LABELS[offer.because] : ''}
                 </Text>
               )}
-              {outright ? (
-                <ActionButton
-                  label={`Buy it outright — ${money(listing.askingPrice)}`}
-                  onPress={() => {
-                    buyAHome(listing.id, 'cash');
-                    setOpen(undefined);
-                  }}
-                />
-              ) : null}
+              <PurchasePaymentChoices
+                purchaseName={listing.name}
+                total={dollars(listing.askingPrice)}
+                cash={state.player.cash}
+                cards={state.cards}
+                onPay={(payment) => {
+                  buyAHome(listing.id, 'cash', payment);
+                  setOpen(undefined);
+                }}
+              />
             </>
           ) : null}
         </Fragment>

@@ -970,18 +970,18 @@ row (and send it to Homes), and give cars and valuables their own rows, or
 rename the row "Things you own" and send it to the Assets screen. Net worth is
 unaffected.
 
-**31. Credit cards lack an explicit purchase-payment choice.** — **Payton:
-return to this.** The original note said balances could only come from fees and
-interest; that conflicts with the existing code. `advanceYear` calculates the
-year's uncovered costs, calls `drawFrom` on available cards before posting the
-bills, and records the advance as a `debt` row ("Put on the … card"). Cards do
-cover ordinary shortfalls automatically; `finance/cards.ts` updates their balances.
-There is still no per-purchase "Pay with card" control for a car, store,
-auction or renovation. Payton's request that cards be a real way to pay remains
-open; this correction does not choose a new payment model. The original options
-were explicit purchase payment or automatic ordinary-living charges. Any change
-needs its credit/utilization and reward effects measured. Related to findings
-24 (cars mostly cash) and 26 (renovations cash only).
+**31. Explicit purchase payment choices.** — **Built by Agent B; PR #10 awaiting
+review and device checks.** Payton authorized the engine on 6 October. Cash or
+one selected card pays the full eligible purchase; available credit, frozen
+status and the confirmed price are checked by the engine. Shopping, homes,
+vehicles/inspections/modifications, renovations, auctions, businesses and public
+investment screens use the selector. Private-deal and creator purchase commands
+also accept it; those screens are separate work. Auctions charge only wins at
+the final premium-inclusive price. Card-funded transfers stay transfers, and
+borrowed funds aren't income. No balance numbers or save format changed.
+See `claude/purchase-payment-contract.md` for contracts, checks and remaining
+work. Existing annual shortfall draws remain in place. Related findings 24
+and 26 now have explicit card purchase paths where the card can cover the cost.
 
 **32. Living costs scale with income to an absurd degree.** — **Payton: return
 to this. He has said lifestyle tiers are acceptable if that is what it takes.**

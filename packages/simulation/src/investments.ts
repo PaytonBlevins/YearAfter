@@ -17,6 +17,13 @@
  * rather than a free pass (CORE_RULES 13.53).
  */
 
+import {
+  payPurchase,
+  paymentNote,
+  type PurchasePayment,
+  type PaymentRefusal,
+} from '@yearafter/finance';
+
 import { cents, dollars, err, ok, type Result } from '@yearafter/core';
 import {
   INSTRUMENTS,
@@ -128,7 +135,7 @@ export const estateOf = (state: GameState): Estate => ({
 export const pledgeableOf = (state: GameState): number =>
   pledgeableAgainst(state.prices, state.portfolio);
 
-export type InvestError = TradeRefusal;
+export type InvestError = TradeRefusal | PaymentRefusal;
 
 export interface InvestOutcome {
   readonly state: GameState;
@@ -142,13 +149,20 @@ export function invest(
   state: GameState,
   instrumentId: string,
   amount: number,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<InvestOutcome, InvestError> {
   const instrument = findInstrument(instrumentId);
   if (!instrument) return err('noSuchInstrument');
 
   const cash = Math.round(Number(state.player.cash) / 100);
   const wanted = Math.round(amount);
-  const refusal = canBuy(state.prices, state.portfolio, instrument, wanted, cash);
+  const refusal = canBuy(
+    state.prices,
+    state.portfolio,
+    instrument,
+    wanted,
+    payment.kind === 'cash' ? cash : Number.POSITIVE_INFINITY,
+  );
   if (refusal) return err(refusal);
 
   const bought = buyUnits(state.prices, state.portfolio, instrumentId, wanted);
@@ -169,23 +183,32 @@ export function invest(
     account. Charging what was asked and keeping the difference is the same
     defect as the card row that said "some" and spent everything.
   */
-  const moved = moveMoney(state, {
-    category: 'investment',
-    amount: dollars(-bought.spent),
-    source: `${instrument.name} — bought`,
-  });
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(bought.spent),
+    'investment',
+    `${instrument.name} — bought`,
+    payment,
+  );
+  if (!paid.ok) return err(paid.error);
+  const moved = paid.value;
 
   return ok({
     state: {
       ...state,
-      player: withCash(state.player, moved),
-      finance: moved.finance,
+      player: { ...state.player, cash: moved.ledger.balance },
+      finance: moved.ledger,
+      cards: moved.cards,
       portfolio: bought.holdings,
     },
     title: 'Bought',
-    body: `${units(bought.units)} of ${instrument.name} at ${price(
-      priceOf(state.prices, instrumentId),
-    )}, for ${money(bought.spent)}.`,
+    body:
+      `${units(bought.units)} of ${instrument.name} at ${price(
+        priceOf(state.prices, instrumentId),
+      )}, for ${money(bought.spent)}.` + paymentNote(payment),
     good: true,
   });
 }
@@ -272,6 +295,27 @@ const NOTHING_DOING: TradePreview = {
   penalty: 0,
   refusal: 'notEnoughForOneUnit',
 };
+
+export function quoteInvestment(
+  state: GameState,
+  instrumentId: string,
+  amount: number,
+): TradePreview {
+  const instrument = findInstrument(instrumentId);
+  if (!instrument) return { ...NOTHING_DOING, refusal: 'noSuchInstrument' };
+  const wanted = Math.max(0, Math.round(amount));
+  if (wanted <= 0 || !Number.isSafeInteger(wanted)) return NOTHING_DOING;
+  const refusal = canBuy(
+    state.prices,
+    state.portfolio,
+    instrument,
+    wanted,
+    Number.POSITIVE_INFINITY,
+  );
+  if (refusal) return { ...NOTHING_DOING, refusal };
+  const bought = buyUnits(state.prices, state.portfolio, instrumentId, wanted);
+  return { units: bought.units, cash: bought.spent, penalty: 0, refusal: undefined };
+}
 
 export function previewBuy(state: GameState, instrumentId: string, dollars: number): TradePreview {
   const instrument = findInstrument(instrumentId);
