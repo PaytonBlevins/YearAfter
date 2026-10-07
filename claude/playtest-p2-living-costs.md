@@ -204,7 +204,11 @@ failures did not. **29 mutations caught; none missed.**
   historical claude notes**, the same set reported for P1. No mass formatting is included.
 - GitHub's available status/run readers return no statuses or pull-request workflow runs for
   main `beff25a`; a green current-main Actions run cannot be confirmed. Do not call local verify
-  green or claim that CI cleared the byte-format issue.
+  green or claim that CI cleared the byte-format issue. PR #14 CI run 82 on `d722e53`
+  subsequently failed at Format check; its downloaded log lists exactly the same 22 historical
+  notes as local format:check. The later typecheck/test/content steps were skipped in that CI run;
+  the complete local typecheck/test run above did execute. Run:
+  https://github.com/PaytonBlevins/YearAfter/actions/runs/37555313236.
 - No `project_write` tool is exposed, so the changed docs cannot be mirrored to the Claude Project
   here. Repo docs are authoritative for this work. Native/on-device checks are unavailable; screen
   behavior is verified through the real game provider and repository, not claimed device-tested.
