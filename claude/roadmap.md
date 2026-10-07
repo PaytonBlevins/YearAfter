@@ -1405,3 +1405,22 @@ Agent A's next ticket.
     They show loss/reserve and loan scenarios and confirmed exit actions. B1's
     accept/decline rescue engine and survival measurement remain open with Agent A;
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
+
+## Playtest P1 — business rescue choices (7 October 2026)
+
+Built on `feat/playtest-p1-business-rescue`, pending merge. One yearly review lists all troubled
+businesses, with a separate inject-or-close answer for each. No automatic draw on personal
+cash for losses or loan shortfalls. Existing half-reserve rescue buffer and business balance
+numbers retained. Save v44 carries the unresolved quote; the lender's interest is accrued
+once. Declining uses the normal closure path, subtracts the trading hole, pays the lender
+first and keeps unpaid debt. Death winds down troubled businesses; healthy ones can pass
+on, and closed-business debt reduces the liquid estate before inheritance.
+
+Measured cohort: 9,300 owners across 31 types, five years. Baseline / rescue-if-affordable
+survival both 82.1%; decline-all 63.0%; 37.0% ever need the review. All 7,515 measured
+answers reconcile. This cohort differs from 0604's historical 78.7% (BLS comparison 51%);
+no calibration claim against BLS is made. See `claude/playtest-p1-business-rescue.md`.
+
+**Found by P1:** Other personal debts and division of the estate remain 0508 work;
+P1 only nets debt of closed businesses from liquid inheritance, without building wills.
+Native device checks remain pending. P2 awaits Payton's go-ahead.

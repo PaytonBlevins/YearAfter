@@ -1,3 +1,4 @@
+import { businessRescueOk } from './business-rescue-validation';
 /**
  * Ticket 0005 — save migrations.
  *
@@ -1012,6 +1013,10 @@ const migrations: Readonly<Record<number, Migration>> = {
    * v42 -> v43: Ticket 0707 — what has been said yes to this year. Nothing has been, in any
    * older save, so the record is empty for year 0. What a v42 save already carries is kept.
    */
+  43: (save) => {
+    const { businessRescue: _notYetBuilt, ...prior } = save;
+    return { ...prior, version: 44 };
+  },
   42: (save) => {
     const old =
       typeof save['celebrities'] === 'object' && save['celebrities'] !== null
@@ -1342,6 +1347,7 @@ export function validateCurrentSave(
     require('valuables', candidate['valuables'], Array.isArray(candidate['valuables'])),
     // Ticket 0601. And for what is owned and running.
     require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
+    require('businessRescue', candidate['businessRescue'], businessRescueOk(candidate)),
     // Ticket 0605. And for the private deals.
     require('deals', candidate['deals'], Array.isArray(candidate['deals'])),
     // Ticket 0701. And for the channels, and a number for fame.

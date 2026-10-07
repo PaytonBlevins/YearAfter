@@ -120,7 +120,8 @@ examples; vacations must support the same payment choice when implemented. A13/B
 ### Next batch — business failure warnings
 
 - **A3:** Cash warnings are implemented on `feat/playtest-business-warnings`: the business list flags trouble and the dashboard explains a repeat-loss rescue estimate, loan gap, arrears and existing management/exit choices. Sale and closure require separate confirmation. Review/device checks remain pending.
-- **B1 is still open:** main still takes rescue money automatically. There is no injection/decline command or pause before actual failure. These screens describe the existing rules and mark the figures as scenarios; they do not claim the rescue-choice requirement is built. Details: `claude/playtest-business-warnings.md`.
+- **B1 / P1 is built on `feat/playtest-p1-business-rescue`, pending merge:** one yearly review, separate inject-or-close choices, a saved pause, and lender-first closure. The warning screens now explain the choice; repeat-year estimates remain scenarios. Death winds down troubled businesses and closed-business debt reduces the liquid estate. Details: `claude/playtest-p1-business-rescue.md`.
+
 ### A10 — linked monthly-outflow sources
 
 - Payton chose a linked cost-sources view, retaining spec 20: explain the total and keep detailed costs on existing entity screens. Monthly outflow now opens even when zero and shows the same recorded yearly spending divided by twelve.

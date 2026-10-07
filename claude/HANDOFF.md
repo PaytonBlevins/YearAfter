@@ -20,6 +20,15 @@ until they are done. Read `claude/playtest-rules-brief.md` first. For P1–P16 i
 section 0 and the CORE_RULES, migration and validator limits in section 8. Outside that list, section 0
 still applies. v0.08 and 0508 wait.
 
+**7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
+one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
+inject-or-close choices and no automatic personal-bank rescue. Death winds down troubled
+businesses before inheritance; lenders retain priority. Save v44 is reserved for P1.
+This is the narrow P1–P16 engine/save exception in `playtest-rules-brief.md`; older role
+limits below remain historical. Details and verification: `playtest-p1-business-rescue.md`.
+P2 must wait for Payton's next go-ahead. PR #10 was still unmerged on base `beff25a`;
+P1 was started only after Payton's explicit go-ahead, not an inferred merge.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:

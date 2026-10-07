@@ -82,6 +82,7 @@ import { runPursuitYear } from './pursuits';
 import { withPursuitOffer } from './pursuit-offer';
 import { foreclose, markMissed, runHomesYear, withHomeOffer } from './homes';
 import { markVehiclesMissed, repossess, runVehiclesYear, withVehicleOffer } from './vehicles';
+import { withBusinessRescue } from './business-rescue';
 import { withRenovationOffer } from './renovations';
 import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
@@ -1270,6 +1271,21 @@ export function advanceYear(state: GameState): AdvanceResult {
     `withLifeOffer`'s docblock carries the numbers, including the two orderings
     that were tried and rejected.
   */
+  const rescued = withBusinessRescue(next, businessesYear.rescues);
+  const closingEntries = rescued.player.timeline.filter(
+    (entry) => !next.player.timeline.some((prior) => prior.id === entry.id),
+  );
+  const finalEntries = withinBudget([...budgeted, ...closingEntries]);
+  const reviewed =
+    closingEntries.length > 0
+      ? {
+          ...rescued,
+          player: {
+            ...rescued.player,
+            timeline: finalEntries.reduce(appendToTimeline, state.player.timeline),
+          },
+        }
+      : rescued;
   return {
     /*
       Ticket 0416 — something to join, LAST of the four: a league sign-up should
@@ -1297,7 +1313,7 @@ export function advanceYear(state: GameState): AdvanceResult {
           withHomeOffer(
             withLifeOffer(
               withAnyOffer(
-                withCollegeOffer(repossess(foreclose(next)), health.alive),
+                withCollegeOffer(repossess(foreclose(reviewed)), health.alive),
                 health.alive,
               ),
               health.alive,
@@ -1313,7 +1329,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       ),
       health.alive,
     ),
-    newEntries: budgeted,
+    newEntries: finalEntries,
   };
 }
 
