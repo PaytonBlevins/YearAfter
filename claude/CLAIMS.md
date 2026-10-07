@@ -39,4 +39,6 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | Playtest rules and "return to this" notes (P1–P16, `claude/playtest-rules-brief.md`) | — (paused on this list) | Codex / Agent B (`feat/purchase-payment-choices` first, then one branch per ticket) | assigned 6 Oct, engine authorized by Payton for this list only; nothing started |
 
+| 0802 The other team sports (v0.08) | Claude (Agent A): engine data, tests, docs | — | **Shipped 7 Oct (engine only). No save change; saves still v44, Agent B's are v45 onward.** |
+
 | 0801 The sports engine, with basketball (v0.08) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Shipped 6 Oct (engine only; screens are 0809). Took save v44. Agent B's saves are v45 onward.** |

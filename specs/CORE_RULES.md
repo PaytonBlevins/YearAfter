@@ -3032,3 +3032,27 @@ college signed with a team and went on drawing both salaries. The sabotage run d
 printed life did (`job true` beside `stage pro`). When a new state means "this is what they do for a living",
 list every other state that means the same and decide what ends it (here: signing ends the job; a systemic job
 offer is not raised for a pro; the Career screen's own Apply is still open, finding 87).
+
+### 13.139 When one of a kind becomes one of five, every `find` over the list has decided something
+
+0801 read "the sport team" with `activities.find(sportOfActivity)`, which was right while basketball was the only
+sport, and wrong the day football, baseball, soccer and hockey were added: a life on two teams got whichever was
+joined first, whatever it was best at. Adding the second member of a kind means searching for every place that
+takes the first, and writing down which one should win (here: the sport they have been playing, else the one they
+are best at). A test needs two members present and a standing that disagrees with the order.
+
+### 13.140 A harness that says yes to every question puts the life on every team
+
+The first 0802 measurement read 87–90% for the talent-and-work players, against 95 asked for. The harness answered
+each pending question with its first choice, and the first choice of "activity.offer" is `yes`: the lives were on
+every team in the school, and the career followed a different sport from the one being measured. Answering
+`skip` to the question about other teams made it 93–95%. A harness for one branch must say no to the questions
+about other branches, and print the share it could not place (here: lives whose career was a different sport) so
+a bad run is visible.
+
+### 13.141 A generated catalog is changed where it is generated
+
+Two activities were first added to `activities.json` by hand, and the validator found two things at once: the
+blurbs were too long for a phone (52 characters) and the file "is not what the generator produces". The catalog is
+written by `scripts/generate-activities.py`; edit the script and run it. A hand edit that passes by luck is an
+edit the next regeneration deletes.

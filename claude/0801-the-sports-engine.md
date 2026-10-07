@@ -90,7 +90,7 @@ effect on the passive population is negligible and on a pro is large, which is t
 - **Every draw is a hash, not a stream.** `sportUnit(seed, generation, name…)` is a hash of the seed, the
   generation and a name (recruit, draft, star, rank, pick, breakout, retire, and per year: injury, severity,
   title). Nothing is drawn from the shared random stream, so a life that never plays a sport replays exactly
-  as it did before this ticket, and a life that does plays the same career every time.
+  as it did before this ticket, and a life that does plays the same career every time. _(0802's two new school activities did reshuffle which activity a child is offered, so seeded lives changed then: see that ticket's side effects.)_
 - **Saved state** (`sports`, always present from v44): `career?` (stage, seasons, hard seasons, hidden form,
   training this year, reputation, titles, and the college or pro fields), `past[]`, and `offer?` (the
   scholarship or contract the game is asking about, frozen when raised). Skills are not saved; they are
@@ -116,7 +116,7 @@ effect on the passive population is negligible and on a pro is large, which is t
 
 - **No screens.** `skillsOf`, `careerOf`, `careerLabel`, `reputationOf`, `trainSport` and the pending question
   are what 0809 reads.
-- **No other sport.** Football, baseball, soccer and hockey are 0802: a row of data each, with its own road in.
+- **No other sport.** Football, baseball, soccer and hockey are 0802: a row of data each, with its own road in. _(Shipped in 0802; the road in is the shared one.)_
 - **No coaches, teammates or trades.** The team is a name. Spec 1305–1309's relationships are not built.
 - **No salary cap, minor league or overseas route.** An undrafted player's career ends.
 - **No early declaration.** The draft draw happens when college ends, however it ends. Leaving a degree early is

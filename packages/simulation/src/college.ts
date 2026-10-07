@@ -455,7 +455,7 @@ const ACCEPTED_LINES: readonly string[] = [
 const REJECTED_LINES: readonly string[] = [
   "Applied to study {major} and didn't get in. There is always next year.",
   'The {major} application came back as a no, in a very short letter.',
-  'Turned down. They said the year was competitive, which they say every year.',
+  'Turned down for {major}. They said the year was competitive, which they say every year.',
 ];
 
 const TRADE_IN: readonly string[] = [

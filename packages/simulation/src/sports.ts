@@ -39,11 +39,9 @@ import {
   COLLEGE_INJURY_CHANCE,
   HARD_WORK_SESSIONS,
   PRO_INJURY_CHANCE,
-  RETIRE_AGE,
   SERIOUS_SHARE,
   SERIOUS_TIER_LOSS_CHANCE,
   TIER_FAME,
-  TIER_PAY,
   TIER_REPUTATION,
   TIER_TITLE_BONUS,
   between,
@@ -56,6 +54,8 @@ import {
   peakTierFor,
   recruitChance,
   rookiePay,
+  rookieYears,
+  roundOf,
   skillValue,
   sportOfActivity,
   sportReputationWord,
@@ -129,6 +129,27 @@ export function skillsOf(
     value: skillValue(career.form, sportUnit(seed, state.world.generation, 'skill', skill.id)),
   }));
 }
+
+/**
+ * The position a life plays, a label only (0802): drawn from the sport's list by
+ * a hash of the life, so it is the same every time, costs no save field, and
+ * has no effect on the odds, the pay or the skills.
+ */
+export function positionIn(seed: string, generation: number, sport: Sport): string {
+  const list = sport.positions;
+  return list[Math.floor(sportUnit(seed, generation, 'position', sport.id) * list.length)] ?? '';
+}
+
+/** The position of whoever is playing now, or none. For a screen's header. */
+export function positionOf(state: GameState): string | undefined {
+  const career = state.sports.career;
+  const sport = career ? findSport(career.sportId) : undefined;
+  if (!career || !sport) return undefined;
+  return positionIn(state.rng.getSeed(), state.world.generation, sport);
+}
+
+const withArticle = (word: string): string =>
+  `${/^[aeiou]/i.test(word) ? 'an' : 'a'} ${word.toLowerCase()}`;
 
 /** What a career is called, for a screen: the rung and the words. */
 export function careerLabel(career: SportCareer): string {
@@ -298,8 +319,26 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
 
   /* ---- school: on the team, and what graduating from it brings ---------- */
   if (career === undefined || career.stage === 'school') {
-    const entry = before.education.activities.find((row) => sportOfActivity(row.activityId));
-    const sport = entry ? sportOfActivity(entry.activityId) : undefined;
+    /*
+      A player can be on more than one team (ticket 0802 made five sports real). The road follows the
+      one they have been playing, and when they have not started one yet, the one they are best at.
+    */
+    const teams = before.education.activities.flatMap((row) => {
+      const found = sportOfActivity(row.activityId);
+      return found ? [{ row, found }] : [];
+    });
+    const held =
+      career?.stage === 'school'
+        ? teams.find((team) => team.found.id === career?.sportId)
+        : undefined;
+    const chosen =
+      held ??
+      teams.reduce<(typeof teams)[number] | undefined>(
+        (best, team) => (best === undefined || team.row.standing > best.row.standing ? team : best),
+        undefined,
+      );
+    const entry = chosen?.row;
+    const sport = chosen?.found;
     if (entry && sport) {
       const sessions = practisedThisYear(entry, before.player.age);
       const base: SportCareer =
@@ -340,7 +379,12 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
     /* ---- college: seasons, injuries, and the draft when it ends -------- */
     const stillThere = education.stage === 'college' && before.education.stage === 'college';
     const sport = findSport(career.sportId);
-    const injuredBy = injuryOf(seed, gen, year, COLLEGE_INJURY_CHANCE);
+    const injuredBy = injuryOf(
+      seed,
+      gen,
+      year,
+      COLLEGE_INJURY_CHANCE * (sport?.economy.injuryFactor ?? 1),
+    );
     const hard =
       career.trainedAtAge === before.player.age && career.trainedCount >= HARD_WORK_SESSIONS;
     const form = nextForm(before, career, age);
@@ -391,7 +435,10 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
       seed,
       gen,
       year,
-      healthAdjusted(PRO_INJURY_CHANCE, before.player.stats.health),
+      healthAdjusted(
+        PRO_INJURY_CHANCE * (sport?.economy.injuryFactor ?? 1),
+        before.player.stats.health,
+      ),
     );
     if (injury === 'serious' && sportUnit(seed, gen, 'tierloss', year) < SERIOUS_TIER_LOSS_CHANCE) {
       peak = stepTier(peak, -1);
@@ -608,28 +655,60 @@ function draftOffer(
     sportUnit(seed, gen, 'star', sport.id),
     sportUnit(seed, gen, 'rank', sport.id),
   );
-  const pick = draftPickFor(peak, sportUnit(seed, gen, 'pick', sport.id));
+  const { economy } = sport;
+  const pick = draftPickFor(peak, sportUnit(seed, gen, 'pick', sport.id), economy.draftSize);
   const team =
     stablePick(sport.proTeams, `sports:pro:${seed}:${gen}:${pick}`) ?? sport.proTeams[0]!;
   const breakout = between(sportUnit(seed, gen, 'breakout', sport.id), BREAKOUT_YEARS[peak]);
   // Drawn from the age they are drafted at, which is when the career starts: a late bloomer is a late retirement too.
-  const endAge = between(sportUnit(seed, gen, 'retire', sport.id), RETIRE_AGE[peak]);
+  const endAge = between(sportUnit(seed, gen, 'retire', sport.id), economy.retireAge[peak]);
+  const deal = rookieDeal(sport, pick);
   return {
     career: { ...career, peak, breakout, endAge, pick, tier: stepTier(peak, -1) },
     offer: {
       kind: 'contract',
       sportId: sport.id,
       team,
-      salary: rookiePay(pick),
-      years: pick <= 30 ? 4 : 2,
+      salary: deal.salary,
+      years: deal.years,
       rookie: true,
       pick,
       asked: false,
       age,
       eventId: SPORTS_OFFER_EVENT_ID,
     },
-    line: `${pick <= 30 ? `Drafted number ${pick}` : 'Drafted in the second round'} by the ${team}.`,
+    line: `${deal.words} by the ${team}, as ${withArticle(positionIn(seed, gen, sport))}.`,
   };
+}
+
+/** What a first contract is for a pick: the pay on that sport's scale, the years, and the words for the round. */
+export function rookieDeal(
+  sport: Sport,
+  pick: number,
+): { readonly salary: number; readonly years: number; readonly words: string } {
+  const { economy } = sport;
+  return {
+    salary: rookiePay(pick, economy),
+    years: rookieYears(pick, economy.firstRound),
+    words: draftedWords(pick, economy.firstRound),
+  };
+}
+
+const ROUND_WORDS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'];
+
+const ordinal = (n: number): string => {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  const suffix = teen
+    ? 'th'
+    : (({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th');
+  return `${n}${suffix}`;
+};
+
+/** "Drafted number 14", or the round when it was not the first. */
+export function draftedWords(pick: number, firstRound: number): string {
+  if (pick <= firstRound) return `Drafted number ${pick}`;
+  const round = roundOf(pick, firstRound);
+  return `Drafted in the ${ROUND_WORDS[round - 1] ?? ordinal(round)} round`;
 }
 
 /** A new deal when one runs out: what the tier is worth, with a spread, and a little more for a name. */
@@ -644,7 +723,7 @@ function resignOffer(
   const tier = career.tier ?? 'fringe';
   const spread = 0.88 + sportUnit(seed, gen, 'market', age) * 0.26;
   const name = career.reputation >= 50 ? 1.06 : 1;
-  const salary = Math.round((TIER_PAY[tier] * spread * name) / 10_000) * 10_000;
+  const salary = Math.round((sport.economy.pay[tier] * spread * name) / 10_000) * 10_000;
   return {
     kind: 'contract',
     sportId: sport.id,
@@ -930,12 +1009,24 @@ export function answerSportsOffer(
     contract: { salary: offer.salary, yearsLeft: offer.years, rookie: offer.rookie },
     ...(career.stage === 'college' ? { tier: career.tier ?? 'fringe' } : {}),
   };
-  const text = offer.rookie
-    ? `Signed with the ${offer.team}: ${money(offer.salary)} a year for ${offer.years} ${offer.years === 1 ? 'year' : 'years'}.`
-    : `Re-signed with the ${offer.team}: ${money(offer.salary)} a year for ${offer.years} ${offer.years === 1 ? 'year' : 'years'}.`;
   // A first contract is a full-time job: whatever else they were doing for a living ends (ticket 0801).
   const left = offer.rookie && state.employment.job !== undefined ? resign(state) : undefined;
-  const base: GameState = left?.ok ? left.value.state : state;
+  // One answer is one line in the feed (ticket 0301's budget), so the job's own "left" line is folded into this one.
+  const base: GameState = left?.ok
+    ? {
+        ...left.value.state,
+        player: {
+          ...left.value.state.player,
+          timeline: left.value.state.player.timeline.filter(
+            (row) => row.id !== left.value.entry.id,
+          ),
+        },
+      }
+    : state;
+  const years = `${offer.years} ${offer.years === 1 ? 'year' : 'years'}`;
+  const text = offer.rookie
+    ? `Signed with the ${offer.team}: ${money(offer.salary)} a year for ${years}.${left?.ok ? ' That was the end of the day job.' : ''}`
+    : `Re-signed with the ${offer.team}: ${money(offer.salary)} a year for ${years}.`;
   const written = withEntry(
     base,
     offer,

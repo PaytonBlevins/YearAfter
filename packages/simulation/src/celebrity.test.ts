@@ -185,6 +185,20 @@ function connected(base: GameState = MEETING, actionId = 'compliment'): GameStat
 const CONNECTED = connected();
 const TIE = CONNECTED.celebrities.ties[0]!;
 
+/**
+ * A life with a partner, chosen by the condition and not by luck: the connected life above only has one
+ * if that seed's romance happened to go that way, and a change to the catalog moved it (CORE_RULES 13.137).
+ */
+function partnered(): GameState {
+  for (let i = 0; i < 300; i += 1) {
+    const state = liveTo(`celeb-partnered-${i}`, 34);
+    if (state.player.alive && partnerOf(state.circle.people) !== undefined) return state;
+  }
+  throw new Error('no life with a partner found');
+}
+
+const PARTNERED = partnered();
+
 describe('the world: who is famous', () => {
   const SEED = 'world-a';
 
@@ -510,8 +524,8 @@ describe('a stranger in your path', () => {
     expect(whyNotFlirt(single, born(40 + FLIRT_GAP), year)).toBeUndefined();
     expect(whyNotFlirt(single, born(40 - FLIRT_GAP), year)).toBeUndefined();
     // Somebody with a partner is not flirting with a stranger.
-    expect(partnerOf(CONNECTED.circle.people)).toBeDefined();
-    expect(whyNotFlirt(CONNECTED, born(CONNECTED.player.age), year)?.kind).toBe(
+    expect(partnerOf(PARTNERED.circle.people)).toBeDefined();
+    expect(whyNotFlirt(PARTNERED, born(PARTNERED.player.age), year)?.kind).toBe(
       'alreadyWithSomeone',
     );
   });
@@ -1460,7 +1474,7 @@ describe('answering a stranger, to the number', () => {
   const eager = withFame(withCash(single(MEETING), 5_000_000), 100);
 
   it('refuses a flirt from somebody who is taken, and from a child', () => {
-    const taken = { ...MEETING, circle: CONNECTED.circle };
+    const taken = { ...MEETING, circle: PARTNERED.circle };
     expect(partnerOf(taken.circle.people)).toBeDefined();
     const trial = meetings(withFame(taken, 100), 1)[0]!;
     const result = answerEncounter(trial, 'flirt');

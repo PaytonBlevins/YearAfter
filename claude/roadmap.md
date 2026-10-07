@@ -609,10 +609,11 @@ No professional sports or entertainment job existed among the 169, and athletic 
 had no door after eighteen. Payton approved the order and answered the decisions; 0801 was then
 built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sports-engine.md`.
 
-| Ticket                                      | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0801 The sports engine, with basketball** | **DONE (engine).** School team → scholarship offer at graduation → college seasons → the draft → a contract (Accept / Ask for more / Turn it down) → pro seasons, injuries, titles, reputation and fame → retirement. Odds are Payton's: reaching the pros from a team is 95% with talent and hard work, 75% with talent alone, 60% with hard work alone and about 3% with neither; 45% / 20% / 10% of those become stars. Every draw is a hash, so a life with no sport replays exactly as before. Save v44 (`sports`). No screens (0809). |
-| 0802–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Ticket                                      | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0801 The sports engine, with basketball** | **DONE (engine).** School team → scholarship offer at graduation → college seasons → the draft → a contract (Accept / Ask for more / Turn it down) → pro seasons, injuries, titles, reputation and fame → retirement. Odds are Payton's: reaching the pros from a team is 95% with talent and hard work, 75% with talent alone, 60% with hard work alone and about 3% with neither; 45% / 20% / 10% of those become stars. Every draw is a hash, so a life with no sport replays exactly as before. Save v44 (`sports`). No screens (0809).                                             |
+| **0802 The other team sports**              | **DONE (engine).** Football, baseball, soccer and hockey as rows on the 0801 engine: their own leagues, teams, five skills each, positions (a label, derived, never saved), real league minimums at the bottom of each pay ladder, draft sizes (224, 600, 90, 224), career ends and injury factors (football ×1.6 breaks most). Baseball and hockey school teams added. A life on two teams follows the sport it has been playing, else the one it is best at. Same odds as basketball; measured within a few points in every sport. **No save change** (still v44). No screens (0809). |
+| 0803–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -1388,6 +1389,37 @@ drafted.
 pending scholarship or contract question are what 0809 reads. Nothing shows a season, a team or a past
 career.
 
+**90. Positions are a label, and nothing shows it.** A position is drawn from the sport's list by a hash of the
+life and never saved, so it costs no save field. Only the draft line names it ("as a point guard"). `positionOf`
+is what 0809 reads. It does not change odds, pay or skills, which is what was chosen.
+
+**91. The real roads in are not modelled.** All five sports go school team, scholarship, college, draft. Real
+baseball signs out of high school and has a minor league, hockey has a junior route, and soccer has academies and
+overseas clubs (the NCAA does not even count men's soccer, because there are too many routes). Soccer's "draft" is
+fiction. Payton chose the shared ladder; a second road is a new rung and a save change.
+
+**92. Careers are two to three times real length in every sport.** Median pro seasons for a talented hard worker:
+football 8 (real 3.3), basketball 10 (real 4.5), baseball 11, soccer 10, hockey 10. The mix is star-heavy
+because the odds make 45% of those who reach the pros stars, and stars last longer. If it is too long, the
+retirement ranges are the dial.
+
+**93. A life on two teams follows one sport.** The sport they have been playing, else the one they are best at.
+The other team's seasons count for nothing towards a road.
+
+**94. Pay above each league's real minimum is a judgement.** The floors are real (NFL $885,000, MLB $780,000,
+NHL $850,000 from 2026-27, MLS $113,400) and so is hockey's rookie scale. Real top contracts are higher than the
+game's superstar tier in baseball and football ($55 million against real figures near $70 million).
+
+**95. Hockey costs $1,500 a year**, ice time, a team fee and pads, which may keep poorer lives off the team. The
+effect on who plays is not measured.
+
+**96. A life that says yes to every team goes pro about one time in thirty.** 700 lives that only press Advance
+and answer every question with its first choice: 23 became pros (3.3%), 3 of them stars. 0801 measured 0.25%
+because basketball was the only gate. Soccer ($95) and baseball ($180) are open from elementary school, so a
+passive child ends up on one far more often, and the odds given (75% for talent alone) take over. The dials, in
+the order they bite: how many lives are talented (9.7%), the 75% for talent without work, and how easy a team
+is to join.
+
 ## Suggested order
 
 This is the historical delivery order with current status annotations, not an
@@ -1440,5 +1472,5 @@ Agent A's next ticket.
     accept/decline rescue engine and survival measurement remain open with Agent A;
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
 
-12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, shipped as
-    an engine only; Payton chose screens in 0809. Next is chosen by Payton.)_
+12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, and 0802 The
+    other team sports shipped as engines only; Payton chose screens in 0809. Next is chosen by Payton.)_

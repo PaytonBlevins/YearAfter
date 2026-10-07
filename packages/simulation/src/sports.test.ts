@@ -286,7 +286,13 @@ describe('the arithmetic of the odds', () => {
   });
 
   it('is basketball first, and a sport is a row of data', () => {
-    expect(SPORTS.map((sport) => sport.id)).toEqual(['basketball']);
+    expect(SPORTS.map((sport) => sport.id)).toEqual([
+      'basketball',
+      'football',
+      'baseball',
+      'soccer',
+      'hockey',
+    ]);
     expect(findSport('basketball')?.activityId).toBe(BASKETBALL);
     expect(sportOfActivity(BASKETBALL)?.id).toBe('basketball');
     expect(sportOfActivity('act.chess')).toBeUndefined();

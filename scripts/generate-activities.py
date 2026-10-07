@@ -175,6 +175,28 @@ A("act.soccer", "Soccer", "sport", 6,
   join_text="Signed up for soccer. Games are Saturday mornings, every Saturday.",
   leave_text="Stopped playing soccer.")
 
+A("act.baseball", "Baseball", "sport", 7,
+  blurb="Spring evenings and a very long season.",
+  stages=["elementary", "middle", "high"], needs_parent=True,
+  annual_cost=180, cost_source="league fees and a glove",
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the baseball team. Practice after school, games on weekends.",
+  cut_text="Didn't make the baseball team. The coach said to work on your swing and come back.",
+  effects={"health": 3, "discipline": 3, "charisma": 2},
+  join_text="Made the baseball team. Practice after school, games on weekends.",
+  leave_text="Hung up your glove.")
+
+A("act.hockey", "Hockey", "sport", 9,
+  blurb="Ice at six in the morning. The bag never dries.",
+  stages=["middle", "high"], needs_parent=True,
+  annual_cost=1500, cost_source="ice time, a team fee and pads",
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the hockey team. Practice is at six, before school.",
+  cut_text="Cut from hockey. The list was taped to the rink door.",
+  effects={"health": 4, "charisma": 2, "willpower": 3},
+  join_text="Made the hockey team. Practice is at six, before school.",
+  leave_text="Turned in your hockey gear.")
+
 A("act.wrestling", "Wrestling", "sport", 9,
   blurb="Cutting weight is a normal Tuesday.",
   stages=["high"],
