@@ -1,10 +1,12 @@
 # P4 — Economy effect on businesses: approved change
 
-**Status: approved with strong expansion kept at +9%; built and verified; PR pending, baseline content/format gates remain blocked.**
+**Status: approved with strong expansion kept at +9%; built and verified; PR #16 open for review; baseline content/format gates remain blocked.**
 Agent B, `feat/playtest-p4-business-economy`, 7 October 2026. Claim published separately before
 measurement. Latest `origin/main` is still `beff25a`; this branch follows P1 #13, P2 #14 and P3 #15.
 Payton approved the proposal with one exception: strong expansion keeps its original +9% demand
 bonus. The other reductions and contextual thresholds are applied; no save shape/version change.
+
+PR: https://github.com/PaytonBlevins/YearAfter/pull/16 (targets main; depends on P1 #13, P2 #14 and P3 #15).
 
 ## Ticket contract
 
@@ -27,7 +29,8 @@ price/payroll/supplier/rescue rule, unrelated volatility, save shape or TICKET c
 - [x] P1’s explicit rescue/closure behavior and lender priority remain intact.
 - [x] Preserve saved business records; deterministic continuation and reconciliation pass.
 - [x] Repeat calibration on production, tests and at least fifteen independent sabotage mutations.
-- [ ] Update findings and CORE_RULES, format changed files, run full `pnpm verify`, PR to main, stop.
+- [x] Update findings and CORE_RULES, format changed files, run full `pnpm verify`, PR to main, stop.
+      Full verify ran and its baseline catalog blockers are recorded below; content/format gates are not green.
 
 ## What the code already does
 
@@ -228,7 +231,9 @@ It ends with the same nine generator/catalog byte mismatches as unchanged `origi
 activities, advice, auctions, businesses, events-childhood, homes, renovations, valuables and
 vehicles. No catalog reformat is included; the validator’s incidental vehicle-mods rewrite is
 restored. Global format still has the 22 historical-note baseline; changed files are checked
-individually. Actual CI results are recorded after opening the PR.
+individually. Implementation CI run 94 (https://github.com/PaytonBlevins/YearAfter/actions/runs/37695451744)
+fails Format check on those exact 22 historical notes. Its subsequent typecheck, tests and content
+validation are skipped; the full local run above did execute.
 
 The first save test imported content directly, which persistence does not depend on. Its fixture
 now gets the real type through the public simulation market, with a consistent funded adult

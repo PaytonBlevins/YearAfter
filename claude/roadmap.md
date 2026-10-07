@@ -1494,6 +1494,7 @@ Revised production measurement, 9,300 paired owners across 31 trades: five-year 
 survival 82.11% → 83.85% in the harsh cycle, 83.44% → 83.59% under ordinary transitions. The
 paired mature severe profit hit is −8.75% → −4.28% of catalog revenue; boom benefit stays +2.71%.
 All 15 typechecks and 2,633 tests pass; full verify hits nine baseline catalog comparisons.
+PR #16: https://github.com/PaytonBlevins/YearAfter/pull/16 (depends on P1 #13, P2 #14 and P3 #15).
 Full method, prior proposal, approved exception, tests and sabotage: `playtest-p4-business-economy.md`.
 
 ### Found by P4

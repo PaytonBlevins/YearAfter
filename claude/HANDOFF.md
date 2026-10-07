@@ -61,7 +61,9 @@ cycle and 83.44% → 83.59% under ordinary transitions. The immediate severe pro
 halves; the boom benefit and normal-year economics are unchanged. Overall volatility remains
 similar. All 15 typechecks and 2,633 tests pass; full verify hits the nine baseline catalog failures.
 All 26 mutations caught after adding the missing owner-payment case; none missed. PR results: `playtest-p4-business-economy.md`. Native device checks and Project
-mirroring remain open. P5 waits.
+mirroring remain open. PR #16: https://github.com/PaytonBlevins/YearAfter/pull/16
+(targets main, depends on P1 #13, P2 #14 and P3 #15). Implementation CI run 94 confirms the
+same 22-note formatting failure and skips later gates. P5 waits.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
