@@ -3,6 +3,8 @@
 Built by Agent B on `feat/playtest-p2-living-costs`. P2 was claimed in its own commit after
 Payton's go-ahead; Payton then approved the measured proposal before production changes.
 This branch follows P1 while origin/main remains `beff25a`; save v45 follows P1 v44.
+PR: https://github.com/PaytonBlevins/YearAfter/pull/14, targeting main. P1 PR #13 must merge first;
+then rebase P2 onto main and drop the already-merged P1 commits from the comparison.
 P3 does not begin without Payton's next go-ahead.
 
 ## Contract, scope and approval
