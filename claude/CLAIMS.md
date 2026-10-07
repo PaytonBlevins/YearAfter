@@ -47,4 +47,4 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | P3 Social media success rates | — | Codex / Agent B (`feat/playtest-p3-social-success`) | built after Payton approved measured rank lifts and manual settlement correction; saved luck preserved and validated; save v45 unchanged; 2,598 tests and 28 sabotages pass; baseline content/format blockers recorded; PR #15 targets main, depends on P1 PR #13 then P2 PR #14; review pending |
 
-| P4 Economy effect on businesses | — | Codex / Agent B (`feat/playtest-p4-business-economy`) | claimed before measurement; Payton authorized P4; measure survival and profit swing, propose exact balance values before implementation; stacked on P3 PR #15 while main is beff25a; no save version reserved |
+| P4 Economy effect on businesses | — | Codex / Agent B (`feat/playtest-p4-business-economy`) | claimed and measured; recommend half direct economy strength with matching explanation thresholds; awaiting Payton’s balance approval; production unchanged; stacked on P3 PR #15 while main is beff25a; save remains v45, no new version reserved |

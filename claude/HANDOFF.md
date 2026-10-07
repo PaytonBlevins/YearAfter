@@ -50,7 +50,17 @@ Details: `playtest-p3-social-success.md`. Fame anchors, free accounts, manual po
 save v45 remain unchanged. PR #15: https://github.com/PaytonBlevins/YearAfter/pull/15
 (targets main, depends on P1 #13 then P2 #14). Implementation CI run 88 confirms the same 22-note
 formatting failure and skips later gates. Review, device checks and Project mirroring remain
-open. P4 waits.
+open. P4 was subsequently authorized; see its update below.
+
+**P4 measurement update:** Payton authorized P4 on 7 October. Claim published on
+`feat/playtest-p4-business-economy`, following P3 #15 while main remains `beff25a`. Measured
+9,300 paired owners across 31 types and harsh/normal/ordinary transition controls. Halving the
+direct demand effect moves five-year rescue-policy survival from 82.11% to 83.71% in the harsh
+cycle, 83.44% to 83.55% under ordinary transitions. The immediate severe-recession profit hit
+roughly halves; overall profit volatility remains similar. Proposal: half direct strength, retain
+event odds/damage and all other controls, halve contextual explanation thresholds to keep those
+branches visible. Details: `playtest-p4-business-economy.md`. Production is unchanged pending
+Payton’s balance-value approval. Save v45 and TICKET 0708 remain. P5 waits.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

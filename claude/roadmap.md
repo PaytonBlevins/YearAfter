@@ -1480,4 +1480,19 @@ See `playtest-p3-social-success.md`.
   larger tested lifts did not convincingly improve the small tail sample. This remains a known
   balance limitation, not a new unapproved tuning pass.
 - **Findings 64/69:** keep Payton’s 1,400 → 0 / 10,000 → 3 fame anchors and preserve saved luck.
-  Native device checks, Project mirroring and PR review remain open. P4 awaits Payton’s go-ahead.
+  Native device checks, Project mirroring and PR review remain open. P4 was subsequently authorized; see its measurement note below.
+
+### Found by P4 — measurement complete, balance proposal pending
+
+Direct economy sensitivity and event odds are separate influences. The proposed half-strength
+business demand effect moves harsh-cycle five-year rescue-policy survival 82.11% → 83.71%,
+ordinary-transition survival 83.44% → 83.55%. A paired mature severe-recession profit hit roughly
+halves (8.75% → 4.28% of catalog revenue). General profit swings stay similar; finding 37 remains
+open. No attempt to force the historical BLS survival comparator or fix cheap-trade margins.
+
+Halving demand without changing the yearly +5% explanation threshold would make the boom line
+unreachable (largest new gain +4.5%). Propose matching half thresholds for ledger, screen and
+annual context. Event odds/damage and world transitions remain. The claim is published on
+`feat/playtest-p4-business-economy`, following P3 #15. No production or save change is made until
+Payton approves the exact proposal. Full method, comparisons and limits: `playtest-p4-business-economy.md`.
+P5 is not started.
