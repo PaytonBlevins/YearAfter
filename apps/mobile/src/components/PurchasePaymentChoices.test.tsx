@@ -48,7 +48,7 @@ async function pay() {
   if (!rendered) throw new Error('No selector');
   await act(() => rendered?.root.findByType(ActionButton).props.onPress());
 }
-describe('purchase payment selector, awaiting engine integration', () => {
+describe('purchase payment selector', () => {
   it('requires a selection and a separate payment press for cash', async () => {
     await screen();
     expect(rendered?.root.findAllByType(ActionButton)).toHaveLength(0);
@@ -56,7 +56,7 @@ describe('purchase payment selector, awaiting engine integration', () => {
     expect(onPay).not.toHaveBeenCalled();
     expect(rendered?.root.findByType(ActionButton).props.label).toBe('Pay $600 with cash');
     await pay();
-    expect(onPay).toHaveBeenCalledWith({ kind: 'cash' });
+    expect(onPay).toHaveBeenCalledWith({ kind: 'cash', expectedTotal: dollars(600) });
   });
   it.each(['a watch', 'art', 'a vacation', 'a car', 'a renovation', 'a future purchase'])(
     'supports %s without restricting the purchase kind',
@@ -66,7 +66,11 @@ describe('purchase payment selector, awaiting engine integration', () => {
       await choose(product.name);
       expect(onPay).not.toHaveBeenCalled();
       await pay();
-      expect(onPay).toHaveBeenCalledWith({ kind: 'card', productId: product.id });
+      expect(onPay).toHaveBeenCalledWith({
+        kind: 'card',
+        productId: product.id,
+        expectedTotal: dollars(600),
+      });
     },
   );
   it('uses the chosen card and supports its full available limit without a purchase cap', async () => {
@@ -79,7 +83,11 @@ describe('purchase payment selector, awaiting engine integration', () => {
     });
     await choose(other.name);
     await pay();
-    expect(onPay).toHaveBeenCalledWith({ kind: 'card', productId: other.id });
+    expect(onPay).toHaveBeenCalledWith({
+      kind: 'card',
+      productId: other.id,
+      expectedTotal: dollars(50_000),
+    });
   });
   it('does not combine insufficient cards automatically', async () => {
     const other = CARD_PRODUCTS.find((card) => card.id !== product.id);

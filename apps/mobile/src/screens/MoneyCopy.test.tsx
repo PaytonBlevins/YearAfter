@@ -165,7 +165,7 @@ describe('A5 — spoken money and business copy', () => {
       ...state,
       player: { ...state.player, cash: dollars(1_000_000) },
     });
-    expect(text()).toContain('using your cash and any loan you choose');
+    expect(text()).toContain('using cash, a card, or any loan you choose');
     expect(text()).toContain('pays you from its profits');
   });
   it('explains prices and locations directly while retaining staffing controls', async () => {

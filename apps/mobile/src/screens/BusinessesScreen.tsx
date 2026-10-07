@@ -10,6 +10,10 @@
  */
 
 import { Fragment, useRef, useState } from 'react';
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
+import { dollars } from '@yearafter/core';
+import type { PurchasePayment } from '@yearafter/finance';
+
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   EXPAND_REFUSAL_LABELS,
@@ -94,8 +98,9 @@ function PurchasePanel({
   cash: number;
   offers: readonly FinancingOffer[];
   blocked?: string;
-  onGo: (finance?: Financing) => void;
+  onGo: (finance?: Financing, payment?: PurchasePayment) => void;
 }) {
+  const { state } = useGame();
   const [pick, setPick] = useState<{ productId: string; share: 'half' | 'most' } | undefined>(
     undefined,
   );
@@ -116,10 +121,14 @@ function PurchasePanel({
 
   return (
     <>
-      {cash >= cost ? (
-        <ActionButton label={`${verb} — pay ${money(cost)}`} onPress={() => onGo(undefined)} />
-      ) : approved.length === 0 ? (
-        <Text style={styles.note}>You don't have the money for that.</Text>
+      {state ? (
+        <PurchasePaymentChoices
+          purchaseName={verb}
+          total={dollars(cost)}
+          cash={state.player.cash}
+          cards={state.cards}
+          onPay={(payment) => onGo(undefined, payment)}
+        />
       ) : null}
 
       {approved.length > 0 ? (
@@ -259,7 +268,7 @@ export function BusinessesScreen() {
       ) : (
         <>
           <Text style={styles.note}>
-            You pay the startup cost when you open, using your cash and any loan you choose. The
+            You pay the startup cost when you open, using cash, a card, or any loan you choose. The
             business keeps its own money and pays you from its profits.
           </Text>
           <Card>
@@ -284,8 +293,8 @@ export function BusinessesScreen() {
                         cash={cash}
                         offers={openingOffers(state, type.id)}
                         blocked={full ? `You're already running ${MAX_BUSINESSES}.` : undefined}
-                        onGo={(finance) => {
-                          openABusiness(type.id, finance);
+                        onGo={(finance, payment) => {
+                          openABusiness(type.id, finance, payment);
                           setOpen(undefined);
                         }}
                       />
@@ -339,8 +348,8 @@ export function BusinessesScreen() {
                         cash={cash}
                         offers={purchaseOffers(state, listing.id)}
                         blocked={full ? `You're already running ${MAX_BUSINESSES}.` : undefined}
-                        onGo={(finance) => {
-                          buyABusiness(listing.id, finance);
+                        onGo={(finance, payment) => {
+                          buyABusiness(listing.id, finance, payment);
                           setLooking(undefined);
                         }}
                       />
@@ -654,8 +663,8 @@ export function BusinessScreen() {
             cost={view.branchCost}
             cash={dollarsOf(state.player.cash)}
             offers={expansionOffers(state, business.id)}
-            onGo={(finance) => {
-              expandABusiness(business.id, finance);
+            onGo={(finance, payment) => {
+              expandABusiness(business.id, finance, payment);
               setPanel(undefined);
             }}
           />

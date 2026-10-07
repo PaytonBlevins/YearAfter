@@ -1,20 +1,23 @@
 import { Fragment, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { cents, formatMoney, type Money } from '@yearafter/core';
-import { availableOn, drawableOn, findProduct, type HeldCard } from '@yearafter/finance';
+import {
+  availableOn,
+  findProduct,
+  purchaseEligibility,
+  type HeldCard,
+  type PurchasePayment,
+} from '@yearafter/finance';
 import { ActionButton, Card, ListRow, RowDivider, SectionHeading } from './index';
 import { colors, spacing, typography } from '../theme/theme';
 
-/** Proposed UI contract; purchase commands must validate this selection atomically. */
-export type PurchasePayment =
-  { readonly kind: 'cash' } | { readonly kind: 'card'; readonly productId: string };
+export type { PurchasePayment } from '@yearafter/finance';
 
 const money = (amount: Money) =>
   formatMoney(amount, { abbreviate: false, showCents: amount % 100 !== 0 });
 
 /**
- * Reusable purchase selector. Integration waits for the engine's explicit-card
- * purchase contract; this component never charges a card or changes game state.
+ * Reusable purchase selector. Commands revalidate the selection before committing.
  */
 export function PurchasePaymentChoices({
   purchaseName,
@@ -22,15 +25,18 @@ export function PurchasePaymentChoices({
   cash,
   cards,
   onPay,
+  mode = 'purchase',
 }: {
   readonly purchaseName: string;
   readonly total: Money;
   readonly cash: Money;
   readonly cards: readonly HeldCard[];
+  readonly mode?: 'purchase' | 'bid';
   readonly onPay: (payment: PurchasePayment) => void;
 }) {
   const [selected, setSelected] = useState<PurchasePayment>();
-  const cashAllowed = total > 0 && cash >= total;
+  const cashAllowed =
+    total > 0 && purchaseEligibility(cash, cards, total, { kind: 'cash' }) === undefined;
   const chosenCard =
     selected?.kind === 'card'
       ? cards.find((card) => card.productId === selected.productId)
@@ -42,13 +48,17 @@ export function PurchasePaymentChoices({
       : total > 0 &&
         chosenCard !== undefined &&
         chosenProduct !== undefined &&
-        drawableOn(chosenCard) >= total;
+        purchaseEligibility(cash, cards, total, selected ?? { kind: 'cash' }) === undefined;
   const method = selected?.kind === 'cash' ? 'cash' : chosenProduct?.name;
   return (
     <>
       <SectionHeading>{`Pay for ${purchaseName}`}</SectionHeading>
       <Card>
-        <ListRow title="Purchase total" value={money(total)} affordance="none" />
+        <ListRow
+          title={mode === 'bid' ? 'Maximum payment if you win' : 'Purchase total'}
+          value={money(total)}
+          affordance="none"
+        />
         <RowDivider />
         <ListRow
           title="Use cash"
@@ -66,7 +76,11 @@ export function PurchasePaymentChoices({
         {cards.map((card) => {
           const product = findProduct(card.productId);
           const available = availableOn(card);
-          const allowed = total > 0 && product !== undefined && drawableOn(card) >= total;
+          const allowed =
+            total > 0 &&
+            product !== undefined &&
+            purchaseEligibility(cash, cards, total, { kind: 'card', productId: card.productId }) ===
+              undefined;
           const reason =
             product === undefined
               ? "This card isn't available."
@@ -109,10 +123,10 @@ export function PurchasePaymentChoices({
       </Text>
       {selected && method ? (
         <ActionButton
-          label={`Pay ${money(total)} with ${method}`}
+          label={`${mode === 'bid' ? 'Bid up to' : 'Pay'} ${money(total)} with ${method}`}
           disabled={!canPay}
           onPress={() => {
-            if (canPay) onPay(selected);
+            if (canPay) onPay({ ...selected, expectedTotal: total });
           }}
         />
       ) : null}

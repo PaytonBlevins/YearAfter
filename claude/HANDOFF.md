@@ -53,6 +53,13 @@ existing settlement and loan readers and existing exit confirmations. B1's
 injection/decline commands and pre-failure decision remain unbuilt with Agent A;
 this batch does not authorize changing the engine or survival balance. Results:
 `claude/playtest-business-warnings.md`.
+**Purchase-payment exception, authorized by Payton on 6 October:** Agent B owns
+finding 31's shared card-payment engine and mobile integration on
+`feat/purchase-payment-choices` ([PR #10](https://github.com/PaytonBlevins/YearAfter/pull/10)).
+The implementation and verification are in `claude/purchase-payment-contract.md`.
+This authorization applies to purchase payments; other ticket ownership stays
+with Agent A. Creator screens being built separately can pass the same public
+`PurchasePayment` argument to startup and collaboration commands.
 
 ## 1. What this is
 

@@ -18,6 +18,14 @@
  * for them.
  */
 
+import {
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  type PurchasePayment,
+  type PaymentRefusal,
+} from '@yearafter/finance';
+
 import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
 import {
   VEHICLE_MODS,
@@ -31,7 +39,6 @@ import { dollars, err, ok, type Result } from '@yearafter/core';
 import {
   modPriceOf,
   modRefusalFor,
-  post,
   vehicleWorthOf,
   withMod,
   type ModRefusal,
@@ -97,9 +104,11 @@ export type FitModError =
   | 'not-for-this-car'
   | 'covered-by-tarbus'
   | 'already-fitted'
-  | 'cannot-afford';
+  | 'cannot-afford'
+  | PaymentRefusal;
 
 export const FIT_MOD_ERROR_LABELS: Readonly<Record<FitModError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
   'no-such-vehicle': "You don't own that car any more.",
   'no-such-mod': "That isn't something a shop can fit.",
   'not-for-this-car': "That isn't something this car can have.",
@@ -132,6 +141,7 @@ export function fitVehicleMod(
   state: GameState,
   vehicleId: string,
   modId: string,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<FittedModOutcome, FitModError> {
   const vehicle = state.vehicles.find((candidate) => candidate.id === vehicleId);
   if (!vehicle) return err('no-such-vehicle');
@@ -142,14 +152,22 @@ export function fitVehicleMod(
   const refusal = modRefusalFor(mod, found.model, vehicle);
   if (refusal) return err(REFUSAL_ERRORS[refusal]);
   const price = modPriceOf(mod, found.trim);
-  if (Number(state.player.cash) / 100 < price) return err('cannot-afford');
+  if (payment.kind === 'cash' && Number(state.player.cash) / 100 < price)
+    return err('cannot-afford');
 
   const title = vehicleTitleOf(vehicle);
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'vehicle',
-    amount: dollars(-price),
-    source: `${mod.name} on the ${title}`,
-  });
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(price),
+    'vehicle',
+    `${mod.name} on the ${title}`,
+    payment,
+  );
+  if (!paid.ok) return err(paid.error);
+  const books = paid.value;
   const changed = withMod(vehicle, mod, price, state.world.year);
   const next: OwnedVehicle = {
     ...changed,
@@ -164,7 +182,7 @@ export function fitVehicleMod(
     age: state.player.age,
     year: state.world.year,
     kind: 'passive',
-    text,
+    text: text + paymentNote(payment),
     id: `t:${state.world.year}:car:mod:${vehicle.id}:${mod.id}`,
     sequence,
   });
@@ -172,6 +190,7 @@ export function fitVehicleMod(
     state: {
       ...state,
       finance: books.ledger,
+      cards: books.cards,
       vehicles: state.vehicles.map((candidate) => (candidate.id === vehicle.id ? next : candidate)),
       player: {
         ...state.player,

@@ -9,6 +9,9 @@
  * (CORE_RULES 13.28): the row opens its one button.
  */
 
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
+import { dollars } from '@yearafter/core';
+
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import {
@@ -19,7 +22,7 @@ import {
 import { findRenovation } from '@yearafter/content';
 import { renovationOptionsFor } from '@yearafter/simulation';
 import { useNavigation } from '../navigation/navigation';
-import { ActionButton, Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
+import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
 import { colors, spacing, typography } from '../theme/theme';
 
@@ -45,7 +48,6 @@ export function RenovateScreen() {
   const options = renovationOptionsFor(state, home.id);
   const worth = Number(home.value) / 100;
   const expense = annualExpenseOf(home);
-  const cash = Math.floor(Number(state.player.cash) / 100);
   const refreshes = options.filter((option) => option.renovation.refresh);
   const additions = options.filter((option) => !option.renovation.refresh);
 
@@ -73,17 +75,16 @@ export function RenovateScreen() {
           {open === id && !option.refusal ? (
             <>
               <Text style={styles.blurb}>{option.renovation.blurb}</Text>
-              {cash >= option.cost ? (
-                <ActionButton
-                  label={`Do it — ${money(option.cost)}`}
-                  onPress={() => {
-                    renovateHome(home.id, id);
-                    setOpen(undefined);
-                  }}
-                />
-              ) : (
-                <Text style={styles.note}>You don't have the money for that.</Text>
-              )}
+              <PurchasePaymentChoices
+                purchaseName={option.renovation.name}
+                total={dollars(option.cost)}
+                cash={state.player.cash}
+                cards={state.cards}
+                onPay={(payment) => {
+                  renovateHome(home.id, id, payment);
+                  setOpen(undefined);
+                }}
+              />
             </>
           ) : null}
         </Fragment>

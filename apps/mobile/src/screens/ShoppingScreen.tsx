@@ -8,6 +8,9 @@
  * name already says both.
  */
 
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
+import { dollars } from '@yearafter/core';
+
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { COLLECTION_SHELF_LABELS, findValuableStore } from '@yearafter/content';
@@ -101,7 +104,6 @@ export function StoreScreen() {
   if (!state || !current?.storeId) return null;
   const store = findValuableStore(current.storeId);
   const pieces = storeStock(state, current.storeId);
-  const cash = Math.floor(Number(state.player.cash) / 100);
   if (!store || pieces.length === 0) {
     return (
       <ScrollView contentContainerStyle={styles.content}>
@@ -125,17 +127,16 @@ export function StoreScreen() {
               wrap
             />
             {open === piece.id ? (
-              cash >= piece.price ? (
-                <ActionButton
-                  label={`Buy it — ${money(piece.price)}`}
-                  onPress={() => {
-                    buyAValuable(piece.id);
-                    setOpen(undefined);
-                  }}
-                />
-              ) : (
-                <Text style={styles.note}>You don't have the money for that.</Text>
-              )
+              <PurchasePaymentChoices
+                purchaseName={piece.item.name}
+                total={dollars(piece.price)}
+                cash={state.player.cash}
+                cards={state.cards}
+                onPay={(payment) => {
+                  buyAValuable(piece.id, payment);
+                  setOpen(undefined);
+                }}
+              />
             ) : null}
           </Fragment>
         ))}

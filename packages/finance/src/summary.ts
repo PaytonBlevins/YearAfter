@@ -155,9 +155,14 @@ export function summariseFinances(
   let bought = 0;
   let sold = 0;
   for (const entry of transactionsIn(ledger, year)) {
+    const amount = Number(entry.amount);
+    // Borrowing funds a purchase or shortfall; it never becomes income.
+    if (entry.category === 'debt' && amount > 0) {
+      sold += amount;
+      continue;
+    }
     // Ticket 0501: a house is bought and sold across the same line.
     if (entry.category !== 'investment' && entry.category !== 'property') continue;
-    const amount = Number(entry.amount);
     if (amount < 0) bought -= amount;
     else sold += amount;
   }

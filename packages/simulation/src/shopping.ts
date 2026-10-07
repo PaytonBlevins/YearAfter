@@ -22,6 +22,14 @@
  */
 
 import {
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  type PurchasePayment,
+  type PaymentRefusal,
+} from '@yearafter/finance';
+
+import {
   appendRecord,
   appendToTimeline,
   createTimelineEntry,
@@ -138,9 +146,10 @@ export function storeStock(state: GameState, storeId: string): readonly StockPie
 export const openStores = (state: GameState): readonly ValuableStore[] =>
   VALUABLE_STORES.filter((store) => storeStock(state, store.id).length > 0);
 
-export type BuyValuableError = 'no-such-piece' | 'cannot-afford' | 'too-young';
+export type BuyValuableError = 'no-such-piece' | 'cannot-afford' | 'too-young' | PaymentRefusal;
 
 export const BUY_VALUABLE_ERROR_LABELS: Readonly<Record<BuyValuableError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
   'no-such-piece': "That's not for sale any more.",
   'cannot-afford': "You don't have the money for that.",
   'too-young': "You're too young to buy that.",
@@ -179,6 +188,7 @@ export interface ShoppingOutcome {
 export function buyValuable(
   state: GameState,
   stockId: string,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<ShoppingOutcome, BuyValuableError> {
   if (state.player.age < SHOP_VALUABLES_FROM_AGE) return err('too-young');
   const storeId = stockId.split(':')[2];
@@ -186,7 +196,8 @@ export function buyValuable(
     ? storeStock(state, storeId).find((candidate) => candidate.id === stockId)
     : undefined;
   if (!piece) return err('no-such-piece');
-  if (Number(state.player.cash) / 100 < piece.price) return err('cannot-afford');
+  if (payment.kind === 'cash' && Number(state.player.cash) / 100 < piece.price)
+    return err('cannot-afford');
   const owned: OwnedValuable = {
     id: piece.id,
     itemId: piece.item.id,
@@ -194,17 +205,24 @@ export function buyValuable(
     purchasePrice: dollars(piece.price),
     value: dollars(resaleAtPurchase(piece.item, piece.price)),
   };
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'property',
-    amount: dollars(-piece.price),
-    source: `Bought ${articled(piece.item)}`,
-  });
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(piece.price),
+    'property',
+    `Bought ${articled(piece.item)}`,
+    payment,
+  );
+  if (!paid.ok) return err(paid.error);
+  const books = paid.value;
   const legendary = piece.item.kind === 'mythical';
   const entry = line(
     state,
-    legendary
+    (legendary
       ? `Found ${articled(piece.item)} at the back of an antiques shop, and bought it for ${money(piece.price)}. Nobody believes you.`
-      : `Bought ${articled(piece.item)} for ${money(piece.price)}.`,
+      : `Bought ${articled(piece.item)} for ${money(piece.price)}.`) + paymentNote(payment),
     `val:bought:${piece.id}`,
     legendary ? 'milestone' : 'passive',
   );
@@ -212,6 +230,7 @@ export function buyValuable(
     state: {
       ...state,
       finance: books.ledger,
+      cards: books.cards,
       valuables: [...state.valuables, owned],
       player: {
         ...state.player,
