@@ -41,3 +41,6 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | P1 Business rescue choices | — | Codex / Agent B (`feat/playtest-p1-business-rescue`) | built; one yearly review, explicit rescue/closure, save v44; tests and sabotage verified; PR pending |
 | v44 | Codex / Agent B | P1 business rescue choices; reserved before implementation, migration and tests built |
+
+| P2 Living costs and lifestyle tiers | — | Codex / Agent B (`feat/playtest-p2-living-costs`) | claimed after Payton's go-ahead; measurement first; stacked on P1 pending merge |
+| v45 | Codex / Agent B | P2 living costs and lifestyle tiers; reserved after P1 v44 |
