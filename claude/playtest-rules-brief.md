@@ -27,8 +27,8 @@ choice (a number that changes how the game plays, a new screen's shape), **propo
 as you did with the posting limits. Do not decide it silently.
 
 **Update, 6 October (later): Payton started v0.08 ticket 0801 (the sports engine) in parallel.** Agent A
-holds **save v44** for it (`CLAIMS.md`). **Your saves are numbered from v48 onward, in the order your
-tickets land** (updated 7 October: Agent A's 0803 took v45, 0804 took v46 and 0805 took v47). Do not take v44, v45, v46 or v47. If you already have, tell Payton before pushing and renumber. Agent A
+holds **save v44** for it (`CLAIMS.md`). **Your saves are numbered from v49 onward, in the order your
+tickets land** (updated 7 October: Agent A's 0803 took v45, 0804 took v46, 0805 took v47 and 0806 took v48). Do not take v44, v45, v46, v47 or v48. If you already have, tell Payton before pushing and renumber. Agent A
 touches the shared files (roadmap, `CORE_RULES.md`, `packages/*/src/index.ts`, `gameStore.tsx`,
 migrations, `TICKET`) only in small separate commits; rebase often. Agent A moves `TICKET` to `'0801'`
 when 0801 ships, and you leave it alone.

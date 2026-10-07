@@ -30,6 +30,7 @@ import { answerHomeOffer, isHomeOfferDecision } from './homes';
 import { answerVehicleOffer, isVehicleOfferDecision } from './vehicles';
 import { answerRenovationOffer, isRenovationOfferDecision } from './renovations';
 import { answerActingOffer, isActingOfferDecision } from './acting';
+import { answerMusicOffer, isMusicOfferDecision } from './music';
 import { answerSportsOffer, isSportsOfferDecision } from './sports';
 import { RngDomains } from './rng/rng';
 
@@ -146,6 +147,15 @@ export function decide(
   // Ticket 0805. The ninth: a part somebody wants the actor for.
   if (isActingOfferDecision(eventId)) {
     const answered = answerActingOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  // Ticket 0806. The tenth: a label's deal.
+  if (isMusicOfferDecision(eventId)) {
+    const answered = answerMusicOffer(state, choiceId);
     if (!answered.ok) {
       return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
     }

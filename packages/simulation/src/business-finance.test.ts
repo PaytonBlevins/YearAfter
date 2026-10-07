@@ -141,7 +141,7 @@ describe('0603 — what is for sale', () => {
     expect(new Set(first.map((row) => row.id)).size).toBe(4);
     expect(first.map((row) => row.id)).toEqual([
       'biz:2030:clothing:for0',
-      'biz:2030:autorepair:for1',
+      'biz:2030:recordlabel:for1',
       'biz:2030:clothing:for2',
       'biz:2030:autorepair:for3',
     ]);

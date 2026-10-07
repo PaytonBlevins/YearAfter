@@ -3145,3 +3145,34 @@ Three guards in 0805 could not change any result, because something else already
 (the chance in the table is zero below supporting), a cap on the craft target (the target is always under the
 headroom), and a list of applications that was both cleared and kept at the same age. Each survived the mutation run
 and each was deleted, with a comment where the reason is not obvious. Leave the table as the one source of truth and put an assertion on the table.
+
+### 13.154 A test helper that sets a balance must go through the ledger
+
+`rich()` put money on the player and in the ledger's balance without a transaction, which is fine for a function called
+on its own and wrong the moment a whole year runs over it: `advanceYear` reconciles the balance against the
+transactions and refused five music tests ("the books do not balance"). A test that runs a year gets its money the way
+the game does, as a posted gift (`windfall`); a helper that skips the ledger is only for direct calls into one function,
+and says so.
+
+### 13.155 A growth model needs a ceiling and a measure of luck before it ships, not after
+
+The first music model compounded: more listeners found more listeners, and a lucky life reached a number that no
+longer fit in a safe integer ("Money out of safe integer range"). The fix is structural, not a lower rate: what the
+work can hold is a ceiling (`audienceCeiling`, set by craft and one fixed luck draw for the life), room falls to zero as
+the audience approaches it, and an audience over it falls back a quarter a year. Anything that grows by a share of
+itself has a ceiling, a floor on room, and a measure of how far a life can go above the median.
+
+### 13.156 A wire that only moves a hard-to-read number is tested with the producer swapped, not with a finished life
+
+A year's mood reaches the character's spirits, but two lives that differ by one hit differ in cash, name and a dozen
+small things, and the happiness they end on is chaotic in all of them (adjacent crafts ended at 10, 22, 13, 21). Three
+differential tests passed with the wire cut. `music-mood.test.ts` replaces the music year with itself plus a fixed
+mood and runs the same life twice: the only difference there can be is the mood. When a result cannot be read off the
+end of a life, hold everything else still instead.
+
+### 13.157 A saved field that nothing reads is dead state
+
+`seenAge` was copied over from acting, where an actor's offers read it, and written every year by music, where nothing
+did. The mutation that removed its write survived. A field that is saved and validated costs a migration check, a test
+and a line in every save, and tells the next reader that something depends on it. It was removed from the state, the
+year and the migration check.

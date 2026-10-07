@@ -1,7 +1,7 @@
 # 0805 — Acting
 
 **Status: DONE (engine).** No screens: they are 0809's. **Save change: v46 → v47.** Agent B's saves are now v48
-and onward (`CLAIMS.md`). Six rungs of acting work from student films to prestige pictures, three ways in (be seen, apply,
+and onward (`CLAIMS.md`; 0806 then took v48, so they are v49 onward). Six rungs of acting work from student films to prestige pictures, three ways in (be seen, apply,
 an agent) of which none is required, lessons and character development, a negotiation, awards, fame, and the Talent
 Agency business that 0602 left out.
 

@@ -2176,7 +2176,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(47);
+    expect(CURRENT_SAVE_VERSION).toBe(48);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {
@@ -2654,8 +2654,161 @@ describe('Ticket 0406 — a question survives being saved', () => {
     }
   });
 
-  it('is at version 47 (0805)', () => {
-    expect(CURRENT_SAVE_VERSION).toBe(47);
+  it('opens a v47 save with an empty musician and moves only the version (0806)', () => {
+    const { save } = newSave('MUSIC-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.music;
+    old.version = 47;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.music).toEqual({
+      stageYears: 0,
+      listeners: 0,
+      peak: 0,
+      released: { single: 0, ep: 0, lp: 0 },
+      catalogue: 0,
+      bestQuality: 0,
+      reputation: 0,
+      awards: 0,
+      idle: 0,
+      lastPay: 0,
+      plan: { single: 0, ep: 0, lp: 0, tour: false },
+      collabs: {},
+      answered: [],
+      tours: 0,
+    });
+  });
+
+  it('keeps a musician a v47 save somehow already has rather than writing over it (0806)', () => {
+    const { save } = newSave('MUSIC-KEEP');
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 47;
+    old.music = { ...old.music, listeners: 1200, peak: 1200 };
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.music.listeners).toBe(1200);
+  });
+
+  it('round-trips a musician: a deal, an offer, a plan, collaborations and lessons (0806)', () => {
+    const { save } = newSave('MUSIC-ROUND');
+    const base = fromSave(save);
+    const music = {
+      craft: 71,
+      stageYears: 3,
+      listeners: 48_000,
+      peak: 61_000,
+      released: { single: 9, ep: 2, lp: 1 },
+      catalogue: 17.5,
+      bestQuality: 88,
+      reputation: 34,
+      awards: 1,
+      idle: 0,
+      best: 'regional' as const,
+      lastPay: 41_000,
+      lessons: { since: 16, seasons: 6 },
+      deal: {
+        kind: 'indie' as const,
+        label: 'Porchlight Records',
+        advance: 24_000,
+        royalty: 0.4,
+        left: 2,
+        since: 24,
+        owed: 31_500,
+        paid: true,
+      },
+      offer: {
+        id: 'lbl:26',
+        kind: 'major' as const,
+        label: 'Crestline Records',
+        advance: 90_000,
+        royalty: 0.18,
+        term: 3,
+        age: 26,
+        asked: true,
+        source: 'demo' as const,
+      },
+      demoAge: 26,
+      plan: { single: 4, ep: 1, lp: 0, tour: true },
+      collabs: { 'p:music:2': 1 },
+      answered: ['co:2030:music:0'],
+      tours: 3,
+    };
+    const state: GameState = { ...base, music };
+    expect(fromSave(toSave(state, { id: save.id })).music).toEqual(music);
+  });
+
+  it('refuses a musician that is not sound (0806)', () => {
+    const { save } = newSave('MUSIC-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const good = raw.music;
+    expect(migrateSave({ ...raw, music: good }).ok).toBe(true);
+    const deal = {
+      kind: 'indie',
+      label: 'Porchlight Records',
+      advance: 1000,
+      royalty: 0.4,
+      left: 2,
+      since: 24,
+      owed: 0,
+      paid: false,
+    };
+    const offer = {
+      id: 'lbl:26',
+      kind: 'indie',
+      label: 'Porchlight Records',
+      advance: 1000,
+      royalty: 0.4,
+      term: 2,
+      age: 26,
+      source: 'called',
+    };
+    expect(migrateSave({ ...raw, music: { ...good, deal, offer } }).ok).toBe(true);
+    const bad = [
+      null,
+      [],
+      { ...good, best: 'legend' },
+      { ...good, listeners: -1 },
+      { ...good, listeners: 1.5 },
+      { ...good, reputation: 101 },
+      { ...good, bestQuality: -1 },
+      { ...good, catalogue: -2 },
+      { ...good, catalogue: 'lots' },
+      { ...good, craft: 120 },
+      { ...good, lastPay: -5 },
+      { ...good, tours: 1.2 },
+      { ...good, released: { single: 1, ep: 0 } },
+      { ...good, released: 3 },
+      { ...good, plan: { single: 1, ep: 0, lp: 0 } },
+      { ...good, plan: { single: -1, ep: 0, lp: 0, tour: false } },
+      { ...good, plan: null },
+      { ...good, lessons: { since: 12 } },
+      { ...good, deal: { ...deal, kind: 'boutique' } },
+      { ...good, deal: { ...deal, left: 0 } },
+      { ...good, deal: { ...deal, paid: 'yes' } },
+      { ...good, deal: { ...deal, royalty: 0 } },
+      { ...good, deal: { ...deal, royalty: 1.5 } },
+      { ...good, deal: { ...deal, advance: -1 } },
+      { ...good, deal: { ...deal, owed: -1 } },
+      { ...good, offer: { ...offer, source: 'email' } },
+      { ...good, offer: { ...offer, term: 0 } },
+      { ...good, offer: { ...offer, id: 7 } },
+      { ...good, offer: { ...offer, asked: 'no' } },
+      { ...good, collabs: [] },
+      { ...good, collabs: { x: -1 } },
+      { ...good, answered: [3] },
+      { ...good, answered: 'x' },
+      { ...good, demoAge: -1 },
+    ];
+    for (const row of bad) {
+      expect(migrateSave({ ...raw, music: row }).ok, JSON.stringify(row)).toBe(false);
+    }
+  });
+
+  it('is at version 48 (0806)', () => {
+    expect(CURRENT_SAVE_VERSION).toBe(48);
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {

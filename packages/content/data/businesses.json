@@ -527,6 +527,41 @@
       "gate": 48000
     },
     {
+      "id": "biz.recordlabel",
+      "name": "Record Label",
+      "sector": "Media",
+      "blurb": "You sign artists, press their records and hope one of them breaks. Most never earn back what you spent.",
+      "startup": 250000,
+      "revenue": 1100000,
+      "cogs": 0.38,
+      "staff": 4,
+      "staffMin": 1,
+      "wage": 60000,
+      "assetShare": 0.2,
+      "elasticity": 2.36,
+      "cyclical": 0.6,
+      "volatility": 0.3,
+      "ramp": 3.0,
+      "productShare": 0.0,
+      "skills": [
+        "charisma",
+        "smarts"
+      ],
+      "valueMultiple": 2.2,
+      "names": [
+        "Lowtide Records",
+        "Brass Key Music",
+        "Copper Wire Records",
+        "Northside Sound Co.",
+        "Third Coast Recordings",
+        "Marigold Music Group"
+      ],
+      "overhead": 332000,
+      "supplier": false,
+      "headroom": 1.0,
+      "gate": 150000
+    },
+    {
       "id": "biz.realestate",
       "name": "Real Estate Brokerage",
       "sector": "Professional",

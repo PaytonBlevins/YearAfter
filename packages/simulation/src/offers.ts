@@ -26,6 +26,7 @@
 
 import { isFullTime } from './sports-individual';
 import { isActingFullTime } from './acting';
+import { isMusicFullTime } from './music';
 import { isPostFullTime } from './sports-post';
 import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
 import {
@@ -277,7 +278,8 @@ export function withAnyOffer(state: GameState, alive: boolean): GameState {
   if (
     isFullTime(state.sports.career) ||
     isPostFullTime(state.sports.post) ||
-    isActingFullTime(state.acting)
+    isActingFullTime(state.acting) ||
+    isMusicFullTime(state.music)
   ) {
     return state;
   }
