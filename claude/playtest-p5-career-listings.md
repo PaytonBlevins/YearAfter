@@ -1,6 +1,6 @@
 # Playtest P5 — twelve career listings and study matches
 
-**Status:** built and verified on 7 October 2026; PR publication below. Payton authorized P5.
+**Status:** built on 7 October 2026; PR #17 open, baseline verification blockers below. Payton authorized P5.
 Twelve listings and at least two study/training matches are already requested. Payton approved showing all available matches when qualification gates leave fewer than two.
 The preliminary prototypes were restored byte for byte before the final implementation.
 
@@ -263,6 +263,7 @@ Neither full verification nor repository formatting is reported green.
 
 Fetched real `origin/main` again before publication; it remains `beff25a`, already an ancestor.
 P5 is stacked on P1 #13, P2 #14, P3 #15 and P4 #16. Payton merges; no main push or
-rewriting of published history. PR and actual Actions result will be recorded after publication.
+rewriting of published history. PR #17: https://github.com/PaytonBlevins/YearAfter/pull/17. Published implementation `3b90be3`. CI run 100 (implementation `3b90be3`) fails the Format check on those same 22 historical notes and skips typecheck, unit tests and content validation.
+https://github.com/PaytonBlevins/YearAfter/actions/runs/37701150383. CI does not verify the nine local catalog mismatches because that step is skipped.
 Native-device checks and Claude Project mirroring remain unavailable; `project_write` is not
 exposed in this session. No device check or Project mirror is claimed. P6 has not started.

@@ -76,6 +76,9 @@ existing details. All 15 typechecks and 2,670 tests pass; full verify stops on t
 catalog mismatches. All 29 behavior-changing mutations caught after repairing two test gaps;
 one additional equivalent survivor is documented. Formatting still fails 22 historical notes;
 P5's files pass. Details: `playtest-p5-career-listings.md`.
+PR #17: https://github.com/PaytonBlevins/YearAfter/pull/17 (targets main, depends on P1 #13,
+P2 #14, P3 #15 and P4 #16). Implementation CI run 100 confirms the same 22-note format
+failure and skips later gates.
 P6 waits for Payton's go-ahead.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)

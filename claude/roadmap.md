@@ -1524,6 +1524,8 @@ Measurement, methods and acceptance: `playtest-p5-career-listings.md`. No save c
 All 15 typechecks and 2,670 tests pass; full verify has the nine baseline catalog mismatches.
 Thirty mutation trials caught all 29 behavioral defects after two gap repairs; one equivalent
 survivor is explained. P5 files pass formatting; 22 old notes still block the full format gate.
+PR #17: https://github.com/PaytonBlevins/YearAfter/pull/17 (depends on #13–#16).
+Implementation CI run 100 confirms the same 22 historical formatting failures, skipping later gates.
 Review, Project mirroring and native-device checks remain. P6 has not started.
 
 ### Found by P5
