@@ -20,6 +20,25 @@ until they are done. Read `claude/playtest-rules-brief.md` first. For P1–P16 i
 section 0 and the CORE_RULES, migration and validator limits in section 8. Outside that list, section 0
 still applies. v0.08 and 0508 wait.
 
+**7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
+one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
+inject-or-close choices and no automatic personal-bank rescue. Death winds down troubled
+businesses before inheritance; lenders retain priority. Save v44 is reserved for P1.
+This is the narrow P1–P16 engine/save exception in `playtest-rules-brief.md`; older role
+limits below remain historical. Details and verification: `playtest-p1-business-rescue.md`.
+P2 was subsequently authorized by Payton; see its update below. PR #10 was still unmerged on base `beff25a`;
+P1 was started only after Payton's explicit go-ahead, not an inferred merge.
+
+**P2 update:** Payton approved the measured living curve, Frugal / Comfortable / Lavish spending
+and happiness effects, $1,600 car allowance and Lifestyle screen. Agent B built P2 on
+`feat/playtest-p2-living-costs`, stacked on P1 while `origin/main` remains `beff25a`. Save v45 follows
+P1 v44; keep both migrations. The choice saves immediately, bills on annual advance, and cannot
+farm happiness by switching. Estimates and child-cost copy read the selected lifestyle. TICKET
+remains 0708. Measurement, verification and open issues: `playtest-p2-living-costs.md`.
+P2 PR: https://github.com/PaytonBlevins/YearAfter/pull/14 (targets main, depends on P1 PR #13).
+P3 waits for Payton's next explicit go-ahead. If P1 merges first, rebase P2 onto main and
+drop already-merged P1 commits; do not squash away the separately reserved save versions.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:

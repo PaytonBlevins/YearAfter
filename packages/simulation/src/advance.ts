@@ -82,6 +82,7 @@ import { runPursuitYear } from './pursuits';
 import { withPursuitOffer } from './pursuit-offer';
 import { foreclose, markMissed, runHomesYear, withHomeOffer } from './homes';
 import { markVehiclesMissed, repossess, runVehiclesYear, withVehicleOffer } from './vehicles';
+import { withBusinessRescue } from './business-rescue';
 import { withRenovationOffer } from './renovations';
 import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
@@ -468,7 +469,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Only the one they live in: a rental's costs are the rental's, against its rent.
     housingCost: homesYear.residenceCost,
     // Ticket 0504. The cars, and whether there is one — owning one means the
-    // living bill stops paying for getting about (`VEHICLE_SHARE`).
+    // living bill stops paying for getting about (a bounded dollar allowance).
     vehicleCost: vehiclesYear.cost,
     ownsVehicle: state.vehicles.length > 0,
   });
@@ -1105,7 +1106,11 @@ export function advanceYear(state: GameState): AdvanceResult {
         ...health.statDeltas,
         ...shaped,
         // Ticket 0706. The year's news about a channel or about being known.
-        ...(creatorsYear.mood === 0 ? {} : { happiness: creatorsYear.mood }),
+        // Preserve the existing creator/activity mood before adding a tier's
+        // paid-year effect. Comfortable must not erase a year of activities.
+        happiness:
+          (creatorsYear.mood === 0 ? (shaped.happiness ?? 0) : creatorsYear.mood) +
+          (living.mood > 0 && money.short < 0 ? 0 : living.mood),
       }),
       health: clampStat(health.health),
     },
@@ -1270,6 +1275,21 @@ export function advanceYear(state: GameState): AdvanceResult {
     `withLifeOffer`'s docblock carries the numbers, including the two orderings
     that were tried and rejected.
   */
+  const rescued = withBusinessRescue(next, businessesYear.rescues);
+  const closingEntries = rescued.player.timeline.filter(
+    (entry) => !next.player.timeline.some((prior) => prior.id === entry.id),
+  );
+  const finalEntries = withinBudget([...budgeted, ...closingEntries]);
+  const reviewed =
+    closingEntries.length > 0
+      ? {
+          ...rescued,
+          player: {
+            ...rescued.player,
+            timeline: finalEntries.reduce(appendToTimeline, state.player.timeline),
+          },
+        }
+      : rescued;
   return {
     /*
       Ticket 0416 — something to join, LAST of the four: a league sign-up should
@@ -1297,7 +1317,7 @@ export function advanceYear(state: GameState): AdvanceResult {
           withHomeOffer(
             withLifeOffer(
               withAnyOffer(
-                withCollegeOffer(repossess(foreclose(next)), health.alive),
+                withCollegeOffer(repossess(foreclose(reviewed)), health.alive),
                 health.alive,
               ),
               health.alive,
@@ -1313,7 +1333,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       ),
       health.alive,
     ),
-    newEntries: budgeted,
+    newEntries: finalEntries,
   };
 }
 

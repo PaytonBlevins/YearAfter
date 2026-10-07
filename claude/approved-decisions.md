@@ -81,6 +81,16 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   first. Frugal / Comfortable / Lavish follow, as a way to spend more on purpose. **This overrides
   spec 1166's removal of a tier selector by name.** The car's yearly cost becomes a dollar amount
   scaled to the car and no longer a share of the living bill (finding 33).
+  **P2 proposal approved by Payton:** Comfortable is the default; Frugal buys 80% of discretionary
+  spending above basic needs, Comfortable 100%, Lavish 150%. Annual happiness nudges are −1 / 0 / +2,
+  through the existing stat curve, with no effect at basic needs or in hardship and no Lavish bonus
+  for an unpaid year. Selection itself changes no money, time or stats. The approved default uses
+  marginal after-tax spending of 92% up to $50,000, 40% to $120,000 and 15% above, with wealth pull
+  tapering above $100,000. The embedded car allowance is $1,600 per index-1 single renter, scaled to
+  household/location/housing and capped at real car costs. Lifestyle opens from the Living costs row
+  with three options and annual estimates. This explicitly overrides MASTER_SPEC section 22 and
+  its interface passage removing a tier selector (the brief's “spec 1166”); sections 20–21 still keep
+  contextual costs and the backend ledger. See `playtest-p2-living-costs.md`.
 - **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
   account creation for channels.
 
