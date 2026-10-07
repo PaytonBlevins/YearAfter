@@ -63,7 +63,17 @@ similar. All 15 typechecks and 2,633 tests pass; full verify hits the nine basel
 All 26 mutations caught after adding the missing owner-payment case; none missed. PR results: `playtest-p4-business-economy.md`. Native device checks and Project
 mirroring remain open. PR #16: https://github.com/PaytonBlevins/YearAfter/pull/16
 (targets main, depends on P1 #13, P2 #14 and P3 #15). Implementation CI run 94 confirms the
-same 22-note formatting failure and skips later gates. P5 waits.
+same 22-note formatting failure and skips later gates. P5 was subsequently authorized; see its measurement note below.
+
+**P5 measurement update:** Payton authorized P5 on 7 October. Agent B published its separate
+claim on `feat/playtest-p5-career-listings`, following P4 #16 while main remains `beff25a`.
+Twelve listings with two reserved study/training matches were measured, then all prototype
+source restored byte for byte. Played-life median jobs seen rises 93 → 96; passive first-job
+age remains median 17. Two matches are always shown when two are eligible in the program
+corpus. A new Architectural Studies graduate has only one eligible matching job, so the
+recommendation is to show all available matches without bypassing qualification/experience
+gates. That exception awaits Payton's decision. No implementation, save bump, final verify
+or sabotage completion is claimed. Details: `playtest-p5-career-listings.md`. P6 waits.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

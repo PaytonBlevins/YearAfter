@@ -900,7 +900,10 @@ it. Wherever debt ends up living, a student should see what they owe.
 `LISTINGS = 6` in `careers/openings.ts`. Doubling it is one constant, but
 0401's reachability numbers and the starvation guards were measured at six, so
 it needs a re-measure (more listings means more of the 169 jobs seen in a life,
-and a passive player gets work sooner).
+and may change first-job timing). **P5 measurement:** played-life median jobs seen rises
+93 → 96, but passive first-job age stays median 17 in 250 paired lives. Twelve listings alone
+still often show fewer than two study/training matches. Reservation and the scarce-pool
+proposal are recorded in `playtest-p5-career-listings.md`; implementation is pending.
 
 ### Found by 0504
 
@@ -1507,4 +1510,32 @@ Full method, prior proposal, approved exception, tests and sabotage: `playtest-p
   its old +5% yearly threshold would hide it even though the boom still has +9%. Ledger, screen
   and timeline thresholds are now shared/pinned. The exact 1.5% screen boundary and half-percent
   rounding exposed floating-point cancellation; both signs and neighboring values are tested.
-- Native device checks, Project mirroring and PR review remain open. P5 awaits Payton’s go-ahead.
+- Native device checks, Project mirroring and PR review remain open. P5 was subsequently authorized; see below.
+
+### Playtest P5 — measured, scarce-pool decision pending (7 October 2026)
+
+Claim published on `feat/playtest-p5-career-listings`, following P4 PR #16 while main remains
+`beff25a`. Proposed twelve listings, reserving two eligible study/training matches and filling
+the rest from the existing weighted general pool. The played-life median sees 93 → 96 of 169
+jobs; a passive life still gets its first job at median age 17. Across all 53 programs and
+5,300 paired new-graduate contexts, fewer than two matching rows drops from 57.38% to 1.89%;
+the remaining 100 cases all have only one eligible architecture job. With ten years' work,
+the same 5,300-context check has zero misses. All prototype source was restored byte for byte.
+Measurement, methods and unbuilt acceptance: `playtest-p5-career-listings.md`. No save change,
+final verification or completed sabotage report is claimed. P6 has not started.
+
+### Found by P5
+
+- **One eligible match cannot fill two distinct slots.** A new Architectural Studies graduate
+  can apply for Architectural drafter; Junior designer requires career reach as well as the
+  degree. Recommend showing all available matches when fewer than two are eligible, leaving
+  the qualification/experience gates intact. Await Payton's decision on this exception.
+- **More listings do not automatically mean an earlier first job (finding 21).** First-offer
+  chance and the education-ending trigger already govern that door. Paired passive quantiles
+  stay 16 / 17 / 18 even though lifetime board coverage improves.
+- **Reservations change the starvation ruler.** Existing linear weight-share exposure is a
+  proxy, not an exact selection probability. Account for the matching pool/general slots in
+  final tests while retaining the zero-reach / 95% single-life intent.
+- **The saved major is current/last, not a history of degree subjects.** The proposal uses
+  that existing information plus all held licenses. It cannot promise every old subject after
+  another enrolment overwrites `majorId` without a separate save/history design.
