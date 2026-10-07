@@ -72,10 +72,20 @@ import type { PendingDecision } from '@yearafter/events';
 import type { GameState } from './game-state';
 import { cannotEnrol } from './college';
 import { resign } from './careers';
-import type { CareerTier, PastCareer, SportCareer, SportsOffer, SportsState } from './sports-state';
+import { POST_JOBS } from '@yearafter/content';
+import { postOffer, postOccupation, postTitle, runPostYear } from './sports-post';
+import type {
+  CareerTier,
+  PastCareer,
+  PostJob,
+  SportCareer,
+  SportsOffer,
+  SportsState,
+} from './sports-state';
 import {
   addSportsRecord,
   isFullTime,
+  nationalTeamOffer,
   runArtsYear,
   runIndividualSeason,
   trainingCeiling,
@@ -164,7 +174,7 @@ export function careerLabel(career: SportCareer): string {
   const name = sport?.noun ?? 'sport';
   if (career.stage === 'pro') {
     // A tour has no club to name: the circuit is the label (ticket 0803).
-    if (sport?.format === 'tour') return sport.league;
+    if (sport?.format === 'tour' || sport?.format === 'olympic') return sport.league;
     return career.team ? `${career.team}, ${name}` : `Professional ${name}`;
   }
   if (career.stage === 'college')
@@ -181,10 +191,14 @@ export function sportsFameOf(career: SportCareer | undefined): number {
 }
 
 /** The header, for somebody who plays for a living. */
-export function sportsOccupation(career: SportCareer | undefined): string | undefined {
+export function sportsOccupation(
+  career: SportCareer | undefined,
+  post?: PostJob,
+): string | undefined {
   // A club fighter has a day job, and it is still what the header says (ticket 0803).
-  if (!isFullTime(career)) return undefined;
-  return findSport(career!.sportId)?.playerTitle;
+  if (isFullTime(career)) return findSport(career!.sportId)?.playerTitle;
+  // A coach, or a national commentator, after the playing (ticket 0804).
+  return postOccupation(post);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -340,7 +354,8 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
     sports = withoutArts;
   }
   // An amateur fighter is a career waiting on an answer, not a school team to be walked away from.
-  const amateur = career?.stage === 'school' && findSport(career.sportId)?.format === 'combat';
+  const amateurFormat = career?.stage === 'school' ? findSport(career.sportId)?.format : undefined;
+  const amateur = amateurFormat === 'combat' || amateurFormat === 'olympic';
 
   /* ---- school: on the team, and what graduating from it brings ---------- */
   if (career === undefined || career.stage === 'school') {
@@ -573,6 +588,30 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
     }
   }
 
+  /* ---- a place in a national program (ticket 0804) ---- */
+  if (career === undefined && sports.offer === undefined) {
+    const found = nationalTeamOffer(before, age, artsYear.arts);
+    if (found) {
+      career = found.career;
+      sports = { ...sports, offer: found.offer };
+      lines.push({ kind: 'milestone', text: found.line });
+    }
+  }
+
+  /* ---- after the playing: a coaching or commentary post (ticket 0804) ---- */
+  if (sports.post && !sports.post.over) {
+    const year = runPostYear(sports.post, age);
+    if (year.post) sports = { ...sports, post: year.post };
+    pay += year.pay;
+    for (const text of year.lines) lines.push({ kind: 'milestone', text });
+  } else if (career === undefined && sports.offer === undefined) {
+    const found = postOffer({ ...before, sports }, age);
+    if (found) {
+      sports = { ...sports, offer: found.offer };
+      lines.push({ kind: 'milestone', text: found.line });
+    }
+  }
+
   const playing = career;
   sports = { ...sports, ...(playing ? { career: playing } : {}) };
   if (!playing) {
@@ -773,6 +812,15 @@ function offerPrompt(offer: SportsOffer): string {
     const sport = findSport(offer.sportId);
     return `${offer.team} will put you on a ${sport?.noun ?? 'fight'} card. The first purses are small, and the rest of your life stays where it is.`;
   }
+  if (offer.kind === 'national-team') {
+    const sport = findSport(offer.sportId);
+    return `The ${sport?.league ?? 'national program'} has a place for you at ${offer.team}. A stipend, a coach, and a chance at the Games.`;
+  }
+  if (offer.kind === 'post-job') {
+    const row = POST_JOBS[offer.level];
+    const sport = findSport(offer.sportId);
+    return `There is a job as a ${sport?.noun ?? 'sports'} ${row.words}: ${money(row.pay)} a year${row.fullTime ? ', and a full-time one' : ', beside whatever else you do'}.`;
+  }
   const years = `${offer.years} ${offer.years === 1 ? 'year' : 'years'}`;
   if (offer.rookie) {
     return `The ${offer.team} will sign you: ${money(offer.salary)} a year for ${years}.${offer.asked ? ' You have already asked once.' : ''}`;
@@ -797,6 +845,18 @@ function offerChoices(offer: SportsOffer): PendingDecision['choices'] {
     return [
       { id: ACCEPT, label: 'Turn pro' },
       { id: DECLINE, label: 'Stay an amateur' },
+    ];
+  }
+  if (offer.kind === 'national-team') {
+    return [
+      { id: ACCEPT, label: 'Join the program' },
+      { id: DECLINE, label: 'Not now' },
+    ];
+  }
+  if (offer.kind === 'post-job') {
+    return [
+      { id: ACCEPT, label: 'Take the job' },
+      { id: DECLINE, label: 'Not for me' },
     ];
   }
   return [
@@ -873,12 +933,92 @@ const addRecord = (
   year: number,
 ): readonly LifeRecord[] => appendRecord(records, stampRecord(record, age, year, records.length));
 
+/** The answer to a coaching or commentary job (ticket 0804). There is no career to settle: the post is what is kept. */
+function answerPostOffer(
+  state: GameState,
+  offer: Extract<SportsOffer, { kind: 'post-job' }>,
+  choiceId: string,
+): Result<SportsOfferOutcome, SportsOfferError> {
+  if (!offerChoices(offer).some((choice) => choice.id === choiceId)) return err('no-such-choice');
+  const { offer: _spent, ...sportsRest } = state.sports;
+  const pending = state.pending.filter((row) => row.eventId !== SPORTS_OFFER_EVENT_ID);
+  const row = POST_JOBS[offer.level];
+  const sport = findSport(offer.sportId);
+  const post: PostJob = {
+    sportId: offer.sportId,
+    kind: offer.postKind,
+    level: offer.level,
+    since: offer.age,
+    seasons: 0,
+  };
+  if (choiceId === DECLINE) {
+    const written = withEntry(
+      state,
+      offer,
+      `Turned down the ${sport?.noun ?? 'sports'} ${row.words} job.`,
+      'passive',
+      'post:no',
+    );
+    return ok({
+      entry: written.entry,
+      state: {
+        ...state,
+        player: written.player,
+        sports: { ...sportsRest, post: { ...post, over: true } },
+        pending,
+      },
+    });
+  }
+  // A coach's job is a living and ends a day job; a local commentator keeps theirs.
+  const left = row.fullTime && state.employment.job !== undefined ? resign(state) : undefined;
+  const base: GameState = left?.ok
+    ? {
+        ...left.value.state,
+        player: {
+          ...left.value.state.player,
+          timeline: left.value.state.player.timeline.filter(
+            (entry) => entry.id !== left.value.entry.id,
+          ),
+        },
+      }
+    : state;
+  const written = withEntry(
+    base,
+    offer,
+    `Took the job as a ${sport?.noun ?? 'sports'} ${row.words}.${left?.ok ? ' That was the end of the day job.' : ''}`,
+    'milestone',
+    'post:yes',
+  );
+  return ok({
+    entry: written.entry,
+    state: {
+      ...base,
+      player: {
+        ...written.player,
+        records: addRecord(
+          written.player.records,
+          {
+            category: 'career',
+            label: `Became a ${postTitle(post).toLowerCase()}`,
+            referenceId: offer.sportId,
+          },
+          offer.age,
+          state.world.year,
+        ),
+      },
+      sports: { ...sportsRest, post },
+      pending,
+    },
+  });
+}
+
 export function answerSportsOffer(
   state: GameState,
   choiceId: string,
 ): Result<SportsOfferOutcome, SportsOfferError> {
   const offer = state.sports.offer;
   const career = state.sports.career;
+  if (offer?.kind === 'post-job') return answerPostOffer(state, offer, choiceId);
   if (!offer || !career) return err('no-offer');
   const allowed = offerChoices(offer).some((choice) => choice.id === choiceId);
   if (!allowed) return err('no-such-choice');
@@ -964,8 +1104,9 @@ export function answerSportsOffer(
   }
 
   /* ---- the tour card, or a gym's offer (ticket 0803) ----------------- */
-  if (offer.kind === 'tour-card' || offer.kind === 'turn-pro') {
+  if (offer.kind === 'tour-card' || offer.kind === 'turn-pro' || offer.kind === 'national-team') {
     const proTour = offer.kind === 'tour-card';
+    const program = offer.kind === 'national-team';
     if (choiceId === DECLINE) {
       const past: PastCareer = {
         sportId: career.sportId,
@@ -976,16 +1117,18 @@ export function answerSportsOffer(
         reputation: career.reputation,
         reached: proTour ? 'college' : 'school',
         how: 'declined',
-        ...(proTour ? {} : { wins: 0, losses: 0 }),
+        ...(proTour || program ? {} : { wins: 0, losses: 0 }),
       };
       const { career: _c, ...without } = sportsRest;
       return settle(
         { ...without, past: [...sportsRest.past, past] },
         proTour
           ? `Turned down the ${sport?.leagueShort ?? 'tour'} card.`
-          : `Turned down ${offer.kind === 'turn-pro' ? offer.team : 'the gym'} and stayed an amateur.`,
+          : program
+            ? `Turned down a place in the ${sport?.leagueShort ?? 'national'} program.`
+            : `Turned down ${offer.kind === 'turn-pro' ? offer.team : 'the gym'} and stayed an amateur.`,
         'milestone',
-        proTour ? 'tour:no' : 'pro:no',
+        proTour ? 'tour:no' : program ? 'nat:no' : 'pro:no',
       );
     }
     // A tour has no club: the college the player came from stops being their team the day they leave it.
@@ -1015,8 +1158,16 @@ export function answerSportsOffer(
     const { arts: _used, ...restNoArts } = sportsRest;
     const text = proTour
       ? `Took the ${sport?.leagueShort ?? 'tour'} card.${left?.ok ? ' That was the end of the day job.' : ''}`
-      : `Signed with ${offer.kind === 'turn-pro' ? offer.team : 'the gym'}. The first fight is in the spring.${left?.ok ? ' That was the end of the day job.' : ''}`;
-    const written = withEntry(base, offer, text, 'milestone', proTour ? 'tour:yes' : 'pro:yes');
+      : program
+        ? `Joined the ${sport?.leagueShort ?? 'national'} program at ${offer.team}.`
+        : `Signed with ${offer.kind === 'turn-pro' ? offer.team : 'the gym'}. The first fight is in the spring.${left?.ok ? ' That was the end of the day job.' : ''}`;
+    const written = withEntry(
+      base,
+      offer,
+      text,
+      'milestone',
+      proTour ? 'tour:yes' : program ? 'nat:yes' : 'pro:yes',
+    );
     return ok({
       entry: written.entry,
       state: {
@@ -1029,7 +1180,9 @@ export function answerSportsOffer(
               category: 'career',
               label: proTour
                 ? `Earned a ${sport?.leagueShort ?? 'tour'} card`
-                : `Turned pro as a ${sport?.noun ?? 'fighter'} fighter`,
+                : program
+                  ? `Joined the ${sport?.leagueShort ?? 'national'} program`
+                  : `Turned pro as a ${sport?.noun ?? 'fighter'} fighter`,
               ...(sport ? { referenceId: sport.id } : {}),
             },
             offer.age,

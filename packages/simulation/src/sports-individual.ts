@@ -34,15 +34,23 @@ import {
 } from '@yearafter/character';
 import {
   ART_START_LEVEL,
+  FINAL_LINE,
   FIGHT_LUCK,
   FIGHTS_PER_YEAR,
+  GAMES_NOISE,
+  GAMES_TEAM_TIER,
   HARD_WORK_SESSIONS,
   MARTIAL_ART_MIN_AGE,
   MAX_ARTS_AT_ONCE,
+  MEDAL_PRIZE,
+  MEDAL_SPONSORSHIP,
+  MEDAL_WORDS,
   MIN_ART_SEASONS,
   MISSED_SEASON_PURSE,
+  OLYMPIC_WINDOW,
   PRO_INJURY_CHANCE,
   PURSE_SPREAD,
+  REACH_NATIONAL,
   REACH_PROS,
   TIER_REPUTATION,
   TITLE_PURSE_SHARE,
@@ -58,14 +66,18 @@ import {
   findSport,
   fightCareerFor,
   fightWinChance,
+  isGamesYear,
   isOut,
   isHardWorker,
+  medalFor,
   naturalForm,
+  olympicCareersFor,
   skillValue,
   stepTier,
   tierForPerformance,
   worldRankFor,
   type MartialArt,
+  type Medal,
   type Sport,
   type SportTier,
 } from '@yearafter/content';
@@ -76,10 +88,13 @@ import { affordsFee } from './pursuits';
 import {
   COMBAT_MINOR_LINES,
   COMBAT_SERIOUS_LINES,
+  OLYMPIC_MINOR_LINES,
+  OLYMPIC_SERIOUS_LINES,
   TOUR_MINOR_LINES,
   TOUR_SERIOUS_LINES,
   healthAdjusted,
   injuryOf,
+  money,
   nextForm,
   pick,
   positionIn,
@@ -444,9 +459,68 @@ export function turnProOffer(
   };
 }
 
+/**
+ * A place in a national program (ticket 0804), the Olympic sports' road in. Checked each year while there is
+ * no career and no question open, against one draw for the life per sport and the lower `REACH_NATIONAL`
+ * table. Boxing and wrestling only come here after the gym's question has been settled (the caller checks
+ * the pro offer first), so a boxer is asked about the pros before the Games.
+ */
+export function nationalTeamOffer(
+  before: GameState,
+  age: number,
+  arts: readonly ArtStudy[],
+):
+  { readonly career: SportCareer; readonly offer: SportsOffer; readonly line: string } | undefined {
+  const road = olympicCareersFor(
+    arts.map((row) => ({ artId: row.artId, level: row.level, seasons: row.seasons })),
+  );
+  const seed = before.rng.getSeed();
+  const gen = before.world.generation;
+  for (const candidate of road) {
+    const sport = findSport(candidate.sportId);
+    if (!sport || sport.format !== 'olympic') continue;
+    const window = OLYMPIC_WINDOW[sport.id as keyof typeof OLYMPIC_WINDOW];
+    if (age < window[0] || age > window[1]) continue;
+    if (before.sports.past.some((row) => row.sportId === sport.id)) continue;
+    const base = baseArts(arts, sport);
+    const seasons = base.reduce((total, row) => total + row.seasons, 0);
+    const hardSeasons = base.reduce((total, row) => total + row.hardSeasons, 0);
+    const category = categoryOf(
+      before.player.talents.athletics,
+      isHardWorker(seasons, hardSeasons),
+    );
+    if (sportUnit(seed, gen, 'national', sport.id) >= REACH_NATIONAL[category]) continue;
+    const team = stablePick(sport.proTeams, `sports:center:${seed}:${gen}:${sport.id}`) ?? '';
+    const career: SportCareer = {
+      sportId: sport.id,
+      // The years before the program: a record of seasons, like an amateur fighter's.
+      stage: 'school',
+      startedAge: Math.min(...base.map((row) => row.startedAge)),
+      seasons,
+      hardSeasons,
+      form: candidate.form,
+      trainedAtAge: -1,
+      trainedCount: 0,
+      reputation: 0,
+      titles: 0,
+      team,
+    };
+    return {
+      career,
+      offer: { kind: 'national-team', sportId: sport.id, team, age, eventId: OFFER_EVENT_ID },
+      line: `The ${sport.league} has a place for you at ${team}. Years of work, and somebody was watching.`,
+    };
+  }
+  return undefined;
+}
+
 /** The studies a fight career is built from: the one art for boxing, the best of each style for MMA. */
 export function baseArts(arts: readonly ArtStudy[], sport: Sport): readonly ArtStudy[] {
   const ready = arts.filter((row) => row.seasons >= MIN_ART_SEASONS);
+  // An Olympic sport is built from whatever feeds it: swimming from swimming, the boxing program from boxing (ticket 0804).
+  if (sport.format === 'olympic') {
+    return ready.filter((row) => findMartialArt(row.artId)?.feeds.includes(sport.id));
+  }
   if (sport.id === 'boxing') return ready.filter((row) => row.artId === 'boxing');
   const best = (style: MartialArt['style']): ArtStudy | undefined =>
     ready
@@ -489,6 +563,8 @@ export interface IndividualSeasonOutput {
   readonly lines: readonly { readonly kind: 'passive' | 'milestone'; readonly text: string }[];
   readonly records: readonly NewLifeRecord[];
   readonly pay: number;
+  /** The Olympic medal won this year, if any (ticket 0804). */
+  readonly medal?: Medal;
   readonly mood: number;
   readonly health: number;
 }
@@ -524,7 +600,8 @@ export function runIndividualSeason(input: {
   const lines: IndividualSeasonOutput['lines'][number][] = [];
   const records: NewLifeRecord[] = [];
   const combat = sport.format === 'combat';
-  const tour = !combat;
+  const olympic = sport.format === 'olympic';
+  const tour = sport.format === 'tour';
 
   const tier = (career.tier ?? 'fringe') as SportTier;
   const proSeasons = (career.proSeasons ?? 0) + 1;
@@ -578,7 +655,7 @@ export function runIndividualSeason(input: {
     else if (tierRank(target) < tierRank(tier)) next = stepTier(tier, -1);
     // A first season is not judged: nobody loses a card or a gym in the year they arrive.
     if (tier === 'fringe' && isOut(performance) && proSeasons > 1) {
-      ended = combat ? 'released' : 'lost-card';
+      ended = combat ? 'released' : olympic ? 'cut' : 'lost-card';
     }
   }
   // A serious injury costs a rung one time in three, as it does a team player.
@@ -591,18 +668,34 @@ export function runIndividualSeason(input: {
   // A belt: moving up into the top two rungs of a fight card is a title fight won.
   const belt = combat && next !== tier && tierRank(next) > tierRank(tier) && tierRank(next) >= 3;
 
+  // The Games (ticket 0804): every fourth year the national team goes, and a year's results become a placing.
+  const gamesYear = olympic && isGamesYear(year);
+  const onTeam = tierRank(next) >= tierRank(GAMES_TEAM_TIER) && ended === undefined;
+  let medal: Medal | undefined;
+  let finalist = false;
+  if (gamesYear && !missed && onTeam) {
+    const games = performance + (sportUnit(seed, gen, 'games', year) - 0.5) * GAMES_NOISE;
+    medal = medalFor(games);
+    finalist = medal === undefined && games >= FINAL_LINE;
+  }
+  const medalPay = medal ? MEDAL_PRIZE[medal] + MEDAL_SPONSORSHIP[medal] : 0;
+
   const spread =
     PURSE_SPREAD[0] + sportUnit(seed, gen, 'purse', year) * (PURSE_SPREAD[1] - PURSE_SPREAD[0]);
   const base = sport.economy.pay[tier];
-  const pay = missed
-    ? Math.round(base * MISSED_SEASON_PURSE)
-    : Math.round(base * spread + (title || belt ? base * TITLE_PURSE_SHARE : 0));
+  const pay =
+    (missed
+      ? Math.round(base * MISSED_SEASON_PURSE)
+      : Math.round(base * spread + (title || belt ? base * TITLE_PURSE_SHARE : 0))) + medalPay;
 
   const reputation = Math.max(
     0,
     Math.min(
       100,
-      (career.reputation ?? 0) + TIER_REPUTATION[tier] + (title || belt ? 6 : 0) - (missed ? 3 : 0),
+      (career.reputation ?? 0) +
+        TIER_REPUTATION[tier] +
+        (title || belt || medal ? 6 : 0) -
+        (missed ? 3 : 0),
     ),
   );
 
@@ -616,7 +709,7 @@ export function runIndividualSeason(input: {
     hardSeasons: career.hardSeasons + (hard ? 1 : 0),
     form: missed ? Math.max(0, form - 8) : form,
     reputation,
-    titles: career.titles + (title || belt ? 1 : 0),
+    titles: career.titles + (title || belt || medal ? 1 : 0),
     ...(combat ? { wins, losses } : {}),
   };
 
@@ -638,6 +731,35 @@ export function runIndividualSeason(input: {
           tierRank(next) > tierRank(tier)
             ? `The matchmakers are giving you better opponents. You are ${tierWords(next)} on the card now.`
             : `Back down the card after a bad run. You are ${tierWords(next)} now.`,
+      });
+    }
+  } else if (olympic) {
+    if (medal) {
+      lines.push({
+        kind: 'milestone',
+        text: `Won an Olympic ${MEDAL_WORDS[medal]} medal. ${money(MEDAL_PRIZE[medal] + MEDAL_SPONSORSHIP[medal])} in prizes and sponsors came with it.`,
+      });
+    } else if (finalist) {
+      lines.push({
+        kind: 'milestone',
+        text: 'Made the final at the Games and finished out of the medals.',
+      });
+    } else if (gamesYear && missed && onTeam) {
+      lines.push({ kind: 'milestone', text: 'An injury kept you out of the Games.' });
+    } else if (gamesYear && !missed && !onTeam && ended === undefined) {
+      lines.push({ kind: 'passive', text: "Didn't make the team for the Games." });
+    } else if (gamesYear && !missed && onTeam) {
+      lines.push({ kind: 'passive', text: 'Went to the Games and went out early.' });
+    }
+    if (next !== tier && tierRank(next) > tierRank(tier)) {
+      lines.push({
+        kind: 'milestone',
+        text: `The program is moving you up. You are ${tierWords(next)} on the national team now.`,
+      });
+    } else if (next !== tier) {
+      lines.push({
+        kind: 'passive',
+        text: `Slipping down the national ranking. You are ${tierWords(next)} now.`,
       });
     }
   } else {
@@ -665,6 +787,13 @@ export function runIndividualSeason(input: {
       });
     }
   }
+  if (medal) {
+    records.push({
+      category: 'championship',
+      label: `Olympic ${MEDAL_WORDS[medal]} medal in ${sport.noun}, ${year}`,
+      referenceId: sport.id,
+    });
+  }
   if (title || belt) {
     records.push({
       category: 'championship',
@@ -673,17 +802,23 @@ export function runIndividualSeason(input: {
     });
   }
 
-  let mood = title || belt ? 4 : 0;
+  let mood = (title || belt ? 4 : 0) + (medal ? 6 : 0);
   let health = 0;
   if (injury === 'minor') {
     lines.push({
       kind: 'passive',
-      text: pick(combat ? COMBAT_MINOR_LINES : TOUR_MINOR_LINES, `sports:injury:m:${year}`),
+      text: pick(
+        combat ? COMBAT_MINOR_LINES : olympic ? OLYMPIC_MINOR_LINES : TOUR_MINOR_LINES,
+        `sports:injury:m:${year}`,
+      ),
     });
   } else if (injury === 'serious') {
     lines.push({
       kind: 'passive',
-      text: pick(combat ? COMBAT_SERIOUS_LINES : TOUR_SERIOUS_LINES, `sports:injury:s:${year}`),
+      text: pick(
+        combat ? COMBAT_SERIOUS_LINES : olympic ? OLYMPIC_SERIOUS_LINES : TOUR_SERIOUS_LINES,
+        `sports:injury:s:${year}`,
+      ),
     });
     health -= 4;
     mood -= 3;
@@ -703,6 +838,11 @@ export function runIndividualSeason(input: {
       kind: 'milestone',
       text: `Lost your ${sport.leagueShort} card after a year outside the places that count.`,
     });
+  } else if (ended === 'cut') {
+    lines.push({
+      kind: 'milestone',
+      text: `The ${sport.leagueShort} cut you from the national program after a year outside the places that count.`,
+    });
   } else if (ended === 'released') {
     lines.push({
       kind: 'milestone',
@@ -713,12 +853,21 @@ export function runIndividualSeason(input: {
       kind: 'milestone',
       text: `Retired from ${sport.noun} at ${age}, after ${proSeasons} ${proSeasons === 1 ? 'season' : 'seasons'}${
         combat ? ` and a record of ${wins}–${losses}` : ''
-      }${updated.titles > 0 ? `, with ${updated.titles} ${updated.titles === 1 ? 'title' : 'titles'}` : ''}.`,
+      }${updated.titles > 0 ? `, with ${updated.titles} ${olympic ? (updated.titles === 1 ? 'medal' : 'medals') : updated.titles === 1 ? 'title' : 'titles'}` : ''}.`,
     });
     ended = 'retired';
   }
 
-  return { career: updated, ...(ended ? { ended } : {}), lines, records, pay, mood, health };
+  return {
+    career: updated,
+    ...(ended ? { ended } : {}),
+    ...(medal ? { medal } : {}),
+    lines,
+    records,
+    pay,
+    mood,
+    health,
+  };
 }
 
 /* -------------------------------------------------------------------------- */

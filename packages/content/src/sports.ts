@@ -25,7 +25,12 @@ export type SportId =
   | 'golf'
   | 'tennis'
   | 'boxing'
-  | 'mma';
+  | 'mma'
+  | 'track'
+  | 'swimming'
+  | 'gymnastics'
+  | 'wrestling'
+  | 'olympic-boxing';
 
 /**
  * How a sport is played for a living (ticket 0803).
@@ -33,11 +38,12 @@ export type SportId =
  *   team    a roster: a draft, a contract, a club that pays you (0801, 0802)
  *   tour    a ranked circuit: a tour card, prize money, and a rank that moves with results (golf, tennis)
  *   combat  a record: fights decided by skill, purses, and a road that runs through a martial art (boxing, MMA)
+ *   olympic a national program: a season of results, a Games every four years, medals (ticket 0804)
  *
  * The two individual formats share one rule: nobody is guaranteed a thing. What a player earns is
  * what the season's results earn it.
  */
-export type SportFormat = 'team' | 'tour' | 'combat';
+export type SportFormat = 'team' | 'tour' | 'combat' | 'olympic';
 
 export type SportTier = 'fringe' | 'role' | 'starter' | 'star' | 'superstar';
 
@@ -385,6 +391,114 @@ const MMA_ECONOMY: SportEconomy = {
   fullTimeFrom: 'role',
   declineFrom: 31,
 };
+
+/**
+ * The Olympic sports (ticket 0804). The IOC pays athletes nothing. Team USA pays a medalist $37,500 for gold,
+ * $22,500 for silver and $15,000 for bronze (Operation Gold, unchanged for Paris 2024); most Olympians hold
+ * another job, and training costs tens of thousands a year. So a stipend runs from a grant at the bottom to a
+ * champion's sponsorship at the top, and the full-time living starts at `star`. The ladders below are a game
+ * ladder: grants and a day job for the bottom three tiers, sponsors above.
+ */
+const TRACK_ECONOMY: SportEconomy = {
+  pay: { fringe: 8_000, role: 25_000, starter: 50_000, star: 120_000, superstar: 400_000 },
+  retireAge: {
+    fringe: [26, 30],
+    role: [28, 32],
+    starter: [29, 33],
+    star: [31, 35],
+    superstar: [32, 37],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 1.0,
+  fullTimeFrom: 'star',
+  declineFrom: 29,
+};
+
+const SWIMMING_ECONOMY: SportEconomy = {
+  pay: { fringe: 7_000, role: 22_000, starter: 45_000, star: 110_000, superstar: 350_000 },
+  retireAge: {
+    fringe: [23, 27],
+    role: [25, 29],
+    starter: [26, 30],
+    star: [28, 32],
+    superstar: [29, 34],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 0.7,
+  fullTimeFrom: 'star',
+  declineFrom: 26,
+};
+
+const GYMNASTICS_ECONOMY: SportEconomy = {
+  pay: { fringe: 6_000, role: 20_000, starter: 40_000, star: 100_000, superstar: 300_000 },
+  retireAge: {
+    fringe: [19, 22],
+    role: [20, 24],
+    starter: [21, 25],
+    star: [23, 27],
+    superstar: [24, 28],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 1.5,
+  fullTimeFrom: 'star',
+  declineFrom: 21,
+};
+
+const WRESTLING_ECONOMY: SportEconomy = {
+  pay: { fringe: 5_000, role: 15_000, starter: 30_000, star: 80_000, superstar: 220_000 },
+  retireAge: {
+    fringe: [25, 29],
+    role: [27, 31],
+    starter: [28, 32],
+    star: [29, 33],
+    superstar: [30, 35],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 1.4,
+  fullTimeFrom: 'star',
+  declineFrom: 28,
+};
+
+const OLYMPIC_BOXING_ECONOMY: SportEconomy = {
+  pay: { fringe: 6_000, role: 18_000, starter: 35_000, star: 90_000, superstar: 250_000 },
+  retireAge: {
+    fringe: [23, 27],
+    role: [25, 29],
+    starter: [26, 30],
+    star: [28, 32],
+    superstar: [29, 34],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 1.3,
+  fullTimeFrom: 'star',
+  declineFrom: 27,
+};
+
+/** The training centers a national program sends its athletes to. Fictional. */
+const OLYMPIC_CENTERS: readonly string[] = [
+  'Lakeview Training Center',
+  'High Plains Training Center',
+  'Pacific Crest Athletic Center',
+  'Redstone Performance Center',
+  'Northern Pines Training Center',
+  'Coastal Sports Institute',
+  'Summit Ridge Training Center',
+  'Ironwood Athletic Institute',
+  'Silver Lake Training Center',
+  'Cedar Valley Performance Center',
+  'Harborview Training Center',
+  'Prairie Gate Athletic Center',
+];
 
 const FIGHT_GYMS: readonly string[] = [
   'Ironbridge Fight Club',
@@ -764,6 +878,130 @@ export const SPORTS: readonly Sport[] = [
     collegeTeams: [],
     economy: MMA_ECONOMY,
   },
+  {
+    id: 'track',
+    format: 'olympic',
+    name: 'Track and field',
+    activityId: '',
+    noun: 'track and field',
+    league: 'National Track Federation',
+    leagueShort: 'NTF',
+    playerTitle: 'Olympic track athlete',
+    skills: [
+      { id: 'start', name: 'Start' },
+      { id: 'speed', name: 'Speed' },
+      { id: 'endurance', name: 'Endurance' },
+      { id: 'technique', name: 'Technique' },
+      { id: 'tactics', name: 'Race tactics' },
+    ],
+    positions: [
+      'Sprinter',
+      'Hurdler',
+      'Middle-distance runner',
+      'Distance runner',
+      'Jumper',
+      'Thrower',
+    ],
+    proTeams: OLYMPIC_CENTERS,
+    collegeTeams: [],
+    economy: TRACK_ECONOMY,
+  },
+  {
+    id: 'swimming',
+    format: 'olympic',
+    name: 'Swimming',
+    activityId: '',
+    noun: 'swimming',
+    league: 'National Aquatics Federation',
+    leagueShort: 'NAF',
+    playerTitle: 'Olympic swimmer',
+    skills: [
+      { id: 'starts', name: 'Starts and turns' },
+      { id: 'stroke', name: 'Stroke' },
+      { id: 'endurance', name: 'Endurance' },
+      { id: 'speed', name: 'Speed' },
+      { id: 'pacing', name: 'Pacing' },
+    ],
+    positions: [
+      'Freestyler',
+      'Backstroker',
+      'Breaststroker',
+      'Butterflyer',
+      'Medley swimmer',
+      'Distance swimmer',
+    ],
+    proTeams: OLYMPIC_CENTERS,
+    collegeTeams: [],
+    economy: SWIMMING_ECONOMY,
+  },
+  {
+    id: 'gymnastics',
+    format: 'olympic',
+    name: 'Gymnastics',
+    activityId: '',
+    noun: 'gymnastics',
+    league: 'National Gymnastics Federation',
+    leagueShort: 'NGF',
+    playerTitle: 'Olympic gymnast',
+    skills: [
+      { id: 'strength', name: 'Strength' },
+      { id: 'balance', name: 'Balance' },
+      { id: 'flexibility', name: 'Flexibility' },
+      { id: 'air', name: 'Air awareness' },
+      { id: 'nerve', name: 'Nerve' },
+    ],
+    positions: [
+      'All-around gymnast',
+      'Floor and vault specialist',
+      'Bars and beam specialist',
+      'Rings and pommel specialist',
+    ],
+    proTeams: OLYMPIC_CENTERS,
+    collegeTeams: [],
+    economy: GYMNASTICS_ECONOMY,
+  },
+  {
+    id: 'wrestling',
+    format: 'olympic',
+    name: 'Wrestling',
+    activityId: '',
+    noun: 'wrestling',
+    league: 'National Wrestling Federation',
+    leagueShort: 'NWF',
+    playerTitle: 'Olympic wrestler',
+    skills: [
+      { id: 'takedowns', name: 'Takedowns' },
+      { id: 'control', name: 'Control' },
+      { id: 'balance', name: 'Balance' },
+      { id: 'conditioning', name: 'Conditioning' },
+      { id: 'mat-sense', name: 'Mat sense' },
+    ],
+    positions: ['Freestyle wrestler', 'Greco-Roman wrestler'],
+    proTeams: OLYMPIC_CENTERS,
+    collegeTeams: [],
+    economy: WRESTLING_ECONOMY,
+  },
+  {
+    id: 'olympic-boxing',
+    format: 'olympic',
+    name: 'Amateur boxing',
+    activityId: '',
+    noun: 'amateur boxing',
+    league: 'Amateur Boxing Union',
+    leagueShort: 'ABU',
+    playerTitle: 'Olympic boxer',
+    skills: [
+      { id: 'striking', name: 'Striking' },
+      { id: 'defense', name: 'Defense' },
+      { id: 'footwork', name: 'Footwork' },
+      { id: 'conditioning', name: 'Conditioning' },
+      { id: 'ring-iq', name: 'Ring IQ' },
+    ],
+    positions: ['Light boxer', 'Welter boxer', 'Middle boxer', 'Heavy boxer'],
+    proTeams: OLYMPIC_CENTERS,
+    collegeTeams: [],
+    economy: OLYMPIC_BOXING_ECONOMY,
+  },
 ];
 
 const SPORTS_BY_ID = new Map(SPORTS.map((sport) => [sport.id, sport]));
@@ -778,6 +1016,11 @@ export const TOUR_SPORTS: readonly Sport[] = SPORTS.filter((sport) => sport.form
 
 /** Boxing and MMA: no school team; the road runs through a martial art. */
 export const COMBAT_SPORTS: readonly Sport[] = SPORTS.filter((sport) => sport.format === 'combat');
+
+/** Track and field, swimming, gymnastics, wrestling and amateur boxing: a national program and the Games (ticket 0804). */
+export const OLYMPIC_SPORTS: readonly Sport[] = SPORTS.filter(
+  (sport) => sport.format === 'olympic',
+);
 
 /** The sport a school activity is the first rung of, if any. */
 export const sportOfActivity = (activityId: string): Sport | undefined =>
@@ -1050,7 +1293,8 @@ export const TURN_PRO_MIN_AGE = 18;
 export const TURN_PRO_MAX_AGE = 30;
 export const MIN_ART_SEASONS = 3;
 
-export type ArtStyle = 'striking' | 'grappling';
+/** Striking and grappling feed MMA; `athletic` is an Olympic discipline that is not a martial art (ticket 0804). */
+export type ArtStyle = 'striking' | 'grappling' | 'athletic';
 
 export interface MartialArt {
   readonly id: string;
@@ -1081,7 +1325,7 @@ export const MARTIAL_ARTS: readonly MartialArt[] = [
     blurb: 'A heavy bag, a jump rope and a coach who counts.',
     annualCost: 900,
     costSource: 'gym dues and hand wraps',
-    feeds: ['boxing', 'mma'],
+    feeds: ['boxing', 'mma', 'olympic-boxing'],
     skills: [
       { id: 'striking', name: 'Striking' },
       { id: 'defense', name: 'Defense' },
@@ -1132,7 +1376,7 @@ export const MARTIAL_ARTS: readonly MartialArt[] = [
     blurb: 'Takedowns and a mat that smells like a mat.',
     annualCost: 500,
     costSource: 'a wrestling club and shoes',
-    feeds: ['mma'],
+    feeds: ['mma', 'wrestling'],
     skills: [
       { id: 'takedowns', name: 'Takedowns' },
       { id: 'control', name: 'Control' },
@@ -1178,7 +1422,70 @@ export const MARTIAL_ARTS: readonly MartialArt[] = [
   },
 ];
 
-const ARTS_BY_ID = new Map(MARTIAL_ARTS.map((art) => [art.id, art]));
+/**
+ * The three Olympic disciplines that are not martial arts (ticket 0804). They are studied the same way: from
+ * ten, two at a time, three sessions a year, a level that is readable only while it is studied, and three
+ * seasons before it counts. Wrestling and boxing are already arts above, and feed the Olympic wrestling and
+ * boxing programs too.
+ */
+export const OLYMPIC_DISCIPLINES: readonly MartialArt[] = [
+  {
+    id: 'track',
+    name: 'Track and field',
+    style: 'athletic',
+    blurb: 'Early mornings, a stopwatch and a lot of laps.',
+    annualCost: 400,
+    costSource: 'track club dues and spikes',
+    feeds: ['track'],
+    skills: [
+      { id: 'start', name: 'Start' },
+      { id: 'speed', name: 'Speed' },
+      { id: 'endurance', name: 'Endurance' },
+      { id: 'technique', name: 'Technique' },
+    ],
+    startLine: 'Joined a track club. Your first race was a blur.',
+    stopLine: 'Hung up the spikes.',
+  },
+  {
+    id: 'swimming',
+    name: 'Swimming',
+    style: 'athletic',
+    blurb: 'Black lines, chlorine and the 5 a.m. alarm.',
+    annualCost: 1_200,
+    costSource: 'swim club dues and suits',
+    feeds: ['swimming'],
+    skills: [
+      { id: 'starts', name: 'Starts and turns' },
+      { id: 'stroke', name: 'Stroke' },
+      { id: 'endurance', name: 'Endurance' },
+      { id: 'speed', name: 'Speed' },
+    ],
+    startLine: 'Joined a swim club. Your goggles never fit.',
+    stopLine: 'Got out of the pool for good.',
+  },
+  {
+    id: 'gymnastics',
+    name: 'Gymnastics',
+    style: 'athletic',
+    blurb: 'Chalk, beams and a body that learns to fall.',
+    annualCost: 2_400,
+    costSource: 'gym club dues, leotards and travel to meets',
+    feeds: ['gymnastics'],
+    skills: [
+      { id: 'strength', name: 'Strength' },
+      { id: 'balance', name: 'Balance' },
+      { id: 'flexibility', name: 'Flexibility' },
+      { id: 'nerve', name: 'Nerve' },
+    ],
+    startLine: 'Started gymnastics. The beam is narrower than it looks.',
+    stopLine: 'Left the gym for the last time.',
+  },
+];
+
+/** Everything a student can study: the six arts and the three disciplines. */
+export const STUDIES: readonly MartialArt[] = [...MARTIAL_ARTS, ...OLYMPIC_DISCIPLINES];
+
+const ARTS_BY_ID = new Map(STUDIES.map((art) => [art.id, art]));
 
 export const findMartialArt = (id: string): MartialArt | undefined => ARTS_BY_ID.get(id);
 
@@ -1328,3 +1635,215 @@ export function fightWinChance(form: number, tier: SportTier, opponentUnit: numb
 /** A world rank within a tier's band, from a unit. Higher tiers are lower numbers. */
 export const worldRankFor = (tier: SportTier, unit: number): number =>
   between(unit, WORLD_RANK_BAND[tier]);
+
+/* -------------------------------------------------------------------------- */
+/* The Olympic sports (ticket 0804)                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Five groups, not five simulators (spec 379): track and field, swimming, gymnastics, wrestling and
+ * amateur boxing. No judo, and no winter events, weightlifting or rotating slot (Payton, 7 October 2026).
+ * A life studies a discipline from ten; once three seasons are in and a draw says so, the national
+ * program offers a place. From there a season is a tour's: results move a rung, and every fourth year
+ * the Games decide who is a medalist.
+ */
+
+/** Ages a national program takes an athlete: gymnastics and swimming peak early, track and boxing do not. */
+export const OLYMPIC_WINDOW: Readonly<
+  Record<
+    'track' | 'swimming' | 'gymnastics' | 'wrestling' | 'olympic-boxing',
+    readonly [number, number]
+  >
+> = {
+  track: [16, 30],
+  swimming: [16, 26],
+  gymnastics: [16, 22],
+  wrestling: [18, 30],
+  'olympic-boxing': [18, 30],
+};
+
+/**
+ * Getting a place in a national program, by who the life is: a lower table than the pros', because a
+ * place is only the start and the Games are the filter (Payton's 95/75/60/3 is the team-sport table).
+ * One draw for the life per sport, a moving threshold, as everywhere in v0.08.
+ */
+export const REACH_NATIONAL: Readonly<Record<SportCategory, number>> = {
+  talentAndWork: 0.5,
+  talentOnly: 0.3,
+  workOnly: 0.2,
+  neither: 0.01,
+};
+
+/** The Games are every fourth year, summer ones only (no winter events in this build). */
+export const GAMES_EVERY = 4;
+export const isGamesYear = (year: number): boolean => year % GAMES_EVERY === 0;
+
+/** At the Games a performance is form, a season's luck, and one more draw this wide. */
+export const GAMES_NOISE = 16;
+
+export type Medal = 'gold' | 'silver' | 'bronze';
+
+/** The performance a medal takes. Above the highest field is gold, at the second highest silver. */
+export const MEDAL_LINE: Readonly<Record<Medal, number>> = {
+  gold: 98,
+  silver: 92,
+  bronze: 86,
+};
+
+/** A finalist is an Olympian who did not medal. */
+export const FINAL_LINE = 62;
+
+/** The lowest tier the national team picks for the Games. Below it the athlete is an alternate who watches. */
+export const GAMES_TEAM_TIER: SportTier = 'role';
+
+export const medalFor = (gamesPerformance: number): Medal | undefined => {
+  if (gamesPerformance >= MEDAL_LINE.gold) return 'gold';
+  if (gamesPerformance >= MEDAL_LINE.silver) return 'silver';
+  if (gamesPerformance >= MEDAL_LINE.bronze) return 'bronze';
+  return undefined;
+};
+
+/** Team USA's Operation Gold, unchanged for Paris 2024 (the US Olympic and Paralympic Committee). */
+export const MEDAL_PRIZE: Readonly<Record<Medal, number>> = {
+  gold: 37_500,
+  silver: 22_500,
+  bronze: 15_000,
+};
+
+/** What a medal does to a name: the sponsors. A judgement; the prize above is real and small. */
+export const MEDAL_SPONSORSHIP: Readonly<Record<Medal, number>> = {
+  gold: 250_000,
+  silver: 100_000,
+  bronze: 40_000,
+};
+
+export const MEDAL_WORDS: Readonly<Record<Medal, string>> = {
+  gold: 'gold',
+  silver: 'silver',
+  bronze: 'bronze',
+};
+
+/**
+ * Which Olympic sports a set of studied arts is a base for, best first. A sport needs one of the arts or
+ * disciplines that feed it, three seasons in; the form is that art's level.
+ */
+export function olympicCareersFor(
+  arts: readonly ArtProgress[],
+): readonly { readonly sportId: SportId; readonly form: number }[] {
+  const ready = arts.filter((row) => row.seasons >= MIN_ART_SEASONS);
+  const found: { sportId: SportId; form: number }[] = [];
+  for (const sport of OLYMPIC_SPORTS) {
+    const levels = ready
+      .filter((row) => findMartialArt(row.artId)?.feeds.includes(sport.id))
+      .map((row) => row.level);
+    if (levels.length > 0) found.push({ sportId: sport.id, form: Math.max(...levels) });
+  }
+  return found.sort((a, b) => b.form - a.form);
+}
+
+/* -------------------------------------------------------------------------- */
+/* After the playing: coaching and commentary (ticket 0804)                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Spec: post-career options include college, pro and overseas coaching and commentary, and a strong
+ * prior career improves access. Sources: the median coach or scout earns $47,320 (BLS, 2025) and
+ * about 298,800 hold the job; the median broadcast announcer earns about $47,340 (BLS, May 2025), and
+ * there is no wage series for sports commentary alone. The ladder above those two numbers is a game ladder.
+ */
+export type PostKind = 'coach' | 'commentary';
+export type PostLevel = 'college' | 'overseas' | 'pro' | 'local' | 'national';
+
+export interface PostJobRow {
+  readonly kind: PostKind;
+  readonly level: PostLevel;
+  /** Gross, a year, at the start. */
+  readonly pay: number;
+  /** A living that ends a day job, or something done beside one. */
+  readonly fullTime: boolean;
+  /** For the offer: "a college {sport} coach". */
+  readonly words: string;
+}
+
+export const POST_JOBS: Readonly<Record<PostLevel, PostJobRow>> = {
+  college: { kind: 'coach', level: 'college', pay: 55_000, fullTime: true, words: 'college coach' },
+  overseas: {
+    kind: 'coach',
+    level: 'overseas',
+    pay: 95_000,
+    fullTime: true,
+    words: 'overseas coach',
+  },
+  pro: { kind: 'coach', level: 'pro', pay: 160_000, fullTime: true, words: 'pro coach' },
+  local: {
+    kind: 'commentary',
+    level: 'local',
+    pay: 48_000,
+    fullTime: false,
+    words: 'local commentator',
+  },
+  national: {
+    kind: 'commentary',
+    level: 'national',
+    pay: 240_000,
+    fullTime: true,
+    words: 'national analyst',
+  },
+};
+
+/** A post pays a little more every year in it, to this multiple of where it started. */
+export const POST_RAISE = 0.03;
+export const POST_RAISE_CAP = 1.6;
+export const POST_END_AGE = 68;
+/** Nobody is offered a post after this age: the offer is for the years just after the playing. */
+export const POST_OFFER_MAX_AGE = 62;
+
+export interface PastQuality {
+  readonly reached: 'school' | 'college' | 'pro';
+  readonly bestTier?: SportTier;
+  readonly titles: number;
+  readonly seasons: number;
+}
+
+/** How good a past career was, for choosing the one a post follows. */
+export function pastScore(past: PastQuality): number {
+  const tier = past.bestTier === undefined ? 0 : (tierIndex(past.bestTier) + 1) * 10;
+  return (
+    tier + past.titles * 2 + Math.min(10, past.seasons) / 10 + (past.reached === 'pro' ? 5 : 0)
+  );
+}
+
+/** The best coaching job and the best commentary job a past career opens, if any. */
+export function postLevelsFor(past: PastQuality): {
+  readonly coach?: PostLevel;
+  readonly commentary?: PostLevel;
+} {
+  const pro = past.reached === 'pro';
+  const rank = past.bestTier === undefined ? -1 : tierIndex(past.bestTier);
+  const college = past.reached !== 'school' && past.seasons >= 3;
+  let coach: PostLevel | undefined;
+  if (pro && (rank >= 2 || past.titles >= 3)) coach = 'pro';
+  else if (pro && rank >= 1) coach = 'overseas';
+  else if (college || pro) coach = 'college';
+  let commentary: PostLevel | undefined;
+  if (pro && (rank >= 3 || past.titles >= 3)) commentary = 'national';
+  else if (pro || college) commentary = 'local';
+  return {
+    ...(coach ? { coach } : {}),
+    ...(commentary ? { commentary } : {}),
+  };
+}
+
+/**
+ * The chance that a post is offered at all: one draw for the life, against this. A fringe pro gets one a
+ * little more than one time in ten; a superstar nine times in ten. Titles and medals count.
+ */
+export function postChance(past: PastQuality): number {
+  const rank = past.bestTier === undefined ? 0 : tierIndex(past.bestTier);
+  const base = past.reached === 'pro' ? 0.12 + 0.14 * rank : 0.08;
+  return Math.min(0.92, base + 0.03 * Math.min(8, past.titles));
+}
+
+/** The pay of a post after some years in it. */
+export const postPay = (level: PostLevel, seasons: number): number =>
+  Math.round(POST_JOBS[level].pay * Math.min(POST_RAISE_CAP, 1 + POST_RAISE * seasons));

@@ -42,6 +42,7 @@ import { runEmployment } from './phases/employment';
 import { withAnyOffer } from './offers';
 import { withCollegeOffer } from './college-offer';
 import { runSportsYear, sportsOccupation, withSportsOffer } from './sports';
+import { postTitle } from './sports-post';
 import { withLifeOffer } from './life-offer';
 import { runEvents } from './phases/events';
 import { householdPartnerOf, partnerOf } from '@yearafter/social';
@@ -166,6 +167,11 @@ function sportsSource(state: GameState, year: { readonly sports: GameState['spor
   // Ticket 0803. A tour pays prize money and a fight card pays purses; only a team pays a salary.
   if (sport?.format === 'tour') return `Prize money, ${sport.league}`;
   if (sport?.format === 'combat') return `Fight purses, ${sport.league}`;
+  // Ticket 0804. A national program pays a stipend, and the sponsors pay what a medal is worth.
+  if (sport?.format === 'olympic') return `Stipend and sponsors, ${sport.league}`;
+  // After the playing: a coach's salary or a commentator's pay.
+  const post = year.sports.post ?? state.sports.post;
+  if (!career && post) return `${postTitle(post)} pay`;
   const team = career?.team;
   return team ? `Playing for the ${team}` : 'Playing pay';
 }
@@ -1182,7 +1188,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // what they were promoted to rather than what they were promoted from.
     // Ticket 0801. Playing for a living is the occupation while it lasts, ahead of any job on the books.
     occupation:
-      sportsOccupation(sportsYear.sports.career) ??
+      sportsOccupation(sportsYear.sports.career, sportsYear.sports.post) ??
       occupationFor(
         education.education,
         nextAge,

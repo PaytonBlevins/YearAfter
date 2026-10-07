@@ -1046,6 +1046,12 @@ const migrations: Readonly<Record<number, Migration>> = {
    * to write and only the version moves. No RNG, no clock.
    */
   44: (save) => ({ ...save, version: 45 }),
+  /**
+   * v45 -> v46: Ticket 0804 — the Olympic sports, coaching and commentary. `sports.post` and the two
+   * new questions are optional and nothing before could write one, so only the version moves.
+   * No RNG, no clock.
+   */
+  45: (save) => ({ ...save, version: 46 }),
 };
 
 /**
@@ -1236,12 +1242,32 @@ function sportsOk(value: unknown): boolean {
       kind !== 'scholarship' &&
       kind !== 'contract' &&
       kind !== 'tour-card' &&
-      kind !== 'turn-pro'
+      kind !== 'turn-pro' &&
+      kind !== 'national-team' &&
+      kind !== 'post-job'
     ) {
       return false;
     }
-    // A question with nobody to ask about is a save that cannot be answered.
-    if (career === undefined) return false;
+    // A question with nobody to ask about is a save that cannot be answered. A post is
+    // offered to somebody who is not playing, so it is the one question with no career.
+    if (career === undefined && kind !== 'post-job') return false;
+  }
+  const post = sports['post'];
+  if (post !== undefined) {
+    if (typeof post !== 'object' || post === null) return false;
+    const job = post as Record<string, unknown>;
+    const levels = ['college', 'overseas', 'pro', 'local', 'national'];
+    if (
+      typeof job['sportId'] !== 'string' ||
+      (job['kind'] !== 'coach' && job['kind'] !== 'commentary') ||
+      typeof job['level'] !== 'string' ||
+      !levels.includes(job['level']) ||
+      !Number.isSafeInteger(job['since']) ||
+      !Number.isSafeInteger(job['seasons']) ||
+      (job['over'] !== undefined && typeof job['over'] !== 'boolean')
+    ) {
+      return false;
+    }
   }
   return true;
 }

@@ -25,6 +25,7 @@
  */
 
 import { isFullTime } from './sports-individual';
+import { isPostFullTime } from './sports-post';
 import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@yearafter/character';
 import {
   ALL_JOBS,
@@ -272,7 +273,7 @@ export function withAnyOffer(state: GameState, alive: boolean): GameState {
   if (hasSystemicOffer(state)) return state;
   if (state.retirement.retiredAtAge !== undefined) return state;
   // Ticket 0801. Somebody who plays for a living is not between jobs. No draw is spent on it.
-  if (isFullTime(state.sports.career)) return state;
+  if (isFullTime(state.sports.career) || isPostFullTime(state.sports.post)) return state;
 
   const held = state.employment.job;
   /*

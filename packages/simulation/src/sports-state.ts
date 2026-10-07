@@ -113,7 +113,9 @@ export interface PastCareer {
     /** A tour player who lost their card (ticket 0803). */
     | 'lost-card'
     /** A fighter the gym stopped booking (ticket 0803). */
-    | 'released';
+    | 'released'
+    /** An Olympic athlete the national program dropped (ticket 0804). */
+    | 'cut';
   /** Fighters: the record at the end. Absent otherwise. */
   readonly wins?: number;
   readonly losses?: number;
@@ -155,6 +157,23 @@ export type SportsOffer =
       readonly eventId: string;
     }
   | {
+      /** The Olympic sports (ticket 0804): the national program has a place for you. */
+      readonly kind: 'national-team';
+      readonly sportId: string;
+      readonly team: string;
+      readonly age: number;
+      readonly eventId: string;
+    }
+  | {
+      /** After the playing (ticket 0804): a coaching or commentary job, at the level the career earned. */
+      readonly kind: 'post-job';
+      readonly sportId: string;
+      readonly postKind: 'coach' | 'commentary';
+      readonly level: 'college' | 'overseas' | 'pro' | 'local' | 'national';
+      readonly age: number;
+      readonly eventId: string;
+    }
+  | {
       /** Boxing and MMA (ticket 0803): a gym will put you on a card. */
       readonly kind: 'turn-pro';
       readonly sportId: string;
@@ -163,7 +182,24 @@ export type SportsOffer =
       readonly eventId: string;
     };
 
+/**
+ * A job after the playing (ticket 0804): coaching or commentary, tied to the sport the career was in. It
+ * pays while it lasts and ends at sixty-eight, or when the person leaves. A post that was turned down or
+ * left is kept with `over`, so the question is not asked twice in a life.
+ */
+export interface PostJob {
+  readonly sportId: string;
+  readonly kind: 'coach' | 'commentary';
+  readonly level: 'college' | 'overseas' | 'pro' | 'local' | 'national';
+  readonly since: number;
+  /** Years in the post, this one included once it has run. */
+  readonly seasons: number;
+  readonly over?: boolean;
+}
+
 export interface SportsState {
+  /** After the playing (ticket 0804). Absent is none ever offered. */
+  readonly post?: PostJob;
   /** Martial arts being studied (ticket 0803). Absent is none; at most two at a time. */
   readonly arts?: readonly ArtStudy[];
   readonly career?: SportCareer;

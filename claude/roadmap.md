@@ -614,7 +614,8 @@ built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sport
 | **0801 The sports engine, with basketball** | **DONE (engine).** School team → scholarship offer at graduation → college seasons → the draft → a contract (Accept / Ask for more / Turn it down) → pro seasons, injuries, titles, reputation and fame → retirement. Odds are Payton's: reaching the pros from a team is 95% with talent and hard work, 75% with talent alone, 60% with hard work alone and about 3% with neither; 45% / 20% / 10% of those become stars. Every draw is a hash, so a life with no sport replays exactly as before. Save v44 (`sports`). No screens (0809).                                             |
 | **0802 The other team sports**              | **DONE (engine).** Football, baseball, soccer and hockey as rows on the 0801 engine: their own leagues, teams, five skills each, positions (a label, derived, never saved), real league minimums at the bottom of each pay ladder, draft sizes (224, 600, 90, 224), career ends and injury factors (football ×1.6 breaks most). Baseball and hockey school teams added. A life on two teams follows the sport it has been playing, else the one it is best at. Same odds as basketball; measured within a few points in every sport. **No save change** (still v44). No screens (0809). |
 | **0803 Individual sports and combat**       | **DONE (engine).** Golf and tennis (school team, scholarship, college, then a tour card and prize money), boxing and MMA (six martial arts studied from ten, three seasons, then a gym puts you on a card at 18–30), all on the 0801 engine with a `format` of team, tour or combat. Fights are decided by skill, not a minigame: a hash per fight against a logistic on form, luck moving a rung. Reaching the pros matches Payton's table; the star share runs above it (finding 97). **Save v45** (Agent B: v46+). No screens (0809).                                                |
-| 0804–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **0804 Olympics, coaching and commentary**  | **DONE (engine).** Track and field, swimming, gymnastics, wrestling and amateur boxing, studied as a discipline from ten and joined as a national program at 16+, with a Games every fourth year, medals that pay a prize and a sponsorship, and after any career in 0801–0804 a coaching or commentary post whose level the career earned. **Save v46** (Agent B: v47+). No screens (0809).                                                                                                                                                                                            |
+| 0805–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -1444,6 +1445,22 @@ golf and tennis add about five of twenty-four. A passive life does not start an 
 
 **105. A fighter who turns the card down is not asked again,** and any one art but boxing has no pro path alone.
 
+**106. The national program's table is lower than the pros'.** 50 / 30 / 20 / 1 (`REACH_NATIONAL`) against the pros' 95 / 75 / 60 / 3; a judgement. Talent and work reach it 47–51% of the time.
+
+**107. "Medalist" counts any medal over several Games.** 21–31% of talent-and-work athletes who joined win one; dials `MEDAL_LINE` and `GAMES_NOISE`.
+
+**108. Prize amounts are real, sponsorships and the five stipend ladders are judgement.**
+
+**109. A post's pay ladder is a game ladder above the BLS medians** ($47,320 coaches, about $47,340 announcers).
+
+**110. Training starts at ten,** and gymnasts start much earlier in real life.
+
+**111. Boxing and wrestling reach the Games only after the pro question,** and joining the program removes the boxing art, so such a boxer cannot then go pro.
+
+**112. Careers are still long.** Median seasons 11–22 across the five sports.
+
+**113. 0804 took save v46.** Agent B's saves are v47 and onward.
+
 ## Suggested order
 
 This is the historical delivery order with current status annotations, not an
@@ -1497,5 +1514,5 @@ Agent A's next ticket.
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
 
 12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, 0802 The
-    other team sports and 0803 Individual sports and combat shipped as engines only; Payton chose screens in 0809.
+    other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary shipped as engines only; Payton chose screens in 0809.
     Next is chosen by Payton.)_

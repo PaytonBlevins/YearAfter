@@ -3095,3 +3095,22 @@ The first versions of three 0803 tests passed or failed on the seed they happene
 card made `if (career) {...}` a test of nothing. `firstWith` searches a numbered set of lives for one that
 satisfies a condition and throws if none of 25 does. A conditional assertion inside a branch the data may never
 reach is a test that passes on a broken engine.
+
+### 13.147 Sequence a shared path so the earlier ticket's odds stay what they were
+
+Boxing and wrestling could reach the Games and a pro card. Putting the Olympic question first would have taken boxers
+the 0803 table gave to the gym, and every 0803 test with them. The Olympic offer is raised only when no pro offer is open. When a
+new road shares an old one's start, give the old one first call and the new one what is left, so the earlier
+ticket's measurements and tests stay true without being re-derived.
+
+### 13.148 Extend a catalog with a new array and a combined lookup, not by editing the old array
+
+The three disciplines are studied like the six arts, but `MARTIAL_ARTS` is the six arts only, because 0803's
+tests, odds and the MMA rule read it. `STUDIES` is the arts plus the disciplines and `findMartialArt` looks in it.
+A list other code counts or loops over is not the place to add a different kind of entry.
+
+### 13.149 Real figures for the real part, and mark the invented part
+
+The Olympic prizes are what the USOPC pays; the sponsorships, the stipend ladders and the post pay are mine. Both are
+in the same table in `content`, so the ticket doc and the code comment say which is which, and the dial is named. A
+reader who sees a precise figure assumes it is a source.

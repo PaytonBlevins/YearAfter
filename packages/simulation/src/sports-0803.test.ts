@@ -287,7 +287,8 @@ function firstWith(
 
 describe('the four new rows', () => {
   it('adds golf and tennis (a tour) and boxing and MMA (a fight card) to the five team sports', () => {
-    expect(SPORTS.map((sport) => sport.id)).toEqual([
+    // The first nine are 0801–0803; 0804 added the five Olympic sports after them.
+    expect(SPORTS.slice(0, 9).map((sport) => sport.id)).toEqual([
       'basketball',
       'football',
       'baseball',

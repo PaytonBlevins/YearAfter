@@ -151,3 +151,16 @@ export const COMBAT_SERIOUS_LINES: readonly string[] = [
   'Tore a knee in camp. Surgery in the spring.',
   'A fractured orbital bone ended your year.',
 ];
+
+/** An Olympic athlete's: the hamstring, the shoulder and the knee (ticket 0804). */
+export const OLYMPIC_MINOR_LINES: readonly string[] = [
+  'A tight hamstring cost you a meet.',
+  'Pulled out of a qualifier with a sore shoulder.',
+  'A sprained ankle kept you off the mat for a month.',
+];
+
+export const OLYMPIC_SERIOUS_LINES: readonly string[] = [
+  'A torn ligament ended the season in the spring.',
+  'Surgery on your knee, and a year of rehab.',
+  'A stress fracture, and the season was gone.',
+];

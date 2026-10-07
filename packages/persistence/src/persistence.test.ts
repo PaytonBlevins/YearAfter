@@ -2176,7 +2176,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(45);
+    expect(CURRENT_SAVE_VERSION).toBe(46);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {
@@ -2411,6 +2411,138 @@ describe('Ticket 0406 — a question survives being saved', () => {
       const result = migrateSave({ ...raw, sports: { past: [], arts } });
       expect(result.ok, JSON.stringify(arts)).toBe(false);
     }
+  });
+
+  it('opens a v45 save as it is, with no post, and moves only the version (0804)', () => {
+    const { save } = newSave('POST-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    old.sports = { past: [], career: { ...CAREER } };
+    old.version = 45;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.sports).toEqual({ past: [], career: CAREER });
+    expect('post' in result.value.sports).toBe(false);
+  });
+
+  it('round-trips a post, a post that was turned down, and the two new questions (0804)', () => {
+    const { save } = newSave('POST-ROUND');
+    const base = fromSave(save);
+    const past = {
+      sportId: 'swimming',
+      startedAge: 10,
+      endedAge: 30,
+      seasons: 14,
+      titles: 2,
+      reputation: 40,
+      reached: 'pro' as const,
+      bestTier: 'star' as const,
+      how: 'retired' as const,
+    };
+    for (const post of [
+      { sportId: 'swimming', kind: 'coach', level: 'pro', since: 33, seasons: 4 },
+      {
+        sportId: 'swimming',
+        kind: 'commentary',
+        level: 'local',
+        since: 33,
+        seasons: 0,
+        over: true,
+      },
+    ] as const) {
+      const state: GameState = { ...base, sports: { past: [past], post } };
+      expect(fromSave(toSave(state, { id: save.id })).sports).toEqual(state.sports);
+    }
+    const offers = [
+      {
+        kind: 'national-team',
+        sportId: 'track',
+        team: 'Lakeview Training Center',
+        age: 17,
+        eventId: 'sports.offer',
+      },
+    ] as const;
+    for (const offer of offers) {
+      const withOffer: GameState = { ...base, sports: { past: [], career: { ...CAREER }, offer } };
+      expect(fromSave(toSave(withOffer, { id: save.id })).sports.offer).toEqual(offer);
+    }
+    // A post is the one question with no career to ask about.
+    const postOffer = {
+      kind: 'post-job',
+      sportId: 'swimming',
+      postKind: 'coach',
+      level: 'college',
+      age: 32,
+      eventId: 'sports.offer',
+    } as const;
+    const asked: GameState = { ...base, sports: { past: [past], offer: postOffer } };
+    expect(fromSave(toSave(asked, { id: save.id })).sports.offer).toEqual(postOffer);
+  });
+
+  it('accepts the two new questions: a national-team place with its career, and a post with none (0804)', () => {
+    const { save } = newSave('OFFER-OK');
+    const raw = JSON.parse(JSON.stringify(save));
+    const nat = {
+      kind: 'national-team',
+      sportId: 'track',
+      team: 'Lakeview Training Center',
+      age: 17,
+      eventId: 'sports.offer',
+    };
+    const post = {
+      kind: 'post-job',
+      sportId: 'swimming',
+      postKind: 'coach',
+      level: 'college',
+      age: 32,
+      eventId: 'sports.offer',
+    };
+    const past = {
+      sportId: 'swimming',
+      startedAge: 10,
+      endedAge: 30,
+      seasons: 14,
+      titles: 2,
+      reputation: 40,
+      reached: 'pro',
+      bestTier: 'star',
+      how: 'retired',
+    };
+    expect(
+      migrateSave({ ...raw, sports: { past: [], career: { ...CAREER }, offer: nat } }).ok,
+    ).toBe(true);
+    expect(migrateSave({ ...raw, sports: { past: [past], offer: post } }).ok).toBe(true);
+  });
+
+  it('refuses a post that is not a sound coaching or commentary job, and any other question with no career (0804)', () => {
+    const { save } = newSave('POST-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const post = { sportId: 'swimming', kind: 'coach', level: 'pro', since: 33, seasons: 4 };
+    expect(migrateSave({ ...raw, sports: { past: [], post } }).ok).toBe(true);
+    const bad: unknown[] = [
+      'coach',
+      null,
+      { ...post, sportId: 7 },
+      { ...post, kind: 'manager' },
+      { ...post, level: 'galactic' },
+      { ...post, since: 33.5 },
+      { ...post, seasons: 'four' },
+      { ...post, over: 'yes' },
+    ];
+    for (const row of bad) {
+      expect(migrateSave({ ...raw, sports: { past: [], post: row } }).ok, JSON.stringify(row)).toBe(
+        false,
+      );
+    }
+    const orphan = {
+      kind: 'national-team',
+      sportId: 'track',
+      team: 'x',
+      age: 17,
+      eventId: 'sports.offer',
+    };
+    expect(migrateSave({ ...raw, sports: { past: [], offer: orphan } }).ok).toBe(false);
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {
