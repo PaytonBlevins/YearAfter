@@ -1459,7 +1459,9 @@ posts. Existing saved luck is preserved and malformed luck rejected. Save stays 
 Free accounts, manual choices, twelve-post cap, income rates, source curves, top-quarter fade and
 small-audience fame anchors are retained. Existing screens consume the engine changes.
 All 15 typechecks and 2,598 tests pass; 28 independent mutations caught, none missed. Nine baseline
-catalog mismatches and 22 historical-note formatting failures remain. See `playtest-p3-social-success.md`.
+catalog mismatches and 22 historical-note formatting failures remain.
+PR #15: https://github.com/PaytonBlevins/YearAfter/pull/15 (depends on P1 #13 then P2 #14).
+See `playtest-p3-social-success.md`.
 
 ### Found by P3
 

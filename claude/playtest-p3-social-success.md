@@ -1,8 +1,9 @@
 # P3 — Social media success rates: approved change built
 
-**Status: Payton approved the measured proposal; implementation and verification complete, PR pending.**
+**Status: Payton approved the measured proposal; implementation and verification complete, PR #15 open for review.**
 Agent B, `feat/playtest-p3-social-success`, 7 October 2026. Main remains `beff25a`; this branch
 is stacked on P2 PR #14 and P1 PR #13. The claim is its own published commit.
+PR: https://github.com/PaytonBlevins/YearAfter/pull/15 (targets main; merge P1 #13 then P2 #14 first).
 
 **Spec sections:** MASTER_SPEC 236–237, 251, 255–259, 879–943, 944–953 (especially revised 949),
 1361–1372, and the Fame, Public Figures & Creator Economy appendix. Payton’s manual-posting
@@ -273,7 +274,10 @@ No catalog reformat is included; the validator’s incidental vehicle-mods rewri
 
 `pnpm format:check` fails on 22 untouched historical Claude notes, the same baseline documented
 by P2. Every P3 changed file is formatted and checked individually. P3 CI status is reported in
-the PR; local full verification is not described as green. Runtime pnpm is 11.25 rather than the
+the PR; local full verification is not described as green. The implementation commit’s CI run 88
+(https://github.com/PaytonBlevins/YearAfter/actions/runs/37691253117) fails Format check on exactly those
+22 historical notes; typecheck, tests and content validation are skipped in CI. Those checks did
+run locally as reported above. Runtime pnpm is 11.25 rather than the
 repo’s pinned 10.28, so dependency auto-refresh was disabled for the verify command; dependencies
 and lockfile were not changed.
 

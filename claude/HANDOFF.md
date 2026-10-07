@@ -47,7 +47,10 @@ viral roll. Saved luck stays fixed and corrupt luck is rejected. All 15 typechec
 pass; 28 independent sabotage mutations were caught, none missed. Full verify hits the same nine
 catalog mismatches as an untouched main archive; format has 22 historical-note failures.
 Details: `playtest-p3-social-success.md`. Fame anchors, free accounts, manual posts, TICKET and
-save v45 remain unchanged. Review, device checks and Project mirroring remain open. P4 waits.
+save v45 remain unchanged. PR #15: https://github.com/PaytonBlevins/YearAfter/pull/15
+(targets main, depends on P1 #13 then P2 #14). Implementation CI run 88 confirms the same 22-note
+formatting failure and skips later gates. Review, device checks and Project mirroring remain
+open. P4 waits.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
