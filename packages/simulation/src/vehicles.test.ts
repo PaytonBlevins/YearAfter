@@ -11,7 +11,6 @@ import { dollars } from '@yearafter/core';
 import {
   INSPECTION_FEE,
   REPOSSESS_AFTER,
-  VEHICLE_SHARE,
   homesValue,
   mortgagesOwed,
   portfolioWorth,
@@ -23,7 +22,7 @@ import {
   vehiclesValue,
   type OwnedVehicle,
 } from '@yearafter/finance';
-import { VEHICLE_LOTS, findVehicleTrim } from '@yearafter/content';
+import { VEHICLE_LOTS, findVehicleTrim, costIndexOf } from '@yearafter/content';
 import { advanceYear } from './advance';
 import { decide } from './decide';
 import type { GameState } from './game-state';
@@ -394,7 +393,12 @@ describe('0504 — buying, owning and selling one', () => {
 });
 
 describe('0504 — the living bill and the car', () => {
-  const household = { standard: 45_000, housing: 'ownPlace' as const, leftHomeAt: 22 };
+  const household = {
+    standard: 45_000,
+    lifestyle: 'comfortable' as const,
+    housing: 'ownPlace' as const,
+    leftHomeAt: 22,
+  };
   const input = {
     age: 40,
     household,
@@ -431,9 +435,13 @@ describe('0504 — the living bill and the car', () => {
         .filter((entry) => entry.year === next.world.year && entry.category === 'living')
         .reduce((sum, entry) => sum + Number(entry.amount), 0);
     };
-    // At least the car's share comes off — not merely the car's own running
-    // costs squeezed out of everything else.
-    expect(living(withCar)).toBeLessThanOrEqual(living(buyer) * (1 - VEHICLE_SHARE + 0.01));
+    // P2 explicitly replaces the old income-scaled contract: owning a car
+    // removes a capped dollar allowance, never 8.5% of a wealthy life's bill.
+    const discount = living(buyer) - living(withCar);
+    expect(discount).toBeGreaterThan(0);
+    expect(discount).toBeLessThanOrEqual(
+      1_600 * costIndexOf(buyer.player.currentLocation.cityId) * 100 + 1,
+    );
   });
 });
 

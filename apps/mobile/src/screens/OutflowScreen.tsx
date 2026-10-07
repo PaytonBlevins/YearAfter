@@ -83,8 +83,8 @@ export function OutflowScreen() {
       <Card>
         <ListRow
           title="Living costs"
-          subtitle="Rent and everyday household spending are handled automatically. Children can add to household costs."
-          affordance="none"
+          subtitle="Choose your lifestyle. Rent and everyday household spending follow it; children can add to the cost."
+          onPress={() => push({ screen: 'lifestyle', title: 'Lifestyle' })}
           wrap
         />
         <RowDivider />
