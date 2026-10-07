@@ -83,6 +83,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     // Ticket 0506, the seventh, in the same breath as the field.
     valuables: state.valuables,
     ...(state.renovationOffer !== undefined ? { renovationOffer: state.renovationOffer } : {}),
+    ...(state.businessRescue !== undefined ? { businessRescue: state.businessRescue } : {}),
     // Ticket 0507. The diary is what stops a fourth visit and a second bid.
     ...(state.auctions !== undefined ? { auctions: state.auctions } : {}),
     // Ticket 0601, the eighth, in the same breath as the field.
@@ -135,6 +136,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     ...(save.inspected !== undefined ? { inspected: save.inspected } : {}),
     valuables: save.valuables,
     ...(save.renovationOffer !== undefined ? { renovationOffer: save.renovationOffer } : {}),
+    ...(save.businessRescue !== undefined ? { businessRescue: save.businessRescue } : {}),
     ...(save.auctions !== undefined ? { auctions: save.auctions } : {}),
     businesses: save.businesses,
     deals: save.deals,

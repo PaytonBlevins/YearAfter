@@ -1026,6 +1026,14 @@ balance by age, and 0502 and 0504 each had to re-tune because of it
 two samples again. Note 19 is closely related: the monthly outflow figure counts
 income tax, which makes a high earner's number look larger still.
 
+**P2 implementation:** Payton approved the measured default and explicit Frugal / Comfortable /
+Lavish choices. Built on `feat/playtest-p2-living-costs` (save v45), with a Lifestyle screen linked
+from Living costs, paid-year happiness effects and immediately saved preferences. Measured actual
+$250,000 gross pay leaves $165,000 after $85,000 tax; settled Comfortable living is $82,238 at zero
+liquid wealth and $87,930 at $1m, rather than the historical estimate above. Both 150-life samples
+remain within the existing 55–64 and 65–74 net-worth bands. Details: `playtest-p2-living-costs.md`.
+The explicit tier-selector override is recorded in approved-decisions; no full expense breakdown.
+
 **33. Check the "car cost" while in there.** Payton's car costs $5,500 a year
 and the outflow is $20,000. The car is not the problem (finding 32), but it's
 worth confirming that the $5,500 isn't also being left inside the living bill.
@@ -1034,6 +1042,23 @@ standard that share is about $14,000, which is more than the car costs. So a
 rich owner's bill drops by more than the car adds. That's a second reason
 the high-income number is wrong, in the other direction. It should be a
 dollar amount scaled to the car's real running cost, not a share of the whole bill.
+
+**P2 implementation of 33:** Removed VEHICLE_SHARE. Owning a car replaces an embedded dollar
+allowance capped at actual running costs and $1,600 scaled by location, household and housing,
+independent of income/tier. Expensive car commitments add their real dollars; the living model
+no longer hides the full extra car payment by squeezing it out of generic spending. Mortgage
+squeeze and hardship protection remain. Literal tests replace the superseded 8.5% contract.
+
+### Found by P2
+
+- **Old-age accumulation remains for P15.** At 75+, the two passive samples still have median net
+  worth $497,442 and $447,058. P2 does not introduce a retirement spending horizon.
+- **Business-finance tests coupled quotes to a car-purchase history.** The changed living curve
+  moved a seeded car purchase and introduced an auto loan, changing the business marketplace and
+  lender obligations. P2 stabilizes those tests' original $47,353 cash and debt-free $11,200 car
+  fixture; every literal business quote, loan and ledger assertion stays intact.
+- **Project mirroring and device checks remain open.** No project_write or native device runtime
+  is available in this session; repo docs and real-store component checks are complete.
 
 ### Found by the v0.06 measurement and 0601
 
@@ -1405,3 +1430,81 @@ Agent A's next ticket.
     They show loss/reserve and loan scenarios and confirmed exit actions. B1's
     accept/decline rescue engine and survival measurement remain open with Agent A;
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
+
+## Playtest P1 — business rescue choices (7 October 2026)
+
+Built on `feat/playtest-p1-business-rescue`, pending merge. One yearly review lists all troubled
+businesses, with a separate inject-or-close answer for each. No automatic draw on personal
+cash for losses or loan shortfalls. Existing half-reserve rescue buffer and business balance
+numbers retained. Save v44 carries the unresolved quote; the lender's interest is accrued
+once. Declining uses the normal closure path, subtracts the trading hole, pays the lender
+first and keeps unpaid debt. Death winds down troubled businesses; healthy ones can pass
+on, and closed-business debt reduces the liquid estate before inheritance.
+
+Measured cohort: 9,300 owners across 31 types, five years. Baseline / rescue-if-affordable
+survival both 82.1%; decline-all 63.0%; 37.0% ever need the review. All 7,515 measured
+answers reconcile. This cohort differs from 0604's historical 78.7% (BLS comparison 51%);
+no calibration claim against BLS is made. See `claude/playtest-p1-business-rescue.md`.
+
+**Found by P1:** Other personal debts and division of the estate remain 0508 work;
+P1 only nets debt of closed businesses from liquid inheritance, without building wills.
+Native device checks remain pending. P2 awaits Payton's go-ahead.
+
+### Playtest P3 — approved social-success change built (7 October 2026)
+
+New-account rank lifts are video/photo 3, stream/podcast 5, short-form 3, subscription 2,
+including Kick/Facebook/X aliases. Payton approved them after measurement. Manual annual
+settlement now uses full existing negative drift above target and leaves breakout rolls to actual
+posts. Existing saved luck is preserved and malformed luck rejected. Save stays v45, TICKET 0708.
+Free accounts, manual choices, twelve-post cap, income rates, source curves, top-quarter fade and
+small-audience fame anchors are retained. Existing screens consume the engine changes.
+All 15 typechecks and 2,598 tests pass; 28 independent mutations caught, none missed. Nine baseline
+catalog mismatches and 22 historical-note formatting failures remain.
+PR #15: https://github.com/PaytonBlevins/YearAfter/pull/15 (depends on P1 #13 then P2 #14).
+See `playtest-p3-social-success.md`.
+
+### Found by P3
+
+- **B6 is not uniformly low.** Manual discovery makes small recurring payments attainable;
+  early income, lifetime traction and full-time earnings are distinct measures. After the approved
+  change, ordinary six-year YouTube pay reaches 100%, TikTok 43.5%; deliberate strong play reaches
+  the $30,000 yearly creator-income benchmark in 9.25% / 2.25%, respectively. A wage here is any
+  year before personal tax and bills, not sustained take-home pay.
+- **A six-year check missed mature viral compounding.** Before P3, four-post TikTok lives reached
+  the wage benchmark in 83% of the shared-calendar sample, against 12% for twelve posts; varied
+  calendars still reversed the incentive (40% against 8%). Full downward drift and removing the
+  extra annual breakout resolve that retention interaction. In the final shared-calendar hobby
+  sample, four/twelve posts reach recurring pay in 80% / 98.33% of lives and wage in 0% / 1.67%.
+- **Streaming and podcast full-time careers remain especially rare.** Strong six-year play reaches
+  wage in 3% on Twitch and 0.5% on podcasts. The approved moderate lifts improve side income;
+  larger tested lifts did not convincingly improve the small tail sample. This remains a known
+  balance limitation, not a new unapproved tuning pass.
+- **Findings 64/69:** keep Payton’s 1,400 → 0 / 10,000 → 3 fame anchors and preserve saved luck.
+  Native device checks, Project mirroring and PR review remain open. P4 was subsequently authorized; see its measurement note below.
+
+### Playtest P4 — approved economy reduction built (7 October 2026)
+
+Full-cyclicality business demand effects are now severe recession −13%, recession −6.5%, slowdown
+−2.5%, normal 0%, growth +2.5%, **strong expansion +9% unchanged**, as Payton requested. The
+lower ledger/screen/timeline thresholds keep contextual explanations visible. Saved historical
+records stay as they were. Industry cyclicality, named events, world transitions, independent
+shocks, business controls and P1 rescue choices remain. No save bump; save v45 and TICKET 0708.
+
+Revised production measurement, 9,300 paired owners across 31 trades: five-year rescue-policy
+survival 82.11% → 83.85% in the harsh cycle, 83.44% → 83.59% under ordinary transitions. The
+paired mature severe profit hit is −8.75% → −4.28% of catalog revenue; boom benefit stays +2.71%.
+All 15 typechecks and 2,633 tests pass; full verify hits nine baseline catalog comparisons.
+PR #16: https://github.com/PaytonBlevins/YearAfter/pull/16 (depends on P1 #13, P2 #14 and P3 #15).
+Full method, prior proposal, approved exception, tests and sabotage: `playtest-p4-business-economy.md`.
+
+### Found by P4
+
+- **General profit volatility remains (finding 37).** Harsh-cycle mature normalized profit swings
+  shrink slightly; ordinary-transition swings remain similar. This fixes the economy's influence
+  without promising to remove all independent business risk. Cheap-trade startup/profit ratios
+  (finding 38) and acquisition economics are not retuned.
+- **A lower coefficient can leave its explanation behind.** Ordinary growth tops out at +2.5%;
+  its old +5% yearly threshold would hide it even though the boom still has +9%. Ledger, screen
+  and timeline thresholds are now shared/pinned. The exact 1.5% screen boundary and half-percent
+  rounding exposed floating-point cancellation; both signs and neighboring values are tested.
+- Native device checks, Project mirroring and PR review remain open. P5 awaits Payton’s go-ahead.

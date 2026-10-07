@@ -1,3 +1,4 @@
+import type { BusinessRescue } from './business-rescue';
 /**
  * The live game state and the year-advance loop.
  *
@@ -293,6 +294,7 @@ export interface GameState {
   readonly valuables: readonly OwnedValuable[];
   /** Ticket 0506. A renovation the game asked about unprompted, if one is open. */
   readonly renovationOffer?: RenovationOffer;
+  readonly businessRescue?: BusinessRescue;
   /**
    * Ticket 0507. This year's auction diary: how many sales attended at each
    * venue (spec 41's yearly limits) and which lots were bid on. A diary for
@@ -479,7 +481,8 @@ export const hasSystemicOffer = (state: GameState): boolean =>
   state.pursuitOffer !== undefined ||
   state.homeOffer !== undefined ||
   state.vehicleOffer !== undefined ||
-  state.renovationOffer !== undefined;
+  state.renovationOffer !== undefined ||
+  state.businessRescue !== undefined;
 
 export const createWorldState = (year: number, generation = 1): WorldState => ({
   year,
@@ -515,6 +518,7 @@ export interface CreateGameStateOptions {
   readonly inspected?: readonly string[];
   readonly valuables?: readonly OwnedValuable[];
   readonly renovationOffer?: RenovationOffer;
+  readonly businessRescue?: BusinessRescue;
   readonly auctions?: AuctionDiary;
   readonly businesses?: readonly OwnedBusiness[];
   readonly deals?: readonly PrivateDeal[];
@@ -559,6 +563,7 @@ export const createGameState = (
   ...(options.inspected && options.inspected.length > 0 ? { inspected: options.inspected } : {}),
   valuables: options.valuables ?? EMPTY_VALUABLES,
   ...(options.renovationOffer ? { renovationOffer: options.renovationOffer } : {}),
+  ...(options.businessRescue ? { businessRescue: options.businessRescue } : {}),
   ...(options.auctions ? { auctions: options.auctions } : {}),
   businesses: options.businesses ?? EMPTY_BUSINESSES,
   deals: options.deals ?? EMPTY_DEALS,

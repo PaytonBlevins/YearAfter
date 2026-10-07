@@ -30,7 +30,12 @@ const BASE: Omit<LivingPhaseInput, 'household'> = {
 
 /** Twenty years at the same income: long past the creep's settling time. */
 const settle = (over: Partial<LivingPhaseInput>) => {
-  let household: HouseholdFinances = { standard: 30_000, housing: 'ownPlace', leftHomeAt: 22 };
+  let household: HouseholdFinances = {
+    standard: 30_000,
+    lifestyle: 'comfortable',
+    housing: 'ownPlace',
+    leftHomeAt: 22,
+  };
   let last = runLiving({ ...BASE, household, ...over });
   for (let year = 0; year < 20; year += 1) {
     household = last.household;

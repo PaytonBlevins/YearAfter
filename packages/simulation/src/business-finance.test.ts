@@ -1,3 +1,4 @@
+import { withBusinessRescue, injectIntoBusinessRescue } from './business-rescue';
 /**
  * Ticket 0603 acceptance tests — borrowing for a business and buying one
  * (simulation side).
@@ -87,7 +88,28 @@ function liveTo(seed: string, age: number): GameState {
 }
 
 /** Thirty, $52,451 earned last year, $47,353 in the bank, and the year is 2030. */
-const BASE = liveTo('biz-adult', 30);
+// P2 changes when this seeded life buys and finances a car. These tests pin
+// business quotes, not thirty years of living balance: retain the original
+// explicit cash and debt-free $11,200 car so the market/underwriting fixture
+// stays the same. All literal price, deposit, ledger and loan assertions remain.
+const PLAYED_BASE = liveTo('biz-adult', 30);
+const BASE: GameState = {
+  ...topUp(PLAYED_BASE, 47_353 - Math.floor(Number(PLAYED_BASE.player.cash) / 100)),
+  vehicles: [
+    {
+      id: 'car:2026:lot.used-2:3',
+      trimId: 'car.subaro-outbacker.premium',
+      modelYear: 2020,
+      boughtYear: 2026,
+      purchasePrice: dollars(17_300),
+      value: dollars(11_200),
+      condition: 71.8,
+      history: 'full',
+      accident: true,
+      behindYears: 0,
+    },
+  ],
+};
 const RICH = topUp(BASE, 400_000);
 /** Exactly $60,000 in the bank: enough to put a fifth down on one of the listings, not to buy it. */
 const FIXED = topUp(BASE, 60_000 - Math.floor(Number(BASE.player.cash) / 100));
@@ -359,7 +381,7 @@ describe('0603 — the business pays its own loan', () => {
     expect(free.drawn - owing.drawn).toBeLessThanOrEqual(16_759);
   });
 
-  it('has the owner step in for a shortfall, as they would for a loss', () => {
+  it('has the owner explicitly choose to meet a shortfall', () => {
     const business = { ...mature(), cash: dollars(0) };
     const year = runBusinessesYear({
       ...input,
@@ -368,11 +390,27 @@ describe('0603 — the business pays its own loan', () => {
       available: 50_000_000,
     });
     // $3,000,000 at 8.75% is $3,262,500; the year's payment on that is $502,783, far more than a cafe clears.
-    expect(year.businesses[0]!.last?.repaid).toBe(502_783);
-    const stepIn = year.transactions.find((row) => /to meet its loan payment/.test(row.source));
+    expect(year.businesses[0]!.last?.repaid).toBeUndefined();
+    expect(year.transactions.some((row) => row.amount < 0)).toBe(false);
+    const review = withBusinessRescue(
+      {
+        ...topUp(RICH, 50_000_000),
+        world: { ...RICH.world, year: input.year },
+        businesses: year.businesses,
+        loans: year.loans,
+      },
+      year.rescues,
+    );
+    const answered = injectIntoBusinessRescue(review, business.id);
+    expect(answered.ok).toBe(true);
+    if (!answered.ok) throw new Error(answered.error);
+    expect(answered.value.state.businesses[0]!.last?.repaid).toBe(502_783);
+    const stepIn = answered.value.state.finance.transactions.find((row) =>
+      /keep it going/.test(row.source),
+    );
     expect(stepIn).toBeDefined();
     expect(Number(stepIn!.amount)).toBeLessThan(0);
-    expect(year.loans[0]!.inArrears).toBe(false);
+    expect(answered.value.state.loans[0]!.inArrears).toBe(false);
   });
 
   it('falls behind, and grows, when nobody can cover it', () => {
@@ -385,7 +423,7 @@ describe('0603 — the business pays its own loan', () => {
     });
     expect(year.loans[0]!.inArrears).toBe(true);
     expect(Number(year.loans[0]!.balance)).toBe(326_250_000);
-    expect(year.lines.join(' ')).toMatch(/couldn't make its loan payment/);
+    expect(year.rescues[0]!.loanPayment).toBe(502_783);
     expect(year.businesses[0]!.last?.repaid).toBeUndefined();
   });
 
@@ -401,7 +439,7 @@ describe('0603 — the business pays its own loan', () => {
     expect(year.lines.join(' ')).toMatch(/paid off its loan/);
   });
 
-  it('leaves a loan alone when its business goes under, for the owner to carry', () => {
+  it('holds the failed business and its accrued loan for a rescue choice', () => {
     const losing = {
       ...newBusiness(type, 'biz:2000:cafe:0', 'The Losing Place', 2000, 0.55),
       staff: type.staff * 2,
@@ -417,10 +455,11 @@ describe('0603 — the business pays its own loan', () => {
       loans: [loanOn(losing.id, 100_000)],
       available: 0,
     });
-    expect(year.businesses).toHaveLength(0);
+    expect(year.businesses).toHaveLength(1);
+    expect(year.rescues).toHaveLength(1);
     expect(year.loans).toHaveLength(1);
-    expect(Number(year.loans[0]!.balance)).toBe(10_000_000);
-    expect(year.serviced).toEqual([]);
+    expect(Number(year.loans[0]!.balance)).toBe(10_875_000);
+    expect(year.serviced).toEqual([losing.id]);
   });
 
   it('is serviced by the business in a real year, and by the household only when there is no business left', () => {
