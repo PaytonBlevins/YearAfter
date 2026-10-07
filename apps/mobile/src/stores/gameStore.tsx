@@ -451,7 +451,13 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         const result = resolveDecision(current, eventId, choiceId);
         if (!result.ok) {
           // Expected, not exceptional: the same save answered on two devices.
-          setSaveError(`That choice is no longer available (${result.error}).`);
+          setSaveError(
+            result.error === 'cannot-afford'
+              ? "You don't have enough in your bank to keep this business going. You can close it instead."
+              : eventId === 'business.rescue'
+                ? 'This business decision has changed. Try the current choices.'
+                : `That choice is no longer available (${result.error}).`,
+          );
           return current;
         }
         opens = result.value.opens;

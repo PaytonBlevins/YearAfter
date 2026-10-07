@@ -2991,3 +2991,17 @@ a sentence, a default or a boundary nothing pinned: the collaboration text for a
 swap (three different states needed, not one), "Nobody has asked this year" when only a group has,
 rounding of a fractional dollar, age 15 against 16. A line a player reads is pinned by a test that
 names the line, and a fixture for a branch is checked to reach it (13.126).
+
+### 13.134 A repeated missed payment can lose its warning without losing its debt
+
+P1 found that `runLoanYear.missed` reports entry into arrears, not every unpaid year.
+A rescue gate based on that list ignores a lender already in arrears. Compare the payment
+actually made with the fully funded quote, and test an already-arrears business. Hold the
+quote after the year's interest so answering a saved choice cannot charge interest twice.
+
+### 13.135 Pausing a failure must preserve the hole and the lender
+
+A held rescue can have a negative till. The old wind-down reader clamps the till to zero,
+so closing it without subtracting the trading hole forgives the loss. Apply the hole before
+paying the lender, keep unpaid debt, and prove both ledger flows. Test death in the actual
+annual advance and the heir's liquid inheritance, not just the rescue answer in isolation.

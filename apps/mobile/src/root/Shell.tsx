@@ -12,6 +12,7 @@ import { findJob } from '@yearafter/careers';
 import type { FamilyMember } from '@yearafter/relationships';
 import { eulogyFor, heirsIn, keepsBusinesses } from '@yearafter/simulation';
 import { CharacterHeader } from '../components/CharacterHeader';
+import { BusinessRescueCard } from '../components/BusinessRescueCard';
 import { DecisionCard } from '../components/DecisionCard';
 import { FinancesScreen } from '../screens/FinancesScreen';
 import { CreditScreen } from '../screens/CreditScreen';
@@ -279,7 +280,12 @@ export function Shell() {
         player: time is stopped whatever world they wandered into, and a control
         that does nothing with no explanation is the worst version of that.
       */}
-      {decision ? (
+      {decision?.eventId === 'business.rescue' && state.businessRescue ? (
+        <BusinessRescueCard
+          state={state}
+          onChoose={(choiceId) => answerAndNavigate(decision.eventId, choiceId)}
+        />
+      ) : decision ? (
         <DecisionCard
           decision={decision}
           remaining={state.pending.length}

@@ -1,3 +1,4 @@
+import type { BusinessRescue } from '@yearafter/simulation';
 /**
  * Ticket 0005 — SaveGameV1.
  *
@@ -49,7 +50,7 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 43;
+export const CURRENT_SAVE_VERSION = 44;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -183,7 +184,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 43;
+  readonly version: 44;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -281,6 +282,7 @@ export interface SaveGameV18 {
   readonly valuables: readonly OwnedValuable[];
   /** Ticket 0506. A renovation the game asked about, waiting on an answer. */
   readonly renovationOffer?: RenovationOffer;
+  readonly businessRescue?: BusinessRescue;
   /** Ticket 0507. This year's auction diary. */
   readonly auctions?: AuctionDiary;
   /** Ticket 0601. The businesses the character owns. Always present from v38. */
