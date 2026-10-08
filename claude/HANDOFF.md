@@ -145,6 +145,16 @@ Owned formatting passes. PR #21 targets main and is mergeable when checked. Impl
 the same 22 historical-note formatting checks and skips later gates. Native checks/Project mirroring open.
 P10 and life-event wording wait for Payton.
 
+**P10 proposal update (8 October):** Payton authorized P10. Agent B separately claimed
+`feat/playtest-p10-iced-watches`, following P9 #21 while main remains `beff25a`.
+Actual purchases/sales cover all 55 watches; ten-year asset probes use 100 seed keys.
+No icing field/action exists. Proposed 53 eligible models, preserve the existing
+factory-set Jakob and exclude the smartwatch, per-watch custom prices and positive/
+negative value effects, ready-iced purchase or owned-watch action on existing screens,
+cash/card payment and no-RNG save v47. All new numbers/shape await approval; no
+production edits or save reservation. Details: `playtest-p10-iced-watches.md`.
+P11 and life-event wording wait.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:

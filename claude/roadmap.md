@@ -1661,3 +1661,23 @@ A pool already prevents later installing an infinity pool because both are once-
 additions in the same group. The indoor pool shares that constraint; replacement
 pricing is not quietly added. Annual renovation expense also includes the home's
 expense rate on recovered value, beyond the catalog upkeep; previews must use the reader.
+
+### Playtest P10 — measured iced-out watch proposal (8 October 2026 UTC)
+
+Authorized and separately claimed on `feat/playtest-p10-iced-watches`, following P9 #21.
+Measured real purchases/sales of all 55 watches and ten-year paths across 100 seed keys.
+No icing command or held field; existing Jakob is factory-set. Proposed original/iced
+configuration and owned-watch action on existing screens, 53 eligible models, explicit
+per-watch cost/value metadata and existing cash/card contract, precious annual market
+for aftermarket work and no-RNG save v47. Full manifest and tradeoffs:
+`playtest-p10-iced-watches.md`. Approval awaits; production unchanged, no version
+reserved. P11 and life-event wording wait.
+
+### Found by P10
+
+The eleven original sought entries currently resell for 115% of paid retail, including
+an instant original-watch markup. Preserve that approved rule, but never apply it to
+an iced invoice's custom-work cost. The existing $20m Jakob's factory diamonds are
+not aftermarket work. Original watches can keep their current yearly market; a cheap
+iced watch should not drift to the bare-watch fashion floor after gemstones were paid
+for. The proposed switch to the existing precious reader needs explicit approval.
