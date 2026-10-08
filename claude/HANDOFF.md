@@ -141,7 +141,8 @@ transfer in the financial summary. Save v46/TICKET 0708 unchanged. Stack follows
 #20 while main remains `beff25a`. Details/results: `playtest-p9-renovations.md`.
 All 15 typechecks and 2,867 tests pass; 28 sabotage mutations caught, none missed.
 Full verify still exits on seven baseline catalog mismatches; formatting on 22 old notes.
-Owned formatting passes. PR publication pending. Native checks/Project mirroring open.
+Owned formatting passes. PR #21 targets main and is mergeable when checked. Implementation CI 125 fails
+the same 22 historical-note formatting checks and skips later gates. Native checks/Project mirroring open.
 P10 and life-event wording wait for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)

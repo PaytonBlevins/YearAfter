@@ -1651,7 +1651,8 @@ classifies borrowing as a transfer, preserving P6 earned-income rules. Renovatio
 owned generator now matches. Save v46/TICKET 0708 unchanged. Stacked on P8 #20 and
 PRs #13–#19 while main remains `beff25a`. All 15 typechecks and 2,867 tests pass;
 28 sabotage mutations caught, none missed; seven old catalog mismatches and 22 historical
-format failures remain. Owned formatting passes; PR publication pending.
+format failures remain. Owned formatting passes; PR #21 targets main and is mergeable when checked. Implementation CI 125 fails
+the same 22 historical-note formatting checks and skips later gates.
 Details: `playtest-p9-renovations.md`. P10 and life-event wording wait.
 
 ### Found by P9

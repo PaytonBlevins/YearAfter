@@ -1,7 +1,10 @@
 # Playtest P9 — approved renovation expansion
 
 Status: authorized, separately claimed, measured and approved by Payton on 8 October
-2026 UTC; implementation built and verified; PR publication in progress. Branch `feat/playtest-p9-renovations`
+2026 UTC; implementation built and verified;
+[PR #21](https://github.com/PaytonBlevins/YearAfter/pull/21) targets main and is mergeable
+when checked. Implementation commit `3ee8226`; depends on P1–P8 #13–#20 and shares
+PR #10 payment helpers. Main remains `beff25a`. Branch `feat/playtest-p9-renovations`
 is stacked on P8 PR #20 while main remains `beff25a`.
 
 ## Scope and existing contract
@@ -239,6 +242,10 @@ Full formatting has 22 historical-note failures; all owned files pass formatting
 `git diff --check`. The validator's known secondary vehicle-mods layout side effect
 is restored only after checking semantic equality to tracked bytes; it is not committed. Native-device checks and Claude
 Project mirroring remain unavailable. P10 has not started.
+Implementation CI run 125 (`37859490031`), job `113591559479`, failed the format
+step on the same 22 historical notes; typecheck, unit tests and content validation
+were skipped. The job log confirms the 22-file format failure. CI is not green. The complete local results above were read from the final
+release log after all tests and content validation finished.
 
 ### Sabotage audit
 
