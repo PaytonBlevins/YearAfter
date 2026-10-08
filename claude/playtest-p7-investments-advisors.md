@@ -1,15 +1,14 @@
 # Playtest P7 — investments and advisors
 
-**Status:** measurement and proposal only, 8 October 2026 UTC. Payton authorized starting
+**Status:** proposal approved with amended sizing; implementation in progress, 8 October 2026 UTC. Payton authorized starting
 P7; the new numbers and screen/save choices below await approval under the playtest brief.
-No production source, tests, catalog numbers or save schema changed. P8 waits.
+Approval receipt: Payton approved everything with **15% for investing in general**, not just one stock. Every advisor buy suggestion, including idle-cash fund suggestions, uses 15% of spare cash; there is no 25% fund exception. Reserve, corrected sale targets/index reallocation, goal screen and volatility changes remain approved. Prior 25% prototype results below are historical experiments and must be rerun. P8 waits.
 **Branch:** `feat/playtest-p7-investments-advisors`, stacked on P6 PR #18 and #13–#17;
 `origin/main` remains `beff25a`. Claim published separately before measurements.
 **Scope:** B11, B12 and finding 28. Investor volatility, advisor commands, cash protection,
 explicit purchase savings and the existing Advisor screen. No business macro retune, private
 deals, retirement spending, new advisor tier or life-event wording.
-**Save:** v45 and TICKET 0708 unchanged. Proposed goal needs the next available version
-(expected v46 if still free); no version reserved before approval. `approved-decisions.md`
+**Save:** P7 now reserves v46 for the optional goal; TICKET 0708 stays. `approved-decisions.md`
 is unchanged. Claude Project mirroring is unavailable in this session.
 
 ## Findings from the actual commands
