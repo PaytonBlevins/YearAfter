@@ -265,10 +265,11 @@ export const CREATOR_CATEGORIES: readonly CreatorCategory[] = [
   },
 ];
 
+// P3: approved player rank lifts; source curves and the top-quarter fade stay unchanged.
 const BASE_PLATFORMS: readonly Platform[] = [
   {
     id: 'video',
-    lift: 1.5,
+    lift: 3,
     name: 'YouTube',
     audienceWord: 'subscribers',
     audienceOne: 'subscriber',
@@ -304,7 +305,7 @@ const BASE_PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'stream',
-    lift: 2.5,
+    lift: 5,
     name: 'Twitch',
     audienceWord: 'followers',
     audienceOne: 'follower',
@@ -336,7 +337,7 @@ const BASE_PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'photo',
-    lift: 1.5,
+    lift: 3,
     name: 'Instagram',
     audienceWord: 'followers',
     audienceOne: 'follower',
@@ -356,7 +357,7 @@ const BASE_PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'shortform',
-    lift: 2.0,
+    lift: 3,
     name: 'TikTok',
     audienceWord: 'followers',
     audienceOne: 'follower',
@@ -389,7 +390,7 @@ const BASE_PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'podcast',
-    lift: 2.5,
+    lift: 5,
     name: 'Amazon Music Podcasts',
     audienceWord: 'listeners',
     audienceOne: 'listener',
@@ -434,7 +435,7 @@ const BASE_PLATFORMS: readonly Platform[] = [
   },
   {
     id: 'subscription',
-    lift: 1.2,
+    lift: 2,
     name: 'Substack',
     audienceWord: 'readers',
     audienceOne: 'reader',

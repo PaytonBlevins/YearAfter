@@ -61,7 +61,7 @@ export function BusinessWarning({
           <ListRow
             title="You already helped it through"
             value={money(business.last?.injected ?? 0)}
-            subtitle="This came from your bank last year to cover a trading loss."
+            subtitle="This came from your bank last year to keep the business going."
             affordance="none"
             wrap
           />
@@ -92,8 +92,9 @@ export function BusinessWarning({
             {warning.hasHistory
               ? " If last year's trading result repeats,"
               : ' Before any new trading income,'}{' '}
-            the business would be about {money(warning.loanGap)} short of that payment. Money may
-            come from your bank to pay it; if it can't make the full payment, the loan falls behind.
+            the business would be about {money(warning.loanGap)} short of that payment. You’ll be
+            asked whether to put money in or close the business if its own cash can't make the
+            payment.
           </Text>
         ) : null}
         {warning.rescue > 0 && warning.loanGap > 0 ? (
@@ -102,10 +103,9 @@ export function BusinessWarning({
           </Text>
         ) : null}
         <Text style={styles.note}>
-          These are estimates, not a forecast. Sales, costs and events can change. Under the current
-          rules, a trading loss the business can't cover takes money from your bank automatically if
-          you can afford the rescue. If you can't, the business closes. You can't decline that
-          rescue yet.
+          These are estimates, not a forecast. Sales, costs and events can change. If the business
+          can't cover a loss or its loan payment, you'll choose whether to put money in or close it.
+          Nothing comes from your bank without that choice.
         </Text>
         <Text style={styles.note}>
           Review prices, supplies and staffing below before advancing the year. Changes can help,

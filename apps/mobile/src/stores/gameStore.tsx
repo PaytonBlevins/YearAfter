@@ -10,6 +10,7 @@
  * waits on a write — but failures surface in `saveError` rather than vanishing.
  */
 
+import { GIG_UNAVAILABLE_LABELS } from '@yearafter/education';
 import {
   createContext,
   useCallback,
@@ -22,6 +23,8 @@ import {
 } from 'react';
 import { asSaveId, type SaveId } from '@yearafter/core';
 import {
+  setLifestyle,
+  LIFESTYLE_ERROR_LABELS,
   advanceYear,
   createNewGame,
   decide as resolveDecision,
@@ -109,7 +112,7 @@ import {
   closeBusiness,
   type Financing,
 } from '@yearafter/simulation';
-import { EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
+import { type LifestyleTier, EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
 import type { BidTier, Payroll, SupplierGrade } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 
@@ -148,6 +151,7 @@ import {
 } from '@yearafter/persistence';
 
 interface GameContextValue {
+  readonly chooseLifestyle: (tier: LifestyleTier) => void;
   readonly ready: boolean;
   readonly state: GameState | null;
   readonly settings: SaveSettings;
@@ -451,7 +455,13 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         const result = resolveDecision(current, eventId, choiceId);
         if (!result.ok) {
           // Expected, not exceptional: the same save answered on two devices.
-          setSaveError(`That choice is no longer available (${result.error}).`);
+          setSaveError(
+            result.error === 'cannot-afford'
+              ? "You don't have enough in your bank to keep this business going. You can close it instead."
+              : eventId === 'business.rescue'
+                ? 'This business decision has changed. Try the current choices.'
+                : `That choice is no longer available (${result.error}).`,
+          );
           return current;
         }
         opens = result.value.opens;
@@ -1234,6 +1244,26 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const chooseLifestyle = useCallback(
+    (tier: LifestyleTier) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = setLifestyle(current, tier);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Lifestyle unchanged',
+            body: LIFESTYLE_ERROR_LABELS[result.error],
+            tone: 'neutral',
+          });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const setContributionTo = useCallback(
     (rate: number) => {
       setState((current) => {
@@ -1591,7 +1621,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       mutateEducation((current) => {
         const result = takeGig(current, gigId);
         if (!result.ok) {
-          setSaveError(`Cannot take that on (${result.error}).`);
+          setSaveError(
+            result.error === 'no-such-gig'
+              ? "That work isn't available."
+              : GIG_UNAVAILABLE_LABELS[result.error],
+          );
           return current;
         }
         return result.value;
@@ -1674,6 +1708,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       dismissAdvisorNow,
       actOnAdviceWith,
       setContributionTo,
+      chooseLifestyle,
       retireNowAction,
       takeOutEarlyWith,
       stopTreatingFor,
@@ -1750,6 +1785,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       dismissAdvisorNow,
       actOnAdviceWith,
       setContributionTo,
+      chooseLifestyle,
       retireNowAction,
       takeOutEarlyWith,
       payLoanWith,

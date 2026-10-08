@@ -40,6 +40,8 @@ export interface CollegeYearInput {
   readonly support?: number;
   /** One [0,1) draw, passed in so this package stays pure. */
   readonly roll: number;
+  /** P6: the existing overload penalty, not a second grade curve. */
+  readonly overloadPenalty?: number;
 }
 
 export type CollegeEnding = 'finished' | 'failed-out' | 'ran-out-of-money';
@@ -146,13 +148,14 @@ export function runCollegeYear(state: EducationState, input: CollegeYearInput): 
 
   /* ---- the year ----------------------------------------------------------- */
   const program = state.majorId ? findMajor(state.majorId) : undefined;
-  const target = collegeTarget(
-    input.smarts,
-    input.discipline,
-    EFFORT_PERFORMANCE[state.effort],
-    program?.difficulty ?? 0.4,
-    input.academics,
-  );
+  const target =
+    collegeTarget(
+      input.smarts,
+      input.discipline,
+      EFFORT_PERFORMANCE[state.effort],
+      program?.difficulty ?? 0.4,
+      input.academics,
+    ) + (input.overloadPenalty ?? 0);
   // Same drift the school model uses, so a bad first year is recoverable and a
   // good one is not a guarantee.
   const performance = clampStat(
