@@ -566,6 +566,14 @@ walk(contentDir, (file) => {
       );
       continue;
     }
+    if (rel === 'packages/content/data/renovations.json') {
+      if (!Number.isSafeInteger(entry.space) || entry.space < 0)
+        fail(rel, `${entry.id}: space must be a nonnegative whole number.`);
+      if (!Number.isSafeInteger(entry.happiness) || entry.happiness < 0 || entry.happiness > 2)
+        fail(rel, `${entry.id}: annual comfort must be a whole number from zero to two.`);
+      if ((entry.refresh || entry.beds > 0) && (entry.space !== 0 || entry.happiness !== 0))
+        fail(rel, `${entry.id}: refreshes and structural bedrooms use no amenity space/comfort.`);
+    }
     const previous = seenIds.get(entry.id);
     if (previous) fail(rel, `Duplicate content id "${entry.id}" (also in ${previous}).`);
     else seenIds.set(entry.id, rel);

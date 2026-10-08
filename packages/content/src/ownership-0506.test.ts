@@ -50,7 +50,7 @@ const REAL = [
 ];
 
 describe('0506 — renovations', () => {
-  it('is spec 153–154 and 1875’s list, and nothing else', () => {
+  it('retains the spec list alongside approved P9 additions', () => {
     const names = new Set(RENOVATIONS.map((renovation) => renovation.name));
     for (const name of [
       'Modern Kitchen',
@@ -75,10 +75,10 @@ describe('0506 — renovations', () => {
     ]) {
       expect(names.has(name), name).toBe(true);
     }
-    // Spec 153: no flooring, exterior or landscaping.
+    // P9 explicitly allows Patio; retain the broader flooring/exterior/landscaping bans.
     for (const renovation of RENOVATIONS) {
       expect(
-        /floor(ing)?\b|siding|roof|landscap|lawn|patio|fence/i.test(renovation.name),
+        /floor(ing)?\b|siding|roof|landscap|lawn|fence/i.test(renovation.name),
         renovation.name,
       ).toBe(false);
     }

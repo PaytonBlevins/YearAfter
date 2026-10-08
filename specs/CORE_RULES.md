@@ -3168,3 +3168,13 @@ failure. In P8, the vehicle generator's secondary vehicle-mods file changed layo
 while the validator restored vehicles alone. Check the working tree after verification,
 confirm semantic equality before restoring accidental output, and do not commit it
 as part of another ticket. The validator restoration gap remains an open follow-up.
+
+### 13.156 Derived amenity comfort must use the lived-in home and the final paid year
+
+Buying an amenity is not a stat reward. Derive the bounded annual contribution from
+installed work on the actual residence, merge it with existing mood sources and
+suppress it for hardship or a final cash shortfall. A preview must show marginal
+comfort after the combined cap and full recurring expense, including added home
+value. Recheck aggregate space before payment; grandfather existing paid work and
+allow zero-space maintenance. Do not persist a second bonus that can survive a
+sale, rental or loss. Paired settlement checks need independent RNG instances.

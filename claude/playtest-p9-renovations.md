@@ -1,7 +1,7 @@
-# Playtest P9 — renovation expansion proposal
+# Playtest P9 — approved renovation expansion
 
-Status: authorized and separately claimed 8 October 2026 UTC; measured proposal
-awaits Payton's approval. No production P9 changes. Branch `feat/playtest-p9-renovations`
+Status: authorized, separately claimed, measured and approved by Payton on 8 October
+2026 UTC; implementation built and verified; PR publication in progress. Branch `feat/playtest-p9-renovations`
 is stacked on P8 PR #20 while main remains `beff25a`.
 
 ## Scope and existing contract
@@ -174,3 +174,107 @@ renovations' own generator reproducibility without mass reformat as part of this
 
 Device checks and Claude Project mirroring remain unavailable here; do not report
 them complete. Stop after P9; P10 needs another instruction.
+
+## Implementation after approval
+
+All nine additions are built with the exact approved manifest; 28 entries total.
+The original nineteen entries retain every original field (a frozen canonical hash
+checks this), apart from new derived space/comfort metadata. Renovation generator
+output now matches the checked-in JSON byte for byte while preserving its original short-list layout. The content validator checks integral nonnegative space and bounded
+comfort; zero-space structural/refresh work cannot acquire amenity benefits.
+
+The real command refuses insufficient space before payment, and preserves unknown
+legacy work and over-capacity holdings. Duplicate saved groups count once for space
+and comfort. Pool, infinity pool and indoor pool still exclude each other. Guest
+house adds no beds, rented units or rent income. The seventh door remains refresh-only.
+
+Annual settlement derives comfort from the current residence after the homes year,
+adds it to existing activity/creator/lifestyle mood, keeps normal nudging and caps,
+and suppresses it during hardship or final cash shortfall. Purchases do not alter
+stats. Another property gives no personal comfort preview. The screen quotes actual
+value/expense changes, capped marginal comfort and remaining space before payment.
+
+The published PR #10 shared payment helper/selector is reused on this stack because
+PR #10 is not on main yet. Only renovation is wired in this slice. Both cash and the
+selected held card are supported, with quoted-price, status and available-credit
+checks repeated at command time. Positive debt funding remains a transfer rather
+than income in the existing summary; P6 odd-job earned-income accounting is preserved.
+Save v46/TICKET 0708 remain unchanged: no new saved shape and no migration is needed.
+
+### Actual after-build seven-home probe
+
+Repeated the same real-function sequential-install probe from the baseline. Order
+is existing catalog first, then new additions; blocked additions may fit when chosen
+instead of earlier amenities. This is a capability check, not a passive purchase policy.
+
+| Kind      | Visible options | Successful commands | Held non-refresh groups | Immediate happiness gain |
+| --------- | --------------- | ------------------- | ----------------------- | ------------------------ |
+| Condo     | 7               | 7                   | 2                       | 0                        |
+| Townhouse | 12              | 11                  | 6                       | 0                        |
+| Starter   | 15              | 11                  | 6                       | 0                        |
+| Family    | 18              | 14                  | 9                       | 0                        |
+| Large     | 21              | 16                  | 11                      | 0                        |
+| Luxury    | 27              | 18                  | 13                      | 0                        |
+| Estate    | 28              | 24                  | 19                      | 0                        |
+
+Annual tests separately run real settlement with independent same-seed states,
+including a zero-upkeep study to isolate mood without changing annual finances.
+They check bounded contribution, activity/lifestyle merging, hardship/shortfall,
+no health/smarts benefit, full ledger reconciliation and replay after save reload.
+All nine additions are also sold through the real command with exact sale proceeds;
+the rental quote uses recovered home value without creating another rented unit.
+A controlled creator-mood reader checks that comfort adds to that source too.
+A reused mutable RNG fixture initially spoiled two paired comparisons; fresh games
+on each side repaired the fixture before verification. Save tests preserve an
+already over-capacity condo, paid costs, bedrooms, value and RNG without deletion.
+
+### Verification
+
+All 28 distinct sabotage mutations were caught by behavioral tests: **none missed**.
+Tar backup and MD5 comparison restored every mutated file exactly. Full `pnpm verify`
+passes all 15 typechecks and **2,867 tests** (73 more than P8), then exits nonzero on
+seven pre-existing catalog-generator mismatches: activities, advice, auctions,
+businesses, childhood events, homes and vehicles. Renovations now reproduces exactly.
+Full formatting has 22 historical-note failures; all owned files pass formatting and
+`git diff --check`. The validator's known secondary vehicle-mods layout side effect
+is restored only after checking semantic equality to tracked bytes; it is not committed. Native-device checks and Claude
+Project mirroring remain unavailable. P10 has not started.
+
+### Sabotage audit
+
+| #   | Mutation                                      | Suite       | Result |
+| --- | --------------------------------------------- | ----------- | ------ |
+| 1   | Sauna price changed                           | content     | Caught |
+| 2   | Patio recovery raised to 99%                  | content     | Caught |
+| 3   | Indoor pool upkeep disappears                 | content     | Caught |
+| 4   | Guest house adds main bedrooms                | content     | Caught |
+| 5   | Recording studio fits condos                  | content     | Caught |
+| 6   | Study annual comfort doubled                  | content     | Caught |
+| 7   | Existing pool uses no space                   | content     | Caught |
+| 8   | Existing pool repriced                        | content     | Caught |
+| 9   | Indoor pool separate group                    | content     | Caught |
+| 10  | Condo capacity raised from 2 to 200           | finance     | Caught |
+| 11  | Space reader omits installed amenities        | simulation  | Caught |
+| 12  | Space gate absent                             | simulation  | Caught |
+| 13  | Exact capacity boundary rejects               | simulation  | Caught |
+| 14  | Comfort cap removed                           | simulation  | Caught |
+| 15  | Legacy groups counted twice                   | simulation  | Caught |
+| 16  | Unknown saved work erased                     | simulation  | Caught |
+| 17  | Preview omits value-based expenses            | simulation  | Caught |
+| 18  | Preview uncapped gain                         | simulation  | Caught |
+| 19  | Non-residence preview grants personal comfort | simulation  | Caught |
+| 20  | No hardship suppression                       | simulation  | Caught |
+| 21  | No shortfall suppression                      | simulation  | Caught |
+| 22  | Second homes add comfort                      | simulation  | Caught |
+| 23  | Annual comfort unwired                        | simulation  | Caught |
+| 24  | Card balance result lost                      | simulation  | Caught |
+| 25  | Renovation charge doubled                     | simulation  | Caught |
+| 26  | Store drops chosen payment                    | mobile      | Caught |
+| 27  | Saved work omitted on load                    | persistence | Caught |
+| 28  | Borrowed funds counted as income              | payment     | Caught |
+
+The first scratch harness stopped after trial 26 because its backup-loop variable
+shadowed the serializer path; no test survivor. The harness was fixed, all 28 trials
+were rerun against the final guest-house wording, and exact restoration succeeded.
+Backup/logs remain outside git. No weakened assertion or engine fix was needed to
+make the 28 behavioral defects fail their acceptance tests.

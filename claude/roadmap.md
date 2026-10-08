@@ -1638,19 +1638,25 @@ The vehicle generator also writes vehicle-mods, leaving a formatting-only dirty
 secondary output after full verification. Exact tracked bytes were restored;
 secondary-output restoration is a separate open finding, not a P8 implementation.
 
-### Playtest P9 — measured renovation proposal (8 October 2026 UTC)
+### Playtest P9 — approved renovation expansion built (8 October 2026 UTC)
 
-Authorized and separately claimed on `feat/playtest-p9-renovations`, following P8 #20.
-Existing nineteen renovations already cover pool/infinity pool/basketball/hedge maze.
-Actual command probes on seven lived-in kinds show no happiness effect or aggregate
-space limit. Proposed nine additions, per-row cost/upkeep/recovery, +3 annual
-residence-only comfort cap and kind-derived size budgets. Existing paid work and
-financial numbers preserved; derived metadata can avoid a save bump (v46/TICKET 0708).
-Numbers await Payton approval. Details: `playtest-p9-renovations.md`. P10 waits.
+Payton approved the separately claimed, measured proposal on `feat/playtest-p9-renovations`.
+Built nine additions for 28 total, all approved costs/upkeep/recovery and kind gates,
+aggregate space budgets, derived +3 yearly residence comfort with hardship/final-shortfall
+suppression. Existing catalog fields/paid work and saved bedrooms/value preserved;
+zero-space maintenance stays available. No immediate stats and no rental/second-home
+comfort. Renovate displays full value/upkeep, capped marginal comfort and space, then
+explicit cash/card payment through the shared published PR #10 contract. Summary
+classifies borrowing as a transfer, preserving P6 earned-income rules. Renovations'
+owned generator now matches. Save v46/TICKET 0708 unchanged. Stacked on P8 #20 and
+PRs #13–#19 while main remains `beff25a`. All 15 typechecks and 2,867 tests pass;
+28 sabotage mutations caught, none missed; seven old catalog mismatches and 22 historical
+format failures remain. Owned formatting passes; PR publication pending.
+Details: `playtest-p9-renovations.md`. P10 and life-event wording wait.
 
 ### Found by P9
 
 A pool already prevents later installing an infinity pool because both are once-only
-additions in the same group. Proposed indoor pool shares that constraint; replacement
+additions in the same group. The indoor pool shares that constraint; replacement
 pricing is not quietly added. Annual renovation expense also includes the home's
 expense rate on recovered value, beyond the catalog upkeep; previews must use the reader.

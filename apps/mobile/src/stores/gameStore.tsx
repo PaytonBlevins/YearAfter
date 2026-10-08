@@ -22,6 +22,7 @@ import {
   type ReactNode,
 } from 'react';
 import { asSaveId, type SaveId } from '@yearafter/core';
+import type { PurchasePayment } from '@yearafter/finance';
 import {
   setLifestyle,
   LIFESTYLE_ERROR_LABELS,
@@ -221,7 +222,7 @@ interface GameContextValue {
   /** Ticket 0505. Have a shop fit a modification. */
   readonly fitACarMod: (vehicleId: string, modId: string) => void;
   /** Ticket 0506. Have a builder do something to a home. */
-  readonly renovateHome: (homeId: string, renovationId: string) => void;
+  readonly renovateHome: (homeId: string, renovationId: string, payment?: PurchasePayment) => void;
   /** Ticket 0601. Open a business, run it, sell it or close it. */
   readonly openABusiness: (typeId: string, finance?: Financing) => void;
   /** Ticket 0603. Buy one that is for sale. A loan is written into the purchase, never paid out as cash. */
@@ -900,10 +901,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0506: renovations and shopping ---------------------------- */
 
   const renovateHome = useCallback(
-    (homeId: string, renovationId: string) => {
+    (homeId: string, renovationId: string, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = renovate(current, homeId, renovationId);
+        const result = renovate(current, homeId, renovationId, payment);
         if (!result.ok) {
           setOutcome({ title: 'Not now', body: RENOVATE_ERROR_LABELS[result.error], tone: 'bad' });
           return current;

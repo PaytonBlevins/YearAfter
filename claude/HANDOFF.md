@@ -130,13 +130,19 @@ PR #20: https://github.com/PaytonBlevins/YearAfter/pull/20 (targets main, depend
 #13–#19, mergeable when checked). Implementation CI run 119 failed the same 22 old-note formatting checks; later gates skipped.
 Native checks and Project mirroring remain open. P9 waits for Payton.
 
-**P9 proposal update (8 October):** Payton authorized P9; Agent B separately claimed
-`feat/playtest-p9-renovations`, following P8 #20 while main remains `beff25a`.
-Actual baseline has nineteen entries, zero amenity happiness and no aggregate capacity.
-Proposed nine additions, +3 maximum annual residence comfort, kind-derived space
-budgets, existing costs/IDs preserved, no saved-shape change expected. Full price,
-upkeep, recovery and size manifest: `playtest-p9-renovations.md`; numbers await approval.
-No production P9 edits. P10 waits.
+**P9 implementation update (8 October):** Payton approved the measured manifest.
+Agent B built nine additions (28 total), kind-based aggregate space checks and +3
+maximum annual residence comfort, with hardship/final-shortfall suppression. Existing
+nineteen catalog fields, paid work and unknown legacy holdings remain intact; zero-space
+maintenance remains available above capacity. Pool variants stay mutually exclusive.
+Renovate quotes actual value/upkeep, marginal capped comfort and space, then confirms
+cash or a chosen card. Reuses PR #10 shared payment helpers; borrowed funds remain a
+transfer in the financial summary. Save v46/TICKET 0708 unchanged. Stack follows P8
+#20 while main remains `beff25a`. Details/results: `playtest-p9-renovations.md`.
+All 15 typechecks and 2,867 tests pass; 28 sabotage mutations caught, none missed.
+Full verify still exits on seven baseline catalog mismatches; formatting on 22 old notes.
+Owned formatting passes. PR publication pending. Native checks/Project mirroring open.
+P10 and life-event wording wait for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

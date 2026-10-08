@@ -150,6 +150,12 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   and three sought entries. No new screen, save shape, icing action or selection rules.
   Full real-model/source mapping: `playtest-p8-watch-catalog.md`.
 
+- **P9 renovations, approved 8 October 2026:** Payton approved the measured proposal in
+  `playtest-p9-renovations.md`: nine additions (28 total), the listed costs/upkeep/recovery,
+  kind-derived space budgets and residence-only annual comfort capped at +3, suppressed
+  during hardship or a final cash shortfall. Preserve existing work, use explicit cash/card
+  payment, keep save v46 and stop after P9.
+
 ## Reference material
 
 BitLife screenshots supplied by the product owner, saved at

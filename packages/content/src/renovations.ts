@@ -2,7 +2,7 @@
  * Ticket 0506 — what can be done to a home.
  *
  * Authored by `scripts/generate-renovations.py`: spec 153–154 and 1875's list,
- * and nothing else. A `refresh` (kitchens, bathrooms, finishes) lifts a home's
+ * plus Payton-approved P9 additions. A `refresh` (kitchens, bathrooms, finishes) lifts a home's
  * condition and can be redone once it has aged; anything else is an addition,
  * done once, which adds part of its cost to the home's value.
  */
@@ -24,6 +24,10 @@ export interface Renovation {
   readonly recovery: number;
   /** Whole dollars a year to keep it running. */
   readonly upkeep: number;
+  /** Abstract home-space units. Derived from the catalog, never saved. */
+  readonly space: number;
+  /** Annual residence comfort before the combined +3 cap. */
+  readonly happiness: number;
   /** Bedrooms it adds. */
   readonly beds: number;
   /** A refresh can be done again this many years later. Zero: once only. */

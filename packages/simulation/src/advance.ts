@@ -84,7 +84,7 @@ import { withPursuitOffer } from './pursuit-offer';
 import { foreclose, markMissed, runHomesYear, withHomeOffer } from './homes';
 import { markVehiclesMissed, repossess, runVehiclesYear, withVehicleOffer } from './vehicles';
 import { withBusinessRescue } from './business-rescue';
-import { withRenovationOffer } from './renovations';
+import { withRenovationOffer, renovationComfortFor } from './renovations';
 import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
 import { runDealsYear } from './deals';
@@ -1131,7 +1131,8 @@ export function advanceYear(state: GameState): AdvanceResult {
         // paid-year effect. Comfortable must not erase a year of activities.
         happiness:
           (creatorsYear.mood === 0 ? (shaped.happiness ?? 0) : creatorsYear.mood) +
-          (living.mood > 0 && money.short < 0 ? 0 : living.mood),
+          (living.mood > 0 && money.short < 0 ? 0 : living.mood) +
+          renovationComfortFor(homesYear.homes, living.hardship, money.short),
       }),
       health: clampStat(health.health),
     },
