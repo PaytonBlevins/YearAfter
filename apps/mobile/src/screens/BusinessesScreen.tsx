@@ -12,6 +12,8 @@
 import { Fragment, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
+  businessEconomyVisible,
+  businessEconomyPercent,
   EXPAND_REFUSAL_LABELS,
   MAX_BUSINESSES,
   MAX_LOCATIONS,
@@ -524,13 +526,13 @@ export function BusinessScreen() {
             wrap
           />
         ) : null}
-        {last?.economy && Math.abs(last.economy - 1) >= 0.03 ? (
+        {last?.economy !== undefined && businessEconomyVisible(last.economy) ? (
           <ListRow
             title="The economy"
             subtitle={
               last.economy < 1
-                ? `Took about ${Math.round((1 - last.economy) * 100)}% of your customer demand last year.`
-                : `Brought you about ${Math.round((last.economy - 1) * 100)}% more customer demand last year.`
+                ? `Took about ${businessEconomyPercent(last.economy)}% of your customer demand last year.`
+                : `Brought you about ${businessEconomyPercent(last.economy)}% more customer demand last year.`
             }
             affordance="none"
             wrap

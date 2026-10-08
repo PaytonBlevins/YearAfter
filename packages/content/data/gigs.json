@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "entries": [
     {
       "id": "gig.lemonade",
@@ -7,6 +7,7 @@
       "blurb": "A table, a jug, and an inflated sense of business.",
       "ageMin": 7,
       "ageMax": 11,
+      "kind": "oddJob",
       "payLow": 12,
       "payHigh": 45,
       "hoursPerWeek": 1,
@@ -23,6 +24,7 @@
       "blurb": "Every day after school, in all weathers.",
       "ageMin": 9,
       "ageMax": 15,
+      "kind": "oddJob",
       "payLow": 60,
       "payHigh": 220,
       "hoursPerWeek": 2,
@@ -39,6 +41,7 @@
       "blurb": "Bucket, sponge, and the whole street.",
       "ageMin": 10,
       "ageMax": 16,
+      "kind": "oddJob",
       "payLow": 70,
       "payHigh": 260,
       "hoursPerWeek": 2,
@@ -55,6 +58,7 @@
       "blurb": "Before school. Every morning. In the dark half the year.",
       "ageMin": 12,
       "ageMax": 16,
+      "kind": "oddJob",
       "payLow": 180,
       "payHigh": 420,
       "hoursPerWeek": 4,
@@ -71,6 +75,7 @@
       "blurb": "Somebody else's children, after their bedtime.",
       "ageMin": 12,
       "ageMax": 18,
+      "kind": "oddJob",
       "payLow": 150,
       "payHigh": 600,
       "hoursPerWeek": 3,
@@ -88,6 +93,7 @@
       "blurb": "Hot work, and the money is real.",
       "ageMin": 12,
       "ageMax": 18,
+      "kind": "oddJob",
       "payLow": 200,
       "payHigh": 700,
       "hoursPerWeek": 4,
@@ -104,6 +110,7 @@
       "blurb": "An hour a week, explaining what you already know.",
       "ageMin": 13,
       "ageMax": 18,
+      "kind": "oddJob",
       "payLow": 180,
       "payHigh": 650,
       "hoursPerWeek": 2,
@@ -121,6 +128,7 @@
       "blurb": "A pitch, an hour, and whoever walks past.",
       "ageMin": 13,
       "ageMax": 18,
+      "kind": "oddJob",
       "payLow": 90,
       "payHigh": 800,
       "hoursPerWeek": 3,
@@ -138,6 +146,7 @@
       "blurb": "Ten dollars a head, thirty for a pet.",
       "ageMin": 13,
       "ageMax": 18,
+      "kind": "oddJob",
       "payLow": 120,
       "payHigh": 700,
       "hoursPerWeek": 3,
@@ -155,8 +164,9 @@
       "blurb": "A name badge, a till, and a manager called Dave.",
       "ageMin": 16,
       "ageMax": 22,
-      "payLow": 1200,
-      "payHigh": 3800,
+      "kind": "partTime",
+      "payLow": 6000,
+      "payHigh": 10000,
       "hoursPerWeek": 12,
       "source": "weekend shifts",
       "stat": "discipline",
@@ -171,8 +181,9 @@
       "blurb": "Hot, loud, and the best people you will ever work with.",
       "ageMin": 16,
       "ageMax": 22,
-      "payLow": 1400,
-      "payHigh": 4200,
+      "kind": "partTime",
+      "payLow": 7000,
+      "payHigh": 12000,
       "hoursPerWeek": 14,
       "source": "kitchen shifts",
       "stat": "willpower",
@@ -187,6 +198,7 @@
       "blurb": "Sun, chlorine, and forty minutes of genuine responsibility.",
       "ageMin": 16,
       "ageMax": 22,
+      "kind": "partTime",
       "payLow": 1300,
       "payHigh": 3600,
       "hoursPerWeek": 12,
@@ -203,6 +215,7 @@
       "blurb": "Six weeks, twelve children, no signal.",
       "ageMin": 16,
       "ageMax": 22,
+      "kind": "partTime",
       "payLow": 900,
       "payHigh": 2600,
       "hoursPerWeek": 20,
@@ -211,6 +224,104 @@
       "lines": [
         "Did six weeks as a camp counsellor and came back ${amount} up and completely changed.",
         "Camp paid ${amount}, which worked out at about nothing an hour, and was worth it anyway."
+      ]
+    },
+    {
+      "id": "gig.adult.pet-care",
+      "name": "Pet sitting and dog walking",
+      "blurb": "Regular walks and a spare key for weekends away.",
+      "ageMin": 18,
+      "kind": "oddJob",
+      "payLow": 1500,
+      "payHigh": 6000,
+      "hoursPerWeek": 4,
+      "source": "pet sitting and dog walking",
+      "stat": "discipline",
+      "lines": [
+        "Looked after pets all year and made ${amount}. A few owners started asking for you by name.",
+        "Pet care brought in ${amount}. You knew which dogs needed the long way home."
+      ]
+    },
+    {
+      "id": "gig.adult.yard-work",
+      "name": "Yard work",
+      "blurb": "Lawns, weeds, and neighbors who would rather pay somebody.",
+      "ageMin": 18,
+      "kind": "oddJob",
+      "payLow": 2000,
+      "payHigh": 7000,
+      "hoursPerWeek": 5,
+      "source": "yard work",
+      "stat": "willpower",
+      "lines": [
+        "Kept yards tidy around the neighborhood and made ${amount} doing it.",
+        "Yard work paid ${amount}. Most of it happened on somebody else's Saturday."
+      ]
+    },
+    {
+      "id": "gig.adult.babysitting",
+      "name": "Babysitting",
+      "blurb": "Evenings with other people's children, on your own terms.",
+      "ageMin": 18,
+      "kind": "oddJob",
+      "payLow": 2500,
+      "payHigh": 9000,
+      "hoursPerWeek": 6,
+      "source": "babysitting",
+      "stat": "charisma",
+      "lines": [
+        "Babysitting brought in ${amount}. A few families kept your number handy.",
+        "Watched children for local families and made ${amount} over the year."
+      ]
+    },
+    {
+      "id": "gig.adult.tutoring",
+      "name": "Tutoring",
+      "blurb": "Explain it until it clicks, then do it again next week.",
+      "ageMin": 18,
+      "kind": "oddJob",
+      "payLow": 2500,
+      "payHigh": 10000,
+      "hoursPerWeek": 4,
+      "source": "tutoring",
+      "stat": "smarts",
+      "talent": "academics",
+      "lines": [
+        "Tutored students through the year and made ${amount}. Some of them started enjoying it.",
+        "Tutoring paid ${amount}. You learned which explanations actually worked."
+      ]
+    },
+    {
+      "id": "gig.adult.art",
+      "name": "Art commissions",
+      "blurb": "People send a reference and ask what you would charge.",
+      "ageMin": 18,
+      "kind": "oddJob",
+      "payLow": 1500,
+      "payHigh": 8000,
+      "hoursPerWeek": 4,
+      "source": "art commissions",
+      "stat": "looks",
+      "talent": "writing",
+      "lines": [
+        "Finished art commissions for people and made ${amount} over the year.",
+        "Commission work brought in ${amount}. One customer came back for another."
+      ]
+    },
+    {
+      "id": "gig.adult.repairs",
+      "name": "Small household repairs",
+      "blurb": "Shelves, loose handles, and the little things people put off.",
+      "ageMin": 18,
+      "kind": "oddJob",
+      "payLow": 3000,
+      "payHigh": 12000,
+      "hoursPerWeek": 6,
+      "source": "small household repairs",
+      "stat": "discipline",
+      "lines": [
+        "Fixed little things around people's homes and made ${amount} doing it.",
+        "Household repair work paid ${amount}. Word got around that you showed up."
       ]
     }
   ]

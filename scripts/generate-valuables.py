@@ -40,6 +40,7 @@ Usage:  python3 scripts/generate-valuables.py
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -298,6 +299,58 @@ V("mythical.excalibur", "mythical", "A sword pulled from a stone", 1_500_000, "m
   blurb="The stone came too. It's in the garage.")
 
 
+# Playtest P8: actual model equivalents, appended so existing catalog order and
+# saved IDs remain intact. No invented caliber names or movement specifications.
+# Research mapping and price calibration: claude/playtest-p8-watch-catalog.md.
+V("watch.rolux-yacht-voyager", "watch", "Rolux Yacht-Voyager", 12_300, "watch", brand="Rolux", stores=WL,
+  blurb="A sailing watch with a raised timing bezel. Equally at home on shore.")
+V("watch.rolux-perpetual", "watch", "Rolux Oyster Perpetual 36", 6_500, "sought", brand="Rolux", stores=WL,
+  blurb="A steel bracelet, a clean dial, and no date window.")
+V("watch.rolux-explorer", "watch", "Rolux Explorer 36", 7_500, "sought", brand="Rolux", stores=WL,
+  blurb="The black dial with the big three, six, and nine.")
+V("watch.seyko-alpinist", "watch", "Seyko Alpinist", 725, "watch", brand="Seyko", stores=W,
+  blurb="A green dial and a compass bezel, for the long way home.")
+V("watch.tissoe-gentleperson", "watch", "Tissoe Gentleperson", 825, "watch", brand="Tissoe", stores=W,
+  blurb="A clean steel everyday watch that fits under a shirt cuff.")
+V("watch.hamiltone-ventura", "watch", "Hamiltone Ventura Auto", 995, "watch", brand="Hamiltone", stores=W,
+  blurb="The triangular case. Hard to mistake it for anything else.")
+V("watch.grand-seyko-birch", "watch", "Grand Seyko White Birch", 9_100, "watch", brand="Grand Seyko", stores=WL,
+  blurb="A silver-white dial textured like a stand of birch trees.")
+V("watch.tudar-pelagos", "watch", "Tudar Pelagos", 5_100, "watch", brand="Tudar", stores=W,
+  blurb="A titanium diver with a bracelet that adjusts over a wetsuit.")
+V("watch.longinez-legend-diver", "watch", "Longinez Legend Diver", 3_200, "watch", brand="Longinez", stores=W,
+  blurb="Two crowns and a rotating dive bezel tucked under the crystal.")
+V("watch.orys-pointer-date", "watch", "Orys Big Crown Pointer Date", 2_200, "watch", brand="Orys", stores=W,
+  blurb="An extra hand points to the date around the edge of the dial.")
+V("watch.omegon-aquaterra", "watch", "Omegon Aquaterra", 6_800, "watch", brand="Omegon", stores=WL,
+  blurb="A steel watch that goes from the beach to the office.")
+V("watch.cartrier-ballon", "watch", "Cartrier Ballon Bleu", 6_200, "watch", brand="Cartrier", stores=WL,
+  blurb="A round case with a blue crown tucked into its side.")
+V("watch.breitlong-superocean", "watch", "Breitlong Superocean 42", 4_900, "watch", brand="Breitlong", stores=W,
+  blurb="A steel diver with bold markers and a rotating timing bezel.")
+V("watch.ap-royal-ash-offshore", "watch", "Audemar Pigot Royal Ash Offshore", 39_000, "watch", brand="Audemar Pigot", stores=ML,
+  blurb="The bigger sports chronograph, with an octagonal bezel and rubber strap.")
+V("watch.patrek-aquanote", "watch", "Patrek Phillon Aquanote", 25_000, "sought", brand="Patrek Phillon", stores=ML,
+  blurb="A rounded octagonal steel case, a patterned dial, and a composite strap.")
+V("watch.vacheran-patrimony", "watch", "Vacheran Constantine Patrimony", 25_000, "watch", brand="Vacheran Constantine", stores=ML,
+  blurb="A slim gold dress watch with a quiet dial and slender hands.")
+V("watch.langer-saxonia", "watch", "A. Langer & Sohn Saxonia Thin", 23_000, "watch", brand="A. Langer & Sohn", stores=ML,
+  blurb="A thin gold case, two hands, and nothing extra on the dial.")
+V("watch.jakob-timeless-treasure", "watch", "Jakob & Co. Billionaire Timeless Treasure", 20_000_000, "watch", brand="Jakob & Co.", stores=ML,
+  rarity="very rare", blurb="Yellow diamonds cover the case and bracelet. The price is a fortune by itself.")
+
+
+def catalog_text() -> str:
+    """Reproduce the existing catalog layout without reformatting old rows.
+
+    Only string lists (store IDs and kinds) are compact; entries/stores retain
+    one object per block. ASCII escaping preserves the original authored bytes.
+    """
+    text = json.dumps({"version": CATALOG_VERSION, "stores": STORES, "entries": ENTRIES}, indent=2)
+    return re.sub(r'\[\n((?:\s*"[^"\n]+",?\n)+)\s*\]',
+                  lambda match: json.dumps(json.loads(match.group(0))), text) + "\n"
+
+
 def main() -> None:
     ids = [e["id"] for e in ENTRIES]
     dupes = [i for i, c in Counter(ids).items() if c > 1]
@@ -308,7 +361,7 @@ def main() -> None:
         assert e["price"] > 0, e["id"]
     for s in STORES:
         assert any(s["id"] in e["stores"] for e in ENTRIES), s["id"]
-    OUT_PATH.write_text(json.dumps({"version": CATALOG_VERSION, "stores": STORES, "entries": ENTRIES}, indent=2) + "\n")
+    OUT_PATH.write_text(catalog_text())
     print(f"wrote {OUT_PATH.relative_to(ROOT)}: {len(ENTRIES)} valuables in {len(STORES)} stores")
     print("  by kind:", dict(Counter(e["kind"] for e in ENTRIES)))
 

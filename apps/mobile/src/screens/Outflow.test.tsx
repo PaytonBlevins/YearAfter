@@ -130,17 +130,19 @@ describe('A10 — linked cost sources without an expense ledger', () => {
       '$2,000',
     );
   });
-  it('shows zero honestly and keeps automatic costs explanatory', async () => {
+  it('shows zero honestly and opens the P2 lifestyle choice without exposing a ledger', async () => {
     const rows = await screen({ ...base(), finance: EMPTY_LEDGER });
     expect(rows.find((row) => row.props.title === 'Monthly average')?.props.value).toBe(
       'Nothing going out',
     );
-    for (const title of ['Living costs', 'Income tax']) {
-      const row = rows.find((candidate) => candidate.props.title === title);
-      expect(row?.props.onPress).toBeUndefined();
-      expect(row?.props.value).toBeUndefined();
-    }
-    expect(rows.filter((row) => row.props.onPress)).toHaveLength(0);
+    const living = rows.find((row) => row.props.title === 'Living costs');
+    expect(living?.props.onPress).toBeTypeOf('function');
+    await act(() => living?.props.onPress());
+    expect(push).toHaveBeenCalledWith({ screen: 'lifestyle', title: 'Lifestyle' });
+    const tax = rows.find((row) => row.props.title === 'Income tax');
+    expect(tax?.props.onPress).toBeUndefined();
+    expect(tax?.props.value).toBeUndefined();
+    expect(rows.filter((row) => row.props.onPress)).toHaveLength(1);
   });
   it.each(['Borrowing', 'Children', 'Homes', 'Vehicles', 'Businesses'] as const)(
     'opens the existing %s screen without category amounts',
