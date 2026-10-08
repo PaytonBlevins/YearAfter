@@ -3104,3 +3104,25 @@ A living-cost comparison should capture the bill before shortfall clamping, with
 and verify the real annual caller. A parenting-effect check should compare the same parent's
 state with and without that contribution, not changes across different parent/nonparent groups.
 Keep the original effect floors and sabotage the mechanism after repairing the measurement.
+
+### 13.148 Settle chosen work across every annual stage
+
+A shared model can still lose pay in an early return: P6 found graduation and college omitted
+held gigs, while graduated adults omitted their hours. Use one settlement producer and test
+every stage, including the transition year, with affordable branch fixtures. Preserve the
+paid year's hours before removing aged-out work. Validate saved ids and deduplicate payouts;
+no save-field change is needed to repair settlement of existing ids.
+
+### 13.149 Follow an income producer through its readers
+
+Posting a correct paycheck is not enough. P6 gig income reconciled yet was absent from taxes,
+living inputs, later income tax bases and earned-income readers. Test the actual annual caller,
+gross versus net, ordinary wages versus freelance premiums and the existing child treatment.
+Sabotage each reader independently; a literal helper test cannot prove its integration.
+
+### 13.150 Overcommitment belongs to the workload model
+
+The canonical policy lets players overcommit and experience consequences. A two-gig menu cap
+contradicted it; Payton explicitly approved replacing that cap test. Measure the whole-year
+consequences with real hours rather than assuming unlimited choices create free capacity.
+Separate older working lives from purely retired lives before attributing their stress.

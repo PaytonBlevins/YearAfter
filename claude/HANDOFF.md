@@ -36,7 +36,7 @@ P1 v44; keep both migrations. The choice saves immediately, bills on annual adva
 farm happiness by switching. Estimates and child-cost copy read the selected lifestyle. TICKET
 remains 0708. Measurement, verification and open issues: `playtest-p2-living-costs.md`.
 P2 PR: https://github.com/PaytonBlevins/YearAfter/pull/14 (targets main, depends on P1 PR #13).
-P3 was subsequently authorized by Payton; see its measurement update below. If P1 merges first, rebase P2 onto main and
+P3 was subsequently authorized by Payton; see its implementation update below. If P1 merges first, rebase P2 onto main and
 drop already-merged P1 commits; do not squash away the separately reserved save versions.
 
 **P3 implementation update:** Payton approved the measured proposal on 7 October. Agent B built
@@ -79,17 +79,20 @@ P5's files pass. Details: `playtest-p5-career-listings.md`.
 PR #17: https://github.com/PaytonBlevins/YearAfter/pull/17 (targets main, depends on P1 #13,
 P2 #14, P3 #15 and P4 #16). Implementation CI run 100 confirms the same 22-note format
 failure and skips later gates.
-P6 was subsequently authorized; see its measurement update below.
+P6 was subsequently authorized; see its implementation update below.
 
-**P6 measurement update:** Payton authorized P6 on 7 October Pacific (8 October UTC). Agent B
-claimed `feat/playtest-p6-school-work`, stacked on P5 #17 while main remains `beff25a`. Existing
-gigs are always available within their ages, but all expire by 22; zero of 10,212 observed
-age-23–64 life-years had an available row. Four shift gigs already start at 16. Graduation
-skips gig pay, college/trade branches skip both pay and hours, and adults' gig hours do not
-reach stress. The paired teen baseline shows the existing workload model penalizes stacked
-shifts. Proposed adult catalog/pay, teen shift pay, cap correction and screen sections await
-Payton's approval in `playtest-p6-school-work.md`; no production changes yet. Save v45 / TICKET
-0708 unchanged; P7 waits.
+**P6 implementation update:** Payton approved the measured proposal on 8 October UTC
+(7 October Pacific). Agent B built six deliberate adult odd jobs from 18 without an upper age
+cutoff and clearly separated the four school shifts on `feat/playtest-p6-school-work`, stacked
+on P5 #17 while main remains `beff25a`. Retail/kitchen annual ranges are $6,000–$10,000 and
+$7,000–$12,000. The approved cap correction uses existing hidden workload. Every school stage
+pays once, including graduation and college; paid hours survive age-out and reach stress.
+Existing tax curves, living costs and subsequent income bases count adult work. No save bump:
+v45 and TICKET 0708 stay. All 15 typechecks and 2,713 tests pass; full verify hits the nine baseline
+catalog mismatches, full format the same 22 old notes. Paired retail median graduation cash is
+$18,369 (previously $9,926); all-six adult work has median stress 100, not free capacity.
+Details, measurements, sabotage and PR/CI results: `playtest-p6-school-work.md`.
+Native checks and Project mirroring remain open. P7 has not started.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

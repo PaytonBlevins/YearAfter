@@ -113,6 +113,18 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   reach to fill the quota. Hiring odds and first-job offer chance stay. The current/last major
   and all held licenses supply matching information; no degree-subject history is promised.
   See `playtest-p5-career-listings.md`.
+- **P6 adult and school work proposal approved by Payton (8 October UTC):** six deliberate
+  freelance choices from 18 without an upper-age cutoff: pet care 4 h/$1,500–$6,000; yard work
+  5 h/$2,000–$7,000; babysitting 6 h/$2,500–$9,000; tutoring 4 h/$2,500–$10,000; art commissions
+  4 h/$1,500–$8,000; repairs 6 h/$3,000–$12,000. Amounts are annual gross; keep existing
+  ability scaling and talent premium. Retail is $6,000–$10,000, kitchen $7,000–$12,000; their
+  hours and age gates stay. Other child/seasonal pay stays. Remove the two-gig cap and supersede
+  its assertion under CORE_RULES 13.5; existing hidden workload owns overload. Every education
+  stage settles work once with paid hours; college uses existing overload performance penalties.
+  Adult shift wages use the existing ordinary income curve; freelance uses the existing
+  self-employment premium, feeding living and subsequent income bases. Under-18 tax treatment
+  stays. Career shows Part-time & Odd Jobs from 16, with shift/odd-job/held-work sections and
+  take/quit. No save bump. See `playtest-p6-school-work.md`.
 - **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
   account creation for channels.
 

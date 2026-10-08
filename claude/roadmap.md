@@ -1526,7 +1526,7 @@ Thirty mutation trials caught all 29 behavioral defects after two gap repairs; o
 survivor is explained. P5 files pass formatting; 22 old notes still block the full format gate.
 PR #17: https://github.com/PaytonBlevins/YearAfter/pull/17 (depends on #13–#16).
 Implementation CI run 100 confirms the same 22 historical formatting failures, skipping later gates.
-Review, Project mirroring and native-device checks remain. P6 has not started.
+Review, Project mirroring and native-device checks remain. P6 was subsequently authorized; see below.
 
 ### Found by P5
 
@@ -1544,31 +1544,37 @@ Review, Project mirroring and native-device checks remain. P6 has not started.
   that existing information plus all held licenses. It cannot promise every old subject after
   another enrolment overwrites `majorId` without a separate save/history design.
 
-### Playtest P6 — measured, proposal awaits approval (8 October 2026 UTC)
+### Playtest P6 — approved adult and school work built (8 October 2026 UTC)
 
-Payton authorized P6; claim published on `feat/playtest-p6-school-work`, following P5 #17
-while main remains `beff25a`. Existing adult gigs have no random offer probability: every
-eligible row is available, but the entire catalog ends at 22. Across 250 passive lives,
-there is work in all 1,240 age-18–22 years and none in 10,212 age-23–64 or 4,258 older years.
-Four shift jobs already start at 16. Paired retail/kitchen work at 17 makes median stress
-11 → 49 and performance 85 → 78, showing existing workload consequences work.
+Claim published separately on `feat/playtest-p6-school-work`, following P5 #17 while main
+remains `beff25a`. Six manual adult gigs now remain available from 18 with no upper-age cutoff;
+all 10,212 observed age-23–64 and 4,258 older years have six choices. Four existing school
+shifts are explicitly discoverable. Approved retail/kitchen pay is $6,000–$10,000 and
+$7,000–$12,000; fixed two-job cap removed under canonical hidden-workload policy.
+Graduation/college/adult payout and hours gaps are repaired; adult work enters existing tax,
+living and subsequent income stacks. No new stress/grade coefficient or save shape.
 
-Proposal: six manual adult gigs from 18 without an upper-age cutoff; reuse and clearly label
-the existing school shifts, adjust regular-shift pay, remove the fixed cap under canonical
-hidden-capacity policy, and repair stage settlement/income wiring. Exact proposed values,
-method and acceptance are in `playtest-p6-school-work.md`; approval precedes implementation.
-No production/catalog changes, no save bump (v45), no TICKET change (0708). P7 has not started.
+Paired retail median graduation cash $9,926→$18,369; one shift barely changes median grades,
+two retain stress 49/performance 78 at 17. All-six adult work at 30 has median five-year gross
+$215,949, final stress 100 and happiness 21; workload consequences remain real. All 15
+typechecks and 2,713 tests pass; full verify has nine baseline catalog mismatches and full
+format has 22 old-note failures. Method, sabotage, acceptance and publication:
+`playtest-p6-school-work.md`. Save v45 and TICKET 0708 unchanged. P7 waits.
 
 ### Found by P6
 
-- **B8 describes a hard age cutoff.** Fix appropriate adult availability; do not invent a
-  probability dial for a manual menu.
-- **B9 already has four shift ids from 16.** Give them clear part-time discovery rather than
-  duplicating employment, with the existing age/parental gates preserved.
-- **Held work does not settle in every stage.** Graduation pays zero; college, vocational and
-  postgrad retain ids but pay zero and omit hours. Graduated adults pay but report zero gig
-  hours. Repair these paths before adding adult rows, or those rows buy free capacity.
-- **Adult gig income is omitted from tax/living inputs.** Proposed integration uses existing
-  curves and real net income, never a second ledger producer.
-- **The two-gig cap conflicts with CORE_RULES 13.5.** Proposed explicit removal and superseding
-  canonical-rule test await Payton; no old test has been weakened or deleted.
+- **B8 was a catalog cutoff, not low odds.** All old gigs ended by 22; adult choices are a manual
+  menu, not a random offer roll. Six appropriate rows fix availability without RNG enrollment.
+- **B9 already had four shift ids from 16.** Reuse them with clear discovery and their real gates.
+- **Early returns skipped work.** Graduation and college missed pay, adults missed hours. A single
+  annual producer now covers all stages and preserves the paid year's hours before age-out.
+- **Income readers missed gig earnings.** Tax/living, subsequent income bases and loan/dashboard
+  readers now include the real ledger producer, without double posting.
+- **The two-gig cap contradicted CORE_RULES 13.5.** Payton approved removal and explicit replacement
+  of its old assertion; workload, not a menu quota, owns overload.
+- **Stacked gigs can outgross lower-paid careers but carry costs.** All six at 30 pushes median
+  stress to 100. Older working lives have substantial baseline stress; this is not a measurement
+  of purely retired people. Approved pay and existing capacity stay; retirement spending is P15.
+- **Brief reference 0208 is stale.** School workload belongs to 0204/0205 and lesson 0408 / 13.66;
+  0208 names Children. No parenting work is included.
+- Review, native-device checks and Claude Project mirroring remain open.

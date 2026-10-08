@@ -177,6 +177,7 @@ export function summariseFinances(
   const earned =
     Number(totalFor(ledger, 'salary', year)) +
     Number(totalFor(ledger, 'commission', year)) +
+    Number(totalFor(ledger, 'oddJob', year)) +
     // Ticket 0601: what a business paid its owner is earned, and so is the tax on it.
     Number(totalFor(ledger, 'business', year)) +
     // Ticket 0701: what a channel earned, net of its upkeep, is earned and taxed.

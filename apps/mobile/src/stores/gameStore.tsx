@@ -10,6 +10,7 @@
  * waits on a write — but failures surface in `saveError` rather than vanishing.
  */
 
+import { GIG_UNAVAILABLE_LABELS } from '@yearafter/education';
 import {
   createContext,
   useCallback,
@@ -1620,7 +1621,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       mutateEducation((current) => {
         const result = takeGig(current, gigId);
         if (!result.ok) {
-          setSaveError(`Cannot take that on (${result.error}).`);
+          setSaveError(
+            result.error === 'no-such-gig'
+              ? "That work isn't available."
+              : GIG_UNAVAILABLE_LABELS[result.error],
+          );
           return current;
         }
         return result.value;

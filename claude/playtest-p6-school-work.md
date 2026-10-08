@@ -1,8 +1,8 @@
 # Playtest P6 — adult odd jobs and high-school part-time work
 
-**Status:** claimed and measured 8 October 2026 UTC (7 October Pacific). Payton authorized
-starting P6. Gameplay values and the screen proposal below await his approval; production
-code remains unchanged. P7 has not started.
+**Status:** built after Payton approved the measured proposal on 8 October 2026 UTC
+(7 October Pacific). Branch `feat/playtest-p6-school-work`, stacked on P5 #17 and P1–P4
+#13–#16; main remains `beff25a`. P7 has not started.
 
 ## Ticket P6 — adult odd jobs and high-school part-time work
 
@@ -17,11 +17,11 @@ component tests; persistence replay tests; this doc, CLAIMS, HANDOFF, roadmap, a
 when approved, and relevant CORE_RULES lessons.
 **Protected areas touched:** gig availability/pay and annual settlement; hidden capacity and
 school-performance wiring; removing the existing two-gig cap conflicts with its old test but
-follows canonical CORE_RULES 13.5. That rule/test change is proposed explicitly below, not
-silently implemented. Tax uses existing curves rather than introducing a new tax model.
-**Save:** existing held gig ids already save in `education.gigs`. The proposed catalog metadata
+follows canonical CORE_RULES 13.5. Payton explicitly approved superseding the old cap test with the canonical hidden-workload
+contract below; every other old test remains. Tax uses existing curves rather than introducing a new tax model.
+**Save:** existing held gig ids already save in `education.gigs`. The catalog metadata
 and derived screen sections need no new saved field. Save v45 and TICKET 0708 stay; no new save
-version is reserved. If implementation reveals a new saved shape is needed, revisit the design.
+version is reserved. Round-trip and malformed-held-id tests confirm that the existing shape suffices.
 
 ### Requirement
 
@@ -31,20 +31,20 @@ paid during the annual advance with a named ledger source and amount, and contri
 existing hidden workload and school consequences. No weekly turn, visible capacity budget or
 new stat. Fix the existing graduation/college/adult wiring gaps as part of making work usable.
 
-### Acceptance, after approval
+### Acceptance
 
-- [ ] Adult work remains available after 22 and into retirement; no automatic enrollment.
-- [ ] Age-appropriate school shifts are clearly discoverable from Career.
-- [ ] Held work pays exactly once during ordinary school, graduation, college/trade school and adulthood.
-- [ ] Hours reach stress in all stages; school consequences are observable without double-counting hours.
-- [ ] Taxes/net income and living-cost inputs use the real ledger producers; reconciliation holds.
-- [ ] Direct command gates, taking/quitting, component flows, save/load and seeded replay tests.
-- [ ] Re-measure grades/stress/earnings, including stacked work and older adults.
-- [ ] At least fifteen independent sabotage mutations, tar backups and restored MD5 hashes.
-- [ ] Changed-file formatting and full `pnpm verify`; report baseline blockers and actual CI.
-- [ ] PR into main; Payton merges; stop before P7.
+- [x] Adult work remains available after 22 and into retirement; no automatic enrollment.
+- [x] Age-appropriate school shifts are clearly discoverable from Career.
+- [x] Held work pays exactly once during ordinary school, graduation, college/trade school and adulthood.
+- [x] Hours reach stress in all stages; school consequences are observable without double-counting hours.
+- [x] Taxes/net income and living-cost inputs use the real ledger producers; reconciliation holds.
+- [x] Direct command gates, taking/quitting, component flows, save/load and seeded replay tests.
+- [x] Re-measure grades/stress/earnings, including stacked work and older adults.
+- [x] At least fifteen independent sabotage mutations, tar backups and restored MD5 hashes.
+- [x] Changed-file formatting and full `pnpm verify`; report baseline blockers and actual CI.
+- [x] PR into main; Payton merges; stop before P7.
 
-## What the current code actually does
+## What the pre-P6 code actually did
 
 `gigOffers` is a manual catalog menu, not a random offer roll or a systemic event. Every
 eligible gig is shown whenever the player opens it. Career exposes Odd Jobs at every age.
@@ -135,7 +135,7 @@ final P6 effects. No fixture cash or credential construction is a production cha
    variation lesson is 0408 / CORE_RULES 13.66. P6 follows those actual owners; no parenting
    change is proposed.
 
-## Concrete proposal for Payton
+## Approved proposal (preserved for review)
 
 ### Adult choices and income
 
@@ -187,15 +187,148 @@ and plain refusal reasons; held work is visibly confirmed immediately and saves 
 existing store. No visible capacity budget, scheduler or automatic job selection. Change the
 footer so adults are not told they are only working before a real job.
 
-## Verification and next step
+## Built behavior and final measurement
 
-Only inspection and measurement are complete. Initial harness attempts used the serializer's
-wrong call shape; those failed runs were discarded before the complete measurement above.
-No implementation tests, sabotage or full verification are claimed for P6. No production source
-or catalog was edited to obtain these results. Native-device checks and Claude Project mirroring
-remain unavailable; `project_write` is not exposed.
+Six manual adult options have no upper-age cutoff. Four shifts are separately labeled; taking
+and quitting work remain deliberate commands. The screen shows annual gross before tax and
+weekly hours. Existing age and parental gates remain. Regular work and freelance work share
+one annual payout producer in every education stage; the paid year's hours survive age-out.
+College uses its existing performance drift and overload penalty. Salary plus shift wages
+enter the existing ordinary tax curve; freelance follows with the existing self-employment
+premium. Subsequent business, creator and deal income sees that tax base. Living costs,
+loan underwriting and the finance summary count the real work income. Under-18 tax treatment
+stays. No scheduler, RNG enrollment, new workload coefficient or save migration.
 
-Claim published first on `feat/playtest-p6-school-work`, stacked on P5 #17 (and P1–P4 #13–#16).
-Fetched real main still points at `beff25a`; no claim that those PRs merged. Save v45 and TICKET
-0708 stay. Payton's brief requires approval for new game values/screen shape, so the proposal
-above awaits approval before implementation. P7 has not started.
+The following repeats the baseline's 250 seeds, save-cloned paired teen states and first-choice
+policy. Each measured annual advance reconciles. With no manually selected work, all 10,212
+observed age-23–64 years and all 4,258 older years now show exactly six available adult choices.
+All 1,240 age-18–22 years retain work, averaging eleven choices with the legacy options included.
+Menu availability is not a random offer rate or automatic enrollment rate.
+
+### School shifts (238 paired lives)
+
+All values are p10 / median / p90. Capacity and the Smarts-at-18 distribution remain unchanged:
+capacity 21.12 / 23.44 / 25.82 hours/week; Smarts 52 / 83 / 91.
+
+| Work    | Pay at 17                   | Pay at graduation (18)      | Performance at 17 | Stress at 17 | Cash at 18                  |
+| ------- | --------------------------- | --------------------------- | ----------------- | ------------ | --------------------------- |
+| None    | $0 / $0 / $0                | $0 / $0 / $0                | 51 / 85 / 99      | 3 / 11 / 28  | $0 / $6,927 / $38,845       |
+| Retail  | $7,600 / $8,867 / $9,800    | $7,667 / $8,867 / $9,867    | 51 / 84 / 98      | 7 / 22 / 51  | $7,428 / $18,369 / $50,148  |
+| Kitchen | $9,500 / $10,917 / $11,917  | $9,500 / $11,000 / $12,000  | 50 / 84 / 98      | 9 / 26 / 56  | $11,239 / $21,412 / $53,367 |
+| Both    | $18,034 / $19,700 / $21,000 | $18,217 / $19,766 / $21,000 | 44 / 78 / 92      | 30 / 49 / 82 | $25,860 / $33,918 / $64,428 |
+
+Graduation previously paid zero. Retail's median cash at 18 rises from $9,926 to $18,369;
+kitchen $10,680 to $21,412; both $13,394 to $33,918. This combines the approved higher pay and
+repairing the graduation gap. Hours at 17 are unchanged: none 3 / 7 / 12, retail 15 / 19 / 24,
+kitchen 17 / 21 / 26, both 29 / 33 / 38. One shift barely changes median grades; two retain the
+existing meaningful school/stress consequence. The college integration tests use affordable
+real program ids and prove pay, degree-plus-work hours and the existing performance penalty.
+
+### Adult work alongside the played life
+
+Clone the same living snapshots at 30 or 65, retain their real jobs/families/activities, choose
+none, repairs, repairs plus pet care, or all six gigs, then play five years with the same first
+choices. This is a side-work comparison, not a population of unemployed or purely retired
+adults. Gross is five-year cumulative pay; stress/happiness/cash are final-state quantiles.
+
+| Age 30→35 (247 lives) | Five-year gross, p10 / median / p90 | Final stress   | Final happiness | Final cash                   | Years at stress ≥30 |
+| --------------------- | ----------------------------------- | -------------- | --------------- | ---------------------------- | ------------------- |
+| None                  | $0 / $0 / $0                        | 4 / 16 / 56    | 45 / 70 / 83    | $3,926 / $36,420 / $194,297  | 30.53%              |
+| Repairs               | $33,450 / $50,550 / $57,000         | 9 / 32 / 81    | 33 / 67 / 81    | $5,500 / $46,938 / $206,373  | 49.64%              |
+| Repairs + pet care    | $50,175 / $76,050 / $85,500         | 21 / 50 / 98   | 23 / 59 / 78    | $8,641 / $52,700 / $205,013  | 71.50%              |
+| All six               | $184,208 / $215,949 / $236,309      | 97 / 100 / 100 | 12 / 21 / 36    | $21,149 / $90,485 / $207,887 | 99.84%              |
+
+All four scenarios have 1,235 person-years and no deaths. Across the entire cohort side-work
+taxes total $0, $4,007,651, $6,081,722 and $19,491,378 respectively. These totals are not per-life.
+
+| Age 65→70 (224 lives) | Five-year gross, p10 / median / p90 | Final stress    | Final happiness | Final cash                    | Years at stress ≥30 |
+| --------------------- | ----------------------------------- | --------------- | --------------- | ----------------------------- | ------------------- |
+| None                  | $0 / $0 / $0                        | 23 / 61 / 100   | 25 / 61 / 79    | $3,701 / $58,760 / $478,769   | 73.30%              |
+| Repairs               | $27,750 / $47,700 / $57,750         | 60 / 100 / 100  | 19 / 34 / 62    | $4,022 / $74,168 / $500,766   | 94.73%              |
+| Repairs + pet care    | $41,625 / $71,550 / $86,625         | 86 / 100 / 100  | 15 / 28 / 50    | $10,341 / $82,528 / $511,407  | 98.00%              |
+| All six               | $178,467 / $205,600 / $230,174      | 100 / 100 / 100 | 12 / 20 / 28    | $25,123 / $132,547 / $578,066 | 100.00%             |
+
+None has 1,101 person-years and 18 deaths; each working variant 1,100 and 19 deaths. Cohort
+side-work taxes are $0, $3,721,987, $5,637,254 and $17,957,384. Do not infer causal mortality
+from a one-person difference. Existing age-related capacity and retained regular work explain
+why added work is especially costly here; P6 does not recalibrate retirement spending (P15).
+
+**Judgment and remaining findings:** the approved six jobs can outgross some low-paid careers
+when stacked, but the real hidden workload makes doing all six costly rather than free income.
+At 30, median stress rises 16→100 and happiness 70→21. Adult gig hours previously never reached
+stress, so this is a wiring repair using existing coefficients. Older working lives already
+have substantial stress without added gigs. Keep those findings visible; do not silently retune
+approved pay, workload or retirement parameters. P7 is untouched.
+
+## Tests and sabotage
+
+43 new tests: education 16, simulation 13, mobile 11, persistence 2, finance 1. They cover real
+commands, underage/unknown/duplicate gates, taking a third job, quitting, every school stage,
+final-year pay/hours, school and college overload, adult stress, real annual tax/living inputs,
+subsequent income bases, source/amount text, ledger reconciliation, finance/loan readers,
+full screen menus and actions, v45 round-trip, malformed ids and seeded continuation.
+
+Only the old two-not-three cap assertion was superseded, as explicitly approved. It now proves
+canonical third-job selection; all other legacy tests remain. The original idle-graduate
+identity assertion was preserved by avoiding unnecessary state allocation. New screen fixtures
+use the existing uppercase heading renderer; tax-base spies target the actual owning module.
+
+All 32 independent behavioral mutations were caught after adding the missing held-work case; **none missed**. Each trial starts from
+the same tar-backed source bytes; all ten source MD5 hashes were asserted restored. Compiler or
+import failures do not count. Two detections use explicit test-helper runtime errors (third job
+refused and missing Career row), not a matcher assertion. One meaningful screen case was added after the extra held-subset mutation survived. Native-device checks and Claude Project
+mirroring remain unavailable: no emulator/device or `project_write` capability is exposed.
+
+## Verification and publication
+
+All fifteen packages typecheck; the full suite passes 2,713 tests. `pnpm verify` reaches content
+validation and fails nine existing generated-catalog comparisons: activities, advice, auctions,
+businesses, events-childhood, homes, renovations, valuables and vehicles. No catalog is rewritten
+to hide that environment/baseline issue. Restore the validator's incidental vehicle-mods rewrite.
+Changed files pass Prettier; full formatting still reports the same 22 historical notes.
+Save v45 and both earlier migrations remain; TICKET stays 0708 in both owners.
+
+Publication/actual CI results follow below. Payton merges the stacked PRs. P7 waits for go-ahead.
+
+### Sabotage-verification report
+
+| #   | Independent mutation                   | Result                                |
+| --- | -------------------------------------- | ------------------------------------- |
+| 1   | adult work ages out at 22              | Caught                                |
+| 2   | drop direct minimum age                | Caught                                |
+| 3   | restore a two-job menu cap             | Caught                                |
+| 4   | allow duplicate take                   | Caught                                |
+| 5   | skip work in early-return years        | Caught                                |
+| 6   | college drops paid work                | Caught                                |
+| 7   | adult work hours are zero              | Caught                                |
+| 8   | college omits work hours               | Caught                                |
+| 9   | college ignores overload penalty       | Caught                                |
+| 10  | drop the last year payout              | Caught                                |
+| 11  | tax child earnings                     | Caught                                |
+| 12  | shifts pay no incremental tax          | Caught                                |
+| 13  | freelance pays no tax                  | Caught                                |
+| 14  | ignore wages in the side tax stack     | Caught                                |
+| 15  | living misses net side income          | Caught                                |
+| 16  | living misses gross side income        | Caught                                |
+| 17  | business tax base misses work          | Caught                                |
+| 18  | creator tax base misses work           | Caught                                |
+| 19  | deal tax base misses work              | Caught                                |
+| 20  | do not post the side tax               | Caught                                |
+| 21  | underwriting misses work income        | Caught                                |
+| 22  | dashboard tax denominator misses work  | Caught                                |
+| 23  | duplicate ids pay twice                | Caught                                |
+| 24  | work ledger pays a negative amount     | Caught                                |
+| 25  | shift wages classified as freelance    | Caught                                |
+| 26  | screen truncates available work        | Caught                                |
+| 27  | screen takes wrong id                  | Caught                                |
+| 28  | quit retakes the job                   | Caught                                |
+| 29  | screen hides part-time section         | Caught                                |
+| 30  | Career hides the part-time entry label | Caught                                |
+| 31  | child parental gate removed            | Caught                                |
+| 32  | Screen truncates held work             | Caught after adding all-six-held case |
+
+An additional held-subset truncation mutation initially survived: the screen tests exercised
+all six available options, but not all six held together. Added a case that holds all six,
+requires every row to be a Quit action and verifies each real id. The same mutation is now
+caught. The available-menu truncation remains a separate mutation, using a type-valid slice.
+Final result: all 32 caught, none missed; one initial test gap repaired without weakening tests.

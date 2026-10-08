@@ -36,6 +36,7 @@ import { asEventId, clampStat, dollars } from '@yearafter/core';
 import { nudgeStats } from '@yearafter/character';
 import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
+import { gigIncome } from './gig-income';
 import { occupationFor, runEducation } from './phases/education';
 import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
@@ -387,7 +388,14 @@ export function advanceYear(state: GameState): AdvanceResult {
     holdsJob: employment.employment.job !== undefined,
     stat: (type) => averageStat(worked.stats as unknown as Record<string, number>, type),
   });
-  const businessTax = businessTaxOn(employment.earned, businessesYear.drawn);
+  const sideWork = gigIncome(
+    nextAge,
+    employment.earned,
+    education.shiftGross,
+    education.freelanceGross,
+  );
+  const earnedIncome = employment.earned + sideWork.taxableGross;
+  const businessTax = businessTaxOn(earnedIncome, businessesYear.drawn);
   /*
     Ticket 0701 — a year of every channel. After the business draw because the
     tax on what a channel paid depends on everything earned before it, and
@@ -405,13 +413,13 @@ export function advanceYear(state: GameState): AdvanceResult {
     generation: state.world.generation,
     work: workToSettle(state),
   });
-  const creatorTax = businessTaxOn(employment.earned + businessesYear.drawn, creatorsYear.net);
+  const creatorTax = businessTaxOn(earnedIncome + businessesYear.drawn, creatorsYear.net);
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
   const dealsYear = runDealsYear({
     deals: state.deals,
     year: nextYear,
     market,
-    otherIncome: employment.earned + businessesYear.drawn + creatorsYear.net,
+    otherIncome: earnedIncome + businessesYear.drawn + creatorsYear.net,
   });
   const businessNet = businessesYear.drawn - businessTax;
 
@@ -445,7 +453,11 @@ export function advanceYear(state: GameState): AdvanceResult {
     // case this whole phase exists to make cost something. Ticket 0502: and
     // what the partner's did, because a household lives on both.
     afterTaxIncome:
-      employment.takeHome + partnered.net + businessNet + (creatorsYear.net - creatorTax),
+      employment.takeHome +
+      sideWork.net +
+      partnered.net +
+      businessNet +
+      (creatorsYear.net - creatorTax),
     wealth: Math.floor(Number(state.player.cash) / 100),
     /*
       Ticket 0308b. What the cards would actually lend, which is part of what a
@@ -456,7 +468,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0308b. What they hold in the market — see `portfolio` on the
     // input. Being illiquid is not the same as being destitute.
     portfolio: Math.floor(Number(portfolioWorth(state.prices, state.portfolio)) / 100),
-    earned: employment.earned,
+    earned: earnedIncome,
     ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
       ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }
       : {}),
@@ -655,6 +667,15 @@ export function advanceYear(state: GameState): AdvanceResult {
   */
   const reported = [
     ...education.transactions,
+    ...(sideWork.tax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-sideWork.tax),
+            source: 'Tax on part-time and odd-job income',
+          },
+        ]
+      : []),
     ...family.transactions,
     ...employment.transactions,
     // Ticket 0502. A partner's pay and the tax on it.

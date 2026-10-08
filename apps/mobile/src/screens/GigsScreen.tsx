@@ -1,26 +1,8 @@
-/**
- * Ticket 0206b — odd jobs.
- *
- * Review: "I also want to be able to perform freelance jobs at appropriate
- * ages." The age gate is the whole point: a lemonade stand at eight, a paper
- * round at twelve, a kitchen at sixteen. Rows you are too young for are SHOWN,
- * with the reason, because "not at your age" is a fact about a childhood and
- * hiding it would leave the screen looking empty for no visible cause.
- *
- * This is not employment. Ticket 0210 builds real jobs; these are the things a
- * child can actually do, and the money they pay is the first money in this game
- * that is genuinely the player's.
- */
+/** P6: deliberate school shifts and adult side work, with annual pay and weekly hours. */
 
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import {
-  GIG_UNAVAILABLE_LABELS,
-  MAX_GIGS,
-  gigOffers,
-  gigPay,
-  type GigOffer,
-} from '@yearafter/education';
+import { GIG_UNAVAILABLE_LABELS, gigOffers, gigPay, type GigOffer } from '@yearafter/education';
 import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
 import { colors, spacing, typography } from '../theme/theme';
@@ -44,7 +26,7 @@ export function GigsScreen() {
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <EmptyState
           title="Nothing you can do for money yet"
-          body="Give it a few years. Somebody will always need their dog walking."
+          body="Give it a few years. Somebody will need a hand."
         />
       </ScrollView>
     );
@@ -58,7 +40,7 @@ export function GigsScreen() {
     >
       {held.length > 0 ? (
         <>
-          <SectionHeading note={`${held.length} of ${MAX_GIGS}`}>You are doing</SectionHeading>
+          <SectionHeading note={`${held.length} on the go`}>Work you're doing</SectionHeading>
           <Card>
             {held.map((offer, index) => (
               <Fragment key={offer.gig.id}>
@@ -78,23 +60,27 @@ export function GigsScreen() {
         </>
       ) : null}
 
-      {open.length > 0 ? (
-        <>
-          <SectionHeading>Going</SectionHeading>
-          <Card>
-            {open.map((offer, index) => (
-              <Fragment key={offer.gig.id}>
-                {index > 0 ? <RowDivider /> : null}
-                <GigRow
-                  offer={offer}
-                  expected={gigPay(offer.gig, player.stats, player.talents)}
-                  onPress={() => takeAGig(offer.gig.id)}
-                />
-              </Fragment>
-            ))}
-          </Card>
-        </>
-      ) : null}
+      {(['partTime', 'oddJob'] as const).map((kind) => {
+        const rows = open.filter((offer) => (offer.gig.kind ?? 'oddJob') === kind);
+        if (rows.length === 0) return null;
+        return (
+          <Fragment key={kind}>
+            <SectionHeading>{kind === 'partTime' ? 'Part-time shifts' : 'Odd jobs'}</SectionHeading>
+            <Card>
+              {rows.map((offer, index) => (
+                <Fragment key={offer.gig.id}>
+                  {index > 0 ? <RowDivider /> : null}
+                  <GigRow
+                    offer={offer}
+                    expected={gigPay(offer.gig, player.stats, player.talents)}
+                    onPress={() => takeAGig(offer.gig.id)}
+                  />
+                </Fragment>
+              ))}
+            </Card>
+          </Fragment>
+        );
+      })}
 
       {closed.length > 0 ? (
         <>
@@ -112,8 +98,8 @@ export function GigsScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.noteText}>
-          These are the things you can do for money before a real job — a salary, a boss, somewhere
-          to be promoted to — is on the table.
+          Choose work that fits your life. It pays when you advance a year, alongside any regular
+          job. Taking on too much can make school and the rest of the year harder.
         </Text>
       </View>
     </ScrollView>
@@ -142,7 +128,7 @@ function GigRow({
       meta={
         unavailable
           ? `${gig.ageMin}+`
-          : `${gig.hoursPerWeek} h/wk · about $${(expected ?? gig.payLow).toLocaleString('en-US')}/yr`
+          : `${gig.hoursPerWeek} h/wk · about $${(expected ?? gig.payLow).toLocaleString('en-US')}/yr before tax`
       }
       affordance={unavailable ? 'none' : 'action'}
       disabled={Boolean(unavailable)}

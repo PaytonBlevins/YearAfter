@@ -25,7 +25,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT_PATH = ROOT / "packages/content/data/gigs.json"
 
-CATALOG_VERSION = 1
+CATALOG_VERSION = 2
 
 GIGS: list[dict] = []
 
@@ -35,7 +35,7 @@ def G(
     name: str,
     blurb: str,
     age_min: int,
-    age_max: int,
+    age_max: int | None,
     pay_low: int,
     pay_high: int,
     hours: float,
@@ -44,9 +44,10 @@ def G(
     stat: str = "discipline",
     talent: str | None = None,
     needs_parent: bool = False,
+    kind: str = "oddJob",
 ) -> None:
     """
-    One thing a child can do for money.
+    One deliberate work option, with age gates and an annual payout.
 
     `source` is the phrase the feed uses, and `pay_low`/`pay_high` are what a
     year of it is worth — not one afternoon, because the game's unit of time is
@@ -58,7 +59,8 @@ def G(
             "name": name,
             "blurb": blurb,
             "ageMin": age_min,
-            "ageMax": age_max,
+            **({"ageMax": age_max} if age_max is not None else {}),
+            "kind": kind,
             "payLow": pay_low,
             "payHigh": pay_high,
             "hoursPerWeek": hours,
@@ -129,27 +131,54 @@ G("gig.commissions", "Drawing things for people", "Ten dollars a head, thirty fo
 
 # --- sixteen and up -----------------------------------------------------------
 G("gig.retail", "Weekend shifts in a shop", "A name badge, a till, and a manager called Dave.",
-  16, 22, 1200, 3800, 12, "weekend shifts",
+  16, 22, 6000, 10000, 12, "weekend shifts",
   ["Worked weekends in a shop all year and made ${amount}. It was mostly fine.",
-   "The weekend job paid ${amount} and took every Saturday you had."])
+   "The weekend job paid ${amount} and took every Saturday you had."], kind="partTime")
 
 G("gig.food", "Kitchen shifts", "Hot, loud, and the best people you will ever work with.",
-  16, 22, 1400, 4200, 14, "kitchen shifts",
+  16, 22, 7000, 12000, 14, "kitchen shifts",
   ["Worked in a kitchen most nights and made ${amount}. You have never been so tired.",
    "The kitchen paid ${amount} and taught you to work faster than you thought you could."],
-  stat="willpower")
+  stat="willpower", kind="partTime")
 
 G("gig.lifeguard", "Lifeguarding", "Sun, chlorine, and forty minutes of genuine responsibility.",
   16, 22, 1300, 3600, 12, "lifeguarding",
   ["Lifeguarded all summer and made ${amount} watching people not drown.",
    "Lifeguarding paid ${amount} and cost you an entire summer of being anywhere else."],
-  stat="health")
+  stat="health", kind="partTime")
 
 G("gig.camp", "Camp counsellor", "Six weeks, twelve children, no signal.",
   16, 22, 900, 2600, 20, "the camp job",
   ["Did six weeks as a camp counsellor and came back ${amount} up and completely changed.",
    "Camp paid ${amount}, which worked out at about nothing an hour, and was worth it anyway."],
-  stat="charisma")
+  stat="charisma", kind="partTime")
+
+
+# P6: chosen side work throughout adulthood. None means no upper-age cutoff.
+G("gig.adult.pet-care", "Pet sitting and dog walking", "Regular walks and a spare key for weekends away.",
+  18, None, 1500, 6000, 4, "pet sitting and dog walking",
+  ["Looked after pets all year and made ${amount}. A few owners started asking for you by name.",
+   "Pet care brought in ${amount}. You knew which dogs needed the long way home."])
+G("gig.adult.yard-work", "Yard work", "Lawns, weeds, and neighbors who would rather pay somebody.",
+  18, None, 2000, 7000, 5, "yard work",
+  ["Kept yards tidy around the neighborhood and made ${amount} doing it.",
+   "Yard work paid ${amount}. Most of it happened on somebody else's Saturday."], stat="willpower")
+G("gig.adult.babysitting", "Babysitting", "Evenings with other people's children, on your own terms.",
+  18, None, 2500, 9000, 6, "babysitting",
+  ["Babysitting brought in ${amount}. A few families kept your number handy.",
+   "Watched children for local families and made ${amount} over the year."], stat="charisma")
+G("gig.adult.tutoring", "Tutoring", "Explain it until it clicks, then do it again next week.",
+  18, None, 2500, 10000, 4, "tutoring",
+  ["Tutored students through the year and made ${amount}. Some of them started enjoying it.",
+   "Tutoring paid ${amount}. You learned which explanations actually worked."], stat="smarts", talent="academics")
+G("gig.adult.art", "Art commissions", "People send a reference and ask what you would charge.",
+  18, None, 1500, 8000, 4, "art commissions",
+  ["Finished art commissions for people and made ${amount} over the year.",
+   "Commission work brought in ${amount}. One customer came back for another."], stat="looks", talent="writing")
+G("gig.adult.repairs", "Small household repairs", "Shelves, loose handles, and the little things people put off.",
+  18, None, 3000, 12000, 6, "small household repairs",
+  ["Fixed little things around people's homes and made ${amount} doing it.",
+   "Household repair work paid ${amount}. Word got around that you showed up."])
 
 
 def check() -> None:
@@ -160,7 +189,7 @@ def check() -> None:
         if gid in seen:
             problems.append(f"duplicate gig id {gid!r}")
         seen.add(gid)
-        if gig["ageMin"] > gig["ageMax"]:
+        if "ageMax" in gig and gig["ageMin"] > gig["ageMax"]:
             problems.append(f"{gid}: inverted age range")
         if gig["payLow"] > gig["payHigh"]:
             problems.append(f"{gid}: inverted pay range")
@@ -180,7 +209,7 @@ def check() -> None:
     # Every childhood age from the first gig on must have something available,
     # or a player who opens the screen finds an empty list and learns not to.
     for age in range(7, 18):
-        if not [g for g in GIGS if g["ageMin"] <= age <= g["ageMax"]]:
+        if not [g for g in GIGS if g["ageMin"] <= age <= g.get("ageMax", float("inf"))]:
             problems.append(f"no gig available at age {age}")
 
     if problems:
@@ -199,7 +228,7 @@ def main() -> None:
     print(f"wrote {OUT_PATH.relative_to(ROOT)}")
     print(f"{len(GIGS)} gigs")
     for age in range(7, 19, 2):
-        available = [g for g in GIGS if g["ageMin"] <= age <= g["ageMax"]]
+        available = [g for g in GIGS if g["ageMin"] <= age <= g.get("ageMax", float("inf"))]
         print(f"  age {age:>2}: {len(available)} available")
 
 
