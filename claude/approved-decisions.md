@@ -141,6 +141,15 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   Goal protection applies to advice, not manual trades or purchases. Save v46 is P7's;
   TICKET remains 0708. See `playtest-p7-investments-advisors.md` for measured policy limits.
 
+- **P8 approved with amendments by Payton (8 October):** reduce the proposed 48 additions
+  to 15–20. Add recognizable actual model families across existing fictional makers,
+  not invented variants, movements or technical specifications. Keep the approved
+  price/resale/store approach and existing holdings unchanged. Include a very expensive
+  Jacob & Co. equivalent. Agent B selected eighteen total, including Jakob & Co.'s
+  Billionaire Timeless Treasure equivalent at $20m, fifteen ordinary watch-class entries
+  and three sought entries. No new screen, save shape, icing action or selection rules.
+  Full real-model/source mapping: `playtest-p8-watch-catalog.md`.
+
 ## Reference material
 
 BitLife screenshots supplied by the product owner, saved at

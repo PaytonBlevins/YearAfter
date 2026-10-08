@@ -114,12 +114,19 @@ Aggressive all-surplus self-directed investing still beats the hybrid advisor's 
 do not claim universal superiority. Details: `playtest-p7-investments-advisors.md`.
 Native-device checks and Claude Project mirroring remain open.
 
-**P8 proposal update (8 October):** Payton authorized the next ticket. Agent B claimed
-`feat/playtest-p8-watch-catalog`, stacked on P7 #19; main remains `beff25a`.
-Baseline and process-only draft measurements are in `playtest-p8-watch-catalog.md`.
-Proposed: 48 additions, 85 watches, two new fictional makers, new prices $95–$110,000;
-all old pieces/prices and selection/resale rules preserved. New gameplay prices await
-Payton's approval under the brief. No production catalog edits, save bump or P9 work.
+**P8 implementation update (8 October):** Payton reduced the proposal to 15–20 real
+model equivalents, no invented movements, approved the remaining approach, and
+requested a very expensive Jacob & Co. equivalent. Built eighteen: 55 watches total,
+one new fictional maker, existing 151 entries and all store/selection rules unchanged.
+Includes Jakob & Co. Billionaire Timeless Treasure at $20m. Save v46/TICKET 0708 stay.
+Branch `feat/playtest-p8-watch-catalog` follows P7 #19 while main remains `beff25a`.
+28 new tests; all 2,794 tests and 15 typechecks pass. Full verify has eight existing
+catalog mismatches; valuables now reproduces exactly. 25 sabotage mutations caught,
+none missed, source MD5 restored. Actual twenty-year reference discovery is 27 → 39
+at $10k+ means; mixed-auction effects and model/source mappings are in
+`playtest-p8-watch-catalog.md`. Validator secondary-output restoration is an open
+finding; its incidental vehicle-mods format edit was restored, not committed.
+Native checks and Project mirroring remain open. P9 waits for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

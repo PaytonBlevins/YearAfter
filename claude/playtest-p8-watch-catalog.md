@@ -1,127 +1,200 @@
-# Playtest P8 — bigger watch catalog
+# Playtest P8 — more real watch model equivalents
 
-Status: claimed 8 October 2026 UTC; catalog proposal awaiting Payton's approval.
-Branch: `feat/playtest-p8-watch-catalog`, stacked on P7 PR #19. Main is `beff25a`.
-No product content has changed. P9 renovations and P10 icing are separate tickets.
+Status: approved amendments implemented 8 October 2026 UTC; verification and sabotage report below.
+Branch `feat/playtest-p8-watch-catalog`, stacked on P7 PR #19. Main remains `beff25a`.
 
-## Contract and baseline
+## Payton's decision and scope
 
-P8/B13 calls for more references and models per maker, including fictional equivalents
-of Rolex, Patek, F.P. Journe, Tissot, Citizen, Omega, Vacheron Constantin and Tudor.
-The brief says a real product choice, including a gameplay number, must be proposed
-and approved. The table below is that proposal, not an approved price sheet.
+The initial 48-addition proposal was superseded. Payton asked for only 15–20 additions,
+approved the remaining price/resale/store approach, then clarified he meant real model
+families (Submariner, Yacht-Master, Oyster Perpetual, etc.), not invented variants or
+movements. He also requested a very expensive Jacob & Co. equivalent and confirmed
+that direction. Built 18 additions: 37 → 55 watches, 26 → 27 fictional makers, 151 →
+169 valuables. Seventeen additions broaden fifteen existing makers; the eighteenth
+introduces Jakob & Co. There is no promise to add a model to all 26 existing makers
+within eighteen slots. No fabricated calibers, hairsprings or reserve specifications.
 
-There are 37 watches among 151 valuables, across 26 makers; 19 makers have only one
-watch. Citizen and F.P. Journe have no equivalents. Authoring lives in
-`scripts/generate-valuables.py`, not handwritten generated JSON. Its entries and
-stores are logically identical to the current JSON; its serialization is not
-byte-identical. The known validator mismatch therefore predates P8.
+P9 renovations, P10 watch modification/icing and life-event wording remain separate.
+The Jakob piece has its real model's gem-set identity in catalog content; it does not
+add an icing action, a modification flag or a resale modifier.
 
-Watch Room shows six pieces per year, Maison five pieces mixed with jewelry.
-Eligibility uses existing store affiliation, means gates and a price ceiling of
-max($2,000, 1.5 times means). The catalog expansion must not change those rules.
-Auctions pick from eligible valuables, so increasing the watch pool also increases
-watch representation in mixed auctions. Measure that before implementation is
-reported complete; do not quietly retune auction probabilities.
+All old 151 entries, including their order, IDs, prices, resale categories, stores,
+rarities and blurbs, remain exactly the same. Five store definitions, stock-selection
+rules, purchase commands, valuation/tax/estate rules and screens are unchanged.
+Existing Shopping/Collections readers automatically display the new models.
 
-## Proposed expansion — 48 additions, 85 watches total
+## Model mapping, prices and stores
 
-Keep all 37 existing watches and their IDs, prices, holds, stores and descriptions.
-Keep all 114 non-watch entries. Add two fictional makers: Civitan and F.P. Jorin.
-This gives 28 watch makers. References differ by model, function, material or size;
-they are not a list of dial-color duplicates. New prices are proposed game values
-in constant 2025 dollars, calibrated to the existing catalog's bands; they are not
-claims about exact current real-world retail prices. Existing $70–$650,000 limits
-stay intact; additions range from $95 to $110,000.
+Fictional brands stay under the existing 0506/MASTER_SPEC 1043–1059 contract. Real
+model names or close recognizable equivalents identify the family; no invented
+movement specifications are presented. Official maker sources were checked on
+8 October. Some regional product pages were unavailable or robots-blocked (notably
+Omega's main site); no detailed technical claim is built from those inaccessible pages.
+Descriptions are short visual/function summaries rather than a technical spec sheet.
+Prices are rounded game calibrations in constant 2025 dollars alongside existing
+catalog bands, not a promise of today's exact retail price. The Jacob anchor is the
+maker's announced $20 million model, an explicit exception to the old $650,000 watch
+ceiling requested by Payton. Current ordinary resale means 75% of paid cost, not a
+claim about a real collectible's auction appraisal. Only three new scarce sports
+references use the existing 115% `sought` class. No resale coefficient changes.
 
-Every model and price below is fictional. `fashion`, `watch` and `sought` use the
-existing resale classes without changes. Ordinary pieces are not automatically
-investments. In particular, no new F.P. Jorin model is assigned above-retail resale.
+| Stable ID suffix (`val.watch.`) | In-game model                             | Real model/source                                                                                                                           | Price       | Holds  | Stores              |
+| ------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------ | ------------------- |
+| rolux-yacht-voyager             | Rolux Yacht-Voyager                       | [Rolex Yacht-Master](https://newsroom.rolex.com/watches/oyster-collection/yacht-master)                                                     | $12,300     | watch  | Watch Room + Maison |
+| rolux-perpetual                 | Rolux Oyster Perpetual 36                 | [Rolex Oyster Perpetual 36](https://newsroom.rolex.com/watches/oyster-collection/oyster-perpetual)                                          | $6,500      | sought | Watch Room + Maison |
+| rolux-explorer                  | Rolux Explorer 36                         | [Rolex Explorer 36](https://newsroom.rolex.com/watches/oyster-collection/explorer)                                                          | $7,500      | sought | Watch Room + Maison |
+| seyko-alpinist                  | Seyko Alpinist                            | [Seiko Prospex Alpinist SPB121](https://www.seikowatches.com/us-en/products/prospex/alpinist-design)                                        | $725        | watch  | Watch Room          |
+| tissoe-gentleperson             | Tissoe Gentleperson                       | [Tissot Gentleman](https://www.tissotwatches.com/en-us/T1274071103100.html)                                                                 | $825        | watch  | Watch Room          |
+| hamiltone-ventura               | Hamiltone Ventura Auto                    | [Hamilton Ventura Auto H24515551](https://www.hamiltonwatch.com/en-us/h24515551-ventura-auto.html)                                          | $995        | watch  | Watch Room          |
+| grand-seyko-birch               | Grand Seyko White Birch                   | [Grand Seiko White Birch SLGH005](https://www.grand-seiko.com/us-en/collections/slgh005g)                                                   | $9,100      | watch  | Watch Room + Maison |
+| tudar-pelagos                   | Tudar Pelagos                             | [Tudor Pelagos](https://www.tudorwatch.com/en/watch-family/pelagos)                                                                         | $5,100      | watch  | Watch Room          |
+| longinez-legend-diver           | Longinez Legend Diver                     | [Longines Legend Diver](https://www.longines.com/en-us/p/watch-longines-legend-diver-l3-764-4-50-9)                                         | $3,200      | watch  | Watch Room          |
+| orys-pointer-date               | Orys Big Crown Pointer Date               | [Oris Big Crown Pointer Date](https://www.oris.ch/en-US/product/watch/big-crown/big-crown-pointer-date/01-754-7741-4065-07-5-20-63)         | $2,200      | watch  | Watch Room          |
+| omegon-aquaterra                | Omegon Aquaterra                          | [Omega Seamaster Aqua Terra](https://www.omegawatches.com/watches/seamaster/aqua-terra-150m/catalog)                                        | $6,800      | watch  | Watch Room + Maison |
+| cartrier-ballon                 | Cartrier Ballon Bleu                      | [Cartier Ballon Bleu](https://www.cartier.com/en-us/watches/collections/ballon-de-cartier/ballon-bleu-de-cartier-watch-CRWSBB0027.html)     | $6,200      | watch  | Watch Room + Maison |
+| breitlong-superocean            | Breitlong Superocean 42                   | [Breitling Superocean Automatic 42](https://www.breitling.com/us-en/watches/superocean/superocean-automatic-42/A17366D81C1A1/)              | $4,900      | watch  | Watch Room          |
+| ap-royal-ash-offshore           | Audemar Pigot Royal Ash Offshore          | [Audemars Piguet Royal Oak Offshore 26420SO](https://www.audemarspiguet.com/us/en/watch-collection/royal-oak-offshore/26420SO.OO.A002CA.01) | $39,000     | watch  | Maison              |
+| patrek-aquanote                 | Patrek Phillon Aquanote                   | [Patek Philippe Aquanaut 5167A](https://www.patek.com/en/collection/aquanaut/5167a-001)                                                     | $25,000     | sought | Maison              |
+| vacheran-patrimony              | Vacheran Constantine Patrimony            | [Vacheron Constantin Patrimony](https://www.vacheron-constantin.com/ww/en/collections/patrimony/81180-000r-b518.html)                       | $25,000     | watch  | Maison              |
+| langer-saxonia                  | A. Langer & Sohn Saxonia Thin             | [A. Lange & Söhne Saxonia Thin](https://www.alange-soehne.com/gb-en/timepieces/saxonia/saxonia-thin)                                        | $23,000     | watch  | Maison              |
+| jakob-timeless-treasure         | Jakob & Co. Billionaire Timeless Treasure | [Jacob & Co. Billionaire Timeless Treasure](https://jacobandco.com/news/billionaire-timeless-treasure)                                      | $20,000,000 | watch  | Maison              |
 
-| Maker                | Proposed references and whole-dollar prices                                                                                                  | Holds                                                             | Store               |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------- |
-| Rolux                | Explorer 36 $7,500; Explorer II $10,200; Air Voyager $7,700; Sea Explorer $13,900; Yacht Voyager $12,300; Perpetual 36 $6,500                | sought for Explorer 36 and Perpetual 36; watch for the other four | Watch Room + Maison |
-| Patrek Phillon       | Aquanote $25,000; World Traveller $58,000; Annual Calendar $55,000; Ellipse $36,000; Pilot Travel $60,000                                    | sought for Aquanote; watch for the other four                     | Maison              |
-| F.P. Jorin           | Blue Chronometer $40,000; Reserve Chronometer $55,000; Calendar $75,000; Resonance $110,000                                                  | watch                                                             | Maison              |
-| Tissoe               | PRZ Quartz 40 $395; Gentleperson $825; Heritage 1938 $995; Seastar 1000 $795                                                                 | fashion for PRZ Quartz; watch for the other three                 | Watch Room          |
-| Civitan              | Solar Everyday $250; Solar Promaster Diver $395; Tsukiya Automatic $450; Series Eight $1,295                                                 | fashion for both solar models; watch for both automatics          | Watch Room          |
-| Omegon               | Aquaterra $6,800; Planet Ocean $7,800; Seamaster Heritage $7,100; Speedmeister Racing $10,000; Constellation $7,000; Deville Prestige $4,800 | watch                                                             | Watch Room + Maison |
-| Vacheran Constantine | Patrimony $25,000; Traditionelle $28,000; Historiques Square $39,000; Fiftysix $13,000                                                       | watch                                                             | Maison              |
-| Tudar                | Black Cove 58 $4,000; Pelagos $5,100; Ranger $3,300; Royal $2,800                                                                            | watch                                                             | Watch Room          |
-| Seyko                | Five Sports $325; Alpinist $725                                                                                                              | watch                                                             | Watch Room          |
-| Grand Seyko          | Birch $9,100; Heritage Spring $6,000                                                                                                         | watch                                                             | Watch Room + Maison |
-| Hamiltone            | Khaki Mechanical $595; Ventura $995                                                                                                          | watch                                                             | Watch Room          |
-| Longinez             | Legend Diver $3,200; Master Calendar $3,000                                                                                                  | watch                                                             | Watch Room          |
-| Cartrier             | Ballon $6,200; Panthere Quartz $4,250                                                                                                        | watch for Ballon; fashion for Panthere Quartz                     | Watch Room + Maison |
-| Casiot               | Field Digital $95                                                                                                                            | fashion                                                           | Watch Room          |
+New mix: 15 ordinary mechanical-watch-class entries, three sought entries, no new
+fashion watch. Jakob is `very rare`, Maison only, $20,000,000 retail and $15,000,000
+initial resale. Rarity does not weight retail stock: the existing means gate and
+price ceiling restrict visibility. Maison needs $150,000 means and any piece must
+cost no more than max($2,000, 1.5 times means). Thus the $20m model needs at least
+$13,333,333.34 means to enter the pool; seeing it does not imply having enough cash
+to buy it. Do not claim it has a special one-off/limited-production simulation.
 
-Counts: eight requested makers receive 37 additions; the remaining six makers
-receive 11. New resale mix: 5 fashion, 40 watch, 3 sought. Existing resale
-coefficients, annual drift, floor, tax treatment and estate handling stay unchanged.
-All sought additions are recognizable scarce sports references, not every expensive
-watch. Prices and store placement keep a broad affordable/midrange/luxury mix.
+## Baseline and built measurements
 
-The names above are draft authoring labels. Stable IDs will be assigned once at
-implementation; do not change or recycle existing IDs. Fictional naming still
-requires the project's eventual legal review, just as the original catalog does.
+Actual `storeStock`, 250 seeds (`p8-0`…`p8-249`), twenty years (2000–2019), age 30,
+exact means fixtures funded through a prior-year ledger posting. No purchases;
+these measure shelves, not demand or lifetime ownership. 5,000 counters per means
+level, 20,000 per catalog. The earlier 48-item fixture run is historical only and
+is not the implemented result.
 
-## Shelf measurements before approval
+| Means    | Distinct Watch Room references, old → built | Median references seen in 20 years, old → built | Median makers per counter, old → built |
+| -------- | ------------------------------------------- | ----------------------------------------------- | -------------------------------------- |
+| $1,000   | 9 → 12                                      | 9 → 12                                          | 5 → 5                                  |
+| $10,000  | 27 → 40                                     | 27 → 39                                         | 6 → 5                                  |
+| $50,000  | 27 → 40                                     | 27 → 39                                         | 6 → 5                                  |
+| $250,000 | 27 → 40                                     | 27 → 39                                         | 6 → 5                                  |
 
-Actual `storeStock` was run for 250 seeds (`p8-0` through `p8-249`), years
-2000–2019, at age 30 and each listed whole-dollar means level. Funds were posted
-in the prior year to avoid counting the measurement gift twice as current income.
-No purchases were made. The proposal run appended 48 fixture items to the content
-array in that process only; repository content was untouched. Fixture IDs/descriptions
-are placeholders, so these are visibility measurements, not purchase/save tests.
+Every counter still has six pieces. At $10k+ means, built twenty-year p10/median/p90
+reference discovery is 37/39/40 versus baseline 26/27/27. Maison is correctly hidden
+at $1k/$10k/$50k and open at $250k. More models also make those makers occur more
+often; no maker-quota or selection-algorithm change was introduced.
 
-| Means    | Distinct Watch Room references across 5,000 counters, old → draft | Median distinct references seen over 20 years, old → draft | Median makers per counter, old → draft |
-| -------- | ----------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------- |
-| $1,000   | 9 → 22                                                            | 9 → 22                                                     | 5 → 4                                  |
-| $10,000  | 27 → 62                                                           | 27 → 54                                                    | 6 → 5                                  |
-| $50,000  | 27 → 62                                                           | 27 → 54                                                    | 6 → 5                                  |
-| $250,000 | 27 → 62                                                           | 27 → 54                                                    | 6 → 5                                  |
+Actual `lotsFor` was measured with the same seeds and twenty years, visit 1, using
+baseline and built catalog arrays inside the scratch process (no checkout mutation).
+Watch share below is among valuable lots, excluding cars; total lot and car counts
+were exactly unchanged within each matched fixture. Car-share and legendary-roll
+constants are unchanged. Catalog growth naturally dilutes other valuable kinds.
 
-All 20,000 counters had six pieces in each run. Maison remained correctly hidden
-below $150,000 means. More models improve long-run reference discovery, while
-makers with more references naturally appear more often; this reduces median
-maker diversity on a single counter by one. The proposal retains this existing
-uniform-reference selection rule rather than introducing a maker quota.
+| Venue                  | Means       | Watch share among valuable lots, old → built | Distinct watch models, old → built |
+| ---------------------- | ----------- | -------------------------------------------- | ---------------------------------- |
+| Hartwell & Finch       | $10,000     | 26.9% → 35.6%                                | 27 → 40                            |
+| Hartwell & Finch       | $1,000,000  | 26.1% → 34.1%                                | 37 → 54                            |
+| Ashcombe Private Sales | $1,000,000  | 24.1% → 32.3%                                | 8 → 12                             |
+| Hartwell & Finch       | $50,000,000 | 26.1% → 34.1%                                | 37 → 54                            |
+| Ashcombe Private Sales | $50,000,000 | 22.3% → 31.6%                                | 8 → 13                             |
 
-Mixed-auction eligible-pool shares (conditional on a non-car, non-legendary lot;
-not a measured realized lot rate) follow the actual venue filters:
+At $50m means, Jakob appeared in 330 of 20,000 private-sale lots (1.65% overall).
+At $1m it appeared zero times. General houses exclude pieces priced $1m or more;
+their pool never included Jakob. This is actual current selection, not a new
+rarity promise. All eighteen additions also passed actual retail offer/purchase
+coverage, including a $14m cash fixture that can see Jakob but cannot pay for it.
 
-| Venue                      | Means   | Watch share before | Watch share with draft |
-| -------------------------- | ------- | ------------------ | ---------------------- |
-| Hartwell & Finch           | $10,000 | 27/100 (27.0%)     | 63/136 (46.3%)         |
-| Crane Brothers Auctioneers | $10,000 | 27/100 (27.0%)     | 63/136 (46.3%)         |
+## Generator reproducibility and compatibility
 
-| Ashcombe Private Sales | $1,000,000 | 8/33 (24.2%) | 20/45 (44.4%) |
+The baseline Python entries/stores matched JSON semantically, but serialization
+expanded string arrays and therefore failed byte-level validation. P8 adds a
+`catalog_text()` writer that compacts only string lists while preserving original
+ASCII escaping and object layout. Its output reproduced the pre-P8 catalog exactly
+before additions. No Prettier write over catalog data, no unrelated catalog edit.
+The generator now reproduces the new tracked JSON byte for byte; existing JSON
+rows remain byte-for-byte intact and the eighteen new rows append at the end.
+Catalog metadata stays version 1. Save stays v46, TICKET stays 0708: holdings already
+save stable item IDs. No schema or migration edits. All 55 models round-trip through
+real persistence; a pre-P8 37-watch collection survives the existing v45 migration.
+One real settlement year preserves IDs/provenance and replays identically after load.
+Unpurchased derived shelves can change when a pool grows; owned IDs do not change.
 
-This dilution of other valuables is an explicit catalog-expansion consequence for
-approval. Car-share and legendary-roll constants remain unchanged.
+The existing RNG loader normalizes signed state words to unsigned equivalents.
+The save fixture is canonicalized once through that existing loader before asserting
+an exact round trip; this is unrelated to catalog additions and no RNG code changed.
 
-## Implementation and acceptance after approval
+## Tests and verification
 
-- Append entries through the generator; generated JSON must reproduce byte-for-byte.
-  Preserve existing row formatting and values rather than reformat unrelated catalogs.
-- Keep current shopping and collections screens. No new screen, filters, search,
-  retailer checkout rules or automatic purchases. New models appear on existing shelves.
-- Confirm affordability, maker/model variety, determinism, distinct shelf IDs,
-  ownership filtering, purchases, resale, tax and estate behavior with actual functions.
-- Measure shelves by means band and seed/year, and watch representation in mixed
-  auctions. Distinguish catalog breadth from the handful visible in a single year.
-- Test all existing IDs/entries survive, both requested new maker equivalents exist,
-  every new piece has legal catalog fields and reachable stores, and the stated
-  count/price/resale mix is exact. Verify old saves still resolve their owned items.
-- At least 15 distinct behavioral sabotage trials, repair surviving test gaps and
-  restore source exactly before final verification. Record every missed mutation.
-- Run full `pnpm verify` and owned-file formatting. Report existing global failures
-  separately; no unrelated catalog rewrite or old-note format cleanup.
+28 new tests: content 5, simulation 20, persistence 3. Frozen pre-P8 hashes protect
+all old entries/stores; an explicit approved manifest protects price/resale/count
+and ID coverage. Actual commands check affordability, ledger reconciliation,
+initial resale, estate asset inclusion, ownership filtering, repeat-purchase refusal,
+collection shelves, sale proceeds, deterministic counters and no RNG consumption.
+The save tests assert valuation movement for every held model after a real year.
+The existing real-brand guard now includes Jacob & Co.
 
-No save migration is expected: holdings already save stable catalog item IDs.
-Save v46 and TICKET 0708 remain. Unpurchased offers are derived from a catalog pool,
-so an expanded pool can change shelves for the current year on upgrade; owned
-pieces remain stable. No promise of preserving an old unpurchased quote.
+Full `pnpm verify`: all 15 typechecks and all 2,794 tests pass. Content validation
+fails only the eight previously recorded generator mismatches: activities, advice,
+auctions, businesses, childhood events, homes, renovations and vehicles. Valuables
+now passes. No unrelated data rewrite or weakened/deleted test.
 
-Native device verification and Claude Project mirroring remain unavailable here;
-do not report either as completed. Stop after P8; P9 requires a new instruction.
+## Sabotage verification
+
+Twenty-five distinct mutations, each against a passing targeted baseline. All caught
+on the first pass; none missed. The generator was regenerated for catalog mutations
+so a mismatching JSON/source pair was not the only thing that could catch them.
+The deliberate generator-layout defect was checked without changing tracked JSON.
+
+| Mutation                       | Catching suite | Result |
+| ------------------------------ | -------------- | ------ |
+| underprice Jacob               | content        | caught |
+| Jacob above-retail resale      | content        | caught |
+| Jacob at ordinary counter      | content        | caught |
+| Jacob common rarity            | content        | caught |
+| real Jacob brand               | content        | caught |
+| empty model description        | content        | caught |
+| invented caliber description   | content        | caught |
+| remove added model             | content        | caught |
+| added model is jewelry         | content        | caught |
+| Oyster loses scarce class      | content        | caught |
+| Aquanaut price drift           | content        | caught |
+| reprice old Submariner         | content        | caught |
+| rename old saved ID            | content        | caught |
+| change store slot count        | content        | caught |
+| unstable generator layout      | content        | caught |
+| ordinary resale coefficient    | simulation     | caught |
+| purchase values at retail      | simulation     | caught |
+| purchase costs no money        | simulation     | caught |
+| sale credits twice value       | simulation     | caught |
+| allows repeat purchase         | simulation     | caught |
+| estate drops watches           | simulation     | caught |
+| cannot afford check absent     | simulation     | caught |
+| all owned yearly values freeze | persistence    | caught |
+| loaded collection dropped      | persistence    | caught |
+| serialized provenance dropped  | persistence    | caught |
+
+Before mutations, six source/catalog files were tarred. Every file was restored
+in a finally block and its MD5 compared to the original, including engine files
+that have no production P8 edits. No mutation or scratch harness ships.
+
+## Verification side effect found
+
+`generate-vehicles.py` also writes `vehicle-mods.json`, while the validator restores
+only the declared primary `OUT_PATH` on a mismatch. Full verification therefore
+left an unrelated formatting-only modification to the secondary output. Confirmed
+semantic equality and restored its exact tracked bytes. Do not commit that accidental
+change. Validator secondary-output restoration is an open follow-up, not a P8 fix.
+
+## Final review status
+
+Full format check fails the same 22 historical Claude notes. All P8-owned files
+pass formatting, and `git diff --check` is clean. Targeted content/simulation/save
+suites passed again after restoration. Full verification results above are from
+the restored-equivalent production tree. PR and observed CI details will be added
+after publishing. No native-device or Project-mirroring claim.
+Native device checks and Claude Project mirroring remain unavailable here; neither
+is reported complete. Scratch harnesses, logs and backup tar stay outside git.
+Stop after P8; P9 needs Payton's next instruction.

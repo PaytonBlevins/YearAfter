@@ -1703,6 +1703,204 @@
       "stores": ["store.antiques"],
       "rarity": "mythical",
       "blurb": "The stone came too. It's in the garage."
+    },
+    {
+      "id": "val.watch.rolux-yacht-voyager",
+      "kind": "watch",
+      "name": "Rolux Yacht-Voyager",
+      "brand": "Rolux",
+      "price": 12300,
+      "holds": "watch",
+      "stores": ["store.watches", "store.maison"],
+      "rarity": "common",
+      "blurb": "A sailing watch with a raised timing bezel. Equally at home on shore."
+    },
+    {
+      "id": "val.watch.rolux-perpetual",
+      "kind": "watch",
+      "name": "Rolux Oyster Perpetual 36",
+      "brand": "Rolux",
+      "price": 6500,
+      "holds": "sought",
+      "stores": ["store.watches", "store.maison"],
+      "rarity": "common",
+      "blurb": "A steel bracelet, a clean dial, and no date window."
+    },
+    {
+      "id": "val.watch.rolux-explorer",
+      "kind": "watch",
+      "name": "Rolux Explorer 36",
+      "brand": "Rolux",
+      "price": 7500,
+      "holds": "sought",
+      "stores": ["store.watches", "store.maison"],
+      "rarity": "common",
+      "blurb": "The black dial with the big three, six, and nine."
+    },
+    {
+      "id": "val.watch.seyko-alpinist",
+      "kind": "watch",
+      "name": "Seyko Alpinist",
+      "brand": "Seyko",
+      "price": 725,
+      "holds": "watch",
+      "stores": ["store.watches"],
+      "rarity": "common",
+      "blurb": "A green dial and a compass bezel, for the long way home."
+    },
+    {
+      "id": "val.watch.tissoe-gentleperson",
+      "kind": "watch",
+      "name": "Tissoe Gentleperson",
+      "brand": "Tissoe",
+      "price": 825,
+      "holds": "watch",
+      "stores": ["store.watches"],
+      "rarity": "common",
+      "blurb": "A clean steel everyday watch that fits under a shirt cuff."
+    },
+    {
+      "id": "val.watch.hamiltone-ventura",
+      "kind": "watch",
+      "name": "Hamiltone Ventura Auto",
+      "brand": "Hamiltone",
+      "price": 995,
+      "holds": "watch",
+      "stores": ["store.watches"],
+      "rarity": "common",
+      "blurb": "The triangular case. Hard to mistake it for anything else."
+    },
+    {
+      "id": "val.watch.grand-seyko-birch",
+      "kind": "watch",
+      "name": "Grand Seyko White Birch",
+      "brand": "Grand Seyko",
+      "price": 9100,
+      "holds": "watch",
+      "stores": ["store.watches", "store.maison"],
+      "rarity": "common",
+      "blurb": "A silver-white dial textured like a stand of birch trees."
+    },
+    {
+      "id": "val.watch.tudar-pelagos",
+      "kind": "watch",
+      "name": "Tudar Pelagos",
+      "brand": "Tudar",
+      "price": 5100,
+      "holds": "watch",
+      "stores": ["store.watches"],
+      "rarity": "common",
+      "blurb": "A titanium diver with a bracelet that adjusts over a wetsuit."
+    },
+    {
+      "id": "val.watch.longinez-legend-diver",
+      "kind": "watch",
+      "name": "Longinez Legend Diver",
+      "brand": "Longinez",
+      "price": 3200,
+      "holds": "watch",
+      "stores": ["store.watches"],
+      "rarity": "common",
+      "blurb": "Two crowns and a rotating dive bezel tucked under the crystal."
+    },
+    {
+      "id": "val.watch.orys-pointer-date",
+      "kind": "watch",
+      "name": "Orys Big Crown Pointer Date",
+      "brand": "Orys",
+      "price": 2200,
+      "holds": "watch",
+      "stores": ["store.watches"],
+      "rarity": "common",
+      "blurb": "An extra hand points to the date around the edge of the dial."
+    },
+    {
+      "id": "val.watch.omegon-aquaterra",
+      "kind": "watch",
+      "name": "Omegon Aquaterra",
+      "brand": "Omegon",
+      "price": 6800,
+      "holds": "watch",
+      "stores": ["store.watches", "store.maison"],
+      "rarity": "common",
+      "blurb": "A steel watch that goes from the beach to the office."
+    },
+    {
+      "id": "val.watch.cartrier-ballon",
+      "kind": "watch",
+      "name": "Cartrier Ballon Bleu",
+      "brand": "Cartrier",
+      "price": 6200,
+      "holds": "watch",
+      "stores": ["store.watches", "store.maison"],
+      "rarity": "common",
+      "blurb": "A round case with a blue crown tucked into its side."
+    },
+    {
+      "id": "val.watch.breitlong-superocean",
+      "kind": "watch",
+      "name": "Breitlong Superocean 42",
+      "brand": "Breitlong",
+      "price": 4900,
+      "holds": "watch",
+      "stores": ["store.watches"],
+      "rarity": "common",
+      "blurb": "A steel diver with bold markers and a rotating timing bezel."
+    },
+    {
+      "id": "val.watch.ap-royal-ash-offshore",
+      "kind": "watch",
+      "name": "Audemar Pigot Royal Ash Offshore",
+      "brand": "Audemar Pigot",
+      "price": 39000,
+      "holds": "watch",
+      "stores": ["store.maison"],
+      "rarity": "common",
+      "blurb": "The bigger sports chronograph, with an octagonal bezel and rubber strap."
+    },
+    {
+      "id": "val.watch.patrek-aquanote",
+      "kind": "watch",
+      "name": "Patrek Phillon Aquanote",
+      "brand": "Patrek Phillon",
+      "price": 25000,
+      "holds": "sought",
+      "stores": ["store.maison"],
+      "rarity": "common",
+      "blurb": "A rounded octagonal steel case, a patterned dial, and a composite strap."
+    },
+    {
+      "id": "val.watch.vacheran-patrimony",
+      "kind": "watch",
+      "name": "Vacheran Constantine Patrimony",
+      "brand": "Vacheran Constantine",
+      "price": 25000,
+      "holds": "watch",
+      "stores": ["store.maison"],
+      "rarity": "common",
+      "blurb": "A slim gold dress watch with a quiet dial and slender hands."
+    },
+    {
+      "id": "val.watch.langer-saxonia",
+      "kind": "watch",
+      "name": "A. Langer & Sohn Saxonia Thin",
+      "brand": "A. Langer & Sohn",
+      "price": 23000,
+      "holds": "watch",
+      "stores": ["store.maison"],
+      "rarity": "common",
+      "blurb": "A thin gold case, two hands, and nothing extra on the dial."
+    },
+    {
+      "id": "val.watch.jakob-timeless-treasure",
+      "kind": "watch",
+      "name": "Jakob & Co. Billionaire Timeless Treasure",
+      "brand": "Jakob & Co.",
+      "price": 20000000,
+      "holds": "watch",
+      "stores": ["store.maison"],
+      "rarity": "very rare",
+      "blurb": "Yellow diamonds cover the case and bracelet. The price is a fortune by itself."
     }
   ]
 }

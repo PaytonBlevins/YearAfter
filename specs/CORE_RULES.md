@@ -3149,3 +3149,22 @@ spending. Match those policies, state the comparator, and disclose stronger cont
 outperform it. Controlled investment returns do not establish superiority over every played
 life. Round-trip the hired advisor and goal through the actual state constructor: serializing
 a field is insufficient if construction silently drops it.
+
+### 13.154 Catalog growth changes selection probabilities without changing an RNG rule
+
+Uniform draws over eligible references make a maker with more models more common,
+and additional watches dilute other kinds in mixed auctions. Measure the actual
+reader, disclose those effects, and distinguish multi-year discovery from one
+counter's variety. Freeze existing IDs, complete entry values and store definitions
+when appending to a catalog used by saves. The authoring generator must reproduce
+tracked bytes without reformatting unrelated rows; tests should cover actual
+purchase, sale, estate and save readers as well as membership in the catalog.
+
+### 13.155 Verification must restore every output it temporarily generates
+
+A generator can write more than its declared primary output. Comparing and restoring
+only that primary file can leave unrelated secondary catalogs dirty even on a reported
+failure. In P8, the vehicle generator's secondary vehicle-mods file changed layout
+while the validator restored vehicles alone. Check the working tree after verification,
+confirm semantic equality before restoring accidental output, and do not commit it
+as part of another ticket. The validator restoration gap remains an open follow-up.

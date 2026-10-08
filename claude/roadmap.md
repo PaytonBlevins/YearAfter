@@ -1615,12 +1615,24 @@ and stronger controls: `playtest-p7-investments-advisors.md`. P8 waits.
   v46 migration. Advisor and goal both survive the real state constructor; native checks
   and Claude Project mirroring remain open.
 
-### Playtest P8 — measured catalog proposal (8 October 2026 UTC)
+### Playtest P8 — approved real-model catalog expansion built (8 October 2026 UTC)
 
-Authorized and separately claimed on `feat/playtest-p8-watch-catalog`, stacked on
-P7 #19. Proposed 48 additions (37 → 85 watches; 26 → 28 fictional makers), keeping
-existing pieces and prices. Actual shelf runs across 20,000 counters per catalog
-show broader long-run discovery but slightly less maker variety per counter.
-Mixed-auction pool dilution is quantified. Full price/holds/store manifest and
-acceptance plan: `playtest-p8-watch-catalog.md`. Gameplay prices await approval;
-production catalog remains unchanged, save v46/TICKET 0708 stay, P9 waits.
+Payton reduced the 48-addition draft to 15–20, clarified actual model families and
+no invented movements, and requested a very expensive Jacob & Co. equivalent.
+Built eighteen additions (37 → 55 watches; 26 → 27 fictional makers), including
+Jakob & Co. Billionaire Timeless Treasure at $20m. Old 151 entries and stores are
+unchanged. Generator serialization now reproduces tracked valuables bytes without
+mass reformat. Actual twenty-year Watch Room median discovery rises 27 → 39 at
+$10k+ means; mixed-auction dilution and real-model/source mapping are documented.
+28 new tests; all 2,794 tests and 15 typechecks pass, eight baseline generator
+mismatches remain; 25 sabotage mutations caught, none missed, MD5 restored.
+`feat/playtest-p8-watch-catalog` follows P7 #19 while main remains `beff25a`.
+Save v46/TICKET 0708 stay; no screen/save/selection/icing change. P9 waits.
+Details: `playtest-p8-watch-catalog.md`.
+
+### Found by P8
+
+The content validator restores only the generator's declared primary output.
+The vehicle generator also writes vehicle-mods, leaving a formatting-only dirty
+secondary output after full verification. Exact tracked bytes were restored;
+secondary-output restoration is a separate open finding, not a P8 implementation.

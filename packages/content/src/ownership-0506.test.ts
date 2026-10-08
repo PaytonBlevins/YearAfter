@@ -14,6 +14,7 @@ import {
 
 /** Real marques a fictional analogue must never ship as. */
 const REAL = [
+  'Jacob & Co',
   'Rolex',
   'Omega',
   'Patek',
