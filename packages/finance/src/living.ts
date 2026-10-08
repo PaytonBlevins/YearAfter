@@ -35,13 +35,9 @@
  *   `housing`    whether they are paying for a roof (spec: housing
  *                circumstances). Today that is one bit — at home, or not.
  *
- * WHAT THIS DELIBERATELY IS NOT
- *
- * Not a budget. Spec 21 keeps the ledger on the backend and forbids
- * month-by-month accounting, and spec 1166 removes the lifestyle-tier selector
- * by name. The player never picks a tier, never sees a category breakdown, and
- * never gets a bill to approve. They see a life getting more expensive as it
- * gets bigger, which is what this is.
+ * P2 adds an explicit lifestyle choice, authorized in the playtest brief.
+ * It scales discretionary spending above subsistence, while the underlying
+ * income/wealth standard keeps its memory. The backend ledger remains private.
  */
 
 import { cents, type Money } from '@yearafter/core';
@@ -86,8 +82,13 @@ export const MARGINAL_SPEND = 0.92;
  * After-tax income past which each extra dollar is much less likely to be
  * spent. A high earner's life gets better, not proportionally more expensive.
  */
-export const TAPER_FROM = 120_000;
-export const TAPER_SPEND = 0.74;
+// P2: preserve ordinary-earner calibration, then let raises leave room to save.
+export const TAPER_FROM = 50_000;
+export const TAPER_SPEND = 0.4;
+export const HIGH_INCOME_FROM = 120_000;
+export const HIGH_INCOME_SPEND = 0.15;
+/** Above this liquid wealth, lifestyle creep tapers rather than growing linearly. */
+export const WEALTH_TAPER_FROM = 100_000;
 
 /**
  * What holding money does to what you are used to.
@@ -104,10 +105,16 @@ export const WEALTH_PULL = 0.018;
 export function standardTargetFor(afterTaxIncome: number, wealth: number): number {
   const income = Math.max(0, afterTaxIncome);
   const ordinary = Math.min(income, TAPER_FROM);
-  const rest = Math.max(0, income - TAPER_FROM);
+  const middle = Math.max(0, Math.min(income, HIGH_INCOME_FROM) - TAPER_FROM);
+  const rest = Math.max(0, income - HIGH_INCOME_FROM);
   const fromIncome =
-    SUBSISTENCE + Math.max(0, ordinary - SUBSISTENCE) * MARGINAL_SPEND + rest * TAPER_SPEND;
-  return fromIncome + Math.max(0, wealth) * WEALTH_PULL;
+    SUBSISTENCE +
+    Math.max(0, ordinary - SUBSISTENCE) * MARGINAL_SPEND +
+    middle * TAPER_SPEND +
+    rest * HIGH_INCOME_SPEND;
+  const held = Math.max(0, wealth);
+  const wealthBase = held <= WEALTH_TAPER_FROM ? held : Math.sqrt(WEALTH_TAPER_FROM * held);
+  return fromIncome + wealthBase * WEALTH_PULL;
 }
 
 /**
@@ -166,17 +173,35 @@ export type Housing = 'withFamily' | 'ownPlace' | 'owned';
 export const OWNER_SHARE = 0.7;
 
 /**
- * Ticket 0504. The share of a household's spending that goes on buying and
- * keeping a car — the purchase, the finance charges, the servicing and the
- * repairs. Fuel, insurance and registration stay in the living bill (spec
- * 179–182 removes them as mechanics).
- *
- * The BLS Consumer Expenditure Survey puts vehicle purchases at about 7% of
- * what a US household spends and maintenance and repairs near 1.5%. A
- * household that owns a car stops paying this share through the living bill,
- * because the car charges it directly.
+ * P2: an index-1 single renter's embedded annual transport allowance, dollars.
+ * Owning a car replaces at most this allowance and never more than its real
+ * running cost. Fuel/insurance/registration remain abstracted, not new mechanics.
+ * It scales with location, household and housing, never income or lifestyle.
  */
-export const VEHICLE_SHARE = 0.085;
+export const VEHICLE_ALLOWANCE = 1_600;
+
+export const LIFESTYLE_TIERS = ['frugal', 'comfortable', 'lavish'] as const;
+export type LifestyleTier = (typeof LIFESTYLE_TIERS)[number];
+export const LIFESTYLES: Readonly<
+  Record<
+    LifestyleTier,
+    {
+      readonly name: string;
+      readonly discretionary: number;
+      readonly happiness: number;
+    }
+  >
+> = {
+  frugal: { name: 'Frugal', discretionary: 0.8, happiness: -1 },
+  comfortable: { name: 'Comfortable', discretionary: 1, happiness: 0 },
+  lavish: { name: 'Lavish', discretionary: 1.5, happiness: 2 },
+};
+export const isLifestyleTier = (value: unknown): value is LifestyleTier =>
+  value === 'frugal' || value === 'comfortable' || value === 'lavish';
+
+/** The choice never changes basic needs or the remembered comfortable standard. */
+export const lifestyleStandardFor = (standard: number, lifestyle: LifestyleTier): number =>
+  SUBSISTENCE + Math.max(0, standard - SUBSISTENCE) * LIFESTYLES[lifestyle].discretionary;
 
 /**
  * What living at home costs, as a share of living alone.
@@ -230,6 +255,7 @@ export const householdScale = (partnered: boolean, childAges: readonly number[])
 /* -------------------------------------------------------------------------- */
 
 export interface LivingInput {
+  readonly lifestyle?: LifestyleTier;
   /** The standard carried in from last year, in index-1.00 dollars. */
   readonly standard: number;
   /** The city's cost index. 1.00 is an average American city. */
@@ -262,45 +288,21 @@ export interface LivingCost {
 
 export function livingCostFor(input: LivingInput): LivingCost {
   const standard = Math.max(SUBSISTENCE, Math.round(input.standard));
+  const chosen = lifestyleStandardFor(standard, input.lifestyle ?? 'comfortable');
   const scale = input.locationIndex * householdScale(input.partnered, input.childAges);
-  const car = input.ownsVehicle ? 1 - VEHICLE_SHARE : 1;
   const owned = input.housing === 'owned';
-  const committed =
-    (owned ? Math.max(0, input.housingCost ?? 0) : 0) + Math.max(0, input.vehicleCost ?? 0);
-  if (owned || committed > 0 || input.ownsVehicle) {
-    /*
-      Ticket 0501 — HOUSE-POOR IS A REAL THING, AND SO IS BUILDING EQUITY.
-
-      A renter at this standard spends `standard × scale` on everything, roof
-      included. An owner spends the non-roof share of that plus whatever the
-      house actually costs. When the house costs less than the rent it
-      replaced, the difference is left over — which is how a mortgage turns a
-      roof into savings. When it costs MORE, the household spends less on
-      everything else to carry it, down to the floor of what a life costs at
-      subsistence; a standard that ignored the mortgage would spend the same
-      as a renter on top of it and walk every owner into a shortfall.
-
-      Measured, that is exactly what the first version did: 109 of 179 homes
-      were let go, at a median age of 63, as retirement income fell and a
-      fixed mortgage did not.
-
-      Ticket 0504 — A CAR IS THE SAME SHAPE, SMALLER. The living bill has
-      always bought "getting about" (see `SUBSISTENCE`); once a household owns
-      a car it stops buying that share, and the car's own payment and
-      servicing are charged by the car. A cheap car leaves a little over; a car
-      that costs more than the share squeezes everything else, the same way a
-      mortgage does, rather than being paid for twice (CORE_RULES 13.86).
-    */
-    const roof = owned ? OWNER_SHARE : input.housing === 'withFamily' ? AT_HOME_SHARE : 1;
-    const whole = standard * scale * (owned ? 1 : roof);
-    const usual = standard * scale * roof * car;
-    const floor = SUBSISTENCE * scale * roof * car;
-    const squeezed = whole - committed;
-    const total = Math.round(Math.max(floor, Math.min(usual, squeezed)));
-    return { total: Math.max(0, total), standard };
-  }
-  const housing = input.housing === 'withFamily' ? AT_HOME_SHARE : 1;
-  const total = Math.round(standard * scale * housing);
+  const roof = owned ? OWNER_SHARE : input.housing === 'withFamily' ? AT_HOME_SHARE : 1;
+  const allowance = input.ownsVehicle
+    ? Math.min(Math.max(0, input.vehicleCost ?? 0), VEHICLE_ALLOWANCE * scale * roof)
+    : 0;
+  const whole = chosen * scale * (owned ? 1 : roof);
+  const usual = chosen * scale * roof - allowance;
+  const floor = SUBSISTENCE * scale * roof - allowance;
+  // A mortgage can squeeze discretionary living, down to basic needs. Car
+  // commitments are billed in real dollars; an expensive car must cost more,
+  // rather than automatically removing its whole payment from this bill.
+  const squeezed = whole - (owned ? Math.max(0, input.housingCost ?? 0) : 0) - allowance;
+  const total = Math.round(Math.max(floor, Math.min(usual, squeezed)));
   return { total: Math.max(0, total), standard };
 }
 
@@ -322,6 +324,7 @@ export const livingAmount = (cost: LivingCost): Money => cents(-cost.total * 100
  * and changed nothing anywhere (CORE_RULES 13.36, again).
  */
 export interface HouseholdFinances {
+  readonly lifestyle: LifestyleTier;
   readonly standard: number;
   readonly housing: Housing;
   /** The age they last moved out, if they have. For copy, and for 0305. */
@@ -343,4 +346,5 @@ export interface HouseholdFinances {
 export const NEW_HOUSEHOLD: HouseholdFinances = {
   standard: SUBSISTENCE,
   housing: 'withFamily',
+  lifestyle: 'comfortable',
 };

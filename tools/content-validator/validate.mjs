@@ -566,6 +566,14 @@ walk(contentDir, (file) => {
       );
       continue;
     }
+    if (rel === 'packages/content/data/renovations.json') {
+      if (!Number.isSafeInteger(entry.space) || entry.space < 0)
+        fail(rel, `${entry.id}: space must be a nonnegative whole number.`);
+      if (!Number.isSafeInteger(entry.happiness) || entry.happiness < 0 || entry.happiness > 2)
+        fail(rel, `${entry.id}: annual comfort must be a whole number from zero to two.`);
+      if ((entry.refresh || entry.beds > 0) && (entry.space !== 0 || entry.happiness !== 0))
+        fail(rel, `${entry.id}: refreshes and structural bedrooms use no amenity space/comfort.`);
+    }
     const previous = seenIds.get(entry.id);
     if (previous) fail(rel, `Duplicate content id "${entry.id}" (also in ${previous}).`);
     else seenIds.set(entry.id, rel);
@@ -584,7 +592,8 @@ if (existsSync(gigsPath)) {
   try {
     const gigs = JSON.parse(readFileSync(gigsPath, 'utf8')).entries ?? [];
     for (const gig of gigs) {
-      if (!(gig.ageMin <= gig.ageMax)) fail(rel, `${gig.id}: inverted age range.`);
+      if (gig.ageMax !== undefined && !(gig.ageMin <= gig.ageMax))
+        fail(rel, `${gig.id}: inverted age range.`);
       if (!(gig.payLow > 0 && gig.payLow <= gig.payHigh)) {
         fail(rel, `${gig.id}: pay must be positive and not inverted.`);
       }
@@ -599,7 +608,9 @@ if (existsSync(gigsPath)) {
     }
     // A screen that is empty at some age teaches the player not to open it.
     for (const age of [8, 10, 12, 14, 16, 17]) {
-      if (!gigs.some((gig) => gig.ageMin <= age && age <= gig.ageMax)) {
+      if (
+        !gigs.some((gig) => gig.ageMin <= age && (gig.ageMax === undefined || age <= gig.ageMax))
+      ) {
         fail(rel, `nothing a ${age}-year-old can do for money.`);
       }
     }

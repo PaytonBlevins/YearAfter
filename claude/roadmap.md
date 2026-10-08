@@ -900,7 +900,9 @@ it. Wherever debt ends up living, a student should see what they owe.
 `LISTINGS = 6` in `careers/openings.ts`. Doubling it is one constant, but
 0401's reachability numbers and the starvation guards were measured at six, so
 it needs a re-measure (more listings means more of the 169 jobs seen in a life,
-and a passive player gets work sooner).
+and may change first-job timing). **P5 measurement:** played-life median jobs seen rises
+93 → 96, but passive first-job age stays median 17 in 250 paired lives. Twelve listings alone
+still often show fewer than two study/training matches. Reservations and the approved scarce-pool rule are built in `playtest-p5-career-listings.md`; review is pending.
 
 ### Found by 0504
 
@@ -1026,6 +1028,14 @@ balance by age, and 0502 and 0504 each had to re-tune because of it
 two samples again. Note 19 is closely related: the monthly outflow figure counts
 income tax, which makes a high earner's number look larger still.
 
+**P2 implementation:** Payton approved the measured default and explicit Frugal / Comfortable /
+Lavish choices. Built on `feat/playtest-p2-living-costs` (save v45), with a Lifestyle screen linked
+from Living costs, paid-year happiness effects and immediately saved preferences. Measured actual
+$250,000 gross pay leaves $165,000 after $85,000 tax; settled Comfortable living is $82,238 at zero
+liquid wealth and $87,930 at $1m, rather than the historical estimate above. Both 150-life samples
+remain within the existing 55–64 and 65–74 net-worth bands. Details: `playtest-p2-living-costs.md`.
+The explicit tier-selector override is recorded in approved-decisions; no full expense breakdown.
+
 **33. Check the "car cost" while in there.** Payton's car costs $5,500 a year
 and the outflow is $20,000. The car is not the problem (finding 32), but it's
 worth confirming that the $5,500 isn't also being left inside the living bill.
@@ -1034,6 +1044,23 @@ standard that share is about $14,000, which is more than the car costs. So a
 rich owner's bill drops by more than the car adds. That's a second reason
 the high-income number is wrong, in the other direction. It should be a
 dollar amount scaled to the car's real running cost, not a share of the whole bill.
+
+**P2 implementation of 33:** Removed VEHICLE_SHARE. Owning a car replaces an embedded dollar
+allowance capped at actual running costs and $1,600 scaled by location, household and housing,
+independent of income/tier. Expensive car commitments add their real dollars; the living model
+no longer hides the full extra car payment by squeezing it out of generic spending. Mortgage
+squeeze and hardship protection remain. Literal tests replace the superseded 8.5% contract.
+
+### Found by P2
+
+- **Old-age accumulation remains for P15.** At 75+, the two passive samples still have median net
+  worth $497,442 and $447,058. P2 does not introduce a retirement spending horizon.
+- **Business-finance tests coupled quotes to a car-purchase history.** The changed living curve
+  moved a seeded car purchase and introduced an auto loan, changing the business marketplace and
+  lender obligations. P2 stabilizes those tests' original $47,353 cash and debt-free $11,200 car
+  fixture; every literal business quote, loan and ledger assertion stays intact.
+- **Project mirroring and device checks remain open.** No project_write or native device runtime
+  is available in this session; repo docs and real-store component checks are complete.
 
 ### Found by the v0.06 measurement and 0601
 
@@ -1405,3 +1432,232 @@ Agent A's next ticket.
     They show loss/reserve and loan scenarios and confirmed exit actions. B1's
     accept/decline rescue engine and survival measurement remain open with Agent A;
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
+
+## Playtest P1 — business rescue choices (7 October 2026)
+
+Built on `feat/playtest-p1-business-rescue`, pending merge. One yearly review lists all troubled
+businesses, with a separate inject-or-close answer for each. No automatic draw on personal
+cash for losses or loan shortfalls. Existing half-reserve rescue buffer and business balance
+numbers retained. Save v44 carries the unresolved quote; the lender's interest is accrued
+once. Declining uses the normal closure path, subtracts the trading hole, pays the lender
+first and keeps unpaid debt. Death winds down troubled businesses; healthy ones can pass
+on, and closed-business debt reduces the liquid estate before inheritance.
+
+Measured cohort: 9,300 owners across 31 types, five years. Baseline / rescue-if-affordable
+survival both 82.1%; decline-all 63.0%; 37.0% ever need the review. All 7,515 measured
+answers reconcile. This cohort differs from 0604's historical 78.7% (BLS comparison 51%);
+no calibration claim against BLS is made. See `claude/playtest-p1-business-rescue.md`.
+
+**Found by P1:** Other personal debts and division of the estate remain 0508 work;
+P1 only nets debt of closed businesses from liquid inheritance, without building wills.
+Native device checks remain pending. P2 awaits Payton's go-ahead.
+
+### Playtest P3 — approved social-success change built (7 October 2026)
+
+New-account rank lifts are video/photo 3, stream/podcast 5, short-form 3, subscription 2,
+including Kick/Facebook/X aliases. Payton approved them after measurement. Manual annual
+settlement now uses full existing negative drift above target and leaves breakout rolls to actual
+posts. Existing saved luck is preserved and malformed luck rejected. Save stays v45, TICKET 0708.
+Free accounts, manual choices, twelve-post cap, income rates, source curves, top-quarter fade and
+small-audience fame anchors are retained. Existing screens consume the engine changes.
+All 15 typechecks and 2,598 tests pass; 28 independent mutations caught, none missed. Nine baseline
+catalog mismatches and 22 historical-note formatting failures remain.
+PR #15: https://github.com/PaytonBlevins/YearAfter/pull/15 (depends on P1 #13 then P2 #14).
+See `playtest-p3-social-success.md`.
+
+### Found by P3
+
+- **B6 is not uniformly low.** Manual discovery makes small recurring payments attainable;
+  early income, lifetime traction and full-time earnings are distinct measures. After the approved
+  change, ordinary six-year YouTube pay reaches 100%, TikTok 43.5%; deliberate strong play reaches
+  the $30,000 yearly creator-income benchmark in 9.25% / 2.25%, respectively. A wage here is any
+  year before personal tax and bills, not sustained take-home pay.
+- **A six-year check missed mature viral compounding.** Before P3, four-post TikTok lives reached
+  the wage benchmark in 83% of the shared-calendar sample, against 12% for twelve posts; varied
+  calendars still reversed the incentive (40% against 8%). Full downward drift and removing the
+  extra annual breakout resolve that retention interaction. In the final shared-calendar hobby
+  sample, four/twelve posts reach recurring pay in 80% / 98.33% of lives and wage in 0% / 1.67%.
+- **Streaming and podcast full-time careers remain especially rare.** Strong six-year play reaches
+  wage in 3% on Twitch and 0.5% on podcasts. The approved moderate lifts improve side income;
+  larger tested lifts did not convincingly improve the small tail sample. This remains a known
+  balance limitation, not a new unapproved tuning pass.
+- **Findings 64/69:** keep Payton’s 1,400 → 0 / 10,000 → 3 fame anchors and preserve saved luck.
+  Native device checks, Project mirroring and PR review remain open. P4 was subsequently authorized; see its measurement note below.
+
+### Playtest P4 — approved economy reduction built (7 October 2026)
+
+Full-cyclicality business demand effects are now severe recession −13%, recession −6.5%, slowdown
+−2.5%, normal 0%, growth +2.5%, **strong expansion +9% unchanged**, as Payton requested. The
+lower ledger/screen/timeline thresholds keep contextual explanations visible. Saved historical
+records stay as they were. Industry cyclicality, named events, world transitions, independent
+shocks, business controls and P1 rescue choices remain. No save bump; save v45 and TICKET 0708.
+
+Revised production measurement, 9,300 paired owners across 31 trades: five-year rescue-policy
+survival 82.11% → 83.85% in the harsh cycle, 83.44% → 83.59% under ordinary transitions. The
+paired mature severe profit hit is −8.75% → −4.28% of catalog revenue; boom benefit stays +2.71%.
+All 15 typechecks and 2,633 tests pass; full verify hits nine baseline catalog comparisons.
+PR #16: https://github.com/PaytonBlevins/YearAfter/pull/16 (depends on P1 #13, P2 #14 and P3 #15).
+Full method, prior proposal, approved exception, tests and sabotage: `playtest-p4-business-economy.md`.
+
+### Found by P4
+
+- **General profit volatility remains (finding 37).** Harsh-cycle mature normalized profit swings
+  shrink slightly; ordinary-transition swings remain similar. This fixes the economy's influence
+  without promising to remove all independent business risk. Cheap-trade startup/profit ratios
+  (finding 38) and acquisition economics are not retuned.
+- **A lower coefficient can leave its explanation behind.** Ordinary growth tops out at +2.5%;
+  its old +5% yearly threshold would hide it even though the boom still has +9%. Ledger, screen
+  and timeline thresholds are now shared/pinned. The exact 1.5% screen boundary and half-percent
+  rounding exposed floating-point cancellation; both signs and neighboring values are tested.
+- Native device checks, Project mirroring and PR review remain open. P5 was subsequently authorized; see below.
+
+### Playtest P5 — approved career listings built (7 October 2026)
+
+Claim published on `feat/playtest-p5-career-listings`, following P4 PR #16 while main remains
+`beff25a`. Built twelve listings, reserving two eligible study/training matches and filling
+the rest from the existing weighted general pool. The played-life median sees 93 → 96 of 169
+jobs; a passive life still gets its first job at median age 17. Across all 53 programs and
+5,300 paired new-graduate contexts, fewer than two matching rows drops from 57.38% to 1.89%;
+the remaining 100 cases all have only one eligible architecture job. With ten years' work,
+the same 5,300-context check has zero misses. The preliminary prototype was restored before final implementation.
+Measurement, methods and acceptance: `playtest-p5-career-listings.md`. No save change: v45 and TICKET 0708. Full verification and sabotage results are recorded there;
+All 15 typechecks and 2,670 tests pass; full verify has the nine baseline catalog mismatches.
+Thirty mutation trials caught all 29 behavioral defects after two gap repairs; one equivalent
+survivor is explained. P5 files pass formatting; 22 old notes still block the full format gate.
+PR #17: https://github.com/PaytonBlevins/YearAfter/pull/17 (depends on #13–#16).
+Implementation CI run 100 confirms the same 22 historical formatting failures, skipping later gates.
+Review, Project mirroring and native-device checks remain. P6 was subsequently authorized; see below.
+
+### Found by P5
+
+- **One eligible match cannot fill two distinct slots.** A new Architectural Studies graduate
+  can apply for Architectural drafter; Junior designer requires career reach as well as the
+  degree. Recommend showing all available matches when fewer than two are eligible, leaving
+  the qualification/experience gates intact. Payton approved this exception; no gate or catalog change was needed.
+- **More listings do not automatically mean an earlier first job (finding 21).** First-offer
+  chance and the education-ending trigger already govern that door. Paired passive quantiles
+  stay 16 / 17 / 18 even though lifetime board coverage improves.
+- **Reservations change the starvation ruler.** The existing linear weight-share proxy was
+  not an exact selection probability. P5 uses conservative ranking-event probability bounds
+  for the matching/general pools, retaining the zero-reach / 95% single-life intent.
+- **The saved major is current/last, not a history of degree subjects.** The implementation uses
+  that existing information plus all held licenses. It cannot promise every old subject after
+  another enrolment overwrites `majorId` without a separate save/history design.
+
+### Playtest P6 — approved adult and school work built (8 October 2026 UTC)
+
+Claim published separately on `feat/playtest-p6-school-work`, following P5 #17 while main
+remains `beff25a`. Six manual adult gigs now remain available from 18 with no upper-age cutoff;
+all 10,212 observed age-23–64 and 4,258 older years have six choices. Four existing school
+shifts are explicitly discoverable. Approved retail/kitchen pay is $6,000–$10,000 and
+$7,000–$12,000; fixed two-job cap removed under canonical hidden-workload policy.
+Graduation/college/adult payout and hours gaps are repaired; adult work enters existing tax,
+living and subsequent income stacks. No new stress/grade coefficient or save shape.
+
+Paired retail median graduation cash $9,926→$18,369; one shift barely changes median grades,
+two retain stress 49/performance 78 at 17. All-six adult work at 30 has median five-year gross
+$215,949, final stress 100 and happiness 21; workload consequences remain real. All 15
+typechecks and 2,713 tests pass; full verify has nine baseline catalog mismatches and full
+format has 22 old-note failures. Method, sabotage, acceptance and publication:
+`playtest-p6-school-work.md`. PR #18: https://github.com/PaytonBlevins/YearAfter/pull/18
+(targets main, depends on #13–#17). Implementation CI run 107 confirms the same 22-note format
+failure and skips later gates. Save v45 and TICKET 0708 unchanged. P7 subsequently authorized.
+
+### Found by P6
+
+- **B8 was a catalog cutoff, not low odds.** All old gigs ended by 22; adult choices are a manual
+  menu, not a random offer roll. Six appropriate rows fix availability without RNG enrollment.
+- **B9 already had four shift ids from 16.** Reuse them with clear discovery and their real gates.
+- **Early returns skipped work.** Graduation and college missed pay, adults missed hours. A single
+  annual producer now covers all stages and preserves the paid year's hours before age-out.
+- **Income readers missed gig earnings.** Tax/living, subsequent income bases and loan/dashboard
+  readers now include the real ledger producer, without double posting.
+- **The two-gig cap contradicted CORE_RULES 13.5.** Payton approved removal and explicit replacement
+  of its old assertion; workload, not a menu quota, owns overload.
+- **Stacked gigs can outgross lower-paid careers but carry costs.** All six at 30 pushes median
+  stress to 100. Older working lives have substantial baseline stress; this is not a measurement
+  of purely retired people. Approved pay and existing capacity stay; retirement spending is P15.
+- **Brief reference 0208 is stale.** School workload belongs to 0204/0205 and lesson 0408 / 13.66;
+  0208 names Children. No parenting work is included.
+- Review, native-device checks and Claude Project mirroring remain open.
+
+### Playtest P7 — approved engine, save and screens built (8 October 2026 UTC)
+
+Claim published separately before measurement, stacked on P6 #18 while main remains
+`beff25a`. Payton approved 20% smaller investor shocks, a six-month recurring-bill reserve
+(minimum $12,000) plus explicit purchase goal, correct risk targets and index reallocation,
+and a goal section on the existing Advisor screen. He amended every advisor investment to
+**15% of spare cash**, including funds and reinvestment. All built; manual amounts stay.
+Save v46 owns the optional goal with no-RNG migration; TICKET 0708 stays. Hired-advisor
+reload omission repaired. 53 new tests; 2,766 total and 15 typechecks pass; 28 distinct
+sabotage mutations caught after one test gap repair. Full verify still has nine baseline
+catalog mismatches, full format 22 old notes. PR #19: https://github.com/PaytonBlevins/YearAfter/pull/19
+(targets main, depends on #13–#18; mergeable when checked). Implementation CI run 113
+fails the same 22-note format checks and skips later gates. Actual measurements
+and stronger controls: `playtest-p7-investments-advisors.md`. P8 waits.
+
+### Found by P7
+
+- **A risk reduction can increase risk.** The command sells the largest overall holding even
+  when the recommendation names a sector or speculative holdings. Real probes sold a safe
+  bond fund and increased the offending allocation. Correct applicable targets are needed.
+- **Lowest volatility is not broadest exposure.** The fund helper chooses Government Bond
+  Fund. Explicit `fd.broadindex` routing materially changes advisor results.
+- **Smaller cheques alone do not fix advisor performance.** Scratch controlled comparisons
+  improve after targeting/reallocation fixes, but the full-life paid median still trails random
+  picks. B12 remains open; controlled returns cannot stand in for household outcomes.
+- **Old happiness figures are historical.** Current P2/P6-stack all-index versus buffered
+  happiness medians are 69 versus 72, p10 38 versus 54; do not repeat 20 versus 78 as current.
+- **The living estimate excludes separately billed commitments.** A reserve based on it
+  alone understates home/vehicle/debt costs. The combined reader now includes real separately billed commitments, with no
+  double-counting or business-account leakage; signed orphan debt counts personally.
+- The explicit purchase goal now has Set/Clear on the existing Advisor screen and a no-RNG
+  v46 migration. Advisor and goal both survive the real state constructor; native checks
+  and Claude Project mirroring remain open.
+
+### Playtest P8 — approved real-model catalog expansion built (8 October 2026 UTC)
+
+Payton reduced the 48-addition draft to 15–20, clarified actual model families and
+no invented movements, and requested a very expensive Jacob & Co. equivalent.
+Built eighteen additions (37 → 55 watches; 26 → 27 fictional makers), including
+Jakob & Co. Billionaire Timeless Treasure at $20m. Old 151 entries and stores are
+unchanged. Generator serialization now reproduces tracked valuables bytes without
+mass reformat. Actual twenty-year Watch Room median discovery rises 27 → 39 at
+$10k+ means; mixed-auction dilution and real-model/source mapping are documented.
+28 new tests; all 2,794 tests and 15 typechecks pass, eight baseline generator
+mismatches remain; 25 sabotage mutations caught, none missed, MD5 restored.
+`feat/playtest-p8-watch-catalog` follows P7 #19 while main remains `beff25a`.
+Save v46/TICKET 0708 stay; no screen/save/selection/icing change. P9 waits.
+PR #20 targets main, depends on #13–#19 and was mergeable when checked. Implementation
+CI run 119 failed the same 22 old-note formatting checks and skipped later gates; details: `playtest-p8-watch-catalog.md`.
+
+### Found by P8
+
+The content validator restores only the generator's declared primary output.
+The vehicle generator also writes vehicle-mods, leaving a formatting-only dirty
+secondary output after full verification. Exact tracked bytes were restored;
+secondary-output restoration is a separate open finding, not a P8 implementation.
+
+### Playtest P9 — approved renovation expansion built (8 October 2026 UTC)
+
+Payton approved the separately claimed, measured proposal on `feat/playtest-p9-renovations`.
+Built nine additions for 28 total, all approved costs/upkeep/recovery and kind gates,
+aggregate space budgets, derived +3 yearly residence comfort with hardship/final-shortfall
+suppression. Existing catalog fields/paid work and saved bedrooms/value preserved;
+zero-space maintenance stays available. No immediate stats and no rental/second-home
+comfort. Renovate displays full value/upkeep, capped marginal comfort and space, then
+explicit cash/card payment through the shared published PR #10 contract. Summary
+classifies borrowing as a transfer, preserving P6 earned-income rules. Renovations'
+owned generator now matches. Save v46/TICKET 0708 unchanged. Stacked on P8 #20 and
+PRs #13–#19 while main remains `beff25a`. All 15 typechecks and 2,867 tests pass;
+28 sabotage mutations caught, none missed; seven old catalog mismatches and 22 historical
+format failures remain. Owned formatting passes; PR #21 targets main and is mergeable when checked. Implementation CI 125 fails
+the same 22 historical-note formatting checks and skips later gates.
+Details: `playtest-p9-renovations.md`. P10 and life-event wording wait.
+
+### Found by P9
+
+A pool already prevents later installing an infinity pool because both are once-only
+additions in the same group. The indoor pool shares that constraint; replacement
+pricing is not quietly added. Annual renovation expense also includes the home's
+expense rate on recovered value, beyond the catalog upkeep; previews must use the reader.

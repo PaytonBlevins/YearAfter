@@ -245,16 +245,32 @@ export const EMPTY_BUSINESSES: readonly OwnedBusiness[] = [];
 /**
  * How much of a business's custom survives each of spec 1222's states, for a
  * business that feels the whole of it. "Effects should be moderate rather than
- * constantly punitive": a severe recession takes a quarter, a boom adds a tenth.
+ * constantly punitive". P4 halves the ordinary effects; Payton kept the +9% boom.
  */
 export const ECONOMY_DEMAND: Readonly<Record<MarketState, number>> = {
-  severeRecession: 0.74,
-  recession: 0.87,
-  slowdown: 0.95,
+  severeRecession: 0.87,
+  recession: 0.935,
+  slowdown: 0.975,
   normal: 1,
-  growth: 1.05,
+  growth: 1.025,
   strongExpansion: 1.09,
 };
+
+/** P4: keep reduced effects legible in existing context, not a new economy screen. */
+export const BUSINESS_ECONOMY_LEDGER_THRESHOLD = 0.0025;
+export const BUSINESS_ECONOMY_SCREEN_THRESHOLD = 0.015;
+export const BUSINESS_ECONOMY_LOSS_THRESHOLD = 0.03;
+export const BUSINESS_ECONOMY_GAIN_THRESHOLD = 0.025;
+
+/** Compare multipliers so subtraction cannot hide an exact threshold such as 1.015. */
+export const businessEconomyVisible = (
+  economy: number | undefined,
+  threshold = BUSINESS_ECONOMY_SCREEN_THRESHOLD,
+): boolean => economy !== undefined && (economy <= 1 - threshold || economy >= 1 + threshold);
+
+/** One unit of float tolerance keeps an exact half-percent from rounding the wrong way. */
+export const businessEconomyPercent = (economy: number): number =>
+  Math.round((Math.abs(economy - 1) + Number.EPSILON) * 100);
 
 /** What a business of this kind sees of the economy. */
 export const economyFor = (state: MarketState, cyclical: number): number =>

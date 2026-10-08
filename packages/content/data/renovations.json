@@ -9,7 +9,7 @@
       "share": 0.1,
       "floor": 25000,
       "cost": 0,
-      "recovery": 0.0,
+      "recovery": 0,
       "upkeep": 0,
       "beds": 0,
       "redoAfter": 15,
@@ -27,6 +27,8 @@
         "home.apartments-large"
       ],
       "blurb": "New cabinets, counters and appliances.",
+      "space": 0,
+      "happiness": 0,
       "phrase": "a new kitchen"
     },
     {
@@ -55,6 +57,8 @@
         "home.apartments-large"
       ],
       "blurb": "Stone counters, an island, and a range nobody needs.",
+      "space": 0,
+      "happiness": 0,
       "phrase": "a luxury kitchen"
     },
     {
@@ -65,7 +69,7 @@
       "share": 0.07,
       "floor": 15000,
       "cost": 0,
-      "recovery": 0.0,
+      "recovery": 0,
       "upkeep": 0,
       "beds": 0,
       "redoAfter": 15,
@@ -83,6 +87,8 @@
         "home.apartments-large"
       ],
       "blurb": "New tile, fixtures and a shower that works.",
+      "space": 0,
+      "happiness": 0,
       "phrase": "a new bathroom"
     },
     {
@@ -111,6 +117,8 @@
         "home.apartments-large"
       ],
       "blurb": "A soaking tub, heated floors and double sinks.",
+      "space": 0,
+      "happiness": 0,
       "phrase": "a luxury bathroom"
     },
     {
@@ -139,6 +147,8 @@
         "home.apartments-large"
       ],
       "blurb": "Hardwood, millwork and lighting through the whole place.",
+      "space": 0,
+      "happiness": 0,
       "phrase": "new finishes throughout"
     },
     {
@@ -162,6 +172,8 @@
         "home.estate"
       ],
       "blurb": "Another bedroom, built on.",
+      "space": 0,
+      "happiness": 0,
       "phrase": "another bedroom"
     },
     {
@@ -179,6 +191,8 @@
       "kinds": ["home.family", "home.large", "home.luxury", "home.estate"],
       "blurb": "Room for one more, where the lot allows it.",
       "needs": "reno.bedroom-1",
+      "space": 0,
+      "happiness": 0,
       "phrase": "one more bedroom"
     },
     {
@@ -203,6 +217,8 @@
         "home.estate"
       ],
       "blurb": "Cameras, sensors and a monitored alarm.",
+      "space": 0,
+      "happiness": 0,
       "phrase": "a security system"
     },
     {
@@ -226,6 +242,8 @@
         "home.estate"
       ],
       "blurb": "A room of machines you will use more in January.",
+      "space": 1,
+      "happiness": 1,
       "phrase": "a home gym"
     },
     {
@@ -249,6 +267,8 @@
         "home.estate"
       ],
       "blurb": "A projector, real seats and the good speakers.",
+      "space": 1,
+      "happiness": 1,
       "phrase": "a home theater"
     },
     {
@@ -265,6 +285,8 @@
       "redoAfter": 0,
       "kinds": ["home.starter", "home.family", "home.large", "home.luxury", "home.estate"],
       "blurb": "A hot tub on the deck.",
+      "space": 1,
+      "happiness": 1,
       "phrase": "a hot tub"
     },
     {
@@ -281,6 +303,8 @@
       "redoAfter": 0,
       "kinds": ["home.starter", "home.family", "home.large", "home.luxury", "home.estate"],
       "blurb": "An in-ground pool. Summer is different now.",
+      "space": 3,
+      "happiness": 2,
       "phrase": "a pool"
     },
     {
@@ -297,6 +321,8 @@
       "redoAfter": 0,
       "kinds": ["home.luxury", "home.estate"],
       "blurb": "The edge disappears into the view.",
+      "space": 4,
+      "happiness": 2,
       "phrase": "an infinity pool"
     },
     {
@@ -313,6 +339,8 @@
       "redoAfter": 0,
       "kinds": ["home.large", "home.luxury", "home.estate"],
       "blurb": "Racks for a thousand bottles, kept at fifty-five degrees.",
+      "space": 1,
+      "happiness": 1,
       "phrase": "a wine cellar"
     },
     {
@@ -329,6 +357,8 @@
       "redoAfter": 0,
       "kinds": ["home.large", "home.luxury", "home.estate"],
       "blurb": "A half court, lights and a real hoop.",
+      "space": 3,
+      "happiness": 1,
       "phrase": "a basketball court"
     },
     {
@@ -345,6 +375,8 @@
       "redoAfter": 0,
       "kinds": ["home.luxury", "home.estate"],
       "blurb": "A full court, fenced and lit.",
+      "space": 4,
+      "happiness": 1,
       "phrase": "a tennis court"
     },
     {
@@ -361,6 +393,8 @@
       "redoAfter": 0,
       "kinds": ["home.luxury", "home.estate"],
       "blurb": "Two lanes in the basement. Nobody believes you until they see it.",
+      "space": 3,
+      "happiness": 1,
       "phrase": "a bowling alley"
     },
     {
@@ -377,6 +411,8 @@
       "redoAfter": 0,
       "kinds": ["home.luxury", "home.estate"],
       "blurb": "A dome on the roof and a telescope worth more than a car.",
+      "space": 2,
+      "happiness": 1,
       "phrase": "an observatory"
     },
     {
@@ -393,7 +429,193 @@
       "redoAfter": 0,
       "kinds": ["home.estate"],
       "blurb": "A hedge maze. Somebody has to trim it.",
+      "space": 4,
+      "happiness": 1,
       "phrase": "a hedge maze"
+    },
+    {
+      "id": "reno.sauna",
+      "name": "Sauna",
+      "group": "sauna",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 12000,
+      "recovery": 0.25,
+      "upkeep": 300,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": [
+        "home.townhouse",
+        "home.starter",
+        "home.family",
+        "home.large",
+        "home.luxury",
+        "home.estate"
+      ],
+      "blurb": "A warm room for a quiet end to the day.",
+      "space": 1,
+      "happiness": 1,
+      "phrase": "a sauna"
+    },
+    {
+      "id": "reno.patio",
+      "name": "Patio",
+      "group": "patio",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 15000,
+      "recovery": 0.5,
+      "upkeep": 300,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": ["home.starter", "home.family", "home.large", "home.luxury", "home.estate"],
+      "blurb": "A paved spot to sit outside and eat with friends.",
+      "space": 1,
+      "happiness": 1,
+      "phrase": "a patio"
+    },
+    {
+      "id": "reno.game-room",
+      "name": "Game Room",
+      "group": "game-room",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 25000,
+      "recovery": 0.2,
+      "upkeep": 300,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": [
+        "home.townhouse",
+        "home.starter",
+        "home.family",
+        "home.large",
+        "home.luxury",
+        "home.estate"
+      ],
+      "blurb": "A room for games, with space to leave the table set up.",
+      "space": 1,
+      "happiness": 1,
+      "phrase": "a game room"
+    },
+    {
+      "id": "reno.study",
+      "name": "Private Study",
+      "group": "study",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 18000,
+      "recovery": 0.35,
+      "upkeep": 0,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": [
+        "home.condo",
+        "home.townhouse",
+        "home.starter",
+        "home.family",
+        "home.large",
+        "home.luxury",
+        "home.estate"
+      ],
+      "blurb": "A quiet room with shelves and a desk of your own.",
+      "space": 1,
+      "happiness": 1,
+      "phrase": "a private study"
+    },
+    {
+      "id": "reno.fountain",
+      "name": "Front-yard Fountain",
+      "group": "fountain",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 20000,
+      "recovery": 0.15,
+      "upkeep": 600,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": ["home.family", "home.large", "home.luxury", "home.estate"],
+      "blurb": "Running water by the front walk. The pump needs care.",
+      "space": 1,
+      "happiness": 1,
+      "phrase": "a front-yard fountain"
+    },
+    {
+      "id": "reno.guest-house",
+      "name": "Guest House",
+      "group": "guest-house",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 180000,
+      "recovery": 0.5,
+      "upkeep": 2000,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": ["home.luxury", "home.estate"],
+      "blurb": "A small place for visiting family and friends. It isn't a rental unit.",
+      "space": 4,
+      "happiness": 1,
+      "phrase": "a guest house"
+    },
+    {
+      "id": "reno.studio",
+      "name": "Recording Studio",
+      "group": "studio",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 45000,
+      "recovery": 0.15,
+      "upkeep": 600,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": ["home.large", "home.luxury", "home.estate"],
+      "blurb": "A sound-treated room to make recordings without waking the house.",
+      "space": 2,
+      "happiness": 1,
+      "phrase": "a recording studio"
+    },
+    {
+      "id": "reno.indoor-pool",
+      "name": "Indoor Pool",
+      "group": "pool",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 250000,
+      "recovery": 0.3,
+      "upkeep": 8000,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": ["home.luxury", "home.estate"],
+      "blurb": "A pool under a roof. Heating and ventilation are year-round bills.",
+      "space": 4,
+      "happiness": 2,
+      "phrase": "an indoor pool"
+    },
+    {
+      "id": "reno.outdoor-kitchen",
+      "name": "Outdoor Kitchen",
+      "group": "outdoor-kitchen",
+      "refresh": false,
+      "share": 0,
+      "floor": 0,
+      "cost": 20000,
+      "recovery": 0.35,
+      "upkeep": 500,
+      "beds": 0,
+      "redoAfter": 0,
+      "kinds": ["home.family", "home.large", "home.luxury", "home.estate"],
+      "blurb": "A grill, counters and a sink for cooking outside.",
+      "space": 1,
+      "happiness": 1,
+      "phrase": "an outdoor kitchen"
     }
   ]
 }

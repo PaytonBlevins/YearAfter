@@ -10,6 +10,7 @@
  * waits on a write — but failures surface in `saveError` rather than vanishing.
  */
 
+import { GIG_UNAVAILABLE_LABELS } from '@yearafter/education';
 import {
   createContext,
   useCallback,
@@ -21,7 +22,10 @@ import {
   type ReactNode,
 } from 'react';
 import { asSaveId, type SaveId } from '@yearafter/core';
+import type { PurchasePayment } from '@yearafter/finance';
 import {
+  setLifestyle,
+  LIFESTYLE_ERROR_LABELS,
   advanceYear,
   createNewGame,
   decide as resolveDecision,
@@ -90,6 +94,8 @@ import {
   hireAdvisor,
   dismissAdvisor,
   actOnAdvice,
+  setCashGoal,
+  CASH_GOAL_ERROR_LABELS,
   setContribution,
   retireNow,
   takeOutEarly,
@@ -109,7 +115,7 @@ import {
   closeBusiness,
   type Financing,
 } from '@yearafter/simulation';
-import { EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
+import { type LifestyleTier, EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
 import type { BidTier, Payroll, SupplierGrade } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 
@@ -148,6 +154,7 @@ import {
 } from '@yearafter/persistence';
 
 interface GameContextValue {
+  readonly chooseLifestyle: (tier: LifestyleTier) => void;
   readonly ready: boolean;
   readonly state: GameState | null;
   readonly settings: SaveSettings;
@@ -215,7 +222,7 @@ interface GameContextValue {
   /** Ticket 0505. Have a shop fit a modification. */
   readonly fitACarMod: (vehicleId: string, modId: string) => void;
   /** Ticket 0506. Have a builder do something to a home. */
-  readonly renovateHome: (homeId: string, renovationId: string) => void;
+  readonly renovateHome: (homeId: string, renovationId: string, payment?: PurchasePayment) => void;
   /** Ticket 0601. Open a business, run it, sell it or close it. */
   readonly openABusiness: (typeId: string, finance?: Financing) => void;
   /** Ticket 0603. Buy one that is for sale. A loan is written into the purchase, never paid out as cash. */
@@ -240,6 +247,7 @@ interface GameContextValue {
   readonly hireAdvisorWith: (advisorId: string) => void;
   readonly dismissAdvisorNow: () => void;
   readonly actOnAdviceWith: (recommendationId: string) => void;
+  readonly setPurchaseGoal: (amount: number) => void;
   /** Ticket 0310. */
   readonly setContributionTo: (rate: number) => void;
   readonly retireNowAction: () => void;
@@ -451,7 +459,13 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         const result = resolveDecision(current, eventId, choiceId);
         if (!result.ok) {
           // Expected, not exceptional: the same save answered on two devices.
-          setSaveError(`That choice is no longer available (${result.error}).`);
+          setSaveError(
+            result.error === 'cannot-afford'
+              ? "You don't have enough in your bank to keep this business going. You can close it instead."
+              : eventId === 'business.rescue'
+                ? 'This business decision has changed. Try the current choices.'
+                : `That choice is no longer available (${result.error}).`,
+          );
           return current;
         }
         opens = result.value.opens;
@@ -887,10 +901,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0506: renovations and shopping ---------------------------- */
 
   const renovateHome = useCallback(
-    (homeId: string, renovationId: string) => {
+    (homeId: string, renovationId: string, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = renovate(current, homeId, renovationId);
+        const result = renovate(current, homeId, renovationId, payment);
         if (!result.ok) {
           setOutcome({ title: 'Not now', body: RENOVATE_ERROR_LABELS[result.error], tone: 'bad' });
           return current;
@@ -1213,13 +1227,32 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     });
   }, [persist, saveId, settings]);
 
+  const setPurchaseGoal = useCallback(
+    (amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = setCashGoal(current, amount);
+        if (!result.ok) {
+          setSaveError(CASH_GOAL_ERROR_LABELS[result.error]);
+          return current;
+        }
+        setSaveError(null);
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const actOnAdviceWith = useCallback(
     (recommendationId: string) => {
       setState((current) => {
         if (!current) return current;
         const result = actOnAdvice(current, recommendationId);
         if (!result.ok) {
-          setSaveError(`That one cannot be acted on (${result.error}).`);
+          setSaveError(
+            'That recommendation is no longer available. Check your cash and what you hold, then try again.',
+          );
           return current;
         }
         setOutcome({
@@ -1229,6 +1262,26 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         });
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const chooseLifestyle = useCallback(
+    (tier: LifestyleTier) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = setLifestyle(current, tier);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Lifestyle unchanged',
+            body: LIFESTYLE_ERROR_LABELS[result.error],
+            tone: 'neutral',
+          });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
       });
     },
     [persist, saveId, settings],
@@ -1591,7 +1644,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       mutateEducation((current) => {
         const result = takeGig(current, gigId);
         if (!result.ok) {
-          setSaveError(`Cannot take that on (${result.error}).`);
+          setSaveError(
+            result.error === 'no-such-gig'
+              ? "That work isn't available."
+              : GIG_UNAVAILABLE_LABELS[result.error],
+          );
           return current;
         }
         return result.value;
@@ -1673,7 +1730,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       hireAdvisorWith,
       dismissAdvisorNow,
       actOnAdviceWith,
+      setPurchaseGoal,
       setContributionTo,
+      chooseLifestyle,
       retireNowAction,
       takeOutEarlyWith,
       stopTreatingFor,
@@ -1749,7 +1808,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       hireAdvisorWith,
       dismissAdvisorNow,
       actOnAdviceWith,
+      setPurchaseGoal,
       setContributionTo,
+      chooseLifestyle,
       retireNowAction,
       takeOutEarlyWith,
       payLoanWith,
