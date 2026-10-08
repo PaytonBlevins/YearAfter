@@ -1581,15 +1581,18 @@ failure and skips later gates. Save v45 and TICKET 0708 unchanged. P7 subsequent
   0208 names Children. No parenting work is included.
 - Review, native-device checks and Claude Project mirroring remain open.
 
-### Playtest P7 — measured proposal awaiting approval (8 October 2026 UTC)
+### Playtest P7 — approved engine, save and screens built (8 October 2026 UTC)
 
-Claim published separately on `feat/playtest-p7-investments-advisors`, stacked on P6 #18
-while main remains `beff25a`. B11/B12/finding 28 measured; no production changes.
-Proposed 20% smaller investor shocks, cost-scaled reserve (six months, minimum $12,000)
-plus explicit purchase goal, 25% idle/15% single-name spare-cash sizing, correct reductions
-and surplus transfer to Broad Market Index, with a goal section on the existing Advisor screen.
-Save v45/TICKET 0708 unchanged; v46 proposed but not reserved. Payton approval required for
-these numbers and screen/save shape. Full results: `playtest-p7-investments-advisors.md`. P8 waits.
+Claim published separately before measurement, stacked on P6 #18 while main remains
+`beff25a`. Payton approved 20% smaller investor shocks, a six-month recurring-bill reserve
+(minimum $12,000) plus explicit purchase goal, correct risk targets and index reallocation,
+and a goal section on the existing Advisor screen. He amended every advisor investment to
+**15% of spare cash**, including funds and reinvestment. All built; manual amounts stay.
+Save v46 owns the optional goal with no-RNG migration; TICKET 0708 stays. Hired-advisor
+reload omission repaired. 53 new tests; 2,766 total and 15 typechecks pass; 28 distinct
+sabotage mutations caught after one test gap repair. Full verify still has nine baseline
+catalog mismatches, full format 22 old notes. Publication/CI pending. Actual measurements
+and stronger controls: `playtest-p7-investments-advisors.md`. P8 waits.
 
 ### Found by P7
 
@@ -1604,6 +1607,8 @@ these numbers and screen/save shape. Full results: `playtest-p7-investments-advi
 - **Old happiness figures are historical.** Current P2/P6-stack all-index versus buffered
   happiness medians are 69 versus 72, p10 38 versus 54; do not repeat 20 versus 78 as current.
 - **The living estimate excludes separately billed commitments.** A reserve based on it
-  alone understates home/vehicle/debt costs. The proposed combined reader needs a new
-  full-life calibration, with no double-counting or business-account leakage.
-- No saved purchase goal exists. Its minimal screen and no-RNG save migration await approval.
+  alone understates home/vehicle/debt costs. The combined reader now includes real separately billed commitments, with no
+  double-counting or business-account leakage; signed orphan debt counts personally.
+- The explicit purchase goal now has Set/Clear on the existing Advisor screen and a no-RNG
+  v46 migration. Advisor and goal both survive the real state constructor; native checks
+  and Claude Project mirroring remain open.

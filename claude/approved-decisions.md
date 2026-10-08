@@ -128,6 +128,19 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
 - **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
   account creation for channels.
 
+- **P7 proposal approved by Payton (8 October), with universal 15% sizing:** investor-only
+  market/sector/individual shocks are 20% smaller; preserve drift, payout, reversion, floors,
+  caps, macro transition odds and P4 business coefficients. Advisors protect six months of
+  current recurring household bills, minimum $12,000, plus an explicit purchase savings goal.
+  Every advisor buy suggestion uses **15% of spare cash**, including funds and reinvestment
+  of reductions; there is no 25% idle-cash or one-stock-only exception. Under-$1,000 buys
+  stay quiet. Reduce applicable sector/speculative/named holdings, retain needed cash and
+  put up to that same 15% limit into Broad Market Index. Existing tiers, risk bars and the
+  0.2% paid fee stay. An optional whole-dollar purchase target has Set/Clear on the existing
+  Advisor screen, before and after hiring, and migrates from older saves as no goal.
+  Goal protection applies to advice, not manual trades or purchases. Save v46 is P7's;
+  TICKET remains 0708. See `playtest-p7-investments-advisors.md` for measured policy limits.
+
 ## Reference material
 
 BitLife screenshots supplied by the product owner, saved at

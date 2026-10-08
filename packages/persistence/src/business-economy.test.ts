@@ -1,3 +1,4 @@
+import { CURRENT_SAVE_VERSION } from './save-schema';
 import { expect, it } from 'vitest';
 import { asSaveId, dollars } from '@yearafter/core';
 import { newBusiness, reconcile, post } from '@yearafter/finance';
@@ -47,7 +48,7 @@ it.each([0.844, 1.054])(
     };
     const state = { ...adult, businesses: [business] };
     const save = toSave(state, { id: asSaveId('p4-save'), createdAt: 0, updatedAt: 0 });
-    expect(save.version).toBe(45);
+    expect(save.version).toBe(CURRENT_SAVE_VERSION);
     const restored = migrateSave(JSON.parse(JSON.stringify(save)));
     expect(restored.ok).toBe(true);
     if (!restored.ok) throw new Error('Invalid save');

@@ -1010,6 +1010,11 @@ const migrations: Readonly<Record<number, Migration>> = {
         : { ties: [], met: [], answeredYear: 0, work: { year: 0, done: [] } },
     version: 42,
   }),
+  /** P7 v45 -> v46: no goal existed before; no invented goal and no RNG. */
+  45: (save) => {
+    const { cashGoal: _future, ...prior } = save;
+    return { ...prior, version: 46 };
+  },
   /** v44 -> v45: P2 defaults the existing life without changing its history or RNG. */
   44: (save) => {
     const household = save['household'];
@@ -1334,7 +1339,10 @@ export function validateCurrentSave(
   const world = candidate['world'] as Record<string, unknown> | undefined;
   const rng = candidate['rng'] as Record<string, unknown> | undefined;
 
+  const goal = candidate['cashGoal'];
   const problems = [
+    require('cashGoal', goal, goal === undefined ||
+      (typeof goal === 'number' && Number.isSafeInteger(goal) && goal >= 0)),
     require('id', candidate['id'], typeof candidate['id'] === 'string'),
     require('player', player, typeof player === 'object' && player !== null),
     require('player.age', player?.['age'], typeof player?.['age'] === 'number'),

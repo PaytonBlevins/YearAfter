@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { asSaveId } from '@yearafter/core';
-import { MemorySaveRepository, toSave } from '@yearafter/persistence';
+import { MemorySaveRepository, toSave, CURRENT_SAVE_VERSION } from '@yearafter/persistence';
 import { createNewGame, livingEstimateFor, type GameState } from '@yearafter/simulation';
 import { GameProvider, useGame } from '../stores/gameStore';
 import { rowTitled, rowsOf, textsOf } from '../test/harness';
@@ -83,7 +83,7 @@ describe('P2 — lifestyle through the real store and save repository', () => {
       expect(rowTitled(renderer, title).props.value).toBe('Selected');
       const loaded = await repository.load(saveId);
       if (!loaded.ok) throw new Error('Not saved');
-      expect(loaded.value.version).toBe(45);
+      expect(loaded.value.version).toBe(CURRENT_SAVE_VERSION);
       expect(loaded.value.household.lifestyle).toBe(tier);
     },
   );

@@ -1,3 +1,4 @@
+import { CURRENT_SAVE_VERSION } from './save-schema';
 import { describe, expect, it } from 'vitest';
 import { asSaveId } from '@yearafter/core';
 import { advanceYear, createNewGame, setLifestyle } from '@yearafter/simulation';
@@ -21,7 +22,7 @@ describe('P2 — save v45 lifestyle', () => {
     if (!result.ok) throw new Error(result.error.kind);
     expect(result.value).toEqual({
       ...legacy,
-      version: 45,
+      version: CURRENT_SAVE_VERSION,
       household: { ...household, lifestyle: 'comfortable' },
     });
     expect(JSON.stringify(legacy)).toBe(before);
@@ -34,7 +35,7 @@ describe('P2 — save v45 lifestyle', () => {
       const chosen = setLifestyle({ ...base, player: { ...base.player, age: 30 } }, tier);
       if (!chosen.ok) throw new Error(chosen.error);
       const save = toSave(chosen.value, options);
-      expect(save.version).toBe(45);
+      expect(save.version).toBe(CURRENT_SAVE_VERSION);
       const loaded = migrateSave(JSON.parse(JSON.stringify(save)));
       if (!loaded.ok) throw new Error(loaded.error.kind);
       expect(loaded.value.household.lifestyle).toBe(tier);

@@ -1,3 +1,4 @@
+import { CURRENT_SAVE_VERSION } from './save-schema';
 import { expect, it } from 'vitest';
 import { asSaveId } from '@yearafter/core';
 import { createNewGame, openings, atTheDoor, advanceYear } from '@yearafter/simulation';
@@ -25,7 +26,7 @@ it('P5 reconstructs twelve matched listings from v45 without saving a board or s
   // new-game streams can hold signed words; loaded snapshots use unsigned words.
   const state = fromSave(toSave(fixture, options));
   const before = toSave(state, options);
-  expect(before.version).toBe(45);
+  expect(before.version).toBe(CURRENT_SAVE_VERSION);
   const board = openings(state);
   expect(board).toHaveLength(12);
   expect(board.filter((j) => fitsStudy(atTheDoor(state), j)).length).toBeGreaterThanOrEqual(2);

@@ -1,3 +1,4 @@
+import { CURRENT_SAVE_VERSION } from './save-schema';
 import { expect, it } from 'vitest';
 import { asSaveId } from '@yearafter/core';
 import { createNewGame, takeGig, advanceYear } from '@yearafter/simulation';
@@ -15,7 +16,7 @@ it('P6 saves and replays adult work with existing v45 ids and no new shape', () 
   const options = { id: asSaveId('p6-save'), createdAt: 0, updatedAt: 0 },
     state = fromSave(toSave(taken.value, options)),
     saved = toSave(state, options);
-  expect(saved.version).toBe(45);
+  expect(saved.version).toBe(CURRENT_SAVE_VERSION);
   expect(saved.education.gigs).toEqual(['gig.adult.repairs']);
   expect(saved).not.toHaveProperty('shiftGross');
   expect(saved.education).not.toHaveProperty('hours');

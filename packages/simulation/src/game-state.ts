@@ -206,6 +206,8 @@ export interface GameState {
    * nobody made.
    */
   readonly advisorId?: string;
+  /** P7: whole dollars explicitly protected for a purchase. */
+  readonly cashGoal?: number;
   /**
    * Ticket 0310. The retirement account, the pension service, and whether they
    * have stopped.
@@ -490,6 +492,8 @@ export const createWorldState = (year: number, generation = 1): WorldState => ({
 });
 
 export interface CreateGameStateOptions {
+  readonly advisorId?: string;
+  readonly cashGoal?: number;
   readonly health?: HealthState;
   readonly finance?: Ledger;
   readonly household?: HouseholdFinances;
@@ -552,6 +556,8 @@ export const createGameState = (
   market: options.market ?? OPENING_MARKET,
   prices: options.prices ?? openingPrices(),
   retirement: options.retirement ?? NO_RETIREMENT,
+  ...(options.advisorId !== undefined ? { advisorId: options.advisorId } : {}),
+  ...(options.cashGoal !== undefined ? { cashGoal: options.cashGoal } : {}),
   ...(options.offer ? { offer: options.offer } : {}),
   ...(options.collegeOffer ? { collegeOffer: options.collegeOffer } : {}),
   ...(options.lifeOffer ? { lifeOffer: options.lifeOffer } : {}),

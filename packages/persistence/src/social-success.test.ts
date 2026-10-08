@@ -1,3 +1,4 @@
+import { CURRENT_SAVE_VERSION } from './save-schema';
 import { describe, expect, it } from 'vitest';
 import { asSaveId } from '@yearafter/core';
 import { advanceYear, createNewGame, openChannel, postToChannel } from '@yearafter/simulation';
@@ -27,7 +28,7 @@ function saved() {
 describe('P3 existing accounts', () => {
   it('keeps old luck, spike and posting budget through reload and deterministic continuation', () => {
     const save = saved();
-    expect(save.version).toBe(45);
+    expect(save.version).toBe(CURRENT_SAVE_VERSION);
     const loaded = migrateSave(JSON.parse(JSON.stringify(save)));
     if (!loaded.ok) throw new Error('Invalid save');
     const a = fromSave(save),

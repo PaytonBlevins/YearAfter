@@ -64,7 +64,7 @@ function saved() {
 describe('P1 — saved business rescue', () => {
   it('round trips the real quote, negative till, loan and pause, and resolves identically after load', () => {
     const save = saved();
-    expect(save.version).toBe(45);
+    expect(save.version).toBe(CURRENT_SAVE_VERSION);
     const loaded = migrateSave(JSON.parse(JSON.stringify(save)));
     expect(loaded.ok).toBe(true);
     if (!loaded.ok) throw new Error(loaded.error.kind);

@@ -96,17 +96,21 @@ PR #18: https://github.com/PaytonBlevins/YearAfter/pull/18 (targets main; depend
 Implementation CI run 107 fails the same 22 historical-note format checks and skips later gates.
 Native checks and Project mirroring remain open. P7 was subsequently authorized; see below.
 
-**P7 measurement update:** Payton authorized starting P7 on 8 October. Agent B published a
-separate claim on `feat/playtest-p7-investments-advisors`, stacked on P6 #18. No production
-changes yet. Real command probes find risk reductions selling unrelated safe holdings and
-the “broadest fund” helper selecting Government Bond Fund rather than Broad Market Index.
-A repaired advice prototype wins 85.6% of matched controlled runs after fees under the current
-market, but its whole-life paid median still trails picking alone; B12 is not complete.
-The proposal asks approval for 20% smaller investor shocks, six months of recurring bills
-(minimum $12,000) plus an explicit purchase goal, 25% idle/15% single-name spare-cash sizing,
-correct sale targets with surplus index reallocation, and a small saved-goal section on the
-existing Advisor screen. Details and caveats: `playtest-p7-investments-advisors.md`.
-Save v45/TICKET 0708 stay; v46 is proposed, not reserved. P8 waits.
+**P7 implementation update:** Payton approved the measured proposal on 8 October, amending
+all advisor investment suggestions to **15% of spare cash**, including funds and
+reinvestment; no 25% exception. Agent B built 20% smaller investor shocks, a six-month
+recurring-bill reserve (minimum $12,000) plus saved purchase goal, correct sale targets
+and Broad Market Index routing, goal Set/Clear and preview on the existing Advisor screen.
+Save v46 migrates older lives to no goal without RNG; hired advisors now survive loading.
+TICKET 0708 stays. Stack follows P6 #18 while main remains `beff25a`; P8 waits.
+53 new tests, 2,766 total and 15 typechecks pass; 28 sabotage mutations caught after one
+generator-silence test repair, none missed. Full verify has nine baseline catalog mismatches;
+full format the same 22 old notes. Final publication/CI pending.
+Actual paid controlled wins are 73.6% after fees; 300-life paid wins versus one 15% random
+cheque are 77.4% at 50, but only 51.7% versus three cheques and 46.6% versus index-only.
+Aggressive all-surplus self-directed investing still beats the hybrid advisor's wealth;
+do not claim universal superiority. Details: `playtest-p7-investments-advisors.md`.
+Native-device checks and Claude Project mirroring remain open.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

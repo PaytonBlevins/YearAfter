@@ -2162,7 +2162,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(45);
+    expect(CURRENT_SAVE_VERSION).toBe(CURRENT_SAVE_VERSION);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {

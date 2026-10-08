@@ -50,7 +50,8 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 45;
+/** P7: explicit purchase savings goal; old lives migrate with no goal. */
+export const CURRENT_SAVE_VERSION = 46;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -184,7 +185,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 45;
+  readonly version: 46;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -239,6 +240,8 @@ export interface SaveGameV18 {
   readonly prices: PriceBook;
   /** Ticket 0309. Who they pay for advice, if anybody. Usually nobody. */
   readonly advisorId?: string;
+  /** P7: whole dollars explicitly protected for a purchase. */
+  readonly cashGoal?: number;
   /** Ticket 0310. The retirement account, the service, and whether they stopped. */
   readonly retirement: RetirementState;
   /**

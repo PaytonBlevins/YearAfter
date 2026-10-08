@@ -93,6 +93,8 @@ import {
   hireAdvisor,
   dismissAdvisor,
   actOnAdvice,
+  setCashGoal,
+  CASH_GOAL_ERROR_LABELS,
   setContribution,
   retireNow,
   takeOutEarly,
@@ -244,6 +246,7 @@ interface GameContextValue {
   readonly hireAdvisorWith: (advisorId: string) => void;
   readonly dismissAdvisorNow: () => void;
   readonly actOnAdviceWith: (recommendationId: string) => void;
+  readonly setPurchaseGoal: (amount: number) => void;
   /** Ticket 0310. */
   readonly setContributionTo: (rate: number) => void;
   readonly retireNowAction: () => void;
@@ -1223,13 +1226,32 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     });
   }, [persist, saveId, settings]);
 
+  const setPurchaseGoal = useCallback(
+    (amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = setCashGoal(current, amount);
+        if (!result.ok) {
+          setSaveError(CASH_GOAL_ERROR_LABELS[result.error]);
+          return current;
+        }
+        setSaveError(null);
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const actOnAdviceWith = useCallback(
     (recommendationId: string) => {
       setState((current) => {
         if (!current) return current;
         const result = actOnAdvice(current, recommendationId);
         if (!result.ok) {
-          setSaveError(`That one cannot be acted on (${result.error}).`);
+          setSaveError(
+            'That recommendation is no longer available. Check your cash and what you hold, then try again.',
+          );
           return current;
         }
         setOutcome({
@@ -1707,6 +1729,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       hireAdvisorWith,
       dismissAdvisorNow,
       actOnAdviceWith,
+      setPurchaseGoal,
       setContributionTo,
       chooseLifestyle,
       retireNowAction,
@@ -1784,6 +1807,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       hireAdvisorWith,
       dismissAdvisorNow,
       actOnAdviceWith,
+      setPurchaseGoal,
       setContributionTo,
       chooseLifestyle,
       retireNowAction,

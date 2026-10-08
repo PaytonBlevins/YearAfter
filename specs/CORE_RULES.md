@@ -3126,3 +3126,26 @@ The canonical policy lets players overcommit and experience consequences. A two-
 contradicted it; Payton explicitly approved replacing that cap test. Measure the whole-year
 consequences with real hours rather than assuming unlimited choices create free capacity.
 Separate older working lives from purely retired lives before attributing their stress.
+
+### 13.151 Risk reductions must target the described risk
+
+An instruction to reduce speculative exposure must not sell an unrelated safe holding merely
+because it is the largest. Resolve applicable holdings from the recommendation's reason,
+span holdings when needed, and test that unrelated positions survive. “Lowest volatility”
+is not “broadest exposure”: use the explicit catalog id for an index destination.
+
+### 13.152 Protect commitments in both advice and its command
+
+A reserve based only on the living row omits separately billed mortgage, car and debt
+payments. Reuse settlement calculators, account for student deferral, exclude operating
+business accounts but include signed debt after closure, and avoid duplicate allowances.
+Recompute after every player tap. Test silence in the generator as well as refusal of stale
+commands; a protected goal can otherwise still receive an inappropriate buy suggestion.
+
+### 13.153 Measure the policy, not just the stock signal
+
+Advisor comparisons depend on contribution size, reinvestment, cash goals, fees and household
+spending. Match those policies, state the comparator, and disclose stronger controls that
+outperform it. Controlled investment returns do not establish superiority over every played
+life. Round-trip the hired advisor and goal through the actual state constructor: serializing
+a field is insufficient if construction silently drops it.

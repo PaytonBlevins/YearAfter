@@ -1,15 +1,22 @@
 # Playtest P7 — investments and advisors
 
-**Status:** proposal approved with amended sizing; implementation in progress, 8 October 2026 UTC. Payton authorized starting
-P7; the new numbers and screen/save choices below await approval under the playtest brief.
-Approval receipt: Payton approved everything with **15% for investing in general**, not just one stock. Every advisor buy suggestion, including idle-cash fund suggestions, uses 15% of spare cash; there is no 25% fund exception. Reserve, corrected sale targets/index reallocation, goal screen and volatility changes remain approved. Prior 25% prototype results below are historical experiments and must be rerun. P8 waits.
+**Status:** approved P7 engine/save/screens built, verified; publication in progress,
+8 October 2026 UTC. Payton approved the proposal with **15% for investing in general**, not
+just one stock. Every advisor buy, including funds and reinvestment, uses 15% of spare cash.
+The initial 25% idle-cash prototype below is historical, not the final calibration. P8 waits.
 **Branch:** `feat/playtest-p7-investments-advisors`, stacked on P6 PR #18 and #13–#17;
 `origin/main` remains `beff25a`. Claim published separately before measurements.
-**Scope:** B11, B12 and finding 28. Investor volatility, advisor commands, cash protection,
-explicit purchase savings and the existing Advisor screen. No business macro retune, private
-deals, retirement spending, new advisor tier or life-event wording.
-**Save:** P7 now reserves v46 for the optional goal; TICKET 0708 stays. `approved-decisions.md`
-is unchanged. Claude Project mirroring is unavailable in this session.
+**Spec sections:** 949–978 (balance/economy), 1043–1059 (reconciliation), 1108–1140
+(save/annual cadence), 1222–1246 (financial persistence), 1383 (advisor), 1691 onward (0308/0309).
+**Allowed files:** finance advisors/market and their tests; simulation investments/state and tests;
+persistence schema/migrations/serialization and save tests; mobile Advisor screen/store and tests;
+this doc, HANDOFF, CLAIMS, roadmap, approved decisions and CORE_RULES lessons.
+**Protected areas touched:** explicit approved investment balance, advisory sizing and optional
+save goal. No business macro retune, private deals, retirement spending, tier/fee changes or
+life-event wording. Existing tests remain; old current-save-v45 literals now assert the current
+version, with an explicit P7 v46 guard. Historical migration inputs keep their old versions.
+**Save:** v46 claimed and built; old lives get no invented goal and no RNG draw. TICKET stays 0708. `approved-decisions.md` records the actual approval. Native checks and Claude Project
+mirroring remain unavailable in this session.
 
 ## Findings from the actual commands
 
@@ -130,7 +137,7 @@ Current paid cumulative fees through 55 have p10/median/p90 $846/$5,275/$20,232;
 prototype $878/$4,204/$19,490. Life spending and opportunity effects must be reported
 alongside return metrics when the actual combined model is rerun.
 
-## Concrete proposal for Payton's approval
+## Historical proposal (approved with universal 15% amendment)
 
 1. **20% smaller investor shocks:** use the 0.80 market/sector/individual shock multipliers
    above. Preserve market-state probabilities, drift, payout, reversion, floors, caps and
@@ -177,22 +184,128 @@ Approval authorizes building and calibrating this candidate; it does not waive t
 performance requirement. If the corrected full-life model still fails, report it and propose
 any additional product dial instead of silently changing risk, fees or promising superiority.
 
-## Implementation acceptance after approval
+## Implementation acceptance
 
-- [ ] Engine and screens use one derived recurring-bill/reserve calculation without duplicated charges.
-- [ ] No advisory buy crosses protected cash; zero/sub-minimum buys suppressed; stale ids rechecked.
-- [ ] Goal set/clear, rejection language, both screen branches and purchase-goal silence tested.
-- [ ] Correct sector/speculative/named-sale targets, multiple holdings and explicit index transfer tested.
-- [ ] Actual command reruns reproduce positive paid net-of-fee controlled results and a convincing
+- [x] Engine and screens use one derived recurring-bill/reserve calculation without duplicated charges.
+- [x] No advisory buy crosses protected cash; zero/sub-minimum buys suppressed; stale ids rechecked.
+- [x] Goal set/clear, rejection language, both screen branches and purchase-goal silence tested.
+- [x] Correct sector/speculative/named-sale targets, multiple holdings and explicit index transfer tested.
+- [x] Actual command reruns reproduce positive paid net-of-fee controlled results and a convincing
       whole-life comparison; report distributions, paired wins, spending, cash, happiness and stress.
-- [ ] Market risk hierarchy, correlations, concentrated/spread comparisons, crashes, horizons,
+- [x] Market risk hierarchy, correlations, concentrated/spread comparisons, crashes, horizons,
       coupons/maturities and floor guarantees remain; no weaker/deleted tests.
-- [ ] Save version claimed, no-RNG migration, round-trip, malformed shape and seeded replay tests.
-- [ ] At least fifteen independent sabotage mutations; fix survivors, restore and verify hashes.
-- [ ] Full `pnpm verify`, changed-file formatting, full format and actual CI reported honestly.
-- [ ] Final docs, approved decisions, CORE_RULES lessons, roadmap, PR into main; stop before P8.
+- [x] Save version claimed, no-RNG migration, round-trip, malformed shape and seeded replay tests.
+- [x] At least fifteen independent sabotage mutations; fix survivors, restore and verify hashes.
+- [x] Full `pnpm verify`, changed-file formatting, full format and actual CI reported honestly.
+- [x] Final docs, approved decisions, CORE_RULES lessons, roadmap, PR into main; stop before P8.
 
-Measurements used scratch harnesses only. No implementation tests or sabotage run is claimed
-for this proposal. The P6 full-check baseline was 2,713 tests and 15 typechecks passing, nine
+Initial measurements used scratch harnesses; final actual-command runs and verification are recorded below. The P6 full-check baseline was 2,713 tests and 15 typechecks passing, nine
 catalog validation mismatches and 22 historical-note formatting failures. Recheck on the
 implemented P7 branch; do not rewrite catalogs or old notes as an incidental fix.
+
+## Final implementation and measurements
+
+The 15% rule applies to every advisor buy, including idle cash and index transfers from a
+reduction. A transfer takes at most the smaller of sale proceeds and 15% of spare cash after
+funding the reserve; the remaining sale proceeds stay in cash. Existing manual investment
+amounts are unchanged. No annual auto-trading was introduced. Cash-goal Set/Clear checks
+alive/adult/pending gates and safe nonnegative whole-dollar amounts, changes no money or RNG,
+and is saved immediately. Zero clears it. Goals stay until explicitly changed/cleared.
+
+The recurring-bill reader adds separate residence, vehicle, loan and card payments to the
+existing living estimate after its allowances. Active-business operating payments stay
+outside; debt signed for a closed business is now a household commitment. Student loan
+deferral and card interest/minimum calculations come from the actual settlement routines.
+Neither bill estimates nor previews post money or consume RNG. Each trade rechecks live
+advice and the reserve. The screen previews actual source/destination/cash retention through
+the same pure command, distinguishes forecasts, and removes stale statistical sales claims.
+
+Save tests found an additional existing bug: `fromSave` passed the hired advisor to a state
+constructor that dropped it. Both advisor and purchase goal now survive that constructor.
+An heir begins a new personal goal/advisor state; no inherited purchase target is invented.
+
+### Final controlled returns: universal 15%, actual commands
+
+Same 500-seed, forty-year $10,000 annual contribution/$12,000 starting-buffer design as above.
+Production market and advisor functions, actual hiring and 0.2% fees; every year reconciles.
+
+| Policy             |      Final wealth p10 / median / p90 | Paired wins over random picking | Median cumulative fee |
+| ------------------ | -----------------------------------: | ------------------------------: | --------------------: |
+| Self               |   $662,639 / $1,271,623 / $3,010,150 |                               — |                    $0 |
+| Free advisor       |   $793,763 / $1,398,076 / $2,750,567 |                           71.0% |                    $0 |
+| Paid advisor       |   $868,511 / $1,497,794 / $2,612,332 |                           73.6% |               $36,319 |
+| Broad Market Index | $1,478,792 / $2,294,629 / $3,341,586 |                           89.4% |                    $0 |
+
+Paid median is 17.8% above matched random picking after fees; free is 9.9% above. Universal
+15% retains more cash than the initial larger-reinvestment prototype and therefore has lower
+controlled returns. Actual measured price SDs reproduce the softer-market column above.
+
+### Whole lives: following advice, with stronger controls disclosed
+
+300 seeds `p7-life-0`…`p7-life-299`, actual engine and save cloning, first-choice passive
+life policy, to 55/death. Strategies share the dynamic bill reserve. Random15 makes one
+yearly purchase of 15% of spare cash into a seeded non-bond name; RandomThree15 makes three
+successive such cheques into that year's same name. Index15 makes one index cheque.
+Free/paid follow their real recommendations; paid bootstraps with one random15 purchase
+until its existing $10,000 hiring gate is met. No free capital or fee waiver.
+
+| Policy        | Age-45–54 wealth p10 / median / p90 | Happiness median | Stress median | Post-year cash <$1 |
+| ------------- | ----------------------------------: | ---------------: | ------------: | -----------------: |
+| Random15      |       $50,014 / $209,824 / $671,046 |               73 |            15 |             16.48% |
+| RandomThree15 |       $56,161 / $247,171 / $800,538 |               73 |            15 |             19.63% |
+| Index15       |       $56,414 / $243,178 / $847,911 |               74 |            15 |             16.82% |
+| Free advice   |       $55,710 / $221,074 / $674,931 |               74 |            15 |             16.28% |
+| Paid advice   |       $52,323 / $240,514 / $849,002 |               73 |            15 |             15.70% |
+
+292 paired living-at-50 seeds: free beats Random15 in 199 (68.2%), paid in 226 (77.4%).
+Paid beats RandomThree15 in 151 (51.7%) and Index15 in 136 (46.6%); those are **not** a
+convincing advantage over the stronger policies. Paid wealth median is 14.6% above one
+Random15 purchase, but 2.7% below RandomThree15 and 1.1% below Index15. Its p10 is only
+4.6% above Random15. Report that weaker tail honestly; do not substitute the controlled floor.
+Paid lifetime fee p10/median/p90: $304/$3,474/$18,444. Median cumulative living spend:
+Random15 $1,474,328; RandomThree15 $1,512,599; Index15 $1,499,103; free $1,499,976; paid
+$1,490,025. Outcome snapshots overlap within lives and cash-gated events can diverge, so these
+are descriptive policy comparisons, not independent individual-year causal estimates.
+
+A separate 100-life aggressive hybrid control invests **all** surplus manually before adding
+advice. Age-band random median $248,427, free $238,656, paid $212,717; paid happiness 74
+versus random 71 and zero-cash share 20.0% versus 26.1%. Advice improves liquidity and
+happiness there but lowers net worth. B12's measured advantage applies to the stated picking
+policies; superiority over active/aggressive self-directed investing remains an open finding.
+No further risk/fee/return dial was silently changed to remove that limitation.
+
+### Verification and sabotage
+
+53 new tests cover universal fund/stock sizing, goal/reserve boundaries and repeated taps,
+actual sale targets and multiple holdings, named forecasts, previews, household/operating
+account separation, orphan debt, command gates, migration, malformed goals, replay and
+real store/repository screen flows. Existing behavior tests remain.
+
+28 distinct behavior-changing mutations tested. Initial goal-input omission survived because
+the command refused the buy even though the generator still suggested it. Added actual
+generator-silence assertion; rerun catches it. Every other mutation caught immediately;
+rechecked the business-loan mutation after adding orphan handling. **Final: none missed.**
+
+| Mutations | Coverage                                                                                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 01–06     | 34% sizing, missing cash floor/bill scaling/goal, tiny buys and spending all spare cash                                               |
+| 07–13     | ignored saved goal, wrong fund, safe/incorrect-sector sales, single-position truncation, wrong destination and unlimited reinvestment |
+| 14–16     | negative goal and missing alive/adult gates                                                                                           |
+| 17–20     | invented migrated goal, omitted serialized/loaded goal and dropped hired advisor                                                      |
+| 21–26     | old volatility, missing home/car/card bills, business-loan leakage and malformed-save acceptance                                      |
+| 27–28     | ignored named-stock target and omitted orphan-loan payments                                                                           |
+
+Tar backups and MD5 before/after checks restored all mutated source files exactly. Rerun
+logs distinguish assertion failures from build errors; no compilation error counts as a catch.
+Final full verification, formatting and actual PR/CI results follow publication below.
+
+### Final full checks
+
+`pnpm verify`: all **15 typechecks and 2,766 tests pass** (53 new). It then stops on the
+same nine generator/catalog mismatches: activities, advice, auctions, businesses,
+events-childhood, homes, renovations, valuables and vehicles. P6 reproduced these in a fresh
+`origin/main` archive; main is still `beff25a`. No catalogs were rewritten.
+`pnpm format:check` reports the same 22 historical Claude notes; all P7-owned files pass
+Prettier and `git diff --check`. Final 300-life rerun after orphan-debt handling reproduces
+every recorded result exactly. Native checks and Claude Project mirroring remain open.
+PR targets main and depends on #13–#18; Payton merges. Actual CI status will be appended.
