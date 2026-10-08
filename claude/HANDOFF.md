@@ -94,7 +94,19 @@ $18,369 (previously $9,926); all-six adult work has median stress 100, not free 
 Details, measurements, sabotage and PR/CI results: `playtest-p6-school-work.md`.
 PR #18: https://github.com/PaytonBlevins/YearAfter/pull/18 (targets main; depends on #13–#17).
 Implementation CI run 107 fails the same 22 historical-note format checks and skips later gates.
-Native checks and Project mirroring remain open. P7 has not started.
+Native checks and Project mirroring remain open. P7 was subsequently authorized; see below.
+
+**P7 measurement update:** Payton authorized starting P7 on 8 October. Agent B published a
+separate claim on `feat/playtest-p7-investments-advisors`, stacked on P6 #18. No production
+changes yet. Real command probes find risk reductions selling unrelated safe holdings and
+the “broadest fund” helper selecting Government Bond Fund rather than Broad Market Index.
+A repaired advice prototype wins 85.6% of matched controlled runs after fees under the current
+market, but its whole-life paid median still trails picking alone; B12 is not complete.
+The proposal asks approval for 20% smaller investor shocks, six months of recurring bills
+(minimum $12,000) plus an explicit purchase goal, 25% idle/15% single-name spare-cash sizing,
+correct sale targets with surplus index reallocation, and a small saved-goal section on the
+existing Advisor screen. Details and caveats: `playtest-p7-investments-advisors.md`.
+Save v45/TICKET 0708 stay; v46 is proposed, not reserved. P8 waits.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

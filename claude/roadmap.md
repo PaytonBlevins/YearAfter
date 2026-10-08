@@ -1561,7 +1561,7 @@ typechecks and 2,713 tests pass; full verify has nine baseline catalog mismatche
 format has 22 old-note failures. Method, sabotage, acceptance and publication:
 `playtest-p6-school-work.md`. PR #18: https://github.com/PaytonBlevins/YearAfter/pull/18
 (targets main, depends on #13–#17). Implementation CI run 107 confirms the same 22-note format
-failure and skips later gates. Save v45 and TICKET 0708 unchanged. P7 waits.
+failure and skips later gates. Save v45 and TICKET 0708 unchanged. P7 subsequently authorized.
 
 ### Found by P6
 
@@ -1580,3 +1580,30 @@ failure and skips later gates. Save v45 and TICKET 0708 unchanged. P7 waits.
 - **Brief reference 0208 is stale.** School workload belongs to 0204/0205 and lesson 0408 / 13.66;
   0208 names Children. No parenting work is included.
 - Review, native-device checks and Claude Project mirroring remain open.
+
+### Playtest P7 — measured proposal awaiting approval (8 October 2026 UTC)
+
+Claim published separately on `feat/playtest-p7-investments-advisors`, stacked on P6 #18
+while main remains `beff25a`. B11/B12/finding 28 measured; no production changes.
+Proposed 20% smaller investor shocks, cost-scaled reserve (six months, minimum $12,000)
+plus explicit purchase goal, 25% idle/15% single-name spare-cash sizing, correct reductions
+and surplus transfer to Broad Market Index, with a goal section on the existing Advisor screen.
+Save v45/TICKET 0708 unchanged; v46 proposed but not reserved. Payton approval required for
+these numbers and screen/save shape. Full results: `playtest-p7-investments-advisors.md`. P8 waits.
+
+### Found by P7
+
+- **A risk reduction can increase risk.** The command sells the largest overall holding even
+  when the recommendation names a sector or speculative holdings. Real probes sold a safe
+  bond fund and increased the offending allocation. Correct applicable targets are needed.
+- **Lowest volatility is not broadest exposure.** The fund helper chooses Government Bond
+  Fund. Explicit `fd.broadindex` routing materially changes advisor results.
+- **Smaller cheques alone do not fix advisor performance.** Scratch controlled comparisons
+  improve after targeting/reallocation fixes, but the full-life paid median still trails random
+  picks. B12 remains open; controlled returns cannot stand in for household outcomes.
+- **Old happiness figures are historical.** Current P2/P6-stack all-index versus buffered
+  happiness medians are 69 versus 72, p10 38 versus 54; do not repeat 20 versus 78 as current.
+- **The living estimate excludes separately billed commitments.** A reserve based on it
+  alone understates home/vehicle/debt costs. The proposed combined reader needs a new
+  full-life calibration, with no double-counting or business-account leakage.
+- No saved purchase goal exists. Its minimal screen and no-RNG save migration await approval.
