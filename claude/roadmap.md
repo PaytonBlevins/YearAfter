@@ -1559,7 +1559,9 @@ two retain stress 49/performance 78 at 17. All-six adult work at 30 has median f
 $215,949, final stress 100 and happiness 21; workload consequences remain real. All 15
 typechecks and 2,713 tests pass; full verify has nine baseline catalog mismatches and full
 format has 22 old-note failures. Method, sabotage, acceptance and publication:
-`playtest-p6-school-work.md`. Save v45 and TICKET 0708 unchanged. P7 waits.
+`playtest-p6-school-work.md`. PR #18: https://github.com/PaytonBlevins/YearAfter/pull/18
+(targets main, depends on #13–#17). Implementation CI run 107 confirms the same 22-note format
+failure and skips later gates. Save v45 and TICKET 0708 unchanged. P7 waits.
 
 ### Found by P6
 

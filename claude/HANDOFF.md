@@ -92,6 +92,8 @@ v45 and TICKET 0708 stay. All 15 typechecks and 2,713 tests pass; full verify hi
 catalog mismatches, full format the same 22 old notes. Paired retail median graduation cash is
 $18,369 (previously $9,926); all-six adult work has median stress 100, not free capacity.
 Details, measurements, sabotage and PR/CI results: `playtest-p6-school-work.md`.
+PR #18: https://github.com/PaytonBlevins/YearAfter/pull/18 (targets main; depends on #13–#17).
+Implementation CI run 107 fails the same 22 historical-note format checks and skips later gates.
 Native checks and Project mirroring remain open. P7 has not started.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)

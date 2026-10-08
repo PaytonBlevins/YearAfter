@@ -288,7 +288,12 @@ to hide that environment/baseline issue. Restore the validator's incidental vehi
 Changed files pass Prettier; full formatting still reports the same 22 historical notes.
 Save v45 and both earlier migrations remain; TICKET stays 0708 in both owners.
 
-Publication/actual CI results follow below. Payton merges the stacked PRs. P7 waits for go-ahead.
+PR #18: https://github.com/PaytonBlevins/YearAfter/pull/18 (targets main; depends on P1 #13
+through P5 #17). Published implementation `e9b387f` matches the locally verified file tree.
+Actual implementation CI run 107
+(https://github.com/PaytonBlevins/YearAfter/actions/runs/37739157071) fails formatting on the same
+22 historical notes listed by the local full-format check. Its typecheck, tests and content
+validation steps are skipped. The local full verification above ran those gates; CI is not green. Payton merges the stacked PRs. P7 waits for go-ahead.
 
 ### Sabotage-verification report
 
