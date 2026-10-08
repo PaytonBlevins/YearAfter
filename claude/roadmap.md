@@ -1543,3 +1543,32 @@ Review, Project mirroring and native-device checks remain. P6 has not started.
 - **The saved major is current/last, not a history of degree subjects.** The implementation uses
   that existing information plus all held licenses. It cannot promise every old subject after
   another enrolment overwrites `majorId` without a separate save/history design.
+
+### Playtest P6 — measured, proposal awaits approval (8 October 2026 UTC)
+
+Payton authorized P6; claim published on `feat/playtest-p6-school-work`, following P5 #17
+while main remains `beff25a`. Existing adult gigs have no random offer probability: every
+eligible row is available, but the entire catalog ends at 22. Across 250 passive lives,
+there is work in all 1,240 age-18–22 years and none in 10,212 age-23–64 or 4,258 older years.
+Four shift jobs already start at 16. Paired retail/kitchen work at 17 makes median stress
+11 → 49 and performance 85 → 78, showing existing workload consequences work.
+
+Proposal: six manual adult gigs from 18 without an upper-age cutoff; reuse and clearly label
+the existing school shifts, adjust regular-shift pay, remove the fixed cap under canonical
+hidden-capacity policy, and repair stage settlement/income wiring. Exact proposed values,
+method and acceptance are in `playtest-p6-school-work.md`; approval precedes implementation.
+No production/catalog changes, no save bump (v45), no TICKET change (0708). P7 has not started.
+
+### Found by P6
+
+- **B8 describes a hard age cutoff.** Fix appropriate adult availability; do not invent a
+  probability dial for a manual menu.
+- **B9 already has four shift ids from 16.** Give them clear part-time discovery rather than
+  duplicating employment, with the existing age/parental gates preserved.
+- **Held work does not settle in every stage.** Graduation pays zero; college, vocational and
+  postgrad retain ids but pay zero and omit hours. Graduated adults pay but report zero gig
+  hours. Repair these paths before adding adult rows, or those rows buy free capacity.
+- **Adult gig income is omitted from tax/living inputs.** Proposed integration uses existing
+  curves and real net income, never a second ledger producer.
+- **The two-gig cap conflicts with CORE_RULES 13.5.** Proposed explicit removal and superseding
+  canonical-rule test await Payton; no old test has been weakened or deleted.

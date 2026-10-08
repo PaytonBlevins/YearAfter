@@ -79,7 +79,17 @@ P5's files pass. Details: `playtest-p5-career-listings.md`.
 PR #17: https://github.com/PaytonBlevins/YearAfter/pull/17 (targets main, depends on P1 #13,
 P2 #14, P3 #15 and P4 #16). Implementation CI run 100 confirms the same 22-note format
 failure and skips later gates.
-P6 waits for Payton's go-ahead.
+P6 was subsequently authorized; see its measurement update below.
+
+**P6 measurement update:** Payton authorized P6 on 7 October Pacific (8 October UTC). Agent B
+claimed `feat/playtest-p6-school-work`, stacked on P5 #17 while main remains `beff25a`. Existing
+gigs are always available within their ages, but all expire by 22; zero of 10,212 observed
+age-23–64 life-years had an available row. Four shift gigs already start at 16. Graduation
+skips gig pay, college/trade branches skip both pay and hours, and adults' gig hours do not
+reach stress. The paired teen baseline shows the existing workload model penalizes stacked
+shifts. Proposed adult catalog/pay, teen shift pay, cap correction and screen sections await
+Payton's approval in `playtest-p6-school-work.md`; no production changes yet. Save v45 / TICKET
+0708 unchanged; P7 waits.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
