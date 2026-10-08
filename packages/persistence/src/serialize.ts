@@ -83,6 +83,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     // Ticket 0506, the seventh, in the same breath as the field.
     valuables: state.valuables,
     ...(state.renovationOffer !== undefined ? { renovationOffer: state.renovationOffer } : {}),
+    ...(state.businessRescue !== undefined ? { businessRescue: state.businessRescue } : {}),
     // Ticket 0507. The diary is what stops a fourth visit and a second bid.
     ...(state.auctions !== undefined ? { auctions: state.auctions } : {}),
     // Ticket 0601, the eighth, in the same breath as the field.
@@ -99,6 +100,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     // Omitted entirely when nobody is hired, which is what every other optional
     // field in this document does and what the migration relies on.
     ...(state.advisorId !== undefined ? { advisorId: state.advisorId } : {}),
+    ...(state.cashGoal !== undefined ? { cashGoal: state.cashGoal } : {}),
     retirement: state.retirement,
     settings: options.settings ?? DEFAULT_SETTINGS,
     createdAt: options.createdAt ?? now,
@@ -124,6 +126,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     market: save.market,
     prices: save.prices,
     ...(save.advisorId !== undefined ? { advisorId: save.advisorId } : {}),
+    ...(save.cashGoal !== undefined ? { cashGoal: save.cashGoal } : {}),
     ...(save.offer !== undefined ? { offer: save.offer } : {}),
     ...(save.collegeOffer !== undefined ? { collegeOffer: save.collegeOffer } : {}),
     ...(save.lifeOffer !== undefined ? { lifeOffer: save.lifeOffer } : {}),
@@ -135,6 +138,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     ...(save.inspected !== undefined ? { inspected: save.inspected } : {}),
     valuables: save.valuables,
     ...(save.renovationOffer !== undefined ? { renovationOffer: save.renovationOffer } : {}),
+    ...(save.businessRescue !== undefined ? { businessRescue: save.businessRescue } : {}),
     ...(save.auctions !== undefined ? { auctions: save.auctions } : {}),
     businesses: save.businesses,
     deals: save.deals,

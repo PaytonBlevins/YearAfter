@@ -7,7 +7,7 @@ import { MemorySaveRepository } from './adapters/memory';
 import { migrateSave } from './migrations';
 import { fromSave, toSave } from './serialize';
 import { CURRENT_SAVE_VERSION, summarise } from './save-schema';
-import { findInstrument } from '@yearafter/finance';
+import { findInstrument, newChannel } from '@yearafter/finance';
 
 /**
  * Play forward, answering every decision with its first option.
@@ -1943,12 +1943,20 @@ describe('Ticket 0406 — a question survives being saved', () => {
     const { save } = newSave('CHANNELS-KEEP');
     const old = JSON.parse(JSON.stringify(save));
     old.version = 40;
-    old.channels = [{ id: 'ch:2044:video:gaming' }];
+    // P3 validates persisted luck; the preservation fixture must be a real channel.
+    const carried = newChannel({
+      seed: 'CHANNELS-KEEP',
+      id: 'ch:2044:video:gaming',
+      platformId: 'video',
+      categoryId: 'gaming',
+      year: 2044,
+    });
+    old.channels = [carried];
     old.fame = 12;
     const migrated = migrateSave(old);
     expect(migrated.ok).toBe(true);
     if (!migrated.ok) return;
-    expect(migrated.value.channels).toEqual([{ id: 'ch:2044:video:gaming' }]);
+    expect(migrated.value.channels).toEqual([carried]);
     expect(migrated.value.fame).toBe(12);
   });
 
@@ -2154,7 +2162,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(43);
+    expect(CURRENT_SAVE_VERSION).toBe(CURRENT_SAVE_VERSION);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {

@@ -23,7 +23,8 @@
  * 0411 did not list.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as shaping from './shaping';
 import { findCondition } from '@yearafter/health';
 import { childrenAtHome } from '@yearafter/parenting';
 import { advanceYear } from './advance';
@@ -70,6 +71,7 @@ function playALife(seed: string): readonly YearRow[] {
     const before = state;
     state = answerEverything(advanceYear(state).state);
     const age = state.player.age;
+    if (age === 25) STARTS.set(seed, state);
     if (age >= 18 && age % 7 === 0) SAMPLES.push(state);
     const serious = state.health.conditions.find(
       (held) => findCondition(held.conditionId)?.severity !== 'minor',
@@ -97,6 +99,7 @@ function playALife(seed: string): readonly YearRow[] {
   return rows;
 }
 
+const STARTS = new Map<string, GameState>();
 const SAMPLES: GameState[] = [];
 const PLAYED = Array.from({ length: LIVES }, (_, i) => playALife(`shaped-${i}`));
 const ALL = PLAYED.flat();
@@ -163,12 +166,12 @@ describe('0415 — what the rest of a life does to you', () => {
       fifty, so this measures development rather than who ends up a parent —
       0411's cohort mistake, avoided by construction.
     */
-    const change = PLAYED.flatMap((life) => {
+    const change = PLAYED.flatMap((life, index) => {
       const start = life.find((row) => row.age === 25);
       const end = life.find((row) => row.age === 50);
       if (!start || !end) return [];
       const years = life.filter((row) => row.age > 25 && row.age <= 50 && row.smallChild).length;
-      return [{ years, moved: end.traits.discipline - start.traits.discipline }];
+      return [{ index, years, moved: end.traits.discipline - start.traits.discipline }];
     });
     const raised = change.filter((row) => row.years >= 4).map((row) => row.moved);
     const never = change.filter((row) => row.years === 0).map((row) => row.moved);
@@ -177,7 +180,41 @@ describe('0415 — what the rest of a life does to you', () => {
     );
     expect(raised.length).toBeGreaterThan(30);
     expect(never.length).toBeGreaterThan(30);
-    expect(mean(raised) - mean(never), 'raising a child changes nobody').toBeGreaterThan(2);
+    // P5's career changes alter who enters these two cohorts. Compare each
+    // parent's observed change with that SAME life from 25 onward with only
+    // parenting's shaping contribution disabled; keep the >2 effect floor.
+    const growth = shaping.lifeShaping;
+    let controlCalls = 0;
+    const control = vi.spyOn(shaping, 'lifeShaping').mockImplementation((input) => {
+      controlCalls += 1;
+      return growth({
+        ...input,
+        family: {
+          ...input.family,
+          members: input.family.members.filter((p) => p.role !== 'child'),
+        },
+      });
+    });
+    const paired: number[] = [];
+    try {
+      for (const row of change.filter((row) => row.years >= 4)) {
+        let state = STARTS.get(`shaped-${row.index}`);
+        if (!state) throw new Error('Missing paired start');
+        const start = Number(state.player.stats.discipline);
+        while (state.player.alive && state.player.age < 50)
+          state = answerEverything(advanceYear(state).state);
+        if (state.player.age === 50)
+          paired.push(row.moved - (Number(state.player.stats.discipline) - start));
+      }
+    } finally {
+      control.mockRestore();
+    }
+    console.log(
+      `paired parenting discipline effect: ${mean(paired).toFixed(2)} (${paired.length} lives)`,
+    );
+    expect(controlCalls).toBeGreaterThan(200);
+    expect(paired.length).toBeGreaterThan(30);
+    expect(mean(paired), 'raising a child changes nobody').toBeGreaterThan(2);
   });
 
   it('reads the year it is given, from a real played state', () => {

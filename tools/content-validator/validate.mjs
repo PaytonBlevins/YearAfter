@@ -584,7 +584,8 @@ if (existsSync(gigsPath)) {
   try {
     const gigs = JSON.parse(readFileSync(gigsPath, 'utf8')).entries ?? [];
     for (const gig of gigs) {
-      if (!(gig.ageMin <= gig.ageMax)) fail(rel, `${gig.id}: inverted age range.`);
+      if (gig.ageMax !== undefined && !(gig.ageMin <= gig.ageMax))
+        fail(rel, `${gig.id}: inverted age range.`);
       if (!(gig.payLow > 0 && gig.payLow <= gig.payHigh)) {
         fail(rel, `${gig.id}: pay must be positive and not inverted.`);
       }
@@ -599,7 +600,9 @@ if (existsSync(gigsPath)) {
     }
     // A screen that is empty at some age teaches the player not to open it.
     for (const age of [8, 10, 12, 14, 16, 17]) {
-      if (!gigs.some((gig) => gig.ageMin <= age && age <= gig.ageMax)) {
+      if (
+        !gigs.some((gig) => gig.ageMin <= age && (gig.ageMax === undefined || age <= gig.ageMax))
+      ) {
         fail(rel, `nothing a ${age}-year-old can do for money.`);
       }
     }
