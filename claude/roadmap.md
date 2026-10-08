@@ -1628,7 +1628,8 @@ $10k+ means; mixed-auction dilution and real-model/source mapping are documented
 mismatches remain; 25 sabotage mutations caught, none missed, MD5 restored.
 `feat/playtest-p8-watch-catalog` follows P7 #19 while main remains `beff25a`.
 Save v46/TICKET 0708 stay; no screen/save/selection/icing change. P9 waits.
-Details: `playtest-p8-watch-catalog.md`.
+PR #20 targets main, depends on #13–#19 and was mergeable when checked. Implementation
+CI run 119 failed the same 22 old-note formatting checks and skipped later gates; details: `playtest-p8-watch-catalog.md`.
 
 ### Found by P8
 

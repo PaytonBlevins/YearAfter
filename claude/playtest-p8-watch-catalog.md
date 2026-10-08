@@ -193,8 +193,12 @@ change. Validator secondary-output restoration is an open follow-up, not a P8 fi
 Full format check fails the same 22 historical Claude notes. All P8-owned files
 pass formatting, and `git diff --check` is clean. Targeted content/simulation/save
 suites passed again after restoration. Full verification results above are from
-the restored-equivalent production tree. PR and observed CI details will be added
-after publishing. No native-device or Project-mirroring claim.
+the restored-equivalent production tree. [PR #20](https://github.com/PaytonBlevins/YearAfter/pull/20) targets main and was
+mergeable when checked. It depends on P1–P7 PRs #13–#19; Payton merges those first.
+Implementation commit `a368d87e4a5b1115224c360d1377c745f4402482` has CI run 119
+(`37855500798`, job `113578556313`): failed at Format check on the same 22
+historical Claude notes, confirmed from actual job logs. Later typecheck, unit-test
+and content-validation steps were skipped; local results above are separate. No native-device or Project-mirroring claim.
 Native device checks and Claude Project mirroring remain unavailable here; neither
 is reported complete. Scratch harnesses, logs and backup tar stay outside git.
 Stop after P8; P9 needs Payton's next instruction.

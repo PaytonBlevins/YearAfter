@@ -126,6 +126,8 @@ none missed, source MD5 restored. Actual twenty-year reference discovery is 27 â
 at $10k+ means; mixed-auction effects and model/source mappings are in
 `playtest-p8-watch-catalog.md`. Validator secondary-output restoration is an open
 finding; its incidental vehicle-mods format edit was restored, not committed.
+PR #20: https://github.com/PaytonBlevins/YearAfter/pull/20 (targets main, depends on
+#13â€“#19, mergeable when checked). Implementation CI run 119 failed the same 22 old-note formatting checks; later gates skipped.
 Native checks and Project mirroring remain open. P9 waits for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
