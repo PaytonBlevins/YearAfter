@@ -1,6 +1,6 @@
 # Playtest P7 — investments and advisors
 
-**Status:** approved P7 engine/save/screens built, verified; publication in progress,
+**Status:** approved P7 engine/save/screens built, built and published for review,
 8 October 2026 UTC. Payton approved the proposal with **15% for investing in general**, not
 just one stock. Every advisor buy, including funds and reinvestment, uses 15% of spare cash.
 The initial 25% idle-cash prototype below is historical, not the final calibration. P8 waits.
@@ -308,4 +308,14 @@ events-childhood, homes, renovations, valuables and vehicles. P6 reproduced thes
 `pnpm format:check` reports the same 22 historical Claude notes; all P7-owned files pass
 Prettier and `git diff --check`. Final 300-life rerun after orphan-debt handling reproduces
 every recorded result exactly. Native checks and Claude Project mirroring remain open.
-PR targets main and depends on #13–#18; Payton merges. Actual CI status will be appended.
+PR targets main and depends on #13–#18; Payton merges. Actual implementation CI is recorded below.
+
+### Publication and CI
+
+PR #19: https://github.com/PaytonBlevins/YearAfter/pull/19 (open, mergeable when checked; targets main and depends on #13–#18).
+Implementation commit `16a99ffb9424b9fc41213801cc7198a848d5e122`. CI run 113
+(https://github.com/PaytonBlevins/YearAfter/actions/runs/37836901323), job `113516123295`, fails the format step on exactly the same 22 historical
+notes observed locally. Typecheck, unit tests and content validation are skipped there;
+their local results above are not described as CI passes. P7-owned files do not appear
+in the CI formatting failures. A final documentation commit records this result.
+P8 has not started. Payton reviews/merges. Native checks and Project mirroring remain open.

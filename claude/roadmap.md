@@ -1591,7 +1591,9 @@ and a goal section on the existing Advisor screen. He amended every advisor inve
 Save v46 owns the optional goal with no-RNG migration; TICKET 0708 stays. Hired-advisor
 reload omission repaired. 53 new tests; 2,766 total and 15 typechecks pass; 28 distinct
 sabotage mutations caught after one test gap repair. Full verify still has nine baseline
-catalog mismatches, full format 22 old notes. Publication/CI pending. Actual measurements
+catalog mismatches, full format 22 old notes. PR #19: https://github.com/PaytonBlevins/YearAfter/pull/19
+(targets main, depends on #13–#18; mergeable when checked). Implementation CI run 113
+fails the same 22-note format checks and skips later gates. Actual measurements
 and stronger controls: `playtest-p7-investments-advisors.md`. P8 waits.
 
 ### Found by P7

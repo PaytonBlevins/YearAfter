@@ -105,7 +105,9 @@ Save v46 migrates older lives to no goal without RNG; hired advisors now survive
 TICKET 0708 stays. Stack follows P6 #18 while main remains `beff25a`; P8 waits.
 53 new tests, 2,766 total and 15 typechecks pass; 28 sabotage mutations caught after one
 generator-silence test repair, none missed. Full verify has nine baseline catalog mismatches;
-full format the same 22 old notes. Final publication/CI pending.
+full format the same 22 old notes. PR #19: https://github.com/PaytonBlevins/YearAfter/pull/19
+(targets main, depends on #13–#18; mergeable when checked). Implementation CI run 113
+fails the same 22 historical-note format checks and skips later gates.
 Actual paid controlled wins are 73.6% after fees; 300-life paid wins versus one 15% random
 cheque are 77.4% at 50, but only 51.7% versus three cheques and 46.6% versus index-only.
 Aggressive all-surplus self-directed investing still beats the hybrid advisor's wealth;
