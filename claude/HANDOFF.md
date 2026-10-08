@@ -130,6 +130,14 @@ PR #20: https://github.com/PaytonBlevins/YearAfter/pull/20 (targets main, depend
 #13–#19, mergeable when checked). Implementation CI run 119 failed the same 22 old-note formatting checks; later gates skipped.
 Native checks and Project mirroring remain open. P9 waits for Payton.
 
+**P9 proposal update (8 October):** Payton authorized P9; Agent B separately claimed
+`feat/playtest-p9-renovations`, following P8 #20 while main remains `beff25a`.
+Actual baseline has nineteen entries, zero amenity happiness and no aggregate capacity.
+Proposed nine additions, +3 maximum annual residence comfort, kind-derived space
+budgets, existing costs/IDs preserved, no saved-shape change expected. Full price,
+upkeep, recovery and size manifest: `playtest-p9-renovations.md`; numbers await approval.
+No production P9 edits. P10 waits.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:
