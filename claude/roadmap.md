@@ -1614,3 +1614,13 @@ and stronger controls: `playtest-p7-investments-advisors.md`. P8 waits.
 - The explicit purchase goal now has Set/Clear on the existing Advisor screen and a no-RNG
   v46 migration. Advisor and goal both survive the real state constructor; native checks
   and Claude Project mirroring remain open.
+
+### Playtest P8 — measured catalog proposal (8 October 2026 UTC)
+
+Authorized and separately claimed on `feat/playtest-p8-watch-catalog`, stacked on
+P7 #19. Proposed 48 additions (37 → 85 watches; 26 → 28 fictional makers), keeping
+existing pieces and prices. Actual shelf runs across 20,000 counters per catalog
+show broader long-run discovery but slightly less maker variety per counter.
+Mixed-auction pool dilution is quantified. Full price/holds/store manifest and
+acceptance plan: `playtest-p8-watch-catalog.md`. Gameplay prices await approval;
+production catalog remains unchanged, save v46/TICKET 0708 stay, P9 waits.

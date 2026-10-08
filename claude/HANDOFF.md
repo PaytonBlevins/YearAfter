@@ -114,6 +114,13 @@ Aggressive all-surplus self-directed investing still beats the hybrid advisor's 
 do not claim universal superiority. Details: `playtest-p7-investments-advisors.md`.
 Native-device checks and Claude Project mirroring remain open.
 
+**P8 proposal update (8 October):** Payton authorized the next ticket. Agent B claimed
+`feat/playtest-p8-watch-catalog`, stacked on P7 #19; main remains `beff25a`.
+Baseline and process-only draft measurements are in `playtest-p8-watch-catalog.md`.
+Proposed: 48 additions, 85 watches, two new fictional makers, new prices $95–$110,000;
+all old pieces/prices and selection/resale rules preserved. New gameplay prices await
+Payton's approval under the brief. No production catalog edits, save bump or P9 work.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:
