@@ -3271,3 +3271,22 @@ minimum horizon without predicting death, normalize once through household/locat
 and housing factors, retain standard creep and hardship. Report increased shortfall
 rates alongside falling wealth, and test real retired lifetime ledgers, saved tiers,
 migration, active screen eligibility and boundary mutations.
+
+### 13.163 Persistent NPC careers need life-scoped identity and a defined pay metric
+
+An NPC id can recur in independent games. Career records belong inside that
+game's save, with draws keyed by master seed and identity; never keep a cohort-wide
+map or silently rewrite established ids. Initial partner matching is context,
+not a rule that reprices a spouse after each player raise. Keep a person's own
+career, qualification/license ceiling and final pension base across job moves,
+work spells and absence. Catch up missed career years without sending their
+past wages to a new household. Screens read settled state rather than advancing
+it, and descendant continuation must not inherit a parent's spouse/career.
+
+Define correlation before calibrating it: raw/log pay, positive earners, partner
+age window and annual versus lifetime observations are different statistics.
+Report the unselected metric too, disclose rare-tail observation shares and
+compare independent actual-life cohorts. Preserve an old partner's exact current
+wages/pension and books in migration; infer only prospective employment, never
+retroactive experience or new matching pay. Test a real low initial quote at the
+annual salary floor: an ordinary-income random sample can miss a broken boundary.

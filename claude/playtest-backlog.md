@@ -71,12 +71,18 @@ samples mostly still work, so their rising wealth is not proof that retirees nev
 spend down. Actual retired production paired medians fall $67k/$42k; poorly funded
 retirees have more shortfalls, chiefly after fixing suppressed pension-based living.
 Details, tests, mutations and limits: `playtest-p15-retirement-spending.md`.
-**Findings 13/16 / P16:** Authorized and measured, not yet built. Proposed
-catalog-backed persistent careers with steady/rising/falling pay and job moves;
-one-time initial matching, not repricing after every player raise. The 1,000-life
-holdouts give log-pay correlation 0.352/0.393 and raw 0.276/0.289. The proposed
-log-pay interpretation explicitly awaits approval, as do the rates, Person-row
-extension and save-v51 migration. See `playtest-p16-partner-careers.md`.
+**Findings 13/16 / P16:** Approved and built, including the explicit log-pay
+interpretation. Persistent catalog jobs with steady/rising/falling pay, job moves,
+one-time initial matching and the existing Person work row. Save v51 preserves
+established current wages/pensions and books. 1,300 production lives reconcile;
+holdout log correlation 0.351739/0.392886, raw 0.275666/0.289297. P2/P15 guards
+remain unchanged. 48 new tests, 3,354 total and 15 typechecks pass; 31 valid mutations
+caught after one floor-boundary repair, none remain missed. Seven inherited catalog
+mismatches remain. PR #28 targets main and depends on #13–#27:
+https://github.com/PaytonBlevins/YearAfter/pull/28. Details:
+`playtest-p16-partner-careers.md`. Full format and implementation CI 171 retain
+the same 22 historical-note failures; install passes, later gates skip. Native/
+Project checks remain open; stop after P16.
 Life-event wording and unrelated work still wait for Payton.
 
 ## Suggested order, when the time comes

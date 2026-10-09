@@ -35,10 +35,9 @@ import { afterTax } from './pay';
  * $50,000.
  */
 /*
-  TO BE REWORKED — roadmap finding 16. Payton's direction after 0503: one
-  earning power fixed for life, centred near $50,000, is not how real life is.
-  Partners should range from about $20,000 to $250,000+, some changing jobs
-  with pay that moves, some staying put a whole career.
+  Legacy v50 income anchor, retained for exact migration compatibility.
+  P16 prospective pay uses saved catalog careers in partner-career.ts and
+  does not use this median or age-earnings curve.
 */
 export const PARTNER_PEAK_MEDIAN = 52_000;
 /** Spread of earning power, as a log-normal sigma: p10 ≈ $29k, p90 ≈ $92k. */

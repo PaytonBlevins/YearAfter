@@ -1,7 +1,7 @@
 /**
- * Ticket 0502 — a partner's year of work, as money the household receives.
+ * P16 — a saved partner career's year of work, as household income.
  *
- * The rules are in `@yearafter/careers/partner`; this is the part that knows
+ * Career and shared participation rules are in `@yearafter/careers`; this knows
  * who the partner is and what the household looks like this year. It posts
  * nothing itself. Like every phase since 0301 it RETURNS transactions and
  * `advanceYear` commits them — with the income, ahead of every outgoing.

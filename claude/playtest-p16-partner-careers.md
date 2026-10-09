@@ -4,7 +4,8 @@ Payton authorized P16 on 9 October 2026, after P15. Claimed in its own commit
 `7483088` before measurement on `feat/playtest-p16-partner-careers`. Refreshed
 `origin/main` remains `beff25a`; the branch follows P15 #27 and #13–#26. P15's
 explicit preapproval applied to that ticket, not new P16 product values.
-**Measurement/proposal only; no production engine or save changes yet.**
+**Payton approved the measured proposal in full, including the log-pay metric,
+on 9 October 2026. Implementation is now authorized; save v51 is reserved to P16.**
 
 ## Contract and scope
 
@@ -21,8 +22,8 @@ household-income readers/tests; persistence schema/migrations/validation/tests;
 existing Person screen and real-store component tests; this note, claims,
 handoff, roadmap, backlog and a CORE lesson at implementation closeout.
 Protected changes: persistent NPC career state, prospective partner pay and annual
-household income. **Save v51 is reserved for P16** if the proposed stateful model
-is approved; P13 owns v50 and P14/P15 leave it unchanged. No save code changed.
+household income. **Save v51 is reserved for P16 and now implemented under Payton's
+approval**; P13 owns v50 and P14/P15 leave it unchanged. TICKET 0708 is unchanged.
 
 Out of scope: managing a partner's job, a new NPC career tab, changing dating odds
 or relationship stages, changing the player's jobs/pay, NPC business/wealth
@@ -178,7 +179,7 @@ rules, pension based on final own career pay; v51 legacy-preserving migration;
 and the existing Person-row extension below. Do not silently substitute a
 raw-dollar target or change the profile/rates when implementing approved values.
 
-## Proposed persistence/UI contract, awaiting approval
+## Approved persistence/UI contract
 
 Maintain a compact career per modeled person, keyed by NPC identity within its
 game and randomized using master seed plus identity, not a new
@@ -203,7 +204,7 @@ jobs, returned to work, retired). No job-management controls or extra stats.
 Finances, living, borrowing, housing eligibility and the screen read the same
 settled pay, with gross/net/tax kept distinct and every row posted once.
 
-## Acceptance after approval
+## Approved acceptance
 
 - New partners include $20k-class work and a genuine $250k+ tail, with rising,
   stalled and falling careers, job changes and meaningful stay-put careers.
@@ -219,11 +220,143 @@ settled pay, with gross/net/tax kept distinct and every row posted once.
 - Real-store Person screen, at least 15 valid sabotage mutations with exact
   restoration, full verify/format, CORE lesson, docs and PR into main.
 
-## Open status
+## Implementation and production measurement
 
-Measurement and proposal are complete and await Payton's approval, especially the
-log-pay interpretation. No implementation, new acceptance
-tests, sabotage or fresh full verify claimed yet. Last completed P15 gate: all
-3,306 tests and 15 typechecks pass, seven inherited generator byte mismatches and
-22 historical-note formatting failures remain. Native/device checks and unavailable
-Claude Project mirroring remain open. Life-event wording stays deferred.
+Payton approved the complete measured policy and explicit log-pay definition on
+9 October. Careers now retain a catalog job, own full-time salary, style, initial
+credential/license ceiling, job-since year, last processed year and last settled
+gross/net/tax/status/change. The frozen salary itself is the retirement pay base;
+no redundant pension account, prior-pay history or second person record is stored.
+Participation is shared with 0502, while its old earning-power calculation is used
+only for migration. All annual rates, quote/matching variation, floors/ceilings
+and pension share remain as approved above.
+
+Every adult household stage settles through one annual phase: manual romance,
+systemic formation and loaded games do not have separate earnings rules. New
+households initialize on their first annual settlement using that year's actual
+player salary/commission. Before that, the Person row says household pay starts
+with the next year. The screen reads only saved, current-year results: no quote
+draws or career progression while rendering, and no stale departing spouse's
+career is shown as a new year's pay. Out-of-work years retain wage potential;
+departures retain personal career state but post nothing. A returning person
+catches up their own career and receives only the current year's pay, no backpay.
+Moves can mean a new employer with the same title; promotion remains distinct.
+
+v50 migration preserves the entire old save except version and the added career
+map. A current adult household partner retains exact legacy wages/pension and
+status, with job tenure starting now rather than invented historical experience.
+No assortative reprice is applied to an established spouse. Existing pensions
+remain exactly unchanged after subsequent years; non-earners retain prospective
+wage potential without inventing current pay. v51 validates job, qualifications,
+license, style, whole-dollar pay/taxes, timestamps and status before loading.
+Serialization restores all career state. Actual descendant continuation starts
+with an empty map and no inherited spouse/career; no estate model was expanded.
+
+Production checkpoint `p16-checkpoints/production.test.ts` ran **1,300 actual
+new-game lives with no substituted phases**: A/B each 150, C/D disjoint 500.
+Every adult annual ledger reconciles. Checked-in
+`partner-careers-balance-p16.test.ts` guards A/B's approved log-pay interval,
+unchanged P2 age-band bounds, household ownership and a genuine high-pay tail.
+
+| Sample | Working years | Dual-earner years | Median partner pay |      p99 | Over $250k | Log correlation | Raw correlation |
+| ------ | ------------: | ----------------: | -----------------: | -------: | ---------: | --------------: | --------------: |
+| A      |         2,881 |             2,825 |            $48,740 | $148,200 |         0% |        0.357262 |        0.302975 |
+| B      |         2,880 |             2,821 |            $46,183 | $280,734 |    1.9097% |        0.372285 |        0.233955 |
+| C      |         9,704 |             9,490 |            $50,042 | $210,066 |    0.0618% |        0.351739 |        0.275666 |
+| D      |         9,706 |             9,553 |            $49,131 | $157,497 |    0.4224% |        0.392886 |        0.289297 |
+
+The wealth, ownership, p10/p90/p99 and career-count results reproduce the selected
+proposal table. C's production pay correlations differ slightly (log 0.351739
+versus prototype 0.351764, raw 0.275666 versus 0.275733): production retains the
+approved **initial** qualification ceiling across moves, while the prototype
+inferred it anew from the current job. No rates were retuned. C/D still have
+654/644 careers, 120/127 steady styles, 326/315 job changes and 272/271 pay cuts.
+These remain observation shares and sample results, not guaranteed earnings or
+a claim that raw-dollar correlation is always 0.3–0.4.
+
+## Sabotage verification
+
+31 independent, applicable mutations were run against the real production files
+and acceptance tests. Initially **30 caught, one missed**: lowering the $20k annual
+salary floor to $10k. The original ordinary-pay sample never reached the floor.
+Added a real low-initial-quote cohort, then reran that mutation: **caught**.
+Final outstanding missed mutations: **none**. Every affected source file was
+restored byte-for-byte and hashes checked after both runs. Syntax/import failures
+were not counted as catches.
+
+| Mutation                                | Result                                           |
+| --------------------------------------- | ------------------------------------------------ |
+| Omit master seed from career keys       | Caught                                           |
+| Alter initial matching weight           | Caught                                           |
+| Alter initial matching sigma            | Caught                                           |
+| Alter catalog quote sigma               | Caught                                           |
+| Lower player-context ceiling            | Caught                                           |
+| Raise player-context floor              | Caught                                           |
+| Match retirees to player pay            | Caught                                           |
+| Change steady share                     | Caught                                           |
+| Change mobile share                     | Caught                                           |
+| Raise ordinary growth                   | Caught                                           |
+| Raise mobile growth                     | Caught                                           |
+| Halve ordinary move chance              | Caught                                           |
+| Halve mobile move chance                | Caught                                           |
+| Increase promotion chance               | Caught                                           |
+| Increase setback chance                 | Caught                                           |
+| Reduce the pay cut                      | Caught                                           |
+| Lower annual salary floor               | Initially missed; caught after boundary coverage |
+| Lower annual salary ceiling             | Caught                                           |
+| Let steady wages grow                   | Caught                                           |
+| Change pension share                    | Caught                                           |
+| Remove young half-time adjustment       | Caught                                           |
+| Skip catch-up years                     | Caught                                           |
+| Let careers grow past retirement        | Caught                                           |
+| Pay dates                               | Caught                                           |
+| Pay dead partners                       | Caught                                           |
+| Omit partner tax row                    | Caught                                           |
+| Post net as gross                       | Caught                                           |
+| Omit careers from saves                 | Caught                                           |
+| Omit restored careers                   | Caught                                           |
+| Rematch established spouse in migration | Caught                                           |
+| Accept malformed career maps            | Caught                                           |
+
+## Actual retired-life remeasurement
+
+300 more real lives chose retirement at 65 and reconcile throughout, using the
+unchanged P15 policy. This is separate from the mostly wage-earning passive elder
+cohort above. The original P15 acceptance bounds were rerun without edits.
+
+| Sample | Paired 75→85 survivors | Median wealth change | Share declining | 65–74 worth | 75–84 worth | 85–94 worth | 85–94 shortfall years |
+| ------ | ---------------------: | -------------------: | --------------: | ----------: | ----------: | ----------: | --------------------: |
+| A      |                     67 |             −$60,614 |           83.6% |    $364,872 |    $304,659 |    $214,204 |                21.10% |
+| B      |                     66 |             −$39,183 |           81.8% |    $297,449 |    $252,353 |    $149,449 |                26.55% |
+
+P15 alone measured −$67,474/−$42,497 and 85+ shortfalls 27.86%/21.91%.
+P16 changes spouse earnings/pensions, so individual outcomes and shortfalls
+change without retuning P15. This preserves meaningful wealth decline, not a
+promise that every retiree succeeds. Native checks are still needed.
+
+## Verification and delivery status
+
+- 48 new P16 tests: careers 8, simulation command/settlement/continuation 6,
+  simulation two-cohort balance 1, persistence 24, actual-store Person UI 9.
+- Full `pnpm verify`: **all 3,354 tests and 15 typechecks pass**. Content validation
+  reaches only seven inherited generator/catalog byte mismatches: activities,
+  advice, auctions, businesses, events-childhood, homes and vehicles. No catalog
+  source or generator was changed; the validator's incidental vehicle-mods
+  formatting rewrite was proven JSON-equivalent and restored to original bytes.
+- Prior migration tests retain exact field assertions, updating only the current
+  save-version expectations to 51. No P2/P15 economic bounds were weakened.
+- 31 valid sabotage mutations caught after the documented initial floor miss;
+  no outstanding misses, exact source restoration checked. Production/retired
+  checkpoints plus checked-in balance tests use real annual settlement.
+- Implementation `5fb3465` published. PR #28:
+  https://github.com/PaytonBlevins/YearAfter/pull/28 targets main and depends on
+  P15 #27 and #13–#26 while refreshed main remains `beff25a`.
+- Touched files pass formatting. Full `pnpm format:check` retains the same 22
+  historical-note failures as P15. Implementation CI run **171**, job
+  `113963907460`, fails exactly those same 22 files, checked against local warnings
+  and the job log. Frozen install passes; typecheck/tests/content steps skip.
+  The PR is mergeable when checked. Documentation-closeout CI will be unobserved.
+- Native/device checks and unavailable Claude Project mirroring remain open.
+
+Life-event wording and unrelated work stay deferred. Stop after this report and
+PR; no new ticket is authorized automatically by finishing P16.

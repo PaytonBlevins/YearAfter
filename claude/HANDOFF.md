@@ -262,23 +262,33 @@ pass. Full verify retains seven inherited catalog mismatches; full format retain
 `feat/playtest-p15-retirement-spending` stacks on P14 #26 and #13–#25 while main
 stays `beff25a`. PR #27: https://github.com/PaytonBlevins/YearAfter/pull/27 targets main, depends on #13–#26, and is mergeable when checked. Implementation `867086f` published; CI 165 fails the same 22 historical-note format checks, verified against logs; install passes and later gates skip. Docs-closeout CI will be unobserved. P16 and life-event wording wait for Payton.
 
-**P16 measurement update (9 October UTC):** Payton authorized after P15. Claimed
-and published `7483088` before measurement on `feat/playtest-p16-partner-careers`,
-following P15 #27 and #13–#26 while refreshed main remains `beff25a`. Baseline
-300 lives confirms fixed earning power and raw pay correlation −0.028/0.130.
-Six valid 300-life career prototypes and 1,000 disjoint holdout lives reconcile;
-invalid cross-life NPC-ID state reuse was found in the harness and discarded.
-Propose persistent catalog-backed careers, 20/60/20 steady/ordinary/mobile styles,
-one-time 0.95 initial matching and **log-pay** correlation around 0.35: holdouts
-0.352/0.393, with raw-dollar 0.276/0.289 reported, not misrepresented as 0.3–0.4.
-All selected-cohort wealth medians retain P2 bounds. Extend the existing Person
-work row, no job-management chore. Save v51 reserved for P16; legacy migration
-must preserve current pay/pension, cash, history and RNG. Full values, limits and
-acceptance: `playtest-p16-partner-careers.md`. **Proposal awaits approval**,
-particularly the correlation metric; no production/save/UI edits yet. Existing
-3,306 tests/15 typechecks and inherited verify/format failures describe P15, not
-a fresh P16 completion. Native/Project checks remain open; unrelated work and
-life-event wording wait.
+**P16 approved and built (9 October UTC):** Payton approved the complete measured
+policy, including the explicit log-pay metric. Claimed/published `7483088` before
+measurement; `feat/playtest-p16-partner-careers` follows P15 #27 and #13–#26 while
+main remains `beff25a`. Built autonomous saved catalog jobs, 20/60/20 career
+styles, approved raises/moves/promotions/setbacks, one-time initial matching,
+own final-pay pensions and the existing Person work row. No player job controls.
+Save v51 preserves established partners' exact current income, history, cash and
+RNG; new households initialize on annual settlement. Departures/deaths post no
+new income, returns have no backpay, and actual descendants inherit no spouse
+career. TICKET 0708 and settled decisions stay unchanged.
+
+1,300 actual production lives reconcile: 500-life holdouts log correlation
+0.351739/0.392886, raw 0.275666/0.289297, both with rare $250k+ earnings; P2 bands
+and ownership remain. 300 explicitly retired lives still spend down under
+unchanged P15 policy: paired 75→85 medians −$60,614/−$39,183, 83.6%/81.8% declining.
+All 3,354 tests and 15 typechecks pass, including 48 new tests. 31 valid mutations
+caught after repairing one initially missed floor-boundary test; none remain
+missed, all source restored exactly. Full verify retains seven inherited catalog
+mismatches. Full values, calibration, mutation list and limits:
+`playtest-p16-partner-careers.md`. PR #28:
+https://github.com/PaytonBlevins/YearAfter/pull/28 targets main and depends on
+#13–#27; implementation `5fb3465` published, mergeable when checked. Full format
+retains the same 22 historical-note failures. Implementation CI 171 fails those
+exact 22 files, verified against job logs; install passes and later gates skip.
+Documentation-closeout CI will be unobserved.
+Native/device and unavailable Project mirroring checks remain open. Stop after
+P16; life-event wording and unrelated work still require Payton's next assignment.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

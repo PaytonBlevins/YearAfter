@@ -820,9 +820,16 @@ standard of living has no sense of a shorter horizon, so older characters
 never draw their savings down.
 
 **13. A partner's earnings don't depend on the player's.** — **Payton: return
-to this.** A partner's earning power is drawn independently of what the player
+to this; approved P16 built, PR #28 pending merge.** Historical 0502 finding:
+a partner's earning power is drawn independently of what the player
 earns; in the world the two correlate at about 0.3–0.4 (people tend to partner
 with people in similar work and income).
+
+P16 initializes once from job-pay context, then keeps the partner's own career.
+Payton approved log-pay correlation around 0.35 for positive dual-earner annual
+observations with partner age 25–61; this is not a universal raw-dollar target.
+Production holdouts give log 0.351739/0.392886 and raw 0.275666/0.289297. See
+`playtest-p16-partner-careers.md` and the implementation note below.
 
 **14. Mortgage rates are nominal in a constant-dollar economy.** 6.5–7.25% with
 no inflation is a real rate nearly double the world's, so leverage on property
@@ -833,7 +840,8 @@ rates on screen look right; worth a decision.
 is a choice a minority make. Deliberate, but worth confirming.
 
 **16. A partner's earnings are too narrow and too fixed.** — **Payton: return
-to this. Direction given after 0503.** 0502 gave every partner one earning
+to this; approved P16 built, PR #28 pending merge. Direction given after 0503.**
+Historical 0502 finding: every partner had one earning
 power fixed for life, centred on a $52,000 peak (p10 ~$29,000, p90 ~$92,000),
 moved only by an age curve and stretches out of work. Payton's direction:
 that is not how real life is. Partners should NOT earn a fixed amount for life,
@@ -843,6 +851,12 @@ and down; some keep the same work and pay their whole career. The rework should
 give a partner a real working life — a much wider spread of earnings, careers
 that can rise, stall or fall, job changes, and some who stay put — rather than
 one number scaled by age. Pairs naturally with finding 13.
+
+P16 replaces prospective income with persistent catalog jobs, approved
+steady/ordinary/mobile styles, actual raises/cuts/moves and own final-pay pensions.
+No fixed $50k peak is used in new income. Legacy income remains only for exact
+v50 migration. The existing Person row shows the job and settled pay; save v51,
+calibration, tests and limits are in `playtest-p16-partner-careers.md`.
 
 ### Payton's playtest notes, after 0503
 
@@ -1836,7 +1850,7 @@ pass. Full verify retains seven inherited catalog mismatches; full format retain
 `feat/playtest-p15-retirement-spending` stacks on P14 #26 and #13–#25 while main
 stays `beff25a`. PR #27: https://github.com/PaytonBlevins/YearAfter/pull/27 targets main, depends on #13–#26, and is mergeable when checked. Implementation `867086f` published; CI 165 fails the same 22 historical-note format checks, verified against logs; install passes and later gates skip. Docs-closeout CI will be unobserved. P16 and life-event wording wait for Payton.
 
-### Playtest P16 — measured partner-career proposal (9 October 2026 UTC)
+### Playtest P16 — approved partner careers built (9 October 2026 UTC)
 
 Payton authorized P16 after P15. Separately claimed/published `7483088` before
 measurement, on `feat/playtest-p16-partner-careers`, following P15 #27 and
@@ -1855,10 +1869,27 @@ read 0.352/0.393 log versus 0.276/0.289 raw, median working pay $50,042/$49,131.
 55–64 worth $336,225/$361,604 and 65–74 $438,978/$446,296 retain P2 bounds.
 Both holdouts include a small $250k+ tail and actual own-career moves/cuts.
 All proposed values and limits: `playtest-p16-partner-careers.md`.
-**Approval required before production changes**, especially the correlation
-metric. No new save/engine/UI or acceptance/sabotage/full-verify completion yet.
-P16 reserves save v51 if approved; P13 owns v50. Native/Project and inherited
-verify/format failures remain open. Life-event wording and unrelated work wait.
+**Payton approved the complete policy and log-pay metric; now built.** Saved
+catalog jobs, initial qualification ceilings, pay/style/tenure and settled-year
+status feed one annual household phase and the existing Person work row. New
+households initialize on first annual settlement. Departures/deaths pay nothing,
+returning people have no backpay, descendants inherit no spouse career. Save v51
+preserves an old spouse's exact current income, history/cash/RNG and infers only a
+prospective job. P13 owns v50; TICKET and approved decisions stay unchanged.
+
+1,300 actual production lives reproduce selected wealth/pay distributions:
+holdout log correlation 0.351739/0.392886 and raw 0.275666/0.289297. No raw-dollar
+target claim. 300 explicitly retired lives preserve P15's guards, paired median
+75→85 wealth change −$60,614/−$39,183; 83.6%/81.8% decline. 48 new tests, 3,354 total
+and 15 typechecks pass. 31 valid mutations caught after one boundary-test repair;
+none remain missed and exact source restoration verified. Full verify retains
+seven inherited catalog mismatches. PR #28:
+https://github.com/PaytonBlevins/YearAfter/pull/28 targets main, depends on #13–#27;
+implementation `5fb3465` published, mergeable when checked. Full format retains
+22 historical-note failures. Implementation CI 171 fails the exact same 22 files,
+verified against logs; install passes and later gates skip. Documentation-closeout
+CI will be unobserved. Native/Project checks remain open. Stop here; life-event
+wording and unrelated work wait.
 
 ### Found by P16 measurement
 
