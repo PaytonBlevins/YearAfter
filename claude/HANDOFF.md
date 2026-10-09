@@ -181,6 +181,18 @@ Details are in the ticket doc. Stack follows P10
 #22 while main remains `beff25a`. Native checks/Project mirroring open. P12–P16 and
 life-event wording wait for Payton.
 
+**P12 measurement update (9 October UTC):** Payton authorized P12. Separately claimed
+`feat/playtest-p12-supplier-pitches` before measurement, after refreshing main; stacked
+on P11 #23 while main remains `beff25a`. Twenty types use suppliers; existing grades
+switch freely and there is no loyalty. Measured all three grades/real commands, 3,000
+counterfactual pitches across all twenty types, and 240,000 weighted event-years.
+Proposed five free searches per business/world-year (scope needs approval), one pitch
+at a time, small independent quote variation, and Low/Medium/High loyalty softening
+only supplier-hike surcharges 0%/25%/50%. No ongoing discount or signing fee. Current
+Suppliers section gains current/pitched contracts and Accept/Pass/Search; save v49
+proposed, not reserved. Details: `playtest-p12-supplier-pitches.md`. Await approval
+before production edits; P13–P16/life-event wording wait. Native checks/Project mirroring open.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:
