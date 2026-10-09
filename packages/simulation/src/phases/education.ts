@@ -37,6 +37,9 @@ export interface EducationPhaseOutput {
   readonly records: readonly NewLifeRecord[];
   /** Ticket 0301. What this phase moved, for `advanceYear` to post. */
   readonly transactions: readonly NewTransaction[];
+  /** P6: derived income for tax/living integration; never saved. */
+  readonly shiftGross: number;
+  readonly freelanceGross: number;
 }
 
 /**
@@ -177,6 +180,12 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     capacity: result.capacity,
     lines: result.lines.map((line) => ({ kind: line.kind as TimelineKind, text: line.text })),
     transactions,
+    shiftGross: result.earned
+      .filter((row) => row.kind === 'partTime')
+      .reduce((n, row) => n + row.dollars, 0),
+    freelanceGross: result.earned
+      .filter((row) => row.kind === 'oddJob')
+      .reduce((n, row) => n + row.dollars, 0),
     records: schoolRecords(
       state.education,
       result.state,

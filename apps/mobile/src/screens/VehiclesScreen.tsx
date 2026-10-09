@@ -20,6 +20,8 @@
  * the deposit and the rate are the lender's answer, shown before the press.
  */
 
+import { dollars } from '@yearafter/core';
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import {
@@ -38,6 +40,8 @@ import {
   type VehicleMarket,
 } from '@yearafter/content';
 import {
+  vehicleServiceQuote,
+  SERVICE_VEHICLE_ERROR_LABELS,
   SHOP_FROM_AGE,
   carLoanOfferFor,
   findVehicleListing,
@@ -338,7 +342,8 @@ export function CarListingScreen() {
 /* -------------------------------------------------------------------------- */
 
 export function VehicleScreen() {
-  const { state, sellACar } = useGame();
+  const { state, sellACar, serviceACar } = useGame();
+  const [servicePayment, setServicePayment] = useState(false);
   const { current, pop, push } = useNavigation();
   if (!state || !current?.vehicleId) return null;
   const vehicle = state.vehicles.find((candidate) => candidate.id === current.vehicleId);
@@ -354,6 +359,7 @@ export function VehicleScreen() {
   const monthly = found ? monthlyCostOf(vehicle, found, year) : 0;
   const owed = Number(vehicle.loan?.balance ?? 0) / 100;
   const sale = vehicleSaleOf(vehicle);
+  const service = vehicleServiceQuote(state, vehicle.id);
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -410,6 +416,44 @@ export function VehicleScreen() {
         />
       </Card>
       {found?.model.blurb ? <Text style={styles.blurb}>{found.model.blurb}</Text> : null}
+
+      <SectionHeading>Extra preventive service</SectionHeading>
+      <Text style={styles.note}>
+        Ordinary maintenance is already in your yearly car bill. This extra work reduces wear and
+        the chance of a major repair on your next year forward. Renewing it yearly can help your car
+        last around 5–10 years longer. It won't prevent crashes or fix hidden faults.
+      </Text>
+      {vehicle.service ? (
+        <Text style={styles.note}>
+          {vehicle.service.year === year
+            ? 'Serviced this year — covers next year'
+            : `Last extra service: ${vehicle.service.year}`}
+        </Text>
+      ) : null}
+      {service.ok ? (
+        <>
+          <ActionButton
+            label={`Arrange extra service — ${money(service.value.cost)}`}
+            variant="secondary"
+            onPress={() => setServicePayment(true)}
+          />
+          {servicePayment ? (
+            <PurchasePaymentChoices
+              key={`${vehicle.id}:${year}:${service.value.cost}`}
+              purchaseName="extra preventive service"
+              total={dollars(service.value.cost)}
+              cash={state.player.cash}
+              cards={state.cards}
+              onPay={(payment) => {
+                serviceACar(vehicle.id, payment);
+                setServicePayment(false);
+              }}
+            />
+          ) : null}
+        </>
+      ) : (
+        <Text style={styles.note}>{SERVICE_VEHICLE_ERROR_LABELS[service.error]}</Text>
+      )}
 
       {/* Ticket 0505. What has been done to it, and the way in to do more. */}
       <SectionHeading>Modifications</SectionHeading>

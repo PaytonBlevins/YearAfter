@@ -112,6 +112,12 @@ function inheritedLedger(
   heirAge: number,
   sellBusinesses: boolean,
 ): Ledger {
+  const closedBusinessDebt = state.loans
+    .filter(
+      (loan) =>
+        loan.businessId && !state.businesses.some((business) => business.id === loan.businessId),
+    )
+    .reduce((sum, loan) => sum + Number(loan.balance), 0);
   const estate = Number(state.player.cash);
   let books = EMPTY_LEDGER;
   if (estate > 0) {
@@ -181,6 +187,13 @@ function inheritedLedger(
       category: 'gift',
       amount: cents(deals),
       source: `The sale of ${state.player.firstName}'s private deals`,
+    }).ledger;
+  }
+  if (closedBusinessDebt > 0 && Number(books.balance) > 0) {
+    books = post(books, state.world.year, heirAge, {
+      category: 'debt',
+      amount: cents(-Math.min(closedBusinessDebt, Number(books.balance))),
+      source: 'The estate paid what its closed businesses still owed',
     }).ledger;
   }
   return books;
@@ -379,8 +392,8 @@ export function continueAsChild(
         };
       })
     : undefined;
-  // Only the loans of businesses that were handed on. One whose business is already gone is a
-  // personal debt now, and personal debts are dropped at a death as they always were (0508's).
+  // Only the loans of businesses that were handed on. One whose business is already gone has
+  // a claim on the liquid estate now (P1, inheritedLedger). Other personal debts remain 0508's.
   const inheritedLoans = inherited
     ? state.loans.filter((loan) => inherited.some((business) => business.id === loan.businessId))
     : undefined;

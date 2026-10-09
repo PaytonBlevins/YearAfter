@@ -15,11 +15,14 @@ import {
   HOME_CONDITION_LABELS,
   RENOVATION_REFUSAL_LABELS,
   annualExpenseOf,
+  renovationSpaceFor,
 } from '@yearafter/finance';
+import { dollars } from '@yearafter/core';
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
 import { findRenovation } from '@yearafter/content';
 import { renovationOptionsFor } from '@yearafter/simulation';
 import { useNavigation } from '../navigation/navigation';
-import { ActionButton, Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
+import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
 import { colors, spacing, typography } from '../theme/theme';
 
@@ -45,7 +48,7 @@ export function RenovateScreen() {
   const options = renovationOptionsFor(state, home.id);
   const worth = Number(home.value) / 100;
   const expense = annualExpenseOf(home);
-  const cash = Math.floor(Number(state.player.cash) / 100);
+  const space = renovationSpaceFor(home);
   const refreshes = options.filter((option) => option.renovation.refresh);
   const additions = options.filter((option) => !option.renovation.refresh);
 
@@ -62,7 +65,7 @@ export function RenovateScreen() {
             subtitle={
               option.refusal
                 ? RENOVATION_REFUSAL_LABELS[option.refusal]
-                : `Adds about ${money(added)} to what it's worth${upkeep > 0 ? ` · ${money(upkeep)} a year to run` : ''}`
+                : `Adds about ${money(added)} to what it's worth${upkeep > 0 ? ` · ${money(upkeep)} a year to run` : ''}${option.renovation.happiness > 0 ? ` · +${option.happinessGain} yearly happiness` : ''}${option.renovation.space > 0 ? ` · ${option.renovation.space} space` : ''}`
             }
             value={money(option.cost)}
             affordance={option.refusal ? 'none' : 'action'}
@@ -73,17 +76,22 @@ export function RenovateScreen() {
           {open === id && !option.refusal ? (
             <>
               <Text style={styles.blurb}>{option.renovation.blurb}</Text>
-              {cash >= option.cost ? (
-                <ActionButton
-                  label={`Do it — ${money(option.cost)}`}
-                  onPress={() => {
-                    renovateHome(home.id, id);
-                    setOpen(undefined);
-                  }}
-                />
-              ) : (
-                <Text style={styles.note}>You don't have the money for that.</Text>
-              )}
+              {option.renovation.happiness > 0 ? (
+                <Text style={styles.note}>
+                  Comfort is for the home you live in, up to +3 a year, when your bills are paid.
+                </Text>
+              ) : null}
+              <PurchasePaymentChoices
+                key={`${id}:${option.cost}`}
+                purchaseName={option.renovation.name}
+                total={dollars(option.cost)}
+                cash={state.player.cash}
+                cards={state.cards}
+                onPay={(payment) => {
+                  renovateHome(home.id, id, payment);
+                  setOpen(undefined);
+                }}
+              />
             </>
           ) : null}
         </Fragment>
@@ -97,6 +105,12 @@ export function RenovateScreen() {
         <ListRow
           title="Condition"
           value={HOME_CONDITION_LABELS[home.condition]}
+          affordance="none"
+          compact
+        />
+        <ListRow
+          title="Space"
+          value={`${space.used} of ${space.capacity} used · ${space.remaining} left`}
           affordance="none"
           compact
         />
