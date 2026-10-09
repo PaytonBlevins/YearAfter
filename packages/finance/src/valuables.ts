@@ -22,7 +22,7 @@
  */
 
 import { cents, dollars, mixedUnit, type Money } from '@yearafter/core';
-import type { Valuable, ValuableHolds } from '@yearafter/content';
+import { findValuable, type Valuable, type ValuableHolds } from '@yearafter/content';
 import { REPRODUCTION_SHARE } from './auctions';
 
 export interface OwnedValuable {
@@ -43,6 +43,8 @@ export interface OwnedValuable {
   readonly fake?: boolean;
   /** Ticket 0507. Found out: a reproduction, worth what reproductions are. */
   readonly reproduction?: boolean;
+  /** Paid aftermarket work; purchasePrice remains the base watch component. */
+  readonly icing?: { readonly cost: Money; readonly year: number };
 }
 
 export const EMPTY_VALUABLES: readonly OwnedValuable[] = [];
@@ -94,6 +96,26 @@ export const valuablesMarketIn = (holds: ValuableHolds, year: number): number =>
 export const resaleAtPurchase = (valuable: Valuable, paid: number): number =>
   Math.round(paid * RESALE[valuable.holds]);
 
+/** Unknown retired IDs retain saved work; known pieces must be customizable watches. */
+export function savedWatchWorkAllowed(itemId: string): boolean {
+  const item = findValuable(itemId);
+  return !item || (item.kind === 'watch' && item.icing?.kind === 'aftermarket');
+}
+
+/** One paid modification of current resale; never retail or the total invoice. */
+export function icingValue(valuable: Valuable, currentValue: Money): Money {
+  const policy = valuable.icing;
+  if (policy?.kind !== 'aftermarket') return currentValue;
+  return dollars(
+    Math.max(
+      1,
+      Math.round(
+        (Number(currentValue) / 100) * policy.valueShare + policy.cost * policy.costRecovery,
+      ),
+    ),
+  );
+}
+
 /**
  * A year of owning one. Half the swing is its kind's market, half its own —
  * one painting takes off while another in the same year doesn't.
@@ -114,12 +136,12 @@ export function valuableYear(
     delete (found as { fake?: boolean }).fake;
     return found;
   }
-  const drift = DRIFT[valuable.holds];
+  const holds = owned.icing ? 'precious' : valuable.holds;
+  const drift = DRIFT[holds];
   const own = Math.max(-2.5, Math.min(2.5, normalFrom(`${seed}:${owned.id}:${year}`)));
-  const swing =
-    drift.mean + drift.spread * (0.6 * valuablesMarketIn(valuable.holds, year) + 0.8 * own);
+  const swing = drift.mean + drift.spread * (0.6 * valuablesMarketIn(holds, year) + 0.8 * own);
   const before = Number(owned.value) / 100;
-  const floor = valuable.holds === 'fashion' ? valuable.price * FASHION_FLOOR : 1;
+  const floor = holds === 'fashion' ? valuable.price * FASHION_FLOOR : 1;
   const value = Math.max(floor, Math.round(before * (1 + Math.max(-0.6, swing))));
   return { ...owned, value: dollars(value) };
 }

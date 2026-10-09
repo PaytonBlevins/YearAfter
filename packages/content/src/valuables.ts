@@ -28,6 +28,15 @@ export type ValuableHolds =
 
 export type ValuableRarity = 'common' | 'uncommon' | 'rare' | 'very rare' | 'mythical';
 
+export type WatchIcing =
+  | {
+      readonly kind: 'aftermarket';
+      readonly cost: number;
+      readonly valueShare: number;
+      readonly costRecovery: number;
+    }
+  | { readonly kind: 'factory' | 'unavailable' };
+
 export interface Valuable {
   readonly id: string;
   readonly kind: ValuableKind;
@@ -39,6 +48,7 @@ export interface Valuable {
   readonly stores: readonly string[];
   readonly rarity: ValuableRarity;
   readonly blurb: string;
+  readonly icing?: WatchIcing;
 }
 
 export interface ValuableStore {

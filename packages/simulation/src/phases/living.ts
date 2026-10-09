@@ -26,6 +26,7 @@ import { dollars } from '@yearafter/core';
 import type { NewTransaction } from '@yearafter/finance';
 import {
   SUBSISTENCE,
+  LIFESTYLES,
   creep,
   householdScale,
   livingCostFor,
@@ -118,6 +119,8 @@ export interface LivingPhaseOutput {
   readonly transactions: readonly NewTransaction[];
   /** Whole dollars charged this year. Zero before 18. */
   readonly cost: number;
+  /** Annual tier nudge; never awarded by the choice command. */
+  readonly mood: number;
   /** Ticket 0504. The same year's bill with no car in it — see the return. */
   readonly withoutCar: number;
   /**
@@ -236,6 +239,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
       lines,
       transactions,
       cost: 0,
+      mood: 0,
       withoutCar: 0,
       hardship: false,
       unmet: 0,
@@ -286,6 +290,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
 
   const asIfAlone = livingCostFor({
     standard,
+    lifestyle: input.household.lifestyle,
     locationIndex: input.locationIndex,
     partnered: input.partnered,
     childAges: input.childAges,
@@ -311,6 +316,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
 
   let cost = livingCostFor({
     standard,
+    lifestyle: input.household.lifestyle,
     locationIndex: input.locationIndex,
     partnered: input.partnered,
     childAges: input.childAges,
@@ -382,6 +388,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     }
     cost = livingCostFor({
       standard,
+      lifestyle: input.household.lifestyle,
       locationIndex: input.locationIndex,
       partnered: input.partnered,
       childAges: input.childAges,
@@ -445,8 +452,19 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     });
   }
 
+  const basicCost = livingCostFor({
+    standard: SUBSISTENCE,
+    locationIndex: input.locationIndex,
+    partnered: input.partnered,
+    childAges: input.childAges,
+    housing,
+    housingCost: input.housingCost ?? 0,
+    vehicleCost: input.vehicleCost ?? 0,
+    ownsVehicle: input.ownsVehicle ?? false,
+  }).total;
   return {
     household: {
+      lifestyle: input.household.lifestyle,
       standard,
       housing,
       /*
@@ -471,6 +489,9 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     lines,
     transactions,
     cost: cost.total,
+    // At the floor there are no discretionary comforts to buy or forgo.
+    mood:
+      !inHardship && cost.total > basicCost ? LIFESTYLES[input.household.lifestyle].happiness : 0,
     /*
       Ticket 0504. What this household's life would cost with no car in it.
       The home door measures a mortgage against the roof the household pays
@@ -483,6 +504,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
       ? cost.total
       : livingCostFor({
           standard,
+          lifestyle: input.household.lifestyle,
           locationIndex: input.locationIndex,
           partnered: input.partnered,
           childAges: input.childAges,
