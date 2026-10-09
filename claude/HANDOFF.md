@@ -158,7 +158,9 @@ appraisal, actual descendant handoff and autosave are tested. Details and verifi
 (147 new); 31 sabotage mutations caught, none missed. Full verification retains
 seven inherited generator mismatches and full formatting 22 historical notes. Stacked on P9 #21; dependencies #13–#21 remain unmerged
 while main is `beff25a`. Native checks and Project mirroring remain open. P11 and
-life-event wording wait for Payton.
+life-event wording wait for Payton. PR #22 targets main and is mergeable when checked:
+https://github.com/PaytonBlevins/YearAfter/pull/22. Implementation CI run 132 failed the same 22 historical-note format checks
+and skipped later gates.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

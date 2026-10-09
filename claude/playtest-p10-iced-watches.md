@@ -374,3 +374,14 @@ Native/on-device checks and Claude Project `project_write` mirroring are unavail
 in this environment and remain explicitly open. The branch follows P9 PR #21 and
 depends on P1–P9 PRs #13–#21; main is still `beff25a` after refreshing origin. Payton
 merges the stack. TICKET 0708 stays untouched. P11 and life-event wording wait.
+
+### Published PR
+
+[P10 PR #22](https://github.com/PaytonBlevins/YearAfter/pull/22) targets main and is
+mergeable when checked, following P9 #21 and depending on P1–P9 #13–#21. Production
+commit `917e729` is published. Implementation CI run 132
+([Actions](https://github.com/PaytonBlevins/YearAfter/actions/runs/37862995155)) is
+confirmed failed at formatting on exactly the same 22 historical Claude notes.
+Install succeeded; typecheck, unit tests and content validation were skipped after
+formatting failed. The job logs were read, not inferred from local results. Local
+release results and inherited blockers are recorded above. Checkout and published tree match exactly.

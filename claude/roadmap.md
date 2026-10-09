@@ -1676,6 +1676,9 @@ base purchase price. Descendants, counterfeit appraisal, sale/estate and actual
 mobile/store/autosave paths are covered. Results: `playtest-p10-iced-watches.md`. All 15 typechecks and 3,014 tests pass
 (147 new); 31 sabotage mutations caught, none missed. Full verification retains
 seven inherited generator mismatches and full formatting 22 historical notes.
+PR #22: https://github.com/PaytonBlevins/YearAfter/pull/22 (main, depends on #13–#21,
+mergeable when checked). Implementation CI run 132 failed the same 22 historical-note format checks and skipped
+later gates.
 P11 and life-event wording wait.
 
 ### Found by P10
