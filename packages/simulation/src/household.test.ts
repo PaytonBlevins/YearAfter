@@ -7,7 +7,8 @@
  * one, and somebody who was only DATING paid for a household of two.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as livingPhase from './phases/living';
 import {
   homesValue,
   mortgagesOwed,
@@ -146,12 +147,27 @@ describe('0502 — a household of two', () => {
       all: the living bill has to be the same. Before 0502 a date cost half
       again as much as living alone.
     */
-    const living = (state: GameState) =>
-      advanceYear(state)
-        .state.finance.transactions.filter(
-          (entry) => entry.year === state.world.year + 1 && entry.category === 'living',
-        )
-        .reduce((sum, entry) => sum + Number(entry.amount), 0);
+    // Compare the charged bill, not the amount paid after unrelated shortfall
+    // clamping. Fix income and verify the real annual caller says single.
+    const living = (state: GameState): number => {
+      let charged = 0;
+      const runLiving = livingPhase.runLiving;
+      const phase = vi.spyOn(livingPhase, 'runLiving').mockImplementation((input) => {
+        const result = runLiving({ ...input, afterTaxIncome: 40_000 });
+        charged = result.transactions
+          .filter((row) => row.category === 'living')
+          .reduce((sum, row) => sum + Number(row.amount), 0);
+        return result;
+      });
+      try {
+        advanceYear(state);
+        expect(phase).toHaveBeenCalledTimes(1);
+        expect(phase.mock.calls[0]?.[0].partnered).toBe(false);
+        return charged;
+      } finally {
+        phase.mockRestore();
+      }
+    };
     const late = SAMPLES.filter((sample) => sample.player.age === 56);
     expect(late.length).toBeGreaterThan(5);
     for (const state of late.slice(0, 6)) {

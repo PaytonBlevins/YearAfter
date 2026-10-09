@@ -16,3 +16,5 @@ export * from './openings';
 export * from './offers';
 export * from './growth';
 export * from './partner';
+
+export * from './listing-exposure';

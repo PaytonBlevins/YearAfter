@@ -123,12 +123,10 @@ describe('A7 — visible rental costs', () => {
     expect(rows.find((row) => row.props.title === 'Letting agent')?.props.value).toBe(
       `${money(numbers.agentYear / 12)} a month`,
     );
-    const projection = rows.find(
-      (row) => row.props.title === 'Projected rent after property costs',
-    );
+    const projection = rows.find((row) => row.props.title === 'Estimated cash after mortgage');
     expect(projection?.props.value).toBe(`${money(numbers.profitYear / 12)} a month`);
     expect(projection?.props.meta).toBe(`${money(numbers.profitYear)} a year`);
-    expect(projection?.props.subtitle).toContain('quoted rent and current occupancy');
+    expect(projection?.props.subtitle).toContain('current occupancy and signed lease rents');
     expect(text()).toContain('not rent already');
   });
   it('shows the mortgage on the same monthly basis as property costs', async () => {
@@ -147,7 +145,7 @@ describe('A7 — visible rental costs', () => {
       `${money(numbers.mortgageMonth)} a month`,
     );
     expect(
-      rows.find((row) => row.props.title === 'Projected rent after property costs')?.props.value,
+      rows.find((row) => row.props.title === 'Estimated cash after mortgage')?.props.value,
     ).toBe(`${money(numbers.profitYear / 12)} a month`);
   });
   it('warns about a projected shortfall', async () => {

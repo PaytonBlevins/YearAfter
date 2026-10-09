@@ -180,8 +180,16 @@ export function RentalScreen() {
         ) : null}
         <RowDivider />
         <ListRow
-          title="Projected rent after property costs"
-          subtitle="Before income tax; quoted rent and current occupancy"
+          title="Estimated operating profit"
+          subtitle="Before mortgage payments and income tax; current occupancy"
+          value={`${money(numbers.operatingYear / 12)} a month`}
+          meta={`${money(numbers.operatingYear)} a year`}
+          affordance="none"
+          wrap
+        />
+        <ListRow
+          title="Estimated cash after mortgage"
+          subtitle="Before income tax; current occupancy and signed lease rents"
           value={`${money(numbers.profitYear / 12)} a month`}
           meta={`${money(numbers.profitYear)} a year`}
           affordance="none"
@@ -191,8 +199,9 @@ export function RentalScreen() {
 
       <Text style={styles.note}>
         Rent is what tenants pay, before your mortgage, property tax, upkeep and any agent fee.
-        Costs are for the whole property, not each unit. This is an estimate, not rent already
-        collected. Empty units and missed payments can change the result.
+        Costs are for the whole property, not each unit. Signed commercial rents stay fixed until
+        renewal. This assumes a full year at current occupancy, not rent already collected. Empty
+        units and missed payments can change the result.
       </Text>
       {numbers.profitYear < 0 ? (
         <Text style={styles.note}>

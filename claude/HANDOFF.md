@@ -20,6 +20,248 @@ until they are done. Read `claude/playtest-rules-brief.md` first. For P1–P16 i
 section 0 and the CORE_RULES, migration and validator limits in section 8. Outside that list, section 0
 still applies. v0.08 and 0508 wait.
 
+**7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
+one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
+inject-or-close choices and no automatic personal-bank rescue. Death winds down troubled
+businesses before inheritance; lenders retain priority. Save v44 is reserved for P1.
+This is the narrow P1–P16 engine/save exception in `playtest-rules-brief.md`; older role
+limits below remain historical. Details and verification: `playtest-p1-business-rescue.md`.
+P2 was subsequently authorized by Payton; see its update below. PR #10 was still unmerged on base `beff25a`;
+P1 was started only after Payton's explicit go-ahead, not an inferred merge.
+
+**P2 update:** Payton approved the measured living curve, Frugal / Comfortable / Lavish spending
+and happiness effects, $1,600 car allowance and Lifestyle screen. Agent B built P2 on
+`feat/playtest-p2-living-costs`, stacked on P1 while `origin/main` remains `beff25a`. Save v45 follows
+P1 v44; keep both migrations. The choice saves immediately, bills on annual advance, and cannot
+farm happiness by switching. Estimates and child-cost copy read the selected lifestyle. TICKET
+remains 0708. Measurement, verification and open issues: `playtest-p2-living-costs.md`.
+P2 PR: https://github.com/PaytonBlevins/YearAfter/pull/14 (targets main, depends on P1 PR #13).
+P3 was subsequently authorized by Payton; see its implementation update below. If P1 merges first, rebase P2 onto main and
+drop already-merged P1 commits; do not squash away the separately reserved save versions.
+
+**P3 implementation update:** Payton approved the measured proposal on 7 October. Agent B built
+it on `feat/playtest-p3-social-success`, stacked on P2 while main remains `beff25a`. Moderate
+new-account rank lifts improve deliberate play. Full existing downward drift removes the
+low-output viral-retention advantage; live manual settlement no longer grants a second annual
+viral roll. Saved luck stays fixed and corrupt luck is rejected. All 15 typechecks and 2,598 tests
+pass; 28 independent sabotage mutations were caught, none missed. Full verify hits the same nine
+catalog mismatches as an untouched main archive; format has 22 historical-note failures.
+Details: `playtest-p3-social-success.md`. Fame anchors, free accounts, manual posts, TICKET and
+save v45 remain unchanged. PR #15: https://github.com/PaytonBlevins/YearAfter/pull/15
+(targets main, depends on P1 #13 then P2 #14). Implementation CI run 88 confirms the same 22-note
+formatting failure and skips later gates. Review, device checks and Project mirroring remain
+open. P4 was subsequently authorized; see its update below.
+
+**P4 implementation update:** Payton approved the proposal on 7 October with strong expansion
+kept at **+9%**. Agent B built the other half-strength demand effects and lower context thresholds
+on `feat/playtest-p4-business-economy`, following P3 #15 while main remains `beff25a`. Save v45,
+TICKET 0708, industry cyclicality, event odds/damage, world transitions and P1 rescue choices stay.
+The revised production cohort gives five-year rescue-policy survival 82.11% → 83.85% in the harsh
+cycle and 83.44% → 83.59% under ordinary transitions. The immediate severe profit hit roughly
+halves; the boom benefit and normal-year economics are unchanged. Overall volatility remains
+similar. All 15 typechecks and 2,633 tests pass; full verify hits the nine baseline catalog failures.
+All 26 mutations caught after adding the missing owner-payment case; none missed. PR results: `playtest-p4-business-economy.md`. Native device checks and Project
+mirroring remain open. PR #16: https://github.com/PaytonBlevins/YearAfter/pull/16
+(targets main, depends on P1 #13, P2 #14 and P3 #15). Implementation CI run 94 confirms the
+same 22-note formatting failure and skips later gates. P5 was subsequently authorized; see its measurement note below.
+
+**P5 implementation update:** Payton approved the scarce-pool exception on 7 October. Agent B
+built twelve listings with two reserved eligible study/training matches on
+`feat/playtest-p5-career-listings`, following P4 #16 while main remains `beff25a`. Fewer than two
+matches means all available matches plus other eligible work; no qualification/experience
+bypass. Current/last major and held licenses feed curation; hiring odds and first-offer chance
+stay. Save v45 and TICKET 0708 remain. Played-life median jobs seen rises 93 → 96; passive
+first-job age stays median 17. The Jobs screen renders the full board and opens each job's
+existing details. All 15 typechecks and 2,670 tests pass; full verify stops on the nine baseline
+catalog mismatches. All 29 behavior-changing mutations caught after repairing two test gaps;
+one additional equivalent survivor is documented. Formatting still fails 22 historical notes;
+P5's files pass. Details: `playtest-p5-career-listings.md`.
+PR #17: https://github.com/PaytonBlevins/YearAfter/pull/17 (targets main, depends on P1 #13,
+P2 #14, P3 #15 and P4 #16). Implementation CI run 100 confirms the same 22-note format
+failure and skips later gates.
+P6 was subsequently authorized; see its implementation update below.
+
+**P6 implementation update:** Payton approved the measured proposal on 8 October UTC
+(7 October Pacific). Agent B built six deliberate adult odd jobs from 18 without an upper age
+cutoff and clearly separated the four school shifts on `feat/playtest-p6-school-work`, stacked
+on P5 #17 while main remains `beff25a`. Retail/kitchen annual ranges are $6,000–$10,000 and
+$7,000–$12,000. The approved cap correction uses existing hidden workload. Every school stage
+pays once, including graduation and college; paid hours survive age-out and reach stress.
+Existing tax curves, living costs and subsequent income bases count adult work. No save bump:
+v45 and TICKET 0708 stay. All 15 typechecks and 2,713 tests pass; full verify hits the nine baseline
+catalog mismatches, full format the same 22 old notes. Paired retail median graduation cash is
+$18,369 (previously $9,926); all-six adult work has median stress 100, not free capacity.
+Details, measurements, sabotage and PR/CI results: `playtest-p6-school-work.md`.
+PR #18: https://github.com/PaytonBlevins/YearAfter/pull/18 (targets main; depends on #13–#17).
+Implementation CI run 107 fails the same 22 historical-note format checks and skips later gates.
+Native checks and Project mirroring remain open. P7 was subsequently authorized; see below.
+
+**P7 implementation update:** Payton approved the measured proposal on 8 October, amending
+all advisor investment suggestions to **15% of spare cash**, including funds and
+reinvestment; no 25% exception. Agent B built 20% smaller investor shocks, a six-month
+recurring-bill reserve (minimum $12,000) plus saved purchase goal, correct sale targets
+and Broad Market Index routing, goal Set/Clear and preview on the existing Advisor screen.
+Save v46 migrates older lives to no goal without RNG; hired advisors now survive loading.
+TICKET 0708 stays. Stack follows P6 #18 while main remains `beff25a`; P8 waits.
+53 new tests, 2,766 total and 15 typechecks pass; 28 sabotage mutations caught after one
+generator-silence test repair, none missed. Full verify has nine baseline catalog mismatches;
+full format the same 22 old notes. PR #19: https://github.com/PaytonBlevins/YearAfter/pull/19
+(targets main, depends on #13–#18; mergeable when checked). Implementation CI run 113
+fails the same 22 historical-note format checks and skips later gates.
+Actual paid controlled wins are 73.6% after fees; 300-life paid wins versus one 15% random
+cheque are 77.4% at 50, but only 51.7% versus three cheques and 46.6% versus index-only.
+Aggressive all-surplus self-directed investing still beats the hybrid advisor's wealth;
+do not claim universal superiority. Details: `playtest-p7-investments-advisors.md`.
+Native-device checks and Claude Project mirroring remain open.
+
+**P8 implementation update (8 October):** Payton reduced the proposal to 15–20 real
+model equivalents, no invented movements, approved the remaining approach, and
+requested a very expensive Jacob & Co. equivalent. Built eighteen: 55 watches total,
+one new fictional maker, existing 151 entries and all store/selection rules unchanged.
+Includes Jakob & Co. Billionaire Timeless Treasure at $20m. Save v46/TICKET 0708 stay.
+Branch `feat/playtest-p8-watch-catalog` follows P7 #19 while main remains `beff25a`.
+28 new tests; all 2,794 tests and 15 typechecks pass. Full verify has eight existing
+catalog mismatches; valuables now reproduces exactly. 25 sabotage mutations caught,
+none missed, source MD5 restored. Actual twenty-year reference discovery is 27 → 39
+at $10k+ means; mixed-auction effects and model/source mappings are in
+`playtest-p8-watch-catalog.md`. Validator secondary-output restoration is an open
+finding; its incidental vehicle-mods format edit was restored, not committed.
+PR #20: https://github.com/PaytonBlevins/YearAfter/pull/20 (targets main, depends on
+#13–#19, mergeable when checked). Implementation CI run 119 failed the same 22 old-note formatting checks; later gates skipped.
+Native checks and Project mirroring remain open. P9 waits for Payton.
+
+**P9 implementation update (8 October):** Payton approved the measured manifest.
+Agent B built nine additions (28 total), kind-based aggregate space checks and +3
+maximum annual residence comfort, with hardship/final-shortfall suppression. Existing
+nineteen catalog fields, paid work and unknown legacy holdings remain intact; zero-space
+maintenance remains available above capacity. Pool variants stay mutually exclusive.
+Renovate quotes actual value/upkeep, marginal capped comfort and space, then confirms
+cash or a chosen card. Reuses PR #10 shared payment helpers; borrowed funds remain a
+transfer in the financial summary. Save v46/TICKET 0708 unchanged. Stack follows P8
+#20 while main remains `beff25a`. Details/results: `playtest-p9-renovations.md`.
+All 15 typechecks and 2,867 tests pass; 28 sabotage mutations caught, none missed.
+Full verify still exits on seven baseline catalog mismatches; formatting on 22 old notes.
+Owned formatting passes. PR #21 targets main and is mergeable when checked. Implementation CI 125 fails
+the same 22 historical-note formatting checks and skips later gates. Native checks/Project mirroring open.
+P10 and life-event wording wait for Payton.
+
+**P10 implementation update (8 October):** Payton approved the full measured proposal.
+Agent B built Original/Iced-out purchase choices and owned-watch customization on the
+existing Store/Collections screens, with explicit full-invoice cash/card payment.
+All 55 original references/stock slots stay; 53 are customizable, Jakob remains
+factory-set and the smartwatch is excluded. Per-model one-time effects use current
+resale, aftermarket work then uses the precious annual market; original rules stay.
+Save v47, separately reserved before production edits, preserves old values/RNG and
+saves work cost/year beside the base watch purchase price. Provenance, counterfeit
+appraisal, actual descendant handoff and autosave are tested. Details and verification:
+`playtest-p10-iced-watches.md`. All 15 typechecks and 3,014 tests pass
+(147 new); 31 sabotage mutations caught, none missed. Full verification retains
+seven inherited generator mismatches and full formatting 22 historical notes. Stacked on P9 #21; dependencies #13–#21 remain unmerged
+while main is `beff25a`. Native checks and Project mirroring remain open. P11 and
+life-event wording wait for Payton. PR #22 targets main and is mergeable when checked:
+https://github.com/PaytonBlevins/YearAfter/pull/22. Implementation CI run 132 failed the same 22 historical-note format checks
+and skipped later gates.
+
+**P11 implementation update (9 October UTC):** Payton approved the measured servicing
+proposal with 5–10 extra years under annual renewal. Separately reserved save v48;
+P10 owns v47. Built extra preventive service on the owned-car screen with an exact
+invoice, explicit cash/card confirmation, spoken refusals and last-service status.
+Price stays half upcoming ordinary mean upkeep (nearest $10, minimum $100). Normal
+wear is multiplied by 0.63, classic wear by 0.75; ordinary major-repair chance by 0.8,
+for the next advance only. Ordinary yearly bills, crashes, hidden faults, past records,
+loans and mods retain their existing rules. Actual production commands reproduce all
+4,200 paired paths: median remaining life increases 5–10 years in the seven measured
+purchases. Details/results: `playtest-p11-car-servicing.md`. Thirty sabotage cases now
+caught; one RNG comparison initially missed a draw and was strengthened. No mutations
+retained. All 15 typechecks and 3,080 tests pass (66 new); full verification retains
+seven inherited generator mismatches and formatting 22 old notes. Changed files pass.
+PR #23 targets main and is mergeable when checked:
+https://github.com/PaytonBlevins/YearAfter/pull/23. Implementation CI 139 fails the same 22 old-note format checks; later gates skip.
+Details are in the ticket doc. Stack follows P10
+#22 while main remains `beff25a`. Native checks/Project mirroring open. P12–P16 and
+life-event wording wait for Payton.
+
+**P12 implementation update (9 October UTC):** Payton approved the entire proposal,
+including five free searches per owned business/world year, shared across its branches.
+Save v49 separately reserved before implementation (`d9a7418`); P11 owns v48. Built
+one named pitch, Accept/Pass/Search, persisted accepted quality/cost/loyalty, only-hike
+surcharge protection, spoken refusals and real owned-screen/store/autosave. Old free
+grade command now refuses. Legacy economics, ordinary goods billing, event selection,
+P1 rescue, payroll/pricing/expansion and TICKET 0708 remain intact. Production reproduces
+60,000 actual search/accept cases and quote counterfactuals plus 12,000 reconciled
+annual settlements. All 15 typechecks and 3,139 tests pass; 26 sabotage mutations
+caught after fixing one stale-Pass test gap, with exact restored hashes. Details:
+`playtest-p12-supplier-pitches.md`. Stacked on P11 #23 while main remains `beff25a`.
+Seven inherited catalog mismatches and 22 old-note formatting failures remain;
+final verify/PR/CI check recorded in the ticket. Native checks/Project mirroring open.
+PR #24 targets main, depends on #13–#23 and was mergeable when checked.
+CI 146 fails the same 22 historical-note format checks; later gates skip. Payton authorized P13 next; P14–P16
+and life-event wording wait for Payton.
+
+**P13 implementation update (9 October UTC):** Payton approved the full measured
+proposal. Save v50 separately reserved before production. Built on
+`feat/playtest-p13-agent-levels`, stacked on P12 #24 and #13–#23 while refreshed
+main remains `beff25a`. Real Estate Brokerage has one saved Low/Mid/High team:
+90/100/115% existing rounded labor cost and potential client demand, independent
+of payroll/headcount/capacity. Missing level is Mid. No direct money/stats/quality
+reward or RNG draw. Commands enforce adult/living/owned/eligible/no-rescue gates;
+manual/automatic staffing, branches, acquisition and actual inheritance preserve it.
+Both price commands refuse brokerage; annual reader ignores stale price and v49
+migration normalizes only current brokerage price to ordinary 100. Histories,
+P12 supplier records and other 30 businesses are preserved. Owned Employees shows
+team tradeoffs, yearly per-head quote and real store/autosave; Price explains market
+rates. Details: `playtest-p13-agent-levels.md`. 81 new tests pass; 27 valid behavioral
+mutations caught, none missed, with exact hash restoration. All 108 production
+operating points reproduce approved measurement; 3,000 actual commands/annual
+settlements preserve level and reconcile. Full verify passes all 15 typechecks and 3,220 tests, then fails only the seven
+inherited generator mismatches; full format retains 22 historical-note failures.
+Changed-file formatting passes. PR #25: https://github.com/PaytonBlevins/YearAfter/pull/25, targets main and
+depends on #13–#24; mergeable when checked. Implementation CI 154 installed but
+fails the same 22 historical-note format checks, confirmed from logs; later gates
+skip. Closeout documentation triggers another run, not observed here. Gaming maximum-price finding remains logged without curve retune.
+Native/device checks and unavailable Project mirroring remain open. P14–P16 and
+life-event wording wait; stop after P13.
+
+**P14 implementation update (9 October UTC):** Payton approved residential rent
+×1.15, the fixed 50%-down investment mortgage choice and separate operating/cash
+projections. Built on `feat/playtest-p14-landlord-returns`, stacked on P13 #25 and
+#13–#24 while refreshed main remains `beff25a`. Commercial yields and signed
+leases, primary-home deposits, APR/terms/caps, expenses and vacancy rules stay.
+Save v50/TICKET 0708 unchanged; existing mortgage fields carry the new deposit.
+110,000 production property-years match all 44 approved pricing cases exactly;
+real quote/purchase/annual command probes and 480 generated-life strategies
+reconcile. 55 new tests and 24 valid sabotage mutations, none missed after one
+lender-boundary gap repair and one invalid no-op injection correction; source
+restored exactly. Full verification details: `playtest-p14-landlord-returns.md`.
+Finding 44's separate commercial vacancy/turnover cost omission remains open;
+there is no dedicated rental income-tax row. Native checks and unavailable Project
+mirroring remain open.
+All 15 typechecks and 3,275 tests pass; full verify retains seven inherited catalog
+byte mismatches and format retains 22 historical-note failures. PR #26: https://github.com/PaytonBlevins/YearAfter/pull/26, targets main, depends on #13–#25; mergeable when checked.
+Implementation CI run 160 fails the same 22 historical-note format checks;
+installation passes, later gates skip. Docs-closeout CI is unobserved.
+P15–P16 and life-event wording wait for Payton.
+
+**P15 implementation update (9 October UTC):** Payton explicitly preapproved the
+measured choices. Built 75+ retired savings allowance: half net liquid savings,
+horizon to 100 with at least eight years, reserve max($12k, six months ordinary
+comfortable living plus home/car commitments). Deduct personal debt; exclude home
+equity/business tills/undrawn retirement/unused credit. Existing P2 standard creep,
+tiers and hardship remain; no forced retirement or automatic asset sale. Corrected
+existing pension/principal availability before living, preserving transfer books,
+payout amounts, save v50 and RNG order. Screens explain the policy.
+300 actual retired production lives match calibration exactly: paired 75→85 median
+wealth declines $67,474/$42,497, versus $4,635/$1,811 before. Pre-retirement P2
+bands stay. Underfunded-retiree 85+ shortfalls rise to 27.86%/21.91%, mainly from
+correcting pension-based living costs; no promise of universal retirement success.
+Passive wage-earning elder samples are not retirement cohorts. See
+`playtest-p15-retirement-spending.md` for measurement and all 23 caught mutations
+(none missed, exact source restoration). 31 new tests; 3,306 tests and 15 typechecks
+pass. Full verify retains seven inherited catalog mismatches; full format retains
+22 historical-note failures. Native/Project checks open. Branch
+`feat/playtest-p15-retirement-spending` stacks on P14 #26 and #13–#25 while main
+stays `beff25a`. PR #27: https://github.com/PaytonBlevins/YearAfter/pull/27 targets main, depends on #13–#26, and is mergeable when checked. Implementation `867086f` published; CI 165 fails the same 22 historical-note format checks, verified against logs; install passes and later gates skip. Docs-closeout CI will be unobserved. P16 and life-event wording wait for Payton.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:

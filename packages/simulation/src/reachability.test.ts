@@ -37,9 +37,8 @@ import {
   ALL_JOBS,
   LISTINGS,
   WORKING_AGE,
-  cannotApply,
   findJob,
-  listingWeight,
+  listingChanceFloors,
   reachOf,
 } from '@yearafter/careers';
 import { createNewGame } from './new-game';
@@ -144,21 +143,20 @@ function aCareer(seed: string): Life {
     /*
       THE ODDS THIS YEAR, NOT JUST THE FACT OF BEING ELIGIBLE (Ticket 0410).
 
-      `listingWeight` is the draw's own formula, exported so this cannot drift
-      from it. A job's share of the six slots is its weight over the weight of
-      everything else the character qualifies for, and multiplying the misses
-      together across the years gives the chance the listings genuinely never
-      got round to it.
+      P5 supersedes the linear LISTINGS * weight / total proxy: dividing
+      uniform draws by weights is not a linear inclusion lottery, and two
+      reserved slots change the pool. listingChanceFloors uses the actual
+      gates, weights and match predicate to bound sufficient ranking events.
+      Multiplying the upper bounds on misses retains the 95% single-life
+      starvation intent without claiming the old proxy was an exact chance.
     */
     const context = atTheDoor(state);
-    const qualifies = ALL_JOBS.filter((job) => cannotApply(job, context) === undefined);
-    const totalWeight = qualifies.reduce((sum, job) => sum + listingWeight(context, job), 0);
+    const chances = listingChanceFloors(context);
     for (const job of ALL_JOBS) {
       if (whyNotJob(state, job) === undefined) {
         const id = String(job.id);
         eligible.set(id, (eligible.get(id) ?? 0) + 1);
-        const share =
-          totalWeight > 0 ? Math.min(1, (LISTINGS * listingWeight(context, job)) / totalWeight) : 0;
+        const share = chances.get(id) ?? 0;
         missed.set(id, (missed.get(id) ?? 1) * (1 - share));
         bestShare.set(id, Math.max(bestShare.get(id) ?? 0, share));
       }
@@ -317,7 +315,9 @@ describe('Ticket 0401 — how much of the catalog a life reaches', () => {
     const offered = lives.reduce((total, life) => total + life.stepUpsOffered, 0);
     expect(years).toBeGreaterThan(500);
     const perYear = offered / years;
-    console.log(`step-ups among the six listings while employed: ${perYear.toFixed(2)} of 6`);
+    console.log(
+      `step-ups among the ${LISTINGS} listings while employed: ${perYear.toFixed(2)} of ${LISTINGS}`,
+    );
     // Two, not 3.38: a floor on "the list contains a career", not a pin on the
     // tuning. The pre-0401 figure of 1.30 fails it.
     expect(perYear).toBeGreaterThan(2);

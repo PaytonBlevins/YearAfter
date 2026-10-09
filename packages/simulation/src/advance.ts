@@ -36,6 +36,7 @@ import { asEventId, clampStat, dollars } from '@yearafter/core';
 import { nudgeStats } from '@yearafter/character';
 import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
+import { gigIncome } from './gig-income';
 import { occupationFor, runEducation } from './phases/education';
 import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
@@ -70,6 +71,8 @@ import {
   yearsOutside,
   type NewTransaction,
   OWNER_SHARE,
+  totalBorrowed,
+  totalOwed,
 } from '@yearafter/finance';
 import { runKin } from './phases/kin';
 import { runLiving } from './phases/living';
@@ -82,7 +85,8 @@ import { runPursuitYear } from './pursuits';
 import { withPursuitOffer } from './pursuit-offer';
 import { foreclose, markMissed, runHomesYear, withHomeOffer } from './homes';
 import { markVehiclesMissed, repossess, runVehiclesYear, withVehicleOffer } from './vehicles';
-import { withRenovationOffer } from './renovations';
+import { withBusinessRescue } from './business-rescue';
+import { withRenovationOffer, renovationComfortFor } from './renovations';
 import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
 import { runDealsYear } from './deals';
@@ -386,7 +390,14 @@ export function advanceYear(state: GameState): AdvanceResult {
     holdsJob: employment.employment.job !== undefined,
     stat: (type) => averageStat(worked.stats as unknown as Record<string, number>, type),
   });
-  const businessTax = businessTaxOn(employment.earned, businessesYear.drawn);
+  const sideWork = gigIncome(
+    nextAge,
+    employment.earned,
+    education.shiftGross,
+    education.freelanceGross,
+  );
+  const earnedIncome = employment.earned + sideWork.taxableGross;
+  const businessTax = businessTaxOn(earnedIncome, businessesYear.drawn);
   /*
     Ticket 0701 — a year of every channel. After the business draw because the
     tax on what a channel paid depends on everything earned before it, and
@@ -404,16 +415,95 @@ export function advanceYear(state: GameState): AdvanceResult {
     generation: state.world.generation,
     work: workToSettle(state),
   });
-  const creatorTax = businessTaxOn(employment.earned + businessesYear.drawn, creatorsYear.net);
+  const creatorTax = businessTaxOn(earnedIncome + businessesYear.drawn, creatorsYear.net);
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
   const dealsYear = runDealsYear({
     deals: state.deals,
     year: nextYear,
     market,
-    otherIncome: employment.earned + businessesYear.drawn + creatorsYear.net,
+    otherIncome: earnedIncome + businessesYear.drawn + creatorsYear.net,
   });
   const businessNet = businessesYear.drawn - businessTax;
 
+  /* -------------------------------------------------------------------------- */
+  /* Ticket 0310 — the retirement account                                        */
+  /* -------------------------------------------------------------------------- */
+  /*
+    PAYING IN WHILE WORKING, DRAWING ONCE STOPPED, and growing either way.
+
+    THE MATCH NEVER TOUCHES THE BANK, so it gets no ledger row. It is money the
+    employer puts straight into the account, and posting it as income and then
+    as an equal outflow would inflate the year's earnings by an amount that
+    never existed in the character's hands — 0302's reconciliation would still
+    balance and the dashboard would be lying.
+
+    THE EMPLOYEE'S OWN CONTRIBUTION IS AN `investment` ROW, for exactly the
+    reason 0308 made a share purchase one: the money genuinely leaves the
+    account, so the row has to exist, but it is a TRANSFER rather than outflow
+    (spec 44-46) and `summariseFinances` already knows to keep it out of the
+    spending figure and add it back into net worth.
+
+    Taken from cash rather than from pre-tax pay, which is the one simplification
+    here. Real contributions reduce taxable income; modelling that would mean
+    reaching into `payBreakdown` in `@yearafter/careers` to make the tax
+    conditional on a finance-package concept, and the effect on a game played in
+    whole years is a few per cent on the way in. Labelled rather than hidden.
+  */
+  const workedJob = employment.employment.job;
+  const jobRow = workedJob ? findJob(workedJob.jobId) : undefined;
+  const benefit = jobRow ? benefitFor(jobRow.template) : undefined;
+
+  let retirement = state.retirement;
+  const retirementRows: NewTransaction[] = [];
+
+  if (retirement.retiredAtAge === undefined && benefit && employment.earned > 0) {
+    const paid = contributeYear(retirement, benefit, employment.earned);
+    retirement = serveYear(paid.state, benefit, employment.earned);
+    if (paid.own > 0) {
+      retirementRows.push({
+        category: 'investment' as const,
+        amount: dollars(-paid.own),
+        source:
+          paid.matched > 0
+            ? `Retirement — you put in $${paid.own.toLocaleString('en-US')}, they added $${paid.matched.toLocaleString('en-US')}`
+            : 'Retirement — paid in',
+      });
+    }
+  }
+
+  /*
+    ONCE STOPPED, THE MONEY COMES BACK. A pension and the state's basic pension
+    are `assetIncome` — they are earnings from something owned. The DRAW is an
+    `investment` row, because it is the character's own money coming back across
+    the same line it went out on, which is the rule 0308b set for a matured bond
+    and for the same reason: calling it income would tell the dashboard a
+    seventy-year-old earned $40,000 for existing.
+  */
+  const drawn = drawYear(retirement, nextAge, benefit ?? pensionableBenefit(state));
+  retirement = drawn.after;
+  if (drawn.pension > 0) {
+    retirementRows.push({
+      category: 'assetIncome' as const,
+      amount: dollars(drawn.pension),
+      source: 'Pension',
+    });
+  }
+  if (drawn.state > 0) {
+    retirementRows.push({
+      category: 'assetIncome' as const,
+      amount: dollars(drawn.state),
+      source: 'State pension',
+    });
+  }
+  if (drawn.drawn > 0) {
+    retirementRows.push({
+      category: 'investment' as const,
+      amount: dollars(drawn.drawn),
+      source: 'Retirement — drawn down',
+    });
+  }
+
+  // P15: calculate the existing payout before living; rows still post once below.
   const living = runLiving({
     household: state.household,
     age: nextAge,
@@ -444,8 +534,19 @@ export function advanceYear(state: GameState): AdvanceResult {
     // case this whole phase exists to make cost something. Ticket 0502: and
     // what the partner's did, because a household lives on both.
     afterTaxIncome:
-      employment.takeHome + partnered.net + businessNet + (creatorsYear.net - creatorTax),
-    wealth: Math.floor(Number(state.player.cash) / 100),
+      employment.takeHome +
+      sideWork.net +
+      partnered.net +
+      businessNet +
+      (creatorsYear.net - creatorTax) +
+      drawn.pension +
+      drawn.state,
+    wealth: Math.floor(Number(state.player.cash) / 100) + drawn.drawn,
+    retired: state.retirement.retiredAtAge !== undefined,
+    personalDebt:
+      (Number(totalOwed(state.cards)) +
+        Number(totalBorrowed(state.loans.filter((loan) => loan.businessId === undefined)))) /
+      100,
     /*
       Ticket 0308b. What the cards would actually lend, which is part of what a
       household can afford — see `credit` on the input. Frozen cards lend
@@ -455,7 +556,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0308b. What they hold in the market — see `portfolio` on the
     // input. Being illiquid is not the same as being destitute.
     portfolio: Math.floor(Number(portfolioWorth(state.prices, state.portfolio)) / 100),
-    earned: employment.earned,
+    earned: earnedIncome,
     ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
       ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }
       : {}),
@@ -468,7 +569,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Only the one they live in: a rental's costs are the rental's, against its rent.
     housingCost: homesYear.residenceCost,
     // Ticket 0504. The cars, and whether there is one — owning one means the
-    // living bill stops paying for getting about (`VEHICLE_SHARE`).
+    // living bill stops paying for getting about (a bounded dollar allowance).
     vehicleCost: vehiclesYear.cost,
     ownsVehicle: state.vehicles.length > 0,
   });
@@ -654,6 +755,15 @@ export function advanceYear(state: GameState): AdvanceResult {
   */
   const reported = [
     ...education.transactions,
+    ...(sideWork.tax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-sideWork.tax),
+            source: 'Tax on part-time and odd-job income',
+          },
+        ]
+      : []),
     ...family.transactions,
     ...employment.transactions,
     // Ticket 0502. A partner's pay and the tax on it.
@@ -770,84 +880,6 @@ export function advanceYear(state: GameState): AdvanceResult {
     amount: row.amount,
     source: row.source,
   }));
-
-  /* -------------------------------------------------------------------------- */
-  /* Ticket 0310 — the retirement account                                        */
-  /* -------------------------------------------------------------------------- */
-  /*
-    PAYING IN WHILE WORKING, DRAWING ONCE STOPPED, and growing either way.
-
-    THE MATCH NEVER TOUCHES THE BANK, so it gets no ledger row. It is money the
-    employer puts straight into the account, and posting it as income and then
-    as an equal outflow would inflate the year's earnings by an amount that
-    never existed in the character's hands — 0302's reconciliation would still
-    balance and the dashboard would be lying.
-
-    THE EMPLOYEE'S OWN CONTRIBUTION IS AN `investment` ROW, for exactly the
-    reason 0308 made a share purchase one: the money genuinely leaves the
-    account, so the row has to exist, but it is a TRANSFER rather than outflow
-    (spec 44-46) and `summariseFinances` already knows to keep it out of the
-    spending figure and add it back into net worth.
-
-    Taken from cash rather than from pre-tax pay, which is the one simplification
-    here. Real contributions reduce taxable income; modelling that would mean
-    reaching into `payBreakdown` in `@yearafter/careers` to make the tax
-    conditional on a finance-package concept, and the effect on a game played in
-    whole years is a few per cent on the way in. Labelled rather than hidden.
-  */
-  const workedJob = employment.employment.job;
-  const jobRow = workedJob ? findJob(workedJob.jobId) : undefined;
-  const benefit = jobRow ? benefitFor(jobRow.template) : undefined;
-
-  let retirement = state.retirement;
-  const retirementRows: NewTransaction[] = [];
-
-  if (retirement.retiredAtAge === undefined && benefit && employment.earned > 0) {
-    const paid = contributeYear(retirement, benefit, employment.earned);
-    retirement = serveYear(paid.state, benefit, employment.earned);
-    if (paid.own > 0) {
-      retirementRows.push({
-        category: 'investment' as const,
-        amount: dollars(-paid.own),
-        source:
-          paid.matched > 0
-            ? `Retirement — you put in $${paid.own.toLocaleString('en-US')}, they added $${paid.matched.toLocaleString('en-US')}`
-            : 'Retirement — paid in',
-      });
-    }
-  }
-
-  /*
-    ONCE STOPPED, THE MONEY COMES BACK. A pension and the state's basic pension
-    are `assetIncome` — they are earnings from something owned. The DRAW is an
-    `investment` row, because it is the character's own money coming back across
-    the same line it went out on, which is the rule 0308b set for a matured bond
-    and for the same reason: calling it income would tell the dashboard a
-    seventy-year-old earned $40,000 for existing.
-  */
-  const drawn = drawYear(retirement, nextAge, benefit ?? pensionableBenefit(state));
-  retirement = drawn.after;
-  if (drawn.pension > 0) {
-    retirementRows.push({
-      category: 'assetIncome' as const,
-      amount: dollars(drawn.pension),
-      source: 'Pension',
-    });
-  }
-  if (drawn.state > 0) {
-    retirementRows.push({
-      category: 'assetIncome' as const,
-      amount: dollars(drawn.state),
-      source: 'State pension',
-    });
-  }
-  if (drawn.drawn > 0) {
-    retirementRows.push({
-      category: 'investment' as const,
-      amount: dollars(drawn.drawn),
-      source: 'Retirement — drawn down',
-    });
-  }
 
   // And the account rides the same market everything else does, including the
   // crashes 0308d spent a ticket making recoverable.
@@ -1105,7 +1137,12 @@ export function advanceYear(state: GameState): AdvanceResult {
         ...health.statDeltas,
         ...shaped,
         // Ticket 0706. The year's news about a channel or about being known.
-        ...(creatorsYear.mood === 0 ? {} : { happiness: creatorsYear.mood }),
+        // Preserve the existing creator/activity mood before adding a tier's
+        // paid-year effect. Comfortable must not erase a year of activities.
+        happiness:
+          (creatorsYear.mood === 0 ? (shaped.happiness ?? 0) : creatorsYear.mood) +
+          (living.mood > 0 && money.short < 0 ? 0 : living.mood) +
+          renovationComfortFor(homesYear.homes, living.hardship, money.short),
       }),
       health: clampStat(health.health),
     },
@@ -1270,6 +1307,21 @@ export function advanceYear(state: GameState): AdvanceResult {
     `withLifeOffer`'s docblock carries the numbers, including the two orderings
     that were tried and rejected.
   */
+  const rescued = withBusinessRescue(next, businessesYear.rescues);
+  const closingEntries = rescued.player.timeline.filter(
+    (entry) => !next.player.timeline.some((prior) => prior.id === entry.id),
+  );
+  const finalEntries = withinBudget([...budgeted, ...closingEntries]);
+  const reviewed =
+    closingEntries.length > 0
+      ? {
+          ...rescued,
+          player: {
+            ...rescued.player,
+            timeline: finalEntries.reduce(appendToTimeline, state.player.timeline),
+          },
+        }
+      : rescued;
   return {
     /*
       Ticket 0416 — something to join, LAST of the four: a league sign-up should
@@ -1297,7 +1349,7 @@ export function advanceYear(state: GameState): AdvanceResult {
           withHomeOffer(
             withLifeOffer(
               withAnyOffer(
-                withCollegeOffer(repossess(foreclose(next)), health.alive),
+                withCollegeOffer(repossess(foreclose(reviewed)), health.alive),
                 health.alive,
               ),
               health.alive,
@@ -1313,7 +1365,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       ),
       health.alive,
     ),
-    newEntries: budgeted,
+    newEntries: finalEntries,
   };
 }
 

@@ -1,3 +1,4 @@
+import type { BusinessRescue } from './business-rescue';
 /**
  * The live game state and the year-advance loop.
  *
@@ -205,6 +206,8 @@ export interface GameState {
    * nobody made.
    */
   readonly advisorId?: string;
+  /** P7: whole dollars explicitly protected for a purchase. */
+  readonly cashGoal?: number;
   /**
    * Ticket 0310. The retirement account, the pension service, and whether they
    * have stopped.
@@ -293,6 +296,7 @@ export interface GameState {
   readonly valuables: readonly OwnedValuable[];
   /** Ticket 0506. A renovation the game asked about unprompted, if one is open. */
   readonly renovationOffer?: RenovationOffer;
+  readonly businessRescue?: BusinessRescue;
   /**
    * Ticket 0507. This year's auction diary: how many sales attended at each
    * venue (spec 41's yearly limits) and which lots were bid on. A diary for
@@ -479,7 +483,8 @@ export const hasSystemicOffer = (state: GameState): boolean =>
   state.pursuitOffer !== undefined ||
   state.homeOffer !== undefined ||
   state.vehicleOffer !== undefined ||
-  state.renovationOffer !== undefined;
+  state.renovationOffer !== undefined ||
+  state.businessRescue !== undefined;
 
 export const createWorldState = (year: number, generation = 1): WorldState => ({
   year,
@@ -487,6 +492,8 @@ export const createWorldState = (year: number, generation = 1): WorldState => ({
 });
 
 export interface CreateGameStateOptions {
+  readonly advisorId?: string;
+  readonly cashGoal?: number;
   readonly health?: HealthState;
   readonly finance?: Ledger;
   readonly household?: HouseholdFinances;
@@ -515,6 +522,7 @@ export interface CreateGameStateOptions {
   readonly inspected?: readonly string[];
   readonly valuables?: readonly OwnedValuable[];
   readonly renovationOffer?: RenovationOffer;
+  readonly businessRescue?: BusinessRescue;
   readonly auctions?: AuctionDiary;
   readonly businesses?: readonly OwnedBusiness[];
   readonly deals?: readonly PrivateDeal[];
@@ -548,6 +556,8 @@ export const createGameState = (
   market: options.market ?? OPENING_MARKET,
   prices: options.prices ?? openingPrices(),
   retirement: options.retirement ?? NO_RETIREMENT,
+  ...(options.advisorId !== undefined ? { advisorId: options.advisorId } : {}),
+  ...(options.cashGoal !== undefined ? { cashGoal: options.cashGoal } : {}),
   ...(options.offer ? { offer: options.offer } : {}),
   ...(options.collegeOffer ? { collegeOffer: options.collegeOffer } : {}),
   ...(options.lifeOffer ? { lifeOffer: options.lifeOffer } : {}),
@@ -559,6 +569,7 @@ export const createGameState = (
   ...(options.inspected && options.inspected.length > 0 ? { inspected: options.inspected } : {}),
   valuables: options.valuables ?? EMPTY_VALUABLES,
   ...(options.renovationOffer ? { renovationOffer: options.renovationOffer } : {}),
+  ...(options.businessRescue ? { businessRescue: options.businessRescue } : {}),
   ...(options.auctions ? { auctions: options.auctions } : {}),
   businesses: options.businesses ?? EMPTY_BUSINESSES,
   deals: options.deals ?? EMPTY_DEALS,

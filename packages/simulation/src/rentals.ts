@@ -34,6 +34,7 @@ import {
   emptyLetting,
   leaseLengthOf,
   goingRentOf,
+  rentYieldFor,
   rentLevelOf,
   rentalEconomics,
   stepRent,
@@ -74,7 +75,7 @@ export const otherPropertyOf = (homes: readonly OwnedHome[]): readonly OwnedHome
 export function goingRentFor(home: Pick<OwnedHome, 'kindId' | 'value' | 'regionKey'>): number {
   const kind = findHomeKind(home.kindId);
   if (!kind) return 0;
-  return goingRentOf(home.value, kind.rentYield, regionCostIndexOf(home.regionKey), kind.units);
+  return goingRentOf(home.value, rentYieldFor(kind), regionCostIndexOf(home.regionKey), kind.units);
 }
 
 /** What one unit is let for at the home's current setting, whole dollars a year. */
@@ -383,5 +384,12 @@ export function economicsOf(home: OwnedHome): RentalEconomics {
         )
       : 0,
     upkeepYear: annualExpenseOf(home),
+    ...(isCommercialKind(home)
+      ? {
+          leaseRents: letting.tenants.flatMap((tenant) =>
+            tenant ? [tenant.rent ?? askingRentOf(home)] : [],
+          ),
+        }
+      : {}),
   });
 }

@@ -44,7 +44,7 @@ import {
   type CarBuyer,
   type OwnedVehicle,
 } from './vehicles';
-import { VEHICLE_SHARE, livingCostFor } from './living';
+import { livingCostFor } from './living';
 
 const facts = (trimId: string): { model: VehicleModel; trim: VehicleTrim } => {
   const found = findVehicleTrim(trimId);
@@ -325,18 +325,16 @@ describe('0504 — the living bill stops buying a car for somebody who owns one'
     housing: 'ownPlace' as const,
   };
 
-  it('takes the car share off, and leaves somebody with no car exactly where they were', () => {
+  it('replaces only the actual running cost up to the P2 dollar allowance', () => {
     const none = livingCostFor(base).total;
     expect(none).toBe(50_000);
-    expect(livingCostFor({ ...base, ownsVehicle: true, vehicleCost: 1_000 }).total).toBe(
-      Math.round(50_000 * (1 - VEHICLE_SHARE)),
-    );
+    expect(livingCostFor({ ...base, ownsVehicle: true, vehicleCost: 1_000 }).total).toBe(49_000);
   });
 
-  it('squeezes everything else for a car that costs more than its share (CORE_RULES 13.86)', () => {
+  it('makes an expensive car an additional real expense after the P2 allowance', () => {
     const dear = livingCostFor({ ...base, ownsVehicle: true, vehicleCost: 12_000 }).total;
-    expect(dear).toBe(50_000 - 12_000);
-    expect(dear + 12_000).toBeLessThanOrEqual(50_000);
+    expect(dear).toBe(48_400);
+    expect(dear + 12_000).toBe(60_400);
   });
 
   it('finds the model the tests above name', () => {
