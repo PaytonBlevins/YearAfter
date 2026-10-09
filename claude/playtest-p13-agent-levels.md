@@ -272,5 +272,11 @@ pass. The validator rewrote vehicle-mods formatting; semantic equality was check
 and original bytes restored. No generated catalog changes are included.
 
 The PR targets main and stacks on P12 #24 and its #13–#23 prerequisites; main
-remains `beff25a`. Publication/CI details follow. Native/device checks and
+remains `beff25a`. PR #25: https://github.com/PaytonBlevins/YearAfter/pull/25, published and mergeable
+when checked. Implementation commit `9cc20e1`; CI 154 (37894293453), job
+113701979448, installed successfully but failed the same 22 historical-note
+format checks. Its logs were read and the failing file list matches the local
+format run exactly; later typecheck/tests/content gates skipped. This is not green
+CI. A later documentation-only closeout triggers another run, not observed here.
+Native/device checks and
 unavailable Claude Project mirroring remain open. Stop before P14.

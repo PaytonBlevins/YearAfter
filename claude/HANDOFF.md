@@ -215,7 +215,10 @@ mutations caught, none missed, with exact hash restoration. All 108 production
 operating points reproduce approved measurement; 3,000 actual commands/annual
 settlements preserve level and reconcile. Full verify passes all 15 typechecks and 3,220 tests, then fails only the seven
 inherited generator mismatches; full format retains 22 historical-note failures.
-Changed-file formatting passes. PR status follows in the ticket. Gaming maximum-price finding remains logged without curve retune.
+Changed-file formatting passes. PR #25: https://github.com/PaytonBlevins/YearAfter/pull/25, targets main and
+depends on #13–#24; mergeable when checked. Implementation CI 154 installed but
+fails the same 22 historical-note format checks, confirmed from logs; later gates
+skip. Closeout documentation triggers another run, not observed here. Gaming maximum-price finding remains logged without curve retune.
 Native/device checks and unavailable Project mirroring remain open. P14–P16 and
 life-event wording wait; stop after P13.
 

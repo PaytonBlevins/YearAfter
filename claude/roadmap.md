@@ -1767,7 +1767,10 @@ All 108 production operating points match the approved measured proposal; 3,000
 real commands and annual settlements preserve levels/reconcile. Added 81 tests;
 27 valid behavioral mutations caught, none missed, with exact restoration. Full verify passes all 15 typechecks and 3,220 tests, then fails only the seven
 inherited generator mismatches; full format retains 22 historical-note failures.
-Changed-file formatting passes. PR status is in `playtest-p13-agent-levels.md`. Native/device and
+Changed-file formatting passes. PR #25 targets main and depends on #13–#24; mergeable when checked.
+Implementation CI 154 installed but fails the same 22 old-note format checks,
+confirmed from logs; later gates skip. Later docs-run status is not observed.
+Details: `playtest-p13-agent-levels.md`. Native/device and
 unavailable Project mirroring remain open. P14–P16 and life-event wording wait.
 
 ### Found by P13
