@@ -1747,18 +1747,28 @@ return. Conditional hike protection is not an annual rebate. A replaced Pass ID 
 its own negative test while a new pitch is pending. Seven inherited generator mismatches,
 22 old-note format failures, native checks and unavailable Project mirroring remain open.
 
-### Playtest P13 — measured agent levels and pricing check (9 October 2026 UTC)
+### Playtest P13 — agent levels and pricing exception (9 October 2026 UTC)
 
-Payton authorized P13 after P12 closeout. Separately claimed and published on
-`feat/playtest-p13-agent-levels`, stacked on P12 #24 while refreshed main stays
-`beff25a`. Current catalog has one explicit agent business, Real Estate Brokerage.
-All 31 actual owned-business price commands work and demand responds; missing B3
-exception is real estate. Measured 54 cost/client-flow configurations at 36 fixed
-contexts and three tiers = 5,832 counterfactual points. Proposed team Low/Mid/High
-at 90/100/115% labor cost and potential client demand, independent of current
-payroll, with a real-estate-only fixed 100% rate and save v50. Details and concrete
-approval choices: `playtest-p13-agent-levels.md`. No production edits or version
-reservation before approval; P14–P16 and life-event wording wait.
+Payton approved the full measured proposal. Save v50 reserved in a separate
+published claim before production on `feat/playtest-p13-agent-levels`, stacked
+on P12 #24 and #13–#23 while refreshed main stays `beff25a`. Real Estate Brokerage
+alone gains Low/Mid/High team levels at 90/100/115% potential client flow and rounded
+existing labor cost. Payroll/headcount/capacity/variable costs remain independent;
+legacy level defaults to exact Mid. Commands enforce adult/living/owned/eligible/
+no-rescue gates and grant no money/RNG/stat benefit. Branches, hiring, acquisition
+and actual descendant continuation preserve the choice.
+
+Brokerage price commands refuse changes; the annual reader uses ordinary 100 even
+with a stale value. v49 migration normalizes only its current price, preserving
+history, funds and P12 supplier records. Other 30 types keep price controls and
+responsive demand. Owned Employees exposes levels and current per-head pay;
+market-rate explanation replaces brokerage price taps, with actual store/autosave.
+All 108 production operating points match the approved measured proposal; 3,000
+real commands and annual settlements preserve levels/reconcile. Added 81 tests;
+27 valid behavioral mutations caught, none missed, with exact restoration. Full verify passes all 15 typechecks and 3,220 tests, then fails only the seven
+inherited generator mismatches; full format retains 22 historical-note failures.
+Changed-file formatting passes. PR status is in `playtest-p13-agent-levels.md`. Native/device and
+unavailable Project mirroring remain open. P14–P16 and life-event wording wait.
 
 ### Found by P13
 

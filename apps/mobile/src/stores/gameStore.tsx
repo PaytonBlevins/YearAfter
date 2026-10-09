@@ -109,6 +109,8 @@ import {
   expandBusiness,
   closeLocation,
   setPrice as setBusinessPrice,
+  setBusinessAgentLevel,
+  BUSINESS_AGENT_ERROR_LABELS,
   searchSupplier,
   acceptSupplier,
   passSupplier,
@@ -122,7 +124,7 @@ import {
   type Financing,
 } from '@yearafter/simulation';
 import { type LifestyleTier, EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
-import type { BidTier, Payroll } from '@yearafter/finance';
+import type { BidTier, Payroll, BusinessAgentLevel } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
@@ -237,6 +239,7 @@ interface GameContextValue {
   readonly searchBusinessSupplier: (businessId: string) => void;
   readonly acceptBusinessSupplier: (businessId: string, pitchId: string) => void;
   readonly passBusinessSupplier: (businessId: string, pitchId: string) => void;
+  readonly chooseBusinessAgents: (businessId: string, level: BusinessAgentLevel) => void;
   readonly tuneBusiness: (businessId: string, change: BusinessChange) => void;
   /** Ticket 0602. Open another location of a business, or close the newest. */
   readonly expandABusiness: (businessId: string, finance?: Financing) => void;
@@ -990,6 +993,26 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [supplierAction],
   );
 
+  const chooseBusinessAgents = useCallback(
+    (businessId: string, level: BusinessAgentLevel) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = setBusinessAgentLevel(current, businessId, level);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body: BUSINESS_AGENT_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const tuneBusiness = useCallback(
     (businessId: string, change: BusinessChange) => {
       setState((current) => {
@@ -1005,7 +1028,19 @@ export function GameProvider({ repository, children }: GameProviderProps) {
                   ? letBusinessStaffGo(current, businessId)
                   : setBusinessAutoStaff(current, businessId, change.on);
         // A dial turned is not news: the screen shows it. Only a refusal speaks.
-        if (!result.ok) return current;
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body:
+              result.error === 'market-priced'
+                ? 'This brokerage works at market rates. Choose its agent team instead.'
+                : result.error === 'at-limit'
+                  ? "You can't change staffing any further."
+                  : "That business choice isn't available any more.",
+            tone: 'bad',
+          });
+          return current;
+        }
         if (saveId) persist(result.value, saveId, settings);
         return result.value;
       });
@@ -1806,6 +1841,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       searchBusinessSupplier,
       acceptBusinessSupplier,
       passBusinessSupplier,
+      chooseBusinessAgents,
       tuneBusiness,
       expandABusiness,
       closeALocation,
@@ -1890,6 +1926,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       searchBusinessSupplier,
       acceptBusinessSupplier,
       passBusinessSupplier,
+      chooseBusinessAgents,
       tuneBusiness,
       expandABusiness,
       closeALocation,

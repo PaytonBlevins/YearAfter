@@ -198,19 +198,26 @@ PR #24 targets main, depends on #13–#23 and was mergeable when checked.
 CI 146 fails the same 22 historical-note format checks; later gates skip. Payton authorized P13 next; P14–P16
 and life-event wording wait for Payton.
 
-**P13 measurement update (9 October UTC):** Payton authorized P13 after P12 closeout.
-Separately claimed/published `feat/playtest-p13-agent-levels`, rebased on refreshed
-main (`beff25a`), stacked on P12 #24. Actual price commands/demand work for all 31
-types; real estate still has the requested-to-be-excluded price control and no
-agent-level selection. Only Real Estate Brokerage is explicitly agent-based in the
-current catalog. Measured 54 cost/client-flow configurations (5,832 counterfactual
-points) with manager/reputation response and last-twenty averaging. Propose saved
-team Low/Mid/High at 90/100/115% existing labor cost and potential client flow;
-keep existing payroll/headcount, variable cost, macro/events/P1 rules. Real estate
-uses ordinary 100 and no price selector/command; other existing sliders stay.
-Save v50 proposed, not reserved, pending approval. Details: `playtest-p13-agent-levels.md`.
-Gaming still has a maximum-price mature optimum in this probe; logged without a curve
-rebuild. No production edits; P14–P16 and life-event wording wait.
+**P13 implementation update (9 October UTC):** Payton approved the full measured
+proposal. Save v50 separately reserved before production. Built on
+`feat/playtest-p13-agent-levels`, stacked on P12 #24 and #13–#23 while refreshed
+main remains `beff25a`. Real Estate Brokerage has one saved Low/Mid/High team:
+90/100/115% existing rounded labor cost and potential client demand, independent
+of payroll/headcount/capacity. Missing level is Mid. No direct money/stats/quality
+reward or RNG draw. Commands enforce adult/living/owned/eligible/no-rescue gates;
+manual/automatic staffing, branches, acquisition and actual inheritance preserve it.
+Both price commands refuse brokerage; annual reader ignores stale price and v49
+migration normalizes only current brokerage price to ordinary 100. Histories,
+P12 supplier records and other 30 businesses are preserved. Owned Employees shows
+team tradeoffs, yearly per-head quote and real store/autosave; Price explains market
+rates. Details: `playtest-p13-agent-levels.md`. 81 new tests pass; 27 valid behavioral
+mutations caught, none missed, with exact hash restoration. All 108 production
+operating points reproduce approved measurement; 3,000 actual commands/annual
+settlements preserve level and reconcile. Full verify passes all 15 typechecks and 3,220 tests, then fails only the seven
+inherited generator mismatches; full format retains 22 historical-note failures.
+Changed-file formatting passes. PR status follows in the ticket. Gaming maximum-price finding remains logged without curve retune.
+Native/device checks and unavailable Project mirroring remain open. P14–P16 and
+life-event wording wait; stop after P13.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

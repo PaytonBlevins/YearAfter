@@ -3223,3 +3223,19 @@ reader. Measure mature operating points with manager/reputation response: a smal
 quality change can move a whole worker, so typical improvement and individual losses
 both matter. A best-of-five bound with perfect information is not a promised player
 return, and conditional event savings are not yearly income.
+
+### 13.160 Agent ability and payroll quality need separate economic paths
+
+Multiply agent-origin client demand before staff capacity, and apply team pay to
+rounded labor without feeding it back into payroll's existing service-quality
+weighting. Preserve variable costs per sale: greater client flow must not secretly
+discount commission-like expenses. Managers may need another whole worker, so a
+higher team level is not a guaranteed profit improvement. Compare mature tail means
+and retain visible cycles rather than choosing a favorable terminal year.
+
+A market-priced business exception must cover direct and nudged commands, stale
+saved values in annual readers, and the owned screen. Normalize only its current
+price in migration, preserving old books and unrelated businesses. Default missing
+team levels to the old economics, validate explicit eligible types and preserve
+levels through staffing, branches and transfer. Use integer percentages before
+whole-dollar rounding so exact half-dollar pay quotes and annual costs agree.

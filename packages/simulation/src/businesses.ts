@@ -56,6 +56,7 @@ import {
   businessEconomyVisible,
   businessEconomyPercent,
   clampPrice,
+  hasBusinessPriceControl,
   drawEvent,
   eventLineFor,
   expansionRefusal,
@@ -595,7 +596,7 @@ export function openBusiness(
 /* An owner's choices                                                          */
 /* -------------------------------------------------------------------------- */
 
-export type ChoiceError = 'no-such-business' | 'no-such-choice' | 'at-limit';
+export type ChoiceError = 'no-such-business' | 'no-such-choice' | 'at-limit' | 'market-priced';
 
 const patch = (
   state: GameState,
@@ -615,13 +616,19 @@ const patch = (
 
 /** Spec 400's slider. */
 export const setPrice = (state: GameState, id: string, price: number) =>
-  patch(state, id, (business) => ({ ...business, price: clampPrice(price) }));
+  patch(state, id, (business, type) =>
+    hasBusinessPriceControl(type.id) ? { ...business, price: clampPrice(price) } : 'market-priced',
+  );
 
 export const nudgePrice = (state: GameState, id: string, steps: number) =>
-  patch(state, id, (business) => ({
-    ...business,
-    price: clampPrice(business.price + steps * PRICE_STEP),
-  }));
+  patch(state, id, (business, type) =>
+    hasBusinessPriceControl(type.id)
+      ? {
+          ...business,
+          price: clampPrice(business.price + steps * PRICE_STEP),
+        }
+      : 'market-priced',
+  );
 
 /** P12: deprecated grade setter cannot bypass the named pitch acceptance command. */
 export const setSupplier = (

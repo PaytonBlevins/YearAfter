@@ -1,10 +1,11 @@
 # Playtest P13 — agent levels and B3 pricing check
 
-Status: Payton authorized P13 on 8 October local / 9 October 2026 UTC after P12
-closeout. Separately claimed and published on `feat/playtest-p13-agent-levels`
-before measurement. Refreshed main remains `beff25a`; stacked on P12 PR #24,
-which depends on #13–#23. **Measured proposal only; no production edits.** Current
-save v49; proposed v50 is not reserved until approval. P14–P16 and life-event wording wait.
+Status: Payton approved the full concrete proposal below on 9 October 2026 UTC.
+Save v50 was reserved in a separate published claim before production edits.
+Implementation on `feat/playtest-p13-agent-levels`, stacked on P12 PR #24 and
+#13–#23 while refreshed main remains `beff25a`. P14–P16 and life-event wording wait.
+The proposed sections below record the approved measured design; implementation
+and verification results follow at the end.
 
 ## Requirement and contracts
 
@@ -75,7 +76,7 @@ BLS does not provide this game's three tier multipliers or client-flow bonuses;
 those below are proposed game values. No real-world deal probability or commission
 rate is claimed.
 
-## Proposed choices — approval required
+## Measured choices — approved by Payton
 
 **One saved team-level choice** on each eligible owned brokerage: Low/Mid/High.
 It applies to the agent team including later hiring and branches. Keep existing
@@ -164,7 +165,7 @@ that would gift a hidden commission discount. A pay-cost probe must also preserv
 original payroll-quality weighting rather than altering it with the test type.
 Only the isolated client-flow/labor counterfactual above supports this proposal.
 
-## Acceptance after approval
+## Acceptance
 
 Test literal tier cost/flow values independently of config, default-Mid equality,
 all eligibility/refusal gates and no money/RNG mutation, manual/automatic staffing,
@@ -177,13 +178,99 @@ At least fifteen independent sabotage mutations with backup/exact restored hashe
 strengthen survivors, then full `pnpm verify`, changed-file formatting, docs/CORE,
 PR into main and stop before P14.
 
-## Open items
+## Approval record
 
-Approval needed for the complete concrete choices above: aggregate team-level
+Payton approved the complete concrete choices above: aggregate team-level
 selection, 90%/100%/115% pay/client flow, real-estate-only price exclusion at 100 and
-legacy normalization, owned-screen shape and v50. No production code/save bump yet.
+legacy normalization, owned-screen shape and v50. The v50 reservation preceded production changes.
 P12 baseline: all 15 typechecks and 3,139 tests pass; seven inherited generator
 mismatches and 22 historical-note format failures still block full verification/CI.
 P12 PR #24 is published, depends on #13–#23 and was mergeable when checked;
 implementation CI 146 installed but failed the same old-note formatting checks.
 Native/device checks and unavailable Claude Project mirroring remain open.
+
+## Implemented engine, save and screen
+
+Real Estate Brokerage now has a persisted Low/Mid/High team choice. The explicit
+eligibility gate contains only `biz.realestate`; Marketing Agency and the other
+29 catalog types retain their economics and ordinary pricing controls. Missing
+level reads as Mid, including new startups. There is no individual roster or
+signing fee. Later hiring, branches, acquisition and actual heir continuation
+preserve the team's level.
+
+Potential demand gets the approved 90/100/115% factor before capacity. Existing
+rounded payroll/turnover labor gets the matching factor, rounded to whole dollars.
+The implementation uses integer percentages before division so a mathematical
+half-dollar rounds up: $53,950 at High becomes $62,043, consistently in annual
+labor and the UI quote. It preserves payroll's quality effect, headcount/capacity,
+variable cost rate, owner attention, events/macro, manager response and P1 rescue.
+No direct quality/reputation/cash/stat benefit and no RNG draw accompany selection.
+
+Both price commands refuse the brokerage. The annual reader uses ordinary 100%
+even with a stale saved price; it leaves that stored field untouched on current
+v50 saves while changing no economic result. The v49 migration normalizes only the
+current brokerage price and preserves all histories, records, funds and P12
+supplier searches/contracts. The optional agent field is validated for value and
+eligible business type. Existing historical-version tests remain; their current
+version expectations move to 50.
+
+The owned Employees section shows the current team, yearly per-agent pay under the
+current payroll including turnover, and all three choices with pay/client tradeoffs.
+Manual headcount, payroll and automatic staffing remain independent. The Price
+section explains market rates instead of offering brokerage price taps. Actual
+store dispatch persists accepted choices and shows spoken refusals. No new route,
+catalog/generator or TICKET change; approved-decisions remains untouched.
+
+## Production calibration
+
+An external scratch harness exercised the actual production kernel and commands.
+All 108 approved payroll/market/shock/tier operating points reproduce the saved
+counterfactual results exactly, including payroll, profit, revenue, staff and
+reputation. Last-twenty averages have no rounding differences in this grid. Low
+wins 17/36 contexts, Mid 14/36 and High 5/36; these fixed contexts are not population
+probabilities. The neutral medium-payroll figures remain exactly those in the table
+above. The one previously noted Big Bucks/Mid reputation cycle remains visible;
+there is no claim of universal convergence or guaranteed High profit advantage.
+
+Across 1,000 independently seeded real funded-adult startups, 3,000 accepted tier
+commands preserve player/ledger and immutable before-call RNG snapshots. Their
+3,000 actual annual settlements preserve the tier and reconcile all emitted
+transactions. These are operating settlement probes, not a full lifetime/survival
+estimate. Repository tests also exercise actual advance, P1 failure without bank
+injection, inheritance and save replay; screen tests use the real store/repository.
+
+## Verification results
+
+Added 81 focused tests: 41 finance, 18 simulation, 15 persistence and seven mobile.
+All pass, including exact half-dollar rounding, literal tier values, each existing
+payroll, all 30 non-agent types, immutable command/RNG state, all refusal gates,
+both pricing endpoints, current-save stale-price annual equivalence, P1 refusal,
+actual descendant continuation, malformed save levels, P12 preservation and real
+store/autosave. The old all-type price test now explicitly requires identical
+brokerage results across prices; ordinary types retain their original checks.
+
+Sabotage: 27 independent valid behavioral mutations, all caught; **none missed**.
+Each ran against the focused tests after exact source backup, and each was restored
+before the next. Final SHA-256 checks match all seven original production files.
+One initially invalid direct-price mutation failed parsing before assertions; it
+is not counted as coverage. Corrected its expression syntax and reran: the direct
+price bypass fails the actual refusal assertion. No test gap was concealed.
+
+Mutations covered Low pay, High client flow, wrong legacy default, marketing
+eligibility, stray levels on other types, stale annual price, removed client or pay
+multipliers, discounted variable costs, bonus capacity, ignored payroll quote,
+floating half-dollar rounding, dead/minor/rescue/unsupported/bad-level command
+gates, RNG draw, cash reward, direct/nudged price bypasses, skipped save validation,
+missing/overbroad migration normalization, wrong store level, omitted autosave and
+wrong screen dispatch. Logs/backups live outside the repository.
+
+Full `pnpm verify` completed: all 15 typechecks and all 3,220 tests pass.
+Content validation fails only the seven inherited generator mismatches: activities,
+advice, auctions, businesses, childhood events, homes and vehicles. Full formatting
+still fails the same 22 historical notes; changed-file formatting and diff checks
+pass. The validator rewrote vehicle-mods formatting; semantic equality was checked
+and original bytes restored. No generated catalog changes are included.
+
+The PR targets main and stacks on P12 #24 and its #13–#23 prerequisites; main
+remains `beff25a`. Publication/CI details follow. Native/device checks and
+unavailable Claude Project mirroring remain open. Stop before P14.

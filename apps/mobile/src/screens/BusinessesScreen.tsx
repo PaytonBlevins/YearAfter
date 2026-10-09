@@ -24,6 +24,14 @@ import {
   PRICE_MIN,
   PRICE_STEPS,
   SUPPLIER_LABELS,
+  AGENT_LEVELS,
+  AGENT_LEVEL_LABELS,
+  AGENT_LEVEL_EFFECTS,
+  businessAgentLevel,
+  businessAgentPayPerHead,
+  hasBusinessAgents,
+  hasBusinessPriceControl,
+  businessPrice,
   supplierTerms,
   supplierSearchFor,
   SUPPLIER_SEARCHES,
@@ -430,6 +438,7 @@ export function BusinessScreen() {
   const {
     state,
     tuneBusiness,
+    chooseBusinessAgents,
     searchBusinessSupplier,
     acceptBusinessSupplier,
     passBusinessSupplier,
@@ -498,7 +507,11 @@ export function BusinessScreen() {
         <ListRow title="Employees" value={`${business.staff}`} affordance="none" compact />
         <ListRow
           title="Price"
-          value={`${business.price}% of the going rate`}
+          value={
+            hasBusinessPriceControl(type.id)
+              ? `${businessPrice(business)}% of the going rate`
+              : 'Market rates'
+          }
           affordance="none"
           compact
         />
@@ -563,16 +576,25 @@ export function BusinessScreen() {
       </Card>
 
       <SectionHeading>Price</SectionHeading>
-      <Text style={styles.note}>
-        Higher prices bring in more per sale, but fewer customers buy. Lower prices attract more
-        customers, but bring in less per sale.
-      </Text>
-      <Card style={styles.pad}>
-        <PriceTrack
-          value={business.price}
-          onPick={(price) => tuneBusiness(business.id, { kind: 'price', price })}
-        />
-      </Card>
+      {hasBusinessPriceControl(type.id) ? (
+        <>
+          <Text style={styles.note}>
+            Higher prices bring in more per sale, but fewer customers buy. Lower prices attract more
+            customers, but bring in less per sale.
+          </Text>
+          <Card style={styles.pad}>
+            <PriceTrack
+              value={businessPrice(business)}
+              onPick={(price) => tuneBusiness(business.id, { kind: 'price', price })}
+            />
+          </Card>
+        </>
+      ) : (
+        <Text style={styles.note}>
+          This brokerage works at market rates. Choose the agent team and pay policy to shape how it
+          does.
+        </Text>
+      )}
 
       {type.supplier ? (
         <>
@@ -665,6 +687,42 @@ export function BusinessScreen() {
       ) : null}
 
       <SectionHeading>Employees</SectionHeading>
+      {hasBusinessAgents(type.id) ? (
+        <>
+          <Text style={styles.note}>
+            Agent level affects the clients your team brings in and what you pay. More clients can
+            need more staff, so higher-level agents aren't a promise of more profit. Your chosen
+            level applies to this business and its branches.
+          </Text>
+          <Card>
+            <ListRow
+              title="Agent team"
+              value={AGENT_LEVEL_LABELS[businessAgentLevel(business)]}
+              affordance="none"
+              wrap
+            />
+            <ListRow
+              title="Yearly pay per agent"
+              value={money(businessAgentPayPerHead(business, type))}
+              subtitle="At your current pay policy, including the usual cost of replacing people who leave. Total pay depends on headcount."
+              affordance="none"
+              wrap
+            />
+            {AGENT_LEVELS.map((level) => (
+              <ListRow
+                key={level}
+                title={AGENT_LEVEL_LABELS[level]}
+                subtitle={`${Math.round(AGENT_LEVEL_EFFECTS[level].pay * 100)}% of ordinary agent pay and ${Math.round(AGENT_LEVEL_EFFECTS[level].clients * 100)}% of potential client demand. Goods and other sale costs still apply.`}
+                value={businessAgentLevel(business) === level ? 'Chosen' : 'Choose'}
+                affordance="action"
+                wrap
+                onPress={() => chooseBusinessAgents(business.id, level)}
+              />
+            ))}
+          </Card>
+        </>
+      ) : null}
+
       <Text style={styles.note}>
         Pay: better pay keeps people and lifts the work, and costs more every year.
       </Text>

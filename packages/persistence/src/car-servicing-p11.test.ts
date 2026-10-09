@@ -44,8 +44,8 @@ describe('P11 save v48', () => {
     const before = JSON.stringify(old);
     const r = migrateSave(old);
     if (!r.ok) throw Error(r.error.kind);
-    expect(CURRENT_SAVE_VERSION).toBe(49);
-    expect(r.value).toEqual({ ...old, version: 49 });
+    expect(CURRENT_SAVE_VERSION).toBe(50);
+    expect(r.value).toEqual({ ...old, version: 50 });
     expect(r.value.vehicles[0]?.service).toBeUndefined();
     expect(JSON.stringify(old)).toBe(before);
   });

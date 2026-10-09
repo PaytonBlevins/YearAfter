@@ -1,3 +1,4 @@
+import { businessAgentEffects, businessPrice, type BusinessAgentLevel } from './business-agents';
 /**
  * Ticket 0601 — what a business is and what a year of it does.
  *
@@ -205,6 +206,7 @@ export interface OwnedBusiness {
   /** Percent of the going price. */
   readonly price: number;
   readonly supplier: SupplierGrade;
+  readonly agentLevel?: BusinessAgentLevel;
   readonly supplierAgreement?: SupplierAgreement;
   readonly supplierSearch?: SupplierSearch;
   readonly payroll: Payroll;
@@ -442,7 +444,7 @@ export function businessYear(
   const locations = locationsOf(business);
   // One owner can only be at one door.
   const hands = input.hands * locationAttention(locations);
-  const price = business.price / 100;
+  const price = businessPrice(business) / 100;
   const quality = qualityOf(
     type,
     business.supplier,
@@ -461,6 +463,7 @@ export function businessYear(
     economy *
     (1 - rivalTook) *
     modifiers.demand *
+    businessAgentEffects(business).clients *
     reputationFactor(business.reputation) *
     ownerFactor(input.stat, hands) *
     business.luck *
@@ -477,7 +480,7 @@ export function businessYear(
   const sold = Math.min(demand, capacity);
   const revenue = sold * price;
   const cogs = sold * type.cogs * supplierTerms(business).cost * modifiers.cogs;
-  const labor = laborCostFor(type, business.staff, business.payroll);
+  const labor = agentLaborCost(business, laborCostFor(type, business.staff, business.payroll));
   const overhead =
     type.overhead * (1 + BRANCH_OVERHEAD_SHARE * (locations - 1)) * modifiers.overhead;
   // An event's one-off is sized to the business, not to the year it had.
@@ -1041,3 +1044,11 @@ export const reportedProfitOf = (listing: Pick<BusinessListing, 'reported'>): nu
     listing.reported.reduce((sum, profit) => sum + profit, 0) /
       Math.max(1, listing.reported.length),
   );
+
+/** Annual pay for one agent at this team's payroll policy, including turnover cost. */
+export const businessAgentPayPerHead = (business: OwnedBusiness, type: BusinessType): number =>
+  agentLaborCost(business, laborCostFor(type, 1, business.payroll));
+
+/** Use integer percentages so an exact half dollar rounds up, including 115%. */
+const agentLaborCost = (business: OwnedBusiness, labor: number): number =>
+  Math.round((labor * Math.round(businessAgentEffects(business).pay * 100)) / 100);

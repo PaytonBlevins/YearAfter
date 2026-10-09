@@ -14,6 +14,8 @@ import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
 import {
   savedSupplierRecordsOk,
+  savedBusinessAgentOk,
+  ORDINARY_BUSINESS_PRICE,
   SUBSISTENCE,
   savedWatchWorkAllowed,
   isLifestyleTier,
@@ -1018,6 +1020,21 @@ const migrations: Readonly<Record<number, Migration>> = {
   47: (save) => ({ ...save, version: 48 }),
   /** P12: no pitch, loyalty or fee is invented for existing holdings. */
   48: (save) => ({ ...save, version: 49 }),
+  /** P13: normalize only prospective brokerage pricing, never historical books or RNG. */
+  49: (save) => ({
+    ...save,
+    version: 50,
+    businesses: Array.isArray(save['businesses'])
+      ? save['businesses'].map((value: unknown) => {
+          if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+          const b = value as Record<string, unknown>;
+          return b['typeId'] === 'biz.realestate'
+            ? { ...b, price: ORDINARY_BUSINESS_PRICE }
+            : value;
+        })
+      : save['businesses'],
+  }),
+
   /** P7 v45 -> v46: no goal existed before; no invented goal and no RNG. */
   45: (save) => {
     const { cashGoal: _future, ...prior } = save;
@@ -1417,8 +1434,10 @@ export function validateCurrentSave(
       })),
     // Ticket 0601. And for what is owned and running.
     require('businesses', candidate['businesses'], Array.isArray(candidate['businesses']) &&
-      candidate['businesses'].every((business: unknown) =>
-        savedSupplierRecordsOk(business, Number(world?.['year'])),
+      candidate['businesses'].every(
+        (business: unknown) =>
+          savedSupplierRecordsOk(business, Number(world?.['year'])) &&
+          savedBusinessAgentOk(business),
       )),
     require('businessRescue', candidate['businessRescue'], businessRescueOk(candidate)),
     // Ticket 0605. And for the private deals.

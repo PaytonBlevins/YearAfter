@@ -51,3 +51,5 @@ export * from './manual-posts';
 export * from './purchase-payment';
 
 export * from './suppliers';
+
+export * from './business-agents';
