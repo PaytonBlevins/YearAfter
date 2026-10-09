@@ -162,6 +162,17 @@ life-event wording wait for Payton. PR #22 targets main and is mergeable when ch
 https://github.com/PaytonBlevins/YearAfter/pull/22. Implementation CI run 132 failed the same 22 historical-note format checks
 and skipped later gates.
 
+**P11 measurement update (9 October UTC):** Payton authorized P11. Separately claimed
+`feat/playtest-p11-car-servicing`, refreshed main and stacked on P10 #22. Existing
+ordinary maintenance is already automatic. Measured 300 actual played lives and 4,200
+paired paths from seven actual purchased offers. Proposed optional extra preventive
+service, half upcoming mean upkeep (nearest $10, minimum $100), 25% less normal wear
+and 20% lower ordinary repair chance on the next advance only. Explicit cash/card
+confirmation on the existing owned-car screen; ordinary yearly bill remains intact.
+Details: `playtest-p11-car-servicing.md`. Save v48 proposed, not reserved; current v47.
+Await product approval before production edits. P12–P16 and life-event wording wait.
+Native checks and Project mirroring remain open.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:
