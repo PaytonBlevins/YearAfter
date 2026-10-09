@@ -71,7 +71,13 @@ samples mostly still work, so their rising wealth is not proof that retirees nev
 spend down. Actual retired production paired medians fall $67k/$42k; poorly funded
 retirees have more shortfalls, chiefly after fixing suppressed pension-based living.
 Details, tests, mutations and limits: `playtest-p15-retirement-spending.md`.
-Finding 13/16 / P16 and life-event wording wait for Payton.
+**Findings 13/16 / P16:** Authorized and measured, not yet built. Proposed
+catalog-backed persistent careers with steady/rising/falling pay and job moves;
+one-time initial matching, not repricing after every player raise. The 1,000-life
+holdouts give log-pay correlation 0.352/0.393 and raw 0.276/0.289. The proposed
+log-pay interpretation explicitly awaits approval, as do the rates, Person-row
+extension and save-v51 migration. See `playtest-p16-partner-careers.md`.
+Life-event wording and unrelated work still wait for Payton.
 
 ## Suggested order, when the time comes
 

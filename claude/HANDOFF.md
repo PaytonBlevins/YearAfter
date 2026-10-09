@@ -262,6 +262,24 @@ pass. Full verify retains seven inherited catalog mismatches; full format retain
 `feat/playtest-p15-retirement-spending` stacks on P14 #26 and #13–#25 while main
 stays `beff25a`. PR #27: https://github.com/PaytonBlevins/YearAfter/pull/27 targets main, depends on #13–#26, and is mergeable when checked. Implementation `867086f` published; CI 165 fails the same 22 historical-note format checks, verified against logs; install passes and later gates skip. Docs-closeout CI will be unobserved. P16 and life-event wording wait for Payton.
 
+**P16 measurement update (9 October UTC):** Payton authorized after P15. Claimed
+and published `7483088` before measurement on `feat/playtest-p16-partner-careers`,
+following P15 #27 and #13–#26 while refreshed main remains `beff25a`. Baseline
+300 lives confirms fixed earning power and raw pay correlation −0.028/0.130.
+Six valid 300-life career prototypes and 1,000 disjoint holdout lives reconcile;
+invalid cross-life NPC-ID state reuse was found in the harness and discarded.
+Propose persistent catalog-backed careers, 20/60/20 steady/ordinary/mobile styles,
+one-time 0.95 initial matching and **log-pay** correlation around 0.35: holdouts
+0.352/0.393, with raw-dollar 0.276/0.289 reported, not misrepresented as 0.3–0.4.
+All selected-cohort wealth medians retain P2 bounds. Extend the existing Person
+work row, no job-management chore. Save v51 reserved for P16; legacy migration
+must preserve current pay/pension, cash, history and RNG. Full values, limits and
+acceptance: `playtest-p16-partner-careers.md`. **Proposal awaits approval**,
+particularly the correlation metric; no production/save/UI edits yet. Existing
+3,306 tests/15 typechecks and inherited verify/format failures describe P15, not
+a fresh P16 completion. Native/Project checks remain open; unrelated work and
+life-event wording wait.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:

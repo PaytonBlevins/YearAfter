@@ -1835,3 +1835,40 @@ pass. Full verify retains seven inherited catalog mismatches; full format retain
 22 historical-note failures. Native/Project checks open. Branch
 `feat/playtest-p15-retirement-spending` stacks on P14 #26 and #13–#25 while main
 stays `beff25a`. PR #27: https://github.com/PaytonBlevins/YearAfter/pull/27 targets main, depends on #13–#26, and is mergeable when checked. Implementation `867086f` published; CI 165 fails the same 22 historical-note format checks, verified against logs; install passes and later gates skip. Docs-closeout CI will be unobserved. P16 and life-event wording wait for Payton.
+
+### Playtest P16 — measured partner-career proposal (9 October 2026 UTC)
+
+Payton authorized P16 after P15. Separately claimed/published `7483088` before
+measurement, on `feat/playtest-p16-partner-careers`, following P15 #27 and
+#13–#26 while refreshed main remains `beff25a`. Two baseline 150-life samples
+give working partner median pay $50,820/$48,194, no $250k working years and raw
+player/partner correlation −0.028/0.130. The age curve already changes gross;
+the fixed part is earning power, with no genuine job or pay-transition state.
+
+Six corrected 300-life career candidates and 1,000 disjoint holdout lives use
+actual annual settlement and reconcile throughout. Proposed catalog jobs,
+20/60/20 steady/ordinary/mobile careers with raises, setbacks and job changes,
+one-time 0.95 initial matching, existing Person work-row extension, save v51
+legacy-preserving migration. No $50k peak/median constant. Matching interpretation
+is **log-pay correlation around 0.35**, not a claim about raw dollars: holdouts
+read 0.352/0.393 log versus 0.276/0.289 raw, median working pay $50,042/$49,131.
+55–64 worth $336,225/$361,604 and 65–74 $438,978/$446,296 retain P2 bounds.
+Both holdouts include a small $250k+ tail and actual own-career moves/cuts.
+All proposed values and limits: `playtest-p16-partner-careers.md`.
+**Approval required before production changes**, especially the correlation
+metric. No new save/engine/UI or acceptance/sabotage/full-verify completion yet.
+P16 reserves save v51 if approved; P13 owns v50. Native/Project and inherited
+verify/format failures remain open. Life-event wording and unrelated work wait.
+
+### Found by P16 measurement
+
+- NPC IDs are scoped to a game, not globally unique across simulated lives.
+  A throwaway cohort-global career map reused unrelated people's state; all
+  affected exploratory candidate runs were discarded. Corrected maps reset per
+  life and career draws include seed plus identity. This was a harness error,
+  not an implemented engine defect or reason to rewrite established NPC IDs.
+- A pay-correlation number needs its definition. Raw dollars, log pay,
+  dual-earner participation, age adjustments and multi-year means differ. The
+  cited French study is not a universal US benchmark. The brief's undefined
+  0.3–0.4 requires an explicit approved game metric; disclose both raw and log
+  rather than silently claiming the easier statistic as success.
