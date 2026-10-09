@@ -4,8 +4,8 @@
  * Spec 1336 decides the shape of this screen more than anything else: "Do not
  * make inventories so large that search/filtering is necessary. Use curated
  * inventories, contextual gating, and yearly refreshes instead." There are
- * forty-nine jobs in the catalog and the player never sees a list of
- * forty-nine. They see six that are going, they refresh every year, and every
+ * many jobs in the catalog and the player never sees the entire catalog.
+ * They see twelve that are going, they refresh every year, and every
  * one of them is something this character could plausibly get.
  *
  * Spec 97 removes Workload and Travel from job listings and spec 104 removes
@@ -73,7 +73,8 @@ export function JobsScreen() {
           <View style={styles.note}>
             <Text style={styles.noteText}>
               Open one to see what it pays, what it needs and what comes with it. One application
-              each per year.
+              each per year. Your studies and training help shape the list; other fields still hire
+              too.
             </Text>
           </View>
         </>

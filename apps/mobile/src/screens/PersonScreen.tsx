@@ -107,10 +107,15 @@ export function PersonScreen() {
               player's to manage — only what it brings in, which is the part a
               household feels.
             */}
-            {work.partner?.id === person.id && work.year ? (
+            {work.partner?.id === person.id ? (
               <>
                 <ListRow
-                  title={WORK_LABELS[work.year.status]}
+                  title={work.jobTitle ?? 'Work'}
+                  subtitle={
+                    work.year
+                      ? `${WORK_LABELS[work.year.status]}. ${work.changeText ?? ''}`
+                      : 'Household pay starts with the next year.'
+                  }
                   value={work.gross > 0 ? `${money(work.gross)} a year` : undefined}
                   affordance="none"
                   compact

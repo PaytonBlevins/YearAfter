@@ -155,9 +155,14 @@ export function summariseFinances(
   let bought = 0;
   let sold = 0;
   for (const entry of transactionsIn(ledger, year)) {
+    const amount = Number(entry.amount);
+    // Borrowed purchase funds are transfers, never income.
+    if (entry.category === 'debt' && amount > 0) {
+      sold += amount;
+      continue;
+    }
     // Ticket 0501: a house is bought and sold across the same line.
     if (entry.category !== 'investment' && entry.category !== 'property') continue;
-    const amount = Number(entry.amount);
     if (amount < 0) bought -= amount;
     else sold += amount;
   }
@@ -177,6 +182,7 @@ export function summariseFinances(
   const earned =
     Number(totalFor(ledger, 'salary', year)) +
     Number(totalFor(ledger, 'commission', year)) +
+    Number(totalFor(ledger, 'oddJob', year)) +
     // Ticket 0601: what a business paid its owner is earned, and so is the tax on it.
     Number(totalFor(ledger, 'business', year)) +
     // Ticket 0701: what a channel earned, net of its upkeep, is earned and taxed.

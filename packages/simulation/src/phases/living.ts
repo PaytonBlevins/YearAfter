@@ -26,10 +26,10 @@ import { dollars } from '@yearafter/core';
 import type { NewTransaction } from '@yearafter/finance';
 import {
   SUBSISTENCE,
+  LIFESTYLES,
   creep,
-  householdScale,
   livingCostFor,
-  standardTargetFor,
+  retirementSpendingFor,
   type HouseholdFinances,
   type Housing,
 } from '@yearafter/finance';
@@ -89,6 +89,9 @@ export interface LivingPhaseInput {
    * rebuild exactly that.
    */
   readonly portfolio: number;
+  /** P15: existing retirement choice and personal debt, never a new saved field. */
+  readonly retired?: boolean;
+  readonly personalDebt?: number;
   /** What the job paid before tax this year, whole dollars. Zero if none. */
   readonly earned: number;
   /** The job's title, for the year's money line. Absent if not working. */
@@ -118,6 +121,8 @@ export interface LivingPhaseOutput {
   readonly transactions: readonly NewTransaction[];
   /** Whole dollars charged this year. Zero before 18. */
   readonly cost: number;
+  /** Annual tier nudge; never awarded by the choice command. */
+  readonly mood: number;
   /** Ticket 0504. The same year's bill with no car in it — see the return. */
   readonly withoutCar: number;
   /**
@@ -236,6 +241,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
       lines,
       transactions,
       cost: 0,
+      mood: 0,
       withoutCar: 0,
       hardship: false,
       unmet: 0,
@@ -278,14 +284,23 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     again. Dividing by the household's size is the ordinary equivalence scale,
     and it leaves a single person exactly where they were (CORE_RULES 13.87).
   */
-  const members = householdScale(input.partnered, input.childAges);
-  let standard = creep(
-    input.household.standard,
-    standardTargetFor(input.afterTaxIncome / members, (input.wealth + input.portfolio) / members),
-  );
+  const plannedHousing: Housing = input.ownsHome
+    ? 'owned'
+    : input.household.housing === 'owned'
+      ? 'ownPlace'
+      : input.household.housing;
+  const target = retirementSpendingFor({
+    ...input,
+    housing: plannedHousing,
+    liquidWealth: input.wealth + input.portfolio,
+    personalDebt: input.personalDebt ?? 0,
+    retired: input.retired ?? false,
+  });
+  let standard = creep(input.household.standard, target.target);
 
   const asIfAlone = livingCostFor({
     standard,
+    lifestyle: input.household.lifestyle,
     locationIndex: input.locationIndex,
     partnered: input.partnered,
     childAges: input.childAges,
@@ -311,6 +326,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
 
   let cost = livingCostFor({
     standard,
+    lifestyle: input.household.lifestyle,
     locationIndex: input.locationIndex,
     partnered: input.partnered,
     childAges: input.childAges,
@@ -382,6 +398,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     }
     cost = livingCostFor({
       standard,
+      lifestyle: input.household.lifestyle,
       locationIndex: input.locationIndex,
       partnered: input.partnered,
       childAges: input.childAges,
@@ -445,8 +462,19 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     });
   }
 
+  const basicCost = livingCostFor({
+    standard: SUBSISTENCE,
+    locationIndex: input.locationIndex,
+    partnered: input.partnered,
+    childAges: input.childAges,
+    housing,
+    housingCost: input.housingCost ?? 0,
+    vehicleCost: input.vehicleCost ?? 0,
+    ownsVehicle: input.ownsVehicle ?? false,
+  }).total;
   return {
     household: {
+      lifestyle: input.household.lifestyle,
       standard,
       housing,
       /*
@@ -471,6 +499,9 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     lines,
     transactions,
     cost: cost.total,
+    // At the floor there are no discretionary comforts to buy or forgo.
+    mood:
+      !inHardship && cost.total > basicCost ? LIFESTYLES[input.household.lifestyle].happiness : 0,
     /*
       Ticket 0504. What this household's life would cost with no car in it.
       The home door measures a mortgage against the roof the household pays
@@ -483,6 +514,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
       ? cost.total
       : livingCostFor({
           standard,
+          lifestyle: input.household.lifestyle,
           locationIndex: input.locationIndex,
           partnered: input.partnered,
           childAges: input.childAges,

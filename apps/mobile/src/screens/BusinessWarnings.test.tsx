@@ -121,7 +121,8 @@ describe('A3 business failure warnings using real finance readers', () => {
     expect(text()).toContain('need about $20,500 from you');
     expect(text()).toContain("you couldn't cover that amount");
     expect(text()).toContain('before advancing the year');
-    expect(text()).toContain("You can't decline that rescue yet");
+    expect(text()).toContain("you'll choose whether to put money in or close it");
+    expect(text()).toContain('Nothing comes from your bank without that choice');
   });
   it('does not call an affordable rescue unaffordable at the exact boundary', async () => {
     const state = fixture();

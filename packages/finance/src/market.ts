@@ -254,7 +254,8 @@ export function runPriceYear(
       pull = Math.max(-REVERSION_CAP, Math.min(REVERSION_CAP, gap)) * REVERSION;
     }
 
-    const raw = instrument.drift + MARKET_EFFECT[state] * instrument.beta + own + sector + pull;
+    const raw =
+      instrument.drift + 0.8 * (MARKET_EFFECT[state] * instrument.beta + own + sector) + pull;
     /*
       One year can only do so much, in either direction — the bound 0308 put on
       the old engine after 0306 compounded $200 into $1.28bn unnoticed. The band

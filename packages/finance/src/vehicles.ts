@@ -240,6 +240,33 @@ export interface OwnedVehicle {
   readonly behindYears: number;
   /** Ticket 0505. What has been fitted. Absent on a standard car. */
   readonly mods?: readonly FittedMod[];
+  /** P11: extra preventive work, paid once; protects the next annual advance only. */
+  readonly service?: { readonly year: number; readonly cost: number };
+}
+
+/** P11: annual renewal targets 5–10 extra median years, not a lifespan guarantee.
+ * Classics already wear slowly; their measured multiplier preserves that model.
+ * The price is extra work beyond the unchanged ordinary maintenance bill.
+ */
+export const SERVICE_WEAR = 0.63;
+export const CLASSIC_SERVICE_WEAR = 0.75;
+export const SERVICE_REPAIR = 0.8;
+export const SERVICE_PRICE_SHARE = 0.5;
+export const SERVICE_MINIMUM = 100;
+
+export function preventiveServiceCost(
+  vehicle: OwnedVehicle,
+  facts: { readonly model: VehicleModel; readonly trim: VehicleTrim },
+  worldYear: number,
+): number {
+  const upkeep =
+    maintenanceFor(
+      facts.model,
+      facts.trim,
+      Math.max(0, worldYear + 1 - vehicle.modelYear),
+      vehicle.condition,
+    ) * strainOf(vehicle);
+  return Math.max(SERVICE_MINIMUM, Math.round((upkeep * SERVICE_PRICE_SHARE) / 10) * 10);
 }
 
 export interface VehicleDefect {
@@ -365,7 +392,14 @@ export function vehicleYear(
 ): VehicleYearResult {
   const { model, trim } = facts;
   const age = Math.max(0, worldYear - vehicle.modelYear);
-  let condition = vehicle.condition - wearFor(model, age, vehicle.history, rolls.wear);
+  const serviced = vehicle.service?.year === worldYear - 1;
+  const wearMultiplier = serviced
+    ? model.market === 'classic'
+      ? CLASSIC_SERVICE_WEAR
+      : SERVICE_WEAR
+    : 1;
+  let condition =
+    vehicle.condition - wearFor(model, age, vehicle.history, rolls.wear) * wearMultiplier;
   // Ticket 0505: a tune and an engine upgrade work a car harder; better
   // brakes and a Tarbus conversion keep it out of trouble.
   const strain = strainOf(vehicle);
@@ -386,7 +420,10 @@ export function vehicleYear(
     repairCost = DEDUCTIBLE;
     condition -= ACCIDENT_WEAR;
     accident = true;
-  } else if (rolls.repair < repairChanceFor(model, age) * strain) {
+  } else if (
+    rolls.repair <
+    repairChanceFor(model, age) * strain * (serviced ? SERVICE_REPAIR : 1)
+  ) {
     event = 'repair';
     repairCost = repairCostFor(trim, rolls.repairSize);
   }

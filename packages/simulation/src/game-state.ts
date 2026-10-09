@@ -1,3 +1,4 @@
+import type { BusinessRescue } from './business-rescue';
 /**
  * The live game state and the year-advance loop.
  *
@@ -14,7 +15,7 @@ import { EMPTY_HISTORY, type EventHistory, type PendingDecision } from '@yearaft
 import { EMPTY_HOUSEHOLD, type Household } from '@yearafter/relationships';
 import { EMPTY_CIRCLE, type SocialCircle } from '@yearafter/social';
 import { EMPTY_PARENTING, type ParentingState } from '@yearafter/parenting';
-import { EMPTY_EMPLOYMENT, type EmploymentState } from '@yearafter/careers';
+import { EMPTY_EMPLOYMENT, type EmploymentState, type PartnerCareers } from '@yearafter/careers';
 import { EMPTY_HEALTH, type HealthState } from '@yearafter/health';
 import {
   EMPTY_CARDS,
@@ -110,6 +111,7 @@ export interface GameState {
    * does not carry over.
    */
   readonly employment: EmploymentState;
+  readonly partnerCareers: PartnerCareers;
   /**
    * Ticket 0211: what is wrong with them, and whether a doctor is on it.
    *
@@ -205,6 +207,8 @@ export interface GameState {
    * nobody made.
    */
   readonly advisorId?: string;
+  /** P7: whole dollars explicitly protected for a purchase. */
+  readonly cashGoal?: number;
   /**
    * Ticket 0310. The retirement account, the pension service, and whether they
    * have stopped.
@@ -293,6 +297,7 @@ export interface GameState {
   readonly valuables: readonly OwnedValuable[];
   /** Ticket 0506. A renovation the game asked about unprompted, if one is open. */
   readonly renovationOffer?: RenovationOffer;
+  readonly businessRescue?: BusinessRescue;
   /**
    * Ticket 0507. This year's auction diary: how many sales attended at each
    * venue (spec 41's yearly limits) and which lots were bid on. A diary for
@@ -479,7 +484,8 @@ export const hasSystemicOffer = (state: GameState): boolean =>
   state.pursuitOffer !== undefined ||
   state.homeOffer !== undefined ||
   state.vehicleOffer !== undefined ||
-  state.renovationOffer !== undefined;
+  state.renovationOffer !== undefined ||
+  state.businessRescue !== undefined;
 
 export const createWorldState = (year: number, generation = 1): WorldState => ({
   year,
@@ -487,6 +493,8 @@ export const createWorldState = (year: number, generation = 1): WorldState => ({
 });
 
 export interface CreateGameStateOptions {
+  readonly advisorId?: string;
+  readonly cashGoal?: number;
   readonly health?: HealthState;
   readonly finance?: Ledger;
   readonly household?: HouseholdFinances;
@@ -502,6 +510,7 @@ export interface CreateGameStateOptions {
   readonly circle?: SocialCircle;
   readonly parenting?: ParentingState;
   readonly employment?: EmploymentState;
+  readonly partnerCareers?: PartnerCareers;
   readonly retirement?: RetirementState;
   readonly pending?: readonly PendingDecision[];
   readonly offer?: JobOffer;
@@ -515,6 +524,7 @@ export interface CreateGameStateOptions {
   readonly inspected?: readonly string[];
   readonly valuables?: readonly OwnedValuable[];
   readonly renovationOffer?: RenovationOffer;
+  readonly businessRescue?: BusinessRescue;
   readonly auctions?: AuctionDiary;
   readonly businesses?: readonly OwnedBusiness[];
   readonly deals?: readonly PrivateDeal[];
@@ -539,6 +549,7 @@ export const createGameState = (
   circle: options.circle ?? EMPTY_CIRCLE,
   parenting: options.parenting ?? EMPTY_PARENTING,
   employment: options.employment ?? EMPTY_EMPLOYMENT,
+  partnerCareers: options.partnerCareers ?? {},
   health: options.health ?? EMPTY_HEALTH,
   finance: options.finance ?? EMPTY_LEDGER,
   household: options.household ?? NEW_HOUSEHOLD,
@@ -548,6 +559,8 @@ export const createGameState = (
   market: options.market ?? OPENING_MARKET,
   prices: options.prices ?? openingPrices(),
   retirement: options.retirement ?? NO_RETIREMENT,
+  ...(options.advisorId !== undefined ? { advisorId: options.advisorId } : {}),
+  ...(options.cashGoal !== undefined ? { cashGoal: options.cashGoal } : {}),
   ...(options.offer ? { offer: options.offer } : {}),
   ...(options.collegeOffer ? { collegeOffer: options.collegeOffer } : {}),
   ...(options.lifeOffer ? { lifeOffer: options.lifeOffer } : {}),
@@ -559,6 +572,7 @@ export const createGameState = (
   ...(options.inspected && options.inspected.length > 0 ? { inspected: options.inspected } : {}),
   valuables: options.valuables ?? EMPTY_VALUABLES,
   ...(options.renovationOffer ? { renovationOffer: options.renovationOffer } : {}),
+  ...(options.businessRescue ? { businessRescue: options.businessRescue } : {}),
   ...(options.auctions ? { auctions: options.auctions } : {}),
   businesses: options.businesses ?? EMPTY_BUSINESSES,
   deals: options.deals ?? EMPTY_DEALS,

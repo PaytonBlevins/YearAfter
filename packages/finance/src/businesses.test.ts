@@ -127,6 +127,13 @@ describe('a year of trading', () => {
         }
         return businessYear(priced, type, NORMAL).profit;
       };
+      // P13's approved pricing exclusion: old saved prices cannot change a brokerage's year.
+      if (type.id === 'biz.realestate') {
+        const baseline = businessYear({ ...business, price: 100 }, type, NORMAL);
+        for (const price of PRICE_STEPS)
+          expect(businessYear({ ...business, price }, type, NORMAL)).toEqual(baseline);
+        continue;
+      }
       const best = PRICE_STEPS.reduce((top, price) =>
         profitAt(price) > profitAt(top) ? price : top,
       );

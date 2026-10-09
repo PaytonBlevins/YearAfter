@@ -734,10 +734,12 @@ describe('odd jobs', () => {
     expect(sitting?.unavailable).toBe('needs-parent');
   });
 
-  it('holds two at once and not three', () => {
+  it('P6 lets hidden workload handle a third commitment instead of blocking the menu', () => {
     const busy = gigOffers({ age: 16, household: household(), held: ['gig.retail', 'gig.lawns'] });
     const others = busy.filter((offer) => !offer.held);
-    expect(others.every((offer) => offer.unavailable === 'hands-full')).toBe(true);
+    expect(
+      others.some((offer) => offer.gig.id === 'gig.food' && offer.unavailable === undefined),
+    ).toBe(true);
   });
 
   it('pays more to somebody who is good at it', () => {

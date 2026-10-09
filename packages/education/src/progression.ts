@@ -164,6 +164,7 @@ const EMPTY: SchoolYearResult['statDeltas'] = {};
 export interface GigEarning {
   readonly dollars: number;
   readonly source: string;
+  readonly kind: 'oddJob' | 'partTime';
 }
 
 /**
@@ -180,24 +181,39 @@ export function runGigs(
   age: number,
   stats: VisibleStats,
   talents: Talents,
-): { state: EducationState; earned: readonly GigEarning[]; lines: readonly string[] } {
+): {
+  state: EducationState;
+  earned: readonly GigEarning[];
+  lines: readonly string[];
+  hours: number;
+  paidIds: readonly string[];
+} {
   const earned: GigEarning[] = [];
   const lines: string[] = [];
   let next = state;
+  let hours = 0;
+  const paidIds: string[] = [];
 
-  for (const gigId of state.gigs) {
+  for (const gigId of new Set(state.gigs)) {
     const gig = findGig(gigId);
-    if (!gig) continue;
+    // Annual settlement receives the new age: work accepted at ageMax still
+    // earns its final paycheck at ageMax + 1. Older saved ids are stale.
+    if (!gig || age < gig.ageMin || (gig.ageMax !== undefined && age > gig.ageMax + 1)) {
+      next = { ...next, gigs: next.gigs.filter((id) => id !== gigId) };
+      continue;
+    }
+    hours += gig.hoursPerWeek;
+    paidIds.push(gigId);
 
     // PAID FIRST, then aged out. The other order found a character who took a
     // lemonade stand at eleven being told at twelve that they had got too old
     // for it, having never been paid a cent for the year they worked it.
     const amount = gigPay(gig, stats, talents);
-    earned.push({ dollars: amount, source: gig.source });
+    earned.push({ dollars: amount, source: gig.source, kind: gig.kind ?? 'oddJob' });
     lines.push(gigLine(gig, amount, ((gigId.length + age) % 2) / 2));
 
     // Too old for another year of it. Nobody runs a lemonade stand at sixteen.
-    if (age >= gig.ageMax) {
+    if (gig.ageMax !== undefined && age >= gig.ageMax) {
       next = { ...next, gigs: next.gigs.filter((id) => id !== gigId) };
       lines.push(
         `That was the last year of ${gig.name.toLowerCase()}. You had got too old for it.`,
@@ -205,7 +221,16 @@ export function runGigs(
     }
   }
 
-  return { state: next, earned, lines };
+  return {
+    state:
+      new Set(next.gigs).size === next.gigs.length
+        ? next
+        : { ...next, gigs: [...new Set(next.gigs)] },
+    earned,
+    lines,
+    hours,
+    paidIds,
+  };
 }
 
 /**
@@ -216,6 +241,32 @@ export function runGigs(
  * every seeded life.
  */
 export function runSchoolYear(state: EducationState, input: SchoolYearInput): SchoolYearResult {
+  const work = runGigs(state, input.age, input.stats, input.talents);
+  // One settlement owner for every school stage. The paid year's hours stay
+  // even if this advance ages a gig out; stale/unknown held ids earn nothing.
+  const result = schoolYear(
+    state.gigs.length === 0 ? state : { ...state, gigs: work.paidIds },
+    input,
+    work,
+  );
+  if (result.earned === work.earned) return result;
+  const workload = assessWorkload(work.hours, input.stats, input.personality, input.age);
+  return {
+    ...result,
+    state: { ...result.state, gigs: work.state.gigs },
+    earned: work.earned,
+    hours: result.hours + work.hours,
+    capacity: work.hours > 0 ? workload.capacity : result.capacity,
+    hiddenLoad: workload.load,
+    lines: [...result.lines, ...work.lines.map((text) => ({ kind: 'passive' as const, text }))],
+  };
+}
+
+function schoolYear(
+  state: EducationState,
+  input: SchoolYearInput,
+  work: ReturnType<typeof runGigs>,
+): SchoolYearResult {
   const lines: SchoolYearResult['lines'] = [];
   const push = (kind: 'milestone' | 'passive', text: string) =>
     (lines as { kind: 'milestone' | 'passive'; text: string }[]).push({ kind, text });
@@ -235,6 +286,12 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
   // Ticket 0210b. A degree year is its own thing — no behaviour, no clubs, no
   // grade to repeat — so it runs in `runCollegeYear` and returns here.
   if (isAtCollege(state)) {
+    const workload = assessWorkload(
+      COLLEGE_HOURS + work.hours,
+      input.stats,
+      input.personality,
+      input.age,
+    );
     const college = runCollegeYear(state, {
       age: input.age,
       smarts: input.stats.smarts,
@@ -243,28 +300,29 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
       cash: input.cash ?? 0,
       support: input.collegeSupport ?? 0,
       roll: input.roll ?? 1,
+      overloadPenalty: overloadPenalties(workload.overload).performance,
     });
     return {
-      state: college.state,
+      state: { ...college.state, gigs: work.state.gigs },
       statDeltas:
         college.ending === 'finished'
           ? { happiness: 8, smarts: 3 }
           : college.ending
             ? { happiness: -6 }
             : { smarts: 2 },
-      hiddenLoad: 0,
-      earned: [],
+      hiddenLoad: workload.load,
+      earned: work.earned,
       // A degree is a real commitment against the same hidden capacity a job
       // takes (spec 1823: full-time work during college is allowed, and stress
       // handles the overcommitment).
-      hours: COLLEGE_HOURS,
+      hours: workload.hours,
       capacity: capacityFor(input.stats, input.personality, input.age),
       costs:
         college.tuition > 0
           ? [{ dollars: college.tuition, source: 'a year of tuition', payer: 'self' as const }]
           : [],
       tuition: college.tuition,
-      lines: college.lines.map((line) => ({ kind: line.kind, text: line.text })),
+      lines: [...college.lines, ...work.lines.map((text) => ({ kind: 'passive' as const, text }))],
     };
   }
 
@@ -272,7 +330,6 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
     // School is over; work is not. Somebody who left at sixteen still has the
     // kitchen shifts, and returning early without running them would silently
     // stop paying a character who is very much still turning up.
-    const work = runGigs(state, input.age, input.stats, input.talents);
     return {
       state: work.state,
       statDeltas: EMPTY,
@@ -286,7 +343,7 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
       // stress at fifty was identical for a character working nights in a
       // kitchen and one who had never worked at all. A whole system was wired
       // to a divisor of zero. CORE_RULES 13.7, found by measuring.
-      hours: 0,
+      hours: work.hours,
       capacity: capacityFor(input.stats, input.personality, input.age),
       costs: [],
       lines: work.lines.map((text) => ({ kind: 'passive' as const, text })),
@@ -490,8 +547,7 @@ export function runSchoolYear(state: EducationState, input: SchoolYearInput): Sc
   }
 
   // ---- what the odd jobs paid ---------------------------------------------
-  const work = runGigs(next, input.age, input.stats, input.talents);
-  next = work.state;
+  next = { ...next, gigs: work.state.gigs };
   for (const line of work.lines) push('passive', line);
   const earned = work.earned;
 

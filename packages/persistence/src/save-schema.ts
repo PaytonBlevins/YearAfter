@@ -1,3 +1,4 @@
+import type { BusinessRescue } from '@yearafter/simulation';
 /**
  * Ticket 0005 — SaveGameV1.
  *
@@ -13,7 +14,7 @@ import type { Character } from '@yearafter/character';
 import type { EducationState } from '@yearafter/education';
 import type { SocialCircle } from '@yearafter/social';
 import type { ParentingState } from '@yearafter/parenting';
-import type { EmploymentState } from '@yearafter/careers';
+import type { EmploymentState, PartnerCareers } from '@yearafter/careers';
 import type {
   HeldCard,
   HeldLoan,
@@ -49,7 +50,10 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 43;
+/** P7: explicit purchase savings goal; old lives migrate with no goal. */
+/** P10: optional paid aftermarket watch work; legacy values stay unchanged. */
+/** P11: optional once-paid preventive car service, expires after the next advance. */
+export const CURRENT_SAVE_VERSION = 51;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -183,7 +187,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 43;
+  readonly version: 51;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -214,6 +218,7 @@ export interface SaveGameV18 {
    * a single reputation would be storing the wrong shape forever.
    */
   readonly employment: EmploymentState;
+  readonly partnerCareers: PartnerCareers;
   /** Ticket 0211: conditions held, the age curve's running total, and the deficit. */
   readonly health: HealthState;
   /**
@@ -238,6 +243,8 @@ export interface SaveGameV18 {
   readonly prices: PriceBook;
   /** Ticket 0309. Who they pay for advice, if anybody. Usually nobody. */
   readonly advisorId?: string;
+  /** P7: whole dollars explicitly protected for a purchase. */
+  readonly cashGoal?: number;
   /** Ticket 0310. The retirement account, the service, and whether they stopped. */
   readonly retirement: RetirementState;
   /**
@@ -281,6 +288,7 @@ export interface SaveGameV18 {
   readonly valuables: readonly OwnedValuable[];
   /** Ticket 0506. A renovation the game asked about, waiting on an answer. */
   readonly renovationOffer?: RenovationOffer;
+  readonly businessRescue?: BusinessRescue;
   /** Ticket 0507. This year's auction diary. */
   readonly auctions?: AuctionDiary;
   /** Ticket 0601. The businesses the character owns. Always present from v38. */

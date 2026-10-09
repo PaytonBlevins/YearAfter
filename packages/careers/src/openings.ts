@@ -9,7 +9,7 @@
  * ones on the list.
  *
  * That also makes applying a decision rather than a search. A player looking at
- * six openings is choosing; a player looking at a filtered catalog is
+ * twelve openings is choosing; a player looking at a filtered catalog is
  * administrating, which is what spec 20 and the Low-Friction Realism Test exist
  * to prevent.
  */
@@ -19,7 +19,10 @@ import { REACH, type Applicant, type CannotApply } from './employment';
 import { licenseReach, meetsLevel, type EducationLevel } from '@yearafter/education';
 
 /** How many listings a year. Enough to choose between, few enough to read. */
-export const LISTINGS = 6;
+export const LISTINGS = 12;
+
+/** P5: at least a couple of eligible listings reflect study or held training. */
+export const STUDY_LISTINGS = 2;
 
 /** The age the world starts offering somebody real work. */
 export const WORKING_AGE = 16;
@@ -38,6 +41,8 @@ export interface OpeningsContext {
   readonly currentJobId?: string;
   /** Licenses held, by id (Ticket 0406). */
   readonly licenses: readonly string[];
+  /** Tracks of the current/last studied major; qualifications still gate jobs. */
+  readonly opens?: readonly string[];
 }
 
 /**
@@ -180,6 +185,13 @@ export function listingWeight(context: OpeningsContext, job: Job): number {
   return weight;
 }
 
+/** Study is a track match, not a substitute for a required qualification. */
+export function fitsStudy(context: OpeningsContext, job: Job): boolean {
+  return (
+    (context.opens ?? []).includes(job.track) || licenseReach(context.licenses, job.track) >= 0
+  );
+}
+
 /**
  * The listings for one year.
  *
@@ -187,8 +199,8 @@ export function listingWeight(context: OpeningsContext, job: Job): number {
  * so the same year always produces the same list, which is what lets a save
  * reload onto the same screen. No RNG is consumed here.
  *
- * Rung 0 of every track is ALWAYS eligible — spec 119's permissive switching
- * means a fifty-year-old electrician can start again in a kitchen, and a list
+ * Entry work still honors age, education and license gates. Spec 119's
+ * permissive switching lets a fifty-year-old electrician start in a kitchen; a list
  * that only ever offered somebody more of what they already do would be a trap
  * dressed as a career.
  */
@@ -202,15 +214,19 @@ export function openingsFor(context: OpeningsContext, draw: (job: Job) => number
   // removing the cold start, which is the point of the previous paragraph.
   const weighted = eligible.map((job) => ({ job, key: draw(job) / listingWeight(context, job) }));
 
-  return (
-    weighted
-      .sort((a, b) => a.key - b.key)
-      .slice(0, LISTINGS)
-      .map((entry) => entry.job)
-      // Presented cheapest-first so the list reads as a ladder rather than as a
-      // ranking of what the game thinks you deserve.
-      .sort((a, b) => a.pay - b.pay)
-  );
+  weighted.sort((a, b) => a.key - b.key);
+  const reserved = weighted.filter(({ job }) => fitsStudy(context, job)).slice(0, STUDY_LISTINGS);
+  const reservedIds = new Set(reserved.map(({ job }) => String(job.id)));
+  // Scarce fields show every available match, never an ineligible or duplicate
+  // row. The remaining slots keep switching into other fields possible.
+  return [
+    ...reserved,
+    ...weighted
+      .filter(({ job }) => !reservedIds.has(String(job.id)))
+      .slice(0, LISTINGS - reserved.length),
+  ]
+    .map(({ job }) => job)
+    .sort((a, b) => a.pay - b.pay);
 }
 
 /** What the player has actually done, in the shape `hireChance` wants. */

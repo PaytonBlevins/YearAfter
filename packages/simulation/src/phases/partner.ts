@@ -1,14 +1,22 @@
 /**
- * Ticket 0502 — a partner's year of work, as money the household receives.
+ * P16 — a saved partner career's year of work, as household income.
  *
- * The rules are in `@yearafter/careers/partner`; this is the part that knows
+ * Career and shared participation rules are in `@yearafter/careers`; this knows
  * who the partner is and what the household looks like this year. It posts
  * nothing itself. Like every phase since 0301 it RETURNS transactions and
  * `advanceYear` commits them — with the income, ahead of every outgoing.
  */
 
 import { dollars } from '@yearafter/core';
-import { partnerYear, type PartnerYear } from '@yearafter/careers';
+import {
+  startPartnerCareer,
+  advancePartnerCareer,
+  findJob,
+  partnerCareerText,
+  type PartnerCareers,
+  type PartnerCareer,
+  type PartnerYear,
+} from '@yearafter/careers';
 import type { NewTransaction } from '@yearafter/finance';
 import { childrenAtHome } from '@yearafter/parenting';
 import { npcAge } from '@yearafter/relationships';
@@ -22,6 +30,9 @@ export interface PartnerPhaseInput {
   readonly worldYear: number;
   /** The ages of the children living at home. */
   readonly childAges: readonly number[];
+  readonly seed?: string;
+  readonly careers?: PartnerCareers;
+  readonly playerPay?: number;
 }
 
 export interface PartnerPhaseOutput {
@@ -32,19 +43,49 @@ export interface PartnerPhaseOutput {
   readonly net: number;
   /** Before tax, whole dollars — what a lender counts. */
   readonly gross: number;
+  readonly careers: PartnerCareers;
+  readonly career?: PartnerCareer;
+  readonly jobTitle?: string;
+  readonly changeText?: string;
 }
 
-const NONE: PartnerPhaseOutput = { transactions: [], net: 0, gross: 0 };
+const NONE: PartnerPhaseOutput = { transactions: [], net: 0, gross: 0, careers: {} };
 
 export function partnerIncomeFor(input: PartnerPhaseInput): PartnerPhaseOutput {
   const partner = householdPartnerOf(input.people);
-  if (!partner || !partner.alive) return NONE;
-  const year = partnerYear({
+  const careers = input.careers ?? {};
+  if (!partner || !partner.alive || npcAge(partner, input.worldYear) < 18)
+    return { ...NONE, careers };
+  const careerInput = {
     id: String(partner.id),
     age: npcAge(partner, input.worldYear),
     youngChild: input.childAges.some((age) => age < YOUNG_CHILD_UNDER),
-  });
-  if (year.gross <= 0) return { ...NONE, partner, year };
+    seed: input.seed ?? '',
+    worldYear: input.worldYear,
+    playerPay: input.playerPay ?? 0,
+  };
+  const previous = careers[String(partner.id)];
+  const career = previous
+    ? advancePartnerCareer(careerInput, previous)
+    : startPartnerCareer(careerInput);
+  return incomeResult(partner, career, { ...careers, [String(partner.id)]: career });
+}
+
+function incomeResult(
+  partner: Acquaintance,
+  career: PartnerCareer,
+  careers: PartnerCareers,
+): PartnerPhaseOutput {
+  const year = career.last;
+  const details = {
+    partner,
+    career,
+    year,
+    careers,
+    jobTitle: findJob(career.jobId)?.title,
+    changeText: partnerCareerText(career),
+  };
+  if (year.gross <= 0) return { ...NONE, ...details };
 
   const whose = `${partner.firstName}'s`;
   const transactions: NewTransaction[] = [
@@ -61,7 +102,7 @@ export function partnerIncomeFor(input: PartnerPhaseInput): PartnerPhaseOutput {
       source: `Tax on ${whose} income`,
     });
   }
-  return { partner, year, transactions, net: year.net, gross: year.gross };
+  return { ...details, transactions, net: year.net, gross: year.gross };
 }
 
 /**
@@ -75,12 +116,11 @@ export function partnerIncomeOf(state: {
   readonly circle: { readonly people: readonly Acquaintance[] };
   readonly world: { readonly year: number };
   readonly family: Parameters<typeof childrenAtHome>[0];
+  readonly partnerCareers: PartnerCareers;
 }): PartnerPhaseOutput {
-  return partnerIncomeFor({
-    people: state.circle.people,
-    worldYear: state.world.year,
-    childAges: childrenAtHome(state.family, state.world.year).map(
-      (child) => state.world.year - child.birthYear,
-    ),
-  });
+  const partner = householdPartnerOf(state.circle.people);
+  const career = partner && state.partnerCareers[String(partner.id)];
+  if (!partner || !partner.alive || !career || career.year !== state.world.year)
+    return { ...NONE, careers: state.partnerCareers, ...(partner?.alive ? { partner } : {}) };
+  return incomeResult(partner, career, state.partnerCareers);
 }
