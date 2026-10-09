@@ -216,7 +216,7 @@ interface GameContextValue {
   /** Ticket 0307. Borrow, and pay extra off. */
   readonly borrow: (productId: string, amount: number) => void;
   /** Ticket 0501. Buy a listed home, outright or with a mortgage. */
-  readonly buyAHome: (listingId: string, how: 'cash' | 'mortgage') => void;
+  readonly buyAHome: (listingId: string, how: 'cash' | 'mortgage' | 'mortgage-half') => void;
   /** Ticket 0501. Spec 211's one Sell action. */
   readonly sellAHome: (homeId: string) => void;
   /** Ticket 0503. Everything a landlord does, one verb at a time. */
@@ -788,7 +788,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0501: homes ---------------------------------------------- */
 
   const buyAHome = useCallback(
-    (listingId: string, how: 'cash' | 'mortgage') => {
+    (listingId: string, how: 'cash' | 'mortgage' | 'mortgage-half') => {
       setState((current) => {
         if (!current) return current;
         const result = buyHome(current, listingId, how);
@@ -796,7 +796,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           // A refusal is an outcome, not an error: the bank saying no is a
           // thing that happened, and the player is told so in a sentence.
           setOutcome({
-            title: how === 'mortgage' ? 'The bank said no' : 'Not enough',
+            title: how !== 'cash' ? 'The bank said no' : 'Not enough',
             body: BUY_HOME_ERROR_LABELS[result.error],
             tone: 'bad',
           });

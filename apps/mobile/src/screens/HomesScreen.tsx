@@ -32,6 +32,7 @@ import {
   homeListings,
   mortgageLineOf,
   mortgageOfferFor,
+  purposeOf,
   otherPropertyOf,
   rentalListings,
   residenceOf,
@@ -161,6 +162,8 @@ export function HomesScreen() {
   const listingRows = (list: readonly HomeListing[]) =>
     list.map((listing, index) => {
       const offer = mortgageOfferFor(state, listing);
+      const investment = purposeOf(state, listing) !== 'home';
+      const half = investment ? mortgageOfferFor(state, listing, 'half') : undefined;
       const owned = state.homes.some((candidate) => candidate.id === listing.id);
       const outright = cash >= listing.askingPrice;
       return (
@@ -173,7 +176,11 @@ export function HomesScreen() {
             }`}
             value={money(listing.askingPrice)}
             meta={`About ${money(listing.annualExpense)} a year to keep · ${
-              owned ? 'Yours' : offer.approved ? 'Mortgage available' : 'No mortgage for you'
+              owned
+                ? 'Yours'
+                : offer.approved || half?.approved
+                  ? 'Mortgage available'
+                  : 'No mortgage for you'
             }`}
             affordance={owned ? 'none' : 'action'}
             disabled={owned}
@@ -198,6 +205,22 @@ export function HomesScreen() {
                   {offer.because ? MORTGAGE_REFUSAL_LABELS[offer.because] : ''}
                 </Text>
               )}
+              {half ? (
+                half.approved ? (
+                  <ActionButton
+                    label={`Put 50% down — ${money(half.down)}`}
+                    onPress={() => {
+                      buyAHome(listing.id, 'mortgage-half');
+                      setOpen(undefined);
+                    }}
+                  />
+                ) : (
+                  <Text style={styles.note}>
+                    50% down:{' '}
+                    {half.because ? MORTGAGE_REFUSAL_LABELS[half.because] : 'The lender said no.'}
+                  </Text>
+                )
+              ) : null}
               {outright ? (
                 <ActionButton
                   label={`Buy it outright — ${money(listing.askingPrice)}`}

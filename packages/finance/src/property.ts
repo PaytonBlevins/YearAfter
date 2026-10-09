@@ -314,6 +314,9 @@ export interface HomeBuyer {
 
 /** Ticket 0503. What the buyer means to do with it. */
 export type MortgagePurpose = 'home' | 'rental' | 'commercial';
+/** P14: fixed investment preset; primary-home deposits stay automatic. */
+export type MortgageDeposit = 'usual' | 'half';
+export const HALF_INVESTMENT_DEPOSIT = 0.5;
 
 export type MortgageRefusal =
   | 'tooYoung'
@@ -322,9 +325,13 @@ export type MortgageRefusal =
   | 'income'
   | 'tooLarge'
   | 'alreadyMortgaged'
-  | 'tooManyMortgages';
+  | 'tooManyMortgages'
+  | 'invalidDeposit'
+  | 'lifeEnded';
 
 export const MORTGAGE_REFUSAL_LABELS: Readonly<Record<MortgageRefusal, string>> = {
+  lifeEnded: 'This life has ended.',
+  invalidDeposit: "That deposit choice isn't available for this property.",
   tooYoung: "Not until you're eighteen.",
   deposit: "You don't have enough for the deposit.",
   standing: "Your credit isn't strong enough for this one.",
@@ -354,6 +361,8 @@ export interface MortgageOffer {
  * everything above `KEEP_IN_HAND`, capped at `TARGET_DOWN`, and never less
  * than the product's floor.
  *
+ * P14 adds an approved fixed half-deposit preset for investment property, with
+ * the same rates and underwriting. It commits more cash to reduce debt.
  * The refusal names what would actually have to change — see the note inside.
  */
 export function mortgageFor(
@@ -362,8 +371,11 @@ export function mortgageFor(
   expense: number,
   purpose: MortgagePurpose = 'home',
   rentYear = 0,
+  deposit: MortgageDeposit = 'usual',
 ): MortgageOffer {
   const none = { approved: false, down: 0, principal: 0, yearlyPayment: 0 } as const;
+  if ((deposit !== 'usual' && deposit !== 'half') || (deposit === 'half' && purpose === 'home'))
+    return { ...none, because: 'invalidDeposit' };
   if (buyer.age < BUY_FROM_AGE) return { ...none, because: 'tooYoung' };
   if (purpose === 'home' && buyer.mortgaged > 0) return { ...none, because: 'alreadyMortgaged' };
   if ((buyer.mortgages ?? buyer.mortgaged) >= MAX_MORTGAGES) {
@@ -405,7 +417,10 @@ export function mortgageFor(
     if ((product.commercial ?? false) !== (purpose === 'commercial')) continue;
     if (!product.commercial && (product.investment ?? false) !== (purpose === 'rental')) continue;
     const floor = Math.ceil(price * product.minDown);
-    const down = Math.max(floor, Math.min(Math.round(price * TARGET_DOWN), spare));
+    const down =
+      deposit === 'half'
+        ? Math.ceil(price * HALF_INVESTMENT_DEPOSIT)
+        : Math.max(floor, Math.min(Math.round(price * TARGET_DOWN), spare));
     const principal = price - down;
     if (principal > product.maxPrincipal) continue;
     fitsSomewhere = true;
