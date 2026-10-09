@@ -3253,3 +3253,21 @@ underwriting. Test underwriting at the income boundary: rich fixtures can pass
 while a lender quietly ignores a rent-policy change. A larger approved deposit
 reduces principal, never APR or lender rules; quotes, commands, ledger transfers,
 save replay and estate settlement must agree on the exact amount.
+
+### 13.162 Retirement spending must distinguish income, principal and liquidity
+
+A continuously employed passive elder cohort is not a retirement cohort. Measure
+actual chosen retirement, paired survivors and age bands separately; cross-sectional
+household medians do not prove one person's spending path. Correct an income reader
+before retuning around a suppressed bill. Current pension is income; released
+retirement principal is available cash and remains an investment transfer, posted
+once. Keep market/RNG order and unchanged payout rates explicit.
+
+An added savings allowance can use net liquid holdings after personal debt and an
+ordinary-bill reserve, not home equity, business tills or credit limits. Reserve
+extras independently of lifestyle choice; a reserve is not an inviolable bank floor
+and a portfolio target does not automatically sell securities. Use a conservative
+minimum horizon without predicting death, normalize once through household/location
+and housing factors, retain standard creep and hardship. Report increased shortfall
+rates alongside falling wealth, and test real retired lifetime ledgers, saved tiers,
+migration, active screen eligibility and boundary mutations.

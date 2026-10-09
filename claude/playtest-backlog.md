@@ -65,6 +65,14 @@ listings, not six · 28 advisors push too hard · 31 explicit credit-card purcha
 that is the fix; needs a spec call) · 33 the car's yearly cost. See the roadmap
 for each one's measurements.
 
+**Finding 12 / P15:** Preapproved and built the 75+ retired half-savings horizon,
+reserve and existing pension/principal living reader; save v50 stays. Passive elder
+samples mostly still work, so their rising wealth is not proof that retirees never
+spend down. Actual retired production paired medians fall $67k/$42k; poorly funded
+retirees have more shortfalls, chiefly after fixing suppressed pension-based living.
+Details, tests, mutations and limits: `playtest-p15-retirement-spending.md`.
+Finding 13/16 / P16 and life-event wording wait for Payton.
+
 ## Suggested order, when the time comes
 
 1. **Decide first** (no code): A10 outflow (spec 20), B3 pricing, B1 how failure

@@ -1813,3 +1813,25 @@ and life-event wording wait. All 15 typechecks and 3,275 tests pass; full verify
 mismatches and full format 22 historical notes. PR #26: https://github.com/PaytonBlevins/YearAfter/pull/26, targets main, depends on #13–#25; mergeable when checked.
 Implementation CI run 160 fails the same 22 historical-note format checks;
 installation passes, later gates skip. Docs-closeout CI is unobserved.
+
+### Playtest P15 — preapproved retirement spending built (9 October 2026 UTC)
+
+Payton explicitly preapproved the
+measured choices. Built 75+ retired savings allowance: half net liquid savings,
+horizon to 100 with at least eight years, reserve max($12k, six months ordinary
+comfortable living plus home/car commitments). Deduct personal debt; exclude home
+equity/business tills/undrawn retirement/unused credit. Existing P2 standard creep,
+tiers and hardship remain; no forced retirement or automatic asset sale. Corrected
+existing pension/principal availability before living, preserving transfer books,
+payout amounts, save v50 and RNG order. Screens explain the policy.
+300 actual retired production lives match calibration exactly: paired 75→85 median
+wealth declines $67,474/$42,497, versus $4,635/$1,811 before. Pre-retirement P2
+bands stay. Underfunded-retiree 85+ shortfalls rise to 27.86%/21.91%, mainly from
+correcting pension-based living costs; no promise of universal retirement success.
+Passive wage-earning elder samples are not retirement cohorts. See
+`playtest-p15-retirement-spending.md` for measurement and all 23 caught mutations
+(none missed, exact source restoration). 31 new tests; 3,306 tests and 15 typechecks
+pass. Full verify retains seven inherited catalog mismatches; full format retains
+22 historical-note failures. Native/Project checks open. Branch
+`feat/playtest-p15-retirement-spending` stacks on P14 #26 and #13–#25 while main
+stays `beff25a`. PR #27: https://github.com/PaytonBlevins/YearAfter/pull/27 targets main, depends on #13–#26, and is mergeable when checked. Implementation `867086f` published; CI 165 fails the same 22 historical-note format checks, verified against logs; install passes and later gates skip. Docs-closeout CI will be unobserved. P16 and life-event wording wait for Payton.
