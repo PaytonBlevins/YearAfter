@@ -48,6 +48,13 @@
  * `business-events.ts`.
  */
 
+import {
+  supplierTerms,
+  SUPPLIER_EFFECTS,
+  type SupplierGrade,
+  type SupplierAgreement,
+  type SupplierSearch,
+} from './suppliers';
 import type { BusinessType } from '@yearafter/content';
 import { cents, dollars, type Money } from '@yearafter/core';
 import type { MarketState } from './investments';
@@ -93,24 +100,12 @@ export const PAYROLL_EFFECTS: Readonly<
 /** The share of a year's pay it costs to replace somebody who left. */
 export const REPLACEMENT_SHARE = 0.25;
 
-/** Spec 393: a supplier is a choice of quality against cost, and nothing else. */
-export type SupplierGrade = 'budget' | 'standard' | 'premium';
-
-export const SUPPLIER_GRADES: readonly SupplierGrade[] = ['budget', 'standard', 'premium'];
-
-export const SUPPLIER_LABELS: Readonly<Record<SupplierGrade, string>> = {
-  budget: 'Budget',
-  standard: 'Standard',
-  premium: 'Premium',
-};
-
-export const SUPPLIER_EFFECTS: Readonly<
-  Record<SupplierGrade, { readonly cost: number; readonly quality: number }>
-> = {
-  budget: { cost: 0.78, quality: 0.88 },
-  standard: { cost: 1, quality: 1 },
-  premium: { cost: 1.22, quality: 1.12 },
-};
+export {
+  SUPPLIER_EFFECTS,
+  SUPPLIER_GRADES,
+  SUPPLIER_LABELS,
+  type SupplierGrade,
+} from './suppliers';
 
 /** Spec 400: "Use a slider." Percent of the going price, in steps. */
 export const PRICE_MIN = 70;
@@ -210,6 +205,8 @@ export interface OwnedBusiness {
   /** Percent of the going price. */
   readonly price: number;
   readonly supplier: SupplierGrade;
+  readonly supplierAgreement?: SupplierAgreement;
+  readonly supplierSearch?: SupplierSearch;
   readonly payroll: Payroll;
   readonly staff: number;
   /**
@@ -300,8 +297,12 @@ export const serviceNoticedIn = (type: BusinessType): number =>
   Math.min(1, (type.staff * type.wage) / type.revenue / 0.3);
 
 /** How good what a business offers is. 1 is ordinary. */
-export function qualityOf(type: BusinessType, supplier: SupplierGrade, payroll: Payroll): number {
-  const goods = SUPPLIER_EFFECTS[supplier].quality;
+export function qualityOf(
+  type: BusinessType,
+  supplier: SupplierGrade,
+  payroll: Payroll,
+  goods = SUPPLIER_EFFECTS[supplier].quality,
+): number {
   const service = PAYROLL_EFFECTS[payroll].quality;
   const weight = type.supplier ? type.productShare : 0;
   return goods ** weight * (service ** serviceNoticedIn(type)) ** (1 - weight);
@@ -442,7 +443,12 @@ export function businessYear(
   // One owner can only be at one door.
   const hands = input.hands * locationAttention(locations);
   const price = business.price / 100;
-  const quality = qualityOf(type, business.supplier, business.payroll);
+  const quality = qualityOf(
+    type,
+    business.supplier,
+    business.payroll,
+    supplierTerms(business).quality,
+  );
 
   const modifiers = input.modifiers ?? NO_MODIFIERS;
   const economy = economyFor(input.market, type.cyclical);
@@ -470,7 +476,7 @@ export function businessYear(
 
   const sold = Math.min(demand, capacity);
   const revenue = sold * price;
-  const cogs = sold * type.cogs * SUPPLIER_EFFECTS[business.supplier].cost * modifiers.cogs;
+  const cogs = sold * type.cogs * supplierTerms(business).cost * modifiers.cogs;
   const labor = laborCostFor(type, business.staff, business.payroll);
   const overhead =
     type.overhead * (1 + BRANCH_OVERHEAD_SHARE * (locations - 1)) * modifiers.overhead;

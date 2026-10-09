@@ -36,7 +36,7 @@ function collectionSave() {
 describe('P8 — old and new catalog IDs in unchanged save v46', () => {
   it('round trips all 55 watches including existing holdings and the $20m model', () => {
     const save = collectionSave();
-    expect(CURRENT_SAVE_VERSION).toBe(48);
+    expect(CURRENT_SAVE_VERSION).toBe(49);
     expect(save.valuables).toHaveLength(55);
     const result = migrateSave(JSON.parse(JSON.stringify(save)));
     if (!result.ok) throw Error(result.error.kind);

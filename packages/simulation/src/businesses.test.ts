@@ -186,7 +186,8 @@ describe('0601 — running one', () => {
   });
 
   it('changes the supplier and the payroll level', () => {
-    expect(ok(setSupplier(state, id, 'premium')).businesses[0]!.supplier).toBe('premium');
+    expect(setSupplier(state, id, 'premium')).toEqual({ ok: false, error: 'no-such-choice' });
+    expect(state.businesses[0]!.supplier).toBe('standard');
     expect(ok(setPayroll(state, id, 'bigBucks')).businesses[0]!.payroll).toBe('bigBucks');
   });
 

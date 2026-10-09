@@ -66,7 +66,7 @@ import {
   locationAttention,
   locationsOf,
   luckFrom,
-  modifiersFor,
+  supplierModifiers,
   newBusiness,
   ownerFactor,
   portfolioWorth,
@@ -623,11 +623,12 @@ export const nudgePrice = (state: GameState, id: string, steps: number) =>
     price: clampPrice(business.price + steps * PRICE_STEP),
   }));
 
-/** Spec 393: a supplier is quality against cost. A business with nothing to buy has no choice to make. */
-export const setSupplier = (state: GameState, id: string, supplier: SupplierGrade) =>
-  patch(state, id, (business, type) =>
-    type.supplier ? { ...business, supplier } : 'no-such-choice',
-  );
+/** P12: deprecated grade setter cannot bypass the named pitch acceptance command. */
+export const setSupplier = (
+  state: GameState,
+  id: string,
+  _supplier: SupplierGrade,
+): Result<GameState, ChoiceError> => patch(state, id, () => 'no-such-choice');
 
 /** Spec 393's Low / Medium / High / Big Bucks. */
 export const setPayroll = (state: GameState, id: string, payroll: Payroll) =>
@@ -1109,7 +1110,7 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
       shock: normalFrom(`${input.seed}:${business.id}:${input.year}:shock`),
       stat: input.stat(type),
       hands,
-      modifiers: modifiersFor(happened),
+      modifiers: supplierModifiers(business, happened),
     });
     const rival = rivalAfter(business.rival, happened, type, input.year, mixedUnit(`${key}:bite`));
     const reputation = Math.max(0, Math.min(100, result.reputation + reputationChangeOf(happened)));

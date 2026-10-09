@@ -61,3 +61,5 @@ export * from './business-rescue';
 export * from './lifestyle';
 
 export * from './gig-income';
+
+export * from './suppliers';

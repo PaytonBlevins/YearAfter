@@ -1720,24 +1720,27 @@ nineteen-year extension. Same-object post-call RNG comparisons hide draws; immut
 before-call snapshots now protect that boundary. Seven inherited generator mismatches,
 22 old-note format failures, native checks and unavailable Project mirroring remain open.
 
-### Playtest P12 — measured supplier-pitch proposal (9 October 2026 UTC)
+### Playtest P12 — approved supplier pitches built (9 October 2026 UTC)
 
-Authorized and separately claimed on `feat/playtest-p12-supplier-pitches`; follows
-P11 #23 after refreshing main (`beff25a`). Measured 20 supplier-using types, all 60
-real grade commands, 3,000 counterfactual pitches across those types and 240,000 actual
-weighted event-years. Proposed five free searches per owned business/world-year, one
-pitch at a time, bounded independent price/quality quotes and three loyalty traits
-softening only the existing supplier-hike surcharge 0%/25%/50%. Keep legacy economics,
-annual goods billing, event odds and payroll/price/expansion/P1 rules. Details and
-approval questions: `playtest-p12-supplier-pitches.md`. Save v49 proposed, not reserved;
-current v48. No production changes; P13–P16 and life-event wording wait.
+Payton approved all proposed terms, including per-business five-search quota shared
+across branches. Save v49 separately reserved before production work on
+`feat/playtest-p12-supplier-pitches`, stacked on P11 #23 while refreshed main remains
+`beff25a`. Built one fictional named pitch, Accept/Pass/Search, fixed accepted quotes,
+low/medium/high loyalty softening only the supplier-hike surcharge 0%/25%/50%, and
+spoken owned-screen/store/autosave. Current generic suppliers retain old economics;
+old unrestricted grade command now refuses. Preserve contracts and usage through
+acquisition/inheritance, reset search availability next year without replacing terms.
+Actual production commands reproduce 60,000 quote cases and 12,000 reconciled annual
+settlements. 3,139 tests and all 15 typechecks pass; 26 mutations caught after one
+stale-Pass test repair. Details/final verification/PR: `playtest-p12-supplier-pitches.md`.
+P13–P16 and life-event wording wait.
 
 ### Found by P12
 
-There is no loyalty or individual supplier today. The five-search requirement does
-not specify per-business versus shared-owner scope. Supplier price is a COGS factor,
-not a signup invoice. Small quality/cost changes can move a whole worker and create
-large individual profit changes even when the typical uplift is modest; don't hide
-that with an average or a promise of profit. Existing agreements must survive new
-years without a compulsory reroll. Baseline generator/old-note format failures,
-native checks and unavailable Project mirroring remain open.
+Payton settled the ambiguous quota scope per business. Supplier price is a per-unit
+COGS factor, not a signup invoice. Small quality/cost changes can move a whole worker;
+individual operating profit falls as well as rises. Median best-five perfect-information
+bound is only 0.420 mature-revenue points on the production sample; it is not a promised
+return. Conditional hike protection is not an annual rebate. A replaced Pass ID needs
+its own negative test while a new pitch is pending. Seven inherited generator mismatches,
+22 old-note format failures, native checks and unavailable Project mirroring remain open.

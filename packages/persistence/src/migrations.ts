@@ -13,6 +13,7 @@ import { businessRescueOk } from './business-rescue-validation';
 import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
 import {
+  savedSupplierRecordsOk,
   SUBSISTENCE,
   savedWatchWorkAllowed,
   isLifestyleTier,
@@ -1015,6 +1016,8 @@ const migrations: Readonly<Record<number, Migration>> = {
   46: (save) => ({ ...save, version: 47 }),
   /** P11 v47 -> v48: no extra service was paid for; no changes or RNG draws. */
   47: (save) => ({ ...save, version: 48 }),
+  /** P12: no pitch, loyalty or fee is invented for existing holdings. */
+  48: (save) => ({ ...save, version: 49 }),
   /** P7 v45 -> v46: no goal existed before; no invented goal and no RNG. */
   45: (save) => {
     const { cashGoal: _future, ...prior } = save;
@@ -1413,7 +1416,10 @@ export function validateCurrentSave(
         );
       })),
     // Ticket 0601. And for what is owned and running.
-    require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
+    require('businesses', candidate['businesses'], Array.isArray(candidate['businesses']) &&
+      candidate['businesses'].every((business: unknown) =>
+        savedSupplierRecordsOk(business, Number(world?.['year'])),
+      )),
     require('businessRescue', candidate['businessRescue'], businessRescueOk(candidate)),
     // Ticket 0605. And for the private deals.
     require('deals', candidate['deals'], Array.isArray(candidate['deals'])),

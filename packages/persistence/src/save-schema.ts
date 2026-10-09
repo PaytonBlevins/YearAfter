@@ -53,7 +53,7 @@ import type { SaveId } from '@yearafter/core';
 /** P7: explicit purchase savings goal; old lives migrate with no goal. */
 /** P10: optional paid aftermarket watch work; legacy values stay unchanged. */
 /** P11: optional once-paid preventive car service, expires after the next advance. */
-export const CURRENT_SAVE_VERSION = 48;
+export const CURRENT_SAVE_VERSION = 49;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -187,7 +187,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 48;
+  readonly version: 49;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;

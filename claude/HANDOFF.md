@@ -181,17 +181,20 @@ Details are in the ticket doc. Stack follows P10
 #22 while main remains `beff25a`. Native checks/Project mirroring open. P12–P16 and
 life-event wording wait for Payton.
 
-**P12 measurement update (9 October UTC):** Payton authorized P12. Separately claimed
-`feat/playtest-p12-supplier-pitches` before measurement, after refreshing main; stacked
-on P11 #23 while main remains `beff25a`. Twenty types use suppliers; existing grades
-switch freely and there is no loyalty. Measured all three grades/real commands, 3,000
-counterfactual pitches across all twenty types, and 240,000 weighted event-years.
-Proposed five free searches per business/world-year (scope needs approval), one pitch
-at a time, small independent quote variation, and Low/Medium/High loyalty softening
-only supplier-hike surcharges 0%/25%/50%. No ongoing discount or signing fee. Current
-Suppliers section gains current/pitched contracts and Accept/Pass/Search; save v49
-proposed, not reserved. Details: `playtest-p12-supplier-pitches.md`. Await approval
-before production edits; P13–P16/life-event wording wait. Native checks/Project mirroring open.
+**P12 implementation update (9 October UTC):** Payton approved the entire proposal,
+including five free searches per owned business/world year, shared across its branches.
+Save v49 separately reserved before implementation (`d9a7418`); P11 owns v48. Built
+one named pitch, Accept/Pass/Search, persisted accepted quality/cost/loyalty, only-hike
+surcharge protection, spoken refusals and real owned-screen/store/autosave. Old free
+grade command now refuses. Legacy economics, ordinary goods billing, event selection,
+P1 rescue, payroll/pricing/expansion and TICKET 0708 remain intact. Production reproduces
+60,000 actual search/accept cases and quote counterfactuals plus 12,000 reconciled
+annual settlements. All 15 typechecks and 3,139 tests pass; 26 sabotage mutations
+caught after fixing one stale-Pass test gap, with exact restored hashes. Details:
+`playtest-p12-supplier-pitches.md`. Stacked on P11 #23 while main remains `beff25a`.
+Seven inherited catalog mismatches and 22 old-note formatting failures remain;
+final verify/PR/CI check recorded in the ticket. Native checks/Project mirroring open.
+P13–P16 and life-event wording wait for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

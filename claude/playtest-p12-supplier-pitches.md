@@ -1,10 +1,11 @@
 # Playtest P12 — measured supplier-pitch proposal
 
-Status: Payton authorized P12 on 8 October local / 9 October 2026 UTC. Separately
-claimed and published before measurement on `feat/playtest-p12-supplier-pitches`.
-Refreshed/rebased main remains `beff25a`; stacked on P11 PR #23. Proposal only:
-no production code, save or catalog changes yet. Current save v48; v49 proposed,
-not reserved. P13–P16 and life-event wording wait.
+Status: Payton approved the complete proposal on 8 October local / 9 October
+2026 UTC, including per-business quotas. Built on `feat/playtest-p12-supplier-pitches`,
+stacked on P11 PR #23 while refreshed main remains `beff25a`. Save v49 was reserved
+in separate published commit `d9a7418` before production edits. P13–P16 and
+life-event wording wait. The measured pre-approval proposal is retained below;
+implementation/results supersede its approval-pending statements.
 
 ## Requirement and scope
 
@@ -68,11 +69,11 @@ No grade wins everywhere. Prices were also swept across the existing 70–140 sl
 in steps of five; supplier effects interact with price and the manager. P13 owns the
 requested agent/pricing review, so this ticket does not silently retune it.
 
-## Proposed product choice — approval required
+## Approved product choices
 
 - **Five free searches per owned business per world year**, shared by all its branches.
-  This per-business interpretation needs Payton's approval: the brief gives five per
-  year without specifying whether owners with multiple businesses share one quota.
+  Payton approved the per-business interpretation, including separate quotas for
+  owners with multiple businesses.
   Opening or loading the screen never consumes a search. An accepted supplier is not
   another search. Only a successful request for a new pitch increments the counter.
 - Search presents exactly one named fictional supplier. Accept, pass or search again;
@@ -194,3 +195,101 @@ unchanged. P11's final baseline is 3,080 tests/15 typechecks passing, seven inhe
 generator mismatches and 22 historical-note formatting failures; CI confirms the
 format failures and skips later gates. Native checks and unavailable Claude Project
 mirroring remain open. No catalog or old-note reformat is included.
+
+## Implemented engine, screen and save
+
+Public `searchSupplier`, `acceptSupplier` and `passSupplier` return typed refusals
+and an updated game state. The search record stores one offer and successful usage;
+viewing uses a read-only current-year reader. ID binds business/year/search ordinal.
+Search and acceptance leave bank, stats, reputation and domain streams unchanged.
+An unrelated business has its own quota; every branch of the same business shares it.
+Dead/minor/foreign/unsupported/rescue-pending requests refuse before mutation.
+The deprecated `setSupplier` now refuses grade changes rather than exposing a free
+bypass. Its old API-specific assertion was changed to the approved refusal contract;
+finance economic tests are preserved. A2 tests still cover all three grades’ cost,
+quality/customer tradeoffs and staff wording, now through current-pitch acceptance.
+
+`businessYear` reads actual accepted goods quality and COGS cost. Annual simulation
+applies loyalty only when the selected event ID is `supplier-hike`; all other
+modifiers, event weights and settlement/P1 rescue rules stay intact. Current generic
+suppliers use the old grade anchors with no loyalty. Accepted agreements survive
+annual advance, acquisitions and actual descendant continuation; same-world-year
+usage is preserved. Suppliers are fictional named wholesalers, not real endorsements.
+
+The owned business Suppliers section shows current and pitched name/grade, relative
+supply cost, goods quality, loyalty and what it protects. Search/Accept/Pass call
+real store commands and autosave; quota and stale refusals use spoken language.
+There is no up-front invoice or card selector for free selection. Actual goods
+remain an annual business expense. The screen has no supplier section for unsupported
+types and does not make profit promises.
+
+Save v49 keeps optional `supplierAgreement` and `supplierSearch` on each held
+business. A pure v48 migration grants no contract, loyalty, spending or search.
+Validation enforces grade/rounded quote bounds, named IDs, years, successful count,
+current pending ordinal and no simultaneous accepted/pending ID. Retired legacy
+business types remain readable and refuse new searches. Current-version expectations
+in earlier save tests were advanced to v49 without changing their old input fixtures.
+
+## Production calibration after approval
+
+Scratch harness uses two disjoint groups of 300 seeds, actual opening of each of
+the 20 relevant types, real search/accept commands and stable same-business keys.
+Five pitches per seed are applied to all types: **60,000 search/accept cases**,
+**60,000 exact matches** to the approved algebraic quote counterfactual, plus
+**12,000 annual settlements**. Opening uses funded adult access fixtures; the
+mature kernel normalizes luck/pay/price/location/reputation and lets the manager
+respond for 40 iterations. These are operating probes, not a forecast of household
+wealth or survival. Each command checks unchanged money and before-call RNG;
+annual payouts are posted and reconciled, with shortfalls retained for explicit P1 review.
+
+| Measure                                                          | Group A          | Group B          |
+| ---------------------------------------------------------------- | ---------------- | ---------------- |
+| Budget / Standard / Premium pitches                              | 547 / 488 / 465  | 497 / 487 / 516  |
+| Five-pitch sequences without Budget                              | 31/300           | 40/300           |
+| High-loyalty pitches                                             | 503/1,500        | 539/1,500        |
+| Median same-grade profit shift, mature-revenue percentage points | 0.087            | 0.118            |
+| Individual profit shift range, same units                        | −9.320 to +8.964 | −9.228 to +9.246 |
+| Median perfect-information best-five bound above best old grade  | 0.420            | 0.420            |
+| Largest best-five bound                                          | 5.645            | 5.645            |
+| Median conditional 7.5% hike operating-profit protection         | $3,027           | $4,388           |
+
+The bound permits retaining the best legacy grade and knows future operating
+results; it is not a promised player return. Conditional hike protection is measured
+only when a hike happens, with mature manager response; it is not an annual discount.
+The pre-approval 240,000 weighted event contexts still establish hike rarity; selection
+weights are unchanged and real weighted-hike annual tests cover all three loyalties.
+Production keys include the business identity, so these seed outputs intentionally
+supersede the proposal’s isolated counterfactual sample rather than pretending its
+previous exact distribution was a contractual guarantee.
+
+## Sabotage verification
+
+Tar backup preceded mutation; every mutated source was restored and both MD5 and
+SHA-256 checked. **26 distinct behavioral defects are caught, none missed after
+repair.** First pass caught 25; allowing Pass with a replaced pitch ID survived.
+The tests already refused stale acceptance but only tested stale Pass after clearing
+the offer. Added an explicit old-ID Pass check while a new offer is pending; rerunning
+that mutation fails. This was a test gap, not a production-code defect left in place.
+
+Caught cases: four searches; six searches; browsing inflates usage; count resets;
+stream RNG consumed; replaced-ID acceptance; replaced-ID Pass; acceptance alters cost;
+acceptance leaves pending; acceptance spends another search; next-year quota never
+resets; goods quality ignored; quoted COGS ignored; loyalty discounts whole bill;
+loyalty shields every event; annual reader drops loyalty; deprecated grade bypass;
+unvaried cost; unvaried quality; dead owner allowed; minor owner allowed; supplier-free
+type allowed; rescue ignored; malformed save accepted; missing store dispatch;
+missing autosave. This is targeted behavioral mutation testing, not exhaustive proof.
+
+## Verification and open checks
+
+All **15 typechecks and 3,139 tests pass** (59 net additions, including updated A2
+coverage). Full `pnpm verify` ran; the first run found two new uncontracted screen
+phrases, corrected to spoken contractions, alongside the seven inherited generator
+mismatches. The final full `pnpm verify` passes all 15 typechecks and all 3,139 tests;
+content validation fails only the seven inherited generator mismatches. PR/CI are
+recorded below when checked.
+Full formatting still reports the same 22 inherited historical notes; changed files
+are formatted. Validator rewrites of the secondary vehicle-mod catalog were restored
+only after semantic equality with HEAD was checked; no catalog rewrite is committed.
+Native/device checks and unavailable Claude Project mirroring remain open. No edits
+to `approved-decisions.md`, TICKET 0708, event wording, P13 or unrelated rules.

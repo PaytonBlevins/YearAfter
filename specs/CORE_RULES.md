@@ -3206,3 +3206,20 @@ Capture an immutable RNG snapshot before calling a command. Comparing returned s
 with the original state after a call can hide an accidental draw when both reference
 the same mutable RNG. Sabotage that boundary explicitly; ordinary financial reconciliation
 and a comparison of the two post-call snapshots do not detect it.
+
+### 13.159 Free searches need a persisted quota and a current-offer identity
+
+A read-only supplier screen must not spend a search. Count only successful commands,
+share the quota across a business's branches, and bind the one pending offer to the
+business/year/search ordinal. Accept or Pass must reject a replaced ID while another
+offer is still pending; checking only an empty offer state misses that defect.
+Keep long-lived accepted terms separate from expiring search history, preserve both
+through buying/inheritance, and disable any older grade setter that bypasses the flow.
+Migrate generic suppliers without free loyalty or a rerolled economic baseline.
+
+Apply price-hike protection to the event's extra surcharge, never to the whole bill
+or unrelated favorable events. Use the actual accepted quality and cost in the annual
+reader. Measure mature operating points with manager/reputation response: a small
+quality change can move a whole worker, so typical improvement and individual losses
+both matter. A best-of-five bound with perfect information is not a promised player
+return, and conditional event savings are not yearly income.

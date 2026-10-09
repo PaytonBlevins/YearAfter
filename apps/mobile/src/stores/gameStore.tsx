@@ -109,7 +109,10 @@ import {
   expandBusiness,
   closeLocation,
   setPrice as setBusinessPrice,
-  setSupplier as setBusinessSupplier,
+  searchSupplier,
+  acceptSupplier,
+  passSupplier,
+  SUPPLIER_ERROR_LABELS,
   setPayroll as setBusinessPayroll,
   hireStaff as hireBusinessStaff,
   letStaffGo as letBusinessStaffGo,
@@ -119,7 +122,7 @@ import {
   type Financing,
 } from '@yearafter/simulation';
 import { type LifestyleTier, EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
-import type { BidTier, Payroll, SupplierGrade } from '@yearafter/finance';
+import type { BidTier, Payroll } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
@@ -231,6 +234,9 @@ interface GameContextValue {
   readonly openABusiness: (typeId: string, finance?: Financing) => void;
   /** Ticket 0603. Buy one that is for sale. A loan is written into the purchase, never paid out as cash. */
   readonly buyABusiness: (listingId: string, finance?: Financing) => void;
+  readonly searchBusinessSupplier: (businessId: string) => void;
+  readonly acceptBusinessSupplier: (businessId: string, pitchId: string) => void;
+  readonly passBusinessSupplier: (businessId: string, pitchId: string) => void;
   readonly tuneBusiness: (businessId: string, change: BusinessChange) => void;
   /** Ticket 0602. Open another location of a business, or close the newest. */
   readonly expandABusiness: (businessId: string, finance?: Financing) => void;
@@ -311,7 +317,6 @@ const GameContext = createContext<GameContextValue | null>(null);
 /** Ticket 0601. The dials on a business, as one value so the store has one action for them. */
 export type BusinessChange =
   | { readonly kind: 'price'; readonly price: number }
-  | { readonly kind: 'supplier'; readonly supplier: SupplierGrade }
   | { readonly kind: 'payroll'; readonly payroll: Payroll }
   | { readonly kind: 'hire' }
   | { readonly kind: 'letGo' }
@@ -952,6 +957,39 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const supplierAction = useCallback(
+    (businessId: string, action: 'search' | 'accept' | 'pass', pitchId = '') => {
+      setState((current) => {
+        if (!current) return current;
+        const result =
+          action === 'search'
+            ? searchSupplier(current, businessId)
+            : action === 'accept'
+              ? acceptSupplier(current, businessId, pitchId)
+              : passSupplier(current, businessId, pitchId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: SUPPLIER_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+  const searchBusinessSupplier = useCallback(
+    (id: string) => supplierAction(id, 'search'),
+    [supplierAction],
+  );
+  const acceptBusinessSupplier = useCallback(
+    (id: string, pitch: string) => supplierAction(id, 'accept', pitch),
+    [supplierAction],
+  );
+  const passBusinessSupplier = useCallback(
+    (id: string, pitch: string) => supplierAction(id, 'pass', pitch),
+    [supplierAction],
+  );
+
   const tuneBusiness = useCallback(
     (businessId: string, change: BusinessChange) => {
       setState((current) => {
@@ -959,15 +997,13 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         const result =
           change.kind === 'price'
             ? setBusinessPrice(current, businessId, change.price)
-            : change.kind === 'supplier'
-              ? setBusinessSupplier(current, businessId, change.supplier)
-              : change.kind === 'payroll'
-                ? setBusinessPayroll(current, businessId, change.payroll)
-                : change.kind === 'hire'
-                  ? hireBusinessStaff(current, businessId)
-                  : change.kind === 'letGo'
-                    ? letBusinessStaffGo(current, businessId)
-                    : setBusinessAutoStaff(current, businessId, change.on);
+            : change.kind === 'payroll'
+              ? setBusinessPayroll(current, businessId, change.payroll)
+              : change.kind === 'hire'
+                ? hireBusinessStaff(current, businessId)
+                : change.kind === 'letGo'
+                  ? letBusinessStaffGo(current, businessId)
+                  : setBusinessAutoStaff(current, businessId, change.on);
         // A dial turned is not news: the screen shows it. Only a refusal speaks.
         if (!result.ok) return current;
         if (saveId) persist(result.value, saveId, settings);
@@ -1767,6 +1803,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       renovateHome,
       openABusiness,
       buyABusiness,
+      searchBusinessSupplier,
+      acceptBusinessSupplier,
+      passBusinessSupplier,
       tuneBusiness,
       expandABusiness,
       closeALocation,
@@ -1848,6 +1887,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       renovateHome,
       openABusiness,
       buyABusiness,
+      searchBusinessSupplier,
+      acceptBusinessSupplier,
+      passBusinessSupplier,
       tuneBusiness,
       expandABusiness,
       closeALocation,
