@@ -250,4 +250,12 @@ fails on the same 22 historical Claude notes; every changed file passes formatti
 The validator rewrites the secondary vehicle-mod catalog; compared parsed values with
 HEAD (identical) and restored exact original bytes. No catalog or generator rewrite
 is committed. TICKET 0708 stays unchanged. Native checks and unavailable Claude Project
-mirroring remain open. PR/CI details are recorded when published; P12–P16 wait.
+mirroring remain open. PR #23 targets main and depends on #13–#22:
+https://github.com/PaytonBlevins/YearAfter/pull/23. Mergeable when checked.
+Implementation commit `c24a5ef`; P12–P16 wait.
+
+Implementation CI run 139 (37866173131), job 113613312823: install succeeds, format
+check fails on the same 22 historical Claude notes shown by the local full check.
+Actual job logs were read; typechecking, unit tests and content validation are skipped
+because formatting exits first. No CI-green claim. A later documentation commit may
+trigger another run; the recorded failure is the implementation run.

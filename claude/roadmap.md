@@ -1706,7 +1706,9 @@ Ordinary bills, accidents, hidden faults, history and loan/modification rules st
 Production reproduces all 4,200 paired paths, with 5–10 extra median remaining years
 for the measured cars. Thirty mutations caught after strengthening one missed RNG
 comparison. Details/final verification/PR: `playtest-p11-car-servicing.md`.
-P12–P16 and life-event wording wait.
+PR #23: https://github.com/PaytonBlevins/YearAfter/pull/23 (main, depends on #13–#22,
+mergeable when checked). Implementation CI 139 fails the same 22 old-note format checks;
+later gates skip. P12–P16 and life-event wording wait.
 
 ### Found by P11
 

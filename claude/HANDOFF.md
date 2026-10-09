@@ -175,7 +175,9 @@ purchases. Details/results: `playtest-p11-car-servicing.md`. Thirty sabotage cas
 caught; one RNG comparison initially missed a draw and was strengthened. No mutations
 retained. All 15 typechecks and 3,080 tests pass (66 new); full verification retains
 seven inherited generator mismatches and formatting 22 old notes. Changed files pass.
-PR/CI status is recorded in the ticket doc. Stack follows P10
+PR #23 targets main and is mergeable when checked:
+https://github.com/PaytonBlevins/YearAfter/pull/23. Implementation CI 139 fails the same 22 old-note format checks; later gates skip.
+Details are in the ticket doc. Stack follows P10
 #22 while main remains `beff25a`. Native checks/Project mirroring open. P12–P16 and
 life-event wording wait for Payton.
 
