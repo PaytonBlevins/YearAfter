@@ -554,12 +554,15 @@ function Elsewhere() {
             : []),
           {
             icon: 'money',
-            title: 'Odd Jobs',
+            title: state.player.age >= 16 ? 'Part-time & Odd Jobs' : 'Odd Jobs',
             subtitle:
               education.gigs.length > 0
                 ? `${education.gigs.length} on the go`
                 : 'What you can do for money at your age',
-            route: { screen: 'gigs', title: 'Odd Jobs' },
+            route: {
+              screen: 'gigs',
+              title: state.player.age >= 16 ? 'Part-time & Odd Jobs' : 'Odd Jobs',
+            },
           },
           /*
             Ticket 0310. RETIREMENT LIVES ON THE CAREER SCREEN, because stopping

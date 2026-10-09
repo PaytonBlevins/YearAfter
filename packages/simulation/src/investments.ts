@@ -36,6 +36,12 @@ import {
   MOST_OF_PAY,
   UNLOCKS_AT,
   advisorFee,
+  advisorReserve,
+  advisorBuyAmount,
+  annualExpenseOf,
+  vehicleLoanPayments,
+  runCardYear,
+  runLoanYear,
   benefitFor,
   canRetire,
   contributeYear,
@@ -61,6 +67,11 @@ import {
 import { findJob, payFor, standingIn } from '@yearafter/careers';
 import { moveMoney, withCash } from './money';
 import type { GameState } from './game-state';
+import { livingEstimateFor } from './lifestyle';
+import { residenceOf } from './rentals';
+import { mortgageLineOf } from './homes';
+import { upkeepOf } from './vehicles';
+import { isInSchool } from '@yearafter/education';
 
 /**
  * Everything owned and owed beyond the cash, for the net-worth line.
@@ -446,6 +457,52 @@ export function dismissAdvisor(state: GameState): GameState {
   return rest as GameState;
 }
 
+/** Current household bills, reusing the settlement calculators without posting money. */
+export function advisorCashFor(state: GameState) {
+  const home = residenceOf(state.homes);
+  const housing = home ? annualExpenseOf(home) + (mortgageLineOf(home)?.payment ?? 0) : 0;
+  const vehicles =
+    vehicleLoanPayments(state.vehicles) +
+    state.vehicles.reduce((sum, v) => sum + upkeepOf(v, state.world.year), 0);
+  const loans = runLoanYear(
+    state.loans.filter(
+      (l) => !l.businessId || !state.businesses.some((b) => b.id === l.businessId),
+    ),
+    Number.MAX_SAFE_INTEGER,
+    isInSchool(state.education),
+  ).charges.reduce((sum, c) => sum - Number(c.amount) / 100, 0);
+  const cards = runCardYear(state.cards, Number.MAX_SAFE_INTEGER).charges.reduce(
+    (sum, c) => sum - Number(c.amount) / 100,
+    0,
+  );
+  const annualBills =
+    livingEstimateFor(state, state.household.lifestyle) + housing + vehicles + loans + cards;
+  const reserve = advisorReserve(annualBills, state.cashGoal ?? 0);
+  return {
+    annualBills,
+    billReserve: advisorReserve(annualBills),
+    goal: state.cashGoal ?? 0,
+    reserve,
+    spare: Math.max(0, Number(state.player.cash) / 100 - reserve),
+  };
+}
+
+export type CashGoalError = 'not-alive' | 'too-young' | 'pending-choice' | 'invalid-amount';
+export const CASH_GOAL_ERROR_LABELS: Record<CashGoalError, string> = {
+  'not-alive': 'This life has ended.',
+  'too-young': "You can set a savings goal when you're 18.",
+  'pending-choice': 'Answer the waiting question first.',
+  'invalid-amount': 'Enter a whole dollar amount of zero or more.',
+};
+export function setCashGoal(state: GameState, amount: number): Result<GameState, CashGoalError> {
+  if (!state.player.alive) return err('not-alive');
+  if (state.player.age < 18) return err('too-young');
+  if (state.pending.length > 0) return err('pending-choice');
+  if (!Number.isSafeInteger(amount) || amount < 0) return err('invalid-amount');
+  const { cashGoal: _old, ...rest } = state;
+  return ok(amount === 0 ? rest : { ...state, cashGoal: amount });
+}
+
 /** This year's advice, or nothing when nobody is hired. */
 export function adviceFor(state: GameState): readonly Recommendation[] {
   if (!state.advisorId) return [];
@@ -455,6 +512,8 @@ export function adviceFor(state: GameState): readonly Recommendation[] {
     cash: Math.round(Number(state.player.cash) / 100),
     year: state.world.year,
     advisorId: state.advisorId,
+    annualBills: advisorCashFor(state).annualBills,
+    cashGoal: state.cashGoal,
   });
 }
 
@@ -487,44 +546,82 @@ export function actOnAdvice(
   const rec = adviceFor(state).find((row) => row.id === recommendationId);
   if (!rec) return err('noSuchInstrument');
 
+  if (!state.player.alive || state.pending.length > 0) return err('noCash');
   if (rec.verb === 'buy') {
-    // A recommendation with no instrument means "put it somewhere sensible",
-    // and the sensible somewhere is the broadest fund in the catalog rather
-    // than a pick this advisor did not make.
-    const target = rec.instrumentId ?? broadestFund()?.id;
-    if (!target) return err('noSuchInstrument');
-    const cash = Math.round(Number(state.player.cash) / 100);
-    return invest(state, target, Math.min(cash, rec.amount ?? cash));
+    const target = rec.instrumentId ?? 'fd.broadindex';
+    const amount = Math.min(rec.amount ?? 0, advisorBuyAmount(advisorCashFor(state).spare));
+    if (amount <= 0) return err('noCash');
+    return invest(state, target, amount);
   }
-
   if (rec.verb === 'reduce' || rec.verb === 'sell' || rec.verb === 'rebalance') {
-    const target = rec.instrumentId ?? biggestHolding(state);
-    if (!target) return err('nothingHeld');
-    const price = priceOf(state.prices, target);
-    if (price <= 0) return err('noSuchInstrument');
-    const wanted = rec.amount ?? 0;
-    if (wanted <= 0) return err('notEnoughForOneUnit');
-    const holding = state.portfolio.find((row) => row.instrumentId === target);
-    if (!holding) return err('nothingHeld');
-    return divest(state, target, Math.min(holding.units, (wanted * 100) / price));
+    let targets = state.portfolio.filter(
+      (h) => !rec.instrumentId || h.instrumentId === rec.instrumentId,
+    );
+    if (rec.reason === 'noFloor')
+      targets = targets.filter((h) => {
+        const kind = findInstrument(h.instrumentId)?.kind;
+        return kind === 'crypto' || kind === 'penny';
+      });
+    if (rec.reason === 'concentrated') {
+      const sectors = new Map<string, number>();
+      for (const h of state.portfolio) {
+        const sector = findInstrument(h.instrumentId)?.sector;
+        if (sector)
+          sectors.set(
+            sector,
+            (sectors.get(sector) ?? 0) + h.units * priceOf(state.prices, h.instrumentId),
+          );
+      }
+      const worst = [...sectors].sort((a, b) => b[1] - a[1])[0]?.[0];
+      targets = targets.filter((h) => findInstrument(h.instrumentId)?.sector === worst);
+    }
+    targets = [...targets].sort(
+      (a, b) =>
+        b.units * priceOf(state.prices, b.instrumentId) -
+        a.units * priceOf(state.prices, a.instrumentId),
+    );
+    let next = state,
+      remaining = rec.amount ?? 0,
+      raised = 0;
+    const sources: string[] = [];
+    for (const h of targets) {
+      if (remaining <= 0) break;
+      const price = priceOf(next.prices, h.instrumentId);
+      if (price <= 0) continue;
+      const sale = divest(next, h.instrumentId, Math.min(h.units, (remaining * 100) / price));
+      if (!sale.ok) continue;
+      const money = (Number(sale.value.state.player.cash) - Number(next.player.cash)) / 100;
+      raised += money;
+      remaining -= money;
+      next = sale.value.state;
+      sources.push(findInstrument(h.instrumentId)?.name ?? h.instrumentId);
+    }
+    if (raised <= 0) return err('nothingHeld');
+    // The approved 15% limit also applies to advisor reinvestment of sale proceeds.
+    const transfer = Math.min(raised, advisorBuyAmount(advisorCashFor(next).spare));
+    let invested = 0;
+    if (transfer > 0) {
+      const buy = invest(next, 'fd.broadindex', transfer);
+      if (buy.ok) {
+        invested = (Number(next.player.cash) - Number(buy.value.state.player.cash)) / 100;
+        next = buy.value.state;
+      }
+    }
+    return ok({
+      state: next,
+      title: 'Allocation changed',
+      good: true,
+      body: `${sources.join(', ')} sold for ${money(raised)}. ${money(invested)} moved into Broad Market Index; ${money(raised - invested)} stayed in cash.`,
+    });
   }
-
-  // `hold` is the one with nothing to do, and saying so beats a dead button.
   return err('nothingHeld');
 }
 
-/** The fund with the widest spread of things inside it. */
-const broadestFund = (): Instrument | undefined =>
-  instrumentsOfKind('fund')
-    .slice()
-    .sort((a, b) => a.spread - b.spread)[0];
-
-const biggestHolding = (state: GameState): string | undefined =>
-  [...state.portfolio].sort(
-    (a, b) =>
-      b.units * priceOf(state.prices, b.instrumentId) -
-      a.units * priceOf(state.prices, a.instrumentId),
-  )[0]?.instrumentId;
+/** A pure preview of the same command, including its real source and destination. */
+export function advicePreviewFor(state: GameState, id: string): string | undefined {
+  const outcome = actOnAdvice(state, id);
+  return outcome.ok ? outcome.value.body : undefined;
+}
 
 /* -------------------------------------------------------------------------- */
 /* Ticket 0310 — retirement                                                    */

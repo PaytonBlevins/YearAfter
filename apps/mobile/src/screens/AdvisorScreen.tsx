@@ -23,7 +23,7 @@
  */
 
 import { Fragment, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import {
   ADVISORS,
   VERB_LABELS,
@@ -34,7 +34,7 @@ import {
   willTakeYou,
   type Recommendation,
 } from '@yearafter/finance';
-import { adviceFor, feeThisYear } from '@yearafter/simulation';
+import { adviceFor, advisorCashFor, advicePreviewFor, feeThisYear } from '@yearafter/simulation';
 import {
   ActionButton,
   Card,
@@ -50,16 +50,65 @@ import { colors, radii, spacing, typography } from '../theme/theme';
 const money = (amount: number): string => `$${Math.round(amount).toLocaleString('en-US')}`;
 
 export function AdvisorScreen() {
-  const { state, hireAdvisorWith, dismissAdvisorNow, actOnAdviceWith } = useGame();
+  const { state, hireAdvisorWith, dismissAdvisorNow, actOnAdviceWith, setPurchaseGoal } = useGame();
   const [firing, setFiring] = useState(false);
+  const [goal, setGoal] = useState('');
   if (!state) return null;
 
   const held = Math.round(Number(portfolioWorth(state.prices, state.portfolio)) / 100);
   const advisor = state.advisorId ? findAdvisor(state.advisorId) : undefined;
 
+  const cash = advisorCashFor(state);
+  const goalSection = (
+    <>
+      <SectionHeading>Saving for a purchase</SectionHeading>
+      <Card>
+        <View style={styles.panel}>
+          <Text style={styles.panelBody}>
+            {money(cash.billReserve)} kept for six months of bills (at least $12,000). Your purchase
+            goal protects {money(cash.goal)} more. That leaves {money(cash.spare)} spare.
+          </Text>
+          <Text style={styles.panelBody}>
+            Each investment suggestion uses 15% of spare cash. You still choose whether to act.
+          </Text>
+          <TextInput
+            accessibilityLabel="Purchase savings goal"
+            keyboardType="number-pad"
+            placeholder="Whole dollar target"
+            value={goal}
+            onChangeText={setGoal}
+            style={{ color: colors.ink, padding: spacing.sm }}
+          />
+          <ActionButton
+            label="Set purchase goal"
+            variant="secondary"
+            onPress={() => {
+              setPurchaseGoal(/^\d+$/.test(goal.trim()) ? Number(goal.trim()) : Number.NaN);
+            }}
+          />
+          {cash.goal > 0 ? (
+            <ActionButton
+              label="Clear purchase goal"
+              variant="secondary"
+              onPress={() => {
+                setPurchaseGoal(0);
+                setGoal('');
+              }}
+            />
+          ) : null}
+          <Text style={styles.panelFoot}>
+            This keeps advice quiet about money you need. It does not block a purchase or make a
+            trade for you.
+          </Text>
+        </View>
+      </Card>
+    </>
+  );
+
   if (!advisor) {
     return (
       <ScrollView contentContainerStyle={styles.content}>
+        {goalSection}
         <SectionHeading>Who you could talk to</SectionHeading>
         <Card>
           {ADVISORS.map((row, index) => {
@@ -99,18 +148,12 @@ export function AdvisorScreen() {
         <Card>
           <View style={styles.panel}>
             <Text style={styles.panelBody}>
-              Across 500 simulated lifetimes of picking your own investments, taking advice ended up{' '}
-              <Text style={styles.strong}>31% ahead at the middle</Text> and{' '}
-              <Text style={styles.strong}>56% ahead at the bad end</Text>. It came out ahead in 87
-              of every 100 lives.
-            </Text>
-            <Text style={styles.panelBody}>
-              Most of that is the boring half — being told you have too much in one sector, or too
-              much in things with no floor. The stock ideas are right about two times in three.
+              They can help you spread risk and keep money for bills and a planned purchase. Company
+              picks are forecasts: they can be wrong. Advice costs money when you hire the paid
+              advisor.
             </Text>
             <Text style={styles.panelFoot}>
-              And the honest part: a character who put everything into one broad fund and never
-              touched it beat every advisor on this screen. That is also true in real life.
+              A broad index is another choice. Paying for advice does not promise a better result.
             </Text>
           </View>
         </Card>
@@ -124,6 +167,7 @@ export function AdvisorScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      {goalSection}
       <SectionHeading>Your advisor</SectionHeading>
       <Card>
         <ListRow
@@ -178,6 +222,7 @@ export function AdvisorScreen() {
               {index > 0 ? <RowDivider /> : null}
               <Advice
                 rec={rec}
+                preview={advicePreviewFor(state, rec.id)}
                 onAct={rec.verb === 'hold' ? undefined : () => actOnAdviceWith(rec.id)}
               />
             </Fragment>
@@ -214,9 +259,8 @@ export function AdvisorScreen() {
       </Card>
 
       <Text style={styles.note}>
-        Nothing here is a promise. The calls about a company are right about two times in three, and
-        the advice about how your money is spread is right every time — because it is a description
-        of what you hold rather than a guess about next year.
+        Nothing here is a promise. Calls about a company can be wrong. Advice about how your money
+        is spread describes what you hold today, rather than guessing about next year.
       </Text>
     </ScrollView>
   );
@@ -231,7 +275,15 @@ export function AdvisorScreen() {
  * guessing. Mixing the two without saying so is how an advisor becomes an
  * oracle.
  */
-function Advice({ rec, onAct }: { rec: Recommendation; onAct?: () => void }) {
+function Advice({
+  rec,
+  onAct,
+  preview,
+}: {
+  rec: Recommendation;
+  onAct?: () => void;
+  preview?: string;
+}) {
   return (
     <View style={styles.advice}>
       <View style={styles.adviceHead}>
@@ -244,6 +296,7 @@ function Advice({ rec, onAct }: { rec: Recommendation; onAct?: () => void }) {
       </View>
 
       <Text style={styles.adviceText}>{rec.text}</Text>
+      {preview ? <Text style={styles.panelFoot}>If you act: {preview}</Text> : null}
 
       {onAct && rec.amount !== undefined && rec.amount > 0 ? (
         <ActionButton

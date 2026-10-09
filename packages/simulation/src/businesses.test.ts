@@ -1,3 +1,8 @@
+import {
+  withBusinessRescue,
+  injectIntoBusinessRescue,
+  declineBusinessRescue,
+} from './business-rescue';
 /**
  * Ticket 0601 acceptance tests — owning a business (simulation side).
  *
@@ -181,7 +186,8 @@ describe('0601 — running one', () => {
   });
 
   it('changes the supplier and the payroll level', () => {
-    expect(ok(setSupplier(state, id, 'premium')).businesses[0]!.supplier).toBe('premium');
+    expect(setSupplier(state, id, 'premium')).toEqual({ ok: false, error: 'no-such-choice' });
+    expect(state.businesses[0]!.supplier).toBe('standard');
     expect(ok(setPayroll(state, id, 'bigBucks')).businesses[0]!.payroll).toBe('bigBucks');
   });
 
@@ -284,20 +290,46 @@ describe('0601 — when it goes wrong', () => {
     stat: () => 10,
   };
 
-  it('puts the owner’s money in to cover a bad year, as a transfer', () => {
+  it('puts the owner’s money in only after choosing the rescue, as a transfer', () => {
     const year = runBusinessesYear({ ...input, available: 5_000_000 });
     expect(year.businesses).toHaveLength(1);
-    const injection = year.transactions.find((row) => row.category === 'property');
+    expect(year.transactions.some((row) => row.amount < 0)).toBe(false);
+    const review = withBusinessRescue(
+      {
+        ...topUp(ADULT, 5_000_000),
+        world: { ...ADULT.world, year: 2001 },
+        businesses: year.businesses,
+      },
+      year.rescues,
+    );
+    const answered = injectIntoBusinessRescue(review, losing.id);
+    expect(answered.ok).toBe(true);
+    if (!answered.ok) throw new Error(answered.error);
+    const injection = answered.value.state.finance.transactions.find((row) =>
+      row.source.includes('keep it going'),
+    );
     expect(injection).toBeDefined();
     expect(Number(injection!.amount)).toBeLessThan(0);
-    expect(year.lines.join(' ')).toMatch(/lost/);
+    expect(year.lines.join(' ')).toMatch(/needs/);
   });
 
-  it('closes the business when the owner cannot cover it, and says so', () => {
+  it('closes the business when the owner declines the rescue, and says so', () => {
     const year = runBusinessesYear({ ...input, available: 0 });
-    expect(year.businesses).toHaveLength(0);
-    expect(year.records.some((record) => record.category === 'business')).toBe(true);
-    expect(year.lines.join(' ')).toMatch(/could not carry on/);
+    expect(year.businesses).toHaveLength(1);
+    const review = withBusinessRescue(
+      { ...ADULT, world: { ...ADULT.world, year: 2001 }, businesses: year.businesses },
+      year.rescues,
+    );
+    const answered = declineBusinessRescue(review, losing.id);
+    expect(answered.ok).toBe(true);
+    if (!answered.ok) throw new Error(answered.error);
+    expect(answered.value.state.businesses).toHaveLength(0);
+    expect(
+      answered.value.state.player.records.some(
+        (record) => record.label === 'Closed The Losing Place',
+      ),
+    ).toBe(true);
+    expect(answered.value.entry.text).toMatch(/Closed The Losing Place/);
   });
 });
 

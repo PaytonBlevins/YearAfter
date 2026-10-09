@@ -12,6 +12,8 @@
 import { Fragment, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
+  businessEconomyVisible,
+  businessEconomyPercent,
   EXPAND_REFUSAL_LABELS,
   MAX_BUSINESSES,
   MAX_LOCATIONS,
@@ -22,7 +24,9 @@ import {
   PRICE_MIN,
   PRICE_STEPS,
   SUPPLIER_LABELS,
-  SUPPLIER_GRADES,
+  supplierTerms,
+  supplierSearchFor,
+  SUPPLIER_SEARCHES,
   BUSINESS_LOAN_REFUSALS,
   businessesValue,
   eventLineFor,
@@ -70,6 +74,13 @@ const SUPPLIER_DESCRIPTIONS: Readonly<Record<SupplierGrade, string>> = {
   premium:
     'Better supplies that cost more. They can help bring customers in, but extra sales may not cover the cost.',
 };
+
+const loyaltyText = (loyalty: 'low' | 'medium' | 'high'): string =>
+  loyalty === 'low'
+    ? 'A price hike still applies in full.'
+    : loyalty === 'medium'
+      ? 'Softens a price hike’s extra charge by 25%. It doesn’t cut the ordinary goods bill.'
+      : 'Softens a price hike’s extra charge by 50%. It doesn’t cut the ordinary goods bill.';
 
 /* -------------------------------------------------------------------------- */
 /* Paying for it (ticket 0603)                                                 */
@@ -211,6 +222,7 @@ export function BusinessesScreen() {
               const view = viewOf(state, business);
               if (!view) return null;
               const last = business.last;
+
               return (
                 <Fragment key={business.id}>
                   {index > 0 ? <RowDivider /> : null}
@@ -415,8 +427,17 @@ function Choices<T extends string>({
 export function BusinessScreen() {
   const scroll = useRef<ScrollView>(null);
   const scrollToDecision = useRef(false);
-  const { state, tuneBusiness, sellABusiness, closeABusiness, expandABusiness, closeALocation } =
-    useGame();
+  const {
+    state,
+    tuneBusiness,
+    searchBusinessSupplier,
+    acceptBusinessSupplier,
+    passBusinessSupplier,
+    sellABusiness,
+    closeABusiness,
+    expandABusiness,
+    closeALocation,
+  } = useGame();
   const { current, pop } = useNavigation();
   const [panel, setPanel] = useState<
     'valuation' | 'sell' | 'close' | 'expand' | 'shrink' | undefined
@@ -433,6 +454,9 @@ export function BusinessScreen() {
   }
   const { type } = view;
   const last = business.last;
+  const supplierSearch = supplierSearchFor(business, state.world.year);
+  const pitch = supplierSearch.pending;
+  const terms = supplierTerms(business);
   const hands = handsFor(state);
   const appraisal = panel === 'valuation' ? appraise(state, business.id) : undefined;
   const offer = panel === 'sell' ? offerFor(state, business.id) : undefined;
@@ -524,13 +548,13 @@ export function BusinessScreen() {
             wrap
           />
         ) : null}
-        {last?.economy && Math.abs(last.economy - 1) >= 0.03 ? (
+        {last?.economy !== undefined && businessEconomyVisible(last.economy) ? (
           <ListRow
             title="The economy"
             subtitle={
               last.economy < 1
-                ? `Took about ${Math.round((1 - last.economy) * 100)}% of your customer demand last year.`
-                : `Brought you about ${Math.round((last.economy - 1) * 100)}% more customer demand last year.`
+                ? `Took about ${businessEconomyPercent(last.economy)}% of your customer demand last year.`
+                : `Brought you about ${businessEconomyPercent(last.economy)}% more customer demand last year.`
             }
             affordance="none"
             wrap
@@ -558,19 +582,84 @@ export function BusinessScreen() {
             it. The finished product or service also depends on your staff.
           </Text>
           <Card>
-            {SUPPLIER_GRADES.map((supplier, index) => (
-              <Fragment key={supplier}>
-                {index > 0 ? <RowDivider /> : null}
+            <ListRow
+              title={business.supplierAgreement?.name ?? 'Current supplier'}
+              subtitle={`${SUPPLIER_LABELS[business.supplier]}. ${SUPPLIER_DESCRIPTIONS[business.supplier]}`}
+              affordance="none"
+              wrap
+            />
+            <ListRow
+              title="Supply price"
+              subtitle={`${Math.round(terms.cost * 100)}% of ordinary supplies. Your bill depends on how much you sell.`}
+              affordance="none"
+              wrap
+            />
+            <ListRow
+              title="Goods quality"
+              value={`${Math.round(terms.quality * 100)}% of ordinary supplies`}
+              affordance="none"
+              wrap
+            />
+            <ListRow
+              title="Loyalty"
+              subtitle={
+                business.supplierAgreement
+                  ? `${business.supplierAgreement.loyalty[0]!.toUpperCase()}${business.supplierAgreement.loyalty.slice(1)}. ${loyaltyText(business.supplierAgreement.loyalty)}`
+                  : 'No agreed protection against a supplier price hike.'
+              }
+              affordance="none"
+              wrap
+            />
+            <ListRow
+              title={pitch ? 'Search again' : 'Search for a supplier'}
+              subtitle="A search is free and brings one pitch. Accepting has no signing fee."
+              value={`${SUPPLIER_SEARCHES - supplierSearch.used} searches left`}
+              affordance="action"
+              disabled={supplierSearch.used >= SUPPLIER_SEARCHES}
+              onPress={() => searchBusinessSupplier(business.id)}
+              wrap
+            />
+            {pitch ? (
+              <>
+                <RowDivider />
                 <ListRow
-                  title={SUPPLIER_LABELS[supplier]}
-                  subtitle={SUPPLIER_DESCRIPTIONS[supplier]}
-                  value={business.supplier === supplier ? 'Chosen' : 'Choose'}
-                  affordance="action"
-                  onPress={() => tuneBusiness(business.id, { kind: 'supplier', supplier })}
+                  title={pitch.name}
+                  subtitle={`${SUPPLIER_LABELS[pitch.grade]}. ${SUPPLIER_DESCRIPTIONS[pitch.grade]}`}
+                  affordance="none"
                   wrap
                 />
-              </Fragment>
-            ))}
+                <ListRow
+                  title="Quoted supply price"
+                  value={`${Math.round(pitch.cost * 100)}% of ordinary supplies`}
+                  affordance="none"
+                  wrap
+                />
+                <ListRow
+                  title="Quoted goods quality"
+                  value={`${Math.round(pitch.quality * 100)}% of ordinary supplies`}
+                  affordance="none"
+                  wrap
+                />
+                <ListRow
+                  title="Supplier loyalty"
+                  subtitle={`${pitch.loyalty[0]!.toUpperCase()}${pitch.loyalty.slice(1)}. ${loyaltyText(pitch.loyalty)}`}
+                  affordance="none"
+                  wrap
+                />
+                <ListRow
+                  title="Accept this supplier"
+                  subtitle="Keep these quoted terms until you choose another supplier. Goods are paid for as the business sells them."
+                  affordance="action"
+                  onPress={() => acceptBusinessSupplier(business.id, pitch.id)}
+                  wrap
+                />
+                <ListRow
+                  title="Pass on this pitch"
+                  affordance="action"
+                  onPress={() => passBusinessSupplier(business.id, pitch.id)}
+                />
+              </>
+            ) : null}
           </Card>
         </>
       ) : null}

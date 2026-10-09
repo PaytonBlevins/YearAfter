@@ -532,16 +532,16 @@ export function channelYear(input: {
   }
   const target = targetAudience(channel, input.quality, input.year, input.boost ?? 1);
   const posted = channel.publishing?.year === input.year - 1 ? channel.publishing.count : 0;
+  // P3: posting less slows new spread, but must not preserve an old viral spike.
+  const spreadShare = target < channel.audience ? 1 : Math.min(1, posted / POSTS_PER_YEAR);
   const drifted = input.manual
     ? posted > 0
       ? channel.audience +
-        Math.round(
-          (nextAudience(channel, target) - channel.audience) * Math.min(1, posted / POSTS_PER_YEAR),
-        )
+        Math.round((nextAudience(channel, target) - channel.audience) * spreadShare)
       : Math.round(channel.audience * (1 - platform.churn))
     : nextAudience(channel, target);
-  const gained =
-    input.manual && posted === 0 ? 0 : viralGain(channel, input.quality, input.year, drifted);
+  // Explicit publications already roll for a breakout with the life seed; do not roll twice.
+  const gained = input.manual ? 0 : viralGain(channel, input.quality, input.year, drifted);
   const audience = drifted + gained;
   const average = Math.round((channel.audience + audience) / 2);
   const tier = channel.tier ?? 'standard';

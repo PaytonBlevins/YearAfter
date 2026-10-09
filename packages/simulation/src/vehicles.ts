@@ -40,6 +40,12 @@ import {
 } from '@yearafter/content';
 import { dollars, err, mixedUnit, ok, type Result } from '@yearafter/core';
 import {
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  preventiveServiceCost,
+  type PurchasePayment,
+  type PaymentRefusal,
   DRIVE_FROM_AGE,
   INSPECTION_FEE,
   REPOSSESS_AFTER,
@@ -434,6 +440,81 @@ function line(
     text,
     id: `t:${state.world.year}:${key}`,
     sequence,
+  });
+}
+
+export type ServiceVehicleError =
+  | PaymentRefusal
+  | 'not-alive'
+  | 'too-young'
+  | 'no-such-car'
+  | 'unsupported-car'
+  | 'already-serviced';
+export const SERVICE_VEHICLE_ERROR_LABELS: Readonly<Record<ServiceVehicleError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
+  'not-alive': 'This life has ended.',
+  'too-young': 'You can arrange extra servicing from age 18.',
+  'no-such-car': "You don't own that car any more.",
+  'unsupported-car': "Extra servicing isn't available for this car.",
+  'already-serviced': 'You already paid for extra servicing on this car this year.',
+};
+
+export function vehicleServiceQuote(
+  state: GameState,
+  vehicleId: string,
+): Result<{ readonly cost: number; readonly vehicle: OwnedVehicle }, ServiceVehicleError> {
+  if (!state.player.alive) return err('not-alive');
+  if (state.player.age < DRIVE_FROM_AGE) return err('too-young');
+  const vehicle = state.vehicles.find((car) => car.id === vehicleId);
+  if (!vehicle) return err('no-such-car');
+  const facts = findVehicleTrim(vehicle.trimId);
+  if (!facts) return err('unsupported-car');
+  if (vehicle.service && vehicle.service.year >= state.world.year) return err('already-serviced');
+  return ok({ vehicle, cost: preventiveServiceCost(vehicle, facts, state.world.year) });
+}
+
+/** All gates precede one atomic invoice. Paying restores no condition or past records. */
+export function serviceVehicle(
+  state: GameState,
+  vehicleId: string,
+  payment: PurchasePayment = { kind: 'cash' },
+): Result<BoughtVehicle, ServiceVehicleError> {
+  const quote = vehicleServiceQuote(state, vehicleId);
+  if (!quote.ok) return quote;
+  const { vehicle: held, cost } = quote.value;
+  const title = vehicleTitleOf(held);
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(cost),
+    'vehicle',
+    `Extra preventive service on the ${title}`,
+    payment,
+  );
+  if (!paid.ok) return paid;
+  const vehicle: OwnedVehicle = { ...held, service: { year: state.world.year, cost } };
+  const entry = line(
+    state,
+    `Paid ${money(cost)} for extra preventive servicing on the ${title}.${paymentNote(payment)}`,
+    `car:service:${held.id}`,
+    'passive',
+  );
+  return ok({
+    vehicle,
+    entry,
+    state: {
+      ...state,
+      finance: paid.value.ledger,
+      cards: paid.value.cards,
+      vehicles: state.vehicles.map((car) => (car.id === vehicleId ? vehicle : car)),
+      player: {
+        ...state.player,
+        cash: paid.value.ledger.balance,
+        timeline: appendToTimeline(state.player.timeline, entry),
+      },
+    },
   });
 }
 

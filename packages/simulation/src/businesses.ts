@@ -27,8 +27,13 @@ import {
 } from '@yearafter/character';
 import { BUSINESS_TYPES, findBusinessType, type BusinessType } from '@yearafter/content';
 import { dollars, err, mixedUnit, ok, type Result } from '@yearafter/core';
+import type { BusinessRescueCase } from './business-rescue';
+import { pruneBusinessRescue } from './business-rescue-state';
 import { taxRate } from '@yearafter/careers';
 import {
+  BUSINESS_ECONOMY_LEDGER_THRESHOLD,
+  BUSINESS_ECONOMY_LOSS_THRESHOLD,
+  BUSINESS_ECONOMY_GAIN_THRESHOLD,
   BUSINESS_LOAN_PRODUCTS,
   BUSINESS_LOAN_REFUSALS,
   LISTINGS_PER_YEAR,
@@ -48,6 +53,8 @@ import {
   businessSaleOf,
   businessValueFor,
   businessYear,
+  businessEconomyVisible,
+  businessEconomyPercent,
   clampPrice,
   drawEvent,
   eventLineFor,
@@ -59,7 +66,7 @@ import {
   locationAttention,
   locationsOf,
   luckFrom,
-  modifiersFor,
+  supplierModifiers,
   newBusiness,
   ownerFactor,
   portfolioWorth,
@@ -329,6 +336,7 @@ export function earnedOf(state: GameState): number {
   return Math.round(
     (Number(totalFor(state.finance, 'salary', year)) +
       Number(totalFor(state.finance, 'commission', year)) +
+      Number(totalFor(state.finance, 'oddJob', year)) +
       Number(totalFor(state.finance, 'partner', year)) +
       // Ticket 0701: what a channel paid, net of keeping it going.
       Math.max(0, Number(totalFor(state.finance, 'creator', year)))) /
@@ -615,11 +623,12 @@ export const nudgePrice = (state: GameState, id: string, steps: number) =>
     price: clampPrice(business.price + steps * PRICE_STEP),
   }));
 
-/** Spec 393: a supplier is quality against cost. A business with nothing to buy has no choice to make. */
-export const setSupplier = (state: GameState, id: string, supplier: SupplierGrade) =>
-  patch(state, id, (business, type) =>
-    type.supplier ? { ...business, supplier } : 'no-such-choice',
-  );
+/** P12: deprecated grade setter cannot bypass the named pitch acceptance command. */
+export const setSupplier = (
+  state: GameState,
+  id: string,
+  _supplier: SupplierGrade,
+): Result<GameState, ChoiceError> => patch(state, id, () => 'no-such-choice');
 
 /** Spec 393's Low / Medium / High / Big Bucks. */
 export const setPayroll = (state: GameState, id: string, payroll: Payroll) =>
@@ -937,7 +946,7 @@ function parted(
     'milestone',
   );
   return {
-    state: {
+    state: pruneBusinessRescue({
       ...state,
       finance: settled.ledger,
       loans: settled.loans,
@@ -955,7 +964,7 @@ function parted(
           ),
         ),
       },
-    },
+    }),
     entry,
     proceeds,
     repaid: settled.paid,
@@ -993,7 +1002,10 @@ export function closeBusiness(
   const business = findBusiness(state, id);
   const type = business ? findBusinessType(business.typeId) : undefined;
   if (!business || !type) return err('no-such-business');
-  const proceeds = windDownOf(business, type, state.world.year);
+  const proceeds = Math.max(
+    0,
+    windDownOf(business, type, state.world.year) + Math.min(0, Number(business.cash) / 100),
+  );
   return ok(
     parted(
       state,
@@ -1019,7 +1031,7 @@ export interface BusinessesYearInput {
   readonly year: number;
   readonly seed: string;
   readonly market: MarketState;
-  /** What the owner can put in to cover a loss this year, whole dollars. */
+  /** Legacy measurement input, whole dollars. P1 never spends it automatically. */
   readonly available: number;
   readonly holdsJob: boolean;
   readonly stat: (type: BusinessType) => number;
@@ -1036,12 +1048,12 @@ export interface BusinessesYear {
   readonly loans: readonly HeldLoan[];
   /** The businesses whose loan was serviced here, and so is not the household's to service as well. */
   readonly serviced: readonly string[];
+  readonly rescues: readonly BusinessRescueCase[];
 }
 
 /**
  * The year of every business: what it sold, what it cost, what was left, where
- * that went. A loss comes out of the till and then out of the owner; an owner
- * who cannot cover it loses the business.
+ * that went. A loss comes out of the till. P1 holds a shortfall for the owner to answer.
  */
 export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
   if (input.businesses.length === 0) {
@@ -1053,6 +1065,7 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
       drawn: 0,
       loans: input.loans ?? [],
       serviced: [],
+      rescues: [],
     };
   }
   let loans: readonly HeldLoan[] = input.loans ?? [];
@@ -1061,7 +1074,7 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
   const lines: string[] = [];
   const records: NewLifeRecord[] = [];
   const next: OwnedBusiness[] = [];
-  let available = input.available;
+  const rescues: BusinessRescueCase[] = [];
   let drawnTotal = 0;
   const hands = handsOn(input.businesses.length, input.holdsJob);
 
@@ -1097,89 +1110,61 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
       shock: normalFrom(`${input.seed}:${business.id}:${input.year}:shock`),
       stat: input.stat(type),
       hands,
-      modifiers: modifiersFor(happened),
+      modifiers: supplierModifiers(business, happened),
     });
     const rival = rivalAfter(business.rival, happened, type, input.year, mixedUnit(`${key}:bite`));
     const reputation = Math.max(0, Math.min(100, result.reputation + reputationChangeOf(happened)));
     const cash = Number(business.cash) / 100;
 
-    /*
-      Ticket 0603. A business pays its own loan, from its own till, before the
-      owner is paid anything — which is how a lender is paid and why a loan is
-      the business's and not a claim on wages. If the till cannot cover it the
-      owner steps in for the shortfall, as they do for a loss (they signed for
-      it); if they cannot either, the loan falls behind and grows.
-    */
+    // P1: service from the till only. Quote the fully paid result now, so answering
+    // a rescue cannot accrue a second year's interest or reroll anything.
     const held = loans.find((loan) => loan.businessId === business.id);
-    let serviceLine: string | undefined;
-    let paidFromTill = 0;
-    let ownerSteppedIn = 0;
-    let loanAfter: readonly HeldLoan[] | undefined;
-    if (held) {
-      const onHand = Math.max(0, Math.round(cash + result.profit));
-      let year = runLoanYear([held], onHand, false);
-      if (year.missed.length > 0 && available > 0)
-        year = runLoanYear([held], onHand + available, false);
-      const paid = Math.round(
-        year.charges.reduce((sum, charge) => sum - Number(charge.amount), 0) / 100,
+    const onHand = Math.max(0, Math.round(cash + result.profit));
+    const servicedYear = held ? runLoanYear([held], onHand, false) : undefined;
+    const fundedYear = held ? runLoanYear([held], Number.MAX_SAFE_INTEGER, false) : undefined;
+    const paid = servicedYear
+      ? Math.round(
+          servicedYear.charges.reduce((sum, charge) => sum - Number(charge.amount), 0) / 100,
+        )
+      : 0;
+    const due = fundedYear
+      ? Math.round(fundedYear.charges.reduce((sum, charge) => sum - Number(charge.amount), 0) / 100)
+      : 0;
+    const loanGap = Math.max(0, due - paid);
+    const settled = settleYear(cash, result.profit - paid, result.costs);
+    const needsReview = settled.needed > 0 || loanGap > 0;
+    const drawn = needsReview ? 0 : settled.drawn;
+    const till = needsReview ? cash + result.profit - paid : settled.cash;
+    if (needsReview) {
+      const amount = settled.needed + Math.max(0, loanGap - Math.max(0, till));
+      rescues.push({
+        businessId: business.id,
+        amount,
+        loanPayment: loanGap,
+        ...(held && loanGap > 0
+          ? {
+              loanProductId: held.productId,
+              loanBalance: Number(servicedYear!.loans[0]!.balance),
+              ...(fundedYear!.loans[0] ? { fundedLoan: fundedYear!.loans[0] } : {}),
+            }
+          : {}),
+      });
+      lines.push(
+        `${business.name} needs ${money(amount)} to carry on. You have a decision to make.`,
       );
-      paidFromTill = Math.min(paid, onHand);
-      ownerSteppedIn = paid - paidFromTill;
-      loanAfter = year.loans;
-      serviceLine =
-        year.settled.length > 0
-          ? `${business.name} paid off its loan.`
-          : year.missed.length > 0
-            ? `${business.name} couldn't make its loan payment.`
-            : undefined;
     }
-    const settled = settleYear(cash, result.profit - paidFromTill, result.costs);
-    if (ownerSteppedIn > 0) available = Math.max(0, available - ownerSteppedIn);
-
-    let injected = 0;
-    const kept = settled.cash;
-    let till = kept;
-    if (settled.needed > 0) {
-      if (available >= settled.needed) {
-        injected = settled.needed;
-        available -= injected;
-        till = kept + injected;
-        transactions.push({
-          category: 'property',
-          amount: dollars(-injected),
-          source: `Put money into ${business.name} to see it through a bad year`,
-        });
-      } else {
-        // Nobody to cover it: the business goes under. What was left of the
-        // fittings pays what was owed, and the owner gets what is over, if any.
-        const fittings = windDownOf({ ...business, cash: dollars(0) }, type, input.year);
-        const proceeds = Math.max(0, fittings + kept);
-        if (proceeds > 0) {
-          transactions.push({
-            category: 'property',
-            amount: dollars(proceeds),
-            source: `What was left of ${business.name}`,
-          });
-        }
-        lines.push(
-          `${business.name} lost ${money(result.profit)} this year and could not carry on. The fittings were sold off${proceeds > 0 ? ` for ${money(proceeds)}` : ''}.`,
-        );
-        records.push({
-          category: 'business',
-          label: `Lost ${business.name}`,
-          referenceId: type.id,
-        });
-        continue;
-      }
-    }
-
-    if (settled.drawn > 0) {
+    if (drawn > 0) {
       transactions.push({
         category: 'business',
-        amount: dollars(settled.drawn),
+        amount: dollars(drawn),
         source: `${business.name} — profit`,
       });
-      drawnTotal += settled.drawn;
+      drawnTotal += drawn;
+    }
+    if (held && servicedYear) {
+      loans = [...loans.filter((loan) => loan !== held), ...servicedYear.loans];
+      serviced.push(business.id);
+      if (servicedYear.settled.length > 0) lines.push(`${business.name} paid off its loan.`);
     }
 
     const locations = locationsOf(business);
@@ -1201,33 +1186,23 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
       revenue: result.revenue,
       costs: result.costs,
       profit: result.profit,
-      drawn: settled.drawn,
-      injected,
+      drawn,
+      injected: 0,
       turnedAway: result.turnedAway,
       idle: result.idle,
-      ...(paidFromTill + ownerSteppedIn > 0 ? { repaid: paidFromTill + ownerSteppedIn } : {}),
+      ...(paid > 0 ? { repaid: paid } : {}),
       ...(happened ? { event: happened.event.id } : {}),
-      ...(Math.abs(result.economy - 1) >= 0.005 ? { economy: result.economy } : {}),
+      ...(businessEconomyVisible(result.economy, BUSINESS_ECONOMY_LEDGER_THRESHOLD)
+        ? { economy: result.economy }
+        : {}),
       ...(result.rivalTook > 0 ? { rivalTook: result.rivalTook } : {}),
     };
-    if (held && loanAfter) {
-      loans = [...loans.filter((loan) => loan !== held), ...loanAfter];
-      serviced.push(business.id);
-      if (ownerSteppedIn > 0) {
-        transactions.push({
-          category: 'property',
-          amount: dollars(-ownerSteppedIn),
-          source: `Put money into ${business.name} to meet its loan payment`,
-        });
-      }
-      if (serviceLine) lines.push(serviceLine);
-    }
     const { rival: _was, ...bare } = business;
     next.push({
       ...bare,
       ...(rival ? { rival } : {}),
       cash: dollars(Math.round(till)),
-      invested: dollars(Math.round(Number(business.invested) / 100 + injected)),
+      invested: business.invested,
       staff,
       reputation,
       profits: withProfit(business.profits, result.profit),
@@ -1235,32 +1210,40 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
     });
 
     if (happened) lines.push(eventLineFor(happened.event, business.name));
-    if (result.economy <= 0.94) {
+    if (result.economy <= 1 - BUSINESS_ECONOMY_LOSS_THRESHOLD) {
       lines.push(
-        `The downturn took about ${Math.round((1 - result.economy) * 100)}% of ${business.name}'s custom.`,
+        `The downturn took about ${businessEconomyPercent(result.economy)}% of ${business.name}'s custom.`,
       );
-    } else if (result.economy >= 1.05) {
+    } else if (result.economy >= 1 + BUSINESS_ECONOMY_GAIN_THRESHOLD) {
       lines.push(`The good economy sent more custom ${business.name}'s way.`);
     }
 
     const roll = mixedUnit(`${input.seed}:${business.id}:${input.year}:line`);
+    if (needsReview) continue;
     if (result.profit < 0) {
       lines.push(
-        injected > 0
-          ? `${business.name} lost ${money(result.profit)} this year. You put in ${money(injected)} to keep it going.`
-          : `${business.name} lost ${money(result.profit)} this year, out of its own savings.`,
+        `${business.name} lost ${money(result.profit)} this year, out of its own savings.`,
       );
-    } else if (settled.drawn > 0) {
+    } else if (drawn > 0) {
       lines.push(
         roll < 0.5
-          ? `${business.name} had a year. It paid you ${money(settled.drawn)}.`
-          : `${business.name} cleared ${money(result.profit)}, and ${money(settled.drawn)} of it came to you.`,
+          ? `${business.name} had a year. It paid you ${money(drawn)}.`
+          : `${business.name} cleared ${money(result.profit)}, and ${money(drawn)} of it came to you.`,
       );
     } else {
       lines.push(`${business.name} made ${money(result.profit)} and kept it in the till.`);
     }
   }
-  return { businesses: next, transactions, lines, records, drawn: drawnTotal, loans, serviced };
+  return {
+    businesses: next,
+    transactions,
+    lines,
+    records,
+    drawn: drawnTotal,
+    loans,
+    serviced,
+    rescues,
+  };
 }
 
 /** The owner's knack, for a screen that wants to say whether they are good at this. */

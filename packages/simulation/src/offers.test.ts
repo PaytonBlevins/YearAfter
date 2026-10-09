@@ -309,11 +309,13 @@ describe('Ticket 0407 — the way in', () => {
   */
   function passiveLives(count: number) {
     let everEmployed = 0;
+    const firstJobAges: number[] = [];
     let idleAdultYears = 0;
     let adultYears = 0;
     for (let i = 0; i < count; i += 1) {
       let state = createNewGame({ seed: `0407-guard-${i}` });
       let worked = false;
+      let firstJobAge: number | undefined;
       for (let y = 0; y < 80; y += 1) {
         if (state.health.diedAtAge !== undefined) break;
         state = advanceYear(state).state;
@@ -327,6 +329,10 @@ describe('Ticket 0407 — the way in', () => {
           state = result.value.state;
         }
         const age = state.player.age;
+        if (firstJobAge === undefined && state.employment.job !== undefined) {
+          firstJobAge = age;
+          firstJobAges.push(age);
+        }
         if (age >= 18 && age < 65) {
           adultYears += 1;
           if (state.employment.job === undefined) idleAdultYears += 1;
@@ -335,12 +341,18 @@ describe('Ticket 0407 — the way in', () => {
       }
       if (worked) everEmployed += 1;
     }
-    return { everEmployed, idleAdultYears, adultYears };
+    return { everEmployed, idleAdultYears, adultYears, firstJobAges };
   }
 
   it('puts work in front of somebody who never opens the Career screen', () => {
     const N = 120;
-    const { everEmployed, idleAdultYears, adultYears } = passiveLives(N);
+    const { everEmployed, idleAdultYears, adultYears, firstJobAges } = passiveLives(N);
+    const sorted = [...firstJobAges].sort((a, b) => a - b);
+    const medianFirst = sorted[Math.floor(sorted.length / 2)] ?? Infinity;
+    console.log(`P5 passive first-job median age: ${medianFirst}`);
+    expect(firstJobAges.length).toBeGreaterThan(N * 0.7);
+    expect(medianFirst).toBeGreaterThanOrEqual(16);
+    expect(medianFirst).toBeLessThanOrEqual(20);
     console.log(
       `\npassive lives that ever worked: ${everEmployed}/${N}` +
         `   idle adult years ${idleAdultYears}/${adultYears}`,

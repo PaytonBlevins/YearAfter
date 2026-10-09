@@ -81,8 +81,94 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   first. Frugal / Comfortable / Lavish follow, as a way to spend more on purpose. **This overrides
   spec 1166's removal of a tier selector by name.** The car's yearly cost becomes a dollar amount
   scaled to the car and no longer a share of the living bill (finding 33).
+  **P2 proposal approved by Payton:** Comfortable is the default; Frugal buys 80% of discretionary
+  spending above basic needs, Comfortable 100%, Lavish 150%. Annual happiness nudges are −1 / 0 / +2,
+  through the existing stat curve, with no effect at basic needs or in hardship and no Lavish bonus
+  for an unpaid year. Selection itself changes no money, time or stats. The approved default uses
+  marginal after-tax spending of 92% up to $50,000, 40% to $120,000 and 15% above, with wealth pull
+  tapering above $100,000. The embedded car allowance is $1,600 per index-1 single renter, scaled to
+  household/location/housing and capped at real car costs. Lifestyle opens from the Living costs row
+  with three options and annual estimates. This explicitly overrides MASTER_SPEC section 22 and
+  its interface passage removing a tier selector (the brief's “spec 1166”); sections 20–21 still keep
+  contextual costs and the backend ledger. See `playtest-p2-living-costs.md`.
+- **P3 social-media proposal approved by Payton:** new-account rank lifts are YouTube 3,
+  Twitch/Kick 5, Instagram/Facebook/X 3, TikTok 3, podcasts 5 and Substack 2. Existing saved
+  luck stays fixed; source curves and the top-quarter fade remain. Active accounts above their
+  target take ordinary downward drift regardless of post count; only positive annual spread
+  scales to output. Explicit publications retain their viral rolls, and live annual settlement
+  does not give another automatic viral opportunity. Free accounts, manual posting, the twelve-post
+  cap, platform income rates and the small-audience fame anchors remain. See
+  `playtest-p3-social-success.md` for measurements and verification.
+- **P4 business-economy change approved by Payton, with strong expansion retained:** halve
+  direct severe-recession, recession, slowdown and growth effects to −13%, −6.5%, −2.5% and
+  +2.5% at full cyclicality. Normal stays neutral; **strong expansion stays +9%**. Type
+  cyclicality, named-event odds/damage, world transitions, other business controls and P1 rescue
+  choices remain. Context thresholds halve as proposed: ledger 0.25%, screen 1.5%, annual loss
+  3% and annual gain 2.5%. Existing records retain historical values; future settlements use
+  the new coefficients. No save bump. See `playtest-p4-business-economy.md`.
+- **P5 scarce study/training matches approved by Payton:** show twelve eligible listings,
+  reserving two matching the existing studied-major tracks or held-license tracks. When fewer
+  than two matching jobs qualify, show every available match and fill the remaining places
+  with other eligible work. Never duplicate a row or bypass age, education, license or career
+  reach to fill the quota. Hiring odds and first-job offer chance stay. The current/last major
+  and all held licenses supply matching information; no degree-subject history is promised.
+  See `playtest-p5-career-listings.md`.
+- **P6 adult and school work proposal approved by Payton (8 October UTC):** six deliberate
+  freelance choices from 18 without an upper-age cutoff: pet care 4 h/$1,500–$6,000; yard work
+  5 h/$2,000–$7,000; babysitting 6 h/$2,500–$9,000; tutoring 4 h/$2,500–$10,000; art commissions
+  4 h/$1,500–$8,000; repairs 6 h/$3,000–$12,000. Amounts are annual gross; keep existing
+  ability scaling and talent premium. Retail is $6,000–$10,000, kitchen $7,000–$12,000; their
+  hours and age gates stay. Other child/seasonal pay stays. Remove the two-gig cap and supersede
+  its assertion under CORE_RULES 13.5; existing hidden workload owns overload. Every education
+  stage settles work once with paid hours; college uses existing overload performance penalties.
+  Adult shift wages use the existing ordinary income curve; freelance uses the existing
+  self-employment premium, feeding living and subsequent income bases. Under-18 tax treatment
+  stays. Career shows Part-time & Odd Jobs from 16, with shift/odd-job/held-work sections and
+  take/quit. No save bump. See `playtest-p6-school-work.md`.
 - **Card payment on every purchase is wanted (A13, B17)** and PR #10 is merged first, keeping free
   account creation for channels.
+
+- **P7 proposal approved by Payton (8 October), with universal 15% sizing:** investor-only
+  market/sector/individual shocks are 20% smaller; preserve drift, payout, reversion, floors,
+  caps, macro transition odds and P4 business coefficients. Advisors protect six months of
+  current recurring household bills, minimum $12,000, plus an explicit purchase savings goal.
+  Every advisor buy suggestion uses **15% of spare cash**, including funds and reinvestment
+  of reductions; there is no 25% idle-cash or one-stock-only exception. Under-$1,000 buys
+  stay quiet. Reduce applicable sector/speculative/named holdings, retain needed cash and
+  put up to that same 15% limit into Broad Market Index. Existing tiers, risk bars and the
+  0.2% paid fee stay. An optional whole-dollar purchase target has Set/Clear on the existing
+  Advisor screen, before and after hiring, and migrates from older saves as no goal.
+  Goal protection applies to advice, not manual trades or purchases. Save v46 is P7's;
+  TICKET remains 0708. See `playtest-p7-investments-advisors.md` for measured policy limits.
+
+- **P8 approved with amendments by Payton (8 October):** reduce the proposed 48 additions
+  to 15–20. Add recognizable actual model families across existing fictional makers,
+  not invented variants, movements or technical specifications. Keep the approved
+  price/resale/store approach and existing holdings unchanged. Include a very expensive
+  Jacob & Co. equivalent. Agent B selected eighteen total, including Jakob & Co.'s
+  Billionaire Timeless Treasure equivalent at $20m, fifteen ordinary watch-class entries
+  and three sought entries. No new screen, save shape, icing action or selection rules.
+  Full real-model/source mapping: `playtest-p8-watch-catalog.md`.
+
+- **P9 renovations, approved 8 October 2026:** Payton approved the measured proposal in
+  `playtest-p9-renovations.md`: nine additions (28 total), the listed costs/upkeep/recovery,
+  kind-derived space budgets and residence-only annual comfort capped at +3, suppressed
+  during hardship or a final cash shortfall. Preserve existing work, use explicit cash/card
+  payment, keep save v46 and stop after P9.
+
+- **P10 iced-out watches, approved 8 October 2026:** Payton approved the full measured
+  proposal in `playtest-p10-iced-watches.md`. Preserve all 55 existing references and
+  stock slots; 53 accept aftermarket work, the existing Jakob is factory-set and the
+  Orchard smartwatch is excluded. Fixed per-watch costs are $2,500/$5,000/$10,000/
+  $25,000/$50,000 at the listed catalog bands. The four fashion watches retain current
+  resale plus 40% of work cost; ordinary watches retain 80%, sought watches 65%, with
+  no work-cost recovery for either collector group. Apply once to current resale,
+  then use the existing precious annual market and $1 floor. Original/factory-set
+  annual rules and the original sought 115% purchase recovery remain unchanged.
+  Existing Store/Collections screens offer ready-iced purchase or owned-watch work
+  with explicit cash/card payment of the full invoice. Save v47 adds optional paid
+  work; base purchase price, provenance and counterfeit flags persist. No instant
+  stat reward, repeat work or reverse action. Stop after P10; P11 waits.
 
 ## Reference material
 
