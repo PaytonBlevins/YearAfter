@@ -47,12 +47,51 @@ export function renovationCostOf(
   return Math.round(raw / 500) * 500;
 }
 
-export type RenovationRefusal = 'notForThisHome' | 'needsFirst' | 'alreadyDone' | 'tooSoon';
+/** Abstract capacity; rental/commercial kinds have no leisure allowance. */
+export const RENOVATION_CAPACITY: Readonly<Record<string, number>> = {
+  'home.condo': 2,
+  'home.townhouse': 4,
+  'home.starter': 6,
+  'home.family': 8,
+  'home.large': 12,
+  'home.luxury': 20,
+  'home.estate': 30,
+};
+
+/** Legacy duplicate groups count once, at their largest installed weight. */
+function installedGroups(home: OwnedHome): readonly Renovation[] {
+  const groups = new Map<string, Renovation>();
+  for (const entry of home.renovations ?? []) {
+    const renovation = findRenovation(entry.renovationId);
+    if (!renovation) continue; // Preserve unknown saved work; do not invent its weight.
+    const previous = groups.get(renovation.group);
+    if (!previous || renovation.space > previous.space) groups.set(renovation.group, renovation);
+  }
+  return [...groups.values()];
+}
+
+export function renovationSpaceFor(home: OwnedHome) {
+  const capacity = RENOVATION_CAPACITY[home.kindId] ?? 0;
+  const used = installedGroups(home).reduce((sum, renovation) => sum + renovation.space, 0);
+  return { capacity, used, remaining: Math.max(0, capacity - used) };
+}
+
+/** Comfort is derived, not purchased as an immediate stat boost or saved bonus. */
+export function renovationHappinessOf(home: OwnedHome): number {
+  return Math.min(
+    3,
+    installedGroups(home).reduce((sum, renovation) => sum + renovation.happiness, 0),
+  );
+}
+
+export type RenovationRefusal =
+  'notForThisHome' | 'needsFirst' | 'alreadyDone' | 'tooSoon' | 'noSpace';
 
 export const RENOVATION_REFUSAL_LABELS: Readonly<Record<RenovationRefusal, string>> = {
   notForThisHome: "There's no room for that here.",
   needsFirst: 'That needs the first addition done before it.',
   alreadyDone: "It's already got one.",
+  noSpace: "There isn't room for that addition here.",
   tooSoon: 'That was done recently. It has years left in it.',
 };
 
@@ -70,7 +109,11 @@ export function renovationRefusalFor(
   const inGroup = done.find(
     (entry) => findRenovation(entry.renovationId)?.group === renovation.group,
   );
-  if (!inGroup) return undefined;
+  if (!inGroup) {
+    if (renovation.space > 0 && renovationSpaceFor(home).remaining < renovation.space)
+      return 'noSpace';
+    return undefined;
+  }
   if (!renovation.refresh) return 'alreadyDone';
   // A modern kitchen can become a luxury one whenever; the other way round,
   // or the same again, waits until the last one has aged.

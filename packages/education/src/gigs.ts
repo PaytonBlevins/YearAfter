@@ -17,11 +17,7 @@ import type { Gig } from '@yearafter/content';
 import { gigsForAge } from '@yearafter/content';
 import { livingParents, type Household } from '@yearafter/relationships';
 
-/** Odd jobs a character can hold at once. */
-export const MAX_GIGS = 2;
-
-export type GigUnavailable =
-  'too-young' | 'too-old' | 'needs-parent' | 'hands-full' | 'already-in-it';
+export type GigUnavailable = 'too-young' | 'too-old' | 'needs-parent' | 'already-in-it';
 
 export interface GigOffer {
   readonly gig: Gig;
@@ -33,7 +29,6 @@ export const GIG_UNAVAILABLE_LABELS: Readonly<Record<GigUnavailable, string>> = 
   'too-young': 'Not at your age.',
   'too-old': 'You have aged out of this one.',
   'needs-parent': 'Needs an adult at home to vouch for you.',
-  'hands-full': 'You already have as much work as you can carry.',
   'already-in-it': 'You are already doing this.',
 };
 
@@ -47,11 +42,9 @@ export interface GigContext {
 export function gigUnavailable(gig: Gig, context: GigContext): GigUnavailable | undefined {
   if (context.held.includes(gig.id)) return 'already-in-it';
   if (context.age < gig.ageMin) return 'too-young';
-  if (context.age > gig.ageMax) return 'too-old';
+  if (gig.ageMax !== undefined && context.age > gig.ageMax) return 'too-old';
   if (gig.needsParent && livingParents(context.household).length === 0) return 'needs-parent';
-  // Two at once. Not a rule about being busy — the workload model owns that —
-  // but about what a person can plausibly be committed to at the same time.
-  if (context.held.length >= MAX_GIGS) return 'hands-full';
+  // P6: the hidden workload model handles overcommitment, not a menu cap.
   return undefined;
 }
 

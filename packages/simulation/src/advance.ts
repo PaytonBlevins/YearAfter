@@ -36,6 +36,7 @@ import { asEventId, clampStat, dollars } from '@yearafter/core';
 import { nudgeStats } from '@yearafter/character';
 import type { GameState } from './game-state';
 import { isInSchool } from '@yearafter/education';
+import { gigIncome } from './gig-income';
 import { occupationFor, runEducation } from './phases/education';
 import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
@@ -82,7 +83,8 @@ import { runPursuitYear } from './pursuits';
 import { withPursuitOffer } from './pursuit-offer';
 import { foreclose, markMissed, runHomesYear, withHomeOffer } from './homes';
 import { markVehiclesMissed, repossess, runVehiclesYear, withVehicleOffer } from './vehicles';
-import { withRenovationOffer } from './renovations';
+import { withBusinessRescue } from './business-rescue';
+import { withRenovationOffer, renovationComfortFor } from './renovations';
 import { runValuablesYear } from './shopping';
 import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
 import { runDealsYear } from './deals';
@@ -386,7 +388,14 @@ export function advanceYear(state: GameState): AdvanceResult {
     holdsJob: employment.employment.job !== undefined,
     stat: (type) => averageStat(worked.stats as unknown as Record<string, number>, type),
   });
-  const businessTax = businessTaxOn(employment.earned, businessesYear.drawn);
+  const sideWork = gigIncome(
+    nextAge,
+    employment.earned,
+    education.shiftGross,
+    education.freelanceGross,
+  );
+  const earnedIncome = employment.earned + sideWork.taxableGross;
+  const businessTax = businessTaxOn(earnedIncome, businessesYear.drawn);
   /*
     Ticket 0701 — a year of every channel. After the business draw because the
     tax on what a channel paid depends on everything earned before it, and
@@ -404,13 +413,13 @@ export function advanceYear(state: GameState): AdvanceResult {
     generation: state.world.generation,
     work: workToSettle(state),
   });
-  const creatorTax = businessTaxOn(employment.earned + businessesYear.drawn, creatorsYear.net);
+  const creatorTax = businessTaxOn(earnedIncome + businessesYear.drawn, creatorsYear.net);
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
   const dealsYear = runDealsYear({
     deals: state.deals,
     year: nextYear,
     market,
-    otherIncome: employment.earned + businessesYear.drawn + creatorsYear.net,
+    otherIncome: earnedIncome + businessesYear.drawn + creatorsYear.net,
   });
   const businessNet = businessesYear.drawn - businessTax;
 
@@ -444,7 +453,11 @@ export function advanceYear(state: GameState): AdvanceResult {
     // case this whole phase exists to make cost something. Ticket 0502: and
     // what the partner's did, because a household lives on both.
     afterTaxIncome:
-      employment.takeHome + partnered.net + businessNet + (creatorsYear.net - creatorTax),
+      employment.takeHome +
+      sideWork.net +
+      partnered.net +
+      businessNet +
+      (creatorsYear.net - creatorTax),
     wealth: Math.floor(Number(state.player.cash) / 100),
     /*
       Ticket 0308b. What the cards would actually lend, which is part of what a
@@ -455,7 +468,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0308b. What they hold in the market — see `portfolio` on the
     // input. Being illiquid is not the same as being destitute.
     portfolio: Math.floor(Number(portfolioWorth(state.prices, state.portfolio)) / 100),
-    earned: employment.earned,
+    earned: earnedIncome,
     ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
       ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }
       : {}),
@@ -468,7 +481,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Only the one they live in: a rental's costs are the rental's, against its rent.
     housingCost: homesYear.residenceCost,
     // Ticket 0504. The cars, and whether there is one — owning one means the
-    // living bill stops paying for getting about (`VEHICLE_SHARE`).
+    // living bill stops paying for getting about (a bounded dollar allowance).
     vehicleCost: vehiclesYear.cost,
     ownsVehicle: state.vehicles.length > 0,
   });
@@ -654,6 +667,15 @@ export function advanceYear(state: GameState): AdvanceResult {
   */
   const reported = [
     ...education.transactions,
+    ...(sideWork.tax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-sideWork.tax),
+            source: 'Tax on part-time and odd-job income',
+          },
+        ]
+      : []),
     ...family.transactions,
     ...employment.transactions,
     // Ticket 0502. A partner's pay and the tax on it.
@@ -1105,7 +1127,12 @@ export function advanceYear(state: GameState): AdvanceResult {
         ...health.statDeltas,
         ...shaped,
         // Ticket 0706. The year's news about a channel or about being known.
-        ...(creatorsYear.mood === 0 ? {} : { happiness: creatorsYear.mood }),
+        // Preserve the existing creator/activity mood before adding a tier's
+        // paid-year effect. Comfortable must not erase a year of activities.
+        happiness:
+          (creatorsYear.mood === 0 ? (shaped.happiness ?? 0) : creatorsYear.mood) +
+          (living.mood > 0 && money.short < 0 ? 0 : living.mood) +
+          renovationComfortFor(homesYear.homes, living.hardship, money.short),
       }),
       health: clampStat(health.health),
     },
@@ -1270,6 +1297,21 @@ export function advanceYear(state: GameState): AdvanceResult {
     `withLifeOffer`'s docblock carries the numbers, including the two orderings
     that were tried and rejected.
   */
+  const rescued = withBusinessRescue(next, businessesYear.rescues);
+  const closingEntries = rescued.player.timeline.filter(
+    (entry) => !next.player.timeline.some((prior) => prior.id === entry.id),
+  );
+  const finalEntries = withinBudget([...budgeted, ...closingEntries]);
+  const reviewed =
+    closingEntries.length > 0
+      ? {
+          ...rescued,
+          player: {
+            ...rescued.player,
+            timeline: finalEntries.reduce(appendToTimeline, state.player.timeline),
+          },
+        }
+      : rescued;
   return {
     /*
       Ticket 0416 — something to join, LAST of the four: a league sign-up should
@@ -1297,7 +1339,7 @@ export function advanceYear(state: GameState): AdvanceResult {
           withHomeOffer(
             withLifeOffer(
               withAnyOffer(
-                withCollegeOffer(repossess(foreclose(next)), health.alive),
+                withCollegeOffer(repossess(foreclose(reviewed)), health.alive),
                 health.alive,
               ),
               health.alive,
@@ -1313,7 +1355,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       ),
       health.alive,
     ),
-    newEntries: budgeted,
+    newEntries: finalEntries,
   };
 }
 

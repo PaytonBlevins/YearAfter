@@ -41,6 +41,12 @@ import {
 } from '@yearafter/content';
 import { dollars, err, mixedUnit, ok, type Result } from '@yearafter/core';
 import {
+  icingValue,
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  type PurchasePayment,
+  type PaymentRefusal,
   portfolioWorth,
   post,
   resaleAtPurchase,
@@ -138,10 +144,21 @@ export function storeStock(state: GameState, storeId: string): readonly StockPie
 export const openStores = (state: GameState): readonly ValuableStore[] =>
   VALUABLE_STORES.filter((store) => storeStock(state, store.id).length > 0);
 
-export type BuyValuableError = 'no-such-piece' | 'cannot-afford' | 'too-young';
+export type BuyValuableError =
+  | 'no-such-piece'
+  | 'cannot-afford'
+  | 'too-young'
+  | 'not-customizable'
+  | 'already-iced'
+  | 'known-reproduction'
+  | PaymentRefusal;
 
 export const BUY_VALUABLE_ERROR_LABELS: Readonly<Record<BuyValuableError, string>> = {
-  'no-such-piece': "That's not for sale any more.",
+  ...PAYMENT_REFUSAL_LABELS,
+  'not-customizable': "This watch can't be iced out.",
+  'already-iced': "This one's already iced out.",
+  'known-reproduction': "The jeweler won't customize a known reproduction.",
+  'no-such-piece': "That piece isn't available any more.",
   'cannot-afford': "You don't have the money for that.",
   'too-young': "You're too young to buy that.",
 };
@@ -179,6 +196,8 @@ export interface ShoppingOutcome {
 export function buyValuable(
   state: GameState,
   stockId: string,
+  payment: PurchasePayment = { kind: 'cash' },
+  finish: 'original' | 'iced' = 'original',
 ): Result<ShoppingOutcome, BuyValuableError> {
   if (state.player.age < SHOP_VALUABLES_FROM_AGE) return err('too-young');
   const storeId = stockId.split(':')[2];
@@ -186,25 +205,36 @@ export function buyValuable(
     ? storeStock(state, storeId).find((candidate) => candidate.id === stockId)
     : undefined;
   if (!piece) return err('no-such-piece');
-  if (Number(state.player.cash) / 100 < piece.price) return err('cannot-afford');
+  const quote = valuablePurchaseQuote(piece, finish);
+  if (!quote.ok) return quote;
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(quote.value.total),
+    'property',
+    `Bought ${articled(piece.item)}`,
+    payment,
+  );
+  if (!paid.ok) return err(paid.error === 'payment-cash-short' ? 'cannot-afford' : paid.error);
   const owned: OwnedValuable = {
     id: piece.id,
     itemId: piece.item.id,
     boughtYear: state.world.year,
     purchasePrice: dollars(piece.price),
-    value: dollars(resaleAtPurchase(piece.item, piece.price)),
+    value: dollars(quote.value.resale),
+    ...(finish === 'iced'
+      ? { icing: { cost: dollars(quote.value.work), year: state.world.year } }
+      : {}),
   };
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'property',
-    amount: dollars(-piece.price),
-    source: `Bought ${articled(piece.item)}`,
-  });
+  const books = paid.value;
   const legendary = piece.item.kind === 'mythical';
   const entry = line(
     state,
     legendary
-      ? `Found ${articled(piece.item)} at the back of an antiques shop, and bought it for ${money(piece.price)}. Nobody believes you.`
-      : `Bought ${articled(piece.item)} for ${money(piece.price)}.`,
+      ? `Found ${articled(piece.item)} at the back of an antiques shop, and bought it for ${money(quote.value.total)}. Nobody believes you.`
+      : `Bought ${articled(piece.item)}${finish === 'iced' ? ', iced out' : ''} for ${money(quote.value.total)}.${paymentNote(payment)}`,
     `val:bought:${piece.id}`,
     legendary ? 'milestone' : 'passive',
   );
@@ -212,6 +242,7 @@ export function buyValuable(
     state: {
       ...state,
       finance: books.ledger,
+      cards: books.cards,
       valuables: [...state.valuables, owned],
       player: {
         ...state.player,
@@ -235,6 +266,95 @@ export function buyValuable(
     },
     piece: owned,
     entry,
+  });
+}
+
+/** Shared display/command quote: base resale first, then one customization effect. */
+export function valuablePurchaseQuote(
+  piece: StockPiece,
+  finish: 'original' | 'iced' = 'original',
+): Result<
+  { readonly base: number; readonly work: number; readonly total: number; readonly resale: number },
+  BuyValuableError
+> {
+  const policy = piece.item.icing;
+  if (finish === 'iced' && policy?.kind !== 'aftermarket') return err('not-customizable');
+  const work = finish === 'iced' && policy?.kind === 'aftermarket' ? policy.cost : 0;
+  const original = dollars(resaleAtPurchase(piece.item, piece.price));
+  return ok({
+    base: piece.price,
+    work,
+    total: piece.price + work,
+    resale: Number(finish === 'iced' ? icingValue(piece.item, original) : original) / 100,
+  });
+}
+
+export function valuableIcingQuote(
+  state: GameState,
+  pieceId: string,
+): Result<
+  { readonly cost: number; readonly before: number; readonly after: number },
+  BuyValuableError
+> {
+  const owned = state.valuables.find((piece) => piece.id === pieceId);
+  if (!owned) return err('no-such-piece');
+  if (owned.icing) return err('already-iced');
+  const item = findValuable(owned.itemId);
+  if (item?.kind !== 'watch' || item.icing?.kind !== 'aftermarket') return err('not-customizable');
+  if (owned.reproduction) return err('known-reproduction');
+  return ok({
+    cost: item.icing.cost,
+    before: Number(owned.value) / 100,
+    after: Number(icingValue(item, owned.value)) / 100,
+  });
+}
+
+/** All gates precede payment; a refusal cannot mutate ownership, ledger or RNG. */
+export function iceValuable(
+  state: GameState,
+  pieceId: string,
+  payment: PurchasePayment = { kind: 'cash' },
+): Result<ShoppingOutcome, BuyValuableError> {
+  const quote = valuableIcingQuote(state, pieceId);
+  if (!quote.ok) return quote;
+  const owned = state.valuables.find((piece) => piece.id === pieceId)!;
+  const item = findValuable(owned.itemId)!;
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(quote.value.cost),
+    'property',
+    `Iced out ${articled(item)}`,
+    payment,
+  );
+  if (!paid.ok) return err(paid.error);
+  const piece: OwnedValuable = {
+    ...owned,
+    value: dollars(quote.value.after),
+    icing: { cost: dollars(quote.value.cost), year: state.world.year },
+  };
+  const entry = line(
+    state,
+    `Had ${articled(item)} iced out for ${money(quote.value.cost)}.${paymentNote(payment)}`,
+    `val:iced:${pieceId}`,
+    'passive',
+  );
+  return ok({
+    piece,
+    entry,
+    state: {
+      ...state,
+      finance: paid.value.ledger,
+      cards: paid.value.cards,
+      valuables: state.valuables.map((held) => (held.id === pieceId ? piece : held)),
+      player: {
+        ...state.player,
+        cash: paid.value.ledger.balance,
+        timeline: appendToTimeline(state.player.timeline, entry),
+      },
+    },
   });
 }
 
