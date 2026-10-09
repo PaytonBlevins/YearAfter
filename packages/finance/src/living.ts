@@ -348,3 +348,51 @@ export const NEW_HOUSEHOLD: HouseholdFinances = {
   housing: 'withFamily',
   lifestyle: 'comfortable',
 };
+
+/** P15: a conservative allowance, not a predicted death date or compulsory withdrawal. */
+export const LATER_RETIREMENT_FROM = 75;
+export const RETIREMENT_PLAN_TO = 100;
+export const RETIREMENT_MIN_HORIZON = 8;
+export const RETIREMENT_SAVINGS_SHARE = 0.5;
+export const RETIREMENT_RESERVE_MIN = 12_000;
+export const RETIREMENT_RESERVE_YEARS = 0.5;
+
+export interface RetirementSpendingInput extends Omit<LivingInput, 'standard' | 'lifestyle'> {
+  readonly age: number;
+  readonly retired: boolean;
+  readonly afterTaxIncome: number;
+  /** Cash plus portfolio, including this year's released account principal, never home equity. */
+  readonly liquidWealth: number;
+  readonly personalDebt: number;
+}
+
+/** Derived from existing state; the comfortable standard still moves through creep. */
+export function retirementSpendingFor(input: RetirementSpendingInput): {
+  readonly target: number;
+  readonly savingsYear: number;
+  readonly reserve: number;
+  readonly horizon?: number;
+} {
+  const members = householdScale(input.partnered, input.childAges);
+  const normal = standardTargetFor(input.afterTaxIncome / members, input.liquidWealth / members);
+  if (!input.retired || input.age < LATER_RETIREMENT_FROM)
+    return { target: normal, savingsYear: 0, reserve: 0 };
+  // A tier switch must not shrink the reserve or multiply its own remembered target.
+  const ordinary = livingCostFor({ ...input, standard: normal, lifestyle: 'comfortable' }).total;
+  const commitments = Math.max(0, input.housingCost ?? 0) + Math.max(0, input.vehicleCost ?? 0);
+  const reserve = Math.max(
+    RETIREMENT_RESERVE_MIN,
+    (ordinary + commitments) * RETIREMENT_RESERVE_YEARS,
+  );
+  const spare = Math.max(0, input.liquidWealth - Math.max(0, input.personalDebt) - reserve);
+  const horizon = Math.max(RETIREMENT_MIN_HORIZON, RETIREMENT_PLAN_TO - input.age);
+  const savingsYear = (spare * RETIREMENT_SAVINGS_SHARE) / horizon;
+  const roof =
+    input.housing === 'owned' ? OWNER_SHARE : input.housing === 'withFamily' ? AT_HOME_SHARE : 1;
+  const scale = members * input.locationIndex * roof;
+  const target = Math.max(
+    normal,
+    standardTargetFor(input.afterTaxIncome / members, 0) + savingsYear / scale,
+  );
+  return { target, savingsYear, reserve, horizon };
+}

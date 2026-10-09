@@ -28,9 +28,8 @@ import {
   SUBSISTENCE,
   LIFESTYLES,
   creep,
-  householdScale,
   livingCostFor,
-  standardTargetFor,
+  retirementSpendingFor,
   type HouseholdFinances,
   type Housing,
 } from '@yearafter/finance';
@@ -90,6 +89,9 @@ export interface LivingPhaseInput {
    * rebuild exactly that.
    */
   readonly portfolio: number;
+  /** P15: existing retirement choice and personal debt, never a new saved field. */
+  readonly retired?: boolean;
+  readonly personalDebt?: number;
   /** What the job paid before tax this year, whole dollars. Zero if none. */
   readonly earned: number;
   /** The job's title, for the year's money line. Absent if not working. */
@@ -282,11 +284,19 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     again. Dividing by the household's size is the ordinary equivalence scale,
     and it leaves a single person exactly where they were (CORE_RULES 13.87).
   */
-  const members = householdScale(input.partnered, input.childAges);
-  let standard = creep(
-    input.household.standard,
-    standardTargetFor(input.afterTaxIncome / members, (input.wealth + input.portfolio) / members),
-  );
+  const plannedHousing: Housing = input.ownsHome
+    ? 'owned'
+    : input.household.housing === 'owned'
+      ? 'ownPlace'
+      : input.household.housing;
+  const target = retirementSpendingFor({
+    ...input,
+    housing: plannedHousing,
+    liquidWealth: input.wealth + input.portfolio,
+    personalDebt: input.personalDebt ?? 0,
+    retired: input.retired ?? false,
+  });
+  let standard = creep(input.household.standard, target.target);
 
   const asIfAlone = livingCostFor({
     standard,

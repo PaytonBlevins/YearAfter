@@ -1,6 +1,11 @@
 import { Fragment } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
-import { LIFESTYLES, LIFESTYLE_TIERS, type LifestyleTier } from '@yearafter/finance';
+import {
+  LIFESTYLES,
+  LIFESTYLE_TIERS,
+  LATER_RETIREMENT_FROM,
+  type LifestyleTier,
+} from '@yearafter/finance';
 import { CHARGED_FROM_AGE, livingEstimateFor } from '@yearafter/simulation';
 import { Card, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
@@ -26,6 +31,14 @@ export function LifestyleScreen() {
         Choose how much to spend on everyday comforts. Basic needs stay covered. The choice stays
         until you change it, and takes effect when you advance; choosing costs nothing now.
       </Text>
+      {state.retirement.retiredAtAge !== undefined && state.player.age >= LATER_RETIREMENT_FROM ? (
+        <Text style={styles.note}>
+          Later in retirement, savings can gradually pay for more everyday comforts. The added
+          allowance leaves a cushion for ordinary bills and accounts for personal debt. Your
+          lifestyle choice still controls spending. Investments may need to be sold to pay the
+          bills; your home and retirement account are not sold automatically.
+        </Text>
+      ) : null}
       <Card>
         {LIFESTYLE_TIERS.map((tier, index) => (
           <Fragment key={tier}>

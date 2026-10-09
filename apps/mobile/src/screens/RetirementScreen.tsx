@@ -22,6 +22,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   EARLIEST_RETIREMENT,
+  LATER_RETIREMENT_FROM,
   MOST_OF_PAY,
   STATE_PENSION,
   STATE_PENSION_AT,
@@ -116,6 +117,15 @@ export function RetirementScreen() {
           </>
         ) : null}
       </Card>
+
+      {retired ? (
+        <Text style={styles.note}>
+          Pension payments and money released from your account help cover this year's living costs.
+          From {LATER_RETIREMENT_FROM}, your living standard can gradually use more savings, keeping
+          a cushion for ordinary bills. Frugal, Comfortable and Lavish still control how much you
+          spend. Change them through Living costs on Career.
+        </Text>
+      ) : null}
 
       {/* ---- paying in ------------------------------------------------------ */}
       {!retired ? (
