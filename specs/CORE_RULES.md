@@ -3178,3 +3178,14 @@ comfort after the combined cap and full recurring expense, including added home
 value. Recheck aggregate space before payment; grandfather existing paid work and
 allow zero-space maintenance. Do not persist a second bonus that can survive a
 sale, rental or loss. Paired settlement checks need independent RNG instances.
+
+### 13.157 Customization spend and current resale are different numbers
+
+A ready-customized purchase must value the base item first, then apply the same
+one-time effect as customizing an owned item. Never apply collector resale recovery
+to an invoice containing custom work. Save the base purchase amount and paid work
+separately, and derive total spend once; sale, collection and estate continue reading
+one canonical current value. Preserve factory-set status separately from aftermarket
+work, inherited provenance and hidden counterfeit flags. Switch the annual market
+only for paid aftermarket work, without repeating the initial penalty or charge.
+Validate historical work against its acquisition year, not the current heir's birth.

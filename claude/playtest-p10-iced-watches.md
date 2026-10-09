@@ -1,9 +1,10 @@
-# Playtest P10 — iced-out watches, measured proposal
+# Playtest P10 — approved iced-out watches
 
-Status: Payton authorized P10 on 8 October 2026. Separately claimed and published
-before measurement on `feat/playtest-p10-iced-watches`, stacked on P9 PR #21 while
-main remains `beff25a`. Production is unchanged. The new gameplay numbers and
-purchase/collection shape below await approval. P11 and life-event wording wait.
+Status: Payton approved the full proposal on 8 October 2026. Built on
+`feat/playtest-p10-iced-watches`, stacked on P9 PR #21 while main remains `beff25a`.
+The separate approval/claim commit reserves save v47 before production edits.
+The measurement and proposal below document what was approved; implementation,
+verification and remaining checks are recorded at the end. P11 and life-event wording wait.
 
 ## Requirement and binding scope
 
@@ -65,7 +66,7 @@ market years and seed keys are retained for the candidate comparison below.
 | Richard Millon RM 35                      | $248,950    | $286,293       | $437,036                         |
 | Jakob & Co. Billionaire Timeless Treasure | $19,604,860 | $14,703,645    | $15,825,233                      |
 
-## Proposed product rule and numbers
+## Approved product rule and numbers
 
 Keep the 55 model IDs, names, prices, rarity, stores and original holds unchanged.
 Add explicit per-watch metadata for eligibility, fixed custom-work cost and value
@@ -195,8 +196,8 @@ restoration, then full pnpm verify, owned formatting and a PR into main. Preserv
 seven current pre-existing generator mismatches and 22 old-note formatting failures
 as explicit blockers rather than silently changing them.
 
-Native-device checks and Claude Project mirroring remain unavailable. Implementation
-has not started; no new tests or mutation trials are being claimed as completed.
+Native-device checks and Claude Project mirroring remain unavailable. The proposal
+was measured before production edits; see the completed implementation results below.
 
 ## Calibration references and limits
 
@@ -273,3 +274,103 @@ rule; it is not an investment recommendation or a verified market arbitrage.
 | val.watch.vacheran-patrimony      | Vacheran Constantine Patrimony            | $10,000              | 80%                 | 0%                   | Aftermarket          |
 | val.watch.langer-saxonia          | A. Langer & Sohn Saxonia Thin             | $10,000              | 80%                 | 0%                   | Aftermarket          |
 | val.watch.jakob-timeless-treasure | Jakob & Co. Billionaire Timeless Treasure | —                    | —                   | —                    | factory-set          |
+
+## Implementation and release checks (9 October 2026 UTC)
+
+Built the approved manifest for all 55 existing watches without changing any original
+catalog field. Fifty-three policies are aftermarket, one factory-set, one unavailable.
+The generator reproduces exact tracked bytes; content validation checks policy shape,
+positive integral cost and bounded shares. Existing catalog membership, store sizes,
+selection keys, rarity and stock IDs remain unchanged.
+
+`buyValuable` remains backward compatible and accepts explicit payment and finish.
+Both configurations consume the same stock slot. `valuablePurchaseQuote` values the
+base watch first; `iceValuable` uses the held watch's current appraisal, preserves
+base price/year, provenance and hidden counterfeit flags, and refuses repeat work
+and known reproductions before payment. The full invoice is charged atomically through
+`payPurchase`; card funding remains debt transfer and work/acquisition remains property.
+`valuableIcingQuote` supplies the same cost/resale preview to the collection screen.
+Original non-watch purchases gain the existing payment selector on that same screen.
+
+The actual GameProvider/store actions persist purchases and work, and report spoken
+refusals. Existing screens show Original/Iced-out choices, full invoice and resale,
+work cost/year, base acquisition year/price and total paid once. Factory diamonds are
+labeled separately. The general Sell action stays available. No new route, stat reward,
+reversal, grading control, mythical-watch model or unrelated purchase flow was added.
+
+Save v47 was reserved in its own claim commit before implementation. Its v46 migration
+changes only the version, without RNG, balance changes, repricing or invented work.
+Validation requires integral nonnegative paid cents, valid work/acquisition years and
+eligible known catalog pieces; historical work can predate an heir's birth. Unknown
+retired IDs preserve their held data/value. Paid work survives serialization, reload,
+actual annual appraisal and real descendant handoff. Factory-set legacy holdings are
+unchanged. Existing P7–P9 current-version assertions now expect 47, while historical
+migration fixtures remain historical. P8's frozen legacy catalog hash excludes only
+the newly approved metadata; every original catalog field remains hash-protected.
+
+Post-build scratch `production.ts` used real offers and both paid commands on all 53
+eligible references. The paid paths produce identical holdings, all transactions
+reconcile, all initial values/net-worth losses match the proposal, and all ten-year
+p10/median/p90 values match the approved candidate across the same 100 seed keys.
+This is the same focused asset probe as the pre-build measurement, not a new passive
+population model. All 53 modifications lower immediate net worth; the original 115%
+sought-watch recovery remains a separate existing finding.
+
+### Independent sabotage verification
+
+Tar backup of all ten mutated source/data files before trials. Each trial restored
+original bytes, introduced one behavioral mutation, ran the real targeted Vitest suite,
+and required assertion failures rather than a compile/import failure to count as
+caught. Final restoration checked every original MD5. A descendant-patch harness
+anchor was corrected before running that trial; it is not counted as a mutation.
+**31 distinct behavioral mutations caught; none missed.** Screens, engine, catalog,
+payment helper, migration validation, serialization and actual inheritance are covered.
+
+| Trial | Behavioral mutation                                  | Result |
+| ----- | ---------------------------------------------------- | ------ |
+| 1     | G-Shok cost changed                                  | Caught |
+| 2     | G-Shok recovers all custom spend                     | Caught |
+| 3     | Subaquatic retains original collector value          | Caught |
+| 4     | Factory watch offered aftermarket work               | Caught |
+| 5     | Smartwatch offered aftermarket work                  | Caught |
+| 6     | Modifier uses retail rather than current value       | Caught |
+| 7     | Modifier drops gemstone recovery                     | Caught |
+| 8     | Aftermarket yearly precious switch absent            | Caught |
+| 9     | Original and factory watches switch yearly market    | Caught |
+| 10    | Iced fashion still has bare-watch floor              | Caught |
+| 11    | Customization penalty repeated annually              | Caught |
+| 12    | Counterfeit avoids ordinary appraisal                | Caught |
+| 13    | Ready purchase charges base watch only               | Caught |
+| 14    | Ready purchase saves full invoice as base price      | Caught |
+| 15    | 115 percent resale applied to full custom invoice    | Caught |
+| 16    | Owned customization can be repeated                  | Caught |
+| 17    | Known reproduction can be customized                 | Caught |
+| 18    | Ready card debt result discarded                     | Caught |
+| 19    | Customization card debt result discarded             | Caught |
+| 20    | Customization revalues all held watches              | Caught |
+| 21    | Customization erases inherited and hidden fake flags | Caught |
+| 22    | Saved work discarded on reload                       | Caught |
+| 23    | Save work accepts negative cost                      | Caught |
+| 24    | Save work accepts future year                        | Caught |
+| 25    | Descendant loses paid work                           | Caught |
+| 26    | Purchase store ignores finish and payment            | Caught |
+| 27    | Customization store ignores card selection           | Caught |
+| 28    | Store screen ignores iced configuration              | Caught |
+| 29    | Payment accepts stale invoice                        | Caught |
+| 30    | Payment accepts frozen card                          | Caught |
+| 31    | Payment accepts insufficient card credit             | Caught |
+
+### Validation and open work
+
+Release checks: 147 new P10 tests; 3,014 tests total and all 15 typechecks pass.
+Full `pnpm verify` reaches content validation, then exits nonzero on the same seven
+inherited generator mismatches: activities, advice, auctions, businesses,
+events-childhood, homes and vehicles. No P10-owned validation failure remains.
+The validator's secondary vehicle-mods formatting output was restored only after
+confirming identical parsed JSON (CORE_RULES 13.155). Full formatting still fails on
+22 historical notes; all changed files pass. No existing test was deleted or weakened.
+
+Native/on-device checks and Claude Project `project_write` mirroring are unavailable
+in this environment and remain explicitly open. The branch follows P9 PR #21 and
+depends on P1–P9 PRs #13–#21; main is still `beff25a` after refreshing origin. Payton
+merges the stack. TICKET 0708 stays untouched. P11 and life-event wording wait.

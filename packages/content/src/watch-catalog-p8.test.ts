@@ -45,7 +45,9 @@ const SOUGHT = new Set([
 
 describe('P8 — real model equivalents in a bounded fictional catalog', () => {
   it('preserves every existing entry, its order and every store byte-equivalent in meaning', () => {
-    expect(digest(VALUABLES.slice(0, 151))).toBe(LEGACY_ENTRIES);
+    expect(digest(VALUABLES.slice(0, 151).map(({ icing: _icing, ...original }) => original))).toBe(
+      LEGACY_ENTRIES,
+    );
     expect(digest(VALUABLE_STORES)).toBe(LEGACY_STORES);
   });
   it('adds exactly 18 distinct watches and one maker, with no other catalog growth', () => {

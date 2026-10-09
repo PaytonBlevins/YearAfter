@@ -1662,16 +1662,21 @@ additions in the same group. The indoor pool shares that constraint; replacement
 pricing is not quietly added. Annual renovation expense also includes the home's
 expense rate on recovered value, beyond the catalog upkeep; previews must use the reader.
 
-### Playtest P10 — measured iced-out watch proposal (8 October 2026 UTC)
+### Playtest P10 — approved iced-out watch choices built (8 October 2026 UTC)
 
-Authorized and separately claimed on `feat/playtest-p10-iced-watches`, following P9 #21.
-Measured real purchases/sales of all 55 watches and ten-year paths across 100 seed keys.
-No icing command or held field; existing Jakob is factory-set. Proposed original/iced
-configuration and owned-watch action on existing screens, 53 eligible models, explicit
-per-watch cost/value metadata and existing cash/card contract, precious annual market
-for aftermarket work and no-RNG save v47. Full manifest and tradeoffs:
-`playtest-p10-iced-watches.md`. Approval awaits; production unchanged, no version
-reserved. P11 and life-event wording wait.
+Payton approved the full per-watch proposal; built on `feat/playtest-p10-iced-watches`,
+following P9 #21. Both Original/Iced-out choices consume the same offered stock slot.
+Collection customization previews current resale before/after and charges the fixed
+work cost through an explicit cash/card choice. All 55 base catalog entries remain
+unchanged; 53 accept work, Jakob is factory-set and Orchard excluded. The one-time
+current-value effect and subsequent precious yearly market match the approved
+100-seed ten-year probes for all 53 models; both paid paths agree and reconcile.
+Save v47 preserves legacy values/RNG and persists paid work without duplicating the
+base purchase price. Descendants, counterfeit appraisal, sale/estate and actual
+mobile/store/autosave paths are covered. Results: `playtest-p10-iced-watches.md`. All 15 typechecks and 3,014 tests pass
+(147 new); 31 sabotage mutations caught, none missed. Full verification retains
+seven inherited generator mismatches and full formatting 22 historical notes.
+P11 and life-event wording wait.
 
 ### Found by P10
 
@@ -1680,4 +1685,7 @@ an instant original-watch markup. Preserve that approved rule, but never apply i
 an iced invoice's custom-work cost. The existing $20m Jakob's factory diamonds are
 not aftermarket work. Original watches can keep their current yearly market; a cheap
 iced watch should not drift to the bare-watch fashion floor after gemstones were paid
-for. The proposed switch to the existing precious reader needs explicit approval.
+for. Payton approved the precious reader for paid aftermarket work. The seven inherited
+catalog-generator mismatches and 22 historical-note formatting failures still block
+verification/CI; native checks and Project mirroring remain open. No unrelated catalog
+rewrite or life-event wording work is included.

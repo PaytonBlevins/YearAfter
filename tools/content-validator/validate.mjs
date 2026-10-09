@@ -566,6 +566,26 @@ walk(contentDir, (file) => {
       );
       continue;
     }
+    if (rel === 'packages/content/data/valuables.json') {
+      const policy = entry.icing;
+      if (entry.kind === 'watch') {
+        if (!policy || !['aftermarket', 'factory', 'unavailable'].includes(policy.kind))
+          fail(rel, `${entry.id}: watches need an explicit customization policy.`);
+        else if (
+          policy.kind === 'aftermarket' &&
+          (!Number.isSafeInteger(policy.cost) ||
+            policy.cost <= 0 ||
+            !Number.isFinite(policy.valueShare) ||
+            policy.valueShare < 0 ||
+            policy.valueShare > 1 ||
+            !Number.isFinite(policy.costRecovery) ||
+            policy.costRecovery < 0 ||
+            policy.costRecovery >= 1)
+        )
+          fail(rel, `${entry.id}: customization cost and recovery must be valid and bounded.`);
+      } else if (policy !== undefined)
+        fail(rel, `${entry.id}: only watches have customization policies.`);
+    }
     if (rel === 'packages/content/data/renovations.json') {
       if (!Number.isSafeInteger(entry.space) || entry.space < 0)
         fail(rel, `${entry.id}: space must be a nonnegative whole number.`);

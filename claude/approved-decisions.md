@@ -156,6 +156,20 @@ before v0.08 and 0508, one ticket at a time with a stop between each. The brief 
   during hardship or a final cash shortfall. Preserve existing work, use explicit cash/card
   payment, keep save v46 and stop after P9.
 
+- **P10 iced-out watches, approved 8 October 2026:** Payton approved the full measured
+  proposal in `playtest-p10-iced-watches.md`. Preserve all 55 existing references and
+  stock slots; 53 accept aftermarket work, the existing Jakob is factory-set and the
+  Orchard smartwatch is excluded. Fixed per-watch costs are $2,500/$5,000/$10,000/
+  $25,000/$50,000 at the listed catalog bands. The four fashion watches retain current
+  resale plus 40% of work cost; ordinary watches retain 80%, sought watches 65%, with
+  no work-cost recovery for either collector group. Apply once to current resale,
+  then use the existing precious annual market and $1 floor. Original/factory-set
+  annual rules and the original sought 115% purchase recovery remain unchanged.
+  Existing Store/Collections screens offer ready-iced purchase or owned-watch work
+  with explicit cash/card payment of the full invoice. Save v47 adds optional paid
+  work; base purchase price, provenance and counterfeit flags persist. No instant
+  stat reward, repeat work or reverse action. Stop after P10; P11 waits.
+
 ## Reference material
 
 BitLife screenshots supplied by the product owner, saved at

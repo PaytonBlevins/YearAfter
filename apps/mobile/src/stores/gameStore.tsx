@@ -69,6 +69,7 @@ import {
   buyValuable,
   sellValuable,
   BUY_VALUABLE_ERROR_LABELS,
+  iceValuable,
   attendAuction,
   bidOn,
   ATTEND_ERROR_LABELS,
@@ -234,7 +235,12 @@ interface GameContextValue {
   readonly sellABusiness: (businessId: string) => void;
   readonly closeABusiness: (businessId: string) => void;
   /** Ticket 0506. Buy a piece off a store's counter, or sell one from the collection. */
-  readonly buyAValuable: (stockId: string) => void;
+  readonly buyAValuable: (
+    stockId: string,
+    payment?: PurchasePayment,
+    finish?: 'original' | 'iced',
+  ) => void;
+  readonly iceAValuable: (pieceId: string, payment?: PurchasePayment) => void;
   readonly sellAValuable: (pieceId: string) => void;
   /** Ticket 0507. Go to an auction's next sale, and bid on a lot at it. */
   readonly attendAnAuction: (venueId: string) => void;
@@ -1054,10 +1060,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const buyAValuable = useCallback(
-    (stockId: string) => {
+    (stockId: string, payment?: PurchasePayment, finish?: 'original' | 'iced') => {
       setState((current) => {
         if (!current) return current;
-        const result = buyValuable(current, stockId);
+        const result = buyValuable(current, stockId, payment, finish);
         if (!result.ok) {
           setOutcome({
             title: 'Not now',
@@ -1067,6 +1073,27 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           return current;
         }
         setOutcome({ title: "It's yours", body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const iceAValuable = useCallback(
+    (pieceId: string, payment?: PurchasePayment) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = iceValuable(current, pieceId, payment);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body: BUY_VALUABLE_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
+          return current;
+        }
+        setOutcome({ title: 'Iced out', body: result.value.entry.text, tone: 'good' });
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
       });
@@ -1721,6 +1748,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       sellABusiness,
       closeABusiness,
       buyAValuable,
+      iceAValuable,
       sellAValuable,
       attendAnAuction,
       bidAtAuction,
@@ -1800,6 +1828,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       sellABusiness,
       closeABusiness,
       buyAValuable,
+      iceAValuable,
       sellAValuable,
       attendAnAuction,
       bidAtAuction,

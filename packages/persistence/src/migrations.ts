@@ -14,6 +14,7 @@ import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
 import {
   SUBSISTENCE,
+  savedWatchWorkAllowed,
   isLifestyleTier,
   POSTS_PER_YEAR,
   reconcile,
@@ -1010,6 +1011,8 @@ const migrations: Readonly<Record<number, Migration>> = {
         : { ties: [], met: [], answeredYear: 0, work: { year: 0, done: [] } },
     version: 42,
   }),
+  /** P10 v46 -> v47: no work was paid for; preserve held values, balances and RNG. */
+  46: (save) => ({ ...save, version: 47 }),
   /** P7 v45 -> v46: no goal existed before; no invented goal and no RNG. */
   45: (save) => {
     const { cashGoal: _future, ...prior } = save;
@@ -1371,7 +1374,25 @@ export function validateCurrentSave(
     // Ticket 0504. The same for cars.
     require('vehicles', candidate['vehicles'], Array.isArray(candidate['vehicles'])),
     // Ticket 0506. And for what is in the collection.
-    require('valuables', candidate['valuables'], Array.isArray(candidate['valuables'])),
+    require('valuables', candidate['valuables'], Array.isArray(candidate['valuables']) &&
+      candidate['valuables'].every((piece: unknown) => {
+        if (typeof piece !== 'object' || piece === null) return false;
+        const icing = (piece as Record<string, unknown>)['icing'];
+        if (icing === undefined) return true;
+        if (typeof icing !== 'object' || icing === null || Array.isArray(icing)) return false;
+        const work = icing as Record<string, unknown>;
+        const held = piece as Record<string, unknown>;
+        return (
+          typeof held['itemId'] === 'string' &&
+          savedWatchWorkAllowed(held['itemId']) &&
+          Number.isSafeInteger(held['boughtYear']) &&
+          Number(work['year']) >= Number(held['boughtYear']) &&
+          Number.isSafeInteger(work['cost']) &&
+          Number(work['cost']) >= 0 &&
+          Number.isSafeInteger(work['year']) &&
+          Number(work['year']) <= Number(world?.['year'])
+        );
+      })),
     // Ticket 0601. And for what is owned and running.
     require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
     require('businessRescue', candidate['businessRescue'], businessRescueOk(candidate)),

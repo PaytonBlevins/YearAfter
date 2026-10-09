@@ -145,15 +145,20 @@ Owned formatting passes. PR #21 targets main and is mergeable when checked. Impl
 the same 22 historical-note formatting checks and skips later gates. Native checks/Project mirroring open.
 P10 and life-event wording wait for Payton.
 
-**P10 proposal update (8 October):** Payton authorized P10. Agent B separately claimed
-`feat/playtest-p10-iced-watches`, following P9 #21 while main remains `beff25a`.
-Actual purchases/sales cover all 55 watches; ten-year asset probes use 100 seed keys.
-No icing field/action exists. Proposed 53 eligible models, preserve the existing
-factory-set Jakob and exclude the smartwatch, per-watch custom prices and positive/
-negative value effects, ready-iced purchase or owned-watch action on existing screens,
-cash/card payment and no-RNG save v47. All new numbers/shape await approval; no
-production edits or save reservation. Details: `playtest-p10-iced-watches.md`.
-P11 and life-event wording wait.
+**P10 implementation update (8 October):** Payton approved the full measured proposal.
+Agent B built Original/Iced-out purchase choices and owned-watch customization on the
+existing Store/Collections screens, with explicit full-invoice cash/card payment.
+All 55 original references/stock slots stay; 53 are customizable, Jakob remains
+factory-set and the smartwatch is excluded. Per-model one-time effects use current
+resale, aftermarket work then uses the precious annual market; original rules stay.
+Save v47, separately reserved before production edits, preserves old values/RNG and
+saves work cost/year beside the base watch purchase price. Provenance, counterfeit
+appraisal, actual descendant handoff and autosave are tested. Details and verification:
+`playtest-p10-iced-watches.md`. All 15 typechecks and 3,014 tests pass
+(147 new); 31 sabotage mutations caught, none missed. Full verification retains
+seven inherited generator mismatches and full formatting 22 historical notes. Stacked on P9 #21; dependencies #13–#21 remain unmerged
+while main is `beff25a`. Native checks and Project mirroring remain open. P11 and
+life-event wording wait for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

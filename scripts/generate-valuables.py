@@ -340,6 +340,70 @@ V("watch.jakob-timeless-treasure", "watch", "Jakob & Co. Billionaire Timeless Tr
   rarity="very rare", blurb="Yellow diamonds cover the case and bracelet. The price is a fortune by itself.")
 
 
+# P10: explicit per-model approved policy; original catalog fields remain intact.
+WATCH_ICING = {
+    "val.watch.casiot-g-shok": {"kind": "aftermarket", "cost": 2500, "valueShare": 1, "costRecovery": 0.4},
+    "val.watch.casiot-gold": {"kind": "aftermarket", "cost": 2500, "valueShare": 1, "costRecovery": 0.4},
+    "val.watch.timexa-weekender": {"kind": "aftermarket", "cost": 2500, "valueShare": 1, "costRecovery": 0.4},
+    "val.watch.fossell-chrono": {"kind": "aftermarket", "cost": 2500, "valueShare": 1, "costRecovery": 0.4},
+    "val.watch.seyko-presago": {"kind": "aftermarket", "cost": 2500, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.seyko-diver": {"kind": "aftermarket", "cost": 2500, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.tissoe-prx": {"kind": "aftermarket", "cost": 2500, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.hamiltone-khaki": {"kind": "aftermarket", "cost": 2500, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.apple-ish": {"kind": "unavailable"},
+    "val.watch.tagg-carrara": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.tagg-monako": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.tudar-black-cove": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.longinez-spirit": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.oris-diver": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.breitlong-navigator": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.grand-seyko-snowflake": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.omegon-speedmeister": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.omegon-seamarine": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.cartrier-tanque": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.cartrier-santo": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.rolux-datesure": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.rolux-subaquatic": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.rolux-gmt": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.rolux-daytonna": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.rolux-day-date": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.iwc-pilot": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.jaeger-reverso": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.panerai-luminor": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.zenith-chrono": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.blancpain-fifty": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.ap-royal-ash": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.patrek-calatrova": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.patrek-nautilos": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.vacheran-overseas": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.langer-lange1": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.millon-rm": {"kind": "aftermarket", "cost": 50000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.patrek-grand-comp": {"kind": "aftermarket", "cost": 50000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.rolux-yacht-voyager": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.rolux-perpetual": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.rolux-explorer": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.seyko-alpinist": {"kind": "aftermarket", "cost": 2500, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.tissoe-gentleperson": {"kind": "aftermarket", "cost": 2500, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.hamiltone-ventura": {"kind": "aftermarket", "cost": 2500, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.grand-seyko-birch": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.tudar-pelagos": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.longinez-legend-diver": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.orys-pointer-date": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.omegon-aquaterra": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.cartrier-ballon": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.breitlong-superocean": {"kind": "aftermarket", "cost": 5000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.ap-royal-ash-offshore": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.patrek-aquanote": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.65, "costRecovery": 0},
+    "val.watch.vacheran-patrimony": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.langer-saxonia": {"kind": "aftermarket", "cost": 10000, "valueShare": 0.8, "costRecovery": 0},
+    "val.watch.jakob-timeless-treasure": {"kind": "factory"},
+}
+assert set(WATCH_ICING) == {e["id"] for e in ENTRIES if e["kind"] == "watch"}
+for entry in ENTRIES:
+    if entry["kind"] == "watch":
+        entry["icing"] = WATCH_ICING[entry["id"]]
+
+
 def catalog_text() -> str:
     """Reproduce the existing catalog layout without reformatting old rows.
 
