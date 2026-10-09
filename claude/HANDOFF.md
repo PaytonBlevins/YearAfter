@@ -198,6 +198,20 @@ PR #24 targets main, depends on #13–#23 and was mergeable when checked.
 CI 146 fails the same 22 historical-note format checks; later gates skip. Payton authorized P13 next; P14–P16
 and life-event wording wait for Payton.
 
+**P13 measurement update (9 October UTC):** Payton authorized P13 after P12 closeout.
+Separately claimed/published `feat/playtest-p13-agent-levels`, rebased on refreshed
+main (`beff25a`), stacked on P12 #24. Actual price commands/demand work for all 31
+types; real estate still has the requested-to-be-excluded price control and no
+agent-level selection. Only Real Estate Brokerage is explicitly agent-based in the
+current catalog. Measured 54 cost/client-flow configurations (5,832 counterfactual
+points) with manager/reputation response and last-twenty averaging. Propose saved
+team Low/Mid/High at 90/100/115% existing labor cost and potential client flow;
+keep existing payroll/headcount, variable cost, macro/events/P1 rules. Real estate
+uses ordinary 100 and no price selector/command; other existing sliders stay.
+Save v50 proposed, not reserved, pending approval. Details: `playtest-p13-agent-levels.md`.
+Gaming still has a maximum-price mature optimum in this probe; logged without a curve
+rebuild. No production edits; P14–P16 and life-event wording wait.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:

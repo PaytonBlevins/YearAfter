@@ -1746,3 +1746,28 @@ bound is only 0.420 mature-revenue points on the production sample; it is not a 
 return. Conditional hike protection is not an annual rebate. A replaced Pass ID needs
 its own negative test while a new pitch is pending. Seven inherited generator mismatches,
 22 old-note format failures, native checks and unavailable Project mirroring remain open.
+
+### Playtest P13 — measured agent levels and pricing check (9 October 2026 UTC)
+
+Payton authorized P13 after P12 closeout. Separately claimed and published on
+`feat/playtest-p13-agent-levels`, stacked on P12 #24 while refreshed main stays
+`beff25a`. Current catalog has one explicit agent business, Real Estate Brokerage.
+All 31 actual owned-business price commands work and demand responds; missing B3
+exception is real estate. Measured 54 cost/client-flow configurations at 36 fixed
+contexts and three tiers = 5,832 counterfactual points. Proposed team Low/Mid/High
+at 90/100/115% labor cost and potential client demand, independent of current
+payroll, with a real-estate-only fixed 100% rate and save v50. Details and concrete
+approval choices: `playtest-p13-agent-levels.md`. No production edits or version
+reservation before approval; P14–P16 and life-event wording wait.
+
+### Found by P13
+
+Do not mistake every “Agency” or supplier-free company for a brokerage. Current
+pricing already changes demand; real estate's excluded control is the missing
+piece. The gaming company still favors the maximum in a mature manager/reputation
+probe; this is a margin finding, not disconnected demand. Log it without rebuilding
+pricing. Commission-like variable costs must not shrink when a capacity probe
+changes benchmark revenue, and agent cost must not grant another payroll-quality
+boost. Whole-person staffing can oscillate; compare a tail mean rather than one
+favorable terminal year. Baseline verification/format, native/device checks and
+unavailable Project mirroring remain open.
