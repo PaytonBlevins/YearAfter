@@ -194,7 +194,9 @@ caught after fixing one stale-Pass test gap, with exact restored hashes. Details
 `playtest-p12-supplier-pitches.md`. Stacked on P11 #23 while main remains `beff25a`.
 Seven inherited catalog mismatches and 22 old-note formatting failures remain;
 final verify/PR/CI check recorded in the ticket. Native checks/Project mirroring open.
-P13–P16 and life-event wording wait for Payton.
+PR #24 targets main, depends on #13–#23 and was mergeable when checked.
+CI 146 fails the same 22 historical-note format checks; later gates skip. Payton authorized P13 next; P14–P16
+and life-event wording wait for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

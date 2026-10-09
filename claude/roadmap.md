@@ -1733,7 +1733,9 @@ acquisition/inheritance, reset search availability next year without replacing t
 Actual production commands reproduce 60,000 quote cases and 12,000 reconciled annual
 settlements. 3,139 tests and all 15 typechecks pass; 26 mutations caught after one
 stale-Pass test repair. Details/final verification/PR: `playtest-p12-supplier-pitches.md`.
-P13–P16 and life-event wording wait.
+PR #24 targets main, depends on #13–#23 and was mergeable when checked.
+CI 146 fails the same 22 historical-note format checks; later gates skip. Payton authorized P13 next; P14–P16
+and life-event wording wait.
 
 ### Found by P12
 

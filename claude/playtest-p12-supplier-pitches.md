@@ -293,3 +293,9 @@ are formatted. Validator rewrites of the secondary vehicle-mod catalog were rest
 only after semantic equality with HEAD was checked; no catalog rewrite is committed.
 Native/device checks and unavailable Claude Project mirroring remain open. No edits
 to `approved-decisions.md`, TICKET 0708, event wording, P13 or unrelated rules.
+
+PR #24: https://github.com/PaytonBlevins/YearAfter/pull/24, targets main and depends
+on #13–#23. Mergeable when checked. Implementation `2cb8672`; CI run 146
+(37891626024), job 113693612908, installed successfully but failed the same 22
+historical-note formatting checks. Actual job logs were read; later gates skipped. Payton authorized beginning P13
+after P12 closeout on 8 October local / 9 October UTC.
