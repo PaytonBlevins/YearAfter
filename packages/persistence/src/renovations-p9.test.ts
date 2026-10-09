@@ -41,7 +41,7 @@ function fixture() {
 describe('P9 saved work', () => {
   it('round trips an over-capacity legacy home without deleting work or changing its paid amounts', () => {
     const save = fixture();
-    expect(CURRENT_SAVE_VERSION).toBe(47);
+    expect(CURRENT_SAVE_VERSION).toBe(48);
     const loaded = migrateSave(JSON.parse(JSON.stringify(save)));
     if (!loaded.ok) throw Error(loaded.error.kind);
     const state = fromSave(loaded.value);

@@ -1013,6 +1013,8 @@ const migrations: Readonly<Record<number, Migration>> = {
   }),
   /** P10 v46 -> v47: no work was paid for; preserve held values, balances and RNG. */
   46: (save) => ({ ...save, version: 47 }),
+  /** P11 v47 -> v48: no extra service was paid for; no changes or RNG draws. */
+  47: (save) => ({ ...save, version: 48 }),
   /** P7 v45 -> v46: no goal existed before; no invented goal and no RNG. */
   45: (save) => {
     const { cashGoal: _future, ...prior } = save;
@@ -1372,7 +1374,24 @@ export function validateCurrentSave(
     require('household', candidate['household'], householdOk(candidate['household'])),
     require('homes', candidate['homes'], Array.isArray(candidate['homes'])),
     // Ticket 0504. The same for cars.
-    require('vehicles', candidate['vehicles'], Array.isArray(candidate['vehicles'])),
+    require('vehicles', candidate['vehicles'], Array.isArray(candidate['vehicles']) &&
+      candidate['vehicles'].every((car: unknown) => {
+        if (typeof car !== 'object' || car === null || Array.isArray(car)) return false;
+        const held = car as Record<string, unknown>;
+        const service = held['service'];
+        if (service === undefined) return true;
+        if (typeof service !== 'object' || service === null || Array.isArray(service)) return false;
+        const work = service as Record<string, unknown>;
+        return (
+          Number.isSafeInteger(held['boughtYear']) &&
+          Number.isSafeInteger(work['year']) &&
+          Number(work['year']) >= Number(held['boughtYear']) &&
+          Number(work['year']) <= Number(world?.['year']) &&
+          Number.isSafeInteger(work['cost']) &&
+          Number(work['cost']) >= 100 &&
+          Number(work['cost']) % 10 === 0
+        );
+      })),
     // Ticket 0506. And for what is in the collection.
     require('valuables', candidate['valuables'], Array.isArray(candidate['valuables']) &&
       candidate['valuables'].every((piece: unknown) => {

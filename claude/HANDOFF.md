@@ -162,16 +162,22 @@ life-event wording wait for Payton. PR #22 targets main and is mergeable when ch
 https://github.com/PaytonBlevins/YearAfter/pull/22. Implementation CI run 132 failed the same 22 historical-note format checks
 and skipped later gates.
 
-**P11 measurement update (9 October UTC):** Payton authorized P11. Separately claimed
-`feat/playtest-p11-car-servicing`, refreshed main and stacked on P10 #22. Existing
-ordinary maintenance is already automatic. Measured 300 actual played lives and 4,200
-paired paths from seven actual purchased offers. Proposed optional extra preventive
-service, half upcoming mean upkeep (nearest $10, minimum $100), 25% less normal wear
-and 20% lower ordinary repair chance on the next advance only. Explicit cash/card
-confirmation on the existing owned-car screen; ordinary yearly bill remains intact.
-Details: `playtest-p11-car-servicing.md`. Save v48 proposed, not reserved; current v47.
-Await product approval before production edits. P12–P16 and life-event wording wait.
-Native checks and Project mirroring remain open.
+**P11 implementation update (9 October UTC):** Payton approved the measured servicing
+proposal with 5–10 extra years under annual renewal. Separately reserved save v48;
+P10 owns v47. Built extra preventive service on the owned-car screen with an exact
+invoice, explicit cash/card confirmation, spoken refusals and last-service status.
+Price stays half upcoming ordinary mean upkeep (nearest $10, minimum $100). Normal
+wear is multiplied by 0.63, classic wear by 0.75; ordinary major-repair chance by 0.8,
+for the next advance only. Ordinary yearly bills, crashes, hidden faults, past records,
+loans and mods retain their existing rules. Actual production commands reproduce all
+4,200 paired paths: median remaining life increases 5–10 years in the seven measured
+purchases. Details/results: `playtest-p11-car-servicing.md`. Thirty sabotage cases now
+caught; one RNG comparison initially missed a draw and was strengthened. No mutations
+retained. All 15 typechecks and 3,080 tests pass (66 new); full verification retains
+seven inherited generator mismatches and formatting 22 old notes. Changed files pass.
+PR/CI status is recorded in the ticket doc. Stack follows P10
+#22 while main remains `beff25a`. Native checks/Project mirroring open. P12–P16 and
+life-event wording wait for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

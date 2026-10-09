@@ -3189,3 +3189,20 @@ one canonical current value. Preserve factory-set status separately from afterma
 work, inherited provenance and hidden counterfeit flags. Switch the annual market
 only for paid aftermarket work, without repeating the initial penalty or charge.
 Validate historical work against its acquisition year, not the current heir's birth.
+
+### 13.158 Optional paid care must expire without rewriting the underlying history
+
+When routine upkeep is already deducted by the annual reader, expose paid preventive
+work as additional care with an explicit invoice. Keep the ordinary bill intact.
+Save the paid year/cost, apply its benefit to exactly the next annual advance, and
+retain the last record for display without treating it as perpetual coverage. One
+service must not certify missing old records, restore condition/value immediately,
+discount a hidden fault or protect against an unrelated accident. Measure lifespan
+under repeated paid renewal using the real command and reader; don't turn an average
+5–10 extra years into a guarantee on one visit. Model exceptions need measured evidence:
+a classic's already low wear should not receive nineteen extra years accidentally.
+
+Capture an immutable RNG snapshot before calling a command. Comparing returned state
+with the original state after a call can hide an accidental draw when both reference
+the same mutable RNG. Sabotage that boundary explicitly; ordinary financial reconciliation
+and a comparison of the two post-call snapshots do not detect it.

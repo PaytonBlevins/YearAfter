@@ -63,6 +63,8 @@ import {
   sellVehicle,
   inspectVehicle,
   fitVehicleMod,
+  serviceVehicle,
+  SERVICE_VEHICLE_ERROR_LABELS,
   FIT_MOD_ERROR_LABELS,
   renovate,
   RENOVATE_ERROR_LABELS,
@@ -221,6 +223,7 @@ interface GameContextValue {
   /** Ticket 0504. Pay a mechanic to look a used car over. */
   readonly inspectACar: (listingId: string) => void;
   /** Ticket 0505. Have a shop fit a modification. */
+  readonly serviceACar: (vehicleId: string, payment?: PurchasePayment) => void;
   readonly fitACarMod: (vehicleId: string, modId: string) => void;
   /** Ticket 0506. Have a builder do something to a home. */
   readonly renovateHome: (homeId: string, renovationId: string, payment?: PurchasePayment) => void;
@@ -1080,6 +1083,27 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const serviceACar = useCallback(
+    (vehicleId: string, payment?: PurchasePayment) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = serviceVehicle(current, vehicleId, payment);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body: SERVICE_VEHICLE_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
+          return current;
+        }
+        setOutcome({ title: 'Serviced', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const iceAValuable = useCallback(
     (pieceId: string, payment?: PurchasePayment) => {
       setState((current) => {
@@ -1739,6 +1763,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       sellACar,
       inspectACar,
       fitACarMod,
+      serviceACar,
       renovateHome,
       openABusiness,
       buyABusiness,
@@ -1819,6 +1844,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       sellACar,
       inspectACar,
       fitACarMod,
+      serviceACar,
       renovateHome,
       openABusiness,
       buyABusiness,

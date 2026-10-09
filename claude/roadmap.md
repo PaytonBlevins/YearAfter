@@ -1693,23 +1693,27 @@ catalog-generator mismatches and 22 historical-note formatting failures still bl
 verification/CI; native checks and Project mirroring remain open. No unrelated catalog
 rewrite or life-event wording work is included.
 
-### Playtest P11 — measured servicing proposal (9 October 2026 UTC)
+### Playtest P11 — approved servicing built (9 October 2026 UTC)
 
-Authorized and separately claimed on `feat/playtest-p11-car-servicing`, stacked on P10
-#22 after refreshing main (`beff25a`). Measured 300 actual first-choice lives and 4,200
-paired retained-car paths using seven real purchases. Proposed optional extra preventive
-service at 50% of next year's mean maintenance (nearest $10, minimum $100), reducing
-normal wear 25% and ordinary big-repair chance 20% for the next advance only. Explicit
-cash/card confirmation on the owned-car screen. Costs rise; the benefit is longer life.
-Current ordinary yearly maintenance remains intact. Full proposal/results in
-`playtest-p11-car-servicing.md`; approval required before production edits. Save v48
-proposed, not reserved; current v47. P12–P16 and life-event wording wait.
+Payton approved with a 5–10-year longer-life target. Built on
+`feat/playtest-p11-car-servicing`, stacked on P10 #22 after refreshing main (`beff25a`).
+Separately reserved save v48 before production edits; old cars remain unserviced and
+values/financial history/RNG stay intact. Optional extra preventive work has one
+invoice, cash/card confirmation and last-service/renewal status on the owned-car
+screen. Price is half next year's mean maintenance, nearest $10/minimum $100. Normal
+wear ×0.63, classic wear ×0.75 and ordinary repair chance ×0.8 expire after one advance.
+Ordinary bills, accidents, hidden faults, history and loan/modification rules stay.
+Production reproduces all 4,200 paired paths, with 5–10 extra median remaining years
+for the measured cars. Thirty mutations caught after strengthening one missed RNG
+comparison. Details/final verification/PR: `playtest-p11-car-servicing.md`.
+P12–P16 and life-event wording wait.
 
 ### Found by P11
 
-Ordinary annual maintenance already includes servicing, so the player action must
-clearly identify extra preventive work. Hidden old service history must not become
-perfect records after one paid visit. Age-18 replacement offers are separate from
-condition and can still appear for a well-kept car; no silent retune here. Classic
-baseline longevity is already long. Seven inherited generator mismatches, 22 old-note
-format failures, native checks and unavailable Project mirroring remain open.
+Ordinary annual maintenance already includes servicing, so the player action clearly
+identifies extra preventive work. Hidden old service history does not become perfect
+records after one paid visit. Age-18 replacement offers can still appear for a well-kept
+car; no silent retune here. The classic-specific multiplier avoids an accidental
+nineteen-year extension. Same-object post-call RNG comparisons hide draws; immutable
+before-call snapshots now protect that boundary. Seven inherited generator mismatches,
+22 old-note format failures, native checks and unavailable Project mirroring remain open.
