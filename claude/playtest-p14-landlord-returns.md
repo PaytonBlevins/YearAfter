@@ -3,8 +3,9 @@
 Status: Payton authorized P14 after P13 closeout on 8 October local / 9 October
 2026 UTC. Separately claimed and published before measurement on
 `feat/playtest-p14-landlord-returns`. Refreshed main remains `beff25a`; stacked on
-P13 PR #25 and #13–#24. **Measured proposal, pending approval. No production edits,
-new save fields or reserved version.** P15–P16 and life-event wording wait.
+P13 PR #25 and #13–#24. **Payton approved all three choices, then production was
+built. Save v50 is unchanged; no new fields or version reservation.** P15–P16
+and life-event wording wait.
 
 ## Requirement and contracts
 
@@ -92,7 +93,7 @@ anchor remains a broad comparison; no claim that every 2026 market earns it.
 The proposed 15% adjustment and half-deposit preset are game choices, not forecast
 US rent growth or an empirically derived universal deposit recommendation.
 
-## Concrete proposal — approval required
+## Approved design
 
 1. **Residential going rents ×1.15.** A single documented finance policy factor
    for the eleven noncommercial kinds, applied through the shared rent calculation
@@ -167,9 +168,9 @@ residential rent and unchanged commercial rent: **360,000 annual settlements**.
 Every emitted transaction posts to the ledger and reconciles. Cash/deposit is
 posted as a property transfer; principal paydown is counted separately, not called
 operating profit. These are prospective balance-reader probes: the half-deposit
-purchase command does not exist yet. No full household/lifetime forecast is claimed.
+purchase command did not exist during this preapproval probe. No full household/lifetime forecast is claimed.
 
-## Acceptance after approval
+## Acceptance
 
 Add literal policy/unchanged commercial tests, all six rent settings and region/
 condition comparisons. Exercise actual quote and purchase commands with usual,
@@ -186,12 +187,82 @@ full `pnpm verify`, changed-file formatting, own docs/CORE/findings and PR into 
 then stop before P15. No weakened/deleted acceptance tests or retuned unrelated
 macro, living, tax, property value or mortgage products.
 
+## Implementation and verification
+
+Payton approved the residential ×1.15 rent policy, fixed 50%-down investment option
+and revised projections. The shared finance helper feeds both annual/applicant rent
+and listing underwriting. Half-deposit quotes and purchases share existing products,
+use whole-dollar ceiling deposits and saved mortgage fields, and reject unsupported
+primary-home/dead/malformed requests. Cash and usual mortgages remain available.
+The actual expanded Homes action and store persist the chosen financing. Rental
+shows operating profit separately from cash after the exact annual debt payment,
+with full-year/current-occupancy/before-income-tax wording. Occupied commercial
+leases retain signed rents; the asking row remains the new-lease quote.
+
+Existing estate policy liquidates homes: the mortgage is settled before the heir
+receives proceeds. P14 tests that policy rather than inventing inherited property.
+Compatibility checks retain v50, test v49 migration, old loans, signed rents,
+transactions and deterministic annual replay. No new schema/version/catalog,
+rate, expense, tax, vacancy table or TICKET change.
+
+Production calibration: **110,000 property-years across 44 paired pricing cases**
+match the approved preimplementation ×1.15 rows exactly. Additional command probes
+exercise real quote/deposit/purchase and annual ledger reconciliation across all
+eight investment-building kinds: **1,490 successful purchases/annual settlements** and **10 valid lending refusals**, all reconciled.
+
+A separate **480 generated-life strategy sample** keeps P2 household costs and gives
+no cash gifts. The same 120 seeds are played per policy/financing choice, attempting
+one affordable managed rental at age 38–55 and continuing until 75/death. Usual
+mortgage purchases remain 66/120; half-deposit purchases 50/120. With usual financing,
+observed property cash per retained-owner-year moves −$324 → +$4,508, household
+shortfall owner-years 23 → 9, and properties leaving holdings 11 → 2. With the half
+preset the paired old/new-rent counterfactual moves +$4,428 → +$8,881, shortfall
+owner-years remain 3 and exits 2 → 1. The old-rent half case is a counterfactual,
+not an option formerly available. Owner-years differ (1,697 → 1,881 usual;
+1,299 → 1,335 half), so these are descriptive played-life samples, not guaranteed
+returns or a causal deposit comparison. Quotes, prices, locations, household costs,
+selection and death remain part of the strategy. These rent-less-property-cost
+cash figures exclude personal tax and household expenses; household shortfall
+counts come from the actual funded simulation. Every annual ledger reconciles.
+
 ## Open checks
 
-Approval required for all three concrete choices above: ×1.15 residential rents,
-a fixed 50%-down investment purchase option and revised rental projections. No
-production implementation/test/sabotage claim yet. P13 baseline is 3,220 passing
-tests and 15 typechecks; seven inherited generator byte mismatches and 22 old-note
-format failures still block full verify/CI. The homes generator and saved catalog
-are semantically identical before P14; no catalog reformat is included. Native/
-device checks and unavailable Claude Project mirroring remain open. P15–P16 wait.
+**55 new acceptance tests** cover finance (31), simulation (14), persistence (4)
+and actual mobile store/screens (6). All 15 package typechecks pass. **3,275 tests pass** across all fifteen packages. Full `pnpm verify` exits 1 only
+at content validation: the seven inherited generator byte mismatches are activities,
+advice, auctions, businesses, events-childhood, homes and vehicles. Full formatting
+finds the same 22 historical notes; all changed files pass. The validator rewrites
+vehicle-mods formatting; semantic equality was checked and original bytes restored.
+
+**Sabotage: 24 valid independent mutations caught; none missed after repairs.**
+Exact source backups and SHA-256 comparisons verify restoration after every case.
+The first lender-uplift mutation survived a rich fixture; adding the literal
+income-boundary case catches it. The initial autosave injection selected an empty
+function prefix and changed no behavior; it is excluded as invalid, corrected to
+remove the actual purchase persist call, and caught. The complete 24-case suite
+was rerun after repair against green acceptance tests.
+
+| Area             | Behavioral mutations caught                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rent             | Missing residential uplift; commercial uplift; annual reader bypass; lender quote bypass                                                            |
+| Deposit          | Quarter instead of half; odd-dollar floor; primary-home half allowed; command choosing usual                                                        |
+| Underwriting     | Minor accepted; cash ignored; count limit ignored; other debt ignored; income ceiling ignored; principal cap ignored; dead half borrower accepted   |
+| Projection       | Asking instead of signed rent; fee charged on vacant units; debt included in operating profit; debt omitted from cash; simulation lease rent bypass |
+| Commands/screens | Malformed financing accepted; half button choosing usual; store choosing cash; purchase autosave omitted                                            |
+
+Seven inherited
+generator byte mismatches and 22 historical-note format failures remain baseline
+blockers. Finding 44 remains open for separate commercial vacancy/turnover bills;
+there is no dedicated rental income-tax row. Native/device checks and unavailable
+Claude Project mirroring remain open. P15–P16 and life-event wording wait.
+
+## PR and CI
+
+Implementation published as `5005f2b`. [PR #26](https://github.com/PaytonBlevins/YearAfter/pull/26) targets main,
+depends on P13 #25 and #13–#24, and was mergeable when checked. Main was freshly
+fetched before publication and remains `beff25a`. No pushed history was rewritten.
+Implementation CI run 160 fails the same 22 historical-note formatting checks
+(local filenames compared to fetched job logs); frozen-lockfile installation passes
+and later typecheck/test/content steps skip. Docs-closeout CI is unobserved; this
+is not a green CI claim. Payton merges.
+Stop before P15–P16 and life-event wording.

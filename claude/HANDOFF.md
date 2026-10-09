@@ -222,23 +222,25 @@ skip. Closeout documentation triggers another run, not observed here. Gaming max
 Native/device checks and unavailable Project mirroring remain open. P14–P16 and
 life-event wording wait; stop after P13.
 
-**P14 measurement update (9 October UTC):** Payton authorized P14 after P13 closeout.
-Separately claimed/published `feat/playtest-p14-landlord-returns`; refreshed main
-stays `beff25a`, stacked on P13 #25 and #13–#24. The old 0503 Ohio/California
-operating yields reproduce (~4.7%/~2.8%); the shortfall is chiefly early leveraged
-cash flow. Finding 44 is a separate commercial vacancy/turnover expense omission,
-not proof of negative operating profit; insurance is already in aggregate costs.
-Measured five prospective residential rent factors over 550,000 property-years
-and usual/half/cash balances over 360,000 reconciled annual settlements. Propose
-residential going rent ×1.15, unchanged commercial yields/rates/costs/demand table,
-a fixed 50%-down investment mortgage choice beside usual/cash, and separate
-operating/cash projections honoring fixed commercial lease rents. A $475k Ohio
-duplex's first-five 25%-down cash moves from about −$3,300/year to +$2,500; a
-California half-deposit case averages about +$900, without a per-year guarantee.
-Details and protected quote/command changes: `playtest-p14-landlord-returns.md`.
-Approval pending; no production changes or save reservation, expected v50 stays.
-P15–P16 and life-event wording wait. Existing full-verify/format and native/Project
-checks remain open; no new implementation/sabotage/full-verify result is claimed.
+**P14 implementation update (9 October UTC):** Payton approved residential rent
+×1.15, the fixed 50%-down investment mortgage choice and separate operating/cash
+projections. Built on `feat/playtest-p14-landlord-returns`, stacked on P13 #25 and
+#13–#24 while refreshed main remains `beff25a`. Commercial yields and signed
+leases, primary-home deposits, APR/terms/caps, expenses and vacancy rules stay.
+Save v50/TICKET 0708 unchanged; existing mortgage fields carry the new deposit.
+110,000 production property-years match all 44 approved pricing cases exactly;
+real quote/purchase/annual command probes and 480 generated-life strategies
+reconcile. 55 new tests and 24 valid sabotage mutations, none missed after one
+lender-boundary gap repair and one invalid no-op injection correction; source
+restored exactly. Full verification details: `playtest-p14-landlord-returns.md`.
+Finding 44's separate commercial vacancy/turnover cost omission remains open;
+there is no dedicated rental income-tax row. Native checks and unavailable Project
+mirroring remain open.
+All 15 typechecks and 3,275 tests pass; full verify retains seven inherited catalog
+byte mismatches and format retains 22 historical-note failures. PR #26: https://github.com/PaytonBlevins/YearAfter/pull/26, targets main, depends on #13–#25; mergeable when checked.
+Implementation CI run 160 fails the same 22 historical-note format checks;
+installation passes, later gates skip. Docs-closeout CI is unobserved.
+P15–P16 and life-event wording wait for Payton.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

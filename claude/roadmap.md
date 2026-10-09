@@ -1785,25 +1785,31 @@ boost. Whole-person staffing can oscillate; compare a tail mean rather than one
 favorable terminal year. Baseline verification/format, native/device checks and
 unavailable Project mirroring remain open.
 
-### Playtest P14 — measured landlord returns (9 October 2026 UTC)
+### Playtest P14 — approved landlord returns built (9 October 2026 UTC)
 
-Payton authorized P14 after P13. Claim separately published before measurement on
-`feat/playtest-p14-landlord-returns`, stacked on P13 #25 and #13–#24 while refreshed
-main stays `beff25a`. Managed Ohio duplexes reproduce ~95% potential-rent collection
-and ~4.7% operating yield; California ~2.8%. The 25%-down early cash shortfall is
-not evidence that all unlevered landlords lose. Taxes/insurance/upkeep already form
-one aggregate, so adding insurance again would double-count it. Finding 44's
-commercial vacancy/turnover cost omission remains a separate logged limitation.
+Payton approved the measured proposal, separately claimed before measurement.
+Built residential going rents ×1.15, unchanged commercial yields, a fixed 50%-down
+investment mortgage beside usual/cash, and operating/cash Rental projections
+honoring signed commercial rents. Primary-home deposits, rates/terms/caps, cost and
+vacancy rules stay; save v50/TICKET 0708 unchanged. One shared policy feeds actual
+annual/applicant rent and underwriting; deposit quote and purchase share finance.
 
-550,000 paired prospective property-years compare five residential rent factors;
-360,000 actual annual balance-reader settlements reconcile usual/half/cash ownership.
-Propose ×1.15 residential going rents (commercial unchanged), a fixed 50%-down
-investment mortgage choice, and Rental projections separating operating profit
-from mortgage cash flow and respecting fixed commercial lease rents. Ohio duplex
-first-five cash at 25% down improves from ~−$3,300 to ~+$2,500/year; California at
-50% down averages ~+$900 with the new rent, with some negative years retained.
-No rate, appreciation, region elasticity, agent/cost or vacancy-table retune.
-These are operating/balance probes, not generated household success. Details:
-`playtest-p14-landlord-returns.md`. New product choices await approval; no production
-changes or new save reservation, expected v50 unchanged. P15–P16 and life-event
-wording wait; inherited verify/format and native/Project checks remain open.
+Managed Ohio duplex first-five cash at 25% down improves roughly −$3,300 → +$2,500;
+California at 50% down averages about +$900, with bad years retained. Production
+matches all 44 paired pricing cases across 110,000 property-years; real commands
+and annual ledgers reconcile across all eight investment building kinds. The 480
+no-gift generated-life strategy sample retains P2 household costs; larger deposits
+help cash flow but fewer players can afford them. This is not a per-year guarantee
+or universal lifetime success. Estates liquidate homes after paying mortgages.
+
+55 new tests and 24 valid independent sabotage mutations caught, none missed after
+strengthening lender-boundary coverage; source restored exactly. Branch
+`feat/playtest-p14-landlord-returns` follows P13 #25 and #13–#24 while refreshed
+main is `beff25a`. Details and verification: `playtest-p14-landlord-returns.md`.
+Finding 44's commercial vacancy/turnover bills remain a separate omission; no new
+insurance bill double-counts aggregate costs and no dedicated rental tax row is
+introduced. Inherited verify/format, native/Project checks remain open. P15–P16
+and life-event wording wait. All 15 typechecks and 3,275 tests pass; full verify retains seven inherited catalog
+mismatches and full format 22 historical notes. PR #26: https://github.com/PaytonBlevins/YearAfter/pull/26, targets main, depends on #13–#25; mergeable when checked.
+Implementation CI run 160 fails the same 22 historical-note format checks;
+installation passes, later gates skip. Docs-closeout CI is unobserved.

@@ -3239,3 +3239,17 @@ price in migration, preserving old books and unrelated businesses. Default missi
 team levels to the old economics, validate explicit eligible types and preserve
 levels through staffing, branches and transfer. Use integer percentages before
 whole-dollar rounding so exact half-dollar pay quotes and annual costs agree.
+
+### 13.161 Operating return and mortgage cash flow are different answers
+
+P14 reproduced profitable unlevered rentals but found early leveraged cash
+shortfalls. Reconcile receipts, whole-property operating costs, agent fees and
+annual debt payments separately before retuning costs. A commercial lease uses
+its signed rent until renewal, while the asking rate prices new tenants. Display
+both operating profit and cash after debt as current-occupancy estimates before
+personal income tax; a full-year projection is not an actual collection promise.
+One shared prospective rent policy must feed quotes, applicants, settlement and
+underwriting. Test underwriting at the income boundary: rich fixtures can pass
+while a lender quietly ignores a rent-policy change. A larger approved deposit
+reduces principal, never APR or lender rules; quotes, commands, ledger transfers,
+save replay and estate settlement must agree on the exact amount.
