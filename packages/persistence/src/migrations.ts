@@ -1,3 +1,4 @@
+import { businessRescueOk } from './business-rescue-validation';
 /**
  * Ticket 0005 — save migrations.
  *
@@ -12,7 +13,12 @@
 import { err, ok, type Result } from '@yearafter/core';
 import { GRADES_TO_GRADUATE, SCHOOL_START_AGE } from '@yearafter/education';
 import {
+  savedSupplierRecordsOk,
+  savedBusinessAgentOk,
+  ORDINARY_BUSINESS_PRICE,
   SUBSISTENCE,
+  savedWatchWorkAllowed,
+  isLifestyleTier,
   POSTS_PER_YEAR,
   reconcile,
   reconcileByYear,
@@ -1008,6 +1014,49 @@ const migrations: Readonly<Record<number, Migration>> = {
         : { ties: [], met: [], answeredYear: 0, work: { year: 0, done: [] } },
     version: 42,
   }),
+  /** P10 v46 -> v47: no work was paid for; preserve held values, balances and RNG. */
+  46: (save) => ({ ...save, version: 47 }),
+  /** P11 v47 -> v48: no extra service was paid for; no changes or RNG draws. */
+  47: (save) => ({ ...save, version: 48 }),
+  /** P12: no pitch, loyalty or fee is invented for existing holdings. */
+  48: (save) => ({ ...save, version: 49 }),
+  /** P13: normalize only prospective brokerage pricing, never historical books or RNG. */
+  49: (save) => ({
+    ...save,
+    version: 50,
+    businesses: Array.isArray(save['businesses'])
+      ? save['businesses'].map((value: unknown) => {
+          if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+          const b = value as Record<string, unknown>;
+          return b['typeId'] === 'biz.realestate'
+            ? { ...b, price: ORDINARY_BUSINESS_PRICE }
+            : value;
+        })
+      : save['businesses'],
+  }),
+
+  /** P7 v45 -> v46: no goal existed before; no invented goal and no RNG. */
+  45: (save) => {
+    const { cashGoal: _future, ...prior } = save;
+    return { ...prior, version: 46 };
+  },
+  /** v44 -> v45: P2 defaults the existing life without changing its history or RNG. */
+  44: (save) => {
+    const household = save['household'];
+    return {
+      ...save,
+      household:
+        typeof household === 'object' && household !== null && !Array.isArray(household)
+          ? { ...household, lifestyle: 'comfortable' }
+          : household,
+      version: 45,
+    };
+  },
+  /** v43 -> v44: P1 adds optional rescue quotes without inventing legacy reviews. */
+  43: (save) => {
+    const { businessRescue: _notYetBuilt, ...prior } = save;
+    return { ...prior, version: 44 };
+  },
   /**
    * v42 -> v43: Ticket 0707 — what has been said yes to this year. Nothing has been, in any
    * older save, so the record is empty for year 0. What a v42 save already carries is kept.
@@ -1162,7 +1211,11 @@ function channelPublishingOk(value: unknown): boolean {
   if (!Array.isArray(value)) return false;
   return value.every((channel: unknown) => {
     if (typeof channel !== 'object' || channel === null) return true;
-    const publishing = (channel as Record<string, unknown>)['publishing'];
+    const record = channel as Record<string, unknown>;
+    const luck = record['luck'];
+    // P3: persisted luck is authoritative, but corrupt luck cannot become a balance input.
+    if (typeof luck !== 'number' || !Number.isFinite(luck) || luck < 0 || luck > 1) return false;
+    const publishing = record['publishing'];
     if (publishing === undefined) return true;
     if (typeof publishing !== 'object' || publishing === null || Array.isArray(publishing))
       return false;
@@ -1311,7 +1364,10 @@ export function validateCurrentSave(
   const world = candidate['world'] as Record<string, unknown> | undefined;
   const rng = candidate['rng'] as Record<string, unknown> | undefined;
 
+  const goal = candidate['cashGoal'];
   const problems = [
+    require('cashGoal', goal, goal === undefined ||
+      (typeof goal === 'number' && Number.isSafeInteger(goal) && goal >= 0)),
     require('id', candidate['id'], typeof candidate['id'] === 'string'),
     require('player', player, typeof player === 'object' && player !== null),
     require('player.age', player?.['age'], typeof player?.['age'] === 'number'),
@@ -1335,13 +1391,55 @@ export function validateCurrentSave(
       'people'
     ], Array.isArray((candidate['circle'] as Record<string, unknown> | undefined)?.['people'])),
     // Ticket 0501. A list, however short.
+    require('household', candidate['household'], householdOk(candidate['household'])),
     require('homes', candidate['homes'], Array.isArray(candidate['homes'])),
     // Ticket 0504. The same for cars.
-    require('vehicles', candidate['vehicles'], Array.isArray(candidate['vehicles'])),
+    require('vehicles', candidate['vehicles'], Array.isArray(candidate['vehicles']) &&
+      candidate['vehicles'].every((car: unknown) => {
+        if (typeof car !== 'object' || car === null || Array.isArray(car)) return false;
+        const held = car as Record<string, unknown>;
+        const service = held['service'];
+        if (service === undefined) return true;
+        if (typeof service !== 'object' || service === null || Array.isArray(service)) return false;
+        const work = service as Record<string, unknown>;
+        return (
+          Number.isSafeInteger(held['boughtYear']) &&
+          Number.isSafeInteger(work['year']) &&
+          Number(work['year']) >= Number(held['boughtYear']) &&
+          Number(work['year']) <= Number(world?.['year']) &&
+          Number.isSafeInteger(work['cost']) &&
+          Number(work['cost']) >= 100 &&
+          Number(work['cost']) % 10 === 0
+        );
+      })),
     // Ticket 0506. And for what is in the collection.
-    require('valuables', candidate['valuables'], Array.isArray(candidate['valuables'])),
+    require('valuables', candidate['valuables'], Array.isArray(candidate['valuables']) &&
+      candidate['valuables'].every((piece: unknown) => {
+        if (typeof piece !== 'object' || piece === null) return false;
+        const icing = (piece as Record<string, unknown>)['icing'];
+        if (icing === undefined) return true;
+        if (typeof icing !== 'object' || icing === null || Array.isArray(icing)) return false;
+        const work = icing as Record<string, unknown>;
+        const held = piece as Record<string, unknown>;
+        return (
+          typeof held['itemId'] === 'string' &&
+          savedWatchWorkAllowed(held['itemId']) &&
+          Number.isSafeInteger(held['boughtYear']) &&
+          Number(work['year']) >= Number(held['boughtYear']) &&
+          Number.isSafeInteger(work['cost']) &&
+          Number(work['cost']) >= 0 &&
+          Number.isSafeInteger(work['year']) &&
+          Number(work['year']) <= Number(world?.['year'])
+        );
+      })),
     // Ticket 0601. And for what is owned and running.
-    require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
+    require('businesses', candidate['businesses'], Array.isArray(candidate['businesses']) &&
+      candidate['businesses'].every(
+        (business: unknown) =>
+          savedSupplierRecordsOk(business, Number(world?.['year'])) &&
+          savedBusinessAgentOk(business),
+      )),
+    require('businessRescue', candidate['businessRescue'], businessRescueOk(candidate)),
     // Ticket 0605. And for the private deals.
     require('deals', candidate['deals'], Array.isArray(candidate['deals'])),
     // Ticket 0701. And for the channels, and a number for fame.
@@ -1367,4 +1465,24 @@ export function validateCurrentSave(
     return err({ kind: 'corrupt', detail: books.join('; ') });
   }
   return ok(candidate as unknown as CurrentSaveGame);
+}
+
+/** P2: reject malformed living state before a loaded year can use it. */
+function householdOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row['standard'] === 'number' &&
+    Number.isFinite(row['standard']) &&
+    row['standard'] >= SUBSISTENCE &&
+    (row['housing'] === 'withFamily' ||
+      row['housing'] === 'ownPlace' ||
+      row['housing'] === 'owned') &&
+    isLifestyleTier(row['lifestyle']) &&
+    ['leftHomeAt', 'movedBackAt'].every(
+      (key) =>
+        row[key] === undefined ||
+        (typeof row[key] === 'number' && Number.isInteger(row[key]) && row[key] >= 0),
+    )
+  );
 }

@@ -107,7 +107,7 @@ export interface PushOutcome {
  *
  * Drawn from a STABLE value per job per year rather than from the RNG stream,
  * so opening the Career screen twice does not reshuffle the board and a save
- * reloaded a week later shows the same six jobs. Consuming randomness to render
+ * reloaded a week later shows the same twelve jobs. Consuming randomness to render
  * a list would also make the list depend on how many times the player looked at
  * it, which is the kind of thing that quietly breaks seeded replay.
  */
@@ -149,6 +149,7 @@ export function atTheDoor(state: GameState): OpeningsContext {
   return {
     age: state.player.age,
     education: levelOf(state.education.credentials),
+    opens: majorOpens(state),
     reached: reachedBy(state.employment),
     experience: experienceOf(state.employment, state.player.age),
     standing: state.employment.standing,

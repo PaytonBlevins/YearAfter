@@ -29,6 +29,7 @@ export type ScreenKey =
   | 'finances'
   /** Playtest A10: links to costs on their owning screens, without a ledger. */
   | 'outflow'
+  | 'lifestyle'
   /** Ticket 0305. Where you stand with a lender, and why. */
   | 'credit'
   /** Ticket 0306. The cards you hold, and the ones you could get. */

@@ -10,6 +10,7 @@
  * waits on a write — but failures surface in `saveError` rather than vanishing.
  */
 
+import { GIG_UNAVAILABLE_LABELS } from '@yearafter/education';
 import {
   createContext,
   useCallback,
@@ -21,7 +22,10 @@ import {
   type ReactNode,
 } from 'react';
 import { asSaveId, type SaveId } from '@yearafter/core';
+import type { PurchasePayment } from '@yearafter/finance';
 import {
+  setLifestyle,
+  LIFESTYLE_ERROR_LABELS,
   advanceYear,
   createNewGame,
   decide as resolveDecision,
@@ -59,12 +63,15 @@ import {
   sellVehicle,
   inspectVehicle,
   fitVehicleMod,
+  serviceVehicle,
+  SERVICE_VEHICLE_ERROR_LABELS,
   FIT_MOD_ERROR_LABELS,
   renovate,
   RENOVATE_ERROR_LABELS,
   buyValuable,
   sellValuable,
   BUY_VALUABLE_ERROR_LABELS,
+  iceValuable,
   attendAuction,
   bidOn,
   ATTEND_ERROR_LABELS,
@@ -90,6 +97,8 @@ import {
   hireAdvisor,
   dismissAdvisor,
   actOnAdvice,
+  setCashGoal,
+  CASH_GOAL_ERROR_LABELS,
   setContribution,
   retireNow,
   takeOutEarly,
@@ -100,7 +109,12 @@ import {
   expandBusiness,
   closeLocation,
   setPrice as setBusinessPrice,
-  setSupplier as setBusinessSupplier,
+  setBusinessAgentLevel,
+  BUSINESS_AGENT_ERROR_LABELS,
+  searchSupplier,
+  acceptSupplier,
+  passSupplier,
+  SUPPLIER_ERROR_LABELS,
   setPayroll as setBusinessPayroll,
   hireStaff as hireBusinessStaff,
   letStaffGo as letBusinessStaffGo,
@@ -109,8 +123,8 @@ import {
   closeBusiness,
   type Financing,
 } from '@yearafter/simulation';
-import { EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
-import type { BidTier, Payroll, SupplierGrade } from '@yearafter/finance';
+import { type LifestyleTier, EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
+import type { BidTier, Payroll, BusinessAgentLevel } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
@@ -148,6 +162,7 @@ import {
 } from '@yearafter/persistence';
 
 interface GameContextValue {
+  readonly chooseLifestyle: (tier: LifestyleTier) => void;
   readonly ready: boolean;
   readonly state: GameState | null;
   readonly settings: SaveSettings;
@@ -201,7 +216,7 @@ interface GameContextValue {
   /** Ticket 0307. Borrow, and pay extra off. */
   readonly borrow: (productId: string, amount: number) => void;
   /** Ticket 0501. Buy a listed home, outright or with a mortgage. */
-  readonly buyAHome: (listingId: string, how: 'cash' | 'mortgage') => void;
+  readonly buyAHome: (listingId: string, how: 'cash' | 'mortgage' | 'mortgage-half') => void;
   /** Ticket 0501. Spec 211's one Sell action. */
   readonly sellAHome: (homeId: string) => void;
   /** Ticket 0503. Everything a landlord does, one verb at a time. */
@@ -213,13 +228,18 @@ interface GameContextValue {
   /** Ticket 0504. Pay a mechanic to look a used car over. */
   readonly inspectACar: (listingId: string) => void;
   /** Ticket 0505. Have a shop fit a modification. */
+  readonly serviceACar: (vehicleId: string, payment?: PurchasePayment) => void;
   readonly fitACarMod: (vehicleId: string, modId: string) => void;
   /** Ticket 0506. Have a builder do something to a home. */
-  readonly renovateHome: (homeId: string, renovationId: string) => void;
+  readonly renovateHome: (homeId: string, renovationId: string, payment?: PurchasePayment) => void;
   /** Ticket 0601. Open a business, run it, sell it or close it. */
   readonly openABusiness: (typeId: string, finance?: Financing) => void;
   /** Ticket 0603. Buy one that is for sale. A loan is written into the purchase, never paid out as cash. */
   readonly buyABusiness: (listingId: string, finance?: Financing) => void;
+  readonly searchBusinessSupplier: (businessId: string) => void;
+  readonly acceptBusinessSupplier: (businessId: string, pitchId: string) => void;
+  readonly passBusinessSupplier: (businessId: string, pitchId: string) => void;
+  readonly chooseBusinessAgents: (businessId: string, level: BusinessAgentLevel) => void;
   readonly tuneBusiness: (businessId: string, change: BusinessChange) => void;
   /** Ticket 0602. Open another location of a business, or close the newest. */
   readonly expandABusiness: (businessId: string, finance?: Financing) => void;
@@ -227,7 +247,12 @@ interface GameContextValue {
   readonly sellABusiness: (businessId: string) => void;
   readonly closeABusiness: (businessId: string) => void;
   /** Ticket 0506. Buy a piece off a store's counter, or sell one from the collection. */
-  readonly buyAValuable: (stockId: string) => void;
+  readonly buyAValuable: (
+    stockId: string,
+    payment?: PurchasePayment,
+    finish?: 'original' | 'iced',
+  ) => void;
+  readonly iceAValuable: (pieceId: string, payment?: PurchasePayment) => void;
   readonly sellAValuable: (pieceId: string) => void;
   /** Ticket 0507. Go to an auction's next sale, and bid on a lot at it. */
   readonly attendAnAuction: (venueId: string) => void;
@@ -240,6 +265,7 @@ interface GameContextValue {
   readonly hireAdvisorWith: (advisorId: string) => void;
   readonly dismissAdvisorNow: () => void;
   readonly actOnAdviceWith: (recommendationId: string) => void;
+  readonly setPurchaseGoal: (amount: number) => void;
   /** Ticket 0310. */
   readonly setContributionTo: (rate: number) => void;
   readonly retireNowAction: () => void;
@@ -294,7 +320,6 @@ const GameContext = createContext<GameContextValue | null>(null);
 /** Ticket 0601. The dials on a business, as one value so the store has one action for them. */
 export type BusinessChange =
   | { readonly kind: 'price'; readonly price: number }
-  | { readonly kind: 'supplier'; readonly supplier: SupplierGrade }
   | { readonly kind: 'payroll'; readonly payroll: Payroll }
   | { readonly kind: 'hire' }
   | { readonly kind: 'letGo' }
@@ -451,7 +476,13 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         const result = resolveDecision(current, eventId, choiceId);
         if (!result.ok) {
           // Expected, not exceptional: the same save answered on two devices.
-          setSaveError(`That choice is no longer available (${result.error}).`);
+          setSaveError(
+            result.error === 'cannot-afford'
+              ? "You don't have enough in your bank to keep this business going. You can close it instead."
+              : eventId === 'business.rescue'
+                ? 'This business decision has changed. Try the current choices.'
+                : `That choice is no longer available (${result.error}).`,
+          );
           return current;
         }
         opens = result.value.opens;
@@ -757,7 +788,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0501: homes ---------------------------------------------- */
 
   const buyAHome = useCallback(
-    (listingId: string, how: 'cash' | 'mortgage') => {
+    (listingId: string, how: 'cash' | 'mortgage' | 'mortgage-half') => {
       setState((current) => {
         if (!current) return current;
         const result = buyHome(current, listingId, how);
@@ -765,7 +796,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           // A refusal is an outcome, not an error: the bank saying no is a
           // thing that happened, and the player is told so in a sentence.
           setOutcome({
-            title: how === 'mortgage' ? 'The bank said no' : 'Not enough',
+            title: how !== 'cash' ? 'The bank said no' : 'Not enough',
             body: BUY_HOME_ERROR_LABELS[result.error],
             tone: 'bad',
           });
@@ -887,10 +918,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0506: renovations and shopping ---------------------------- */
 
   const renovateHome = useCallback(
-    (homeId: string, renovationId: string) => {
+    (homeId: string, renovationId: string, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = renovate(current, homeId, renovationId);
+        const result = renovate(current, homeId, renovationId, payment);
         if (!result.ok) {
           setOutcome({ title: 'Not now', body: RENOVATE_ERROR_LABELS[result.error], tone: 'bad' });
           return current;
@@ -929,6 +960,59 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     [persist, saveId, settings],
   );
 
+  const supplierAction = useCallback(
+    (businessId: string, action: 'search' | 'accept' | 'pass', pitchId = '') => {
+      setState((current) => {
+        if (!current) return current;
+        const result =
+          action === 'search'
+            ? searchSupplier(current, businessId)
+            : action === 'accept'
+              ? acceptSupplier(current, businessId, pitchId)
+              : passSupplier(current, businessId, pitchId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: SUPPLIER_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+  const searchBusinessSupplier = useCallback(
+    (id: string) => supplierAction(id, 'search'),
+    [supplierAction],
+  );
+  const acceptBusinessSupplier = useCallback(
+    (id: string, pitch: string) => supplierAction(id, 'accept', pitch),
+    [supplierAction],
+  );
+  const passBusinessSupplier = useCallback(
+    (id: string, pitch: string) => supplierAction(id, 'pass', pitch),
+    [supplierAction],
+  );
+
+  const chooseBusinessAgents = useCallback(
+    (businessId: string, level: BusinessAgentLevel) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = setBusinessAgentLevel(current, businessId, level);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body: BUSINESS_AGENT_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const tuneBusiness = useCallback(
     (businessId: string, change: BusinessChange) => {
       setState((current) => {
@@ -936,17 +1020,27 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         const result =
           change.kind === 'price'
             ? setBusinessPrice(current, businessId, change.price)
-            : change.kind === 'supplier'
-              ? setBusinessSupplier(current, businessId, change.supplier)
-              : change.kind === 'payroll'
-                ? setBusinessPayroll(current, businessId, change.payroll)
-                : change.kind === 'hire'
-                  ? hireBusinessStaff(current, businessId)
-                  : change.kind === 'letGo'
-                    ? letBusinessStaffGo(current, businessId)
-                    : setBusinessAutoStaff(current, businessId, change.on);
+            : change.kind === 'payroll'
+              ? setBusinessPayroll(current, businessId, change.payroll)
+              : change.kind === 'hire'
+                ? hireBusinessStaff(current, businessId)
+                : change.kind === 'letGo'
+                  ? letBusinessStaffGo(current, businessId)
+                  : setBusinessAutoStaff(current, businessId, change.on);
         // A dial turned is not news: the screen shows it. Only a refusal speaks.
-        if (!result.ok) return current;
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body:
+              result.error === 'market-priced'
+                ? 'This brokerage works at market rates. Choose its agent team instead.'
+                : result.error === 'at-limit'
+                  ? "You can't change staffing any further."
+                  : "That business choice isn't available any more.",
+            tone: 'bad',
+          });
+          return current;
+        }
         if (saveId) persist(result.value, saveId, settings);
         return result.value;
       });
@@ -1040,10 +1134,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const buyAValuable = useCallback(
-    (stockId: string) => {
+    (stockId: string, payment?: PurchasePayment, finish?: 'original' | 'iced') => {
       setState((current) => {
         if (!current) return current;
-        const result = buyValuable(current, stockId);
+        const result = buyValuable(current, stockId, payment, finish);
         if (!result.ok) {
           setOutcome({
             title: 'Not now',
@@ -1053,6 +1147,48 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           return current;
         }
         setOutcome({ title: "It's yours", body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const serviceACar = useCallback(
+    (vehicleId: string, payment?: PurchasePayment) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = serviceVehicle(current, vehicleId, payment);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body: SERVICE_VEHICLE_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
+          return current;
+        }
+        setOutcome({ title: 'Serviced', body: result.value.entry.text, tone: 'good' });
+        if (saveId) persist(result.value.state, saveId, settings);
+        return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const iceAValuable = useCallback(
+    (pieceId: string, payment?: PurchasePayment) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = iceValuable(current, pieceId, payment);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Not now',
+            body: BUY_VALUABLE_ERROR_LABELS[result.error],
+            tone: 'bad',
+          });
+          return current;
+        }
+        setOutcome({ title: 'Iced out', body: result.value.entry.text, tone: 'good' });
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
       });
@@ -1213,13 +1349,32 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     });
   }, [persist, saveId, settings]);
 
+  const setPurchaseGoal = useCallback(
+    (amount: number) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = setCashGoal(current, amount);
+        if (!result.ok) {
+          setSaveError(CASH_GOAL_ERROR_LABELS[result.error]);
+          return current;
+        }
+        setSaveError(null);
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
   const actOnAdviceWith = useCallback(
     (recommendationId: string) => {
       setState((current) => {
         if (!current) return current;
         const result = actOnAdvice(current, recommendationId);
         if (!result.ok) {
-          setSaveError(`That one cannot be acted on (${result.error}).`);
+          setSaveError(
+            'That recommendation is no longer available. Check your cash and what you hold, then try again.',
+          );
           return current;
         }
         setOutcome({
@@ -1229,6 +1384,26 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         });
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const chooseLifestyle = useCallback(
+    (tier: LifestyleTier) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = setLifestyle(current, tier);
+        if (!result.ok) {
+          setOutcome({
+            title: 'Lifestyle unchanged',
+            body: LIFESTYLE_ERROR_LABELS[result.error],
+            tone: 'neutral',
+          });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
       });
     },
     [persist, saveId, settings],
@@ -1591,7 +1766,11 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       mutateEducation((current) => {
         const result = takeGig(current, gigId);
         if (!result.ok) {
-          setSaveError(`Cannot take that on (${result.error}).`);
+          setSaveError(
+            result.error === 'no-such-gig'
+              ? "That work isn't available."
+              : GIG_UNAVAILABLE_LABELS[result.error],
+          );
           return current;
         }
         return result.value;
@@ -1655,15 +1834,21 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       sellACar,
       inspectACar,
       fitACarMod,
+      serviceACar,
       renovateHome,
       openABusiness,
       buyABusiness,
+      searchBusinessSupplier,
+      acceptBusinessSupplier,
+      passBusinessSupplier,
+      chooseBusinessAgents,
       tuneBusiness,
       expandABusiness,
       closeALocation,
       sellABusiness,
       closeABusiness,
       buyAValuable,
+      iceAValuable,
       sellAValuable,
       attendAnAuction,
       bidAtAuction,
@@ -1673,7 +1858,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       hireAdvisorWith,
       dismissAdvisorNow,
       actOnAdviceWith,
+      setPurchaseGoal,
       setContributionTo,
+      chooseLifestyle,
       retireNowAction,
       takeOutEarlyWith,
       stopTreatingFor,
@@ -1732,15 +1919,21 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       sellACar,
       inspectACar,
       fitACarMod,
+      serviceACar,
       renovateHome,
       openABusiness,
       buyABusiness,
+      searchBusinessSupplier,
+      acceptBusinessSupplier,
+      passBusinessSupplier,
+      chooseBusinessAgents,
       tuneBusiness,
       expandABusiness,
       closeALocation,
       sellABusiness,
       closeABusiness,
       buyAValuable,
+      iceAValuable,
       sellAValuable,
       attendAnAuction,
       bidAtAuction,
@@ -1749,7 +1942,9 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       hireAdvisorWith,
       dismissAdvisorNow,
       actOnAdviceWith,
+      setPurchaseGoal,
       setContributionTo,
+      chooseLifestyle,
       retireNowAction,
       takeOutEarlyWith,
       payLoanWith,

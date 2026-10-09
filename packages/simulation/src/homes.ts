@@ -46,6 +46,7 @@ import {
   type HomeBuyer,
   type HomeCondition,
   type MortgageOffer,
+  type MortgageDeposit,
   type MortgagePurpose,
   type NewTransaction,
   type OwnedHome,
@@ -53,6 +54,7 @@ import {
 import {
   emptyLetting,
   goingRentOf,
+  rentYieldFor,
   unitYear,
   bestApplicant,
   AGENT_SHARE,
@@ -278,7 +280,7 @@ const listedRentOf = (listing: HomeListing): number => {
   return (
     goingRentOf(
       dollars(listing.askingPrice),
-      kind.rentYield,
+      rentYieldFor(kind),
       regionCostIndexOf(listing.regionKey),
       kind.units,
     ) * kind.units
@@ -286,19 +288,28 @@ const listedRentOf = (listing: HomeListing): number => {
 };
 
 /** What a lender would say about this listing, today. Spec 145's "financing availability". */
-export const mortgageOfferFor = (state: GameState, listing: HomeListing): MortgageOffer =>
-  mortgageFor(
-    listing.askingPrice,
-    buyerOf(state),
-    listing.annualExpense,
-    purposeOf(state, listing),
-    listedRentOf(listing),
-  );
+export const mortgageOfferFor = (
+  state: GameState,
+  listing: HomeListing,
+  deposit: MortgageDeposit = 'usual',
+): MortgageOffer =>
+  deposit === 'half' && !state.player.alive
+    ? { approved: false, because: 'lifeEnded', down: 0, principal: 0, yearlyPayment: 0 }
+    : mortgageFor(
+        listing.askingPrice,
+        buyerOf(state),
+        listing.annualExpense,
+        purposeOf(state, listing),
+        listedRentOf(listing),
+        deposit,
+      );
 
 export type BuyHomeError =
-  'no-such-listing' | 'already-owned' | 'cannot-afford' | 'mortgage-refused';
+  'no-such-listing' | 'already-owned' | 'cannot-afford' | 'mortgage-refused' | 'no-such-financing';
+export type HomeFinancing = 'cash' | 'mortgage' | 'mortgage-half';
 
 export const BUY_HOME_ERROR_LABELS: Readonly<Record<BuyHomeError, string>> = {
+  'no-such-financing': "That payment choice isn't available for this property.",
   'no-such-listing': "That one isn't for sale any more.",
   'already-owned': 'You already own it.',
   'cannot-afford': "You don't have enough to pay for it outright.",
@@ -334,23 +345,26 @@ const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
  * Buy a listed home, outright or with a mortgage.
  *
  * `with: 'mortgage'` runs spec 149's Apply → Approved/Denied and nothing else:
- * the product and the deposit are chosen by `mortgageFor`, not by the player.
+ * the product and usual deposit are chosen by `mortgageFor`. P14 also permits
+ * the approved fixed half-deposit preset for investment property only.
  * The deposit leaves the account as a `property` transfer; the mortgage never
  * passes through cash at all, because the lender pays the seller.
  */
 export function buyHome(
   state: GameState,
   listingId: string,
-  how: 'cash' | 'mortgage',
+  how: HomeFinancing,
 ): Result<BoughtHome, BuyHomeError> {
+  if (how !== 'cash' && how !== 'mortgage' && how !== 'mortgage-half')
+    return err('no-such-financing');
   const listing = anyListing(state, listingId);
   if (!listing) return err('no-such-listing');
   if (state.homes.some((home) => home.id === listing.id)) return err('already-owned');
 
   let paid = listing.askingPrice;
   let mortgage: OwnedHome['mortgage'];
-  if (how === 'mortgage') {
-    const offer = mortgageOfferFor(state, listing);
+  if (how !== 'cash') {
+    const offer = mortgageOfferFor(state, listing, how === 'mortgage-half' ? 'half' : 'usual');
     if (!offer.approved || !offer.product) return err('mortgage-refused');
     paid = offer.down;
     mortgage = {

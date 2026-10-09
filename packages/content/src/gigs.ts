@@ -5,9 +5,9 @@
  * depends on the stable ids here and never on the display names
  * (CORE_RULES 13).
  *
- * These are NOT employment. Ticket 0210 builds real jobs with salaries and
- * promotion paths; these are the things a child can actually do for money, and
- * the age gate is the whole point of them.
+ * P6 adds deliberate adult side work and labels school shifts. These share the
+ * yearly workload but have no career salary or promotion path. Age gates keep
+ * child work and adult options appropriate.
  */
 
 import type { TalentKey, VisibleStatKey } from '@yearafter/character';
@@ -19,7 +19,9 @@ export interface Gig {
   readonly blurb: string;
   /** The age this becomes legal, plausible, or both. */
   readonly ageMin: number;
-  readonly ageMax: number;
+  /** Omitted for adult work that has no upper-age cutoff. */
+  readonly ageMax?: number;
+  readonly kind?: 'oddJob' | 'partTime';
   /** Whole dollars for a YEAR of it — the game's unit of time is a year. */
   readonly payLow: number;
   readonly payHigh: number;
@@ -54,4 +56,4 @@ const BY_ID = new Map(GIGS.map((gig) => [gig.id, gig]));
 export const findGig = (id: string): Gig | undefined => BY_ID.get(id);
 
 export const gigsForAge = (age: number): readonly Gig[] =>
-  GIGS.filter((gig) => age >= gig.ageMin && age <= gig.ageMax);
+  GIGS.filter((gig) => age >= gig.ageMin && (gig.ageMax === undefined || age <= gig.ageMax));

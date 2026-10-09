@@ -121,33 +121,17 @@ const DEAR_ENOUGH = 0.22;
 /** Cash past this multiple of the portfolio is money not working. */
 const IDLE_MULTIPLE = 1.5;
 /** Below this there is no advice to give — a beginner needs a buffer, not a plan. */
-const IDLE_FLOOR = 12_000;
 
-/**
- * THE SHARE OF SPARE CASH A SINGLE STOCK IDEA IS ALLOWED TO ASK FOR.
- *
- * The first version of this file left `amount` off the two buy forecasts, which
- * meant a player following the advice put EVERY spare dollar into one name. It
- * measured as a disaster — forty years of that returned 0.95x the plain-fund
- * benchmark for the independent advisor and 0.77x for the dearer one.
- *
- * The picks were fine. The position sizing was the bug, and it is the same bug
- * as 0307's "pay some off" button that spent the entire balance: an
- * instruction that says SOME and moves EVERYTHING. A real advisor says "I'd put
- * some into this", and a third of spare cash is what "some" means.
- *
- * It is also the whole reason a stock idea can be worth taking. A single name
- * has roughly 23% annual scatter against a broad fund's 15%, so swapping a fund
- * for a name is a bad trade even when the name is better — and adding a slice
- * beside the fund is a good one. The size IS the advice.
- */
-const SLICE = 0.34;
-/** Below this a slice is not worth the row it is printed on. */
+/** P7: every advisor buy uses the same share of genuinely spare cash. */
+export const ADVISOR_INVEST_SHARE = 0.15;
+export const ADVISOR_CASH_FLOOR = 12_000;
 const SLICE_FLOOR = 1_000;
-
-/** What a single-name idea asks for, given what is in the account. */
-const sliceOf = (cash: number): number =>
-  cash < SLICE_FLOOR ? 0 : Math.max(SLICE_FLOOR, Math.round(cash * SLICE));
+export const advisorReserve = (annualBills: number, goal = 0): number =>
+  Math.max(ADVISOR_CASH_FLOOR, annualBills * 0.5) + goal;
+export const advisorBuyAmount = (spare: number): number => {
+  const amount = Math.floor(Math.max(0, spare) * ADVISOR_INVEST_SHARE);
+  return amount >= SLICE_FLOOR ? amount : 0;
+};
 
 /* -------------------------------------------------------------------------- */
 
@@ -173,6 +157,8 @@ export interface AdviceInput {
   readonly cash: number;
   readonly year: number;
   readonly advisorId: string;
+  readonly annualBills?: number;
+  readonly cashGoal?: number;
 }
 
 /**
@@ -210,6 +196,8 @@ export function recommendationsFor(input: AdviceInput): readonly Recommendation[
   if (!advisor) return [];
 
   const { prices, portfolio, cash, year } = input;
+  const reserve = advisorReserve(input.annualBills ?? 24_000, input.cashGoal ?? 0);
+  const buyAmount = advisorBuyAmount(cash - reserve);
   const can = (reason: AdviceReason): boolean => advisor.reasons.includes(reason);
 
   const worth = portfolio.reduce((sum, holding) => sum + holdingWorth(prices, holding) / 100, 0);
@@ -263,16 +251,13 @@ export function recommendationsFor(input: AdviceInput): readonly Recommendation[
     }
   }
 
-  if (can('idleCash') && cash >= IDLE_FLOOR && cash > worth * IDLE_MULTIPLE) {
+  if (can('idleCash') && buyAmount > 0 && cash > worth * IDLE_MULTIPLE) {
     out.push({
       id: `rec.${year}.idleCash`,
       verb: 'buy',
       reason: 'idleCash',
       text: bind(phrase('idleCash', year, 3), { amount: money(cash) }),
-      // Keep a year of ordinary life back; invest the rest. Never all of it —
-      // 0308b measured what happens to a character with no cash buffer and the
-      // answer was a happiness of 20 against 78.
-      amount: Math.max(0, Math.round(cash - IDLE_FLOOR)),
+      amount: buyAmount,
       forecast: false,
     });
   }
@@ -287,7 +272,7 @@ export function recommendationsFor(input: AdviceInput): readonly Recommendation[
       .map((row) => ({ row, gap: gapToTrend(prices, row) }))
       .filter((row) => row.gap >= bar)
       .sort((a, b) => b.gap - a.gap)[0];
-    if (cheap) {
+    if (cheap && buyAmount > 0) {
       out.push({
         id: `rec.${year}.below.${cheap.row.id}`,
         verb: 'buy',
@@ -297,7 +282,7 @@ export function recommendationsFor(input: AdviceInput): readonly Recommendation[
           firm: cheap.row.name,
           gap: pct(cheap.gap),
         }),
-        amount: sliceOf(cash),
+        amount: buyAmount,
         forecast: true,
       });
     }
@@ -333,14 +318,14 @@ export function recommendationsFor(input: AdviceInput): readonly Recommendation[
     const quality = INSTRUMENTS.filter(REVERTS)
       .filter((row) => !held.has(row.id))
       .sort((a, b) => b.drift - a.drift)[0];
-    if (quality) {
+    if (quality && buyAmount > 0) {
       out.push({
         id: `rec.${year}.earner.${quality.id}`,
         verb: 'buy',
         reason: 'strongEarner',
         instrumentId: quality.id,
         text: bind(phrase('strongEarner', year, 6), { firm: quality.name }),
-        amount: sliceOf(cash),
+        amount: buyAmount,
         forecast: true,
       });
     }

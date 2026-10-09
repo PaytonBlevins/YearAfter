@@ -18,7 +18,12 @@ import { RENOVATIONS, findHomeKind, findRenovation, type Renovation } from '@yea
 import { dollars, err, mixedUnit, ok, type Result } from '@yearafter/core';
 import {
   annualExpenseOf,
-  post,
+  payPurchase,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  renovationHappinessOf,
+  type PurchasePayment,
+  type PaymentRefusal,
   renovated,
   renovationCostOf,
   renovationRefusalFor,
@@ -37,6 +42,9 @@ export interface RenovationOption {
   readonly worthAfter: number;
   /** What it would cost to keep a year afterwards. */
   readonly expenseAfter: number;
+  /** Residence comfort after the work, capped; zero for another property. */
+  readonly happinessAfter: number;
+  readonly happinessGain: number;
   readonly refusal?: RenovationRefusal;
 }
 
@@ -60,6 +68,11 @@ export function renovationOptionsFor(
       cost,
       worthAfter: Number(after.value) / 100,
       expenseAfter: annualExpenseOf(after),
+      happinessAfter: residenceOf(state.homes)?.id === home.id ? renovationHappinessOf(after) : 0,
+      happinessGain:
+        residenceOf(state.homes)?.id === home.id
+          ? renovationHappinessOf(after) - renovationHappinessOf(home)
+          : 0,
       ...(refusal ? { refusal } : {}),
     };
   }).filter((option) => option.refusal !== 'notForThisHome');
@@ -72,9 +85,13 @@ export type RenovateError =
   | 'needs-first'
   | 'already-done'
   | 'too-soon'
-  | 'cannot-afford';
+  | 'cannot-afford'
+  | 'not-enough-space'
+  | PaymentRefusal;
 
 export const RENOVATE_ERROR_LABELS: Readonly<Record<RenovateError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
+  'not-enough-space': "There isn't room for that addition here.",
   'no-such-home': "You don't own that place any more.",
   'no-such-renovation': "That isn't something a builder does.",
   'not-for-this-home': "There's no room for that here.",
@@ -89,6 +106,7 @@ const REFUSAL_ERRORS: Readonly<Record<RenovationRefusal, RenovateError>> = {
   needsFirst: 'needs-first',
   alreadyDone: 'already-done',
   tooSoon: 'too-soon',
+  noSpace: 'not-enough-space',
 };
 
 export interface RenovatedHome {
@@ -104,14 +122,14 @@ const nameOf = (home: OwnedHome): string =>
   (findHomeKind(home.kindId)?.noun ?? 'the place').replace(/^an? /, 'the ');
 
 /**
- * Pay a builder. Cash only, and spending (`housing`): what the home is worth
- * more for it shows in the home's value, which is the part that is still
- * money.
+ * Pay a builder with the chosen cash or card, as spending (`housing`).
+ * The recovered cost stays in the home's value.
  */
 export function renovate(
   state: GameState,
   homeId: string,
   renovationId: string,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<RenovatedHome, RenovateError> {
   const home = state.homes.find((candidate) => candidate.id === homeId);
   if (!home) return err('no-such-home');
@@ -120,21 +138,29 @@ export function renovate(
   const refusal = renovationRefusalFor(renovation, home, state.world.year);
   if (refusal) return err(REFUSAL_ERRORS[refusal]);
   const cost = renovationCostOf(renovation, home);
-  if (Number(state.player.cash) / 100 < cost) return err('cannot-afford');
+  if (payment.kind === 'cash' && Number(state.player.cash) / 100 < cost)
+    return err('cannot-afford');
 
   const where = nameOf(home);
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'housing',
-    amount: dollars(-cost),
-    source: `${renovation.name} at ${where}`,
-  });
+  const paid = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(cost),
+    'housing',
+    `${renovation.name} at ${where}`,
+    payment,
+  );
+  if (!paid.ok) return err(paid.error);
+  const books = paid.value;
   const next = renovated(home, renovation, cost, state.world.year);
   const sequence = state.player.timeline.filter((entry) => entry.age === state.player.age).length;
   const entry = createTimelineEntry({
     age: state.player.age,
     year: state.world.year,
     kind: 'passive',
-    text: `Had ${renovation.phrase} put in at ${where}. ${money(cost)}.`,
+    text: `Had ${renovation.phrase} put in at ${where}. ${money(cost)}.${paymentNote(payment)}`,
     id: `t:${state.world.year}:home:reno:${home.id}:${renovation.id}`,
     sequence,
   });
@@ -142,6 +168,7 @@ export function renovate(
     state: {
       ...state,
       finance: books.ledger,
+      cards: books.cards,
       homes: state.homes.map((candidate) => (candidate.id === home.id ? next : candidate)),
       player: {
         ...state.player,
@@ -274,4 +301,15 @@ export function answerRenovationOffer(
   const done = renovate(cleared, offer.homeId, offer.renovationId);
   if (!done.ok) return note("Meant to get the work done. It didn't happen this year.");
   return ok({ state: done.value.state, entry: done.value.entry });
+}
+
+/** Only the lived-in home contributes; unpaid years cannot buy comfort. */
+export function renovationComfortFor(
+  homes: readonly OwnedHome[],
+  hardship: boolean,
+  short: number,
+): number {
+  if (hardship || short < 0) return 0;
+  const home = residenceOf(homes);
+  return home ? renovationHappinessOf(home) : 0;
 }

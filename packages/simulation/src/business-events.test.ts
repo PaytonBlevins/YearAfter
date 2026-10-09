@@ -306,8 +306,8 @@ describe('0604 — the economy, said out loud', () => {
   it('takes a visible share of custom in a bad year, and says so', () => {
     const result = runOne(restaurant(), 'slump', 'severeRecession');
     const last = result.businesses[0]!.last!;
-    expect(last.economy).toBeLessThan(0.9);
-    expect(last.economy).toBeGreaterThan(0.7);
+    // P4 halves the severe-recession hit: 13% × restaurant cyclicality 0.6.
+    expect(last.economy).toBeCloseTo(0.922, 12);
     expect(result.lines.some((line) => /downturn/i.test(line) && /Chez Nous/.test(line))).toBe(
       true,
     );

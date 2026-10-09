@@ -79,6 +79,13 @@ export function stepRent(level: number, direction: 1 | -1): number {
  * as the index to this power — enough that a California duplex barely pays and
  * an Ohio one does, without the cheapest states yielding like a payday loan.
  */
+/** P14 approved policy: residential rentals need room for costs and early debt service. */
+export const RESIDENTIAL_RENT_FACTOR = 1.15;
+export const rentYieldFor = (kind: {
+  readonly rentYield: number;
+  readonly commercial: boolean;
+}): number => kind.rentYield * (kind.commercial ? 1 : RESIDENTIAL_RENT_FACTOR);
+
 export const YIELD_ELASTICITY = 0.7;
 
 export function goingRentOf(
@@ -259,6 +266,11 @@ export interface RentalEconomics {
   /** Every unit let all year at the current setting, whole dollars. */
   readonly fullYear: number;
   readonly mortgageMonth: number;
+  readonly mortgageYear: number;
+  /** Full-year receipts at current occupancy and signed rents, before missed payments/gaps. */
+  readonly collectedYear: number;
+  /** Receipts less operating costs, before mortgage payments and personal income tax. */
+  readonly operatingYear: number;
   /** Upkeep and taxes a year — the "maintenance" spec 149–150 shows here. */
   readonly upkeepYear: number;
   readonly agentYear: number;
@@ -274,9 +286,11 @@ export function rentalEconomics(input: {
   readonly managed: boolean;
   readonly mortgageYear: number;
   readonly upkeepYear: number;
+  /** Occupied commercial leases keep their signed rent until renewal. */
+  readonly leaseRents?: readonly number[];
 }): RentalEconomics {
   const rent = Math.round(input.goingRent * rentLevelOf(input.level).level);
-  const collected = rent * input.let;
+  const collected = input.leaseRents?.reduce((sum, due) => sum + due, 0) ?? rent * input.let;
   const agentYear = input.managed ? Math.round(collected * AGENT_SHARE) : 0;
   return {
     units: input.units,
@@ -284,6 +298,9 @@ export function rentalEconomics(input: {
     rentPerUnitMonth: Math.round(rent / 12),
     fullYear: rent * input.units,
     mortgageMonth: Math.round(input.mortgageYear / 12),
+    mortgageYear: input.mortgageYear,
+    collectedYear: collected,
+    operatingYear: collected - agentYear - input.upkeepYear,
     upkeepYear: input.upkeepYear,
     agentYear,
     profitYear: collected - agentYear - input.mortgageYear - input.upkeepYear,

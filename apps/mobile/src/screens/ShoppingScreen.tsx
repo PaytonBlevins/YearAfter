@@ -10,8 +10,13 @@
 
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
+import { dollars } from '@yearafter/core';
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
 import { COLLECTION_SHELF_LABELS, findValuableStore } from '@yearafter/content';
 import {
+  BUY_VALUABLE_ERROR_LABELS,
+  valuablePurchaseQuote,
+  valuableIcingQuote,
   collectionOf,
   openStores,
   openVenues,
@@ -96,12 +101,13 @@ export function ShoppingScreen() {
 
 export function StoreScreen() {
   const { state, buyAValuable } = useGame();
+  const [iced, setIced] = useState(false);
   const { current } = useNavigation();
   const [open, setOpen] = useState<string | undefined>(undefined);
   if (!state || !current?.storeId) return null;
   const store = findValuableStore(current.storeId);
   const pieces = storeStock(state, current.storeId);
-  const cash = Math.floor(Number(state.player.cash) / 100);
+  const finish: 'original' | 'iced' = iced ? 'iced' : 'original';
   if (!store || pieces.length === 0) {
     return (
       <ScrollView contentContainerStyle={styles.content}>
@@ -121,22 +127,60 @@ export function StoreScreen() {
               subtitle={piece.item.blurb || undefined}
               value={money(piece.price)}
               affordance="action"
-              onPress={() => setOpen(open === piece.id ? undefined : piece.id)}
+              onPress={() => {
+                setOpen(open === piece.id ? undefined : piece.id);
+                setIced(false);
+              }}
               wrap
             />
-            {open === piece.id ? (
-              cash >= piece.price ? (
-                <ActionButton
-                  label={`Buy it — ${money(piece.price)}`}
-                  onPress={() => {
-                    buyAValuable(piece.id);
-                    setOpen(undefined);
-                  }}
-                />
-              ) : (
-                <Text style={styles.note}>You don't have the money for that.</Text>
-              )
-            ) : null}
+            {open === piece.id
+              ? (() => {
+                  const quote = valuablePurchaseQuote(piece, finish);
+                  return (
+                    <>
+                      {piece.item.icing?.kind === 'aftermarket' ? (
+                        <>
+                          <ListRow
+                            title="Original"
+                            value={!iced ? 'Chosen' : undefined}
+                            onPress={() => setIced(false)}
+                            affordance="action"
+                          />
+                          <ListRow
+                            title="Iced-out"
+                            subtitle="Aftermarket diamond work"
+                            value={iced ? 'Chosen' : undefined}
+                            onPress={() => setIced(true)}
+                            affordance="action"
+                          />
+                        </>
+                      ) : piece.item.icing?.kind === 'factory' ? (
+                        <Text style={styles.note}>Factory-set diamonds</Text>
+                      ) : null}
+                      {quote.ok ? (
+                        <>
+                          <Text
+                            style={styles.note}
+                          >{`Base watch or piece: ${money(quote.value.base)} · Custom work: ${money(quote.value.work)} · Total: ${money(quote.value.total)} · Resale: ${money(quote.value.resale)}`}</Text>
+                          <PurchasePaymentChoices
+                            key={`${piece.id}:${finish}`}
+                            purchaseName={piece.item.name}
+                            total={dollars(quote.value.total)}
+                            cash={state.player.cash}
+                            cards={state.cards}
+                            onPay={(payment) => {
+                              buyAValuable(piece.id, payment, finish);
+                              setOpen(undefined);
+                            }}
+                          />
+                        </>
+                      ) : (
+                        <Text style={styles.note}>{BUY_VALUABLE_ERROR_LABELS[quote.error]}</Text>
+                      )}
+                    </>
+                  );
+                })()
+              : null}
           </Fragment>
         ))}
       </Card>
@@ -149,7 +193,8 @@ export function StoreScreen() {
 /* -------------------------------------------------------------------------- */
 
 export function CollectionsScreen() {
-  const { state, sellAValuable } = useGame();
+  const { state, sellAValuable, iceAValuable } = useGame();
+  const [customizing, setCustomizing] = useState<string>();
   const { push } = useNavigation();
   const [selling, setSelling] = useState<string | undefined>(undefined);
   if (!state) return null;
@@ -184,22 +229,72 @@ export function CollectionsScreen() {
                       ? 'A reproduction'
                       : owned.inheritedFrom
                         ? `Was ${owned.inheritedFrom}'s`
-                        : `Bought in ${owned.boughtYear} for ${money(Number(owned.purchasePrice) / 100)}`
+                        : `${owned.icing ? 'Base watch bought' : 'Bought'} in ${owned.boughtYear} for ${money(Number(owned.purchasePrice) / 100)}`
                   }
                   value={money(Number(owned.value) / 100)}
                   affordance="action"
-                  onPress={() => setSelling(selling === owned.id ? undefined : owned.id)}
+                  onPress={() => {
+                    setSelling(selling === owned.id ? undefined : owned.id);
+                    setCustomizing(undefined);
+                  }}
                   wrap
                 />
+                {owned.icing ? (
+                  <Text
+                    style={styles.note}
+                  >{`Iced out in ${owned.icing.year} · Work: ${money(Number(owned.icing.cost) / 100)} · Base watch bought in ${owned.boughtYear}: ${money(Number(owned.purchasePrice) / 100)} · Total paid: ${money(Number(owned.purchasePrice + owned.icing.cost) / 100)}`}</Text>
+                ) : item.icing?.kind === 'factory' ? (
+                  <Text style={styles.note}>Factory-set diamonds</Text>
+                ) : null}
                 {selling === owned.id ? (
-                  <ActionButton
-                    label={`Sell it — ${money(Number(owned.value) / 100)}`}
-                    variant="secondary"
-                    onPress={() => {
-                      sellAValuable(owned.id);
-                      setSelling(undefined);
-                    }}
-                  />
+                  <>
+                    <ActionButton
+                      label={`Sell it — ${money(Number(owned.value) / 100)}`}
+                      variant="secondary"
+                      onPress={() => {
+                        sellAValuable(owned.id);
+                        setSelling(undefined);
+                      }}
+                    />
+                    {item.kind === 'watch'
+                      ? (() => {
+                          const quote = valuableIcingQuote(state, owned.id);
+                          if (!quote.ok)
+                            return (
+                              <Text style={styles.note}>
+                                {BUY_VALUABLE_ERROR_LABELS[quote.error]}
+                              </Text>
+                            );
+                          return (
+                            <>
+                              <ActionButton
+                                label="Have it iced out"
+                                variant="secondary"
+                                onPress={() => setCustomizing(owned.id)}
+                              />
+                              {customizing === owned.id ? (
+                                <>
+                                  <Text
+                                    style={styles.note}
+                                  >{`Custom work: ${money(quote.value.cost)} · Resale now: ${money(quote.value.before)} · After work: ${money(quote.value.after)}`}</Text>
+                                  <PurchasePaymentChoices
+                                    key={`icing:${owned.id}`}
+                                    purchaseName="watch customization"
+                                    total={dollars(quote.value.cost)}
+                                    cash={state.player.cash}
+                                    cards={state.cards}
+                                    onPay={(payment) => {
+                                      iceAValuable(owned.id, payment);
+                                      setCustomizing(undefined);
+                                    }}
+                                  />
+                                </>
+                              ) : null}
+                            </>
+                          );
+                        })()
+                      : null}
+                  </>
                 ) : null}
               </Fragment>
             ))}
