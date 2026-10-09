@@ -1,5 +1,5 @@
 /**
- * Ticket 0502 — a partner who works.
+ * Ticket 0502 legacy income and the participation rules retained by P16.
  *
  * Measured before this ticket (`claude/0502-a-household-of-two.md`): a partner
  * added half again to what a household cost and brought nothing in, so a
@@ -8,7 +8,9 @@
  * one. Real households run the other way: two incomes are most of why couples
  * own homes and singles mostly rent.
  *
- * WHAT THIS IS NOT. A second career simulation. The player cannot see their
+ * HISTORICAL 0502 CONTRACT, superseded by P16 catalog careers. Legacy income
+ * below is retained only for v50 migration; participation remains shared.
+ * The player cannot see their
  * partner's job, apply for it, or push it; spec 674–683 simulates "more than
  * the player is asked to manage", and the part a household feels is the
  * money. So a partner has an earning power, an age, years in and out of work,
@@ -122,14 +124,24 @@ const NOTHING: PartnerYear = { status: 'notWorking', gross: 0, net: 0, tax: 0 };
  * household always comes out the same.
  */
 export function partnerYear(input: PartnerInput): PartnerYear {
-  if (input.age < 18) return NOTHING;
+  const status = partnerWorkOf(input);
+  if (status === 'notWorking') return NOTHING;
   const power = earningPowerOf(input.id);
 
-  if (input.age >= retirementAgeOf(input.id)) {
+  if (status === 'retired') {
     const gross = Math.round(power * PENSION_SHARE);
     return { status: 'retired', gross, net: afterTax(gross), tax: gross - afterTax(gross) };
   }
 
+  const gross = Math.round(power * earningsCurve(input.age));
+  const net = afterTax(gross);
+  return { status: 'working', gross, net, tax: gross - net };
+}
+
+/** Participation only: no legacy earning-power calculation in P16 income. */
+export function partnerWorkOf(input: PartnerInput): PartnerWork {
+  if (input.age < 18) return 'notWorking';
+  if (input.age >= retirementAgeOf(input.id)) return 'retired';
   const chance =
     input.age < 22
       ? WORKING_CHANCE_YOUNG
@@ -137,9 +149,5 @@ export function partnerYear(input: PartnerInput): PartnerYear {
         ? WORKING_CHANCE_WITH_A_BABY
         : WORKING_CHANCE;
   const spell = Math.floor(input.age / SPELL_YEARS);
-  if (!(mixedUnit(`partner:${input.id}:work:${spell}`) < chance)) return NOTHING;
-
-  const gross = Math.round(power * earningsCurve(input.age));
-  const net = afterTax(gross);
-  return { status: 'working', gross, net, tax: gross - net };
+  return mixedUnit(`partner:${input.id}:work:${spell}`) < chance ? 'working' : 'notWorking';
 }

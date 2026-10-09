@@ -10,14 +10,14 @@ const saved = () =>
     { id: asSaveId('p7-save'), createdAt: 0, updatedAt: 0 },
   );
 describe('P7 save v46', () => {
-  it('uses current version 50', () => expect(CURRENT_SAVE_VERSION).toBe(50));
+  it('uses current version 51 after P16', () => expect(CURRENT_SAVE_VERSION).toBe(51));
   it('migrates v45 with no invented goal, preserving all other data', () => {
     const legacy = { ...saved(), version: 45 };
     const before = JSON.stringify(legacy);
     const r = migrateSave(legacy);
     if (!r.ok) throw Error(r.error.kind);
     const { cashGoal: _old, ...rest } = legacy;
-    expect(r.value).toEqual({ ...rest, version: 50 });
+    expect(r.value).toEqual({ ...rest, version: 51 });
     expect(JSON.stringify(legacy)).toBe(before);
     expect(migrateSave(legacy)).toEqual(r);
   });

@@ -52,10 +52,10 @@ describe('P13 save v50', () => {
     };
     const before = JSON.stringify(old);
     const r = value(migrateSave(old));
-    expect(CURRENT_SAVE_VERSION).toBe(50);
+    expect(CURRENT_SAVE_VERSION).toBe(51);
     expect(r).toEqual({
       ...old,
-      version: 50,
+      version: 51,
       businesses: old.businesses.map((b, i) => (i === 0 ? { ...b, price: 100 } : b)),
     });
     expect(r.businesses[0]!.agentLevel).toBeUndefined();

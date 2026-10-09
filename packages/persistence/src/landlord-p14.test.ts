@@ -49,7 +49,7 @@ describe('P14 compatibility without a new save field', () => {
       const saved = fixture(how);
       const r = migrateSave(JSON.parse(JSON.stringify(saved)));
       if (!r.ok) throw Error(String(r.error));
-      expect(CURRENT_SAVE_VERSION).toBe(50);
+      expect(CURRENT_SAVE_VERSION).toBe(51);
       expect(r.value).toEqual(saved);
       expect(toSave(advanceYear(fromSave(r.value)).state, options)).toEqual(
         toSave(advanceYear(fromSave(saved)).state, options),

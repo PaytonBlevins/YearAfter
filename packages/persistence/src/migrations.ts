@@ -29,6 +29,11 @@ import {
 import { CHARGED_FROM_AGE } from '@yearafter/simulation';
 import { findInstrument } from '@yearafter/finance';
 import { CURRENT_SAVE_VERSION, type CurrentSaveGame } from './save-schema';
+import { legacyPartnerCareer } from '@yearafter/careers';
+import { householdPartnerOf, type Acquaintance } from '@yearafter/social';
+import { npcAge, type Household } from '@yearafter/relationships';
+import { childrenAtHome } from '@yearafter/parenting';
+import { partnerCareersOk } from './partner-career-validation';
 
 export type MigrationError =
   | { readonly kind: 'notAnObject' }
@@ -1035,6 +1040,32 @@ const migrations: Readonly<Record<number, Migration>> = {
       : save['businesses'],
   }),
 
+  /** P16: infer a prospective job without rewriting current pay or historical books. */
+  50: (save) => {
+    const people = (save['circle'] as { people?: unknown } | undefined)?.people;
+    const year = (save['world'] as { year?: number } | undefined)?.year;
+    const seed = (save['rng'] as { seed?: string } | undefined)?.seed;
+    const family = save['family'] as Household | undefined;
+    const partner = Array.isArray(people)
+      ? householdPartnerOf(people as Acquaintance[])
+      : undefined;
+    const adult = partner && typeof year === 'number' && npcAge(partner, year) >= 18;
+    const partnerCareers =
+      adult && partner.alive && typeof seed === 'string' && family && Array.isArray(family.members)
+        ? {
+            [String(partner.id)]: legacyPartnerCareer({
+              id: String(partner.id),
+              age: npcAge(partner, year!),
+              worldYear: year!,
+              seed,
+              playerPay: 0,
+              youngChild: childrenAtHome(family, year!).some((c) => year! - c.birthYear < 6),
+            }),
+          }
+        : {};
+    return { ...save, version: 51, partnerCareers };
+  },
+
   /** P7 v45 -> v46: no goal existed before; no invented goal and no RNG. */
   45: (save) => {
     const { cashGoal: _future, ...prior } = save;
@@ -1366,6 +1397,10 @@ export function validateCurrentSave(
 
   const goal = candidate['cashGoal'];
   const problems = [
+    require('partnerCareers', candidate['partnerCareers'], partnerCareersOk(
+      candidate['partnerCareers'],
+      Number(world?.['year']),
+    )),
     require('cashGoal', goal, goal === undefined ||
       (typeof goal === 'number' && Number.isSafeInteger(goal) && goal >= 0)),
     require('id', candidate['id'], typeof candidate['id'] === 'string'),

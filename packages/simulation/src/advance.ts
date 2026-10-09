@@ -370,6 +370,9 @@ export function advanceYear(state: GameState): AdvanceResult {
     people: social.circle.people,
     worldYear: nextYear,
     childAges: childAgesAtHome,
+    seed: state.rng.getSeed(),
+    careers: state.partnerCareers,
+    playerPay: employment.earned,
   });
 
   /*
@@ -1210,6 +1213,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     celebrities: celebritiesYear.celebrities,
     parenting: family.parenting,
     employment: employment.employment,
+    partnerCareers: partnered.careers,
     // Ticket 0211. A pending decision is DISCARDED on the year somebody dies:
     // a question the character will never answer is not a question, and
     // `advanceYear` already refuses to run while one is open, so leaving it

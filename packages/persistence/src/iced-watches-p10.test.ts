@@ -59,8 +59,8 @@ describe('P10 save v47 paid watch work', () => {
     const before = JSON.stringify(old);
     const r = migrateSave(old);
     if (!r.ok) throw Error(r.error.kind);
-    expect(CURRENT_SAVE_VERSION).toBe(50);
-    expect(r.value).toEqual({ ...old, version: 50 });
+    expect(CURRENT_SAVE_VERSION).toBe(51);
+    expect(r.value).toEqual({ ...old, version: 51 });
     expect(r.value.valuables.every((p) => p.icing === undefined)).toBe(true);
     expect(JSON.stringify(old)).toBe(before);
     expect(migrateSave(old)).toEqual(r);

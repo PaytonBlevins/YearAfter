@@ -31,7 +31,7 @@ describe('P15 derived policy without a save bump', () => {
     'round-trips %s and advances actual retirement deterministically',
     (tier) => {
       const save = fixture(tier);
-      expect(CURRENT_SAVE_VERSION).toBe(50);
+      expect(CURRENT_SAVE_VERSION).toBe(51);
       const migrated = migrateSave(JSON.parse(JSON.stringify(save)));
       if (!migrated.ok) throw Error(migrated.error.kind);
       expect(migrated.value).toEqual(save);

@@ -85,7 +85,7 @@ describe('P15 retirement through the real store', () => {
     const saved = await repository.load(saveId);
     if (!saved.ok) throw Error('No save');
     expect(saved.value.household.lifestyle).toBe('frugal');
-    expect(saved.value.version).toBe(50);
+    expect(saved.value.version).toBe(51);
     await act(() => game!.advance());
     expect(reconcile(game!.state!.finance).ok).toBe(true);
     const advanced = await repository.load(saveId);
