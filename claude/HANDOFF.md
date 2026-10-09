@@ -222,6 +222,24 @@ skip. Closeout documentation triggers another run, not observed here. Gaming max
 Native/device checks and unavailable Project mirroring remain open. P14–P16 and
 life-event wording wait; stop after P13.
 
+**P14 measurement update (9 October UTC):** Payton authorized P14 after P13 closeout.
+Separately claimed/published `feat/playtest-p14-landlord-returns`; refreshed main
+stays `beff25a`, stacked on P13 #25 and #13–#24. The old 0503 Ohio/California
+operating yields reproduce (~4.7%/~2.8%); the shortfall is chiefly early leveraged
+cash flow. Finding 44 is a separate commercial vacancy/turnover expense omission,
+not proof of negative operating profit; insurance is already in aggregate costs.
+Measured five prospective residential rent factors over 550,000 property-years
+and usual/half/cash balances over 360,000 reconciled annual settlements. Propose
+residential going rent ×1.15, unchanged commercial yields/rates/costs/demand table,
+a fixed 50%-down investment mortgage choice beside usual/cash, and separate
+operating/cash projections honoring fixed commercial lease rents. A $475k Ohio
+duplex's first-five 25%-down cash moves from about −$3,300/year to +$2,500; a
+California half-deposit case averages about +$900, without a per-year guarantee.
+Details and protected quote/command changes: `playtest-p14-landlord-returns.md`.
+Approval pending; no production changes or save reservation, expected v50 stays.
+P15–P16 and life-event wording wait. Existing full-verify/format and native/Project
+checks remain open; no new implementation/sabotage/full-verify result is claimed.
+
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 
 You are **Agent B**. Your job is narrow and does not include building tickets:
