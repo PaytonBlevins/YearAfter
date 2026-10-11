@@ -22,7 +22,7 @@ export const CELEBRITY_FIELDS = [
 export type CelebrityFieldId = (typeof CELEBRITY_FIELDS)[number];
 
 /** What a player's life has to contain for a field to be within reach (spec 697). */
-export type FieldNetwork = 'channel' | 'business';
+export type FieldNetwork = 'channel' | 'business' | 'modeling';
 
 export interface CelebrityField {
   readonly id: CelebrityFieldId;
@@ -65,6 +65,8 @@ export const CELEBRITY_FIELD_CATALOG: readonly CelebrityField[] = [
     density: 0.9,
     hubPull: 0.9,
     wealthPull: 0.4,
+    // Ticket 0807. Backstage, a model meets the people who cast and the people who sing.
+    network: 'modeling',
   },
   {
     id: 'music',
@@ -76,6 +78,7 @@ export const CELEBRITY_FIELD_CATALOG: readonly CelebrityField[] = [
     density: 1.0,
     hubPull: 0.6,
     wealthPull: 0.3,
+    network: 'modeling',
   },
   {
     id: 'athletics',
@@ -319,7 +322,8 @@ export const findConnectionAction = (id: string): ConnectionAction | undefined =
 /* -------------------------------------------------------------------------- */
 
 /** Where a meeting happened, which is also why it was this person. */
-export type EncounterScene = 'chance' | 'hub' | 'elite' | 'channel' | 'business' | 'fame';
+export type EncounterScene =
+  'chance' | 'hub' | 'elite' | 'channel' | 'business' | 'modeling' | 'fame';
 
 export type CelebrityLineKind =
   | `scene:${EncounterScene}`
@@ -371,6 +375,10 @@ export const CELEBRITY_LINES: Readonly<Record<CelebrityLineKind, readonly string
   'scene:business': [
     'At a business mixer, {name}, {role}, is talking with everybody who will listen.',
     'At a conference, you end up in the same elevator as {name}, {role}.',
+  ],
+  'scene:modeling': [
+    'Backstage at a show, {name}, {role}, is having a hem pinned two chairs down from you.',
+    'At an after-party for a campaign launch, {name}, {role}, comes over and says they know your work.',
   ],
   'scene:fame': [
     'At a party full of people with a following, {name}, {role}, waves you over.',

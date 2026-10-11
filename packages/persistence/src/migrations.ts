@@ -1104,6 +1104,33 @@ const migrations: Readonly<Record<number, Migration>> = {
           },
     version: 48,
   }),
+  /**
+   * v48 -> v49: Ticket 0807 — modeling. Nobody before it could model, so every older save gets an empty model: no
+   * craft, no jobs, no following. What a v48 save already carries is kept. No RNG, no clock.
+   */
+  48: (save) => ({
+    ...save,
+    modeling:
+      typeof save['modeling'] === 'object' && save['modeling'] !== null
+        ? save['modeling']
+        : {
+            credits: 0,
+            tier: 'test',
+            hits: 0,
+            reputation: 0,
+            awards: 0,
+            idle: 0,
+            lastPay: 0,
+            followers: 0,
+            peak: 0,
+            brandOwed: 0,
+            brandAnswered: [],
+            offers: [],
+            booked: [],
+            applied: [],
+          },
+    version: 49,
+  }),
 };
 
 /**
@@ -1403,6 +1430,83 @@ function actingOk(value: unknown): boolean {
   return acting['appliedAge'] === undefined || Number.isSafeInteger(acting['appliedAge']);
 }
 
+const MODEL_TIERS_OK = ['test', 'catalogue', 'commercial', 'editorial', 'campaign', 'face'];
+const PLACEMENTS_OK = ['face', 'featured', 'group'];
+
+function jobOk(value: unknown, offered: boolean): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const row = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  return (
+    typeof row['id'] === 'string' &&
+    typeof row['tier'] === 'string' &&
+    MODEL_TIERS_OK.includes(row['tier']) &&
+    typeof row['placement'] === 'string' &&
+    PLACEMENTS_OK.includes(row['placement']) &&
+    typeof row['medium'] === 'string' &&
+    typeof row['client'] === 'string' &&
+    whole(row['rate']) &&
+    whole(row['days']) &&
+    (row['days'] as number) >= 1 &&
+    whole(row['usage']) &&
+    whole(row['age']) &&
+    (offered
+      ? (row['source'] === 'asked' || row['source'] === 'applied') &&
+        (row['asked'] === undefined || typeof row['asked'] === 'boolean')
+      : whole(row['bookedAge']))
+  );
+}
+
+function modelingOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const modeling = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  if (typeof modeling['tier'] !== 'string' || !MODEL_TIERS_OK.includes(modeling['tier'])) {
+    return false;
+  }
+  if (modeling['best'] !== undefined) {
+    if (typeof modeling['best'] !== 'string' || !MODEL_TIERS_OK.includes(modeling['best'])) {
+      return false;
+    }
+  }
+  if (
+    !whole(modeling['credits']) ||
+    !whole(modeling['hits']) ||
+    !whole(modeling['awards']) ||
+    !whole(modeling['idle']) ||
+    !whole(modeling['lastPay']) ||
+    !whole(modeling['followers']) ||
+    !whole(modeling['peak']) ||
+    !whole(modeling['brandOwed']) ||
+    !optionalWhole(modeling['seenAge']) ||
+    !optionalWhole(modeling['portfolioAge']) ||
+    !optionalWhole(modeling['appliedAge'])
+  ) {
+    return false;
+  }
+  const reputation = modeling['reputation'];
+  if (typeof reputation !== 'number' || reputation < 0 || reputation > 100) return false;
+  const craft = modeling['craft'];
+  if (craft !== undefined && (typeof craft !== 'number' || craft < 0 || craft > 100)) return false;
+  const agency = modeling['agency'];
+  if (agency !== undefined) {
+    if (typeof agency !== 'object' || agency === null) return false;
+    if (!Number.isSafeInteger((agency as Record<string, unknown>)['since'])) return false;
+  }
+  if (!Array.isArray(modeling['offers']) || !modeling['offers'].every((row) => jobOk(row, true))) {
+    return false;
+  }
+  if (!Array.isArray(modeling['booked']) || !modeling['booked'].every((row) => jobOk(row, false))) {
+    return false;
+  }
+  for (const key of ['applied', 'brandAnswered']) {
+    const ids = modeling[key];
+    if (!Array.isArray(ids) || !ids.every((row) => typeof row === 'string')) return false;
+  }
+  return true;
+}
+
 const MUSIC_TIERS_OK = ['local', 'club', 'regional', 'national', 'headliner', 'superstar'];
 const LABEL_KINDS_OK = ['indie', 'major'];
 
@@ -1673,6 +1777,8 @@ export function validateCurrentSave(
     require('acting', candidate['acting'], actingOk(candidate['acting'])),
     // Ticket 0806. Always present from v48: listeners, a catalogue, a deal or an offer, and the plan for the year.
     require('music', candidate['music'], musicOk(candidate['music'])),
+    // Ticket 0807. Always present from v49: a rung, credits, a following, and the jobs on the table and booked.
+    require('modeling', candidate['modeling'], modelingOk(candidate['modeling'])),
     // Ticket 0704. Optional, but if it is there it has to be one of the two.
     require('representation', candidate['representation'], candidate['representation'] ===
       undefined ||

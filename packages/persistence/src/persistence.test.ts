@@ -2176,7 +2176,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(48);
+    expect(CURRENT_SAVE_VERSION).toBe(49);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {
@@ -2642,6 +2642,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       { ...good, credits: 1.5 },
       { ...good, reputation: 101 },
       { ...good, craft: 120 },
+      { ...good, craft: 101 },
       { ...good, agent: { since: 'x' } },
       { ...good, lessons: { since: 12 } },
       { ...good, applied: [3] },
@@ -2777,6 +2778,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       { ...good, catalogue: -2 },
       { ...good, catalogue: 'lots' },
       { ...good, craft: 120 },
+      { ...good, craft: 101 },
       { ...good, lastPay: -5 },
       { ...good, tours: 1.2 },
       { ...good, released: { single: 1, ep: 0 } },
@@ -2807,8 +2809,218 @@ describe('Ticket 0406 — a question survives being saved', () => {
     }
   });
 
-  it('is at version 48 (0806)', () => {
-    expect(CURRENT_SAVE_VERSION).toBe(48);
+  it('opens a v48 save with an empty model and moves only the version (0807)', () => {
+    const { save } = newSave('MODEL-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.modeling;
+    old.version = 48;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.modeling).toEqual({
+      credits: 0,
+      tier: 'test',
+      hits: 0,
+      reputation: 0,
+      awards: 0,
+      idle: 0,
+      lastPay: 0,
+      followers: 0,
+      peak: 0,
+      brandOwed: 0,
+      brandAnswered: [],
+      offers: [],
+      booked: [],
+      applied: [],
+    });
+  });
+
+  it('keeps a model a v48 save somehow already has rather than writing over it (0807)', () => {
+    const { save } = newSave('MODEL-KEEP');
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 48;
+    old.modeling = { ...old.modeling, credits: 7, followers: 900, peak: 900 };
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.modeling.credits).toBe(7);
+    expect(result.value.modeling.followers).toBe(900);
+  });
+
+  it('round-trips a model: a rung, an agency, jobs on the table and booked, and brand money (0807)', () => {
+    const { save } = newSave('MODEL-ROUND');
+    const base = fromSave(save);
+    const modeling = {
+      craft: 68,
+      seenAge: 25,
+      portfolioAge: 24,
+      credits: 14,
+      tier: 'editorial' as const,
+      best: 'campaign' as const,
+      hits: 1,
+      reputation: 31,
+      awards: 1,
+      idle: 0,
+      lastPay: 52_000,
+      agency: { since: 22 },
+      followers: 41_000,
+      peak: 60_000,
+      brandOwed: 8_000,
+      brandAnswered: ['sp:2030:modeling:0'],
+      offers: [
+        {
+          id: '26:0',
+          tier: 'editorial' as const,
+          placement: 'featured' as const,
+          medium: 'a magazine spread',
+          client: 'Atelier North',
+          rate: 3_200,
+          days: 5,
+          usage: 4_000,
+          source: 'applied' as const,
+          age: 26,
+          asked: true,
+        },
+      ],
+      booked: [
+        {
+          id: '25:1',
+          tier: 'commercial' as const,
+          placement: 'group' as const,
+          medium: 'a catalogue shoot',
+          client: 'Calloway Outfitters',
+          rate: 1_200,
+          days: 8,
+          usage: 0,
+          age: 25,
+          bookedAge: 25,
+        },
+      ],
+      appliedAge: 26,
+      applied: ['26:2'],
+    };
+    const state: GameState = { ...base, modeling };
+    expect(fromSave(toSave(state, { id: save.id })).modeling).toEqual(modeling);
+  });
+
+  it('refuses a model that is not sound (0807)', () => {
+    const { save } = newSave('MODEL-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const good = raw.modeling;
+    expect(migrateSave({ ...raw, modeling: good }).ok).toBe(true);
+    const offer = {
+      id: '26:0',
+      tier: 'catalogue',
+      placement: 'featured',
+      medium: 'a catalogue shoot',
+      client: 'Calloway Outfitters',
+      rate: 1000,
+      days: 4,
+      usage: 0,
+      source: 'asked',
+      age: 26,
+    };
+    const shoot = {
+      id: '25:0',
+      tier: 'catalogue',
+      placement: 'featured',
+      medium: 'a catalogue shoot',
+      client: 'Calloway Outfitters',
+      rate: 1000,
+      days: 4,
+      usage: 0,
+      age: 25,
+      bookedAge: 25,
+    };
+    expect(
+      migrateSave({
+        ...raw,
+        modeling: {
+          ...good,
+          offers: [offer],
+          booked: [shoot],
+          agency: { since: 20 },
+          craft: 50,
+          best: 'face',
+        },
+      }).ok,
+    ).toBe(true);
+    // Both ends of a scale are on it: a name nobody knows, or everybody; no craft yet, or all of it.
+    for (const edge of [0, 100]) {
+      expect(
+        migrateSave({ ...raw, modeling: { ...good, reputation: edge, craft: edge } }).ok,
+        String(edge),
+      ).toBe(true);
+    }
+    // A single day's work is a job: the floor is one, not two.
+    expect(migrateSave({ ...raw, modeling: { ...good, offers: [{ ...offer, days: 1 }] } }).ok).toBe(
+      true,
+    );
+    expect(migrateSave({ ...raw, modeling: { ...good, booked: [{ ...shoot, days: 1 }] } }).ok).toBe(
+      true,
+    );
+    const bad = [
+      null,
+      [],
+      'model',
+      { ...good, tier: 'legend' },
+      { ...good, tier: 3 },
+      { ...good, best: 'legend' },
+      { ...good, credits: -1 },
+      { ...good, credits: 1.5 },
+      { ...good, hits: -1 },
+      { ...good, awards: 0.5 },
+      { ...good, idle: -1 },
+      { ...good, lastPay: -5 },
+      { ...good, followers: -1 },
+      { ...good, peak: 1.5 },
+      { ...good, brandOwed: -1 },
+      { ...good, seenAge: -1 },
+      { ...good, portfolioAge: 1.5 },
+      { ...good, appliedAge: -2 },
+      { ...good, reputation: 101 },
+      { ...good, reputation: -1 },
+      { ...good, reputation: 'high' },
+      { ...good, craft: 120 },
+      { ...good, craft: 101 },
+      { ...good, craft: -1 },
+      { ...good, craft: 'a lot' },
+      { ...good, agency: { since: 'x' } },
+      { ...good, agency: null },
+      { ...good, applied: [3] },
+      { ...good, applied: 'x' },
+      { ...good, brandAnswered: [3] },
+      { ...good, brandAnswered: 'x' },
+      { ...good, offers: 'x' },
+      { ...good, booked: 'x' },
+      { ...good, offers: [{ ...offer, tier: 'legend' }] },
+      { ...good, offers: [{ ...offer, placement: 'villain' }] },
+      { ...good, offers: [{ ...offer, id: 7 }] },
+      { ...good, offers: [{ ...offer, medium: 7 }] },
+      { ...good, offers: [{ ...offer, client: 7 }] },
+      { ...good, offers: [{ ...offer, rate: -1 }] },
+      { ...good, offers: [{ ...offer, rate: 1.5 }] },
+      { ...good, offers: [{ ...offer, days: 0 }] },
+      { ...good, offers: [{ ...offer, days: 2.5 }] },
+      { ...good, offers: [{ ...offer, usage: -1 }] },
+      { ...good, offers: [{ ...offer, age: -1 }] },
+      { ...good, offers: [{ ...offer, source: 'email' }] },
+      { ...good, offers: [{ ...offer, asked: 'no' }] },
+      { ...good, offers: [shoot] },
+      { ...good, offers: [null] },
+      { ...good, booked: [offer] },
+      { ...good, booked: [{ ...shoot, bookedAge: -1 }] },
+      { ...good, booked: [{ ...shoot, tier: 'legend' }] },
+      { ...good, booked: [{ ...shoot, days: 0 }] },
+    ];
+    for (const row of bad) {
+      expect(migrateSave({ ...raw, modeling: row }).ok, JSON.stringify(row)).toBe(false);
+    }
+  });
+
+  it('is at version 49 (0807)', () => {
+    expect(CURRENT_SAVE_VERSION).toBe(49);
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {

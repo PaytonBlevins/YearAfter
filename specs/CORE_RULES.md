@@ -3176,3 +3176,31 @@ end of a life, hold everything else still instead.
 did. The mutation that removed its write survived. A field that is saved and validated costs a migration check, a test
 and a line in every save, and tells the next reader that something depends on it. It was removed from the state, the
 year and the migration check.
+
+### 13.158 A weighted sum of stats is centred on the population it reads, not on a sibling's
+
+The first modeling craft copied acting's centre (72) and slope. The looks stat runs far below the others (median 57,
+p10 39, p90 70 at twenty-six), so a third of lives had a craft of 0–20 and half of those never left the first rung.
+It showed up only when the craft was measured across lives, not in any test of the formula. Measure the spread of
+the number a formula reads before centring it, and pin the centre in a test with the population's median beside it.
+
+### 13.159 A mutation that cannot change any result is named and left out, not tested
+
+Two kinds cannot be observed: `<` against `<=` on a hash draw (the draw would have to equal the threshold exactly), and
+`<` against `<=` on a rounding step whose boundary is a multiple of both steps ($10,000 is a multiple of $100 and of
+$1,000). 0807's final run left out fourteen of these, each listed in the ticket by line. Anything else that survives is a missing test or
+a line to delete (13.153); the list of exclusions is short on purpose, and every entry names why.
+
+### 13.160 A small pure function that a whole year runs through gets exported and pinned on its own
+
+The rounding of a rate, the pick of a client when some are taken, the odds an ask for more lands and the name factor on
+a rate were all reached only through a full year, where rounding hid a divisor and a loop hid its edges. XX
+mutations survived until each was exported (`modelRoundRate`, `modelRoundFee`, `makeModelJob`, `modelAskChance`) and tested at its own
+edges. Where a draw has to land in a window, search for the id that does and assert on it.
+
+### 13.161 A sabotage run kills a hung child by its process group, runs in a copy of the tree, and checks both trees when it is stopped
+
+One breakage made the code loop forever. The runner killed the shell it started, not the process it started, so the
+run sat on an orphan for twenty-five minutes and held the pipe open. The runner now starts each test in its own
+session and kills the group on a timeout, uses `--bail=1`, and resumes by index. When a run is stopped by hand, both
+trees are diffed before anything else is touched: a file left mutated looks exactly like a file that is fine.

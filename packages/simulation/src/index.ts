@@ -56,6 +56,8 @@ export * from './acting-state';
 export * from './acting';
 export * from './music-state';
 export * from './music';
+export * from './modeling-state';
+export * from './modeling';
 export * from './sports-state';
 export * from './sports';
 export * from './fame-work';

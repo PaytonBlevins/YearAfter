@@ -617,7 +617,8 @@ built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sport
 | **0804 Olympics, coaching and commentary**  | **DONE (engine).** Track and field, swimming, gymnastics, wrestling and amateur boxing, studied as a discipline from ten and joined as a national program at 16+, with a Games every fourth year, medals that pay a prize and a sponsorship, and after any career in 0801–0804 a coaching or commentary post whose level the career earned. **Save v46** (Agent B: v47+). No screens (0809).                                                                                                                                                                                                                                             |
 | **0805 Acting**                             | **DONE (engine).** Six rungs of acting work from student films to prestige pictures; every part is a lead, a supporting part or a bit part, and is offered to a seen actor or applied for from six casting calls a year (an agent helps and is never needed); lessons, character development, Take / Ask for more / Pass, awards, fame, and the Talent Agency business. **Save v47** (Agent B: v48+). No screens (0809).                                                                                                                                                                                                                 |
 | **0806 Music**                              | **DONE (engine).** Six rungs from a local act to a superstar, all read off monthly listeners; releases under the caps (2 albums, 3 EPs, 15 singles) with a back catalogue that keeps paying, a ceiling set by quality and one fixed luck draw; labels that call or take a demo (indie by default, never required) with an advance and a royalty after it is repaid, Sign / Ask for more / Pass; tours, collaborations (0704), a manager or an agent (0704), a fictional awards ceremony, the Record Label business, and the Music creator channel fed by releases. Real per-stream pay. **Save v48** (Agent B: v49+). No screens (0809). |
-| 0807–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **0807 Modeling**                           | **DONE (engine).** Six rungs from test shoots to the face of a house; a job is a day rate, days and a usage fee; work comes asked for (a model who has been seen), applied for (six castings a year, three applications) or through an agency (20%, the New York cap; helps, never required); looks and charisma, no new talent; an age window; brand deals on 0702's sponsor rules; celebrity networking; a fictional awards ceremony. **Save v49** (Agent B: v50+). No screens (0809). `claude/0807-modeling.md` |
+| 0808–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -1499,6 +1500,24 @@ golf and tennis add about five of twenty-four. A passive life does not start an 
 
 **129. 0806 took save v48.** Agent B's saves are v49 and onward. See `claude/0806-music.md`.
 
+### 0807 findings (130–137)
+
+**130. The ladder is a game ladder; only the median and the cap are real** (BLS models median $23.30 an hour, $48,470 a year, about 4,200 jobs; New York's 20% agency cap). Thresholds, day rates, usage shares, odds, the age curve and brand pay are mine, named and pinned.
+
+**131. A living is likelier than not:** 26 of 40 committed models have a $30,000 year (33 with an agency). Real modeling is mostly part-time. Dials: `MODEL_LIVING_WAGE`, the day rates, `MODEL_YEAR_DAYS`.
+
+**132. Looks are the gate in practice:** the low third by looks peaks under the second rung on average (0.8), the high third near the fourth (3.4). Dials: the craft centre (66.5) and slope (2.4).
+
+**133. The first calibration left 35% of lives at craft 0–20** because looks runs lower than the other stats. Re-centred; CORE_RULES 13.158.
+
+**134. A casting does not need the model to have been seen;** the portfolio and the agency matter for asked work. If a portfolio should gate castings, it is one check in `modelCalls`.
+
+**135. Casting fallback differs from acting's:** modeling takes the highest ready rung, 0805 the lowest. 0805 is unchanged.
+
+**136. Not modelled:** an agency contract term, the 45-day payment lag, the influencer-model crossover beyond brand deals. Brand deals read a pseudo-channel of the model's own followers; a real Fashion channel gets a quarter of the people the work brings.
+
+**137. 0807 took save v49.** Agent B's saves are v50 and onward. See `claude/0807-modeling.md`.
+
 ## Suggested order
 
 This is the historical delivery order with current status annotations, not an
@@ -1552,5 +1571,5 @@ Agent A's next ticket.
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
 
 12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, 0802 The
-    other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting and 0806 Music shipped as engines only; Payton chose screens in 0809.
+    other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting and 0806 Music and 0807 Modeling shipped as engines only; Payton chose screens in 0809.
     Next is chosen by Payton.)_

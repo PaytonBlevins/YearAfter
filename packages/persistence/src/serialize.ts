@@ -100,6 +100,7 @@ export function toSave(state: GameState, options: ToSaveOptions): CurrentSaveGam
     sports: state.sports,
     acting: state.acting,
     music: state.music,
+    modeling: state.modeling,
     // Omitted entirely when nobody is hired, which is what every other optional
     // field in this document does and what the migration relies on.
     ...(state.advisorId !== undefined ? { advisorId: state.advisorId } : {}),
@@ -149,6 +150,7 @@ export function fromSave(save: CurrentSaveGame): GameState {
     sports: save.sports,
     acting: save.acting,
     music: save.music,
+    modeling: save.modeling,
     retirement: save.retirement,
     pending: save.pending,
   });

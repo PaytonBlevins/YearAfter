@@ -49,6 +49,7 @@ import {
 } from '@yearafter/finance';
 import { EMPTY_CELEBRITIES, type CelebrityState } from './celebrity-state';
 import { EMPTY_ACTING, type ActingState } from './acting-state';
+import { EMPTY_MODELING, type ModelingState } from './modeling-state';
 import { EMPTY_MUSIC, type MusicState } from './music-state';
 import { EMPTY_SPORTS, type SportsState } from './sports-state';
 import { Rng } from './rng/rng';
@@ -332,6 +333,11 @@ export interface GameState {
    * Always present from v48.
    */
   readonly music: MusicState;
+  /**
+   * Ticket 0807. A model: the rung work is coming in at, a craft level, a following, an agency, and the jobs on the
+   * table and booked. Always present from v49.
+   */
+  readonly modeling: ModelingState;
   /** Live RNG registry. Serialised into the save on every write. */
   readonly rng: Rng;
 }
@@ -503,7 +509,9 @@ export const hasSystemicOffer = (state: GameState): boolean =>
   // Ticket 0805. A part somebody wants the actor for.
   state.acting.offers.length > 0 ||
   // Ticket 0806. A label's deal.
-  state.music.offer !== undefined;
+  state.music.offer !== undefined ||
+  // Ticket 0807. A job somebody wants the model for.
+  state.modeling.offers.length > 0;
 
 export const createWorldState = (year: number, generation = 1): WorldState => ({
   year,
@@ -549,6 +557,7 @@ export interface CreateGameStateOptions {
   readonly sports?: SportsState;
   readonly acting?: ActingState;
   readonly music?: MusicState;
+  readonly modeling?: ModelingState;
 }
 
 export const createGameState = (
@@ -596,6 +605,7 @@ export const createGameState = (
   sports: options.sports ?? EMPTY_SPORTS,
   acting: options.acting ?? EMPTY_ACTING,
   music: options.music ?? EMPTY_MUSIC,
+  modeling: options.modeling ?? EMPTY_MODELING,
   pending: options.pending ?? [],
   rng,
 });

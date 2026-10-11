@@ -400,11 +400,21 @@ describe('how likely a meeting is', () => {
   });
 
   it('multiplies the parts, and is capped', () => {
-    const pulls = { hub: 2, wealth: 3, fame: 5, channel: true, business: true };
+    const pulls = { hub: 2, wealth: 3, fame: 5, channel: true, business: true, modeling: false };
     expect(encounterMultiplier(pulls)).toBeCloseTo(2 * 3 * 5 * 1.5, 10);
-    expect(encounterMultiplier({ ...pulls, business: false })).toBeCloseTo(2 * 3 * 5 * 1.25, 10);
+    expect(encounterMultiplier({ ...pulls, business: false, modeling: false })).toBeCloseTo(
+      2 * 3 * 5 * 1.25,
+      10,
+    );
     expect(
-      encounterMultiplier({ hub: 1, wealth: 1, fame: 1, channel: false, business: false }),
+      encounterMultiplier({
+        hub: 1,
+        wealth: 1,
+        fame: 1,
+        channel: false,
+        business: false,
+        modeling: false,
+      }),
     ).toBe(1);
     const top = withFame(withCash({ ...ADULT, channels: [channel()] }, 1e9), 100);
     expect(pullsOf(top).channel).toBe(true);
@@ -414,7 +424,14 @@ describe('how likely a meeting is', () => {
     // Everything at its best would be well over the cap, and the cap holds.
     expect(
       ENCOUNTER_BASE *
-        encounterMultiplier({ hub: 2, wealth: 3, fame: 5, channel: true, business: true }),
+        encounterMultiplier({
+          hub: 2,
+          wealth: 3,
+          fame: 5,
+          channel: true,
+          business: true,
+          modeling: false,
+        }),
     ).toBeGreaterThan(ENCOUNTER_MAX);
   });
 
@@ -1407,7 +1424,7 @@ describe('meetings, to the number', () => {
   });
 
   it('is never above sixty in a hundred however much is stacked', () => {
-    const pulls = { hub: 2, wealth: 3, fame: 5, channel: true, business: true };
+    const pulls = { hub: 2, wealth: 3, fame: 5, channel: true, business: true, modeling: false };
     expect(Math.min(ENCOUNTER_MAX, 0.022 * encounterMultiplier(pulls))).toBe(0.6);
   });
 
@@ -1422,7 +1439,7 @@ describe('meetings, to the number', () => {
   });
 
   it('weighs a figure by fame, by what the life is near, and by still working', () => {
-    const pulls = { hub: 1, wealth: 1, fame: 1, channel: false, business: false };
+    const pulls = { hub: 1, wealth: 1, fame: 1, channel: false, business: false, modeling: false };
     const working = notablesIn('weight', 2060).find((f) => isWorking(f, 2060))!;
     const retired = notablesIn('weight', 2060).find((f) => !isWorking(f, 2060))!;
     expect(candidateWeight(working, 2060, pulls)).toBe(fameIn(working, 2060));
@@ -1430,28 +1447,30 @@ describe('meetings, to the number', () => {
   });
 
   it('pulls a field closer by the city, the money, and the network it needs', () => {
-    const none = { hub: 1, wealth: 1, fame: 1, channel: false, business: false };
+    const none = { hub: 1, wealth: 1, fame: 1, channel: false, business: false, modeling: false };
     const acting = findCelebrityField('acting')!;
     expect(fieldPull('acting', none)).toBe(1);
     expect(fieldPull('acting', { ...none, hub: 2 })).toBeCloseTo(1 + acting.hubPull, 10);
     expect(fieldPull('acting', { ...none, wealth: 3 })).toBeCloseTo(1 + acting.wealthPull * 2, 10);
     expect(fieldPull('creator', { ...none, channel: true })).toBe(2.5);
     expect(fieldPull('creator', none)).toBe(1);
-    expect(fieldPull('business', { ...none, business: true })).toBe(2.5);
+    expect(fieldPull('business', { ...none, business: true, modeling: false })).toBe(2.5);
     expect(fieldPull('business', { ...none, channel: true })).toBe(1);
-    expect(fieldPull('acting', { ...none, channel: true, business: true })).toBe(1);
+    expect(fieldPull('acting', { ...none, channel: true, business: true, modeling: false })).toBe(
+      1,
+    );
     expect(fieldPull('sailing', { ...none, hub: 2 })).toBe(1);
   });
 
   it('says why it was this person: the biggest push, or chance when none is big', () => {
-    const none = { hub: 1, wealth: 1, fame: 1, channel: false, business: false };
+    const none = { hub: 1, wealth: 1, fame: 1, channel: false, business: false, modeling: false };
     expect(sceneFor('acting', none)).toBe('chance');
     expect(sceneFor('acting', { ...none, hub: 1 + 0.17 / 0.9 })).toBe('chance');
     expect(sceneFor('acting', { ...none, hub: 1 + 0.19 / 0.9 })).toBe('hub');
     expect(sceneFor('business', { ...none, wealth: 3 })).toBe('elite');
     expect(sceneFor('athletics', { ...none, fame: 5 })).toBe('fame');
     expect(sceneFor('creator', { ...none, channel: true })).toBe('channel');
-    expect(sceneFor('business', { ...none, business: true })).toBe('business');
+    expect(sceneFor('business', { ...none, business: true, modeling: false })).toBe('business');
     expect(sceneFor('sailing', { ...none, hub: 2 })).toBe('chance');
   });
 });

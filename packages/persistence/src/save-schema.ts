@@ -46,13 +46,14 @@ import type {
   SportsState,
   ActingState,
   MusicState,
+  ModelingState,
   RngSnapshot,
   WorldState,
 } from '@yearafter/simulation';
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 48;
+export const CURRENT_SAVE_VERSION = 49;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -89,6 +90,10 @@ export type { WorldState };
  * could let anything, so the migration has nothing to write; the version is
  * bumped so a build that cannot read a tenant refuses the save rather than
  * dropping them.
+ *
+ * v49 added modeling (Ticket 0807): `modeling` — the rung work is coming in at, a craft level, credits, a modeling
+ * reputation, awards, an agency, a following brands read, and the jobs on the table and booked. Always present, so the
+ * migration gives every older save an empty one: nobody before it could model.
  *
  * v48 added music (Ticket 0806): `music` — the monthly listeners, the back catalogue, craft, a reputation, awards, a
  * label's deal or offer, the plan for the year to come, and the collaborations done. Always present, so the
@@ -209,7 +214,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 48;
+  readonly version: 49;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -327,6 +332,8 @@ export interface SaveGameV18 {
   readonly acting: ActingState;
   /** Ticket 0806. A musician: listeners, catalogue, a deal, the plan for the year. Always present from v48. */
   readonly music: MusicState;
+  /** Ticket 0807. A model: a rung, credits, a following, an agency, the jobs on the table and booked. Always present from v49. */
+  readonly modeling: ModelingState;
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

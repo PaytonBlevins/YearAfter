@@ -188,3 +188,4 @@ export * from './sports';
 export * from './post-formats';
 export * from './acting';
 export * from './music';
+export * from './modeling';

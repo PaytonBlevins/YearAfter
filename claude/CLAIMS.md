@@ -39,6 +39,8 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | Playtest rules and "return to this" notes (P1–P16, `claude/playtest-rules-brief.md`) | — (paused on this list) | Codex / Agent B (`feat/purchase-payment-choices` first, then one branch per ticket) | assigned 6 Oct, engine authorized by Payton for this list only; nothing started |
 
+| 0807 Modeling (v0.08) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Built 7 Oct (engine only; screens are 0809). Took save v49. Agent B's saves are v50 onward: if you already wrote a v49 migration, renumber it.** |
+
 | 0806 Music (v0.08) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Built 7 Oct (engine only; screens are 0809). Took save v48. Agent B's saves are v49 onward: if you already wrote a v48 migration, renumber it.** |
 
 | 0805 Acting (v0.08) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Built 7 Oct (engine only; screens are 0809). Took save v47. Agent B's saves are v48 onward: if you already wrote a v47 migration, renumber it.** |
