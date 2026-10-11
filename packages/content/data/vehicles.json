@@ -6,8 +6,13 @@
       "name": "Northgate Auto Group",
       "market": "new",
       "size": 6,
-      "markets": ["mainstream"],
-      "age": [0, 0],
+      "markets": [
+        "mainstream"
+      ],
+      "age": [
+        0,
+        0
+      ],
       "markup": 1.0,
       "defectChance": 0.0,
       "blurb": "Plastic bunting, free coffee, a man called Dale."
@@ -17,8 +22,13 @@
       "name": "Valley Motor Mall",
       "market": "new",
       "size": 6,
-      "markets": ["mainstream"],
-      "age": [0, 0],
+      "markets": [
+        "mainstream"
+      ],
+      "age": [
+        0,
+        0
+      ],
       "markup": 1.0,
       "defectChance": 0.0,
       "blurb": "Eight brands and one enormous parking lot."
@@ -28,8 +38,14 @@
       "name": "Second Street Pre-Owned",
       "market": "used",
       "size": 6,
-      "markets": ["mainstream", "luxury"],
-      "age": [1, 9],
+      "markets": [
+        "mainstream",
+        "luxury"
+      ],
+      "age": [
+        1,
+        9
+      ],
       "markup": 1.08,
       "defectChance": 0.03,
       "blurb": "Inspected, warrantied, and priced like it."
@@ -39,8 +55,13 @@
       "name": "Budget Auto Sales",
       "market": "used",
       "size": 6,
-      "markets": ["mainstream"],
-      "age": [5, 14],
+      "markets": [
+        "mainstream"
+      ],
+      "age": [
+        5,
+        14
+      ],
       "markup": 1.05,
       "defectChance": 0.05,
       "blurb": "Cash, finance, trade-ins. Everybody drives today."
@@ -50,8 +71,14 @@
       "name": "AutoTrove",
       "market": "online",
       "size": 8,
-      "markets": ["mainstream", "luxury"],
-      "age": [2, 16],
+      "markets": [
+        "mainstream",
+        "luxury"
+      ],
+      "age": [
+        2,
+        16
+      ],
       "markup": 0.95,
       "defectChance": 0.1,
       "blurb": "Private sellers. Cheaper, and you only see the photos."
@@ -61,8 +88,14 @@
       "name": "Prestige Motorcars",
       "market": "luxury",
       "size": 4,
-      "markets": ["luxury", "exotic"],
-      "age": [0, 0],
+      "markets": [
+        "luxury",
+        "exotic"
+      ],
+      "age": [
+        0,
+        0
+      ],
       "markup": 1.0,
       "defectChance": 0.0,
       "blurb": "Appointment preferred. The coffee comes in a cup and saucer."
@@ -72,8 +105,14 @@
       "name": "Heritage Collector Cars",
       "market": "luxury",
       "size": 4,
-      "markets": ["exotic", "classic"],
-      "age": [3, 20],
+      "markets": [
+        "exotic",
+        "classic"
+      ],
+      "age": [
+        3,
+        20
+      ],
       "markup": 1.06,
       "defectChance": 0.02,
       "blurb": "Climate-controlled, documented, and not in a hurry to sell."
