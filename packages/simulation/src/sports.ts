@@ -86,6 +86,7 @@ import {
   addSportsRecord,
   isFullTime,
   nationalTeamOffer,
+  racingSeatOffer,
   runArtsYear,
   runIndividualSeason,
   trainingCeiling,
@@ -355,7 +356,8 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
   }
   // An amateur fighter is a career waiting on an answer, not a school team to be walked away from.
   const amateurFormat = career?.stage === 'school' ? findSport(career.sportId)?.format : undefined;
-  const amateur = amateurFormat === 'combat' || amateurFormat === 'olympic';
+  const amateur =
+    amateurFormat === 'combat' || amateurFormat === 'olympic' || amateurFormat === 'racing';
 
   /* ---- school: on the team, and what graduating from it brings ---------- */
   if (career === undefined || career.stage === 'school') {
@@ -598,6 +600,16 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
     }
   }
 
+  /* ---- a seat in a car (ticket 0808): after the gym's question and the program's, so their odds stay what they were ---- */
+  if (career === undefined && sports.offer === undefined) {
+    const found = racingSeatOffer(before, age, artsYear.arts);
+    if (found) {
+      career = found.career;
+      sports = { ...sports, offer: found.offer };
+      lines.push({ kind: 'milestone', text: found.line });
+    }
+  }
+
   /* ---- after the playing: a coaching or commentary post (ticket 0804) ---- */
   if (sports.post && !sports.post.over) {
     const year = runPostYear(sports.post, age);
@@ -810,6 +822,9 @@ function offerPrompt(offer: SportsOffer): string {
   }
   if (offer.kind === 'turn-pro') {
     const sport = findSport(offer.sportId);
+    if (sport?.format === 'racing') {
+      return `${offer.team} will put you in a car in the ${sport.league}. The first pay is small, and the rest of your life stays where it is.`;
+    }
     return `${offer.team} will put you on a ${sport?.noun ?? 'fight'} card. The first purses are small, and the rest of your life stays where it is.`;
   }
   if (offer.kind === 'national-team') {
@@ -842,6 +857,12 @@ function offerChoices(offer: SportsOffer): PendingDecision['choices'] {
     ];
   }
   if (offer.kind === 'turn-pro') {
+    if (findSport(offer.sportId)?.format === 'racing') {
+      return [
+        { id: ACCEPT, label: 'Take the seat' },
+        { id: DECLINE, label: 'Not now' },
+      ];
+    }
     return [
       { id: ACCEPT, label: 'Turn pro' },
       { id: DECLINE, label: 'Stay an amateur' },
@@ -1107,6 +1128,7 @@ export function answerSportsOffer(
   if (offer.kind === 'tour-card' || offer.kind === 'turn-pro' || offer.kind === 'national-team') {
     const proTour = offer.kind === 'tour-card';
     const program = offer.kind === 'national-team';
+    const racing = sport?.format === 'racing';
     if (choiceId === DECLINE) {
       const past: PastCareer = {
         sportId: career.sportId,
@@ -1117,7 +1139,7 @@ export function answerSportsOffer(
         reputation: career.reputation,
         reached: proTour ? 'college' : 'school',
         how: 'declined',
-        ...(proTour || program ? {} : { wins: 0, losses: 0 }),
+        ...(proTour || program || racing ? {} : { wins: 0, losses: 0 }),
       };
       const { career: _c, ...without } = sportsRest;
       return settle(
@@ -1126,7 +1148,9 @@ export function answerSportsOffer(
           ? `Turned down the ${sport?.leagueShort ?? 'tour'} card.`
           : program
             ? `Turned down a place in the ${sport?.leagueShort ?? 'national'} program.`
-            : `Turned down ${offer.kind === 'turn-pro' ? offer.team : 'the gym'} and stayed an amateur.`,
+            : racing
+              ? `Turned down the seat at ${offer.kind === 'turn-pro' ? offer.team : 'the team'}.`
+              : `Turned down ${offer.kind === 'turn-pro' ? offer.team : 'the gym'} and stayed an amateur.`,
         'milestone',
         proTour ? 'tour:no' : program ? 'nat:no' : 'pro:no',
       );
@@ -1138,7 +1162,9 @@ export function answerSportsOffer(
       stage: 'pro',
       tier: 'fringe',
       proSeasons: 0,
-      ...(offer.kind === 'turn-pro' ? { team: offer.team, wins: 0, losses: 0 } : {}),
+      ...(offer.kind === 'turn-pro'
+        ? { team: offer.team, ...(racing ? {} : { wins: 0, losses: 0 }) }
+        : {}),
     };
     // Playing for a living ends the day job. A club fighter's purses are not a living, and the job stays.
     const living = isFullTime(signed);
@@ -1160,7 +1186,9 @@ export function answerSportsOffer(
       ? `Took the ${sport?.leagueShort ?? 'tour'} card.${left?.ok ? ' That was the end of the day job.' : ''}`
       : program
         ? `Joined the ${sport?.leagueShort ?? 'national'} program at ${offer.team}.`
-        : `Signed with ${offer.kind === 'turn-pro' ? offer.team : 'the gym'}. The first fight is in the spring.${left?.ok ? ' That was the end of the day job.' : ''}`;
+        : racing
+          ? `Signed with ${offer.kind === 'turn-pro' ? offer.team : 'the team'}. The first race is in the spring.${left?.ok ? ' That was the end of the day job.' : ''}`
+          : `Signed with ${offer.kind === 'turn-pro' ? offer.team : 'the gym'}. The first fight is in the spring.${left?.ok ? ' That was the end of the day job.' : ''}`;
     const written = withEntry(
       base,
       offer,
@@ -1182,7 +1210,9 @@ export function answerSportsOffer(
                 ? `Earned a ${sport?.leagueShort ?? 'tour'} card`
                 : program
                   ? `Joined the ${sport?.leagueShort ?? 'national'} program`
-                  : `Turned pro as a ${sport?.noun ?? 'fighter'} fighter`,
+                  : racing
+                    ? `Took a seat in the ${sport?.leagueShort ?? 'racing'}`
+                    : `Turned pro as a ${sport?.noun ?? 'fighter'} fighter`,
               ...(sport ? { referenceId: sport.id } : {}),
             },
             offer.age,

@@ -52,6 +52,7 @@ import type { BusinessType } from '@yearafter/content';
 import { cents, dollars, type Money } from '@yearafter/core';
 import type { MarketState } from './investments';
 import { NO_MODIFIERS, rivalTake, type Rival, type YearModifiers } from './business-events';
+import type { RacingTeam } from './racing-state';
 
 /* -------------------------------------------------------------------------- */
 /* The owner's choices                                                         */
@@ -233,6 +234,8 @@ export interface OwnedBusiness {
   readonly branches: readonly number[];
   /** Ticket 0604. Somebody who opened nearby and is still taking a little of its custom. */
   readonly rival?: Rival;
+  /** Ticket 0808. A racing team's car, driver and series. Absent on every other kind of business. */
+  readonly racing?: RacingTeam;
   readonly last?: BusinessLedgerYear;
 }
 

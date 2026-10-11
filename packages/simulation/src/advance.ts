@@ -101,11 +101,12 @@ import { foreclose, markMissed, runHomesYear, withHomeOffer } from './homes';
 import { markVehiclesMissed, repossess, runVehiclesYear, withVehicleOffer } from './vehicles';
 import { withRenovationOffer } from './renovations';
 import { runValuablesYear } from './shopping';
-import { averageStat, businessTaxOn, runBusinessesYear } from './businesses';
+import { averageStat, businessTaxOn, ownerDriving, runBusinessesYear } from './businesses';
 import { runDealsYear } from './deals';
 import { creatorWeek, runCreatorsYear } from './creators';
 import { workToSettle } from './fame-work';
 import { runCelebrityYear } from './celebrity';
+import { awardsInputOf, runAwardsYear } from './awards';
 import { foundOut } from './auctions';
 import { residenceOf } from './rentals';
 import { INSTRUMENTS, SECTORS, costIndexOf, findActivity, findSport } from '@yearafter/content';
@@ -184,6 +185,8 @@ function sportsSource(state: GameState, year: { readonly sports: GameState['spor
   if (sport?.format === 'combat') return `Fight purses, ${sport.league}`;
   // Ticket 0804. A national program pays a stipend, and the sponsors pay what a medal is worth.
   if (sport?.format === 'olympic') return `Stipend and sponsors, ${sport.league}`;
+  // Ticket 0808. A driver is paid by the team that puts them in the car.
+  if (sport?.format === 'racing') return `Driving pay, ${sport.league}`;
   // After the playing: a coach's salary or a commentator's pay.
   const post = year.sports.post ?? state.sports.post;
   if (!career && post) return `${postTitle(post)} pay`;
@@ -319,6 +322,20 @@ export function advanceYear(state: GameState): AdvanceResult {
     age: nextAge,
     year: nextYear,
   });
+
+  /*
+    Ticket 0808 — the awards across fields. It reads what the acting, music, modeling and sports years just did
+    (awards handed out, fame held, a title won) and adds the ceremony sports never had, the charts and the repeat
+    wins. Nothing here is saved or drawn from the random stream.
+  */
+  const awardsYear = runAwardsYear(
+    awardsInputOf(state, nextYear, {
+      acting: actingYear,
+      music: musicYear,
+      modeling: modelYear,
+      sports: sportsYear,
+    }),
+  );
 
   // Then the class. Before events, so an event that fires this year can name
   // somebody who is actually in it — which is the whole of Ticket 0206.
@@ -468,6 +485,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     available: Math.floor(Number(state.player.cash) / 100) + Math.floor(employment.takeHome * 0.5),
     holdsJob: employment.employment.job !== undefined,
     stat: (type) => averageStat(worked.stats as unknown as Record<string, number>, type),
+    // Ticket 0808. An owner who is a pro driver can sit in their own car.
+    ...ownerDriving(sportsYear.sports),
   });
   const businessTax = businessTaxOn(employment.earned, businessesYear.drawn);
   /*
@@ -815,6 +834,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     ],
     (index) => `t:${nextYear}:acting:${index}`,
   );
+  write(awardsYear.lines, (index) => `t:${nextYear}:awards:${index}`);
   write(health.lines, (index) => `t:${nextYear}:health:${index}`);
   // Last in the year, because it is the line about the year as a whole.
   write(stress.lines, (index) => `t:${nextYear}:stress:${index}`);
@@ -1412,7 +1432,8 @@ export function advanceYear(state: GameState): AdvanceResult {
           sportsYear.mood +
           actingYear.mood +
           musicYear.mood +
-          modelYear.mood ===
+          modelYear.mood +
+          awardsYear.mood ===
         0
           ? {}
           : {
@@ -1421,7 +1442,8 @@ export function advanceYear(state: GameState): AdvanceResult {
                 sportsYear.mood +
                 actingYear.mood +
                 musicYear.mood +
-                modelYear.mood,
+                modelYear.mood +
+                awardsYear.mood,
             }),
       }),
       health: clampStat(health.health + sportsYear.health),
@@ -1488,6 +1510,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       ...musicYear.records,
       // Ticket 0807. A first job, a rise, an award.
       ...modelYear.records,
+      // Ticket 0808. The ceremonies, the sweeps and the charts, last, so no earlier record's ordinal moves.
+      ...awardsYear.records,
     ].reduce<readonly LifeRecord[]>(
       (all, record, index) => appendRecord(all, stampRecord(record, nextAge, nextYear, index)),
       state.player.records,
@@ -1557,6 +1581,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       actingYear.fame,
       musicYear.fame,
       modelYear.fame,
+      awardsYear.fame,
     ),
     sports: sportsYear.sports,
     acting: actingYear.acting,

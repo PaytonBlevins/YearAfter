@@ -164,3 +164,16 @@ export const OLYMPIC_SERIOUS_LINES: readonly string[] = [
   'Surgery on your knee, and a year of rehab.',
   'A stress fracture, and the season was gone.',
 ];
+
+/** A driver's: the neck, the wrists and the walls (ticket 0808). */
+export const RACING_MINOR_LINES: readonly string[] = [
+  'A sore neck cost you a test day.',
+  'Cracked a rib in a crash and drove the next round on painkillers.',
+  'Sprained a wrist in the garage and missed a race.',
+];
+
+export const RACING_SERIOUS_LINES: readonly string[] = [
+  'A heavy crash, and a broken leg ended the season.',
+  'Back surgery in the autumn, and the season was gone.',
+  'A broken collarbone, then a long winter of rehab.',
+];

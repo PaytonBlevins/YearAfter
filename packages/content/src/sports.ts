@@ -30,7 +30,8 @@ export type SportId =
   | 'swimming'
   | 'gymnastics'
   | 'wrestling'
-  | 'olympic-boxing';
+  | 'olympic-boxing'
+  | 'racing';
 
 /**
  * How a sport is played for a living (ticket 0803).
@@ -43,7 +44,7 @@ export type SportId =
  * The two individual formats share one rule: nobody is guaranteed a thing. What a player earns is
  * what the season's results earn it.
  */
-export type SportFormat = 'team' | 'tour' | 'combat' | 'olympic';
+export type SportFormat = 'team' | 'tour' | 'combat' | 'olympic' | 'racing';
 
 export type SportTier = 'fringe' | 'role' | 'starter' | 'star' | 'superstar';
 
@@ -513,6 +514,52 @@ const FIGHT_GYMS: readonly string[] = [
   'Union Yard Gym',
   'Brightline Training Center',
   'Fairmount Fight Club',
+];
+
+/**
+ * Motor racing (ticket 0808). The pay is game judgement, anchored loosely: the bottom of the ladder is a seat the driver
+ * helps pay for and a little money from the team; a premier-series driver is paid in the hundreds of thousands to
+ * low millions; the top of a world championship is paid in the tens of millions (the best-paid drivers in the
+ * sport's biggest series are reported at fifty to seventy million a year). A driver lasts: the body gives back
+ * late, and the best last longest.
+ */
+const RACING_ECONOMY: SportEconomy = {
+  pay: {
+    fringe: 40_000,
+    role: 150_000,
+    starter: 600_000,
+    star: 4_000_000,
+    superstar: 25_000_000,
+  },
+  retireAge: {
+    fringe: [27, 33],
+    role: [30, 37],
+    starter: [33, 41],
+    star: [36, 45],
+    superstar: [38, 47],
+  },
+  draftSize: 0,
+  firstRound: 0,
+  rookieTop: 0,
+  injuryFactor: 1.4,
+  fullTimeFrom: 'role',
+  declineFrom: 36,
+};
+
+/** The teams that put a driver in a car. Fictional. */
+const RACING_TEAMS: readonly string[] = [
+  'Redline Motorsport',
+  'Harlow Racing',
+  'Northstar Competition',
+  'Ironside Autosport',
+  'Kestrel Racing Team',
+  'Blackwater Motorsports',
+  'Summit Speed',
+  'Cobalt Racing',
+  'Lakeshore Competition',
+  'Vanguard Autosport',
+  'Pinecrest Racing',
+  'Meridian Works Team',
 ];
 
 export const SPORTS: readonly Sport[] = [
@@ -1002,6 +1049,27 @@ export const SPORTS: readonly Sport[] = [
     collegeTeams: [],
     economy: OLYMPIC_BOXING_ECONOMY,
   },
+  {
+    id: 'racing',
+    format: 'racing',
+    name: 'Motor racing',
+    activityId: '',
+    noun: 'racing',
+    league: 'Apex Racing Series',
+    leagueShort: 'ARS',
+    playerTitle: 'Professional driver',
+    skills: [
+      { id: 'racecraft', name: 'Racecraft' },
+      { id: 'pace', name: 'Qualifying pace' },
+      { id: 'tires', name: 'Tire management' },
+      { id: 'consistency', name: 'Consistency' },
+      { id: 'feedback', name: 'Feedback to engineers' },
+    ],
+    positions: ['Open-wheel driver', 'Stock car driver', 'Sports car driver', 'Touring car driver'],
+    proTeams: RACING_TEAMS,
+    collegeTeams: [],
+    economy: RACING_ECONOMY,
+  },
 ];
 
 const SPORTS_BY_ID = new Map(SPORTS.map((sport) => [sport.id, sport]));
@@ -1021,6 +1089,9 @@ export const COMBAT_SPORTS: readonly Sport[] = SPORTS.filter((sport) => sport.fo
 export const OLYMPIC_SPORTS: readonly Sport[] = SPORTS.filter(
   (sport) => sport.format === 'olympic',
 );
+
+/** Motor racing (ticket 0808): karting from eight, a seat, a series. */
+export const RACING_SPORTS: readonly Sport[] = SPORTS.filter((sport) => sport.format === 'racing');
 
 /** The sport a school activity is the first rung of, if any. */
 export const sportOfActivity = (activityId: string): Sport | undefined =>
@@ -1294,7 +1365,7 @@ export const TURN_PRO_MAX_AGE = 30;
 export const MIN_ART_SEASONS = 3;
 
 /** Striking and grappling feed MMA; `athletic` is an Olympic discipline that is not a martial art (ticket 0804). */
-export type ArtStyle = 'striking' | 'grappling' | 'athletic';
+export type ArtStyle = 'striking' | 'grappling' | 'athletic' | 'driving';
 
 export interface MartialArt {
   readonly id: string;
@@ -1307,6 +1378,8 @@ export interface MartialArt {
   readonly costSource: string;
   /** The careers it counts towards: boxing for boxing, any of them for MMA. */
   readonly feeds: readonly SportId[];
+  /** The youngest a child can start (ticket 0808). Default `MARTIAL_ART_MIN_AGE`; karting takes children of eight. */
+  readonly minAge?: number;
   /** Four things it builds, for the screen. Spec 377: nothing here depends on who teaches it. */
   readonly skills: readonly SportSkill[];
   readonly startLine: string;
@@ -1482,8 +1555,38 @@ export const OLYMPIC_DISCIPLINES: readonly MartialArt[] = [
   },
 ];
 
-/** Everything a student can study: the six arts and the three disciplines. */
-export const STUDIES: readonly MartialArt[] = [...MARTIAL_ARTS, ...OLYMPIC_DISCIPLINES];
+/**
+ * Karting (ticket 0808), the one thing studied for a racing career. It is studied the same way as an art (two at a
+ * time, three sessions a year, three seasons before it counts) but a child can start at eight, which is how drivers
+ * really begin. A new array and a combined lookup, not an edit to the old two (CORE_RULES 13.148).
+ */
+export const RACING_STUDIES: readonly MartialArt[] = [
+  {
+    id: 'karting',
+    name: 'Karting',
+    style: 'driving',
+    blurb: 'A rented kart, a cold track and a lot of lap times.',
+    annualCost: 6_000,
+    costSource: 'kart rental, tires and track days',
+    feeds: ['racing'],
+    minAge: 8,
+    skills: [
+      { id: 'racecraft', name: 'Racecraft' },
+      { id: 'pace', name: 'Pace' },
+      { id: 'tires', name: 'Tire care' },
+      { id: 'consistency', name: 'Consistency' },
+    ],
+    startLine: 'Started karting. You were last on the first day.',
+    stopLine: 'Parked the kart for good.',
+  },
+];
+
+/** Everything a student can study: the six arts, the three disciplines and karting. */
+export const STUDIES: readonly MartialArt[] = [
+  ...MARTIAL_ARTS,
+  ...OLYMPIC_DISCIPLINES,
+  ...RACING_STUDIES,
+];
 
 const ARTS_BY_ID = new Map(STUDIES.map((art) => [art.id, art]));
 
@@ -1740,6 +1843,49 @@ export function olympicCareersFor(
   }
   return found.sort((a, b) => b.form - a.form);
 }
+
+/* -------------------------------------------------------------------------- */
+/* Motor racing (ticket 0808)                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A seat is offered, not applied for. Karting is studied from eight; once three seasons are in and a draw says so, a
+ * team puts the driver in a car. The ages are a window: a driver who has not been seen by thirty is not going to be.
+ */
+export const RACING_WINDOW: readonly [number, number] = [16, 30];
+
+/**
+ * Who gets a seat, one draw per life against these. LOWER than the table for a fight card or a tour: seats are
+ * bought as much as won, and the road is the narrowest of the individual sports. This is game judgement; the
+ * ticket document measures what it makes (the share who ever hold a seat, and how many reach the top two rungs).
+ */
+export const REACH_SEAT: Readonly<Record<SportCategory, number>> = {
+  talentAndWork: 0.35,
+  talentOnly: 0.18,
+  workOnly: 0.12,
+  neither: 0.005,
+};
+
+/** The chance of winning a championship in a season, by tier. A title needs a healthy season. */
+export const RACING_TITLE_CHANCE: Readonly<Record<SportTier, number>> = {
+  fringe: 0,
+  role: 0.03,
+  starter: 0.09,
+  star: 0.22,
+  superstar: 0.4,
+};
+
+/** Where a driver finishes the championship, by tier: a band, moved within by the year, one place for a title. */
+export const RACING_PLACE_BAND: Readonly<Record<SportTier, readonly [number, number]>> = {
+  superstar: [1, 3],
+  star: [2, 6],
+  starter: [4, 11],
+  role: [7, 16],
+  fringe: [11, 24],
+};
+
+/** A season's luck on the scale of the fields: a car breaks, a safety car falls right. A touch wider than a tour's. */
+export const RACING_NOISE = 26;
 
 /* -------------------------------------------------------------------------- */
 /* After the playing: coaching and commentary (ticket 0804)                    */

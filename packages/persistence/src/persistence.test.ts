@@ -2176,7 +2176,7 @@ describe('Ticket 0406 — a question survives being saved', () => {
       answeredYear: 2003,
       work: { year: 0, done: [] },
     });
-    expect(CURRENT_SAVE_VERSION).toBe(49);
+    expect(CURRENT_SAVE_VERSION).toBe(50);
   });
 
   it('keeps what a v42 save already says yes to rather than writing over it (0707)', () => {
@@ -3019,8 +3019,8 @@ describe('Ticket 0406 — a question survives being saved', () => {
     }
   });
 
-  it('is at version 49 (0807)', () => {
-    expect(CURRENT_SAVE_VERSION).toBe(49);
+  it('is at version 50 (0808)', () => {
+    expect(CURRENT_SAVE_VERSION).toBe(50);
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {
@@ -3196,5 +3196,172 @@ describe('Ticket 0406 — a question survives being saved', () => {
     );
     const quietBack = fromSave(JSON.parse(JSON.stringify(quiet)));
     expect('rival' in quietBack.businesses[0]!).toBe(false);
+  });
+});
+
+describe('the racing team (0808)', () => {
+  const team = {
+    rung: 3,
+    car: 57,
+    driver: { kind: 'hired', id: 'drv:2040:3:1', name: 'Marco Vance', skill: 64, age: 27 },
+    development: 'heavy',
+    titles: 1,
+    best: 4,
+    seasons: 6,
+    last: { year: 2043, rung: 3, place: 4, field: 18, title: false, incident: true },
+  };
+
+  const withTeam = (label: string, racing: unknown) => {
+    const { save } = newSave(label);
+    const raw = JSON.parse(JSON.stringify(save));
+    raw.businesses = [
+      {
+        id: 'biz:2040:racing:0',
+        typeId: 'biz.racing',
+        name: 'Redshift Racing',
+        openedYear: 2040,
+        invested: 15_000_000,
+        cash: 1_000_000,
+        price: 100,
+        supplier: 'standard',
+        payroll: 'medium',
+        staff: 3,
+        autoStaff: true,
+        reputation: 50,
+        luck: 1,
+        profits: [],
+        branches: [],
+        ...(racing === undefined ? {} : { racing }),
+      },
+    ];
+    return raw;
+  };
+
+  it('moves a v49 save to v50 with nothing written but the version', () => {
+    const { save } = newSave('RACE-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 49;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(50);
+    expect(CURRENT_SAVE_VERSION).toBe(50);
+    const { version: _a, ...rest } = result.value;
+    const { version: _b, ...was } = old;
+    expect(rest).toEqual(was);
+  });
+
+  it('keeps a business with no team, and one with a team, exactly', () => {
+    expect(migrateSave(withTeam('RACE-NONE', undefined)).ok).toBe(true);
+    const raw = withTeam('RACE-KEEP', team);
+    const result = migrateSave(raw);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.businesses[0]!.racing).toEqual(team);
+  });
+
+  it('round-trips a team through a save and back, with the owner in the car or a hired driver', () => {
+    const { save } = newSave('RACE-ROUND');
+    const base = fromSave(save);
+    for (const driver of [team.driver, { kind: 'owner' }]) {
+      const owned = {
+        ...JSON.parse(JSON.stringify(withTeam('RACE-ROUND', { ...team, driver }).businesses[0])),
+      };
+      const state: GameState = { ...base, businesses: [owned] };
+      const back = fromSave(JSON.parse(JSON.stringify(toSave(state, { id: save.id }))));
+      expect(back.businesses[0]!.racing).toEqual({ ...team, driver });
+    }
+  });
+
+  it('accepts a team with no season behind it, and the edge of every scale', () => {
+    const { last: _last, ...fresh } = team;
+    expect(migrateSave(withTeam('RACE-FRESH', fresh)).ok).toBe(true);
+    for (const rung of [1, 5]) {
+      expect(
+        migrateSave(withTeam('RACE-RUNG', { ...team, rung, best: rung })).ok,
+        String(rung),
+      ).toBe(true);
+    }
+    for (const car of [0, 100]) {
+      expect(migrateSave(withTeam('RACE-CAR', { ...team, car })).ok, String(car)).toBe(true);
+    }
+    for (const skill of [0, 100]) {
+      expect(
+        migrateSave(withTeam('RACE-SKILL', { ...team, driver: { ...team.driver, skill } })).ok,
+        String(skill),
+      ).toBe(true);
+    }
+    expect(migrateSave(withTeam('RACE-ZERO', { ...team, titles: 0, seasons: 0 })).ok).toBe(true);
+    expect(
+      migrateSave(withTeam('RACE-AGE', { ...team, driver: { ...team.driver, age: 0 } })).ok,
+    ).toBe(true);
+    // A team that finished last, or won the title, is a season too.
+    for (const place of [1, 18]) {
+      expect(
+        migrateSave(
+          withTeam('RACE-PLACE', { ...team, last: { ...team.last, place, title: place === 1 } }),
+        ).ok,
+        String(place),
+      ).toBe(true);
+    }
+    for (const development of ['lean', 'steady', 'heavy']) {
+      expect(migrateSave(withTeam('RACE-DEV', { ...team, development })).ok, development).toBe(
+        true,
+      );
+    }
+  });
+
+  it('refuses a team that is not sound, so a season is never run on nonsense', () => {
+    const bad: unknown[] = [
+      null,
+      [],
+      'team',
+      { ...team, rung: 0 },
+      { ...team, rung: 6 },
+      { ...team, rung: 2.5 },
+      { ...team, rung: '3' },
+      { ...team, best: 0 },
+      { ...team, best: 6 },
+      { ...team, car: -1 },
+      { ...team, car: 101 },
+      { ...team, car: '50' },
+      { ...team, car: undefined },
+      { ...team, development: 'reckless' },
+      { ...team, development: undefined },
+      { ...team, titles: -1 },
+      { ...team, titles: 1.5 },
+      { ...team, seasons: -1 },
+      { ...team, seasons: 0.5 },
+      { ...team, driver: undefined },
+      { ...team, driver: null },
+      { ...team, driver: { kind: 'robot' } },
+      { ...team, driver: { ...team.driver, id: 7 } },
+      { ...team, driver: { ...team.driver, name: undefined } },
+      { ...team, driver: { ...team.driver, skill: -1 } },
+      { ...team, driver: { ...team.driver, skill: 101 } },
+      { ...team, driver: { ...team.driver, skill: '60' } },
+      { ...team, driver: { ...team.driver, age: -1 } },
+      { ...team, driver: { ...team.driver, age: 27.5 } },
+      { ...team, last: null },
+      { ...team, last: { ...team.last, year: 2043.5 } },
+      { ...team, last: { ...team.last, rung: 0 } },
+      { ...team, last: { ...team.last, rung: 6 } },
+      { ...team, last: { ...team.last, place: 0 } },
+      { ...team, last: { ...team.last, place: 1.5 } },
+      { ...team, last: { ...team.last, field: 3, place: 4 } },
+      { ...team, last: { ...team.last, field: 'big' } },
+      { ...team, last: { ...team.last, title: 'yes' } },
+      { ...team, last: { ...team.last, incident: 1 } },
+    ];
+    for (const row of bad) {
+      expect(migrateSave(withTeam('RACE-BAD', row)).ok, JSON.stringify(row)).toBe(false);
+    }
+    // A business that is not an object at all is not a team either.
+    const { save } = newSave('RACE-JUNK');
+    const raw = JSON.parse(JSON.stringify(save));
+    raw.businesses = [null];
+    expect(migrateSave(raw).ok).toBe(false);
+    raw.businesses = ['biz'];
+    expect(migrateSave(raw).ok).toBe(false);
   });
 });

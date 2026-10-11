@@ -562,6 +562,41 @@
       "gate": 150000
     },
     {
+      "id": "biz.racing",
+      "name": "Racing Team",
+      "sector": "Motorsport",
+      "blurb": "A car, a crew and a driver, and sponsors who pay by the result. Moving up the ladder costs more than the last rung earned.",
+      "startup": 150000,
+      "revenue": 260000,
+      "cogs": 0.3,
+      "staff": 3,
+      "staffMin": 2,
+      "wage": 38000,
+      "assetShare": 0.45,
+      "elasticity": 3.63,
+      "cyclical": 0.7,
+      "volatility": 0.35,
+      "ramp": 3.0,
+      "productShare": 0.0,
+      "skills": [
+        "smarts",
+        "discipline"
+      ],
+      "valueMultiple": 2.0,
+      "names": [
+        "Redshift Racing",
+        "Apex Motorsport",
+        "Slipstream Racing",
+        "Kingpin Competition",
+        "Chicane Racing",
+        "Checkpoint Motorsports"
+      ],
+      "overhead": 37000,
+      "supplier": false,
+      "headroom": 1.0,
+      "gate": 90000
+    },
+    {
       "id": "biz.realestate",
       "name": "Real Estate Brokerage",
       "sector": "Professional",

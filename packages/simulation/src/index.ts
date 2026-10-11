@@ -52,6 +52,7 @@ export * from './network';
 export * from './celebrity-world';
 export * from './celebrity-state';
 export * from './celebrity';
+export * from './awards';
 export * from './acting-state';
 export * from './acting';
 export * from './music-state';

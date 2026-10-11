@@ -25,7 +25,16 @@ import {
   type NewLifeRecord,
   type TimelineEntry,
 } from '@yearafter/character';
-import { BUSINESS_TYPES, findBusinessType, type BusinessType } from '@yearafter/content';
+import {
+  BUSINESS_TYPES,
+  DEVELOPMENTS,
+  NEW_RUNG_CAR_GAP,
+  RACING_TEAM_TYPE_ID,
+  SERIES,
+  TEAM_INCIDENT_LINES,
+  findBusinessType,
+  type BusinessType,
+} from '@yearafter/content';
 import { dollars, err, mixedUnit, ok, type Result } from '@yearafter/core';
 import { taxRate } from '@yearafter/careers';
 import {
@@ -60,10 +69,12 @@ import {
   locationsOf,
   luckFrom,
   modifiersFor,
+  driverCandidates,
   newBusiness,
   ownerFactor,
   portfolioWorth,
   post,
+  racingYear,
   reportedProfitOf,
   reputationChangeOf,
   reputationWord,
@@ -71,6 +82,7 @@ import {
   runLoanYear,
   settleYear,
   staffCeilingFor,
+  teamOf,
   startupCostFor,
   totalFor,
   visibleTo,
@@ -96,6 +108,10 @@ import {
   type OwnedBusiness,
   type Payroll,
   type PurchaseKind,
+  type RacingTeam,
+  type RacingYearOutput,
+  type TeamDevelopment,
+  type TeamRung,
   type SupplierGrade,
 } from '@yearafter/finance';
 import type { MarketState } from '@yearafter/finance';
@@ -645,6 +661,298 @@ export const setAutoStaff = (state: GameState, id: string, on: boolean) =>
   patch(state, id, (business) => ({ ...business, autoStaff: on }));
 
 /* -------------------------------------------------------------------------- */
+/* A racing team's choices (ticket 0808)                                       */
+/* -------------------------------------------------------------------------- */
+
+export type RacingChoiceError =
+  | ChoiceError
+  | 'not-a-racing-team'
+  | 'no-such-driver'
+  | 'not-a-driver'
+  | 'top-rung'
+  | 'bottom-rung'
+  | 'too-soon'
+  | 'cannot-afford'
+  | FinanceError;
+
+export interface RacingOutcome {
+  readonly state: GameState;
+  readonly entry: TimelineEntry;
+}
+
+/** The owner's driving form when they are a pro driver, in the shape the year wants it. */
+export function ownerDriving(sports: GameState['sports']): { readonly ownerForm?: number } {
+  const career = sports.career;
+  return career?.stage === 'pro' && career.sportId === 'racing' ? { ownerForm: career.form } : {};
+}
+
+const racingOf = (
+  state: GameState,
+  id: string,
+): { readonly business: OwnedBusiness; readonly team: RacingTeam } | RacingChoiceError => {
+  const business = findBusiness(state, id);
+  if (!business || !findBusinessType(business.typeId)) return 'no-such-business';
+  if (business.typeId !== RACING_TEAM_TYPE_ID) return 'not-a-racing-team';
+  return { business, team: teamOf(business, state.rng.getSeed()) };
+};
+
+/** Where the team stands for a screen: its level, who is driving, who is for hire, and what moving up costs. */
+export function racingViewOf(state: GameState, id: string) {
+  const found = racingOf(state, id);
+  if (typeof found === 'string') return undefined;
+  const { business, team } = found;
+  // The top rung has nothing above it: the row is undefined and so is the cost.
+  const next: (typeof SERIES)[TeamRung] | undefined = SERIES[(team.rung + 1) as TeamRung];
+  return {
+    team,
+    series: SERIES[team.rung],
+    candidates: driverCandidates(state.rng.getSeed(), business.id, state.world.year, team.rung),
+    upgradeCost: next?.upgrade,
+    canMoveUp: next !== undefined && team.last?.rung === team.rung,
+    canDriveYourself: ownerDriving(state.sports).ownerForm !== undefined,
+  };
+}
+
+const withTeam = (
+  state: GameState,
+  business: OwnedBusiness,
+  team: RacingTeam,
+  text: string,
+  key: string,
+  kind: 'milestone' | 'passive' = 'passive',
+  extra: Partial<GameState> = {},
+): RacingOutcome => {
+  const entry = line(state, text, key, kind);
+  return {
+    entry,
+    state: {
+      ...state,
+      ...extra,
+      businesses: state.businesses.map((row) =>
+        row.id === business.id ? { ...business, racing: team } : row,
+      ),
+      player: {
+        ...(extra.player ?? state.player),
+        timeline: appendToTimeline(state.player.timeline, entry),
+      },
+    },
+  };
+};
+
+/** How hard the team spends on the car. */
+export function setDevelopment(
+  state: GameState,
+  id: string,
+  development: TeamDevelopment,
+): Result<RacingOutcome, RacingChoiceError> {
+  const found = racingOf(state, id);
+  if (typeof found === 'string') return err(found);
+  if (!DEVELOPMENTS.includes(development)) return err('no-such-choice');
+  const words = { lean: 'a lean', steady: 'a steady', heavy: 'a heavy' }[development];
+  return ok(
+    withTeam(
+      state,
+      found.business,
+      { ...found.team, development },
+      `${found.business.name} will run ${words} development programme this year.`,
+      `racing:dev:${found.business.id}:${development}`,
+    ),
+  );
+}
+
+/** Put a driver from the market in the car. */
+export function hireDriver(
+  state: GameState,
+  id: string,
+  candidateId: string,
+): Result<RacingOutcome, RacingChoiceError> {
+  const found = racingOf(state, id);
+  if (typeof found === 'string') return err(found);
+  const hired = driverCandidates(
+    state.rng.getSeed(),
+    found.business.id,
+    state.world.year,
+    found.team.rung,
+  ).find((row) => row.id === candidateId);
+  if (!hired) return err('no-such-driver');
+  return ok(
+    withTeam(
+      state,
+      found.business,
+      { ...found.team, driver: hired },
+      `${found.business.name} signed ${hired.name} to drive.`,
+      `racing:hire:${found.business.id}:${hired.id}`,
+    ),
+  );
+}
+
+/** Drive your own car: only a pro driver can, and the team stops paying anybody to do it. */
+export function driveOwnTeam(
+  state: GameState,
+  id: string,
+): Result<RacingOutcome, RacingChoiceError> {
+  const found = racingOf(state, id);
+  if (typeof found === 'string') return err(found);
+  const career = state.sports.career;
+  if (ownerDriving(state.sports).ownerForm === undefined || !career) return err('not-a-driver');
+  return ok(
+    withTeam(
+      state,
+      found.business,
+      { ...found.team, driver: { kind: 'owner' } },
+      `You are driving for ${found.business.name} now.`,
+      `racing:drive:${found.business.id}`,
+      'milestone',
+      { sports: { ...state.sports, career: { ...career, team: found.business.name } } },
+    ),
+  );
+}
+
+/** Hand the car back to a hired driver (the first in the market). */
+export function stopDrivingOwnTeam(
+  state: GameState,
+  id: string,
+): Result<RacingOutcome, RacingChoiceError> {
+  const found = racingOf(state, id);
+  if (typeof found === 'string') return err(found);
+  if (found.team.driver.kind !== 'owner') return err('not-a-driver');
+  const hired = driverCandidates(
+    state.rng.getSeed(),
+    found.business.id,
+    state.world.year,
+    found.team.rung,
+  )[0]!;
+  return ok(
+    withTeam(
+      state,
+      found.business,
+      { ...found.team, driver: hired },
+      `You gave up the seat. ${hired.name} drives for ${found.business.name}.`,
+      `racing:park:${found.business.id}`,
+    ),
+  );
+}
+
+/** What a lender would put up for moving a racing team up a series, today. Empty at the top rung or for any other business. */
+export function upgradeOffers(state: GameState, id: string): readonly FinancingOffer[] {
+  const found = racingOf(state, id);
+  if (typeof found === 'string' || found.team.rung >= 5) return [];
+  const cost = SERIES[(found.team.rung + 1) as TeamRung].upgrade;
+  return offersFor(state, purchaseFor(state, 'expand', cost, 0, id));
+}
+
+/** Move up a series: a new car, a bigger hauler, a longer grid. Paid for out of pocket, or borrowed as an expansion is. */
+export function moveUpSeries(
+  state: GameState,
+  id: string,
+  finance?: Financing,
+): Result<RacingOutcome, RacingChoiceError> {
+  const found = racingOf(state, id);
+  if (typeof found === 'string') return err(found);
+  const { business, team } = found;
+  if (team.rung >= 5) return err('top-rung');
+  // One step a season, and only after a season at the level: a team moves on what it just did.
+  if (team.last?.rung !== team.rung) return err('too-soon');
+  const rung = (team.rung + 1) as TeamRung;
+  const cost = SERIES[rung].upgrade;
+  const loan = borrowed(
+    state,
+    purchaseFor(state, 'expand', cost, 0, id),
+    id,
+    `to move ${business.name} up to the ${SERIES[rung].series}`,
+    finance,
+  );
+  if (!loan.ok) return err(loan.error);
+  if (Number(state.player.cash) / 100 + loan.value.amount < cost) return err('cannot-afford');
+  const books = post(loan.value.ledger, state.world.year, state.player.age, {
+    category: 'property',
+    amount: dollars(-cost),
+    source: `${business.name} moved up to the ${SERIES[rung].series}`,
+  });
+  const moved: RacingTeam = {
+    ...team,
+    rung,
+    best: Math.max(team.best, rung) as TeamRung,
+    car: SERIES[rung].strength - NEW_RUNG_CAR_GAP,
+  };
+  const grown: OwnedBusiness = {
+    ...business,
+    invested: dollars(Number(business.invested) / 100 + cost),
+    racing: moved,
+  };
+  const entry = line(
+    state,
+    `${business.name} moved up to ${SERIES[rung].words}, the ${SERIES[rung].series}. It took ${money(cost)} for the car and the gear${
+      loan.value.amount !== 0 ? `, ${money(loan.value.amount)} of it borrowed` : ''
+    }.`,
+    `racing:up:${business.id}:${rung}`,
+    'milestone',
+  );
+  return ok({
+    entry,
+    state: {
+      ...state,
+      finance: books.ledger,
+      loans: loan.value.loans,
+      businesses: state.businesses.map((row) => (row.id === id ? grown : row)),
+      player: {
+        ...state.player,
+        cash: books.ledger.balance,
+        timeline: appendToTimeline(state.player.timeline, entry),
+      },
+    },
+  });
+}
+
+/** What a car sells for when a team steps down: a share of what it cost to step up. */
+export const STEP_DOWN_RETURN = 0.4;
+
+/** Drop back a series, selling the car. The cheaper level is the same sport with less at stake. */
+export function dropDownSeries(
+  state: GameState,
+  id: string,
+): Result<RacingOutcome, RacingChoiceError> {
+  const found = racingOf(state, id);
+  if (typeof found === 'string') return err(found);
+  const { business, team } = found;
+  if (team.rung <= 1) return err('bottom-rung');
+  if (team.last?.rung !== team.rung) return err('too-soon');
+  const rung = (team.rung - 1) as TeamRung;
+  const back = Math.round(SERIES[team.rung].upgrade * STEP_DOWN_RETURN);
+  const books = post(state.finance, state.world.year, state.player.age, {
+    category: 'property',
+    amount: dollars(back),
+    source: `${business.name} sold its car and stepped down to the ${SERIES[rung].series}`,
+  });
+  const entry = line(
+    state,
+    `${business.name} stepped down to ${SERIES[rung].words}. The car brought ${money(back)}.`,
+    `racing:down:${business.id}:${rung}`,
+    'passive',
+  );
+  return ok({
+    entry,
+    state: {
+      ...state,
+      finance: books.ledger,
+      businesses: state.businesses.map((row) =>
+        row.id === id
+          ? {
+              ...business,
+              racing: { ...team, rung, car: SERIES[rung].strength - NEW_RUNG_CAR_GAP },
+            }
+          : row,
+      ),
+      player: {
+        ...state.player,
+        cash: books.ledger.balance,
+        timeline: appendToTimeline(state.player.timeline, entry),
+      },
+    },
+  });
+}
+
+/* -------------------------------------------------------------------------- */
 /* Expanding (ticket 0602)                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -1023,6 +1331,8 @@ export interface BusinessesYearInput {
   readonly available: number;
   readonly holdsJob: boolean;
   readonly stat: (type: BusinessType) => number;
+  /** Ticket 0808. The owner's driving form, 0–100, when they are a pro driver: they can sit in their own car. */
+  readonly ownerForm?: number;
 }
 
 export interface BusinessesYear {
@@ -1036,6 +1346,34 @@ export interface BusinessesYear {
   readonly loans: readonly HeldLoan[];
   /** The businesses whose loan was serviced here, and so is not the household's to service as well. */
   readonly serviced: readonly string[];
+}
+
+const ordinalOf = (n: number): string => {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  const suffix = teen
+    ? 'th'
+    : (({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th');
+  return `${n}${suffix}`;
+};
+
+/** What a racing team's season says for itself: where it finished, and what went wrong on the way. */
+function seasonLines(name: string, out: RacingYearOutput, key: string): readonly string[] {
+  const { season } = out;
+  const series = SERIES[season.rung].series;
+  const lines: string[] = [];
+  lines.push(
+    season.title
+      ? `${name} won the ${series} championship.`
+      : `${name} finished ${ordinalOf(season.place)} of ${season.field} in the ${series}.`,
+  );
+  if (season.incident) {
+    const pick =
+      TEAM_INCIDENT_LINES[
+        Math.floor(mixedUnit(`${key}:${season.year}:incident:line`) * TEAM_INCIDENT_LINES.length)
+      ]!;
+    lines.push(pick.replace('{name}', name));
+  }
+  return lines;
 }
 
 /**
@@ -1079,8 +1417,10 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
     */
     const age = input.year - business.openedYear - 1;
     const key = `${input.seed}:${business.id}:${input.year}:event`;
+    // A racing team's year is a season, with its own incidents; the generic shop events do not fit it (ticket 0808).
+    const racingTeam = type.id === RACING_TEAM_TYPE_ID;
     const happened =
-      age < 0
+      age < 0 || racingTeam
         ? undefined
         : drawEvent(
             type,
@@ -1091,14 +1431,27 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
               size: mixedUnit(`${key}:size`),
             },
           );
-    const result = businessYear(business, type, {
-      year: input.year,
-      market: input.market,
-      shock: normalFrom(`${input.seed}:${business.id}:${input.year}:shock`),
-      stat: input.stat(type),
-      hands,
-      modifiers: modifiersFor(happened),
-    });
+    const season = racingTeam
+      ? racingYear({
+          business,
+          type,
+          team: teamOf(business, input.seed),
+          year: input.year,
+          seed: input.seed,
+          market: input.market,
+          ...(input.ownerForm !== undefined ? { ownerForm: input.ownerForm } : {}),
+        })
+      : undefined;
+    const result =
+      season?.result ??
+      businessYear(business, type, {
+        year: input.year,
+        market: input.market,
+        shock: normalFrom(`${input.seed}:${business.id}:${input.year}:shock`),
+        stat: input.stat(type),
+        hands,
+        modifiers: modifiersFor(happened),
+      });
     const rival = rivalAfter(business.rival, happened, type, input.year, mixedUnit(`${key}:bite`));
     const reputation = Math.max(0, Math.min(100, result.reputation + reputationChangeOf(happened)));
     const cash = Number(business.cash) / 100;
@@ -1186,16 +1539,17 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
     const growth =
       footprintFor(business, type, input.year + 1) /
       Math.max(0.01, footprintFor(business, type, input.year));
-    const staff = business.autoStaff
-      ? autoStaffFor(
-          type,
-          business.staff,
-          result,
-          growth,
-          hands * locationAttention(locations),
-          locations,
-        )
-      : business.staff;
+    const staff =
+      business.autoStaff && !racingTeam
+        ? autoStaffFor(
+            type,
+            business.staff,
+            result,
+            growth,
+            hands * locationAttention(locations),
+            locations,
+          )
+        : business.staff;
     const last: BusinessLedgerYear = {
       year: input.year,
       revenue: result.revenue,
@@ -1231,8 +1585,21 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
       staff,
       reputation,
       profits: withProfit(business.profits, result.profit),
+      ...(season ? { racing: season.team } : {}),
       last,
     });
+
+    if (season) {
+      lines.push(...season.lines);
+      lines.push(...seasonLines(business.name, season, business.id));
+      if (season.season.title) {
+        records.push({
+          category: 'championship',
+          label: `Won the ${SERIES[season.season.rung].series} championship as an owner`,
+          referenceId: type.id,
+        });
+      }
+    }
 
     if (happened) lines.push(eventLineFor(happened.event, business.name));
     if (result.economy <= 0.94) {

@@ -618,7 +618,8 @@ built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sport
 | **0805 Acting**                             | **DONE (engine).** Six rungs of acting work from student films to prestige pictures; every part is a lead, a supporting part or a bit part, and is offered to a seen actor or applied for from six casting calls a year (an agent helps and is never needed); lessons, character development, Take / Ask for more / Pass, awards, fame, and the Talent Agency business. **Save v47** (Agent B: v48+). No screens (0809).                                                                                                                                                                                                                 |
 | **0806 Music**                              | **DONE (engine).** Six rungs from a local act to a superstar, all read off monthly listeners; releases under the caps (2 albums, 3 EPs, 15 singles) with a back catalogue that keeps paying, a ceiling set by quality and one fixed luck draw; labels that call or take a demo (indie by default, never required) with an advance and a royalty after it is repaid, Sign / Ask for more / Pass; tours, collaborations (0704), a manager or an agent (0704), a fictional awards ceremony, the Record Label business, and the Music creator channel fed by releases. Real per-stream pay. **Save v48** (Agent B: v49+). No screens (0809). |
 | **0807 Modeling**                           | **DONE (engine).** Six rungs from test shoots to the face of a house; a job is a day rate, days and a usage fee; work comes asked for (a model who has been seen), applied for (six castings a year, three applications) or through an agency (20%, the New York cap; helps, never required); looks and charisma, no new talent; an age window; brand deals on 0702's sponsor rules; celebrity networking; a fictional awards ceremony. **Save v49** (Agent B: v50+). No screens (0809). `claude/0807-modeling.md` |
-| 0808–0809                                   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **0808 Racing team and the world**          | **DONE (engine).** Motor racing two ways: a driver's career (karting from eight, a seat offered at 16–30, five tiers, a championship, a team that may not renew) and the **Racing Team**, the 34th business type, whose year is a season with a field, a purse and sponsors who pay by the result; the player can run a team, drive their own, or both. Plus one **awards layer across all four fields**: the Laurel Sports Awards (Driver of the Year for racing), a sweep, the third win at a ceremony, the charts, and the 0705 roster winning the same awards and filling the same charts. Derived from the seed, nothing saved. **Save v50** (Agent B: v51+). No screens (0809). `claude/0808-racing-team-and-the-world.md` |
+| 0809                                        | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -1518,6 +1519,30 @@ golf and tennis add about five of twenty-four. A passive life does not start an 
 
 **137. 0807 took save v49.** Agent B's saves are v50 and onward. See `claude/0807-modeling.md`.
 
+### 0808 findings (138–148)
+
+**138. The ladder is a game ladder; only the anchors are real.** An entry-level open-wheel season about $200,000 (2013), a sports-car team about $1 million (2015), an IndyCar $3–8 million a car (2016), a NASCAR Cup car about $20 million before the driver (2024), the Indy 500 purse about $13 million. The running budgets sit on those; every other number (field sizes, strengths, purses, sponsors, `REACH_SEAT`, the pay ladder, title chances, the roster sport weights, the whole awards layer) is a named, pinned judgement.
+
+**139. A middling team loses money in 36–39% of its years** (mean margin about 5%); +8 driver skill is about +10 points of margin. Dials: `TEAM_WEIGHTS`, `SPONSOR_FLOOR`/`SPONSOR_SLOPE`, the budgets.
+
+**140. The driver road is narrow but the top is generous:** 30% of lives with talent and work hold a seat, a third of those reach star. Follows spec 949 as 0803 did (finding 97). Dials: `REACH_SEAT`.
+
+**141. An owner who drives is paid once:** the sports career pays them, the team pays no driver, and a championship record is written only for a title the owner won as the driver.
+
+**142. Buying a listed racing team gives a default rung-1 team,** whatever the seller's series.
+
+**143. Awards are derived, not saved.** The player's wins are records; the roster's winners, champions and every chart are recomputed from (seed, year). Changing the 0705 roster's generation changes who won past awards.
+
+**144. All the awards numbers are judgement** (Laurel 4 / 12 / 25%, ×2.5 with a title, sweep at two fields, third win, nominee loss 50%, roster floor 35). Low on purpose.
+
+**145. A Laurel raises sports fame** (+3 each, to +12), which feeds 0705's meetings and 0707's opportunities. Capped.
+
+**146. Losing an award is told once a year,** at the first ceremony it happened at.
+
+**147. Not modelled:** two cars, constructors' titles, driver contract negotiation, a driver market that bids for the player's driver, buying out another team, suppliers, pit strategy, safety rules. The roster has no models, so the Atelier Awards have no roster winner.
+
+**148. 0808 took save v50.** Agent B's saves are v51 and onward. See `claude/0808-racing-team-and-the-world.md`.
+
 ## Suggested order
 
 This is the historical delivery order with current status annotations, not an
@@ -1571,5 +1596,5 @@ Agent A's next ticket.
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
 
 12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, 0802 The
-    other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting and 0806 Music and 0807 Modeling shipped as engines only; Payton chose screens in 0809.
+    other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting and 0806 Music and 0807 Modeling and 0808 Racing team and the world shipped as engines only; Payton chose screens in 0809.
     Next is chosen by Payton.)_

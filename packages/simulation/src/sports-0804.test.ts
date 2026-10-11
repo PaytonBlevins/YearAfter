@@ -248,7 +248,7 @@ describe('the five Olympic sports', () => {
       'olympic-boxing',
     ]);
     for (const sport of OLYMPIC_SPORTS) expect(sport.format).toBe('olympic');
-    expect(SPORTS).toHaveLength(14);
+    expect(SPORTS).toHaveLength(15);
   });
 
   it('have no judo anywhere, and no winter events, weightlifting or rotating slot', () => {
@@ -269,7 +269,7 @@ describe('the five Olympic sports', () => {
     }
   });
 
-  it('have federations whose letters are nobody else’s, unique across all fourteen', () => {
+  it('have federations whose letters are nobody else’s, unique across all fifteen', () => {
     const letters = SPORTS.map((sport) => sport.leagueShort);
     expect(new Set(letters).size).toBe(SPORTS.length);
     const real = [
@@ -361,7 +361,7 @@ describe('the three Olympic disciplines', () => {
   it('are track, swimming and gymnastics, studied like the arts and not counted as martial arts', () => {
     expect(OLYMPIC_DISCIPLINES.map((row) => row.id)).toEqual(['track', 'swimming', 'gymnastics']);
     expect(MARTIAL_ARTS).toHaveLength(6);
-    expect(STUDIES).toHaveLength(9);
+    expect(STUDIES).toHaveLength(10);
     for (const row of OLYMPIC_DISCIPLINES) {
       expect(row.style).toBe('athletic');
       expect(findMartialArt(row.id)).toBe(row);

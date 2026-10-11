@@ -189,3 +189,5 @@ export * from './post-formats';
 export * from './acting';
 export * from './music';
 export * from './modeling';
+export * from './racing';
+export * from './awards';

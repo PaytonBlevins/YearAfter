@@ -19,8 +19,8 @@ checks and review remain pending; general life-event wording stays last.
 until they are done. Read `claude/playtest-rules-brief.md` first. For P1–P16 in that brief it overrides
 section 0 and the CORE_RULES, migration and validator limits in section 8. Outside that list, section 0
 still applies. 0508 waits. Agent A built v0.08 ticket 0801 (the sports engine) in parallel and took save v44, now
-shipped. **Agent A's 0803 (individual sports) took save v45, 0804 (Olympics, coaching and commentary) took v46, 0805 (Acting) took v47, 0806 (Music) took v48 and 0807 (Modeling) took v49** (7 October), so your saves start at **v50**. If you
-already wrote a v45, v46, v47, v48 or v49 migration, renumber it before it is pushed.
+shipped. **Agent A's 0803 (individual sports) took save v45, 0804 (Olympics, coaching and commentary) took v46, 0805 (Acting) took v47, 0806 (Music) took v48, 0807 (Modeling) took v49 and 0808 (Racing team and the world) took v50** (7–11 October), so your saves start at **v51**. If you
+already wrote a v45, v46, v47, v48, v49 or v50 migration, renumber it before it is pushed.
 
 ## 0. Your scope (read this first; it replaces the earlier two-agent pipeline)
 

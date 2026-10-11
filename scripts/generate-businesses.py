@@ -6,7 +6,7 @@ Authoring source for `packages/content/data/businesses.json`. Edit here, run it,
 commit both.
 
 0602 ADDS NINETEEN (the MORE list below), making thirty-one of spec 396's
-thirty-seven; 0805 adds the Talent Agency and 0806 the Record Label, making thirty-three. The other four wait on
+thirty-seven; 0805 adds the Talent Agency and 0806 the Record Label, and 0808 the Racing Team, making thirty-four. The other three wait on
 systems that do not exist yet (DEFERRED).
 
 A REPRESENTATIVE TWELVE, NOT THE CATALOG. Spec 1356–1360: "start with a
@@ -395,6 +395,16 @@ MORE: list[dict] = [
         assetShare=0.20, elasticity=2.8, cyclical=0.60, volatility=0.30, ramp=3.0, productShare=0.0,
         skills=["charisma", "smarts"], valueMultiple=2.2,
         names=["Lowtide Records", "Brass Key Music", "Copper Wire Records", "Northside Sound Co.", "Third Coast Recordings", "Marigold Music Group"]),
+    # 0808: the one 0602 left for sports. The row below is only what a typical club team looks like in a generic
+    # year (it keeps the catalog's tests honest, and prices a listing). A racing team's real year is a SEASON,
+    # decided in `finance/src/racing.ts`: results, a prize fund, sponsors, a driver and a car.
+    sized(0.12,
+        id="biz.racing", name="Racing Team", sector="Motorsport",
+        blurb="A car, a crew and a driver, and sponsors who pay by the result. Moving up the ladder costs more than the last rung earned.",
+        startup=150_000, revenue=260_000, cogs=0.30, staff=3, staffMin=2, wage=38_000,
+        assetShare=0.45, elasticity=2.8, cyclical=0.70, volatility=0.35, ramp=3.0, productShare=0.0,
+        skills=["smarts", "discipline"], valueMultiple=2.0,
+        names=["Redshift Racing", "Apex Motorsport", "Slipstream Racing", "Kingpin Competition", "Chicane Racing", "Checkpoint Motorsports"]),
     sized(0.10,
         id="biz.realestate", name="Real Estate Brokerage", sector="Professional",
         blurb="Agents on commission and a name on the signs. When the housing market stops, so do you.",
@@ -527,7 +537,6 @@ DEFERRED: dict[str, str] = {
     # work, with a risk of losing it. They belong in one ticket.
     "Private Lending Firm": "0605 (private investments)",
     "Casino": "gambling",
-    "Racing Team": "v0.08 (sports)",
 }
 
 

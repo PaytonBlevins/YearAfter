@@ -53,7 +53,7 @@ import type {
 import type { Household } from '@yearafter/relationships';
 import type { SaveId } from '@yearafter/core';
 
-export const CURRENT_SAVE_VERSION = 49;
+export const CURRENT_SAVE_VERSION = 50;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -90,6 +90,12 @@ export type { WorldState };
  * could let anything, so the migration has nothing to write; the version is
  * bumped so a build that cannot read a tenant refuses the save rather than
  * dropping them.
+ *
+ * v50 added the racing team (Ticket 0808): an owned business may carry `racing` — the series it runs in, the car, who
+ * drives, how it is developed, and the last season. Optional on every business, and no save before it could own a
+ * team, so the migration has nothing to write; the version is bumped so a build that cannot read a team refuses the
+ * save rather than dropping it. (The racing driver career and the awards layer keep nothing of their own: a driver's
+ * career is a sports career, and the awards are derived.)
  *
  * v49 added modeling (Ticket 0807): `modeling` — the rung work is coming in at, a craft level, credits, a modeling
  * reputation, awards, an agency, a following brands read, and the jobs on the table and booked. Always present, so the
@@ -214,7 +220,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 49;
+  readonly version: 50;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;

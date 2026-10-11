@@ -67,9 +67,9 @@ const mature = (
 };
 
 describe('the catalog', () => {
-  it('has thirty-three distinct, well-formed types', () => {
-    expect(BUSINESS_TYPES).toHaveLength(33);
-    expect(new Set(BUSINESS_TYPES.map((type) => type.id)).size).toBe(33);
+  it('has thirty-four distinct, well-formed types', () => {
+    expect(BUSINESS_TYPES).toHaveLength(34);
+    expect(new Set(BUSINESS_TYPES.map((type) => type.id)).size).toBe(34);
     for (const type of BUSINESS_TYPES) {
       expect(type.skills).toHaveLength(2);
       expect(type.names.length).toBeGreaterThanOrEqual(6);

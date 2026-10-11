@@ -3194,7 +3194,7 @@ a line to delete (13.153); the list of exclusions is short on purpose, and every
 ### 13.160 A small pure function that a whole year runs through gets exported and pinned on its own
 
 The rounding of a rate, the pick of a client when some are taken, the odds an ask for more lands and the name factor on
-a rate were all reached only through a full year, where rounding hid a divisor and a loop hid its edges. XX
+a rate were all reached only through a full year, where rounding hid a divisor and a loop hid its edges. Many
 mutations survived until each was exported (`modelRoundRate`, `modelRoundFee`, `makeModelJob`, `modelAskChance`) and tested at its own
 edges. Where a draw has to land in a window, search for the id that does and assert on it.
 
@@ -3204,3 +3204,38 @@ One breakage made the code loop forever. The runner killed the shell it started,
 run sat on an orphan for twenty-five minutes and held the pipe open. The runner now starts each test in its own
 session and kills the group on a timeout, uses `--bail=1`, and resumes by index. When a run is stopped by hand, both
 trees are diffed before anything else is touched: a file left mutated looks exactly like a file that is fine.
+
+### 13.162 What the world does around the player is derived from the seed, the year and the records, and nothing is saved
+
+The roster's award winners, a sport's champion and every chart are pure functions of (seed, year, the player's
+records). A save never holds them, a load can never disagree with a play-through, and there is no migration when
+they change. The cost is that changing how the roster is generated rewrites who won in the past, so the draws are
+pinned in tests and the ticket says so. Save only what the player did.
+
+### 13.163 Order by construction, not by a comparator that has to be consistent
+
+The chart put the player among the roster with a sort whose tie-break was `Number(a.player) - Number(b.player)`. A
+mutation that made that comparator inconsistent still passed every test, because the sort only compared the player,
+who was always last, as the later element. Put the roster in order first, then insert the player at the first place
+where the roster's fame is lower. The tie rule is then a line that a test can break.
+
+### 13.164 A clamp whose bounds cannot be reached and a default no caller uses are deleted, and the bound is pinned
+
+`Math.min(1, chance × multiple)` could never exceed 0.625; `chance > 0 &&` in front of `draw < chance` could never
+matter; `playerFame = 0` was passed explicitly by every caller. Each survived every mutation because nothing could
+tell them apart from the code without them. Delete the line, make the argument required, and pin the fact that makes
+the line unnecessary (here: the largest chance times the multiple is at most one) in a test.
+
+### 13.165 Sabotage runs in one tree take turns, and nothing is synced into the tree while a run holds its backups
+
+Two runs in the same mirror, one mutating `awards.ts` and one mutating a finance file, can kill each other's tests: a
+mutation in one package fails a test in the other and is recorded as killed. A false kill hides a survivor. 0808 caught
+this before trusting any result from overlapping runs and re-ran them in turn. A
+runner also restores the file it backed up when it first saw it, so a file copied over mid-run is overwritten by the
+old copy at the next mutant. Run one group at a time per tree, in a chain, and sync only between groups.
+
+### 13.166 A catalog addition moves every pinned listing, so those pins are named in the ticket
+
+The 34th business type changed the order and the contents of three pinned listings in `business-finance.test.ts` and
+two counts in the finance and simulation business tests. Expect it, update the pins to the new truth rather than
+loosening them, and list the files changed for it in the ticket.

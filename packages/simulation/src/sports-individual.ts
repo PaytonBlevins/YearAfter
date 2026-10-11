@@ -50,8 +50,13 @@ import {
   OLYMPIC_WINDOW,
   PRO_INJURY_CHANCE,
   PURSE_SPREAD,
+  RACING_NOISE,
+  RACING_PLACE_BAND,
+  RACING_TITLE_CHANCE,
+  RACING_WINDOW,
   REACH_NATIONAL,
   REACH_PROS,
+  REACH_SEAT,
   TIER_REPUTATION,
   TITLE_PURSE_SHARE,
   TOUR_NOISE,
@@ -90,6 +95,8 @@ import {
   COMBAT_SERIOUS_LINES,
   OLYMPIC_MINOR_LINES,
   OLYMPIC_SERIOUS_LINES,
+  RACING_MINOR_LINES,
+  RACING_SERIOUS_LINES,
   TOUR_MINOR_LINES,
   TOUR_SERIOUS_LINES,
   healthAdjusted,
@@ -212,7 +219,7 @@ export type ArtError =
 
 export const ART_ERROR_LABELS: Readonly<Record<ArtError, string>> = {
   'no-such-art': 'There is no such art.',
-  'too-young': `Nobody starts before ${MARTIAL_ART_MIN_AGE}.`,
+  'too-young': `Nobody starts before ${MARTIAL_ART_MIN_AGE}, and karting not before 8.`,
   'already-studying': "You're already studying that.",
   'too-many': `There are only hours for ${MAX_ARTS_AT_ONCE} at a time.`,
   'not-studying': "You aren't studying that.",
@@ -255,7 +262,7 @@ function outcomeOf(
 export function startArt(state: GameState, artId: string): Result<ArtOutcome, ArtError> {
   const art = findMartialArt(artId);
   if (!art) return err('no-such-art');
-  if (state.player.age < MARTIAL_ART_MIN_AGE) return err('too-young');
+  if (state.player.age < (art.minAge ?? MARTIAL_ART_MIN_AGE)) return err('too-young');
   const arts = artsOf(state);
   if (arts.some((row) => row.artId === artId)) return err('already-studying');
   if (arts.length >= MAX_ARTS_AT_ONCE) return err('too-many');
@@ -514,11 +521,58 @@ export function nationalTeamOffer(
   return undefined;
 }
 
+/**
+ * A seat in a car (ticket 0808), the road in for motor racing: karting from eight, and when a team sees three seasons of
+ * it and the draw agrees, an offer. Checked each year from sixteen to thirty while there is no career and no question
+ * open, against ONE draw for the life against `REACH_SEAT`, whose threshold rises with hard work and does not roll
+ * again. It comes after the gym's question and the national program's (the caller checks those first, 13.147).
+ */
+export function racingSeatOffer(
+  before: GameState,
+  age: number,
+  arts: readonly ArtStudy[],
+):
+  { readonly career: SportCareer; readonly offer: SportsOffer; readonly line: string } | undefined {
+  if (age < RACING_WINDOW[0] || age > RACING_WINDOW[1]) return undefined;
+  const sport = findSport('racing');
+  if (!sport) return undefined;
+  if (before.sports.past.some((row) => row.sportId === sport.id)) return undefined;
+  const base = baseArts(arts, sport);
+  if (base.length === 0) return undefined;
+  const seed = before.rng.getSeed();
+  const gen = before.world.generation;
+  const seasons = base.reduce((total, row) => total + row.seasons, 0);
+  const hardSeasons = base.reduce((total, row) => total + row.hardSeasons, 0);
+  const category = categoryOf(before.player.talents.athletics, isHardWorker(seasons, hardSeasons));
+  if (sportUnit(seed, gen, 'seat', sport.id) >= REACH_SEAT[category]) return undefined;
+  const team = stablePick(sport.proTeams, `sports:team:${seed}:${gen}:${sport.id}`) ?? '';
+  const level = Math.max(...base.map((row) => row.level));
+  const career: SportCareer = {
+    sportId: sport.id,
+    // The karting years: a record of seasons, and no more, as an amateur fighter's are.
+    stage: 'school',
+    startedAge: Math.min(...base.map((row) => row.startedAge)),
+    seasons,
+    hardSeasons,
+    form: level,
+    trainedAtAge: -1,
+    trainedCount: 0,
+    reputation: 0,
+    titles: 0,
+    team,
+  };
+  return {
+    career,
+    offer: { kind: 'turn-pro', sportId: sport.id, team, age, eventId: OFFER_EVENT_ID },
+    line: `${team} have a seat for you. Years in a kart, and somebody was watching.`,
+  };
+}
+
 /** The studies a fight career is built from: the one art for boxing, the best of each style for MMA. */
 export function baseArts(arts: readonly ArtStudy[], sport: Sport): readonly ArtStudy[] {
   const ready = arts.filter((row) => row.seasons >= MIN_ART_SEASONS);
-  // An Olympic sport is built from whatever feeds it: swimming from swimming, the boxing program from boxing (ticket 0804).
-  if (sport.format === 'olympic') {
+  // An Olympic sport is built from whatever feeds it: swimming from swimming, the boxing program from boxing (ticket 0804); a racing one from karting (ticket 0808).
+  if (sport.format === 'olympic' || sport.format === 'racing') {
     return ready.filter((row) => findMartialArt(row.artId)?.feeds.includes(sport.id));
   }
   if (sport.id === 'boxing') return ready.filter((row) => row.artId === 'boxing');
@@ -602,6 +656,7 @@ export function runIndividualSeason(input: {
   const combat = sport.format === 'combat';
   const olympic = sport.format === 'olympic';
   const tour = sport.format === 'tour';
+  const racing = sport.format === 'racing';
 
   const tier = (career.tier ?? 'fringe') as SportTier;
   const proSeasons = (career.proSeasons ?? 0) + 1;
@@ -643,7 +698,9 @@ export function runIndividualSeason(input: {
       losses += seasonLosses;
       performance = career.form + FIGHT_LUCK * (seasonWins - expected);
     } else {
-      performance = career.form + (sportUnit(seed, gen, 'result', year) - 0.5) * TOUR_NOISE;
+      performance =
+        career.form +
+        (sportUnit(seed, gen, 'result', year) - 0.5) * (racing ? RACING_NOISE : TOUR_NOISE);
     }
   }
 
@@ -655,7 +712,7 @@ export function runIndividualSeason(input: {
     else if (tierRank(target) < tierRank(tier)) next = stepTier(tier, -1);
     // A first season is not judged: nobody loses a card or a gym in the year they arrive.
     if (tier === 'fringe' && isOut(performance) && proSeasons > 1) {
-      ended = combat ? 'released' : olympic ? 'cut' : 'lost-card';
+      ended = combat || racing ? 'released' : olympic ? 'cut' : 'lost-card';
     }
   }
   // A serious injury costs a rung one time in three, as it does a team player.
@@ -664,7 +721,10 @@ export function runIndividualSeason(input: {
     tierRank(next) > tierRank(career.best ?? tier) ? next : (career.best ?? tier)
   ) as SportTier;
 
-  const title = !missed && tour && sportUnit(seed, gen, 'title', year) < TOUR_TITLE_CHANCE[tier];
+  const title =
+    !missed &&
+    (tour || racing) &&
+    sportUnit(seed, gen, 'title', year) < (racing ? RACING_TITLE_CHANCE : TOUR_TITLE_CHANCE)[tier];
   // A belt: moving up into the top two rungs of a fight card is a title fight won.
   const belt = combat && next !== tier && tierRank(next) > tierRank(tier) && tierRank(next) >= 3;
 
@@ -762,6 +822,26 @@ export function runIndividualSeason(input: {
         text: `Slipping down the national ranking. You are ${tierWords(next)} now.`,
       });
     }
+  } else if (racing) {
+    if (!missed) {
+      lines.push({
+        kind: title ? 'milestone' : 'passive',
+        text: title
+          ? `Won the ${sport.leagueShort} championship for ${career.team ?? 'your team'}.`
+          : `Finished ${ordinal(between(sportUnit(seed, gen, 'rank', age), RACING_PLACE_BAND[next]))} in the ${sport.leagueShort} standings.`,
+      });
+    }
+    if (tierRank(next) > tierRank(tier)) {
+      lines.push({
+        kind: 'milestone',
+        text: `A better team wants you. You are ${tierWords(next)} on the grid now.`,
+      });
+    } else if (tierRank(next) < tierRank(tier)) {
+      lines.push({
+        kind: 'passive',
+        text: `Dropped to a slower car after a poor run. You are ${tierWords(next)} now.`,
+      });
+    }
   } else {
     if (!missed) {
       const rank = worldRankFor(next, sportUnit(seed, gen, 'rank', age));
@@ -797,7 +877,11 @@ export function runIndividualSeason(input: {
   if (title || belt) {
     records.push({
       category: 'championship',
-      label: belt ? `Won the ${sport.leagueShort} title` : `Won a ${sport.leagueShort} event`,
+      label: belt
+        ? `Won the ${sport.leagueShort} title`
+        : racing
+          ? `Won the ${sport.leagueShort} championship`
+          : `Won a ${sport.leagueShort} event`,
       referenceId: sport.id,
     });
   }
@@ -808,7 +892,13 @@ export function runIndividualSeason(input: {
     lines.push({
       kind: 'passive',
       text: pick(
-        combat ? COMBAT_MINOR_LINES : olympic ? OLYMPIC_MINOR_LINES : TOUR_MINOR_LINES,
+        combat
+          ? COMBAT_MINOR_LINES
+          : olympic
+            ? OLYMPIC_MINOR_LINES
+            : racing
+              ? RACING_MINOR_LINES
+              : TOUR_MINOR_LINES,
         `sports:injury:m:${year}`,
       ),
     });
@@ -816,7 +906,13 @@ export function runIndividualSeason(input: {
     lines.push({
       kind: 'passive',
       text: pick(
-        combat ? COMBAT_SERIOUS_LINES : olympic ? OLYMPIC_SERIOUS_LINES : TOUR_SERIOUS_LINES,
+        combat
+          ? COMBAT_SERIOUS_LINES
+          : olympic
+            ? OLYMPIC_SERIOUS_LINES
+            : racing
+              ? RACING_SERIOUS_LINES
+              : TOUR_SERIOUS_LINES,
         `sports:injury:s:${year}`,
       ),
     });
@@ -846,7 +942,9 @@ export function runIndividualSeason(input: {
   } else if (ended === 'released') {
     lines.push({
       kind: 'milestone',
-      text: `${career.team ?? 'The gym'} stopped booking you after the losses.`,
+      text: racing
+        ? `${career.team ?? 'The team'} didn't renew your seat after a poor year.`
+        : `${career.team ?? 'The gym'} stopped booking you after the losses.`,
     });
   } else if (age >= retirementAge(sport, best, seed, gen)) {
     lines.push({

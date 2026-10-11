@@ -1131,6 +1131,12 @@ const migrations: Readonly<Record<number, Migration>> = {
           },
     version: 49,
   }),
+  /**
+   * v49 -> v50: Ticket 0808 — the racing team. An owned business may now carry `racing`; nobody before it could own a
+   * team, so there is nothing to write. The version moves so an older build refuses a save it cannot read. No RNG, no
+   * clock.
+   */
+  49: (save) => ({ ...save, version: 50 }),
 };
 
 /**
@@ -1344,6 +1350,65 @@ function sportsOk(value: unknown): boolean {
       !Number.isSafeInteger(job['since']) ||
       !Number.isSafeInteger(job['seasons']) ||
       (job['over'] !== undefined && typeof job['over'] !== 'boolean')
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Ticket 0808. An owned business may carry a racing team; if it does, the rung, the car, the driver, the way the car
+ * is developed and the counts have to be ones the season can run on.
+ */
+function racingTeamOk(business: unknown): boolean {
+  if (typeof business !== 'object' || business === null) return false;
+  const team = (business as Record<string, unknown>)['racing'];
+  if (team === undefined) return true;
+  if (typeof team !== 'object' || team === null || Array.isArray(team)) return false;
+  const row = team as Record<string, unknown>;
+  const rung = (n: unknown): boolean =>
+    Number.isSafeInteger(n) && (n as number) >= 1 && (n as number) <= 5;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  if (!rung(row['rung']) || !rung(row['best'])) return false;
+  if (typeof row['car'] !== 'number' || !(row['car'] >= 0 && row['car'] <= 100)) return false;
+  if (
+    row['development'] !== 'lean' &&
+    row['development'] !== 'steady' &&
+    row['development'] !== 'heavy'
+  ) {
+    return false;
+  }
+  if (!whole(row['titles']) || !whole(row['seasons'])) return false;
+  const driver = row['driver'];
+  if (typeof driver !== 'object' || driver === null) return false;
+  const who = driver as Record<string, unknown>;
+  if (who['kind'] === 'hired') {
+    if (
+      typeof who['id'] !== 'string' ||
+      typeof who['name'] !== 'string' ||
+      typeof who['skill'] !== 'number' ||
+      !(who['skill'] >= 0 && who['skill'] <= 100) ||
+      !whole(who['age'])
+    ) {
+      return false;
+    }
+  } else if (who['kind'] !== 'owner') {
+    return false;
+  }
+  const last = row['last'];
+  if (last !== undefined) {
+    if (typeof last !== 'object' || last === null) return false;
+    const season = last as Record<string, unknown>;
+    if (
+      !Number.isSafeInteger(season['year']) ||
+      !rung(season['rung']) ||
+      !Number.isSafeInteger(season['place']) ||
+      (season['place'] as number) < 1 ||
+      !Number.isSafeInteger(season['field']) ||
+      (season['field'] as number) < (season['place'] as number) ||
+      typeof season['title'] !== 'boolean' ||
+      typeof season['incident'] !== 'boolean'
     ) {
       return false;
     }
@@ -1763,7 +1828,8 @@ export function validateCurrentSave(
     // Ticket 0506. And for what is in the collection.
     require('valuables', candidate['valuables'], Array.isArray(candidate['valuables'])),
     // Ticket 0601. And for what is owned and running.
-    require('businesses', candidate['businesses'], Array.isArray(candidate['businesses'])),
+    require('businesses', candidate['businesses'], Array.isArray(candidate['businesses']) &&
+      candidate['businesses'].every(racingTeamOk)),
     // Ticket 0605. And for the private deals.
     require('deals', candidate['deals'], Array.isArray(candidate['deals'])),
     // Ticket 0701. And for the channels, and a number for fame.
