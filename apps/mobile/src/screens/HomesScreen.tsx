@@ -19,6 +19,9 @@
  * the answer arrives as an outcome card like every other application.
  */
 
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
+import { dollars } from '@yearafter/core';
+
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import {
@@ -64,9 +67,9 @@ export function HomesScreen() {
     );
   }
 
+  const cash = Math.floor(Number(state.player.cash) / 100);
   const listings = homeListings(state);
   const rentals = rentalListings(state);
-  const cash = Math.floor(Number(state.player.cash) / 100);
   const home = residenceOf(state.homes);
   const others = otherPropertyOf(state.homes);
 
@@ -226,6 +229,18 @@ export function HomesScreen() {
                   label={`Buy it outright — ${money(listing.askingPrice)}`}
                   onPress={() => {
                     buyAHome(listing.id, 'cash');
+                    setOpen(undefined);
+                  }}
+                />
+              ) : null}
+              {state.cards.length > 0 ? (
+                <PurchasePaymentChoices
+                  purchaseName={listing.name}
+                  total={dollars(listing.askingPrice)}
+                  cash={state.player.cash}
+                  cards={state.cards}
+                  onPay={(payment) => {
+                    buyAHome(listing.id, 'cash', payment);
                     setOpen(undefined);
                   }}
                 />

@@ -227,7 +227,6 @@ export function CarListingScreen() {
 
   const view = inspectionOf(state, listing);
   const offer = carLoanOfferFor(state, listing);
-  const cash = Math.floor(Number(state.player.cash) / 100);
   const found = findVehicleTrim(listing.trimId);
 
   return (
@@ -289,10 +288,12 @@ export function CarListingScreen() {
       {found?.model.blurb ? <Text style={styles.blurb}>{found.model.blurb}</Text> : null}
 
       {listing.inspectable && !view.inspected ? (
-        <ActionButton
-          label={`Have a mechanic look it over — ${money(INSPECTION_FEE)}`}
-          variant="secondary"
-          onPress={() => inspectACar(listing.id)}
+        <PurchasePaymentChoices
+          purchaseName="a mechanic's inspection"
+          total={dollars(INSPECTION_FEE)}
+          cash={state.player.cash}
+          cards={state.cards}
+          onPay={(payment) => inspectACar(listing.id, payment)}
         />
       ) : null}
 
@@ -323,16 +324,16 @@ export function CarListingScreen() {
           }}
         />
       ) : null}
-      {cash >= view.price ? (
-        <ActionButton
-          label={`Pay cash — ${money(view.price)}`}
-          variant={offer.approved ? 'secondary' : 'primary'}
-          onPress={() => {
-            buyACar(listing.id, 'cash');
-            pop();
-          }}
-        />
-      ) : null}
+      <PurchasePaymentChoices
+        purchaseName={listing.name}
+        total={dollars(view.price)}
+        cash={state.player.cash}
+        cards={state.cards}
+        onPay={(payment) => {
+          buyACar(listing.id, 'cash', payment);
+          pop();
+        }}
+      />
     </ScrollView>
   );
 }
@@ -527,7 +528,6 @@ export function CarModsScreen() {
   const found = findVehicleTrim(vehicle.trimId);
   const slots = modSlotsFor(state, vehicle.id);
   const worth = Number(vehicle.value) / 100;
-  const cash = Math.floor(Number(state.player.cash) / 100);
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -568,17 +568,16 @@ export function CarModsScreen() {
                   {open === id && !option.refusal ? (
                     <>
                       <Text style={styles.blurb}>{option.mod.blurb}</Text>
-                      {cash >= option.price ? (
-                        <ActionButton
-                          label={`Fit it — ${money(option.price)}`}
-                          onPress={() => {
-                            fitACarMod(vehicle.id, id);
-                            setOpen(undefined);
-                          }}
-                        />
-                      ) : (
-                        <Text style={styles.note}>You don't have the money for that.</Text>
-                      )}
+                      <PurchasePaymentChoices
+                        purchaseName={option.mod.name}
+                        total={dollars(option.price)}
+                        cash={state.player.cash}
+                        cards={state.cards}
+                        onPay={(payment) => {
+                          fitACarMod(vehicle.id, id, payment);
+                          setOpen(undefined);
+                        }}
+                      />
                     </>
                   ) : null}
                 </Fragment>

@@ -22,7 +22,7 @@ import {
   type ReactNode,
 } from 'react';
 import { asSaveId, type SaveId } from '@yearafter/core';
-import type { PurchasePayment } from '@yearafter/finance';
+import { PAYMENT_REFUSAL_LABELS, type PurchasePayment } from '@yearafter/finance';
 import {
   setLifestyle,
   LIFESTYLE_ERROR_LABELS,
@@ -216,33 +216,45 @@ interface GameContextValue {
   /** Ticket 0307. Borrow, and pay extra off. */
   readonly borrow: (productId: string, amount: number) => void;
   /** Ticket 0501. Buy a listed home, outright or with a mortgage. */
-  readonly buyAHome: (listingId: string, how: 'cash' | 'mortgage' | 'mortgage-half') => void;
+  readonly buyAHome: (
+    listingId: string,
+    how: 'cash' | 'mortgage' | 'mortgage-half',
+    payment?: PurchasePayment,
+  ) => void;
   /** Ticket 0501. Spec 211's one Sell action. */
   readonly sellAHome: (homeId: string) => void;
   /** Ticket 0503. Everything a landlord does, one verb at a time. */
   readonly letting: (action: LettingAction) => void;
   /** Ticket 0504. Buy a car off a lot, outright or on the lender's instant answer. */
-  readonly buyACar: (listingId: string, how: 'cash' | 'loan') => void;
+  readonly buyACar: (listingId: string, how: 'cash' | 'loan', payment?: PurchasePayment) => void;
   /** Ticket 0504. Sell a car to a dealer. */
   readonly sellACar: (vehicleId: string) => void;
   /** Ticket 0504. Pay a mechanic to look a used car over. */
-  readonly inspectACar: (listingId: string) => void;
+  readonly inspectACar: (listingId: string, payment?: PurchasePayment) => void;
   /** Ticket 0505. Have a shop fit a modification. */
   readonly serviceACar: (vehicleId: string, payment?: PurchasePayment) => void;
-  readonly fitACarMod: (vehicleId: string, modId: string) => void;
+  readonly fitACarMod: (vehicleId: string, modId: string, payment?: PurchasePayment) => void;
   /** Ticket 0506. Have a builder do something to a home. */
   readonly renovateHome: (homeId: string, renovationId: string, payment?: PurchasePayment) => void;
   /** Ticket 0601. Open a business, run it, sell it or close it. */
-  readonly openABusiness: (typeId: string, finance?: Financing) => void;
+  readonly openABusiness: (typeId: string, finance?: Financing, payment?: PurchasePayment) => void;
   /** Ticket 0603. Buy one that is for sale. A loan is written into the purchase, never paid out as cash. */
-  readonly buyABusiness: (listingId: string, finance?: Financing) => void;
+  readonly buyABusiness: (
+    listingId: string,
+    finance?: Financing,
+    payment?: PurchasePayment,
+  ) => void;
   readonly searchBusinessSupplier: (businessId: string) => void;
   readonly acceptBusinessSupplier: (businessId: string, pitchId: string) => void;
   readonly passBusinessSupplier: (businessId: string, pitchId: string) => void;
   readonly chooseBusinessAgents: (businessId: string, level: BusinessAgentLevel) => void;
   readonly tuneBusiness: (businessId: string, change: BusinessChange) => void;
   /** Ticket 0602. Open another location of a business, or close the newest. */
-  readonly expandABusiness: (businessId: string, finance?: Financing) => void;
+  readonly expandABusiness: (
+    businessId: string,
+    finance?: Financing,
+    payment?: PurchasePayment,
+  ) => void;
   readonly closeALocation: (businessId: string) => void;
   readonly sellABusiness: (businessId: string) => void;
   readonly closeABusiness: (businessId: string) => void;
@@ -256,10 +268,10 @@ interface GameContextValue {
   readonly sellAValuable: (pieceId: string) => void;
   /** Ticket 0507. Go to an auction's next sale, and bid on a lot at it. */
   readonly attendAnAuction: (venueId: string) => void;
-  readonly bidAtAuction: (lotId: string, tier: BidTier) => void;
+  readonly bidAtAuction: (lotId: string, tier: BidTier, payment?: PurchasePayment) => void;
   readonly payLoanOff: (productId: string, amount: number, businessId?: string) => void;
   /** Ticket 0308. */
-  readonly buyInvestment: (productId: string, amount: number) => void;
+  readonly buyInvestment: (productId: string, amount: number, payment?: PurchasePayment) => void;
   readonly sellInvestment: (productId: string, amount: number) => void;
   /** Ticket 0309. */
   readonly hireAdvisorWith: (advisorId: string) => void;
@@ -788,10 +800,14 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0501: homes ---------------------------------------------- */
 
   const buyAHome = useCallback(
-    (listingId: string, how: 'cash' | 'mortgage' | 'mortgage-half') => {
+    (
+      listingId: string,
+      how: 'cash' | 'mortgage' | 'mortgage-half',
+      payment: PurchasePayment = { kind: 'cash' },
+    ) => {
       setState((current) => {
         if (!current) return current;
-        const result = buyHome(current, listingId, how);
+        const result = buyHome(current, listingId, how, payment);
         if (!result.ok) {
           // A refusal is an outcome, not an error: the bank saying no is a
           // thing that happened, and the player is told so in a sentence.
@@ -827,10 +843,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0504: vehicles ------------------------------------------- */
 
   const buyACar = useCallback(
-    (listingId: string, how: 'cash' | 'loan') => {
+    (listingId: string, how: 'cash' | 'loan', payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = buyVehicle(current, listingId, how);
+        const result = buyVehicle(current, listingId, how, undefined, payment);
         if (!result.ok) {
           setOutcome({
             title: how === 'loan' ? 'The lender said no' : 'Not enough',
@@ -869,10 +885,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const inspectACar = useCallback(
-    (listingId: string) => {
+    (listingId: string, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = inspectVehicle(current, listingId);
+        const result = inspectVehicle(current, listingId, payment);
         if (!result.ok) {
           setOutcome({ title: 'Not now', body: INSPECT_ERROR_LABELS[result.error], tone: 'bad' });
           return current;
@@ -899,10 +915,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const fitACarMod = useCallback(
-    (vehicleId: string, modId: string) => {
+    (vehicleId: string, modId: string, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = fitVehicleMod(current, vehicleId, modId);
+        const result = fitVehicleMod(current, vehicleId, modId, payment);
         if (!result.ok) {
           setOutcome({ title: 'Not now', body: FIT_MOD_ERROR_LABELS[result.error], tone: 'bad' });
           return current;
@@ -937,10 +953,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   /* ---- Ticket 0601: businesses ------------------------------------------ */
 
   const openABusiness = useCallback(
-    (typeId: string, finance?: Financing) => {
+    (typeId: string, finance?: Financing, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = openBusiness(current, typeId, finance);
+        const result = openBusiness(current, typeId, finance, payment);
         if (!result.ok) {
           setOutcome({
             title: 'Not now',
@@ -1049,10 +1065,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const buyABusiness = useCallback(
-    (listingId: string, finance?: Financing) => {
+    (listingId: string, finance?: Financing, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = buyBusiness(current, listingId, finance);
+        const result = buyBusiness(current, listingId, finance, payment);
         if (!result.ok) {
           setOutcome({ title: 'Not now', body: BUY_REFUSAL_LABELS[result.error], tone: 'bad' });
           return current;
@@ -1066,10 +1082,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const expandABusiness = useCallback(
-    (businessId: string, finance?: Financing) => {
+    (businessId: string, finance?: Financing, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = expandBusiness(current, businessId, finance);
+        const result = expandBusiness(current, businessId, finance, payment);
         if (!result.ok) {
           setOutcome({
             title: 'Not now',
@@ -1229,10 +1245,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const bidAtAuction = useCallback(
-    (lotId: string, tier: BidTier) => {
+    (lotId: string, tier: BidTier, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = bidOn(current, lotId, tier);
+        const result = bidOn(current, lotId, tier, payment);
         if (!result.ok) {
           setOutcome({ title: 'Not now', body: BID_ERROR_LABELS[result.error], tone: 'bad' });
           return current;
@@ -1283,12 +1299,23 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const buyInvestmentWith = useCallback(
-    (productId: string, amount: number) => {
+    (productId: string, amount: number, payment?: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = invest(current, productId, amount);
+        const result = invest(current, productId, amount, payment);
         if (!result.ok) {
-          setSaveError(`Cannot buy that (${result.error}).`);
+          setOutcome({
+            title: 'Not now',
+            tone: 'bad',
+            body:
+              result.error in PAYMENT_REFUSAL_LABELS
+                ? PAYMENT_REFUSAL_LABELS[result.error as keyof typeof PAYMENT_REFUSAL_LABELS]
+                : result.error === 'noCash'
+                  ? "You don't have enough cash for that."
+                  : result.error === 'notEnoughForOneUnit'
+                    ? "That amount isn't enough to buy a unit."
+                    : "That investment isn't available for this purchase.",
+          });
           return current;
         }
         setOutcome({

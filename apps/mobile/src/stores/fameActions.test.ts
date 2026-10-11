@@ -58,6 +58,27 @@ const refused = (attempt: Attempt): string => {
 const RICH = withCash(ADULT, 50_000);
 
 describe('words for every way it can be refused (13.120: written out)', () => {
+  it('explains payment refusals introduced by the purchase-payment integration', () => {
+    const table: readonly [NonNullable<Parameters<typeof refusalText>[0]['reason']>, string][] = [
+      ['payment-finance-conflict', 'Choose either a card or a loan for this purchase.'],
+      [
+        'payment-price-changed',
+        'The price changed. Check the new total and choose how to pay again.',
+      ],
+      ['payment-invalid-amount', "That purchase price isn't available. Try again."],
+      ['payment-cash-short', "You don't have enough cash for that."],
+      ['payment-card-missing', "You don't have that card any more."],
+      ['payment-card-frozen', 'That card is frozen. Catch up on payments before using it.'],
+      [
+        'payment-credit-short',
+        "That card doesn't have enough available credit for the full purchase.",
+      ],
+    ];
+    for (const [reason, words] of table)
+      expect(refusalText({ kind: 'payment', reason })).toBe(words);
+    expect(table).toHaveLength(7);
+  });
+
   it('says each one the way a person would', () => {
     const table: readonly [Parameters<typeof refusalText>[0], string][] = [
       [{ kind: 'tooYoung', age: 16 }, 'You have to be 16 to start one here.'],

@@ -14,6 +14,10 @@
  * change, next to a chart that carries its own context.
  */
 
+import { dollars } from '@yearafter/core';
+import { drawableOn } from '@yearafter/finance';
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
+
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import {
@@ -24,8 +28,8 @@ import {
   priceOf,
   yearChange,
 } from '@yearafter/finance';
-import { previewBuy, previewSell } from '@yearafter/simulation';
-import { Card, ListRow, RowDivider, SectionHeading } from '../components';
+import { quoteInvestment, previewSell } from '@yearafter/simulation';
+import { ActionButton, Card, ListRow, RowDivider, SectionHeading } from '../components';
 import { AmountField } from '../components/AmountField';
 import { PriceChart } from '../components/PriceChart';
 import { useGame } from '../stores/gameStore';
@@ -37,6 +41,7 @@ export function InstrumentScreen() {
   const { current } = useNavigation();
   const [buying, setBuying] = useState(false);
   const [selling, setSelling] = useState(false);
+  const [choosingPayment, setChoosingPayment] = useState(false);
   // Typed digits, as a string, because "" and "0" are different states — one is
   // an untouched field and the other is a player who typed a zero.
   const [buyAmount, setBuyAmount] = useState('');
@@ -59,9 +64,11 @@ export function InstrumentScreen() {
   // What they paid PER UNIT, which is what the chart's rule is drawn at.
   const entry = holding && holding.units > 0 ? Math.round(paid / holding.units) : undefined;
 
-  const most = Math.min(cash, 1_000_000);
+  const most = Math.floor(
+    Math.max(cash, ...state.cards.map((card) => Number(drawableOn(card)) / 100)),
+  );
   const smallest = instrument.kind === 'bond' ? Math.ceil(priceNow / 100) : 1;
-  const canAfford = cash >= smallest;
+  const canAfford = most >= smallest;
 
   /*
     THE LIVE READOUT, recomputed every keystroke from the engine's own functions.
@@ -72,7 +79,7 @@ export function InstrumentScreen() {
     left. A screen that only says so in the receipt has charged the player for
     something it declined to mention.
   */
-  const buyPreview = previewBuy(state, instrumentId, Number(buyAmount || 0));
+  const buyPreview = quoteInvestment(state, instrumentId, Number(buyAmount || 0));
   const buyNote =
     buyPreview.units > 0
       ? buyPreview.cash < Number(buyAmount)
@@ -194,24 +201,45 @@ export function InstrumentScreen() {
         {!canAfford ? (
           <ListRow
             title="Not this one"
-            subtitle={`Opens at ${price(priceNow)}, and you have ${money(cash * 100)}`}
+            subtitle={`Opens at ${price(priceNow)}. No single payment method can cover that right now.`}
             affordance="none"
             disabled
             wrap
           />
+        ) : choosingPayment ? (
+          <>
+            <PurchasePaymentChoices
+              purchaseName={instrument.name}
+              total={dollars(buyPreview.cash)}
+              cash={state.player.cash}
+              cards={state.cards}
+              onPay={(payment) => {
+                buyInvestment(instrumentId, Number(buyAmount), payment);
+                setBuyAmount('');
+                setBuying(false);
+                setChoosingPayment(false);
+              }}
+            />
+            <ActionButton
+              label="Change amount"
+              variant="secondary"
+              onPress={() => setChoosingPayment(false)}
+            />
+          </>
         ) : buying ? (
           <AmountField
-            label={`How much do you want to put in? You have ${money(cash * 100)}.`}
+            label="How much do you want to put in? Choose cash or a card next."
             value={buyAmount}
             onChange={setBuyAmount}
-            max={{ label: 'All of it', onPress: () => setBuyAmount(String(most)) }}
+            max={{
+              label: 'Most with one payment method',
+              onPress: () => setBuyAmount(String(most)),
+            }}
             note={buyNote}
             problem={buyProblem}
-            confirmLabel="Buy"
+            confirmLabel="Choose how to pay"
             onConfirm={() => {
-              buyInvestment(instrumentId, Number(buyAmount));
-              setBuyAmount('');
-              setBuying(false);
+              if (buyPreview.units > 0) setChoosingPayment(true);
             }}
             onCancel={() => {
               setBuyAmount('');
@@ -223,8 +251,8 @@ export function InstrumentScreen() {
             title="Put money in"
             subtitle={
               instrument.kind === 'bond'
-                ? `Whole bonds at ${price(priceNow)}. You have ${money(cash * 100)}`
-                : `You have ${money(cash * 100)} to put at it`
+                ? `Whole bonds at ${price(priceNow)}. Pay with cash or a card.`
+                : 'Choose an amount, then cash or a card'
             }
             affordance="action"
             onPress={() => setBuying(true)}

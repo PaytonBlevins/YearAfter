@@ -7,6 +7,13 @@
  * Relationships screen: a friend who guests is a friend, and the collaboration is the channel's.
  */
 
+import {
+  payPurchase,
+  paymentNote,
+  type PurchasePayment,
+  type PaymentProblem,
+} from '@yearafter/finance';
+
 import { appendToTimeline } from '@yearafter/character';
 import { creatorLine } from '@yearafter/content';
 import type { RepresentationKind } from '@yearafter/content';
@@ -17,7 +24,6 @@ import {
   collabOffersFor,
   groupOfferFor,
   leaveGroupOf,
-  post,
   whyNotRepresented,
   type Channel,
   type CollabOffer,
@@ -72,12 +78,17 @@ export function answerCollabOffer(
   state: GameState,
   offerId: string,
   answer: 'accept' | 'decline',
-): Result<GameState, CollabRefusal> {
+  payment: PurchasePayment = { kind: 'cash' },
+): Result<GameState, CollabRefusal | PaymentProblem> {
   const found = collabOffers(state).find((row) => row.offer.id === offerId);
   if (found === undefined) return err({ kind: 'notOffered' });
   const { offer, channel } = found;
   const accept = answer === 'accept';
-  if (accept && offer.fee > Math.floor(Number(state.player.cash) / 100)) {
+  if (
+    payment.kind === 'cash' &&
+    accept &&
+    offer.fee > Math.floor(Number(state.player.cash) / 100)
+  ) {
     return err({ kind: 'notEnoughMoney', needed: offer.fee });
   }
   const changed = answerCollab({ channel, offer, accept });
@@ -99,23 +110,30 @@ export function answerCollabOffer(
     `creator:${offerId}:${kind}`,
   );
   const spend = accept && offer.fee > 0;
-  const books = spend
-    ? post(state.finance, state.world.year, state.player.age, {
-        category: 'spending',
-        amount: dollars(-offer.fee),
-        source: `Working with ${offer.partner.name}`,
-      })
+  const paid = spend
+    ? payPurchase(
+        state.finance,
+        state.cards,
+        state.world.year,
+        state.player.age,
+        dollars(offer.fee),
+        'spending',
+        `Working with ${offer.partner.name}`,
+        payment,
+      )
     : undefined;
+  if (paid && !paid.ok) return err({ kind: 'payment', reason: paid.error });
+  const books = paid?.ok ? paid.value : undefined;
   return ok({
     ...state,
-    ...(books === undefined ? {} : { finance: books.ledger }),
+    ...(books === undefined ? {} : { finance: books.ledger, cards: books.cards }),
     channels: state.channels.map((row) => (row.id === channel.id ? changed : row)),
     player: {
       ...state.player,
       ...(books === undefined ? {} : { cash: books.ledger.balance }),
       timeline: appendToTimeline(
         state.player.timeline,
-        entryFor(state, text, `creator:collab:${offerId}`),
+        entryFor(state, text + (spend ? paymentNote(payment) : ''), `creator:collab:${offerId}`),
       ),
     },
   });

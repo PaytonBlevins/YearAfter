@@ -9,6 +9,9 @@
  * 13.27: answer the player where they pressed).
  */
 
+import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
+import { dollars } from '@yearafter/core';
+
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { findAuctionVenue } from '@yearafter/content';
@@ -44,7 +47,6 @@ export function AuctionScreen() {
   const left = visitsLeft(state, venue.id);
   const used = visitsUsed(state, venue.id);
   const lots = currentLots(state, venue.id);
-  const cash = Math.floor(Number(state.player.cash) / 100);
   const premium = venue.type === 'storage' ? STORAGE_PREMIUM : BUYERS_PREMIUM;
 
   return (
@@ -111,21 +113,23 @@ export function AuctionScreen() {
                   {open === lot.id && !gone
                     ? BID_TIERS.map((tier) => {
                         const ceiling = maxBidFor(lot.estimate, tier);
-                        const affordable = cash >= ceiling * (1 + premium);
-                        return affordable ? (
-                          <ActionButton
-                            key={tier}
-                            label={`${BID_TIER_LABELS[tier]} — up to ${money(ceiling)}`}
-                            variant={tier === 'fair' ? 'primary' : 'secondary'}
-                            onPress={() => {
-                              bidAtAuction(lot.id, tier);
-                              setOpen(undefined);
-                            }}
-                          />
-                        ) : (
-                          <Text key={tier} style={styles.note}>
-                            {`${BID_TIER_LABELS[tier]}: you couldn't cover ${money(ceiling * (1 + premium))}.`}
-                          </Text>
+                        return (
+                          <Fragment key={tier}>
+                            <Text
+                              style={styles.note}
+                            >{`${BID_TIER_LABELS[tier]} — up to ${money(ceiling)}, plus premium. You'll only be charged if you win, at the final price.`}</Text>
+                            <PurchasePaymentChoices
+                              mode="bid"
+                              purchaseName={`${lot.name} (${BID_TIER_LABELS[tier]} bid)`}
+                              total={dollars(Math.ceil(ceiling * (1 + premium)))}
+                              cash={state.player.cash}
+                              cards={state.cards}
+                              onPay={(payment) => {
+                                bidAtAuction(lot.id, tier, payment);
+                                setOpen(undefined);
+                              }}
+                            />
+                          </Fragment>
                         );
                       })
                     : null}

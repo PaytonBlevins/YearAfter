@@ -26,6 +26,15 @@
  */
 
 import {
+  payPurchase,
+  purchaseEligibility,
+  paymentNote,
+  PAYMENT_REFUSAL_LABELS,
+  type PurchasePayment,
+  type PaymentRefusal,
+} from '@yearafter/finance';
+
+import {
   appendRecord,
   appendToTimeline,
   createTimelineEntry,
@@ -351,9 +360,10 @@ export function attendAuction(state: GameState, venueId: string): Result<GameSta
   });
 }
 
-export type BidError = 'no-such-lot' | 'already-bid' | 'cannot-cover';
+export type BidError = 'no-such-lot' | 'already-bid' | 'cannot-cover' | PaymentRefusal;
 
 export const BID_ERROR_LABELS: Readonly<Record<BidError, string>> = {
+  ...PAYMENT_REFUSAL_LABELS,
   'no-such-lot': "That lot isn't in this sale.",
   'already-bid': 'That one has gone.',
   'cannot-cover': "You couldn't pay that if you won it.",
@@ -405,6 +415,7 @@ export function bidOn(
   state: GameState,
   lotId: string,
   tier: BidTier,
+  payment: PurchasePayment = { kind: 'cash' },
 ): Result<BidOutcome, BidError> {
   const venueId = lotId.split(':')[2] ?? '';
   const venue = findAuctionVenue(venueId);
@@ -413,7 +424,13 @@ export function bidOn(
   if (hasBidOn(state, lotId)) return err('already-bid');
   const premium = lot.kind === 'unit' ? STORAGE_PREMIUM : BUYERS_PREMIUM;
   const ceiling = maxBidFor(lot.estimate, tier);
-  if (Number(state.player.cash) / 100 < ceiling * (1 + premium)) return err('cannot-cover');
+  const refusal = purchaseEligibility(
+    state.player.cash,
+    state.cards,
+    dollars(Math.ceil(ceiling * (1 + premium))),
+    payment,
+  );
+  if (refusal) return err(refusal === 'payment-cash-short' ? 'cannot-cover' : refusal);
 
   const diary = diaryOf(state);
   const marked: GameState = { ...state, auctions: { ...diary, bids: [...diary.bids, lot.id] } };
@@ -428,10 +445,30 @@ export function bidOn(
     });
   }
   const paid = Math.round(result.hammer * (1 + premium));
+  // The confirmed quote is the ceiling including premium; only the winning price is charged.
+  const actualPayment: PurchasePayment =
+    payment.kind === 'card' ? { kind: 'card', productId: payment.productId } : { kind: 'cash' };
+  const paymentResult = payPurchase(
+    state.finance,
+    state.cards,
+    state.world.year,
+    state.player.age,
+    dollars(paid),
+    'property',
+    lot.kind === 'unit' ? `A storage unit at ${venue.name}` : `Won ${lot.name} at ${venue.name}`,
+    actualPayment,
+  );
+  if (!paymentResult.ok) return err(paymentResult.error);
+  const charged: GameState = {
+    ...marked,
+    finance: paymentResult.value.ledger,
+    cards: paymentResult.value.cards,
+    player: { ...marked.player, cash: paymentResult.value.ledger.balance },
+  };
   return ok(
     lot.kind === 'unit'
-      ? wonUnit(marked, venue, lot, result.hammer, paid)
-      : wonLot(marked, venue, lot, result.hammer, paid),
+      ? wonUnit(charged, lot, result.hammer, paid, payment)
+      : wonLot(charged, venue, lot, result.hammer, paid, payment),
   );
 }
 
@@ -441,12 +478,9 @@ function wonLot(
   lot: ValuableLot | CarLot,
   hammer: number,
   paid: number,
+  payment: PurchasePayment,
 ): BidOutcome {
-  const books = post(state.finance, state.world.year, state.player.age, {
-    category: 'property',
-    amount: dollars(-paid),
-    source: `Won ${lot.name} at ${venue.name}`,
-  });
+  const books = { ledger: state.finance };
   let next: GameState = {
     ...state,
     finance: books.ledger,
@@ -492,7 +526,12 @@ function wonLot(
   const text = legendary
     ? `Won ${lot.name} at ${venue.name} for ${money(paid)}. The room went quiet.`
     : `Won ${lot.name} at ${venue.name} for ${money(paid)}, with the premium.`;
-  const entry = line(next, text, `auction:won:${lot.id}`, legendary ? 'milestone' : 'passive');
+  const entry = line(
+    next,
+    text + paymentNote(payment),
+    `auction:won:${lot.id}`,
+    legendary ? 'milestone' : 'passive',
+  );
   return {
     state: {
       ...next,
@@ -515,7 +554,7 @@ function wonLot(
     won: true,
     hammer,
     paid,
-    text,
+    text: text + paymentNote(payment),
     entry,
   };
 }
@@ -556,17 +595,13 @@ export function contentsOf(
 
 function wonUnit(
   state: GameState,
-  venue: AuctionVenue,
   lot: UnitLot,
   hammer: number,
   paid: number,
+  payment: PurchasePayment,
 ): BidOutcome {
   const contents = contentsOf(state.rng.getSeed(), lot);
-  let books = post(state.finance, state.world.year, state.player.age, {
-    category: 'property',
-    amount: dollars(-paid),
-    source: `A storage unit at ${venue.name}`,
-  });
+  let books = { ledger: state.finance };
   books = post(books.ledger, state.world.year, state.player.age, {
     category: 'property',
     amount: dollars(contents.junkValue),
@@ -596,7 +631,12 @@ function wonUnit(
     valuables: owned ? [...state.valuables, owned] : state.valuables,
     player: { ...state.player, cash: books.ledger.balance },
   };
-  const entry = line(next, text, `auction:unit:${lot.id}`, legendary ? 'milestone' : 'passive');
+  const entry = line(
+    next,
+    text + paymentNote(payment),
+    `auction:unit:${lot.id}`,
+    legendary ? 'milestone' : 'passive',
+  );
   return {
     state: {
       ...next,
@@ -605,7 +645,7 @@ function wonUnit(
     won: true,
     hammer,
     paid,
-    text,
+    text: text + paymentNote(payment),
     entry,
   };
 }
