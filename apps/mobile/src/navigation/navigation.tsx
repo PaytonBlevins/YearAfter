@@ -122,6 +122,13 @@ export type ScreenKey =
   | 'fame'
   /** Ticket 0708. One famous person you know: what you can do with them. */
   | 'connection'
+  /** Ticket 0809. Sports, martial arts and karting, acting, music and modeling, from one place. */
+  | 'entertainment'
+  | 'sports'
+  | 'studies'
+  | 'acting'
+  | 'music'
+  | 'modeling'
   | 'debug';
 
 export interface Route {

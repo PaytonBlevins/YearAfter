@@ -61,6 +61,9 @@ export * from './modeling-state';
 export * from './modeling';
 export * from './sports-state';
 export * from './sports';
+export * from './sports-individual';
+export * from './sports-post';
+export { tierWords } from './sports-core';
 export * from './fame-work';
 
 export * from './manual-posts';

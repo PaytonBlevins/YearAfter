@@ -3239,3 +3239,55 @@ old copy at the next mutant. Run one group at a time per tree, in a chain, and s
 The 34th business type changed the order and the contents of three pinned listings in `business-finance.test.ts` and
 two counts in the finance and simulation business tests. Expect it, update the pins to the new truth rather than
 loosening them, and list the files changed for it in the ticket.
+
+### 13.167 A test that reads the constant it checks checks nothing
+
+The hub opened sports at age 6. The test looped over the hub's own table of ages (`FIELD_AGES`) to prove each field
+opened at its age, so it passed for any number. A mutation of the literal survived. The age was a guess; the engine's
+rule is middle school, 11. Derive the value from the engine (`stageForGrade`, `MUSIC_LESSONS_MIN_AGE`, the arts'
+`minAge`) and pin the numbers as literals in the test, so a change to the rule fails the screen's test and not the
+other way round.
+
+### 13.168 A text helper that cannot see a component cannot prove it is absent
+
+`SectionHeading` renders through a component, so a helper that collects the `Text` hosts found no headings at all,
+and every "this heading is not shown" assertion passed without looking. Before trusting a negative assertion, check
+that its positive twin can fail: read headings from the component, or assert the heading is found when it should be.
+
+### 13.169 A guard the engine already enforces is dead code in the screen, and is deleted
+
+The Acting and Modeling screens carried a "not ready for this part" note. `castingCalls` and `modelCalls` never list a
+call the actor is not ready for (they fall back to what the actor can do), so the note could not show. Delete it and
+pin the engine's fact with a test over several ages. Keep a note like this only when a ticket makes the state
+reachable.
+
+### 13.170 A button is offered under the engine's own gate, and the pair is tested together
+
+"Step down a series" was shown whenever there was a series below, and the engine refuses it until a season has been
+run at the current level, as it does for moving up. Derive every button's availability from the same condition the
+engine checks, and test the pair: offered when the engine would accept, absent when it would refuse. A button whose
+refusal is the only thing teaching the rule is a screen that is wrong half the time.
+
+### 13.171 A card says what happened, not what was pressed
+
+Asking a brand for more can end with the brand walking away. The first version titled the card "The deal is on" for
+any answer that wrote a line, which was always, because the engine writes a line for every answer, including a
+refusal. The title is read from the result (money agreed or not), and the test checks the title against the body
+over a sweep until both outcomes have happened, with the sweep's cases counted.
+
+### 13.172 Run mutation workers where a hung mutant cannot take the run down
+
+A mutation to a `while` loop (the hub's `firstAge`) hung the suite, the runner's timeout raised, and one of two
+workers died silently with half the list unrun. A pass that reports "no survivors" over half the mutants is worse than
+one that reports none. Run each mutant in its own process group, kill the group on timeout and count it as caught,
+resume from a results file keyed by file and mutated text (not line number), and compare the count run with the count
+generated before reading any survivor list.
+
+### 13.173 Structure checks belong in one helper that runs on every state of every screen
+
+A hairline between rows, a row that says it can be pressed, a button style that exists: none of these change what a
+screen says, so tests of the words never see them. The first checks ran on one state per screen, and the mutation pass
+showed they missed a missing hairline in every other state. Put the checks in a shared helper (`test/wellFormed.ts`),
+call it from the helper every test already opens the screen through, and let it skip, by name, any card the screen
+had before the ticket. Doing so found two real bugs the first time it ran over all states: the hire-a-driver list and an
+opened martial art's skill bars had no hairlines between their rows.

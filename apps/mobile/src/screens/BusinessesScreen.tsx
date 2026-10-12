@@ -44,6 +44,7 @@ import {
   offerFor,
   openingOffers,
   purchaseOffers,
+  upgradeOffers,
   viewOf,
   type FinancingOffer,
   type Financing,
@@ -51,6 +52,7 @@ import {
 import { useNavigation } from '../navigation/navigation';
 import { ActionButton, Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
+import { DEVELOPMENT_WORDS, racingTeamView, type RacingTeamView } from './entertainmentView';
 import { BusinessWarning, businessWarning } from '../components/BusinessWarning';
 import { colors, radii, spacing, typography } from '../theme/theme';
 
@@ -412,6 +414,203 @@ function Choices<T extends string>({
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* Ticket 0809 — a racing team                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * What a racing team is for the person who owns it: the series it races in, who drives, how hard
+ * it develops the car, and whether it can move up. It replaces the shop sections (customers,
+ * price, suppliers, staff and locations), none of which a team has. Selling, closing, borrowing
+ * and worth stay on the screen as they are.
+ */
+function RacingTeamPanel({
+  businessId,
+  view,
+  cash,
+}: {
+  businessId: string;
+  view: RacingTeamView;
+  cash: number;
+}) {
+  const { state, entertain } = useGame();
+  const [open, setOpen] = useState<'hire' | 'up' | 'down' | undefined>(undefined);
+  if (!state) return null;
+  const toggle = (panel: 'hire' | 'up' | 'down') => setOpen(open === panel ? undefined : panel);
+  return (
+    <>
+      <SectionHeading>The team</SectionHeading>
+      <Card>
+        {view.facts.map((fact, index) => (
+          <Fragment key={fact.title}>
+            {index > 0 ? <RowDivider /> : null}
+            <ListRow
+              title={fact.title}
+              value={fact.value}
+              subtitle={fact.subtitle}
+              affordance="none"
+              compact
+              wrap
+            />
+          </Fragment>
+        ))}
+        <RowDivider />
+        <ListRow
+          title={view.driver.title}
+          value={view.driver.value}
+          subtitle={view.driver.subtitle}
+          affordance="none"
+          wrap
+        />
+        {view.last ? (
+          <>
+            <RowDivider />
+            <ListRow title="Last season" subtitle={view.last} affordance="none" wrap />
+          </>
+        ) : null}
+      </Card>
+
+      <SectionHeading>Driver</SectionHeading>
+      <Card>
+        {view.driving ? (
+          <ListRow
+            title="Hand the car to a hired driver"
+            subtitle="You stop driving for the team"
+            affordance="action"
+            onPress={() => entertain({ type: 'driveOwn', businessId, on: false })}
+            wrap
+          />
+        ) : (
+          <>
+            <ListRow
+              title="Hire a driver"
+              subtitle="Three are looking for a seat this year"
+              affordance="action"
+              onPress={() => toggle('hire')}
+              wrap
+            />
+            {open === 'hire'
+              ? view.candidates.map((candidate) => (
+                  <Fragment key={candidate.id}>
+                    <RowDivider />
+                    <ListRow
+                      title={candidate.title}
+                      subtitle={candidate.subtitle}
+                      affordance="action"
+                      onPress={() => {
+                        entertain({ type: 'hireDriver', businessId, candidateId: candidate.id });
+                        setOpen(undefined);
+                      }}
+                      wrap
+                    />
+                  </Fragment>
+                ))
+              : null}
+            {view.canDriveYourself ? (
+              <>
+                <RowDivider />
+                <ListRow
+                  title="Drive for your own team"
+                  subtitle="You race the car yourself"
+                  affordance="action"
+                  onPress={() => entertain({ type: 'driveOwn', businessId, on: true })}
+                  wrap
+                />
+              </>
+            ) : null}
+          </>
+        )}
+      </Card>
+
+      <SectionHeading>Developing the car</SectionHeading>
+      <Card>
+        {(Object.keys(DEVELOPMENT_WORDS) as (keyof typeof DEVELOPMENT_WORDS)[]).map(
+          (level, index) => (
+            <Fragment key={level}>
+              {index > 0 ? <RowDivider /> : null}
+              <ListRow
+                title={DEVELOPMENT_WORDS[level].label}
+                subtitle={DEVELOPMENT_WORDS[level].blurb}
+                value={view.development === level ? 'Chosen' : 'Choose'}
+                affordance="action"
+                onPress={() => entertain({ type: 'development', businessId, level })}
+                wrap
+              />
+            </Fragment>
+          ),
+        )}
+      </Card>
+
+      <SectionHeading>The series</SectionHeading>
+      <Card>
+        {view.next ? (
+          <>
+            <ListRow
+              title={`Move up to ${view.next.name}`}
+              subtitle={
+                view.next.ready
+                  ? 'A bigger car, a better field and a bigger purse'
+                  : 'Finish a season at this level first'
+              }
+              value={money(view.next.cost)}
+              affordance={view.next.ready ? 'action' : 'none'}
+              disabled={!view.next.ready}
+              onPress={view.next.ready ? () => toggle('up') : undefined}
+              wrap
+            />
+            {open === 'up' && view.next.ready ? (
+              <PurchasePanel
+                verb="Move up"
+                cost={view.next.cost}
+                cash={cash}
+                offers={upgradeOffers(state, businessId)}
+                onGo={(finance) => {
+                  entertain({
+                    type: 'series',
+                    businessId,
+                    direction: 'up',
+                    ...(finance ? { finance } : {}),
+                  });
+                  setOpen(undefined);
+                }}
+              />
+            ) : null}
+          </>
+        ) : (
+          <ListRow
+            title="Top of the ladder"
+            subtitle="There is nothing above this series"
+            affordance="none"
+            wrap
+          />
+        )}
+        {view.canStepDown ? (
+          <>
+            <RowDivider />
+            <ListRow
+              title="Step down a series"
+              subtitle="The car is sold for a fraction of what it cost"
+              affordance="action"
+              onPress={() => toggle('down')}
+              wrap
+            />
+            {open === 'down' ? (
+              <ActionButton
+                label="Step down"
+                variant="danger"
+                onPress={() => {
+                  entertain({ type: 'series', businessId, direction: 'down' });
+                  setOpen(undefined);
+                }}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </Card>
+    </>
+  );
+}
+
 export function BusinessScreen() {
   const scroll = useRef<ScrollView>(null);
   const scrollToDecision = useRef(false);
@@ -432,6 +631,7 @@ export function BusinessScreen() {
     );
   }
   const { type } = view;
+  const racing = racingTeamView(state, business.id);
   const last = business.last;
   const hands = handsFor(state);
   const appraisal = panel === 'valuation' ? appraise(state, business.id) : undefined;
@@ -471,13 +671,17 @@ export function BusinessScreen() {
           affordance="none"
           compact
         />
-        <ListRow title="Employees" value={`${business.staff}`} affordance="none" compact />
-        <ListRow
-          title="Price"
-          value={`${business.price}% of the going rate`}
-          affordance="none"
-          compact
-        />
+        {racing ? null : (
+          <>
+            <ListRow title="Employees" value={`${business.staff}`} affordance="none" compact />
+            <ListRow
+              title="Price"
+              value={`${business.price}% of the going rate`}
+              affordance="none"
+              compact
+            />
+          </>
+        )}
       </Card>
 
       <BusinessWarning
@@ -494,200 +698,214 @@ export function BusinessScreen() {
           setPanel('close');
         }}
       />
-      <SectionHeading>Customers</SectionHeading>
-      <Card>
-        <ListRow
-          title="Demand"
-          value={view.demand ? DEMAND_LABELS[view.demand] : 'Too early to say'}
-          affordance="none"
-          compact
+      {racing ? (
+        <RacingTeamPanel
+          businessId={business.id}
+          view={racing}
+          cash={dollarsOf(state.player.cash)}
         />
-        <ListRow title="Reputation" value={view.reputation} affordance="none" compact />
-        {/*
+      ) : (
+        <>
+          <SectionHeading>Customers</SectionHeading>
+          <Card>
+            <ListRow
+              title="Demand"
+              value={view.demand ? DEMAND_LABELS[view.demand] : 'Too early to say'}
+              affordance="none"
+              compact
+            />
+            <ListRow title="Reputation" value={view.reputation} affordance="none" compact />
+            {/*
           Ticket 0604. Why last year went the way it did. A swing with no reason
           was finding 37; each row below is a reason, and a row with nothing to
           say is not shown, so a quiet year looks quiet.
         */}
-        {last?.event && findBusinessEvent(last.event) ? (
-          <ListRow
-            title="What happened"
-            subtitle={eventLineFor(findBusinessEvent(last.event)!, business.name)}
-            affordance="none"
-            wrap
-          />
-        ) : null}
-        {last?.rivalTook ? (
-          <ListRow
-            title="A rival nearby"
-            subtitle={`They took about ${Math.round(last.rivalTook * 100)}% of your customer demand last year. Their effect gets smaller each year.`}
-            affordance="none"
-            wrap
-          />
-        ) : null}
-        {last?.economy && Math.abs(last.economy - 1) >= 0.03 ? (
-          <ListRow
-            title="The economy"
-            subtitle={
-              last.economy < 1
-                ? `Took about ${Math.round((1 - last.economy) * 100)}% of your customer demand last year.`
-                : `Brought you about ${Math.round((last.economy - 1) * 100)}% more customer demand last year.`
-            }
-            affordance="none"
-            wrap
-          />
-        ) : null}
-      </Card>
-
-      <SectionHeading>Price</SectionHeading>
-      <Text style={styles.note}>
-        Higher prices bring in more per sale, but fewer customers buy. Lower prices attract more
-        customers, but bring in less per sale.
-      </Text>
-      <Card style={styles.pad}>
-        <PriceTrack
-          value={business.price}
-          onPick={(price) => tuneBusiness(business.id, { kind: 'price', price })}
-        />
-      </Card>
-
-      {type.supplier ? (
-        <>
-          <SectionHeading>Suppliers</SectionHeading>
-          <Text style={styles.note}>
-            Choose the supplies you buy. Their quality and cost affect what you sell and who wants
-            it. The finished product or service also depends on your staff.
-          </Text>
-          <Card>
-            {SUPPLIER_GRADES.map((supplier, index) => (
-              <Fragment key={supplier}>
-                {index > 0 ? <RowDivider /> : null}
-                <ListRow
-                  title={SUPPLIER_LABELS[supplier]}
-                  subtitle={SUPPLIER_DESCRIPTIONS[supplier]}
-                  value={business.supplier === supplier ? 'Chosen' : 'Choose'}
-                  affordance="action"
-                  onPress={() => tuneBusiness(business.id, { kind: 'supplier', supplier })}
-                  wrap
-                />
-              </Fragment>
-            ))}
+            {last?.event && findBusinessEvent(last.event) ? (
+              <ListRow
+                title="What happened"
+                subtitle={eventLineFor(findBusinessEvent(last.event)!, business.name)}
+                affordance="none"
+                wrap
+              />
+            ) : null}
+            {last?.rivalTook ? (
+              <ListRow
+                title="A rival nearby"
+                subtitle={`They took about ${Math.round(last.rivalTook * 100)}% of your customer demand last year. Their effect gets smaller each year.`}
+                affordance="none"
+                wrap
+              />
+            ) : null}
+            {last?.economy && Math.abs(last.economy - 1) >= 0.03 ? (
+              <ListRow
+                title="The economy"
+                subtitle={
+                  last.economy < 1
+                    ? `Took about ${Math.round((1 - last.economy) * 100)}% of your customer demand last year.`
+                    : `Brought you about ${Math.round((last.economy - 1) * 100)}% more customer demand last year.`
+                }
+                affordance="none"
+                wrap
+              />
+            ) : null}
           </Card>
-        </>
-      ) : null}
 
-      <SectionHeading>Employees</SectionHeading>
-      <Text style={styles.note}>
-        Pay: better pay keeps people and lifts the work, and costs more every year.
-      </Text>
-      <Card style={styles.pad}>
-        <Choices
-          options={PAYROLLS}
-          value={business.payroll}
-          label={(payroll) => PAYROLL_LABELS[payroll]}
-          onPick={(payroll) => tuneBusiness(business.id, { kind: 'payroll', payroll })}
-        />
-      </Card>
-      <Card>
-        <ListRow
-          title="Hire someone"
-          subtitle={view.canHire ? undefined : "You've reached this location's staff limit"}
-          affordance="action"
-          disabled={!view.canHire}
-          onPress={view.canHire ? () => tuneBusiness(business.id, { kind: 'hire' }) : undefined}
-          compact
-        />
-        <RowDivider />
-        <ListRow
-          title="Let someone go"
-          subtitle={
-            view.canLetGo ? undefined : "You're already at the minimum staff this business needs"
-          }
-          affordance="action"
-          disabled={!view.canLetGo}
-          onPress={view.canLetGo ? () => tuneBusiness(business.id, { kind: 'letGo' }) : undefined}
-          compact
-        />
-        <RowDivider />
-        <ListRow
-          title="Let a manager handle staffing"
-          subtitle={business.autoStaff ? 'On' : 'Off — you decide who works here'}
-          affordance="action"
-          onPress={() => tuneBusiness(business.id, { kind: 'auto', on: !business.autoStaff })}
-          compact
-          wrap
-        />
-      </Card>
+          <SectionHeading>Price</SectionHeading>
+          <Text style={styles.note}>
+            Higher prices bring in more per sale, but fewer customers buy. Lower prices attract more
+            customers, but bring in less per sale.
+          </Text>
+          <Card style={styles.pad}>
+            <PriceTrack
+              value={business.price}
+              onPick={(price) => tuneBusiness(business.id, { kind: 'price', price })}
+            />
+          </Card>
 
-      <SectionHeading>Locations</SectionHeading>
-      <Text style={styles.note}>
-        Another location can bring in more customers, but less than your first location. It needs
-        its own lease and staff. You can only work at one location at a time.
-      </Text>
-      <Card>
-        <ListRow
-          title="Open locations"
-          value={`${view.locations} of ${MAX_LOCATIONS}`}
-          affordance="none"
-          compact
-        />
-        <RowDivider />
-        <ListRow
-          title="Open another location"
-          subtitle={
-            view.expansionBase
-              ? EXPAND_REFUSAL_LABELS[view.expansionBase]
-              : `Costs about ${money(branchCostFor(type))}, and takes a few years to build up customers`
-          }
-          value={view.expansionBase ? undefined : money(view.branchCost)}
-          affordance={view.expansionBase ? 'none' : 'action'}
-          disabled={view.expansionBase !== undefined}
-          onPress={
-            view.expansionBase
-              ? undefined
-              : () => setPanel(panel === 'expand' ? undefined : 'expand')
-          }
-          wrap
-        />
-        {panel === 'expand' && !view.expansionBase ? (
-          <PurchasePanel
-            verb="Open it"
-            cost={view.branchCost}
-            cash={dollarsOf(state.player.cash)}
-            offers={expansionOffers(state, business.id)}
-            onGo={(finance) => {
-              expandABusiness(business.id, finance);
-              setPanel(undefined);
-            }}
-          />
-        ) : null}
-        {view.locations > 1 ? (
-          <>
-            <RowDivider />
+          {type.supplier ? (
+            <>
+              <SectionHeading>Suppliers</SectionHeading>
+              <Text style={styles.note}>
+                Choose the supplies you buy. Their quality and cost affect what you sell and who
+                wants it. The finished product or service also depends on your staff.
+              </Text>
+              <Card>
+                {SUPPLIER_GRADES.map((supplier, index) => (
+                  <Fragment key={supplier}>
+                    {index > 0 ? <RowDivider /> : null}
+                    <ListRow
+                      title={SUPPLIER_LABELS[supplier]}
+                      subtitle={SUPPLIER_DESCRIPTIONS[supplier]}
+                      value={business.supplier === supplier ? 'Chosen' : 'Choose'}
+                      affordance="action"
+                      onPress={() => tuneBusiness(business.id, { kind: 'supplier', supplier })}
+                      wrap
+                    />
+                  </Fragment>
+                ))}
+              </Card>
+            </>
+          ) : null}
+
+          <SectionHeading>Employees</SectionHeading>
+          <Text style={styles.note}>
+            Pay: better pay keeps people and lifts the work, and costs more every year.
+          </Text>
+          <Card style={styles.pad}>
+            <Choices
+              options={PAYROLLS}
+              value={business.payroll}
+              label={(payroll) => PAYROLL_LABELS[payroll]}
+              onPick={(payroll) => tuneBusiness(business.id, { kind: 'payroll', payroll })}
+            />
+          </Card>
+          <Card>
             <ListRow
-              title="Close the newest location"
+              title="Hire someone"
+              subtitle={view.canHire ? undefined : "You've reached this location's staff limit"}
               affordance="action"
-              onPress={() => setPanel(panel === 'shrink' ? undefined : 'shrink')}
+              disabled={!view.canHire}
+              onPress={view.canHire ? () => tuneBusiness(business.id, { kind: 'hire' }) : undefined}
               compact
             />
-            {panel === 'shrink' ? (
+            <RowDivider />
+            <ListRow
+              title="Let someone go"
+              subtitle={
+                view.canLetGo
+                  ? undefined
+                  : "You're already at the minimum staff this business needs"
+              }
+              affordance="action"
+              disabled={!view.canLetGo}
+              onPress={
+                view.canLetGo ? () => tuneBusiness(business.id, { kind: 'letGo' }) : undefined
+              }
+              compact
+            />
+            <RowDivider />
+            <ListRow
+              title="Let a manager handle staffing"
+              subtitle={business.autoStaff ? 'On' : 'Off — you decide who works here'}
+              affordance="action"
+              onPress={() => tuneBusiness(business.id, { kind: 'auto', on: !business.autoStaff })}
+              compact
+              wrap
+            />
+          </Card>
+
+          <SectionHeading>Locations</SectionHeading>
+          <Text style={styles.note}>
+            Another location can bring in more customers, but less than your first location. It
+            needs its own lease and staff. You can only work at one location at a time.
+          </Text>
+          <Card>
+            <ListRow
+              title="Open locations"
+              value={`${view.locations} of ${MAX_LOCATIONS}`}
+              affordance="none"
+              compact
+            />
+            <RowDivider />
+            <ListRow
+              title="Open another location"
+              subtitle={
+                view.expansionBase
+                  ? EXPAND_REFUSAL_LABELS[view.expansionBase]
+                  : `Costs about ${money(branchCostFor(type))}, and takes a few years to build up customers`
+              }
+              value={view.expansionBase ? undefined : money(view.branchCost)}
+              affordance={view.expansionBase ? 'none' : 'action'}
+              disabled={view.expansionBase !== undefined}
+              onPress={
+                view.expansionBase
+                  ? undefined
+                  : () => setPanel(panel === 'expand' ? undefined : 'expand')
+              }
+              wrap
+            />
+            {panel === 'expand' && !view.expansionBase ? (
+              <PurchasePanel
+                verb="Open it"
+                cost={view.branchCost}
+                cash={dollarsOf(state.player.cash)}
+                offers={expansionOffers(state, business.id)}
+                onGo={(finance) => {
+                  expandABusiness(business.id, finance);
+                  setPanel(undefined);
+                }}
+              />
+            ) : null}
+            {view.locations > 1 ? (
               <>
-                <Text style={styles.blurb}>
-                  The fittings go for a fraction of what they're worth, and the crew is let go to
-                  fit.
-                </Text>
-                <ActionButton
-                  label="Close it"
-                  variant="danger"
-                  onPress={() => {
-                    closeALocation(business.id);
-                    setPanel(undefined);
-                  }}
+                <RowDivider />
+                <ListRow
+                  title="Close the newest location"
+                  affordance="action"
+                  onPress={() => setPanel(panel === 'shrink' ? undefined : 'shrink')}
+                  compact
                 />
+                {panel === 'shrink' ? (
+                  <>
+                    <Text style={styles.blurb}>
+                      The fittings go for a fraction of what they're worth, and the crew is let go
+                      to fit.
+                    </Text>
+                    <ActionButton
+                      label="Close it"
+                      variant="danger"
+                      onPress={() => {
+                        closeALocation(business.id);
+                        setPanel(undefined);
+                      }}
+                    />
+                  </>
+                ) : null}
               </>
             ) : null}
-          </>
-        ) : null}
-      </Card>
+          </Card>
+        </>
+      )}
 
       {view.loan ? (
         <>

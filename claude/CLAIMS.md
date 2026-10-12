@@ -39,6 +39,8 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | Playtest rules and "return to this" notes (P1–P16, `claude/playtest-rules-brief.md`) | — (paused on this list) | Codex / Agent B (`feat/purchase-payment-choices` first, then one branch per ticket) | assigned 6 Oct, engine authorized by Payton for this list only; nothing started |
 
+| 0809 Entertainment and Sports screens (v0.08) | Claude (Agent A): screens, store wiring, tests, docs | — | **Built 11 Oct (mobile only). No save change: still v50. Agent B's saves are v51 onward (unchanged). Touches `apps/mobile` (new `EntertainmentScreens`, `entertainmentView`, `entertainmentActions`, `YearRecapNotice`; edits to `gameStore.tsx`, `BusinessesScreen.tsx`, `shells.tsx`, `navigation.tsx`, `Shell.tsx`) and adds three exports to `packages/simulation/src/index.ts`. Expect `gameStore.tsx` and `Shell.tsx` conflicts when folding onto the main that has Agent B's v51 chain.** |
+
 | 0808 Racing team and the world (v0.08) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Built 11 Oct (engine only; screens are 0809). Took save v50. Agent B's saves are v51 onward: if you already wrote a v50 migration, renumber it.** |
 
 | 0807 Modeling (v0.08) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Built 7 Oct (engine only; screens are 0809). Took save v49. Agent B's saves are v50 onward (now v51: see 0808): if you already wrote a v49 migration, renumber it.** |
