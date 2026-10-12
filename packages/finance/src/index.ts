@@ -39,6 +39,8 @@ export * from './valuables';
 export * from './auctions';
 export * from './businesses';
 export * from './business-events';
+export * from './racing-state';
+export * from './racing';
 export * from './private-deals';
 export * from './creators';
 export * from './sponsorships';

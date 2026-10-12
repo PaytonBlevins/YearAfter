@@ -183,5 +183,11 @@ export * from './sponsors';
 export * from './creator-network';
 export * from './celebrity';
 export * from './fame-work';
+export * from './sports';
 
 export * from './post-formats';
+export * from './acting';
+export * from './music';
+export * from './modeling';
+export * from './racing';
+export * from './awards';

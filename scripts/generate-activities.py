@@ -175,6 +175,50 @@ A("act.soccer", "Soccer", "sport", 6,
   join_text="Signed up for soccer. Games are Saturday mornings, every Saturday.",
   leave_text="Stopped playing soccer.")
 
+A("act.baseball", "Baseball", "sport", 7,
+  blurb="Spring evenings and a very long season.",
+  stages=["elementary", "middle", "high"], needs_parent=True,
+  annual_cost=180, cost_source="league fees and a glove",
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the baseball team. Practice after school, games on weekends.",
+  cut_text="Didn't make the baseball team. The coach said to work on your swing and come back.",
+  effects={"health": 3, "discipline": 3, "charisma": 2},
+  join_text="Made the baseball team. Practice after school, games on weekends.",
+  leave_text="Hung up your glove.")
+
+A("act.hockey", "Hockey", "sport", 9,
+  blurb="Ice at six in the morning. The bag never dries.",
+  stages=["middle", "high"], needs_parent=True,
+  annual_cost=1500, cost_source="ice time, a team fee and pads",
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the hockey team. Practice is at six, before school.",
+  cut_text="Cut from hockey. The list was taped to the rink door.",
+  effects={"health": 4, "charisma": 2, "willpower": 3},
+  join_text="Made the hockey team. Practice is at six, before school.",
+  leave_text="Turned in your hockey gear.")
+
+A("act.golf", "Golf", "sport", 6,
+  blurb="Four hours for nine holes and a lot of walking.",
+  stages=["middle", "high"], needs_parent=True,
+  annual_cost=650, cost_source="range fees, greens fees and a set of clubs",
+  tryout="Try out", tryout_stat="discipline",
+  tryout_text="Made the golf team. Nine holes on Tuesdays and a bus to the course.",
+  cut_text="Didn't make the golf team. Six spots, and a long waiting list.",
+  effects={"discipline": 5, "willpower": 3, "happiness": 2},
+  join_text="Made the golf team. Nine holes on Tuesdays and a bus to the course.",
+  leave_text="Put your clubs in the garage.")
+
+A("act.tennis", "Tennis", "sport", 7,
+  blurb="Courts by the school, and wind on every serve.",
+  stages=["middle", "high"], needs_parent=True,
+  annual_cost=380, cost_source="court time, strings and a new racquet",
+  tryout="Try out", tryout_stat="health",
+  tryout_text="Made the tennis team. Challenge matches decide the ladder.",
+  cut_text="Didn't make the tennis team. You lost a tiebreak you should have won.",
+  effects={"health": 4, "discipline": 3, "willpower": 3},
+  join_text="Made the tennis team. Challenge matches decide the ladder.",
+  leave_text="Left the racquet bag in the car and never took it out.")
+
 A("act.wrestling", "Wrestling", "sport", 9,
   blurb="Cutting weight is a normal Tuesday.",
   stages=["high"],

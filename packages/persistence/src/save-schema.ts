@@ -44,6 +44,10 @@ import type {
   RenovationOffer,
   AuctionDiary,
   CelebrityState,
+  SportsState,
+  ActingState,
+  MusicState,
+  ModelingState,
   RngSnapshot,
   WorldState,
 } from '@yearafter/simulation';
@@ -53,7 +57,8 @@ import type { SaveId } from '@yearafter/core';
 /** P7: explicit purchase savings goal; old lives migrate with no goal. */
 /** P10: optional paid aftermarket watch work; legacy values stay unchanged. */
 /** P11: optional once-paid preventive car service, expires after the next advance. */
-export const CURRENT_SAVE_VERSION = 51;
+/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain. */
+export const CURRENT_SAVE_VERSION = 58;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -90,6 +95,39 @@ export type { WorldState };
  * could let anything, so the migration has nothing to write; the version is
  * bumped so a build that cannot read a tenant refuses the save rather than
  * dropping them.
+ *
+ * v50 added the racing team (Ticket 0808): an owned business may carry `racing` — the series it runs in, the car, who
+ * drives, how it is developed, and the last season. Optional on every business, and no save before it could own a
+ * team, so the migration has nothing to write; the version is bumped so a build that cannot read a team refuses the
+ * save rather than dropping it. (The racing driver career and the awards layer keep nothing of their own: a driver's
+ * career is a sports career, and the awards are derived.)
+ *
+ * v49 added modeling (Ticket 0807): `modeling` — the rung work is coming in at, a craft level, credits, a modeling
+ * reputation, awards, an agency, a following brands read, and the jobs on the table and booked. Always present, so the
+ * migration gives every older save an empty one: nobody before it could model.
+ *
+ * v48 added music (Ticket 0806): `music` — the monthly listeners, the back catalogue, craft, a reputation, awards, a
+ * label's deal or offer, the plan for the year to come, and the collaborations done. Always present, so the
+ * migration gives every older save an empty one: nobody before it could release anything past a school band.
+ *
+ * v47 added acting (Ticket 0805): `acting` — the rung work is coming in at, a craft level, credits, an
+ * acting reputation, awards, an agent, lessons, and the parts on the table and booked. Always present, so
+ * the migration gives every older save an empty one: nobody before it could act past a school club.
+ *
+ * v46 added the Olympic sports and the life after playing (Ticket 0804): `sports.post` — a coaching or
+ * commentary job, or the record that one was turned down or left — and two more questions a sport can
+ * ask (a place in a national program, and a post). All optional and nothing before could write one, so
+ * the migration only bumps the version.
+ *
+ * v45 added the individual sports (Ticket 0803): `sports.arts` — the martial arts being studied —
+ * a fighter's `wins` and `losses` on a career and on a past one, and two more questions a sport
+ * can ask (a tour card and a gym's offer). All optional and nothing before could write one, so the
+ * migration only bumps the version; the version is bumped so a build that cannot read an art
+ * refuses the save rather than dropping it.
+ *
+ * v44 added `sports` — the sporting career in progress, the ones that ended, and a question the
+ * sport is asking (Ticket 0801). Every save before it has played no sport past school, so the
+ * migration writes an empty record.
  *
  * v43 added `celebrities.work` — what the character has said yes to this year (a photoshoot, a
  * commercial, a talk show, a guest-star part), which settles with the year's creator income
@@ -187,7 +225,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 51;
+  readonly version: 58;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -303,6 +341,14 @@ export interface SaveGameV18 {
   readonly representation?: Representation;
   /** Ticket 0705. The famous people the character has met. Always present from v42. */
   readonly celebrities: CelebrityState;
+  /** Ticket 0801. A sporting life. Always present from v44. */
+  readonly sports: SportsState;
+  /** Ticket 0805. An acting life. Always present from v47. */
+  readonly acting: ActingState;
+  /** Ticket 0806. A musician: listeners, catalogue, a deal, the plan for the year. Always present from v48. */
+  readonly music: MusicState;
+  /** Ticket 0807. A model: a rung, credits, a following, an agency, the jobs on the table and booked. Always present from v49. */
+  readonly modeling: ModelingState;
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

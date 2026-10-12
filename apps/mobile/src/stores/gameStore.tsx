@@ -136,6 +136,7 @@ import {
   type Attempt,
   type CreatorAction,
 } from './fameActions';
+import { applyEntertainment, type EntertainmentAction } from './entertainmentActions';
 import type { Detail } from '../components/DetailCard';
 import type { Outcome } from '../components/OutcomeCard';
 import type { Result } from '@yearafter/core';
@@ -314,6 +315,8 @@ interface GameContextValue {
   readonly connectWith: (tieId: string, actionId: string, targetId?: string) => void;
   /** Ticket 0708. What you do when you meet somebody famous. */
   readonly meetThem: (actionId: string) => void;
+  /** Ticket 0809. Everything a player does in sports, studies, acting, music, modeling and racing. */
+  readonly entertain: (action: EntertainmentAction) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   /**
    * Ticket 0212. Carry on as one of your children.
@@ -1701,6 +1704,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     (actionId: string) => commit((current) => applyMeeting(current, actionId)),
     [commit],
   );
+  const entertain = useCallback(
+    (action: EntertainmentAction) => commit((current) => applyEntertainment(current, action)),
+    [commit],
+  );
 
   const interactWith = useCallback(
     (personId: string, interactionId: string) => {
@@ -1907,6 +1914,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       doFameWork,
       connectWith,
       meetThem,
+      entertain,
       startNewLife,
       continueAs,
       updateSettings,
@@ -1992,6 +2000,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       doFameWork,
       connectWith,
       meetThem,
+      entertain,
       startNewLife,
       continueAs,
       updateSettings,

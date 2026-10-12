@@ -52,6 +52,18 @@ export * from './network';
 export * from './celebrity-world';
 export * from './celebrity-state';
 export * from './celebrity';
+export * from './awards';
+export * from './acting-state';
+export * from './acting';
+export * from './music-state';
+export * from './music';
+export * from './modeling-state';
+export * from './modeling';
+export * from './sports-state';
+export * from './sports';
+export * from './sports-individual';
+export * from './sports-post';
+export { tierWords } from './sports-core';
 export * from './fame-work';
 
 export * from './manual-posts';

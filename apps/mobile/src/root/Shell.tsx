@@ -44,6 +44,7 @@ import { DoctorScreen } from '../screens/DoctorScreen';
 import { DetailCard } from '../components/DetailCard';
 import { EndOfLifeCard } from '../components/EndOfLifeCard';
 import { GraduationNotice } from '../components/GraduationNotice';
+import { YearRecapNotice } from '../components/YearRecapNotice';
 import { MeetingNotice } from '../components/MeetingCard';
 import { ProgramScreen } from '../screens/ProgramScreen';
 import { OutcomeCard } from '../components/OutcomeCard';
@@ -51,6 +52,14 @@ import { Glyph } from '../theme/icons';
 import { LifeScreen } from '../screens/LifeScreen';
 import { ChannelScreen, NewChannelScreen } from '../screens/ChannelScreens';
 import { ConnectionScreen, FameScreen } from '../screens/FameScreens';
+import {
+  ActingScreen,
+  EntertainmentScreen,
+  ModelingScreen,
+  MusicScreen,
+  SportsScreen,
+  StudiesScreen,
+} from '../screens/EntertainmentScreens';
 import { SocialMediaScreen } from '../screens/SocialMediaScreen';
 import { FamilyScreen } from '../screens/FamilyScreen';
 import { SchoolActivitiesScreen } from '../screens/SchoolActivitiesScreen';
@@ -135,6 +144,12 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   newChannel: NewChannelScreen,
   fame: FameScreen,
   connection: ConnectionScreen,
+  entertainment: EntertainmentScreen,
+  sports: SportsScreen,
+  studies: StudiesScreen,
+  acting: ActingScreen,
+  music: MusicScreen,
+  modeling: ModelingScreen,
   debug: DebugScreen,
 };
 
@@ -305,6 +320,8 @@ export function Shell() {
       {/* Ticket 0708. Under the graduation notice, so an earned milestone is read first. */}
       <MeetingNotice />
       <GraduationNotice />
+      {/* Ticket 0809. The year's sports, screen, music, modeling and racing lines, once. */}
+      <YearRecapNotice />
       {!decision && outcome ? <OutcomeCard outcome={outcome} onDismiss={dismissOutcome} /> : null}
 
       {/*

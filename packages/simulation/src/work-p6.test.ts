@@ -102,7 +102,11 @@ describe('P6 work commands and annual income', () => {
     const tax = vi.spyOn(business, 'businessTaxOn'),
       deals = vi.spyOn(dealPhase, 'runDealsYear');
     advanceYear(s);
-    expect(tax.mock.calls.filter(([base, draw]) => base === gross && draw === 0).length).toBe(2);
+    // The business and the creator tax, and one more for each earning the entertainment tickets (0801–0807) tax on the
+    // same base; what matters is that the side income is in the base, not how many things are taxed on it.
+    expect(
+      tax.mock.calls.filter(([base, draw]) => base === gross && draw === 0).length,
+    ).toBeGreaterThanOrEqual(2);
     expect(deals.mock.calls[0]?.[0].otherIncome).toBe(gross);
   });
   it('keeps under-18 shift income untaxed and pays the following graduation year', () => {

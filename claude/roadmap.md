@@ -4,7 +4,7 @@
 complete; v0.05 tickets 0501–0507 are built, with 0508 Will & Estate deferred by
 Payton. The 0601–0606 and 0701–0704 engines are on `origin/main` at
 `0d23cc5`. The 0605/0606 screens and native-device checks remain open; v0.07
-screens are unassigned, and 0705/0706 are not built. Save **v41**.
+screens are unassigned, and 0705/0706 are not built. Save **v41**. _(Update 6 Oct: 0705–0708 and v0.07 shipped; 0801 sports engine built, save **v44**.)_
 **Agent B's order:** existing notes, 0605 screens, 0606 screens, then new notes
 from Payton. Agent A owns every other ticket end to end; Payton decides the
 next ticket. See `claude/HANDOFF.md` §0 and §7.
@@ -604,10 +604,22 @@ recreational pursuits, including sports, and feeds those participants into the
 health phase's athlete branch. v0.08's professional sports engine remains future
 work; the school-only adult-athlete gap recorded by 0211 is historical.
 
-**6 October 2026: measured and a breakdown proposed (0801–0809), nothing built.**
-No professional sports or entertainment job exists among the 169, and athletic talent
-has no door after eighteen. Waiting for Payton to approve the order and five decisions.
-See `claude/v008-entertainment-measurement.md`.
+**6 October 2026: measured and a breakdown proposed (0801–0809). All nine are built: 0801–0808 as engines, 0809 as their screens.**
+No professional sports or entertainment job existed among the 169, and athletic talent
+had no door after eighteen. Payton approved the order and answered the decisions; 0801 was then
+built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sports-engine.md`.
+
+| Ticket                                      | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0801 The sports engine, with basketball** | **DONE (engine).** School team → scholarship offer at graduation → college seasons → the draft → a contract (Accept / Ask for more / Turn it down) → pro seasons, injuries, titles, reputation and fame → retirement. Odds are Payton's: reaching the pros from a team is 95% with talent and hard work, 75% with talent alone, 60% with hard work alone and about 3% with neither; 45% / 20% / 10% of those become stars. Every draw is a hash, so a life with no sport replays exactly as before. Save v44 (`sports`). No screens (0809).                                                                                                                                                                                      |
+| **0802 The other team sports**              | **DONE (engine).** Football, baseball, soccer and hockey as rows on the 0801 engine: their own leagues, teams, five skills each, positions (a label, derived, never saved), real league minimums at the bottom of each pay ladder, draft sizes (224, 600, 90, 224), career ends and injury factors (football ×1.6 breaks most). Baseball and hockey school teams added. A life on two teams follows the sport it has been playing, else the one it is best at. Same odds as basketball; measured within a few points in every sport. **No save change** (still v44). No screens (0809).                                                                                                                                          |
+| **0803 Individual sports and combat**       | **DONE (engine).** Golf and tennis (school team, scholarship, college, then a tour card and prize money), boxing and MMA (six martial arts studied from ten, three seasons, then a gym puts you on a card at 18–30), all on the 0801 engine with a `format` of team, tour or combat. Fights are decided by skill, not a minigame: a hash per fight against a logistic on form, luck moving a rung. Reaching the pros matches Payton's table; the star share runs above it (finding 97). **Save v45** (Agent B: v46+). No screens (0809).                                                                                                                                                                                         |
+| **0804 Olympics, coaching and commentary**  | **DONE (engine).** Track and field, swimming, gymnastics, wrestling and amateur boxing, studied as a discipline from ten and joined as a national program at 16+, with a Games every fourth year, medals that pay a prize and a sponsorship, and after any career in 0801–0804 a coaching or commentary post whose level the career earned. **Save v46** (Agent B: v47+). No screens (0809).                                                                                                                                                                                                                                                                                                                                     |
+| **0805 Acting**                             | **DONE (engine).** Six rungs of acting work from student films to prestige pictures; every part is a lead, a supporting part or a bit part, and is offered to a seen actor or applied for from six casting calls a year (an agent helps and is never needed); lessons, character development, Take / Ask for more / Pass, awards, fame, and the Talent Agency business. **Save v47** (Agent B: v48+). No screens (0809).                                                                                                                                                                                                                                                                                                         |
+| **0806 Music**                              | **DONE (engine).** Six rungs from a local act to a superstar, all read off monthly listeners; releases under the caps (2 albums, 3 EPs, 15 singles) with a back catalogue that keeps paying, a ceiling set by quality and one fixed luck draw; labels that call or take a demo (indie by default, never required) with an advance and a royalty after it is repaid, Sign / Ask for more / Pass; tours, collaborations (0704), a manager or an agent (0704), a fictional awards ceremony, the Record Label business, and the Music creator channel fed by releases. Real per-stream pay. **Save v48** (Agent B: v49+). No screens (0809).                                                                                         |
+| **0807 Modeling**                           | **DONE (engine).** Six rungs from test shoots to the face of a house; a job is a day rate, days and a usage fee; work comes asked for (a model who has been seen), applied for (six castings a year, three applications) or through an agency (20%, the New York cap; helps, never required); looks and charisma, no new talent; an age window; brand deals on 0702's sponsor rules; celebrity networking; a fictional awards ceremony. **Save v49** (Agent B: v50+). No screens (0809). `claude/0807-modeling.md`                                                                                                                                                                                                               |
+| **0808 Racing team and the world**          | **DONE (engine).** Motor racing two ways: a driver's career (karting from eight, a seat offered at 16–30, five tiers, a championship, a team that may not renew) and the **Racing Team**, the 34th business type, whose year is a season with a field, a purse and sponsors who pay by the result; the player can run a team, drive their own, or both. Plus one **awards layer across all four fields**: the Laurel Sports Awards (Driver of the Year for racing), a sweep, the third win at a ceremony, the charts, and the 0705 roster winning the same awards and filling the same charts. Derived from the seed, nothing saved. **Save v50** (Agent B: v51+). No screens (0809). `claude/0808-racing-team-and-the-world.md` |
+| **0809 Entertainment and Sports screens**   | **DONE.** The mobile screens for 0801–0808: one hub from Activities (Sports and Entertainment), a career screen per field (Sports, Martial Arts and Karting, Acting, Music, Modeling) with awards and charts folded in, the Racing Team inside the business screen, and one year recap card when the year turns. Skills are bars, reputation is a phrase, nothing shows a form number or hours. Offers still arrive as the generic decision card. **No save change (still v50);** three export additions in the simulation package. `claude/0809-entertainment-and-sports-screens.md`                                                                                                                                            |
 
 ## v0.09 Military, Intelligence, Politics & Crime
 
@@ -1395,6 +1407,207 @@ week" and not as a second job.
 **82. Nothing shows the 0706 events or the 0705 history.** The Fame screen lists the people you know now,
 not everyone you have met, and an event is still one line on the timeline (finding 72).
 
+**83. Going pro is common for anyone on a team, and the team is the gate.** With the odds as given,
+94% of talented hard workers on a team reach a contract, and about 59% of players with no talent who work
+hard do. Only 1.3% of passive lives are ever on a basketball team, so 5 in 2,000 (0.25%) go pro. Real life
+is about 0.04% from high school. That is a design choice (Payton's numbers), not a defect.
+
+**84. The star share for no talent and no hard work is 0.5%, and nobody chose it.** Payton gave 45%, 20%
+and 10%. It is the one number in the table that is mine. Superstars are one in four stars.
+
+**85. The rest of the pro career is a judgement.** The pay ladder (fringe $1.3 million, anchored to the
+2025-26 league minimum), career lengths, the 13% yearly injury chance, the 3.3% base title chance, the
+hard-work threshold (two of three sessions, half of seasons), the scholarship cut-off (form 62 for full) and
+the 0.4 / 0.6 split between the recruiting and draft doors have no source. Real careers are about four and a
+half seasons; the game's are longer.
+
+**86. Playing pay is taxed at the business rate**, on top of everything else earned that year. That is a
+little high for the top tier (a payroll tax would be flatter) and was kept for one rule rather than two.
+
+**87. The Career screen can still hire a pro.** Job offers are suppressed for a pro, but the Apply
+button on the Career screen is not gated on the sports career. Signing a rookie contract resigns any
+held job; applying while a pro is not blocked.
+
+**88. There is no early declaration.** The draft is rolled when college ends, however it ends. Leaving
+a degree early is the only way to go early, and the game does not say so. It is also why a dropout can be
+drafted.
+
+**89. There are no screens.** `skillsOf`, `careerOf`, `careerLabel`, `reputationOf`, `trainSport` and the
+pending scholarship or contract question are what 0809 reads. Nothing shows a season, a team or a past
+career.
+
+**90. Positions are a label, and nothing shows it.** A position is drawn from the sport's list by a hash of the
+life and never saved, so it costs no save field. Only the draft line names it ("as a point guard"). `positionOf`
+is what 0809 reads. It does not change odds, pay or skills, which is what was chosen.
+
+**91. The real roads in are not modelled.** All five sports go school team, scholarship, college, draft. Real
+baseball signs out of high school and has a minor league, hockey has a junior route, and soccer has academies and
+overseas clubs (the NCAA does not even count men's soccer, because there are too many routes). Soccer's "draft" is
+fiction. Payton chose the shared ladder; a second road is a new rung and a save change.
+
+**92. Careers are two to three times real length in every sport.** Median pro seasons for a talented hard worker:
+football 8 (real 3.3), basketball 10 (real 4.5), baseball 11, soccer 10, hockey 10. The mix is star-heavy
+because the odds make 45% of those who reach the pros stars, and stars last longer. If it is too long, the
+retirement ranges are the dial.
+
+**93. A life on two teams follows one sport.** The sport they have been playing, else the one they are best at.
+The other team's seasons count for nothing towards a road.
+
+**94. Pay above each league's real minimum is a judgement.** The floors are real (NFL $885,000, MLB $780,000,
+NHL $850,000 from 2026-27, MLS $113,400) and so is hockey's rookie scale. Real top contracts are higher than the
+game's superstar tier in baseball and football ($55 million against real figures near $70 million).
+
+**95. Hockey costs $1,500 a year**, ice time, a team fee and pads, which may keep poorer lives off the team. The
+effect on who plays is not measured.
+
+**96. A life that says yes to every team goes pro about one time in thirty.** 700 lives that only press Advance
+and answer every question with its first choice: 23 became pros (3.3%), 3 of them stars. 0801 measured 0.25%
+because basketball was the only gate. Soccer ($95) and baseball ($180) are open from elementary school, so a
+passive child ends up on one far more often, and the odds given (75% for talent alone) take over. The dials, in
+the order they bite: how many lives are talented (9.7%), the 75% for talent without work, and how easy a team
+is to join.
+
+**97. The star share is measured, not set, and it runs above the table.** A tier is the result of a year's
+performance against a field, not a draw. Talent and work gives 61–73% stars of the pros against 45% asked;
+talent only 21–44% against 20%; work only 4–7% against 10%. The dials are `FIELD_STRENGTH` and `TRAINING_CAP`.
+
+**98. 0803 took save v45.** Agent B's saves are v46 and onward.
+
+**99. Careers are still two to three times real length.** Median pro seasons: boxing 17, golf 19, MMA 15,
+tennis 10. The dials are `retireAge` and `declineFrom`.
+
+**100. Martial-art training has no effect on a character and costs no hours.** It is a road to a career and
+nothing else; Mind & Body effects belong to v0.10.
+
+**101. Prize money and purses are gross.** Travel, coach, caddie, camp and manager cuts are not modelled.
+
+**102. A fringe fighter keeps a day job; from role up it is a living.** Job offers keep coming until then.
+
+**103. A child's lessons are not billed, and an adult at home pays nothing.**
+
+**104. A life that never studies an art never reaches a card.** The passive-life pro rate stays about 3.4%;
+golf and tennis add about five of twenty-four. A passive life does not start an art.
+
+**105. A fighter who turns the card down is not asked again,** and any one art but boxing has no pro path alone.
+
+**106. The national program's table is lower than the pros'.** 50 / 30 / 20 / 1 (`REACH_NATIONAL`) against the pros' 95 / 75 / 60 / 3; a judgement. Talent and work reach it 47–51% of the time.
+
+**107. "Medalist" counts any medal over several Games.** 21–31% of talent-and-work athletes who joined win one; dials `MEDAL_LINE` and `GAMES_NOISE`.
+
+**108. Prize amounts are real, sponsorships and the five stipend ladders are judgement.**
+
+**109. A post's pay ladder is a game ladder above the BLS medians** ($47,320 coaches, about $47,340 announcers).
+
+**110. Training starts at ten,** and gymnasts start much earlier in real life.
+
+**111. Boxing and wrestling reach the Games only after the pro question,** and joining the program removes the boxing art, so such a boxer cannot then go pro.
+
+**112. Careers are still long.** Median seasons 11–22 across the five sports.
+
+**113. 0804 took save v46.** Agent B's saves are v47 and onward (0805 then took v47: see 121).
+
+### 0805 findings (114–121)
+
+**114. The ladder above the SAG floor is a game ladder.** Real: SAG-AFTRA day $1,283 and weekly $4,456, BLS actors median $29.05 an hour. The rest of the fee ranges are mine.
+
+**115. Stars are far too common for real life** (23–28% of the talented and committed) and about right for a game that rewards a talent and effort. Dials: `minCraft`, `HITS_TO_RISE.lead`, the star slots.
+
+**116. There is no age cap on rising,** only a thinning of offers from 55. A first-timer of 48 reached lead in a passive life.
+
+**117. Passive lives now sometimes become actors:** 21% of first-answer lives get a credit; 5% reach lead.
+
+**118. The Talent Agency is a catalog row only** (32 business types; two pinned test expectations moved).
+
+**119. Taking every offer makes careers of 150–240 credits.**
+
+**120. Acting for a living ends a day job,** as playing does: from supporting with recent work the header is "Actor", job offers stop and a held job ends with a line. `pnpm verify` found the first version leaving the job (header and death screen disagreed).
+
+**121. 0805 took save v47.** Agent B's saves are v48 and onward (0806 then took v48: see 129). See `claude/0805-acting.md`.
+
+### 0806 findings (122–129)
+
+**122. The ladder is a game ladder; only the money per stream and the cuts are real** (BLS musicians median $47.80 an hour, about $0.004 a stream, 15% distributor, 15–25% major royalty after recoupment, Lowery on touring). Thresholds, venues, advances and odds are mine, named and pinned.
+
+**123. The 86% retention and the catalogue are the whole of "old records keep paying";** a life that stops releasing loses seven points a year.
+
+**124. A superstar is rare, a living is not:** one in forty reaches the top rung with a talent and the heaviest plan, but 25–27 of 40 committed talented lives have a $30,000 year. Dials: `MUSIC_LIVING_WAGE`, the ceiling, `STREAM_PAYOUT`.
+
+**125. The first model compounded and ran away** (a number past a safe integer). The fix is a ceiling set by quality and one fixed luck draw, room falling to zero as an audience nears it, and a quarter of the excess lost a year. CORE_RULES 13.185.
+
+**126. A talent is not required:** one in three with none and a heavy plan has a living year; 12 of 37 reach regional or better.
+
+**127. Music for a living ends a day job,** as playing and acting do, with the header and eulogy agreeing.
+
+**128. The Record Label is a catalog row only** (33 types); it does not sign the player's own deal.
+
+**129. 0806 took save v48.** Agent B's saves are v49 and onward. See `claude/0806-music.md`.
+
+### 0807 findings (130–137)
+
+**130. The ladder is a game ladder; only the median and the cap are real** (BLS models median $23.30 an hour, $48,470 a year, about 4,200 jobs; New York's 20% agency cap). Thresholds, day rates, usage shares, odds, the age curve and brand pay are mine, named and pinned.
+
+**131. A living is likelier than not:** 26 of 40 committed models have a $30,000 year (33 with an agency). Real modeling is mostly part-time. Dials: `MODEL_LIVING_WAGE`, the day rates, `MODEL_YEAR_DAYS`.
+
+**132. Looks are the gate in practice:** the low third by looks peaks under the second rung on average (0.8), the high third near the fourth (3.4). Dials: the craft centre (66.5) and slope (2.4).
+
+**133. The first calibration left 35% of lives at craft 0–20** because looks runs lower than the other stats. Re-centred; CORE_RULES 13.188.
+
+**134. A casting does not need the model to have been seen;** the portfolio and the agency matter for asked work. If a portfolio should gate castings, it is one check in `modelCalls`.
+
+**135. Casting fallback differs from acting's:** modeling takes the highest ready rung, 0805 the lowest. 0805 is unchanged.
+
+**136. Not modelled:** an agency contract term, the 45-day payment lag, the influencer-model crossover beyond brand deals. Brand deals read a pseudo-channel of the model's own followers; a real Fashion channel gets a quarter of the people the work brings.
+
+**137. 0807 took save v49.** Agent B's saves are v50 and onward. See `claude/0807-modeling.md`.
+
+### 0808 findings (138–148)
+
+**138. The ladder is a game ladder; only the anchors are real.** An entry-level open-wheel season about $200,000 (2013), a sports-car team about $1 million (2015), an IndyCar $3–8 million a car (2016), a NASCAR Cup car about $20 million before the driver (2024), the Indy 500 purse about $13 million. The running budgets sit on those; every other number (field sizes, strengths, purses, sponsors, `REACH_SEAT`, the pay ladder, title chances, the roster sport weights, the whole awards layer) is a named, pinned judgement.
+
+**139. A middling team loses money in 36–39% of its years** (mean margin about 5%); +8 driver skill is about +10 points of margin. Dials: `TEAM_WEIGHTS`, `SPONSOR_FLOOR`/`SPONSOR_SLOPE`, the budgets.
+
+**140. The driver road is narrow but the top is generous:** 30% of lives with talent and work hold a seat, a third of those reach star. Follows spec 949 as 0803 did (finding 97). Dials: `REACH_SEAT`.
+
+**141. An owner who drives is paid once:** the sports career pays them, the team pays no driver, and a championship record is written only for a title the owner won as the driver.
+
+**142. Buying a listed racing team gives a default rung-1 team,** whatever the seller's series.
+
+**143. Awards are derived, not saved.** The player's wins are records; the roster's winners, champions and every chart are recomputed from (seed, year). Changing the 0705 roster's generation changes who won past awards.
+
+**144. All the awards numbers are judgement** (Laurel 4 / 12 / 25%, ×2.5 with a title, sweep at two fields, third win, nominee loss 50%, roster floor 35). Low on purpose.
+
+**145. A Laurel raises sports fame** (+3 each, to +12), which feeds 0705's meetings and 0707's opportunities. Capped.
+
+**146. Losing an award is told once a year,** at the first ceremony it happened at.
+
+**147. Not modelled:** two cars, constructors' titles, driver contract negotiation, a driver market that bids for the player's driver, buying out another team, suppliers, pit strategy, safety rules. The roster has no models, so the Atelier Awards have no roster winner.
+
+**148. 0808 took save v50.** Agent B's saves are v51 and onward. See `claude/0808-racing-team-and-the-world.md`.
+
+### 0809 findings (149–159)
+
+**149. Sports open at middle school** (11 here); karting 8, martial arts 10, music 7, acting 11, modeling 14 — all read from the engines.
+
+**150. The recap is a read of the Life feed.** A field with no line for the year has no recap; a graduation in the same turn takes the card.
+
+**151. Engines never list a call you are not ready for,** so the screens have no "not ready" state.
+
+**152. The racing team's refusal words live in the app** (`RACING_ERROR_LABELS`); the engine returns codes.
+
+**153. There is no verb to retire** from a pro career, or to withdraw from a booked role or job.
+
+**154. Modeling has no chart** (the 0705 roster has no models).
+
+**155. A sports chart is short** (about six figures a sport), so the best rank is in the first seven.
+
+**156. Stepping down and moving up are one step a season.**
+
+**157. The Homes screen shows two cash options for a purchase when the player holds a card.** Not 0809; left for the playtest list.
+
+**158. A save is still v50.** Agent B's chain is on v51; folding the stack onto Agent B's main is a separate step (save version, migrations 46–49, `gameStore.tsx` and `Shell.tsx` conflicts).
+
+**159. Device checks are open.** Nothing in this ticket has been looked at on a phone; Music and Acting are the long screens.
+
 ## Suggested order
 
 This is the historical delivery order with current status annotations, not an
@@ -1446,6 +1659,10 @@ Agent A's next ticket.
     They show loss/reserve and loan scenarios and confirmed exit actions. B1's
     accept/decline rescue engine and survival measurement remain open with Agent A;
     a pre-failure decision is not implemented. See `claude/playtest-business-warnings.md`.
+
+12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, 0802 The
+    other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting and 0806 Music and 0807 Modeling and 0808 Racing team and the world shipped as engines; 0809 Entertainment and Sports screens
+    shipped the screens for all of them. v0.08 is complete. Next is chosen by Payton.)_
 
 ## Playtest P1 — business rescue choices (7 October 2026)
 

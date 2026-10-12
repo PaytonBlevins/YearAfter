@@ -24,6 +24,8 @@ import { appendToTimeline, createTimelineEntry, type TimelineEntry } from '@year
 import {
   CONNECTION_MENU,
   ENCOUNTER_MENU,
+  MODEL_IDLE_FALL_YEARS,
+  MODEL_NETWORK_CREDITS,
   celebrityLine,
   findCelebrityField,
   findCity,
@@ -102,6 +104,8 @@ export interface Pulls {
   readonly fame: number;
   readonly channel: boolean;
   readonly business: boolean;
+  /** Ticket 0807. A model who has worked enough to know the people backstage. */
+  readonly modeling: boolean;
 }
 
 export function pullsOf(state: GameState): Pulls {
@@ -112,12 +116,16 @@ export function pullsOf(state: GameState): Pulls {
     fame: fameFactor(state.fame),
     channel: state.channels.some((channel) => channel.audience >= MIN_COLLAB_AUDIENCE),
     business: state.businesses.length > 0,
+    modeling:
+      state.modeling.credits >= MODEL_NETWORK_CREDITS &&
+      state.modeling.idle < MODEL_IDLE_FALL_YEARS,
   };
 }
 
 /** How much likelier a year is to hold a meeting, before the cap. */
 export function encounterMultiplier(pulls: Pulls): number {
-  const network = 1 + (pulls.channel ? 0.25 : 0) + (pulls.business ? 0.25 : 0);
+  const network =
+    1 + (pulls.channel ? 0.25 : 0) + (pulls.business ? 0.25 : 0) + (pulls.modeling ? 0.25 : 0);
   return pulls.hub * pulls.wealth * pulls.fame * network;
 }
 
@@ -135,7 +143,8 @@ export function fieldPull(fieldId: string, pulls: Pulls): number {
   if (field === undefined) return 1;
   const network =
     (field.network === 'channel' && pulls.channel) ||
-    (field.network === 'business' && pulls.business)
+    (field.network === 'business' && pulls.business) ||
+    (field.network === 'modeling' && pulls.modeling)
       ? 1.5
       : 0;
   return 1 + field.hubPull * (pulls.hub - 1) + field.wealthPull * (pulls.wealth - 1) + network;
@@ -151,6 +160,7 @@ export function sceneFor(fieldId: string, pulls: Pulls): EncounterScene {
     ['fame', (pulls.fame - 1) * 0.6],
     ['channel', field.network === 'channel' && pulls.channel ? 1 : 0],
     ['business', field.network === 'business' && pulls.business ? 1 : 0],
+    ['modeling', field.network === 'modeling' && pulls.modeling ? 1 : 0],
   ];
   const [scene, strength] = reasons.reduce((best, next) => (next[1] > best[1] ? next : best));
   return strength >= SCENE_FROM ? scene : 'chance';

@@ -53,9 +53,9 @@ describe('P16 save v51', () => {
       const serialized = JSON.stringify(legacy);
       const result = migrateSave(JSON.parse(serialized));
       if (!result.ok) throw Error(result.error.kind);
-      expect(CURRENT_SAVE_VERSION).toBe(51);
+      expect(CURRENT_SAVE_VERSION).toBeGreaterThanOrEqual(51);
       const { partnerCareers, ...preserved } = result.value;
-      expect(preserved).toEqual({ ...legacy, version: 51 });
+      expect(preserved).toEqual({ ...legacy, version: CURRENT_SAVE_VERSION });
       expect(JSON.stringify(legacy)).toBe(serialized);
       const input = {
         id: 'p16-save-person',

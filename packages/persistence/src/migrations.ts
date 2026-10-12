@@ -1109,6 +1109,117 @@ const migrations: Readonly<Record<number, Migration>> = {
       version: 43,
     };
   },
+  /**
+   * v51 -> v52: Ticket 0801 — a sporting life. (Built as v43 -> v44 and renumbered when it joined
+   * Agent B's P1–P16 chain, which already held v43 to v51; the migrations below follow it.)
+   *
+   * Ticket 0801 — a sporting life. Nobody before it played past school, so every
+   * older save gets no career, none past and no question. What a v51 save already carries is
+   * kept. No RNG, no clock.
+   */
+  51: (save) => ({
+    ...save,
+    sports:
+      typeof save['sports'] === 'object' && save['sports'] !== null ? save['sports'] : { past: [] },
+    version: 52,
+  }),
+  /**
+   * v52 -> v53: Ticket 0803 — the individual sports. `sports.arts`, a fighter's record and the
+   * two new questions are all optional and nothing before could write one, so there is nothing
+   * to write and only the version moves. No RNG, no clock.
+   */
+  52: (save) => ({ ...save, version: 53 }),
+  /**
+   * v53 -> v54: Ticket 0804 — the Olympic sports, coaching and commentary. `sports.post` and the two
+   * new questions are optional and nothing before could write one, so only the version moves.
+   * No RNG, no clock.
+   */
+  53: (save) => ({ ...save, version: 54 }),
+  /**
+   * v54 -> v55: Ticket 0805 — acting. Nobody before it could act past a school club, so every older
+   * save gets an empty acting life: the bottom rung, no credits, nothing on the table. What a v54
+   * save already carries is kept. No RNG, no clock.
+   */
+  54: (save) => ({
+    ...save,
+    acting:
+      typeof save['acting'] === 'object' && save['acting'] !== null
+        ? save['acting']
+        : {
+            stageYears: 0,
+            credits: 0,
+            tier: 'local',
+            hits: 0,
+            reputation: 0,
+            awards: 0,
+            idle: 0,
+            offers: [],
+            booked: [],
+            applied: [],
+          },
+    version: 55,
+  }),
+  /**
+   * v55 -> v56: Ticket 0806 — music. Nobody before it could release anything past a school band, so every older
+   * save gets an empty musician: no listeners, no catalogue, no plan. What a v55 save already carries is kept.
+   * No RNG, no clock.
+   */
+  55: (save) => ({
+    ...save,
+    music:
+      typeof save['music'] === 'object' && save['music'] !== null
+        ? save['music']
+        : {
+            stageYears: 0,
+            listeners: 0,
+            peak: 0,
+            released: { single: 0, ep: 0, lp: 0 },
+            catalogue: 0,
+            bestQuality: 0,
+            reputation: 0,
+            awards: 0,
+            idle: 0,
+            lastPay: 0,
+            plan: { single: 0, ep: 0, lp: 0, tour: false },
+            collabs: {},
+            answered: [],
+            tours: 0,
+          },
+    version: 56,
+  }),
+  /**
+   * v56 -> v57: Ticket 0807 — modeling. Nobody before it could model, so every older save gets an empty model: no
+   * craft, no jobs, no following. What a v56 save already carries is kept. No RNG, no clock.
+   */
+  56: (save) => ({
+    ...save,
+    modeling:
+      typeof save['modeling'] === 'object' && save['modeling'] !== null
+        ? save['modeling']
+        : {
+            credits: 0,
+            tier: 'test',
+            hits: 0,
+            reputation: 0,
+            awards: 0,
+            idle: 0,
+            lastPay: 0,
+            followers: 0,
+            peak: 0,
+            brandOwed: 0,
+            brandAnswered: [],
+            offers: [],
+            booked: [],
+            applied: [],
+          },
+    version: 57,
+  }),
+  /**
+   * v57 -> v58: Ticket 0808 — the racing team. An owned business may now carry `racing`; nobody before it could own a
+   * team, so there is nothing to write. The version moves so an older build refuses a save it cannot read. No RNG, no
+   * clock.
+   */
+  57: (save) => ({ ...save, version: 58 }),
 };
 
 /**
@@ -1262,6 +1373,385 @@ function channelPublishingOk(value: unknown): boolean {
       Number.isSafeInteger(row['gained'])
     );
   });
+}
+
+function sportsOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const sports = value as Record<string, unknown>;
+  if (!Array.isArray(sports['past'])) return false;
+  const career = sports['career'];
+  if (career !== undefined) {
+    if (typeof career !== 'object' || career === null) return false;
+    const row = career as Record<string, unknown>;
+    if (typeof row['sportId'] !== 'string') return false;
+    if (row['stage'] !== 'school' && row['stage'] !== 'college' && row['stage'] !== 'pro') {
+      return false;
+    }
+    if (typeof row['form'] !== 'number' || typeof row['seasons'] !== 'number') return false;
+  }
+  const arts = sports['arts'];
+  if (arts !== undefined) {
+    if (!Array.isArray(arts) || arts.length > 2) return false;
+    const sound = arts.every((row) => {
+      if (typeof row !== 'object' || row === null) return false;
+      const study = row as Record<string, unknown>;
+      return (
+        typeof study['artId'] === 'string' &&
+        typeof study['level'] === 'number' &&
+        Number.isFinite(study['level']) &&
+        Number.isSafeInteger(study['seasons']) &&
+        Number.isSafeInteger(study['hardSeasons']) &&
+        Number.isSafeInteger(study['startedAge'])
+      );
+    });
+    if (!sound) return false;
+  }
+  const offer = sports['offer'];
+  if (offer !== undefined) {
+    if (typeof offer !== 'object' || offer === null) return false;
+    const kind = (offer as Record<string, unknown>)['kind'];
+    if (
+      kind !== 'scholarship' &&
+      kind !== 'contract' &&
+      kind !== 'tour-card' &&
+      kind !== 'turn-pro' &&
+      kind !== 'national-team' &&
+      kind !== 'post-job'
+    ) {
+      return false;
+    }
+    // A question with nobody to ask about is a save that cannot be answered. A post is
+    // offered to somebody who is not playing, so it is the one question with no career.
+    if (career === undefined && kind !== 'post-job') return false;
+  }
+  const post = sports['post'];
+  if (post !== undefined) {
+    if (typeof post !== 'object' || post === null) return false;
+    const job = post as Record<string, unknown>;
+    const levels = ['college', 'overseas', 'pro', 'local', 'national'];
+    if (
+      typeof job['sportId'] !== 'string' ||
+      (job['kind'] !== 'coach' && job['kind'] !== 'commentary') ||
+      typeof job['level'] !== 'string' ||
+      !levels.includes(job['level']) ||
+      !Number.isSafeInteger(job['since']) ||
+      !Number.isSafeInteger(job['seasons']) ||
+      (job['over'] !== undefined && typeof job['over'] !== 'boolean')
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Ticket 0808. An owned business may carry a racing team; if it does, the rung, the car, the driver, the way the car
+ * is developed and the counts have to be ones the season can run on.
+ */
+function racingTeamOk(business: unknown): boolean {
+  if (typeof business !== 'object' || business === null) return false;
+  const team = (business as Record<string, unknown>)['racing'];
+  if (team === undefined) return true;
+  if (typeof team !== 'object' || team === null || Array.isArray(team)) return false;
+  const row = team as Record<string, unknown>;
+  const rung = (n: unknown): boolean =>
+    Number.isSafeInteger(n) && (n as number) >= 1 && (n as number) <= 5;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  if (!rung(row['rung']) || !rung(row['best'])) return false;
+  if (typeof row['car'] !== 'number' || !(row['car'] >= 0 && row['car'] <= 100)) return false;
+  if (
+    row['development'] !== 'lean' &&
+    row['development'] !== 'steady' &&
+    row['development'] !== 'heavy'
+  ) {
+    return false;
+  }
+  if (!whole(row['titles']) || !whole(row['seasons'])) return false;
+  const driver = row['driver'];
+  if (typeof driver !== 'object' || driver === null) return false;
+  const who = driver as Record<string, unknown>;
+  if (who['kind'] === 'hired') {
+    if (
+      typeof who['id'] !== 'string' ||
+      typeof who['name'] !== 'string' ||
+      typeof who['skill'] !== 'number' ||
+      !(who['skill'] >= 0 && who['skill'] <= 100) ||
+      !whole(who['age'])
+    ) {
+      return false;
+    }
+  } else if (who['kind'] !== 'owner') {
+    return false;
+  }
+  const last = row['last'];
+  if (last !== undefined) {
+    if (typeof last !== 'object' || last === null) return false;
+    const season = last as Record<string, unknown>;
+    if (
+      !Number.isSafeInteger(season['year']) ||
+      !rung(season['rung']) ||
+      !Number.isSafeInteger(season['place']) ||
+      (season['place'] as number) < 1 ||
+      !Number.isSafeInteger(season['field']) ||
+      (season['field'] as number) < (season['place'] as number) ||
+      typeof season['title'] !== 'boolean' ||
+      typeof season['incident'] !== 'boolean'
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+const ACTING_TIERS_OK = ['local', 'commercial', 'working', 'supporting', 'lead', 'star'];
+const BILLINGS_OK = ['lead', 'supporting', 'bit'];
+
+function roleOk(value: unknown, offered: boolean): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const row = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n);
+  return (
+    typeof row['id'] === 'string' &&
+    typeof row['tier'] === 'string' &&
+    ACTING_TIERS_OK.includes(row['tier']) &&
+    typeof row['billing'] === 'string' &&
+    BILLINGS_OK.includes(row['billing']) &&
+    typeof row['medium'] === 'string' &&
+    typeof row['title'] === 'string' &&
+    whole(row['fee']) &&
+    (row['fee'] as number) >= 0 &&
+    whole(row['days']) &&
+    (row['days'] as number) >= 1 &&
+    whole(row['age']) &&
+    (offered
+      ? (row['source'] === 'asked' || row['source'] === 'applied') &&
+        (row['asked'] === undefined || typeof row['asked'] === 'boolean')
+      : whole(row['bookedAge']))
+  );
+}
+
+function actingOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const acting = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  if (typeof acting['tier'] !== 'string' || !ACTING_TIERS_OK.includes(acting['tier'])) return false;
+  if (acting['best'] !== undefined) {
+    if (typeof acting['best'] !== 'string' || !ACTING_TIERS_OK.includes(acting['best']))
+      return false;
+  }
+  if (
+    !whole(acting['stageYears']) ||
+    !whole(acting['credits']) ||
+    !whole(acting['hits']) ||
+    !whole(acting['awards']) ||
+    !whole(acting['idle']) ||
+    !optionalWhole(acting['seenAge']) ||
+    !optionalWhole(acting['devAtAge']) ||
+    !optionalWhole(acting['devCount'])
+  ) {
+    return false;
+  }
+  const reputation = acting['reputation'];
+  if (typeof reputation !== 'number' || reputation < 0 || reputation > 100) return false;
+  const craft = acting['craft'];
+  if (craft !== undefined && (typeof craft !== 'number' || craft < 0 || craft > 100)) return false;
+  const agent = acting['agent'];
+  if (agent !== undefined) {
+    if (typeof agent !== 'object' || agent === null) return false;
+    if (!Number.isSafeInteger((agent as Record<string, unknown>)['since'])) return false;
+  }
+  const lessons = acting['lessons'];
+  if (lessons !== undefined) {
+    if (typeof lessons !== 'object' || lessons === null) return false;
+    const row = lessons as Record<string, unknown>;
+    if (!Number.isSafeInteger(row['since']) || !whole(row['seasons'])) return false;
+  }
+  if (!Array.isArray(acting['offers']) || !acting['offers'].every((row) => roleOk(row, true))) {
+    return false;
+  }
+  if (!Array.isArray(acting['booked']) || !acting['booked'].every((row) => roleOk(row, false))) {
+    return false;
+  }
+  if (
+    !Array.isArray(acting['applied']) ||
+    !acting['applied'].every((row) => typeof row === 'string')
+  ) {
+    return false;
+  }
+  return acting['appliedAge'] === undefined || Number.isSafeInteger(acting['appliedAge']);
+}
+
+const MODEL_TIERS_OK = ['test', 'catalogue', 'commercial', 'editorial', 'campaign', 'face'];
+const PLACEMENTS_OK = ['face', 'featured', 'group'];
+
+function jobOk(value: unknown, offered: boolean): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const row = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  return (
+    typeof row['id'] === 'string' &&
+    typeof row['tier'] === 'string' &&
+    MODEL_TIERS_OK.includes(row['tier']) &&
+    typeof row['placement'] === 'string' &&
+    PLACEMENTS_OK.includes(row['placement']) &&
+    typeof row['medium'] === 'string' &&
+    typeof row['client'] === 'string' &&
+    whole(row['rate']) &&
+    whole(row['days']) &&
+    (row['days'] as number) >= 1 &&
+    whole(row['usage']) &&
+    whole(row['age']) &&
+    (offered
+      ? (row['source'] === 'asked' || row['source'] === 'applied') &&
+        (row['asked'] === undefined || typeof row['asked'] === 'boolean')
+      : whole(row['bookedAge']))
+  );
+}
+
+function modelingOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const modeling = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  if (typeof modeling['tier'] !== 'string' || !MODEL_TIERS_OK.includes(modeling['tier'])) {
+    return false;
+  }
+  if (modeling['best'] !== undefined) {
+    if (typeof modeling['best'] !== 'string' || !MODEL_TIERS_OK.includes(modeling['best'])) {
+      return false;
+    }
+  }
+  if (
+    !whole(modeling['credits']) ||
+    !whole(modeling['hits']) ||
+    !whole(modeling['awards']) ||
+    !whole(modeling['idle']) ||
+    !whole(modeling['lastPay']) ||
+    !whole(modeling['followers']) ||
+    !whole(modeling['peak']) ||
+    !whole(modeling['brandOwed']) ||
+    !optionalWhole(modeling['seenAge']) ||
+    !optionalWhole(modeling['portfolioAge']) ||
+    !optionalWhole(modeling['appliedAge'])
+  ) {
+    return false;
+  }
+  const reputation = modeling['reputation'];
+  if (typeof reputation !== 'number' || reputation < 0 || reputation > 100) return false;
+  const craft = modeling['craft'];
+  if (craft !== undefined && (typeof craft !== 'number' || craft < 0 || craft > 100)) return false;
+  const agency = modeling['agency'];
+  if (agency !== undefined) {
+    if (typeof agency !== 'object' || agency === null) return false;
+    if (!Number.isSafeInteger((agency as Record<string, unknown>)['since'])) return false;
+  }
+  if (!Array.isArray(modeling['offers']) || !modeling['offers'].every((row) => jobOk(row, true))) {
+    return false;
+  }
+  if (!Array.isArray(modeling['booked']) || !modeling['booked'].every((row) => jobOk(row, false))) {
+    return false;
+  }
+  for (const key of ['applied', 'brandAnswered']) {
+    const ids = modeling[key];
+    if (!Array.isArray(ids) || !ids.every((row) => typeof row === 'string')) return false;
+  }
+  return true;
+}
+
+const MUSIC_TIERS_OK = ['local', 'club', 'regional', 'national', 'headliner', 'superstar'];
+const LABEL_KINDS_OK = ['indie', 'major'];
+
+function labelOk(value: unknown, offered: boolean): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const share = row['royalty'];
+  if (typeof share !== 'number' || share <= 0 || share > 1) return false;
+  if (
+    typeof row['kind'] !== 'string' ||
+    !LABEL_KINDS_OK.includes(row['kind']) ||
+    typeof row['label'] !== 'string' ||
+    !whole(row['advance'])
+  ) {
+    return false;
+  }
+  if (offered) {
+    return (
+      typeof row['id'] === 'string' &&
+      whole(row['term']) &&
+      (row['term'] as number) >= 1 &&
+      whole(row['age']) &&
+      (row['source'] === 'called' || row['source'] === 'demo') &&
+      (row['asked'] === undefined || typeof row['asked'] === 'boolean')
+    );
+  }
+  return (
+    whole(row['left']) &&
+    (row['left'] as number) >= 1 &&
+    whole(row['since']) &&
+    whole(row['owed']) &&
+    typeof row['paid'] === 'boolean'
+  );
+}
+
+function musicOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const music = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  if (music['best'] !== undefined) {
+    if (typeof music['best'] !== 'string' || !MUSIC_TIERS_OK.includes(music['best'])) return false;
+  }
+  if (
+    !whole(music['stageYears']) ||
+    !whole(music['listeners']) ||
+    !whole(music['peak']) ||
+    !whole(music['awards']) ||
+    !whole(music['idle']) ||
+    !whole(music['lastPay']) ||
+    !whole(music['tours']) ||
+    !optionalWhole(music['demoAge'])
+  ) {
+    return false;
+  }
+  for (const key of ['reputation', 'bestQuality']) {
+    const stat = music[key];
+    if (typeof stat !== 'number' || stat < 0 || stat > 100) return false;
+  }
+  const catalogue = music['catalogue'];
+  if (typeof catalogue !== 'number' || !Number.isFinite(catalogue) || catalogue < 0) return false;
+  const craft = music['craft'];
+  if (craft !== undefined && (typeof craft !== 'number' || craft < 0 || craft > 100)) return false;
+  const released = music['released'];
+  if (typeof released !== 'object' || released === null) return false;
+  const counts = released as Record<string, unknown>;
+  if (!whole(counts['single']) || !whole(counts['ep']) || !whole(counts['lp'])) return false;
+  const plan = music['plan'];
+  if (typeof plan !== 'object' || plan === null) return false;
+  const row = plan as Record<string, unknown>;
+  if (
+    !whole(row['single']) ||
+    !whole(row['ep']) ||
+    !whole(row['lp']) ||
+    typeof row['tour'] !== 'boolean'
+  ) {
+    return false;
+  }
+  const lessons = music['lessons'];
+  if (lessons !== undefined) {
+    if (typeof lessons !== 'object' || lessons === null) return false;
+    const lesson = lessons as Record<string, unknown>;
+    if (!Number.isSafeInteger(lesson['since']) || !whole(lesson['seasons'])) return false;
+  }
+  if (music['deal'] !== undefined && !labelOk(music['deal'], false)) return false;
+  if (music['offer'] !== undefined && !labelOk(music['offer'], true)) return false;
+  const collabs = music['collabs'];
+  if (typeof collabs !== 'object' || collabs === null || Array.isArray(collabs)) return false;
+  if (!Object.values(collabs).every((count) => whole(count))) return false;
+  return (
+    Array.isArray(music['answered']) && music['answered'].every((id) => typeof id === 'string')
+  );
 }
 
 function celebritiesOk(value: unknown): boolean {
@@ -1472,7 +1962,8 @@ export function validateCurrentSave(
       candidate['businesses'].every(
         (business: unknown) =>
           savedSupplierRecordsOk(business, Number(world?.['year'])) &&
-          savedBusinessAgentOk(business),
+          savedBusinessAgentOk(business) &&
+          racingTeamOk(business),
       )),
     require('businessRescue', candidate['businessRescue'], businessRescueOk(candidate)),
     // Ticket 0605. And for the private deals.
@@ -1482,6 +1973,14 @@ export function validateCurrentSave(
     require('fame', candidate['fame'], typeof candidate['fame'] === 'number'),
     // Ticket 0705. A record of connections, people seen and the year a stranger was last answered.
     require('celebrities', candidate['celebrities'], celebritiesOk(candidate['celebrities'])),
+    // Ticket 0801. A record of past careers, however short, and optionally a career and a question.
+    require('sports', candidate['sports'], sportsOk(candidate['sports'])),
+    // Ticket 0805. Always present from v47: a rung, credits, and the parts on the table and booked.
+    require('acting', candidate['acting'], actingOk(candidate['acting'])),
+    // Ticket 0806. Always present from v48: listeners, a catalogue, a deal or an offer, and the plan for the year.
+    require('music', candidate['music'], musicOk(candidate['music'])),
+    // Ticket 0807. Always present from v49: a rung, credits, a following, and the jobs on the table and booked.
+    require('modeling', candidate['modeling'], modelingOk(candidate['modeling'])),
     // Ticket 0704. Optional, but if it is there it has to be one of the two.
     require('representation', candidate['representation'], candidate['representation'] ===
       undefined ||

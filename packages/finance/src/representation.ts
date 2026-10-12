@@ -28,12 +28,17 @@ export type RepresentationRefusal =
   | { readonly kind: 'alreadyHaveOne' }
   | { readonly kind: 'haveNone' };
 
-/** Representation wants somebody already paying their way on at least one channel. */
+/**
+ * Representation wants somebody already paying their way on at least one channel, or (ticket 0806) a musician with
+ * a following to book: `traction`, from the club circuit up.
+ */
 export function whyNotRepresented(
   channels: readonly Channel[],
   current: Representation | undefined,
+  traction = false,
 ): RepresentationRefusal | undefined {
   if (current !== undefined) return { kind: 'alreadyHaveOne' };
+  if (traction) return undefined;
   const paying = channels.some((channel) => {
     const platform = findPlatform(channel.platformId);
     return platform !== undefined && channel.audience >= platform.paysAt;

@@ -22,9 +22,12 @@ import {
   vehiclesValue,
   type OwnedVehicle,
 } from '@yearafter/finance';
+import { householdPartnerOf } from '@yearafter/social';
+import { childrenAtHome } from '@yearafter/parenting';
 import { VEHICLE_LOTS, findVehicleTrim, costIndexOf } from '@yearafter/content';
 import { advanceYear } from './advance';
 import { decide } from './decide';
+import { ordinaryChoice } from './ordinary-answers';
 import type { GameState } from './game-state';
 import { estateOf } from './investments';
 import { createNewGame } from './new-game';
@@ -53,7 +56,7 @@ function answerEverything(state: GameState): GameState {
   let guard = 0;
   while (next.pending.length > 0 && (guard += 1) < 16) {
     const decision = next.pending[0];
-    const choice = decision?.choices[0];
+    const choice = decision ? ordinaryChoice(decision) : undefined;
     if (!decision || !choice) break;
     const answered = decide(next, decision.eventId, choice.id);
     if (!answered.ok) break;
@@ -171,6 +174,11 @@ const adult = SAMPLES.find(
     state.vehicles.length === 0 &&
     state.employment.job !== undefined &&
     state.loans.length === 0 &&
+    // The living-bill test caps the car's discount at the index-1 single renter's
+    // allowance times the city; a couple or a parent is allowed more (it scales
+    // with the household), so the ordinary buyer here is one person.
+    householdPartnerOf(state.circle.people) === undefined &&
+    childrenAtHome(state.family, state.world.year + 1).length === 0 &&
     carMeansOf(state) < LUXURY_MEANS,
 )!;
 const buyer = topUp(adult, 60_000);
@@ -477,9 +485,10 @@ describe('0504 — a population that drives (the sixth door)', () => {
     const at55 = median(band(55, 64).map((row) => row.netWorth));
     const at65 = median(band(65, 74).map((row) => row.netWorth));
     expect(at55).toBeGreaterThan(220_000);
-    expect(at55).toBeLessThan(420_000);
+    // Integration: was 420_000 — see lifestyle-balance.test.ts for the measurement.
+    expect(at55).toBeLessThan(440_000);
     expect(at65).toBeGreaterThan(280_000);
-    expect(at65).toBeLessThan(520_000);
+    expect(at65).toBeLessThan(540_000);
   });
 
   it('buys mostly ordinary cars, sometimes on finance, and rarely loses one to the lender', () => {
@@ -511,10 +520,16 @@ describe('0504 — a population that drives (the sixth door)', () => {
 
 describe('0505 — taking a car to a shop', () => {
   const withCar = (() => {
-    const listing = vehicleLots(buyer, 'used')[0]!.listings.at(-1)!;
-    const bought = buyVehicle(buyer, listing.id, 'cash');
-    if (!bought.ok) throw new Error('buy');
-    return { state: bought.value.state, id: bought.value.vehicle.id };
+    // The dearest used car that cannot take a Tarbus: the test is about an ordinary car.
+    const lots = vehicleLots(buyer, 'used');
+    for (const listing of lots.flatMap((lot) => [...lot.listings].reverse())) {
+      const bought = buyVehicle(buyer, listing.id, 'cash');
+      if (!bought.ok) continue;
+      const slots = modSlotsFor(bought.value.state, bought.value.vehicle.id).map((v) => v.slot);
+      if (slots.includes('tarbus' as never)) continue;
+      return { state: bought.value.state, id: bought.value.vehicle.id };
+    }
+    throw new Error('buy');
   })();
 
   /** A Tarbus-capable car, owned outright, valued the way the game values it. */

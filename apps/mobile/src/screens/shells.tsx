@@ -978,6 +978,14 @@ export function ActivitiesScreen() {
             subtitle: 'Gym, meditation, martial arts, instruments',
             route: { screen: 'mindBody', title: 'Mind & Body' },
           },
+          // Ticket 0809. The careers 0801–0808 built, from one place: sports, martial arts and
+          // karting, acting, music and modeling.
+          {
+            icon: 'activities' as const,
+            title: 'Sports and Entertainment',
+            subtitle: 'Sports, martial arts, acting, music, modeling',
+            route: { screen: 'entertainment' as const, title: 'Sports and Entertainment' },
+          },
           {
             icon: 'doctor',
             title: 'Doctor',
@@ -1072,9 +1080,23 @@ export function MindBodyScreen() {
         rows={[
           { title: 'Gym', affordance: 'action', ticket: 'v0.10' },
           { title: 'Meditation', affordance: 'action', ticket: 'v0.10' },
-          { title: 'Martial Arts', ticket: '0808' },
-          { title: 'Instruments', ticket: '0803' },
-          { title: 'Acting Lessons', affordance: 'action', ticket: '0801' },
+          // Ticket 0809 built these. They live in Sports and Entertainment, with the careers they feed.
+          {
+            title: 'Martial Arts',
+            subtitle: 'Boxing, Muay Thai, jiu-jitsu, wrestling, karate, taekwondo, karting',
+            route: { screen: 'studies' as const, title: 'Martial Arts and Karting' },
+          },
+          {
+            title: 'Instruments',
+            subtitle: 'Lessons, releases and tours',
+            route: { screen: 'music' as const, title: 'Music' },
+          },
+          {
+            title: 'Acting Lessons',
+            affordance: 'action',
+            subtitle: 'Lessons and character work',
+            route: { screen: 'acting' as const, title: 'Acting' },
+          },
           { title: 'Books / Library', affordance: 'action', ticket: 'v0.10' },
           { title: 'Diet', affordance: 'action', ticket: 'v0.10' },
           { title: 'Walk', affordance: 'action', ticket: 'v0.10' },

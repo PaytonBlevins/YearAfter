@@ -42,7 +42,7 @@ const DEAREST_STARTUP = 14_000_000;
 /**
  * 1 for the cheapest trade in the catalog, 0 for the dearest, on a log scale.
  * Derived from what it costs to open rather than typed, for the reason 0602
- * derived elasticity: a number typed against thirty-one types drifts, and this
+ * derived elasticity: a number typed against thirty-two types drifts, and this
  * one cannot disagree with the startup it is about.
  */
 export function crowdingOf(type: Pick<BusinessType, 'startup'>): number {

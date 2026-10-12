@@ -58,8 +58,8 @@ describe('P12 save v49', () => {
     const before = JSON.stringify(old);
     const r = migrateSave(old);
     if (!r.ok) throw Error(r.error.kind);
-    expect(CURRENT_SAVE_VERSION).toBe(51);
-    expect(r.value).toEqual({ ...old, version: 51 });
+    expect(CURRENT_SAVE_VERSION).toBeGreaterThanOrEqual(51);
+    expect(r.value).toEqual({ ...old, version: CURRENT_SAVE_VERSION });
     expect(JSON.stringify(old)).toBe(before);
   });
   it('round trips terms, pending offer and usage and replays real commands/annual settlement', () => {

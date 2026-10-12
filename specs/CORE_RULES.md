@@ -3290,3 +3290,303 @@ compare independent actual-life cohorts. Preserve an old partner's exact current
 wages/pension and books in migration; infer only prospective employment, never
 retroactive experience or new matching pay. Test a real low initial quote at the
 annual salary floor: an ordinary-income random sample can miss a broken boundary.
+
+### 13.164 A conditional odd is only as big as the gate in front of it
+
+Payton's table for 0801 was "of the players on their teams": 95%, 75%, 60% and 3% reach the pros. Built as asked
+and measured on lives that make the team at seventeen, it comes out at 92%, 71–76%, 63% and 3.1%. Measured on
+lives that only press Advance, 5 in 2,000 (0.25%) go pro, because only 1.3% are ever on a basketball team. My
+earlier guess of 6% had multiplied the table by the share of lives on _any_ team. Before promising a share of a
+population, measure the gate in front of the condition (here: making the team and staying on it), not just the
+condition.
+
+### 13.165 A phase that needs what an earlier phase deletes must read the state the year started in
+
+Graduating from high school sets `education.activities` to `[]`, so by the time anything downstream could ask
+"were they on the basketball team in their last year?" the answer had been erased. `runSportsYear` takes
+`before` (the year's starting state) as well as the school year's result, and reads the team, the practice and
+the stage change from the first and the credentials from the second. A new phase that depends on a field
+another phase clears needs the old state passed in, and a test where the field is cleared in the same year.
+
+### 13.166 A harness variable named `MODE` is vitest's own
+
+A measurement script read `process.env.MODE ?? 'work'` and the run reported "test none" for every row: vitest
+sets `MODE=test`, so the whole run played the idle branch and produced numbers that looked like a finding (hard
+work did nothing). Name harness variables after what they are (`PLAY`, `SEEDP`) and print the variable in the
+output's first line so a wrong value is visible.
+
+### 13.167 A fixture has to reach the branch, and the survivor list tells you which ones did not
+
+Eight of 46 breakages in 0801 survived the first run, and every one was a fixture that could not reach the line:
+a partial scholarship whose parents happened to cover the rest (so the top-up never ran), a run of 400 seasons that
+held no injured title, a career with no title to put on the record, a control life that was never offered a job
+(so "no offer for a pro" proved nothing), a lenient `['retired', 'injury']` assertion. 13.126 and 13.129 said the
+same; the fix each time was to choose the fixture by the condition ("a partial scholarship the parents cannot
+make up") and assert the condition holds before asserting the behaviour.
+
+### 13.168 A state a new rule leaves behind is a bug waiting in an old one
+
+A first pro contract is a full-time job, and nothing said so: a life that had taken a teaching-assistant job in
+college signed with a team and went on drawing both salaries. The sabotage run did not find it; reading a
+printed life did (`job true` beside `stage pro`). When a new state means "this is what they do for a living",
+list every other state that means the same and decide what ends it (here: signing ends the job; a systemic job
+offer is not raised for a pro; the Career screen's own Apply is still open, finding 87).
+
+### 13.169 When one of a kind becomes one of five, every `find` over the list has decided something
+
+0801 read "the sport team" with `activities.find(sportOfActivity)`, which was right while basketball was the only
+sport, and wrong the day football, baseball, soccer and hockey were added: a life on two teams got whichever was
+joined first, whatever it was best at. Adding the second member of a kind means searching for every place that
+takes the first, and writing down which one should win (here: the sport they have been playing, else the one they
+are best at). A test needs two members present and a standing that disagrees with the order.
+
+### 13.170 A harness that says yes to every question puts the life on every team
+
+The first 0802 measurement read 87–90% for the talent-and-work players, against 95 asked for. The harness answered
+each pending question with its first choice, and the first choice of "activity.offer" is `yes`: the lives were on
+every team in the school, and the career followed a different sport from the one being measured. Answering
+`skip` to the question about other teams made it 93–95%. A harness for one branch must say no to the questions
+about other branches, and print the share it could not place (here: lives whose career was a different sport) so
+a bad run is visible.
+
+### 13.171 A generated catalog is changed where it is generated
+
+Two activities were first added to `activities.json` by hand, and the validator found two things at once: the
+blurbs were too long for a phone (52 characters) and the file "is not what the generator produces". The catalog is
+written by `scripts/generate-activities.py`; edit the script and run it. A hand edit that passes by luck is an
+edit the next regeneration deletes.
+
+### 13.172 A number that was a standing in a squad is not a place in the world
+
+The school model lets three practice sessions a year carry anybody towards 100, because a school activity's
+standing is only where you sit in a squad. Reused for a fighter and a tour player, the first build had every
+player who trained at the top of the sport by twenty-five (a hard-working boxer went 44–1). The cap is
+`TRAINING_CAP` in content: work can lift an individual player a set number of points above what they are like, and
+talent is worth more than work. When a mechanic built for one scale is reused on another, measure where it
+saturates before reading anything built on top of it.
+
+### 13.173 A best-ever statistic over a random walk always flatters
+
+"Best tier reached" is the highest point of a year-by-year walk, so it rises with the length of the career even
+when the player never belonged there. The first calibration gave 85% stars among players whose results hovered
+a tier below. The fix was to make a season's result small next to the gap between tiers (the noise is a fraction of
+a rung), and to say in the ticket that the star share is measured, not asked for. A "peak" that is an output of
+chance needs its noise sized against the spacing before the number is compared with a target.
+
+### 13.174 A bill must not end the thing that makes the bill worth paying
+
+Dues for an art were charged to everybody from eighteen, and the first fighter run lost its boxing on its
+eighteenth birthday, the year the gym would have called: an eighteen-year-old at home had a household standard too
+low to afford the gym. Dues are now billed only to an adult living on their own; a child's or a dependent's are the
+household's and not billed. When a cost starts at an age, look at what the same age starts for everything else it
+touches.
+
+### 13.175 One draw for the life, and a threshold that can move under it
+
+The gym's offer is one hash draw per life, compared each year with a threshold that rises as the student works. A
+life that was refused at eighteen can be accepted at twenty-three if it kept training, and a life that was lucky is
+lucky every time it is replayed. It is not a second roll: the draw never changes. Anywhere a yearly check reads
+a fixed draw against a moving line, the test must replay the same seed twice and expect the same year.
+
+### 13.176 A test for a rule must find a life that reached it, and fail loudly when none does
+
+The first versions of three 0803 tests passed or failed on the seed they happened to use: a seed that never got a
+card made `if (career) {...}` a test of nothing. `firstWith` searches a numbered set of lives for one that
+satisfies a condition and throws if none of 25 does. A conditional assertion inside a branch the data may never
+reach is a test that passes on a broken engine.
+
+### 13.177 Sequence a shared path so the earlier ticket's odds stay what they were
+
+Boxing and wrestling could reach the Games and a pro card. Putting the Olympic question first would have taken boxers
+the 0803 table gave to the gym, and every 0803 test with them. The Olympic offer is raised only when no pro offer is open. When a
+new road shares an old one's start, give the old one first call and the new one what is left, so the earlier
+ticket's measurements and tests stay true without being re-derived.
+
+### 13.178 Extend a catalog with a new array and a combined lookup, not by editing the old array
+
+The three disciplines are studied like the six arts, but `MARTIAL_ARTS` is the six arts only, because 0803's
+tests, odds and the MMA rule read it. `STUDIES` is the arts plus the disciplines and `findMartialArt` looks in it.
+A list other code counts or loops over is not the place to add a different kind of entry.
+
+### 13.179 Real figures for the real part, and mark the invented part
+
+The Olympic prizes are what the USOPC pays; the sponsorships, the stipend ladders and the post pay are mine. Both are
+in the same table in `content`, so the ticket doc and the code comment say which is which, and the dial is named. A
+reader who sees a precise figure assumes it is a source.
+
+### 13.180 Calibrate a formula against the measured spread of the stat it reads
+
+The first acting formula centered on 50 and read four character stats on the 0–100 scale, as if they were spread
+across it. They are not: grown characters measure about 56–85. Every character was a gifted actor, 100% of
+the talented reached the top rung and the median career paid $1.3 billion. The fix was to measure the stats first, centre the
+formula on what they actually are (72) and widen it, not to lower thresholds one at a time. Before putting a stat
+into a formula, print its spread.
+
+### 13.181 An optional helper must add to a road and never gate it
+
+Payton's rule for acting: an agent is a factor to take advantage of and success must not depend on one. The agent
+adds a slot, a better chance on an application, a better chance to bargain and an extra two applications a year,
+and costs ten percent of every fee. A life with no agent can be offered work (by being seen) and can apply on its
+own, and the measurement shows both: talent, work and no agent reached a lead or better in 74% of lives against 67%
+with an agent, because the agent's share is a cost. When a helper is added, write the test that a life without it
+reaches the same road.
+
+### 13.182 A test helper that builds a life must fail when it cannot build the one it was asked for
+
+`adult(seed)` returned a child who had died at twelve and every test using it still passed: an unseen child is
+"not seen", has no offers and rejects an application, which is what many tests expected anyway. It was found
+because a mutation (deleting the four-offer cap) survived. A helper that plays a seed forward must check the age and
+that the character is alive, and fall back to the next seed (`name~1`) or throw.
+
+### 13.183 A guard no test can fail is a line to delete, not a test to write
+
+Three guards in 0805 could not change any result, because something else already did the job: a rung check on awards
+(the chance in the table is zero below supporting), a cap on the craft target (the target is always under the
+headroom), and a list of applications that was both cleared and kept at the same age. Each survived the mutation run
+and each was deleted, with a comment where the reason is not obvious. Leave the table as the one source of truth and put an assertion on the table.
+
+### 13.184 A test helper that sets a balance must go through the ledger
+
+`rich()` put money on the player and in the ledger's balance without a transaction, which is fine for a function called
+on its own and wrong the moment a whole year runs over it: `advanceYear` reconciles the balance against the
+transactions and refused five music tests ("the books do not balance"). A test that runs a year gets its money the way
+the game does, as a posted gift (`windfall`); a helper that skips the ledger is only for direct calls into one function,
+and says so.
+
+### 13.185 A growth model needs a ceiling and a measure of luck before it ships, not after
+
+The first music model compounded: more listeners found more listeners, and a lucky life reached a number that no
+longer fit in a safe integer ("Money out of safe integer range"). The fix is structural, not a lower rate: what the
+work can hold is a ceiling (`audienceCeiling`, set by craft and one fixed luck draw for the life), room falls to zero as
+the audience approaches it, and an audience over it falls back a quarter a year. Anything that grows by a share of
+itself has a ceiling, a floor on room, and a measure of how far a life can go above the median.
+
+### 13.186 A wire that only moves a hard-to-read number is tested with the producer swapped, not with a finished life
+
+A year's mood reaches the character's spirits, but two lives that differ by one hit differ in cash, name and a dozen
+small things, and the happiness they end on is chaotic in all of them (adjacent crafts ended at 10, 22, 13, 21). Three
+differential tests passed with the wire cut. `music-mood.test.ts` replaces the music year with itself plus a fixed
+mood and runs the same life twice: the only difference there can be is the mood. When a result cannot be read off the
+end of a life, hold everything else still instead.
+
+### 13.187 A saved field that nothing reads is dead state
+
+`seenAge` was copied over from acting, where an actor's offers read it, and written every year by music, where nothing
+did. The mutation that removed its write survived. A field that is saved and validated costs a migration check, a test
+and a line in every save, and tells the next reader that something depends on it. It was removed from the state, the
+year and the migration check.
+
+### 13.188 A weighted sum of stats is centred on the population it reads, not on a sibling's
+
+The first modeling craft copied acting's centre (72) and slope. The looks stat runs far below the others (median 57,
+p10 39, p90 70 at twenty-six), so a third of lives had a craft of 0–20 and half of those never left the first rung.
+It showed up only when the craft was measured across lives, not in any test of the formula. Measure the spread of
+the number a formula reads before centring it, and pin the centre in a test with the population's median beside it.
+
+### 13.189 A mutation that cannot change any result is named and left out, not tested
+
+Two kinds cannot be observed: `<` against `<=` on a hash draw (the draw would have to equal the threshold exactly), and
+`<` against `<=` on a rounding step whose boundary is a multiple of both steps ($10,000 is a multiple of $100 and of
+$1,000). 0807's final run left out fourteen of these, each listed in the ticket by line. Anything else that survives is a missing test or
+a line to delete (13.183); the list of exclusions is short on purpose, and every entry names why.
+
+### 13.190 A small pure function that a whole year runs through gets exported and pinned on its own
+
+The rounding of a rate, the pick of a client when some are taken, the odds an ask for more lands and the name factor on
+a rate were all reached only through a full year, where rounding hid a divisor and a loop hid its edges. Many
+mutations survived until each was exported (`modelRoundRate`, `modelRoundFee`, `makeModelJob`, `modelAskChance`) and tested at its own
+edges. Where a draw has to land in a window, search for the id that does and assert on it.
+
+### 13.191 A sabotage run kills a hung child by its process group, runs in a copy of the tree, and checks both trees when it is stopped
+
+One breakage made the code loop forever. The runner killed the shell it started, not the process it started, so the
+run sat on an orphan for twenty-five minutes and held the pipe open. The runner now starts each test in its own
+session and kills the group on a timeout, uses `--bail=1`, and resumes by index. When a run is stopped by hand, both
+trees are diffed before anything else is touched: a file left mutated looks exactly like a file that is fine.
+
+### 13.192 What the world does around the player is derived from the seed, the year and the records, and nothing is saved
+
+The roster's award winners, a sport's champion and every chart are pure functions of (seed, year, the player's
+records). A save never holds them, a load can never disagree with a play-through, and there is no migration when
+they change. The cost is that changing how the roster is generated rewrites who won in the past, so the draws are
+pinned in tests and the ticket says so. Save only what the player did.
+
+### 13.193 Order by construction, not by a comparator that has to be consistent
+
+The chart put the player among the roster with a sort whose tie-break was `Number(a.player) - Number(b.player)`. A
+mutation that made that comparator inconsistent still passed every test, because the sort only compared the player,
+who was always last, as the later element. Put the roster in order first, then insert the player at the first place
+where the roster's fame is lower. The tie rule is then a line that a test can break.
+
+### 13.194 A clamp whose bounds cannot be reached and a default no caller uses are deleted, and the bound is pinned
+
+`Math.min(1, chance × multiple)` could never exceed 0.625; `chance > 0 &&` in front of `draw < chance` could never
+matter; `playerFame = 0` was passed explicitly by every caller. Each survived every mutation because nothing could
+tell them apart from the code without them. Delete the line, make the argument required, and pin the fact that makes
+the line unnecessary (here: the largest chance times the multiple is at most one) in a test.
+
+### 13.195 Sabotage runs in one tree take turns, and nothing is synced into the tree while a run holds its backups
+
+Two runs in the same mirror, one mutating `awards.ts` and one mutating a finance file, can kill each other's tests: a
+mutation in one package fails a test in the other and is recorded as killed. A false kill hides a survivor. 0808 caught
+this before trusting any result from overlapping runs and re-ran them in turn. A
+runner also restores the file it backed up when it first saw it, so a file copied over mid-run is overwritten by the
+old copy at the next mutant. Run one group at a time per tree, in a chain, and sync only between groups.
+
+### 13.196 A catalog addition moves every pinned listing, so those pins are named in the ticket
+
+The 34th business type changed the order and the contents of three pinned listings in `business-finance.test.ts` and
+two counts in the finance and simulation business tests. Expect it, update the pins to the new truth rather than
+loosening them, and list the files changed for it in the ticket.
+
+### 13.197 A test that reads the constant it checks checks nothing
+
+The hub opened sports at age 6. The test looped over the hub's own table of ages (`FIELD_AGES`) to prove each field
+opened at its age, so it passed for any number. A mutation of the literal survived. The age was a guess; the engine's
+rule is middle school, 11. Derive the value from the engine (`stageForGrade`, `MUSIC_LESSONS_MIN_AGE`, the arts'
+`minAge`) and pin the numbers as literals in the test, so a change to the rule fails the screen's test and not the
+other way round.
+
+### 13.198 A text helper that cannot see a component cannot prove it is absent
+
+`SectionHeading` renders through a component, so a helper that collects the `Text` hosts found no headings at all,
+and every "this heading is not shown" assertion passed without looking. Before trusting a negative assertion, check
+that its positive twin can fail: read headings from the component, or assert the heading is found when it should be.
+
+### 13.199 A guard the engine already enforces is dead code in the screen, and is deleted
+
+The Acting and Modeling screens carried a "not ready for this part" note. `castingCalls` and `modelCalls` never list a
+call the actor is not ready for (they fall back to what the actor can do), so the note could not show. Delete it and
+pin the engine's fact with a test over several ages. Keep a note like this only when a ticket makes the state
+reachable.
+
+### 13.200 A button is offered under the engine's own gate, and the pair is tested together
+
+"Step down a series" was shown whenever there was a series below, and the engine refuses it until a season has been
+run at the current level, as it does for moving up. Derive every button's availability from the same condition the
+engine checks, and test the pair: offered when the engine would accept, absent when it would refuse. A button whose
+refusal is the only thing teaching the rule is a screen that is wrong half the time.
+
+### 13.201 A card says what happened, not what was pressed
+
+Asking a brand for more can end with the brand walking away. The first version titled the card "The deal is on" for
+any answer that wrote a line, which was always, because the engine writes a line for every answer, including a
+refusal. The title is read from the result (money agreed or not), and the test checks the title against the body
+over a sweep until both outcomes have happened, with the sweep's cases counted.
+
+### 13.202 Run mutation workers where a hung mutant cannot take the run down
+
+A mutation to a `while` loop (the hub's `firstAge`) hung the suite, the runner's timeout raised, and one of two
+workers died silently with half the list unrun. A pass that reports "no survivors" over half the mutants is worse than
+one that reports none. Run each mutant in its own process group, kill the group on timeout and count it as caught,
+resume from a results file keyed by file and mutated text (not line number), and compare the count run with the count
+generated before reading any survivor list.
+
+### 13.203 Structure checks belong in one helper that runs on every state of every screen
+
+A hairline between rows, a row that says it can be pressed, a button style that exists: none of these change what a
+screen says, so tests of the words never see them. The first checks ran on one state per screen, and the mutation pass
+showed they missed a missing hairline in every other state. Put the checks in a shared helper (`test/wellFormed.ts`),
+call it from the helper every test already opens the screen through, and let it skip, by name, any card the screen
+had before the ticket. Doing so found two real bugs the first time it ran over all states: the hire-a-driver list and an
+opened martial art's skill bars had no hairlines between their rows.

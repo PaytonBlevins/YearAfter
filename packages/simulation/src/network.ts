@@ -15,7 +15,7 @@ import {
 } from '@yearafter/finance';
 
 import { appendToTimeline } from '@yearafter/character';
-import { creatorLine } from '@yearafter/content';
+import { MUSIC_TIER_ROWS, creatorLine } from '@yearafter/content';
 import type { RepresentationKind } from '@yearafter/content';
 import { dollars, err, ok, stablePick, type Result } from '@yearafter/core';
 import {
@@ -225,7 +225,12 @@ export function leaveGroup(state: GameState, channelId: string): Result<GameStat
 
 /** Why nobody will take them on, or undefined. */
 export const whyNotHire = (state: GameState): RepresentationRefusal | undefined =>
-  whyNotRepresented(state.channels, state.representation);
+  whyNotRepresented(
+    state.channels,
+    state.representation,
+    // Ticket 0806. A musician with a following to book.
+    state.music.listeners >= MUSIC_TIER_ROWS.club.listeners,
+  );
 
 /** Take on a manager or an agent. One or the other, never both. */
 export function hireRepresentation(

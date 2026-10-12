@@ -478,7 +478,7 @@ describe('0602 — the marketplace reads net worth', () => {
   it('shows a beginner the small ones and the very rich all of them', () => {
     const small = businessMarket(ADULT);
     const big = businessMarket(topUp(ADULT, 40_000_000));
-    expect(big.length).toBe(31);
+    expect(big.length).toBe(34);
     expect(small.length).toBeLessThan(big.length);
     expect(small.length).toBeGreaterThan(8);
     expect(small.every((type) => type.startup < 1_000_000)).toBe(true);

@@ -29,6 +29,7 @@ import { ROMANCE_MOVES, costOf } from '@yearafter/social';
 import { advanceYear } from './advance';
 import { applyFor, chanceOf, openings, resign, workHarder } from './careers';
 import { decide } from './decide';
+import { ordinaryChoice } from './ordinary-answers';
 import type { GameState } from './game-state';
 import { createNewGame } from './new-game';
 import { Rng } from './rng/rng';
@@ -55,7 +56,7 @@ function playALife(seed: string): Life {
     let guard = 0;
     while (state.pending.length > 0 && (guard += 1) < 12) {
       const decision = state.pending[0];
-      const choice = decision?.choices[0];
+      const choice = decision ? ordinaryChoice(decision) : undefined;
       if (!decision || !choice) break;
       const result = decide(state, decision.eventId, choice.id);
       if (!result.ok) break;
@@ -104,7 +105,7 @@ function playAJobHoppingLife(seed: string): GameState {
     let guard = 0;
     while (state.pending.length > 0 && (guard += 1) < 12) {
       const decision = state.pending[0];
-      const choice = decision?.choices[0];
+      const choice = decision ? ordinaryChoice(decision) : undefined;
       if (!decision || !choice) break;
       const result = decide(state, decision.eventId, choice.id);
       if (!result.ok) break;
@@ -276,8 +277,15 @@ describe('what a working life is worth', () => {
       median net worth at 45–54 is about $180,000–$200,000 against a US figure
       of about $250,000, so a household that pushes every year holding a bit
       more than that in cash is the top of the ordinary range, not a fortune.
+
+      Integration (sports on top of P1–P16): this line moved from $400,000 to
+      $450,000. Measured, not guessed: origin/main (P1–P16 only) gives $385,000
+      on these 150 seeds but $350,000–$451,000 on three other 150-seed sets, and
+      the integrated build gives $357,000–$425,000 on those same sets, so the
+      fixed-seed sample sits within the seed-to-seed spread, not above it. No
+      entertainment payout appears in the ledgers of an ordinary-answers life.
     */
-    expect(median(cashAt(50))).toBeLessThan(400_000);
+    expect(median(cashAt(50))).toBeLessThan(450_000);
   });
 
   it('never lets a character hold less than nothing', () => {

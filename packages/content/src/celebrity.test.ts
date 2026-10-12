@@ -40,9 +40,17 @@ describe('0705 — the celebrity catalog', () => {
 
   it('names the part of a life a field needs only for the fields that need one', () => {
     const networks = CELEBRITY_FIELD_CATALOG.filter((field) => field.network !== undefined);
-    expect(networks.map((field) => field.id).sort()).toEqual(['business', 'creator']);
+    expect(networks.map((field) => field.id).sort()).toEqual([
+      'acting',
+      'business',
+      'creator',
+      'music',
+    ]);
     expect(findCelebrityField('creator')?.network).toBe('channel');
     expect(findCelebrityField('business')?.network).toBe('business');
+    // Ticket 0807. A model's backstage is where actors and artists are.
+    expect(findCelebrityField('acting')?.network).toBe('modeling');
+    expect(findCelebrityField('music')?.network).toBe('modeling');
   });
 
   it('puts the six things you can do to a stranger in the order the spec lists them, each findable', () => {

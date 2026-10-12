@@ -151,7 +151,9 @@ export const collegeSupportOf = (state: GameState, program?: Major): number => {
     return 0;
   }
   if (state.education.stage === 'postgrad') return 0;
-  return state.parenting.collegeSupport ?? 0;
+  // Ticket 0801. A sports scholarship is aid too, and it is read here so the affordability gate sees it.
+  const aid = state.sports.career?.stage === 'college' ? (state.sports.career.aid ?? 0) : 0;
+  return (state.parenting.collegeSupport ?? 0) + aid;
 };
 
 /**
@@ -453,7 +455,7 @@ const ACCEPTED_LINES: readonly string[] = [
 const REJECTED_LINES: readonly string[] = [
   "Applied to study {major} and didn't get in. There is always next year.",
   'The {major} application came back as a no, in a very short letter.',
-  'Turned down. They said the year was competitive, which they say every year.',
+  'Turned down for {major}. They said the year was competitive, which they say every year.',
 ];
 
 const TRADE_IN: readonly string[] = [

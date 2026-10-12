@@ -111,6 +111,10 @@ function recordsForDegree(
  * beside a balance of $0 — a sentence the game could not back up. The real
  * ledger entry arrives with Ticket 0301.
  */
+/** What a sports scholarship pays towards tuition this year. A leaf read, so this file need not import the engine. */
+const sportsAid = (state: GameState): number =>
+  state.sports.career?.stage === 'college' ? (state.sports.career.aid ?? 0) : 0;
+
 export function runEducation(state: GameState, age: number): EducationPhaseOutput {
   const result = runSchoolYear(state.education, {
     age,
@@ -128,8 +132,12 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     // hold.
     cash: Math.floor(Number(state.player.cash) / 100),
     // Ticket 0209's parent who said yes to college, honouring it every year.
+    //
+    // Ticket 0801: and a sports scholarship, while the character is on the team that pays it.
     collegeSupport:
-      state.education.stage === 'postgrad' ? 0 : (state.parenting.collegeSupport ?? 0),
+      state.education.stage === 'postgrad'
+        ? 0
+        : (state.parenting.collegeSupport ?? 0) + sportsAid(state),
   });
 
   /*

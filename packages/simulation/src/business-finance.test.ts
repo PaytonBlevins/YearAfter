@@ -195,9 +195,9 @@ describe('0603 — what is for sale', () => {
     expect(businessesForSale(RICH)).toEqual(first);
     expect(new Set(first.map((row) => row.id)).size).toBe(4);
     expect(first.map((row) => row.id)).toEqual([
-      'biz:2030:clothing:for0',
-      'biz:2030:electronics:for1',
-      'biz:2030:clothing:for2',
+      'biz:2030:racing:for0',
+      'biz:2030:recordlabel:for1',
+      'biz:2030:racing:for2',
       'biz:2030:autorepair:for3',
     ]);
     const later = { ...RICH, world: { ...RICH.world, year: RICH.world.year + 1 } };
@@ -215,23 +215,23 @@ describe('0603 — what is for sale', () => {
 
   it('is bought with cash at its asking price, as a transfer, and is no longer for sale', () => {
     const listing = businessesForSale(RICH)[0]!;
-    expect(listing.ask).toBe(261_446);
+    expect(listing.ask).toBe(135_852);
     const before = cashOf(RICH);
     const result = buyBusiness(RICH, listing.id);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     const next = result.value.state;
-    expect(cashOf(next)).toBe(before - 261_446);
+    expect(cashOf(next)).toBe(before - 135_852);
     expect(next.player.cash).toBe(next.finance.balance);
     expect(next.businesses).toHaveLength(1);
     const owned = next.businesses[0]!;
     expect(owned.id).toBe(listing.id);
-    expect(Number(owned.invested)).toBe(26_144_600);
+    expect(Number(owned.invested)).toBe(13_585_200);
     expect(owned.reputation).toBe(listing.business.reputation - 4);
     expect(owned.openedYear).toBe(2030 - listing.years);
     expect(next.loans).toHaveLength(0);
     expect(businessesForSale(next).map((row) => row.id)).not.toContain(listing.id);
-    expect(result.value.entry.text).toMatch(/Bought .* for \$261,446\./);
+    expect(result.value.entry.text).toMatch(/Bought .* for \$135,852\./);
     expect(
       next.finance.transactions.some(
         (row) => row.category === 'property' && row.source === `Bought ${listing.name}`,

@@ -30,6 +30,28 @@ const play = (state: GameState, years: number): GameState => {
   return current;
 };
 
+/** A pro career, as the engine would write it. Ticket 0801. */
+const CAREER = {
+  sportId: 'basketball',
+  stage: 'pro',
+  startedAge: 14,
+  seasons: 6,
+  hardSeasons: 3,
+  form: 71,
+  trainedAtAge: 25,
+  trainedCount: 2,
+  reputation: 38,
+  titles: 0,
+  team: 'Harbor City Gulls',
+  tier: 'starter',
+  peak: 'starter',
+  breakout: 2,
+  proSeasons: 3,
+  endAge: 32,
+  pick: 14,
+  contract: { salary: 6_000_000, yearsLeft: 1, rookie: false },
+} as const;
+
 const newSave = (seed = 'SAVE-TEST') => {
   const state = play(createNewGame({ seed, startYear: 2000 }), 12);
   return { state, save: toSave(state, { id: asSaveId(`save-${seed}`) }) };
@@ -2180,6 +2202,835 @@ describe('Ticket 0406 — a question survives being saved', () => {
     expect(result.value.celebrities.work).toEqual(work);
   });
 
+  it('opens a v51 save with no sporting life, and keeps everything else (0801)', () => {
+    const { save } = newSave('SPORTS-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.sports;
+    old.version = 51;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.sports).toEqual({ past: [] });
+    expect(result.value.celebrities).toEqual(save.celebrities);
+    expect(result.value.fame).toBe(save.fame);
+  });
+
+  it('keeps a sporting life a v51 save somehow already carries (0801)', () => {
+    const { save } = newSave('SPORTS-KEEP');
+    const old = JSON.parse(JSON.stringify(save));
+    const sports = { past: [], career: { ...CAREER } };
+    old.sports = sports;
+    old.version = 51;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.sports).toEqual(sports);
+  });
+
+  it('round-trips a career, a contract on the table and a past career (0801)', () => {
+    const { save } = newSave('SPORTS-ROUND');
+    const base = fromSave(save);
+    const state: GameState = {
+      ...base,
+      sports: {
+        past: [
+          {
+            sportId: 'basketball',
+            startedAge: 14,
+            endedAge: 30,
+            seasons: 14,
+            titles: 1,
+            reputation: 44,
+            reached: 'pro',
+            bestTier: 'star',
+            how: 'retired',
+          },
+        ],
+        career: CAREER,
+        offer: {
+          kind: 'contract',
+          sportId: 'basketball',
+          team: 'Harbor City Gulls',
+          salary: 3_200_000,
+          years: 3,
+          rookie: false,
+          asked: true,
+          age: 26,
+          eventId: 'sports.offer',
+        },
+      },
+    };
+    const again = fromSave(toSave(state, { id: save.id }));
+    expect(again.sports).toEqual(state.sports);
+  });
+
+  it('refuses a malformed sporting life (0801)', () => {
+    const { save } = newSave('SPORTS-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    expect(migrateSave({ ...raw, sports: { past: [] } }).ok).toBe(true);
+    expect(migrateSave({ ...raw, sports: { past: [], career: CAREER } }).ok).toBe(true);
+    const offer = {
+      kind: 'scholarship',
+      sportId: 'basketball',
+      team: 'Ridgemont State Bobcats',
+      aid: 12000,
+      cover: 'full',
+      majorId: 'x',
+      age: 18,
+      eventId: 'sports.offer',
+    };
+    const bad: unknown[] = [
+      undefined,
+      null,
+      7,
+      [],
+      { career: CAREER },
+      { past: 'none' },
+      { past: [], career: 'none' },
+      { past: [], career: { ...CAREER, stage: 'amateur' } },
+      { past: [], career: { ...CAREER, sportId: 4 } },
+      { past: [], career: { ...CAREER, form: 'good' } },
+      { past: [], career: { ...CAREER, seasons: 'many' } },
+      { past: [], offer },
+      { past: [], career: CAREER, offer: { ...offer, kind: 'trade' } },
+      { past: [], career: CAREER, offer: 4 },
+    ];
+    for (const sports of bad) {
+      const result = migrateSave({ ...raw, sports });
+      expect(result.ok, JSON.stringify(sports)).toBe(false);
+    }
+  });
+
+  it('opens a v52 save as it is, with no arts and no record, and moves only the version (0803)', () => {
+    const { save } = newSave('ARTS-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    old.sports = { past: [], career: { ...CAREER } };
+    old.version = 52;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.sports).toEqual({ past: [], career: CAREER });
+    expect('arts' in result.value.sports).toBe(false);
+    expect(result.value.celebrities).toEqual(save.celebrities);
+  });
+
+  it('round-trips the arts being studied, a fighter’s record, and the two new questions (0803)', () => {
+    const { save } = newSave('ARTS-ROUND');
+    const base = fromSave(save);
+    const arts = [
+      {
+        artId: 'boxing',
+        startedAge: 10,
+        seasons: 5,
+        hardSeasons: 4,
+        level: 61,
+        trainedAtAge: 15,
+        trainedCount: 2,
+      },
+      {
+        artId: 'bjj',
+        startedAge: 12,
+        seasons: 3,
+        hardSeasons: 1,
+        level: 44,
+        trainedAtAge: -1,
+        trainedCount: 0,
+      },
+    ];
+    const career = {
+      sportId: 'mma',
+      stage: 'pro' as const,
+      startedAge: 10,
+      seasons: 14,
+      hardSeasons: 9,
+      form: 71,
+      trainedAtAge: 22,
+      trainedCount: 1,
+      reputation: 30,
+      titles: 1,
+      team: 'Harbor Street Gym',
+      tier: 'star' as const,
+      best: 'star' as const,
+      proSeasons: 6,
+      wins: 19,
+      losses: 4,
+    };
+    const past = {
+      sportId: 'boxing',
+      startedAge: 10,
+      endedAge: 34,
+      seasons: 24,
+      titles: 2,
+      reputation: 55,
+      reached: 'pro' as const,
+      bestTier: 'star' as const,
+      wins: 31,
+      losses: 5,
+      how: 'retired' as const,
+    };
+    const state: GameState = { ...base, sports: { arts, career, past: [past] } };
+    const again = fromSave(toSave(state, { id: save.id }));
+    expect(again.sports).toEqual(state.sports);
+    for (const offer of [
+      { kind: 'tour-card', sportId: 'golf', age: 22, eventId: 'sports.offer' },
+      {
+        kind: 'turn-pro',
+        sportId: 'boxing',
+        team: 'Ironbridge Fight Club',
+        age: 18,
+        eventId: 'sports.offer',
+      },
+    ] as const) {
+      const withOffer: GameState = { ...base, sports: { past: [], career: { ...CAREER }, offer } };
+      expect(fromSave(toSave(withOffer, { id: save.id })).sports.offer).toEqual(offer);
+      expect(migrateSave(JSON.parse(JSON.stringify(toSave(withOffer, { id: save.id })))).ok).toBe(
+        true,
+      );
+    }
+  });
+
+  it('refuses a save whose arts are not a list of at most two sound studies (0803)', () => {
+    const { save } = newSave('ARTS-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const study = {
+      artId: 'boxing',
+      startedAge: 10,
+      seasons: 2,
+      hardSeasons: 1,
+      level: 33,
+      trainedAtAge: -1,
+      trainedCount: 0,
+    };
+    expect(migrateSave({ ...raw, sports: { past: [], arts: [study] } }).ok).toBe(true);
+    expect(migrateSave({ ...raw, sports: { past: [], arts: [] } }).ok).toBe(true);
+    const bad: unknown[] = [
+      'boxing',
+      [null],
+      [{ ...study, artId: 7 }],
+      [{ ...study, level: 'high' }],
+      [{ ...study, level: Number.NaN }],
+      [{ ...study, seasons: 1.5 }],
+      [{ ...study, hardSeasons: 'many' }],
+      [study, { ...study, artId: 'bjj' }, { ...study, artId: 'karate' }],
+    ];
+    for (const arts of bad) {
+      const result = migrateSave({ ...raw, sports: { past: [], arts } });
+      expect(result.ok, JSON.stringify(arts)).toBe(false);
+    }
+  });
+
+  it('opens a v53 save as it is, with no post, and moves only the version (0804)', () => {
+    const { save } = newSave('POST-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    old.sports = { past: [], career: { ...CAREER } };
+    old.version = 53;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.sports).toEqual({ past: [], career: CAREER });
+    expect('post' in result.value.sports).toBe(false);
+  });
+
+  it('round-trips a post, a post that was turned down, and the two new questions (0804)', () => {
+    const { save } = newSave('POST-ROUND');
+    const base = fromSave(save);
+    const past = {
+      sportId: 'swimming',
+      startedAge: 10,
+      endedAge: 30,
+      seasons: 14,
+      titles: 2,
+      reputation: 40,
+      reached: 'pro' as const,
+      bestTier: 'star' as const,
+      how: 'retired' as const,
+    };
+    for (const post of [
+      { sportId: 'swimming', kind: 'coach', level: 'pro', since: 33, seasons: 4 },
+      {
+        sportId: 'swimming',
+        kind: 'commentary',
+        level: 'local',
+        since: 33,
+        seasons: 0,
+        over: true,
+      },
+    ] as const) {
+      const state: GameState = { ...base, sports: { past: [past], post } };
+      expect(fromSave(toSave(state, { id: save.id })).sports).toEqual(state.sports);
+    }
+    const offers = [
+      {
+        kind: 'national-team',
+        sportId: 'track',
+        team: 'Lakeview Training Center',
+        age: 17,
+        eventId: 'sports.offer',
+      },
+    ] as const;
+    for (const offer of offers) {
+      const withOffer: GameState = { ...base, sports: { past: [], career: { ...CAREER }, offer } };
+      expect(fromSave(toSave(withOffer, { id: save.id })).sports.offer).toEqual(offer);
+    }
+    // A post is the one question with no career to ask about.
+    const postOffer = {
+      kind: 'post-job',
+      sportId: 'swimming',
+      postKind: 'coach',
+      level: 'college',
+      age: 32,
+      eventId: 'sports.offer',
+    } as const;
+    const asked: GameState = { ...base, sports: { past: [past], offer: postOffer } };
+    expect(fromSave(toSave(asked, { id: save.id })).sports.offer).toEqual(postOffer);
+  });
+
+  it('accepts the two new questions: a national-team place with its career, and a post with none (0804)', () => {
+    const { save } = newSave('OFFER-OK');
+    const raw = JSON.parse(JSON.stringify(save));
+    const nat = {
+      kind: 'national-team',
+      sportId: 'track',
+      team: 'Lakeview Training Center',
+      age: 17,
+      eventId: 'sports.offer',
+    };
+    const post = {
+      kind: 'post-job',
+      sportId: 'swimming',
+      postKind: 'coach',
+      level: 'college',
+      age: 32,
+      eventId: 'sports.offer',
+    };
+    const past = {
+      sportId: 'swimming',
+      startedAge: 10,
+      endedAge: 30,
+      seasons: 14,
+      titles: 2,
+      reputation: 40,
+      reached: 'pro',
+      bestTier: 'star',
+      how: 'retired',
+    };
+    expect(
+      migrateSave({ ...raw, sports: { past: [], career: { ...CAREER }, offer: nat } }).ok,
+    ).toBe(true);
+    expect(migrateSave({ ...raw, sports: { past: [past], offer: post } }).ok).toBe(true);
+  });
+
+  it('refuses a post that is not a sound coaching or commentary job, and any other question with no career (0804)', () => {
+    const { save } = newSave('POST-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const post = { sportId: 'swimming', kind: 'coach', level: 'pro', since: 33, seasons: 4 };
+    expect(migrateSave({ ...raw, sports: { past: [], post } }).ok).toBe(true);
+    const bad: unknown[] = [
+      'coach',
+      null,
+      { ...post, sportId: 7 },
+      { ...post, kind: 'manager' },
+      { ...post, level: 'galactic' },
+      { ...post, since: 33.5 },
+      { ...post, seasons: 'four' },
+      { ...post, over: 'yes' },
+    ];
+    for (const row of bad) {
+      expect(migrateSave({ ...raw, sports: { past: [], post: row } }).ok, JSON.stringify(row)).toBe(
+        false,
+      );
+    }
+    const orphan = {
+      kind: 'national-team',
+      sportId: 'track',
+      team: 'x',
+      age: 17,
+      eventId: 'sports.offer',
+    };
+    expect(migrateSave({ ...raw, sports: { past: [], offer: orphan } }).ok).toBe(false);
+  });
+
+  it('opens a v54 save with an empty acting life and moves only the version (0805)', () => {
+    const { save } = newSave('ACTING-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.acting;
+    old.version = 54;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.acting).toEqual({
+      stageYears: 0,
+      credits: 0,
+      tier: 'local',
+      hits: 0,
+      reputation: 0,
+      awards: 0,
+      idle: 0,
+      offers: [],
+      booked: [],
+      applied: [],
+    });
+  });
+
+  it('round-trips an acting life: an agent, lessons, offers on the table and booked parts (0805)', () => {
+    const { save } = newSave('ACTING-ROUND');
+    const base = fromSave(save);
+    const offer = {
+      id: '24:1',
+      tier: 'supporting' as const,
+      billing: 'supporting' as const,
+      medium: 'a feature film',
+      title: 'Salt Flats',
+      fee: 42_000,
+      days: 22,
+      source: 'applied' as const,
+      age: 24,
+      asked: true,
+    };
+    const booked = {
+      id: '23:0',
+      tier: 'working' as const,
+      billing: 'bit' as const,
+      medium: 'a small TV role',
+      title: 'Low Tide',
+      fee: 3_200,
+      days: 3,
+      age: 23,
+      bookedAge: 23,
+    };
+    const acting = {
+      craft: 66,
+      stageYears: 4,
+      seenAge: 23,
+      credits: 11,
+      tier: 'supporting' as const,
+      best: 'supporting' as const,
+      hits: 2,
+      reputation: 31,
+      awards: 1,
+      idle: 0,
+      agent: { since: 22 },
+      lessons: { since: 18, seasons: 5 },
+      devAtAge: 24,
+      devCount: 2,
+      offers: [offer],
+      booked: [booked],
+      appliedAge: 24,
+      applied: ['call:24:0'],
+    };
+    const state: GameState = { ...base, acting };
+    expect(fromSave(toSave(state, { id: save.id })).acting).toEqual(acting);
+  });
+
+  it('refuses an acting life that is not sound (0805)', () => {
+    const { save } = newSave('ACTING-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const good = raw.acting;
+    expect(migrateSave({ ...raw, acting: good }).ok).toBe(true);
+    const part = {
+      id: 'x',
+      tier: 'local',
+      billing: 'lead',
+      medium: 'a student film',
+      title: 'Paper Boats',
+      fee: 0,
+      days: 6,
+      age: 20,
+    };
+    const bad = [
+      null,
+      [],
+      { ...good, tier: 'legend' },
+      { ...good, best: 'legend' },
+      { ...good, credits: -1 },
+      { ...good, credits: 1.5 },
+      { ...good, reputation: 101 },
+      { ...good, craft: 120 },
+      { ...good, craft: 101 },
+      { ...good, agent: { since: 'x' } },
+      { ...good, lessons: { since: 12 } },
+      { ...good, applied: [3] },
+      { ...good, offers: [{ ...part, source: 'asked', billing: 'villain' }] },
+      { ...good, offers: [{ ...part }] },
+      { ...good, booked: [{ ...part }] },
+    ];
+    for (const row of bad) {
+      expect(migrateSave({ ...raw, acting: row }).ok, JSON.stringify(row)).toBe(false);
+    }
+  });
+
+  it('opens a v55 save with an empty musician and moves only the version (0806)', () => {
+    const { save } = newSave('MUSIC-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.music;
+    old.version = 55;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.music).toEqual({
+      stageYears: 0,
+      listeners: 0,
+      peak: 0,
+      released: { single: 0, ep: 0, lp: 0 },
+      catalogue: 0,
+      bestQuality: 0,
+      reputation: 0,
+      awards: 0,
+      idle: 0,
+      lastPay: 0,
+      plan: { single: 0, ep: 0, lp: 0, tour: false },
+      collabs: {},
+      answered: [],
+      tours: 0,
+    });
+  });
+
+  it('keeps a musician a v55 save somehow already has rather than writing over it (0806)', () => {
+    const { save } = newSave('MUSIC-KEEP');
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 55;
+    old.music = { ...old.music, listeners: 1200, peak: 1200 };
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.music.listeners).toBe(1200);
+  });
+
+  it('round-trips a musician: a deal, an offer, a plan, collaborations and lessons (0806)', () => {
+    const { save } = newSave('MUSIC-ROUND');
+    const base = fromSave(save);
+    const music = {
+      craft: 71,
+      stageYears: 3,
+      listeners: 48_000,
+      peak: 61_000,
+      released: { single: 9, ep: 2, lp: 1 },
+      catalogue: 17.5,
+      bestQuality: 88,
+      reputation: 34,
+      awards: 1,
+      idle: 0,
+      best: 'regional' as const,
+      lastPay: 41_000,
+      lessons: { since: 16, seasons: 6 },
+      deal: {
+        kind: 'indie' as const,
+        label: 'Porchlight Records',
+        advance: 24_000,
+        royalty: 0.4,
+        left: 2,
+        since: 24,
+        owed: 31_500,
+        paid: true,
+      },
+      offer: {
+        id: 'lbl:26',
+        kind: 'major' as const,
+        label: 'Crestline Records',
+        advance: 90_000,
+        royalty: 0.18,
+        term: 3,
+        age: 26,
+        asked: true,
+        source: 'demo' as const,
+      },
+      demoAge: 26,
+      plan: { single: 4, ep: 1, lp: 0, tour: true },
+      collabs: { 'p:music:2': 1 },
+      answered: ['co:2030:music:0'],
+      tours: 3,
+    };
+    const state: GameState = { ...base, music };
+    expect(fromSave(toSave(state, { id: save.id })).music).toEqual(music);
+  });
+
+  it('refuses a musician that is not sound (0806)', () => {
+    const { save } = newSave('MUSIC-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const good = raw.music;
+    expect(migrateSave({ ...raw, music: good }).ok).toBe(true);
+    const deal = {
+      kind: 'indie',
+      label: 'Porchlight Records',
+      advance: 1000,
+      royalty: 0.4,
+      left: 2,
+      since: 24,
+      owed: 0,
+      paid: false,
+    };
+    const offer = {
+      id: 'lbl:26',
+      kind: 'indie',
+      label: 'Porchlight Records',
+      advance: 1000,
+      royalty: 0.4,
+      term: 2,
+      age: 26,
+      source: 'called',
+    };
+    expect(migrateSave({ ...raw, music: { ...good, deal, offer } }).ok).toBe(true);
+    const bad = [
+      null,
+      [],
+      { ...good, best: 'legend' },
+      { ...good, listeners: -1 },
+      { ...good, listeners: 1.5 },
+      { ...good, reputation: 101 },
+      { ...good, bestQuality: -1 },
+      { ...good, catalogue: -2 },
+      { ...good, catalogue: 'lots' },
+      { ...good, craft: 120 },
+      { ...good, craft: 101 },
+      { ...good, lastPay: -5 },
+      { ...good, tours: 1.2 },
+      { ...good, released: { single: 1, ep: 0 } },
+      { ...good, released: 3 },
+      { ...good, plan: { single: 1, ep: 0, lp: 0 } },
+      { ...good, plan: { single: -1, ep: 0, lp: 0, tour: false } },
+      { ...good, plan: null },
+      { ...good, lessons: { since: 12 } },
+      { ...good, deal: { ...deal, kind: 'boutique' } },
+      { ...good, deal: { ...deal, left: 0 } },
+      { ...good, deal: { ...deal, paid: 'yes' } },
+      { ...good, deal: { ...deal, royalty: 0 } },
+      { ...good, deal: { ...deal, royalty: 1.5 } },
+      { ...good, deal: { ...deal, advance: -1 } },
+      { ...good, deal: { ...deal, owed: -1 } },
+      { ...good, offer: { ...offer, source: 'email' } },
+      { ...good, offer: { ...offer, term: 0 } },
+      { ...good, offer: { ...offer, id: 7 } },
+      { ...good, offer: { ...offer, asked: 'no' } },
+      { ...good, collabs: [] },
+      { ...good, collabs: { x: -1 } },
+      { ...good, answered: [3] },
+      { ...good, answered: 'x' },
+      { ...good, demoAge: -1 },
+    ];
+    for (const row of bad) {
+      expect(migrateSave({ ...raw, music: row }).ok, JSON.stringify(row)).toBe(false);
+    }
+  });
+
+  it('opens a v56 save with an empty model and moves only the version (0807)', () => {
+    const { save } = newSave('MODEL-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.modeling;
+    old.version = 56;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    expect(result.value.modeling).toEqual({
+      credits: 0,
+      tier: 'test',
+      hits: 0,
+      reputation: 0,
+      awards: 0,
+      idle: 0,
+      lastPay: 0,
+      followers: 0,
+      peak: 0,
+      brandOwed: 0,
+      brandAnswered: [],
+      offers: [],
+      booked: [],
+      applied: [],
+    });
+  });
+
+  it('keeps a model a v56 save somehow already has rather than writing over it (0807)', () => {
+    const { save } = newSave('MODEL-KEEP');
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 56;
+    old.modeling = { ...old.modeling, credits: 7, followers: 900, peak: 900 };
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.modeling.credits).toBe(7);
+    expect(result.value.modeling.followers).toBe(900);
+  });
+
+  it('round-trips a model: a rung, an agency, jobs on the table and booked, and brand money (0807)', () => {
+    const { save } = newSave('MODEL-ROUND');
+    const base = fromSave(save);
+    const modeling = {
+      craft: 68,
+      seenAge: 25,
+      portfolioAge: 24,
+      credits: 14,
+      tier: 'editorial' as const,
+      best: 'campaign' as const,
+      hits: 1,
+      reputation: 31,
+      awards: 1,
+      idle: 0,
+      lastPay: 52_000,
+      agency: { since: 22 },
+      followers: 41_000,
+      peak: 60_000,
+      brandOwed: 8_000,
+      brandAnswered: ['sp:2030:modeling:0'],
+      offers: [
+        {
+          id: '26:0',
+          tier: 'editorial' as const,
+          placement: 'featured' as const,
+          medium: 'a magazine spread',
+          client: 'Atelier North',
+          rate: 3_200,
+          days: 5,
+          usage: 4_000,
+          source: 'applied' as const,
+          age: 26,
+          asked: true,
+        },
+      ],
+      booked: [
+        {
+          id: '25:1',
+          tier: 'commercial' as const,
+          placement: 'group' as const,
+          medium: 'a catalogue shoot',
+          client: 'Calloway Outfitters',
+          rate: 1_200,
+          days: 8,
+          usage: 0,
+          age: 25,
+          bookedAge: 25,
+        },
+      ],
+      appliedAge: 26,
+      applied: ['26:2'],
+    };
+    const state: GameState = { ...base, modeling };
+    expect(fromSave(toSave(state, { id: save.id })).modeling).toEqual(modeling);
+  });
+
+  it('refuses a model that is not sound (0807)', () => {
+    const { save } = newSave('MODEL-BAD');
+    const raw = JSON.parse(JSON.stringify(save));
+    const good = raw.modeling;
+    expect(migrateSave({ ...raw, modeling: good }).ok).toBe(true);
+    const offer = {
+      id: '26:0',
+      tier: 'catalogue',
+      placement: 'featured',
+      medium: 'a catalogue shoot',
+      client: 'Calloway Outfitters',
+      rate: 1000,
+      days: 4,
+      usage: 0,
+      source: 'asked',
+      age: 26,
+    };
+    const shoot = {
+      id: '25:0',
+      tier: 'catalogue',
+      placement: 'featured',
+      medium: 'a catalogue shoot',
+      client: 'Calloway Outfitters',
+      rate: 1000,
+      days: 4,
+      usage: 0,
+      age: 25,
+      bookedAge: 25,
+    };
+    expect(
+      migrateSave({
+        ...raw,
+        modeling: {
+          ...good,
+          offers: [offer],
+          booked: [shoot],
+          agency: { since: 20 },
+          craft: 50,
+          best: 'face',
+        },
+      }).ok,
+    ).toBe(true);
+    // Both ends of a scale are on it: a name nobody knows, or everybody; no craft yet, or all of it.
+    for (const edge of [0, 100]) {
+      expect(
+        migrateSave({ ...raw, modeling: { ...good, reputation: edge, craft: edge } }).ok,
+        String(edge),
+      ).toBe(true);
+    }
+    // A single day's work is a job: the floor is one, not two.
+    expect(migrateSave({ ...raw, modeling: { ...good, offers: [{ ...offer, days: 1 }] } }).ok).toBe(
+      true,
+    );
+    expect(migrateSave({ ...raw, modeling: { ...good, booked: [{ ...shoot, days: 1 }] } }).ok).toBe(
+      true,
+    );
+    const bad = [
+      null,
+      [],
+      'model',
+      { ...good, tier: 'legend' },
+      { ...good, tier: 3 },
+      { ...good, best: 'legend' },
+      { ...good, credits: -1 },
+      { ...good, credits: 1.5 },
+      { ...good, hits: -1 },
+      { ...good, awards: 0.5 },
+      { ...good, idle: -1 },
+      { ...good, lastPay: -5 },
+      { ...good, followers: -1 },
+      { ...good, peak: 1.5 },
+      { ...good, brandOwed: -1 },
+      { ...good, seenAge: -1 },
+      { ...good, portfolioAge: 1.5 },
+      { ...good, appliedAge: -2 },
+      { ...good, reputation: 101 },
+      { ...good, reputation: -1 },
+      { ...good, reputation: 'high' },
+      { ...good, craft: 120 },
+      { ...good, craft: 101 },
+      { ...good, craft: -1 },
+      { ...good, craft: 'a lot' },
+      { ...good, agency: { since: 'x' } },
+      { ...good, agency: null },
+      { ...good, applied: [3] },
+      { ...good, applied: 'x' },
+      { ...good, brandAnswered: [3] },
+      { ...good, brandAnswered: 'x' },
+      { ...good, offers: 'x' },
+      { ...good, booked: 'x' },
+      { ...good, offers: [{ ...offer, tier: 'legend' }] },
+      { ...good, offers: [{ ...offer, placement: 'villain' }] },
+      { ...good, offers: [{ ...offer, id: 7 }] },
+      { ...good, offers: [{ ...offer, medium: 7 }] },
+      { ...good, offers: [{ ...offer, client: 7 }] },
+      { ...good, offers: [{ ...offer, rate: -1 }] },
+      { ...good, offers: [{ ...offer, rate: 1.5 }] },
+      { ...good, offers: [{ ...offer, days: 0 }] },
+      { ...good, offers: [{ ...offer, days: 2.5 }] },
+      { ...good, offers: [{ ...offer, usage: -1 }] },
+      { ...good, offers: [{ ...offer, age: -1 }] },
+      { ...good, offers: [{ ...offer, source: 'email' }] },
+      { ...good, offers: [{ ...offer, asked: 'no' }] },
+      { ...good, offers: [shoot] },
+      { ...good, offers: [null] },
+      { ...good, booked: [offer] },
+      { ...good, booked: [{ ...shoot, bookedAge: -1 }] },
+      { ...good, booked: [{ ...shoot, tier: 'legend' }] },
+      { ...good, booked: [{ ...shoot, days: 0 }] },
+    ];
+    for (const row of bad) {
+      expect(migrateSave({ ...raw, modeling: row }).ok, JSON.stringify(row)).toBe(false);
+    }
+  });
+
+  it('is at version 50 (0808)', () => {
+    expect(CURRENT_SAVE_VERSION).toBe(58);
+  });
+
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {
     // Ticket 0606. No version bump: `trade`, `leaseEnds` and `rent` are optional on a tenant. Losing
     // `rent` on a reload would reprice a lease at today's rate; losing `leaseEnds` would end it.
@@ -2353,5 +3204,172 @@ describe('Ticket 0406 — a question survives being saved', () => {
     );
     const quietBack = fromSave(JSON.parse(JSON.stringify(quiet)));
     expect('rival' in quietBack.businesses[0]!).toBe(false);
+  });
+});
+
+describe('the racing team (0808)', () => {
+  const team = {
+    rung: 3,
+    car: 57,
+    driver: { kind: 'hired', id: 'drv:2040:3:1', name: 'Marco Vance', skill: 64, age: 27 },
+    development: 'heavy',
+    titles: 1,
+    best: 4,
+    seasons: 6,
+    last: { year: 2043, rung: 3, place: 4, field: 18, title: false, incident: true },
+  };
+
+  const withTeam = (label: string, racing: unknown) => {
+    const { save } = newSave(label);
+    const raw = JSON.parse(JSON.stringify(save));
+    raw.businesses = [
+      {
+        id: 'biz:2040:racing:0',
+        typeId: 'biz.racing',
+        name: 'Redshift Racing',
+        openedYear: 2040,
+        invested: 15_000_000,
+        cash: 1_000_000,
+        price: 100,
+        supplier: 'standard',
+        payroll: 'medium',
+        staff: 3,
+        autoStaff: true,
+        reputation: 50,
+        luck: 1,
+        profits: [],
+        branches: [],
+        ...(racing === undefined ? {} : { racing }),
+      },
+    ];
+    return raw;
+  };
+
+  it('moves a v57 save to v58 with nothing written but the version', () => {
+    const { save } = newSave('RACE-OLD');
+    const old = JSON.parse(JSON.stringify(save));
+    old.version = 57;
+    const result = migrateSave(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.version).toBe(58);
+    expect(CURRENT_SAVE_VERSION).toBe(58);
+    const { version: _a, ...rest } = result.value;
+    const { version: _b, ...was } = old;
+    expect(rest).toEqual(was);
+  });
+
+  it('keeps a business with no team, and one with a team, exactly', () => {
+    expect(migrateSave(withTeam('RACE-NONE', undefined)).ok).toBe(true);
+    const raw = withTeam('RACE-KEEP', team);
+    const result = migrateSave(raw);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.businesses[0]!.racing).toEqual(team);
+  });
+
+  it('round-trips a team through a save and back, with the owner in the car or a hired driver', () => {
+    const { save } = newSave('RACE-ROUND');
+    const base = fromSave(save);
+    for (const driver of [team.driver, { kind: 'owner' }]) {
+      const owned = {
+        ...JSON.parse(JSON.stringify(withTeam('RACE-ROUND', { ...team, driver }).businesses[0])),
+      };
+      const state: GameState = { ...base, businesses: [owned] };
+      const back = fromSave(JSON.parse(JSON.stringify(toSave(state, { id: save.id }))));
+      expect(back.businesses[0]!.racing).toEqual({ ...team, driver });
+    }
+  });
+
+  it('accepts a team with no season behind it, and the edge of every scale', () => {
+    const { last: _last, ...fresh } = team;
+    expect(migrateSave(withTeam('RACE-FRESH', fresh)).ok).toBe(true);
+    for (const rung of [1, 5]) {
+      expect(
+        migrateSave(withTeam('RACE-RUNG', { ...team, rung, best: rung })).ok,
+        String(rung),
+      ).toBe(true);
+    }
+    for (const car of [0, 100]) {
+      expect(migrateSave(withTeam('RACE-CAR', { ...team, car })).ok, String(car)).toBe(true);
+    }
+    for (const skill of [0, 100]) {
+      expect(
+        migrateSave(withTeam('RACE-SKILL', { ...team, driver: { ...team.driver, skill } })).ok,
+        String(skill),
+      ).toBe(true);
+    }
+    expect(migrateSave(withTeam('RACE-ZERO', { ...team, titles: 0, seasons: 0 })).ok).toBe(true);
+    expect(
+      migrateSave(withTeam('RACE-AGE', { ...team, driver: { ...team.driver, age: 0 } })).ok,
+    ).toBe(true);
+    // A team that finished last, or won the title, is a season too.
+    for (const place of [1, 18]) {
+      expect(
+        migrateSave(
+          withTeam('RACE-PLACE', { ...team, last: { ...team.last, place, title: place === 1 } }),
+        ).ok,
+        String(place),
+      ).toBe(true);
+    }
+    for (const development of ['lean', 'steady', 'heavy']) {
+      expect(migrateSave(withTeam('RACE-DEV', { ...team, development })).ok, development).toBe(
+        true,
+      );
+    }
+  });
+
+  it('refuses a team that is not sound, so a season is never run on nonsense', () => {
+    const bad: unknown[] = [
+      null,
+      [],
+      'team',
+      { ...team, rung: 0 },
+      { ...team, rung: 6 },
+      { ...team, rung: 2.5 },
+      { ...team, rung: '3' },
+      { ...team, best: 0 },
+      { ...team, best: 6 },
+      { ...team, car: -1 },
+      { ...team, car: 101 },
+      { ...team, car: '50' },
+      { ...team, car: undefined },
+      { ...team, development: 'reckless' },
+      { ...team, development: undefined },
+      { ...team, titles: -1 },
+      { ...team, titles: 1.5 },
+      { ...team, seasons: -1 },
+      { ...team, seasons: 0.5 },
+      { ...team, driver: undefined },
+      { ...team, driver: null },
+      { ...team, driver: { kind: 'robot' } },
+      { ...team, driver: { ...team.driver, id: 7 } },
+      { ...team, driver: { ...team.driver, name: undefined } },
+      { ...team, driver: { ...team.driver, skill: -1 } },
+      { ...team, driver: { ...team.driver, skill: 101 } },
+      { ...team, driver: { ...team.driver, skill: '60' } },
+      { ...team, driver: { ...team.driver, age: -1 } },
+      { ...team, driver: { ...team.driver, age: 27.5 } },
+      { ...team, last: null },
+      { ...team, last: { ...team.last, year: 2043.5 } },
+      { ...team, last: { ...team.last, rung: 0 } },
+      { ...team, last: { ...team.last, rung: 6 } },
+      { ...team, last: { ...team.last, place: 0 } },
+      { ...team, last: { ...team.last, place: 1.5 } },
+      { ...team, last: { ...team.last, field: 3, place: 4 } },
+      { ...team, last: { ...team.last, field: 'big' } },
+      { ...team, last: { ...team.last, title: 'yes' } },
+      { ...team, last: { ...team.last, incident: 1 } },
+    ];
+    for (const row of bad) {
+      expect(migrateSave(withTeam('RACE-BAD', row)).ok, JSON.stringify(row)).toBe(false);
+    }
+    // A business that is not an object at all is not a team either.
+    const { save } = newSave('RACE-JUNK');
+    const raw = JSON.parse(JSON.stringify(save));
+    raw.businesses = [null];
+    expect(migrateSave(raw).ok).toBe(false);
+    raw.businesses = ['biz'];
+    expect(migrateSave(raw).ok).toBe(false);
   });
 });

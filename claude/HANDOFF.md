@@ -18,7 +18,13 @@ checks and review remain pending; general life-event wording stays last.
 "return to this" findings, **engine, save and balance included**, and asked that nothing else be worked
 until they are done. Read `claude/playtest-rules-brief.md` first. For P1–P16 in that brief it overrides
 section 0 and the CORE_RULES, migration and validator limits in section 8. Outside that list, section 0
-still applies. v0.08 and 0508 wait.
+still applies. 0508 waits. **12 October: Agent A's v0.08 (0801–0809, the sports, acting, music, modeling and racing engines and
+their screens) was integrated with your P1–P16 on `integrate/sports-on-main`.** Agent A had built it in parallel on the older
+main and had taken saves v44–v50; yours (P1–P16) were already on main as v44–v51, so Agent A's migrations were **renumbered after yours**:
+0801 is now v52, 0803 v53, 0804 v54, 0805 v55, 0806 v56, 0807 v57 and 0808 v58 (0802 and 0809 have no bump). The current save is **v58** and
+the next free version is **v59**. Your migrations 43–50 and the P16 migration are unchanged. Saves written by Agent A's old stack build
+(v44–v50 with sports) cannot be opened as the same version on the integrated build; they were development saves only. Agent A's CORE_RULES lessons
+were renumbered 13.164–13.203 after yours (13.134–13.163).
 
 **7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
 one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
