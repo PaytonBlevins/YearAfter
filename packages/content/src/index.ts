@@ -191,3 +191,4 @@ export * from './music';
 export * from './modeling';
 export * from './racing';
 export * from './awards';
+export * from './military';

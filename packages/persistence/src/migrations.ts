@@ -1220,6 +1220,18 @@ const migrations: Readonly<Record<number, Migration>> = {
    * clock.
    */
   57: (save) => ({ ...save, version: 58 }),
+  /**
+   * v58 -> v59: Ticket 0901 — the service engine. Nobody before it could serve, so every older save gets an empty
+   * service: no career, nothing in the past, no question. What a v58 save already carries is kept. No RNG, no clock.
+   */
+  58: (save) => ({
+    ...save,
+    military:
+      typeof save['military'] === 'object' && save['military'] !== null
+        ? save['military']
+        : { past: [] },
+    version: 59,
+  }),
 };
 
 /**
@@ -1609,6 +1621,78 @@ function jobOk(value: unknown, offered: boolean): boolean {
   );
 }
 
+const SERVICE_BRANCHES_OK: readonly string[] = ['army'];
+const SERVICE_ENDINGS_OK: readonly string[] = ['washed-out', 'not-retained', 'term', 'retired'];
+
+/** Ticket 0901. A service life: a career in progress (optional), the ones that ended, and a question. */
+function militaryOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const military = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  const level = (n: unknown): boolean => typeof n === 'number' && n >= 0 && n <= 100;
+  const branchOk = (n: unknown): boolean =>
+    typeof n === 'string' && SERVICE_BRANCHES_OK.includes(n);
+  const gradeOk = (n: unknown): boolean => whole(n) && (n as number) >= 1 && (n as number) <= 9;
+  if (!optionalWhole(military['turnedDownAge']) || !optionalWhole(military['appliedAge'])) {
+    return false;
+  }
+  const past = military['past'];
+  if (!Array.isArray(past)) return false;
+  for (const row of past) {
+    if (typeof row !== 'object' || row === null) return false;
+    const r = row as Record<string, unknown>;
+    if (
+      !branchOk(r['branch']) ||
+      !whole(r['enlistedAge']) ||
+      !whole(r['endedAge']) ||
+      !whole(r['years']) ||
+      !gradeOk(r['finalGrade']) ||
+      !level(r['reputation']) ||
+      typeof r['how'] !== 'string' ||
+      !SERVICE_ENDINGS_OK.includes(r['how']) ||
+      (r['discharge'] !== 'honorable' && r['discharge'] !== 'entry-level')
+    ) {
+      return false;
+    }
+  }
+  const service = military['service'];
+  if (service !== undefined) {
+    if (typeof service !== 'object' || service === null) return false;
+    const c = service as Record<string, unknown>;
+    if (
+      !branchOk(c['branch']) ||
+      (c['stage'] !== 'training' && c['stage'] !== 'serving') ||
+      !whole(c['enlistedAge']) ||
+      !gradeOk(c['grade']) ||
+      !whole(c['years']) ||
+      !whole(c['termEnds']) ||
+      !level(c['performance']) ||
+      !level(c['reputation']) ||
+      (c['effort'] !== 'normal' && c['effort'] !== 'hard') ||
+      !optionalWhole(c['pushedAtAge']) ||
+      !optionalWhole(c['pushedThisYear']) ||
+      !whole(c['lastPay']) ||
+      typeof c['post'] !== 'string'
+    ) {
+      return false;
+    }
+  }
+  const offer = military['offer'];
+  if (offer !== undefined) {
+    if (typeof offer !== 'object' || offer === null) return false;
+    const o = offer as Record<string, unknown>;
+    if (!branchOk(o['branch']) || !whole(o['age']) || typeof o['eventId'] !== 'string')
+      return false;
+    if (o['kind'] === 'reenlist') {
+      if (!gradeOk(o['grade']) || !whole(o['years'])) return false;
+    } else if (o['kind'] !== 'enlist') {
+      return false;
+    }
+  }
+  return true;
+}
+
 function modelingOk(value: unknown): boolean {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const modeling = value as Record<string, unknown>;
@@ -1981,6 +2065,8 @@ export function validateCurrentSave(
     require('music', candidate['music'], musicOk(candidate['music'])),
     // Ticket 0807. Always present from v49: a rung, credits, a following, and the jobs on the table and booked.
     require('modeling', candidate['modeling'], modelingOk(candidate['modeling'])),
+    // Ticket 0901. Always present from v59: a career in progress, the ones that ended, and a question.
+    require('military', candidate['military'], militaryOk(candidate['military'])),
     // Ticket 0704. Optional, but if it is there it has to be one of the two.
     require('representation', candidate['representation'], candidate['representation'] ===
       undefined ||

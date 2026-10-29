@@ -50,6 +50,7 @@ const majorOpens = (state: GameState): readonly string[] => {
 };
 import type { GameState } from './game-state';
 import { RngDomains, stableUnit } from './rng/rng';
+import { servicePushesLeft, workHarderInService } from './military-work';
 
 export type WorkError = CannotApply | 'no-such-job' | 'no-job';
 
@@ -334,6 +335,8 @@ export function applyFor(state: GameState, jobId: string): Result<ApplyOutcome, 
  * every year compounds.
  */
 export function workHarder(state: GameState): Result<PushOutcome, WorkError> {
+  // Ticket 0901. Somebody in uniform has no job held; the same button feeds the service's read of them.
+  if (state.military.service) return workHarderInService(state);
   const held = state.employment.job;
   if (!held) return err('no-job');
 
@@ -389,6 +392,7 @@ export function workHarder(state: GameState): Result<PushOutcome, WorkError> {
  * is who is allowed to read it: the simulation, not the button.
  */
 export const pushesLeft = (state: GameState): number => {
+  if (state.military.service) return servicePushesLeft(state);
   const held = state.employment.job;
   if (!held) return 0;
   const pushed = held.pushedAtAge === state.player.age ? held.pushedThisYear : 0;

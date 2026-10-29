@@ -58,6 +58,7 @@ import {
   withModelingOffer,
 } from './modeling';
 import { runSportsYear, sportsOccupation, withSportsOffer } from './sports';
+import { militaryOccupation, runMilitaryYear, withMilitaryOffer } from './military';
 import { postTitle } from './sports-post';
 import { withLifeOffer } from './life-offer';
 import { runEvents } from './phases/events';
@@ -402,6 +403,33 @@ export function advanceYear(state: GameState): AdvanceResult {
   });
 
   /*
+    Ticket 0901 — a service life. Basic pay for the year, the year's promotion and the question at the end of a term.
+    Taxed and posted below with the other earnings. A recruiter's offer is dropped when another field has already
+    raised a question this year: one a year (spec 1233).
+  */
+  const rawMilitaryYear = runMilitaryYear({
+    before: state,
+    education: education.education,
+    age: nextAge,
+    year: nextYear,
+  });
+  const otherOfferRaised =
+    sportsYear.sports.offer !== undefined ||
+    actingYear.acting.offers.length > 0 ||
+    musicYear.music.offer !== undefined ||
+    modelYear.modeling.offers.length > 0;
+  const militaryYear =
+    rawMilitaryYear.military.offer?.kind === 'enlist' &&
+    state.military.offer === undefined &&
+    otherOfferRaised
+      ? (() => {
+          const { offer: _dropped, ...rest } = rawMilitaryYear.military;
+          return { ...rawMilitaryYear, military: rest };
+        })()
+      : rawMilitaryYear;
+  const serving = state.military.service !== undefined;
+
+  /*
     Ticket 0411 — what the year's work did to them.
 
     Applied HERE rather than inside the phase, because a phase reports and
@@ -412,7 +440,11 @@ export function advanceYear(state: GameState): AdvanceResult {
   */
   const worked: Character = {
     ...education.player,
-    stats: nudgeStats(education.player.stats, employment.statDeltas),
+    // Ticket 0901. Somebody in uniform has no idle years: the service's own year is what moves them.
+    stats: nudgeStats(
+      education.player.stats,
+      serving ? militaryYear.statDeltas : employment.statDeltas,
+    ),
   };
 
   /*
@@ -546,6 +578,17 @@ export function advanceYear(state: GameState): AdvanceResult {
       musicYear.pay,
     modelYear.pay,
   );
+  // Ticket 0901. Basic pay is pay: taxed on top of the rest.
+  const militaryTax = businessTaxOn(
+    earnedIncome +
+      businessesYear.drawn +
+      creatorsYear.net +
+      sportsYear.pay +
+      actingYear.pay +
+      musicYear.pay +
+      modelYear.pay,
+    militaryYear.pay,
+  );
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
   const dealsYear = runDealsYear({
     deals: state.deals,
@@ -558,7 +601,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       sportsYear.pay +
       actingYear.pay +
       musicYear.pay +
-      modelYear.pay,
+      modelYear.pay +
+      militaryYear.pay,
   });
   const businessNet = businessesYear.drawn - businessTax;
 
@@ -680,6 +724,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       (actingYear.pay - actingTax) +
       (musicYear.pay - musicTax) +
       (modelYear.pay - modelTax) +
+      (militaryYear.pay - militaryTax) +
       drawn.pension +
       drawn.state,
     wealth: Math.floor(Number(state.player.cash) / 100) + drawn.drawn,
@@ -713,6 +758,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     // living bill stops paying for getting about (a bounded dollar allowance).
     vehicleCost: vehiclesYear.cost,
     ownsVehicle: state.vehicles.length > 0,
+    // Ticket 0901. The roof and the meals are the service's while they serve.
+    housingProvided: serving,
   });
 
   const events = runEvents(
@@ -877,6 +924,8 @@ export function advanceYear(state: GameState): AdvanceResult {
   write(events.lines, () => undefined);
   write(celebritiesYear.lines, (index) => `t:${nextYear}:celeb:${index}`);
   write(sportsYear.lines, (index) => `t:${nextYear}:sports:${index}`);
+  // Ticket 0901. A year in uniform.
+  write(militaryYear.lines, (index) => `t:${nextYear}:military:${index}`);
   // Acting for a living ends the day job, as playing for a living does (0803, 0804).
   const actingLeftJob =
     employment.employment.job !== undefined &&
@@ -1100,6 +1149,25 @@ export function advanceYear(state: GameState): AdvanceResult {
             category: 'tax' as const,
             amount: dollars(-modelTax),
             source: 'Tax on modeling pay',
+          },
+        ]
+      : []),
+    // Ticket 0901. Basic pay, and the tax on it. Housing and food are not a row: they are the lower living cost.
+    ...(militaryYear.pay > 0
+      ? [
+          {
+            category: 'salary' as const,
+            amount: dollars(militaryYear.pay),
+            source: 'Army pay',
+          },
+        ]
+      : []),
+    ...(militaryTax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-militaryTax),
+            source: 'Tax on Army pay',
           },
         ]
       : []),
@@ -1474,6 +1542,7 @@ export function advanceYear(state: GameState): AdvanceResult {
         happiness:
           (fieldMood === 0 ? (shaped.happiness ?? 0) : fieldMood) +
           (living.mood > 0 && money.short < 0 ? 0 : living.mood) +
+          militaryYear.mood +
           renovationComfortFor(homesYear.homes, living.hardship, money.short),
       }),
       health: clampStat(health.health + sportsYear.health),
@@ -1487,6 +1556,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       actingOccupation(actingYear.acting) ??
       musicOccupation(musicYear.music) ??
       modelingOccupation(modelYear.modeling) ??
+      // Ticket 0901. A rank is the occupation while somebody serves.
+      militaryOccupation(militaryYear.military) ??
       occupationFor(
         education.education,
         nextAge,
@@ -1540,6 +1611,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       ...musicYear.records,
       // Ticket 0807. A first job, a rise, an award.
       ...modelYear.records,
+      // Ticket 0901. A rank, a term ended, an enlistment that did not take.
+      ...militaryYear.records,
       // Ticket 0808. The ceremonies, the sweeps and the charts, last, so no earlier record's ordinal moves.
       ...awardsYear.records,
     ].reduce<readonly LifeRecord[]>(
@@ -1618,6 +1691,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     acting: actingYear.acting,
     music: musicYear.music,
     modeling: modelYear.modeling,
+    military: militaryYear.military,
     // Ticket 0504. The same short year puts a financed car behind.
     vehicles: markVehiclesMissed(
       vehiclesYear.vehicles,
@@ -1735,7 +1809,10 @@ export function advanceYear(state: GameState): AdvanceResult {
                   withModelingOffer(
                     withMusicOffer(
                       withActingOffer(
-                        withSportsOffer(repossess(foreclose(reviewed)), health.alive),
+                        withSportsOffer(
+                          withMilitaryOffer(repossess(foreclose(reviewed)), health.alive),
+                          health.alive,
+                        ),
                         health.alive,
                       ),
                       health.alive,

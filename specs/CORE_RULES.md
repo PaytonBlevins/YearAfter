@@ -3590,3 +3590,32 @@ showed they missed a missing hairline in every other state. Put the checks in a 
 call it from the helper every test already opens the screen through, and let it skip, by name, any card the screen
 had before the ticket. Doing so found two real bugs the first time it ran over all states: the hire-a-driver list and an
 opened martial art's skill bars had no hairlines between their rows.
+
+### 13.204 To test a hashed draw, compute the hash first and run the year only for the seeds that fire
+
+A recruiter's offer is a hash of the seed, the generation, the age and a name. The first test ran a full year on every
+seed in a loop and counted the offers, which is slow and, at 1% a year, mostly runs years where nothing is being tested.
+Compute the same key in the test, keep the seeds whose draw falls under the chance, and run the real year only on those.
+Every trial then counts, the loop can stop at the third case, and the test says how many cases it saw.
+
+### 13.205 A guard that only matters when two things collide needs a test that builds the collision
+
+"One question a year" lets a recruiter's offer give way to a modeling job raised the same year. Thirty-one hand-written
+mutants killed the guard's neighbours and one survived: replacing the guard's condition with `false`. No ordinary life
+raises both in a year, so no ordinary test could tell. The test that kills it makes a life that is certain to raise one
+(a model who has been seen), finds seeds where the other also fires by the same hash, and asserts that only one question
+stands. A guard with no collision test is a line that has never run.
+
+### 13.206 A fixture taken from a played life inherits what the life did, so a test about a gate states the gate's inputs
+
+An "adult at twenty-two" had gone to a trade school in one seed and dropped out in another, so the enlistment tests
+found no one eligible and the offer never fired, which looked like a bug in the offer. A diploma, being out of school and
+a fit body are the gate's inputs; a test about the gate sets them, and a test about the bar sets one of them wrong on
+purpose. Memoising the played life is fine; relying on what it happened to do is not.
+
+### 13.207 Run one mutation worker per source tree
+
+Three workers on the same files each rewrote the line under test while the others ran their tests against it, so every
+result was a mix of two mutants and the restore step from one worker overwrote the other's change. Parallelism needs a
+copy of the tree per worker, or none. A worker also restores its file on any exit, including a signal, and the file is
+checked against the original before the next run starts.

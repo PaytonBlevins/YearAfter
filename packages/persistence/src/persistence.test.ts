@@ -3027,8 +3027,8 @@ describe('Ticket 0406 — a question survives being saved', () => {
     }
   });
 
-  it('is at version 50 (0808)', () => {
-    expect(CURRENT_SAVE_VERSION).toBe(58);
+  it('is at version 59 (0901)', () => {
+    expect(CURRENT_SAVE_VERSION).toBe(59);
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {
@@ -3245,17 +3245,20 @@ describe('the racing team (0808)', () => {
     return raw;
   };
 
-  it('moves a v57 save to v58 with nothing written but the version', () => {
+  it('moves a v57 save on with nothing written but the version and the service', () => {
+    // 0808 wrote nothing at v58; 0901 adds an empty `military` at v59, so a v57 save arrives at the current version
+    // with exactly that one thing added.
     const { save } = newSave('RACE-OLD');
     const old = JSON.parse(JSON.stringify(save));
     old.version = 57;
+    delete old.military;
     const result = migrateSave(old);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.version).toBe(58);
-    expect(CURRENT_SAVE_VERSION).toBe(58);
-    const { version: _a, ...rest } = result.value;
+    expect(result.value.version).toBe(CURRENT_SAVE_VERSION);
+    const { version: _a, military, ...rest } = result.value;
     const { version: _b, ...was } = old;
+    expect(military).toEqual({ past: [] });
     expect(rest).toEqual(was);
   });
 

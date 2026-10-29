@@ -15,6 +15,7 @@ const ENTERTAINMENT_OFFERS = new Set([
   'acting.offer',
   'music.offer',
   'modeling.offer',
+  'military.offer',
 ]);
 
 /** The choice an ordinary-life harness makes: the first, except that an entertainment offer is turned down. */

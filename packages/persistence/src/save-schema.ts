@@ -48,6 +48,7 @@ import type {
   ActingState,
   MusicState,
   ModelingState,
+  MilitaryState,
   RngSnapshot,
   WorldState,
 } from '@yearafter/simulation';
@@ -57,8 +58,8 @@ import type { SaveId } from '@yearafter/core';
 /** P7: explicit purchase savings goal; old lives migrate with no goal. */
 /** P10: optional paid aftermarket watch work; legacy values stay unchanged. */
 /** P11: optional once-paid preventive car service, expires after the next advance. */
-/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain. */
-export const CURRENT_SAVE_VERSION = 58;
+/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain; 0901 (the service) took v59. */
+export const CURRENT_SAVE_VERSION = 59;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -101,6 +102,11 @@ export type { WorldState };
  * team, so the migration has nothing to write; the version is bumped so a build that cannot read a team refuses the
  * save rather than dropping it. (The racing driver career and the awards layer keep nothing of their own: a driver's
  * career is a sports career, and the awards are derived.)
+ *
+ * v59 added the service (Ticket 0901): `military` — a career in progress (a branch, a grade, years served, the term, a
+ * performance the service never shows as a number, a reputation of its own), the careers that ended and how, and a
+ * question the service is asking. Always present, so the migration gives every older save an empty one: nobody before it
+ * could serve.
  *
  * v49 added modeling (Ticket 0807): `modeling` — the rung work is coming in at, a craft level, credits, a modeling
  * reputation, awards, an agency, a following brands read, and the jobs on the table and booked. Always present, so the
@@ -225,7 +231,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 58;
+  readonly version: 59;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -349,6 +355,8 @@ export interface SaveGameV18 {
   readonly music: MusicState;
   /** Ticket 0807. A model: a rung, credits, a following, an agency, the jobs on the table and booked. Always present from v49. */
   readonly modeling: ModelingState;
+  /** Ticket 0901. A service life: a career, the ones that ended, and a question. Always present from v59. */
+  readonly military: MilitaryState;
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

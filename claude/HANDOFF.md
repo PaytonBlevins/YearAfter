@@ -26,6 +26,12 @@ the next free version is **v59**. Your migrations 43–50 and the P16 migration 
 (v44–v50 with sports) cannot be opened as the same version on the integrated build; they were development saves only. Agent A's CORE_RULES lessons
 were renumbered 13.164–13.203 after yours (13.134–13.163).
 
+**29 October: Agent A's v0.09 Military has started.** 0901 (the service engine, with the Army) took save **v59**, stacked
+on `integrate/sports-on-main`. **The current save is v59 and the next free version is v60.** Do not take v59 or lower. It
+adds a `military` field to the game state (a career in progress, the ones that ended, and a question), a `housingProvided`
+input to the living phase, and a hand-over in `workHarder`/`pushesLeft` to a service version while somebody serves.
+Details: `0901-the-service-engine.md`.
+
 **7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
 one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
 inject-or-close choices and no automatic personal-bank rescue. Death winds down troubled

@@ -52,6 +52,7 @@ import { EMPTY_CELEBRITIES, type CelebrityState } from './celebrity-state';
 import { EMPTY_ACTING, type ActingState } from './acting-state';
 import { EMPTY_MODELING, type ModelingState } from './modeling-state';
 import { EMPTY_MUSIC, type MusicState } from './music-state';
+import { EMPTY_MILITARY, type MilitaryState } from './military-state';
 import { EMPTY_SPORTS, type SportsState } from './sports-state';
 import { Rng } from './rng/rng';
 
@@ -343,6 +344,11 @@ export interface GameState {
    * table and booked. Always present from v49.
    */
   readonly modeling: ModelingState;
+  /**
+   * Ticket 0901. A service life: the career in progress, the ones that ended, and a question the service is asking.
+   * Always present from v59.
+   */
+  readonly military: MilitaryState;
   /** Live RNG registry. Serialised into the save on every write. */
   readonly rng: Rng;
 }
@@ -517,7 +523,9 @@ export const hasSystemicOffer = (state: GameState): boolean =>
   // Ticket 0806. A label's deal.
   state.music.offer !== undefined ||
   // Ticket 0807. A job somebody wants the model for.
-  state.modeling.offers.length > 0;
+  state.modeling.offers.length > 0 ||
+  // Ticket 0901. A recruiter's offer, or the end of a term.
+  state.military.offer !== undefined;
 
 export const createWorldState = (year: number, generation = 1): WorldState => ({
   year,
@@ -568,6 +576,7 @@ export interface CreateGameStateOptions {
   readonly acting?: ActingState;
   readonly music?: MusicState;
   readonly modeling?: ModelingState;
+  readonly military?: MilitaryState;
 }
 
 export const createGameState = (
@@ -620,6 +629,7 @@ export const createGameState = (
   acting: options.acting ?? EMPTY_ACTING,
   music: options.music ?? EMPTY_MUSIC,
   modeling: options.modeling ?? EMPTY_MODELING,
+  military: options.military ?? EMPTY_MILITARY,
   pending: options.pending ?? [],
   rng,
 });

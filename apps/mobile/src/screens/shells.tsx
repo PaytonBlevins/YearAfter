@@ -992,12 +992,12 @@ export function ActivitiesScreen() {
             subtitle: 'Care, fertility, rehab, treatment',
             route: { screen: 'doctor', title: 'Doctor' },
           },
-          { icon: 'crime', title: 'Crime', ticket: '0901' },
+          { icon: 'crime', title: 'Crime', ticket: 'v0.09' },
           {
             icon: 'gambling',
             title: 'Gambling',
             subtitle: 'Casino, racing, lottery',
-            ticket: '0902',
+            ticket: 'v0.10',
           },
           // Tickets 0701–0707 built the creator engine, the celebrity world, their events and
           // fame opportunities; ticket 0708 is the screens for all of it. Fame is reached from

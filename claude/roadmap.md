@@ -629,6 +629,40 @@ built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sport
 > General crime, Crime talent integration, independent dealer progression,
 > organized crime, courts/prison/parole/escape minigame.
 
+**29 October 2026: Military measured and a breakdown approved (0901–0906); 0901 is built.** Payton chose Military as the
+first part of v0.09. Intelligence is the military-intelligence door in 0905; Politics and Crime get their own
+measurement and breakdown when Military is done. See `claude/v009-military-measurement.md` and
+`claude/0901-the-service-engine.md`.
+
+| Ticket                                             | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0901 The service engine, with the Army**         | **DONE (engine).** Enlist at 17–35 by a recruiter's offer or an application (no draft); a year of basic training (12.6% do not finish); nine enlisted grades on the real 2026 pay table, promoted by time and a yearly performance read from Discipline, Smarts and Health (never Charisma), with the Work Harder button feeding it; a four-year term and the choice to stay or leave, and retirement at twenty years; housing provided for a single person. Every draw is a hash, so a life with no recruiter replays exactly as before. **Save v59** (Agent B: v60+). No screens (0906). `claude/0901-the-service-engine.md` |
+| **0902 Other branches, specialties and officers**  | Not started. Navy, Marine Corps, Air Force and Coast Guard (no Space Force), four or five specialties each, and the officer road.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **0903 Deployments**                               | Not started. Orders, a year away, combat pay, awards, rare death and real injuries, the world carrying on.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **0904 Discharge, benefits and veterans**          | Not started. Every way out, the Blended Retirement System, the TSP, the GI Bill, veteran preference.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **0905 Military intelligence and the agencies**    | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **0906 Military screens**                          | Not started. Last, as for sports.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
+### 0901 findings (160–168)
+
+**160. Only the pay table, the force profile, the first-term attrition and the Army titles are real.** The pay table is a third-party reading of the DFAS chart, not yet checked against DFAS. Every other number (offer rates, standards, promotion times and chances, performance targets, training pass rate, retention floor) is a named, pinned judgement in `content/src/military.ts`.
+
+**161. The share who serve is generous.** 12% of lives are offered; taking every offer serves one life in eight. Dial: `enlistOfferChance`.
+
+**162. A dropout cannot enlist.** The standard asks for a high-school credential and the game has no GED.
+
+**163. First terms end in three ways here, not the real mix:** washing out (12.6%), not being asked to stay (4.8%) or choosing to leave. The real first-term attrition (35.8%) needs discharges, injuries and deployments (0903, 0904).
+
+**164. A serving member can still be raised an acting, music or modeling offer.** Those engines have no service guard; 0902 should add one.
+
+**165. Events gated on "has a job" read a service member as unemployed.** Left for 0904.
+
+**166. A 20-year retiree is paid no pension, TSP or GI Bill.** That is 0904.
+
+**167. Performance is never shown;** only the reputation word is.
+
+**168. 0901 took save v59.** Agent B's saves are v60 and onward.
+
 ## v0.10 World Integration
 
 > Upgrade NPC simulation, family dynasties with resilient legacy, hidden world
@@ -1663,6 +1697,10 @@ Agent A's next ticket.
 12. **0801 → 0809 (v0.08 Entertainment & Sports).** _(0801 The sports engine, with basketball, 0802 The
     other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting and 0806 Music and 0807 Modeling and 0808 Racing team and the world shipped as engines; 0809 Entertainment and Sports screens
     shipped the screens for all of them. v0.08 is complete. Next is chosen by Payton.)_
+
+13. **0901 → 0906 (v0.09 Military).** _(0901 The service engine, with the Army shipped as an engine, 29 October 2026.
+    0902–0906 are approved and not started. Politics and Crime are not in this list; they get their own measurement.
+    Next is chosen by Payton.)_
 
 ## Playtest P1 — business rescue choices (7 October 2026)
 

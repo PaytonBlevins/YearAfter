@@ -31,6 +31,7 @@ import { answerVehicleOffer, isVehicleOfferDecision } from './vehicles';
 import { answerRenovationOffer, isRenovationOfferDecision } from './renovations';
 import { answerBusinessRescue, BUSINESS_RESCUE_EVENT_ID } from './business-rescue';
 import { answerActingOffer, isActingOfferDecision } from './acting';
+import { answerMilitaryOffer, isMilitaryOfferDecision } from './military';
 import { answerModelingOffer, isModelingOfferDecision } from './modeling';
 import { answerMusicOffer, isMusicOfferDecision } from './music';
 import { answerSportsOffer, isSportsOfferDecision } from './sports';
@@ -175,6 +176,15 @@ export function decide(
   // Ticket 0807. The eleventh: a job somebody wants the model for.
   if (isModelingOfferDecision(eventId)) {
     const answered = answerModelingOffer(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  // Ticket 0901. The twelfth: a recruiter's offer, or the end of a term.
+  if (isMilitaryOfferDecision(eventId)) {
+    const answered = answerMilitaryOffer(state, choiceId);
     if (!answered.ok) {
       return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
     }

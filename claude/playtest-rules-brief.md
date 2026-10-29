@@ -33,6 +33,10 @@ take v44–v58. If you already have, tell Payton before pushing and renumber. Ag
 `CORE_RULES.md`, `packages/*/src/index.ts`, `gameStore.tsx`, migrations, `TICKET`) only in small separate commits;
 rebase often.
 
+**Update, 29 October: Agent A's 0901 (the service engine) took save v59.** The current save is v59 and the next free
+version is **v60**. Do not take v44–v59. If you already have, tell Payton before pushing and renumber. 0901 touches the
+living phase (a `housingProvided` input that changes nothing for a life that is not serving) and `workHarder`.
+
 ## Read these first, in this order
 
 1. `specs/AI_CODING_INSTRUCTIONS.md`, `specs/ARCHITECTURE.md` (binding)
