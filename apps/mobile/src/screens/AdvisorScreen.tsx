@@ -24,17 +24,27 @@
 
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { INSTRUMENTS, KIND_LABELS, findInstrument } from '@yearafter/content';
 import {
   ADVISORS,
   VERB_LABELS,
   findAdvisor,
+  advisorFee,
+  priceOf,
   howTheyHaveDone,
   isPrediction,
   portfolioWorth,
   willTakeYou,
   type Recommendation,
 } from '@yearafter/finance';
-import { adviceFor, advisorCashFor, advicePreviewFor, feeThisYear } from '@yearafter/simulation';
+import {
+  adviceFor,
+  advisorCashFor,
+  advisorBudgetFor,
+  advicePreviewFor,
+  askAdvisorAbout,
+  feeThisYear,
+} from '@yearafter/simulation';
 import {
   ActionButton,
   Card,
@@ -53,12 +63,16 @@ export function AdvisorScreen() {
   const { state, hireAdvisorWith, dismissAdvisorNow, actOnAdviceWith, setPurchaseGoal } = useGame();
   const [firing, setFiring] = useState(false);
   const [goal, setGoal] = useState('');
+  const [query, setQuery] = useState('');
+  const [asked, setAsked] = useState<string>();
+  const [switching, setSwitching] = useState<string>();
   if (!state) return null;
 
   const held = Math.round(Number(portfolioWorth(state.prices, state.portfolio)) / 100);
   const advisor = state.advisorId ? findAdvisor(state.advisorId) : undefined;
 
   const cash = advisorCashFor(state);
+  const budget = advisorBudgetFor(state);
   const goalSection = (
     <>
       <SectionHeading>Saving for a purchase</SectionHeading>
@@ -69,7 +83,8 @@ export function AdvisorScreen() {
             goal protects {money(cash.goal)} more. That leaves {money(cash.spare)} spare.
           </Text>
           <Text style={styles.panelBody}>
-            Each investment suggestion uses 15% of spare cash. You still choose whether to act.
+            Advisor purchases share a yearly budget of 15% of spare cash. You’ve used{' '}
+            {money(budget.spent)} through advice this year, with {money(budget.remaining)} left.
           </Text>
           <TextInput
             accessibilityLabel="Purchase savings goal"
@@ -105,38 +120,66 @@ export function AdvisorScreen() {
     </>
   );
 
+  const tiers = (
+    <>
+      <SectionHeading>Compare advisor tiers</SectionHeading>
+      <Card>
+        {ADVISORS.map((row, index) => {
+          const takes = willTakeYou(row, held);
+          const current = row.id === advisor?.id;
+          const annualFee = advisorFee(row, held);
+          const record = howTheyHaveDone(state.prices, row.id);
+          const rate = row.feeBasis ? `${row.feeBasis / 100}% of holdings yearly` : 'No fee';
+          return (
+            <Fragment key={row.id}>
+              {index > 0 ? <RowDivider /> : null}
+              <ListRow
+                icon="advisor"
+                title={row.name}
+                subtitle={row.blurb}
+                value={current ? 'Current' : undefined}
+                meta={`${rate} · ${row.minimumPortfolio ? `${money(row.minimumPortfolio)} minimum` : 'No minimum'}`}
+                affordance={takes && !current ? 'action' : 'none'}
+                disabled={!takes}
+                onPress={takes && !current ? () => setSwitching(row.id) : undefined}
+                wrap
+              />
+              <Text style={styles.tierDetail}>
+                {takes
+                  ? `About ${money(annualFee)} a year at your current holdings.`
+                  : `You have ${money(held)} invested.`}
+                {record.calls > 0
+                  ? ` Past buy calls: ${record.right} of ${record.calls} worked in a replay.`
+                  : row.reasons.includes('belowTrend')
+                    ? ' Not enough price history for a replay yet.'
+                    : ' No price forecasts.'}
+              </Text>
+              {switching === row.id && takes && !current ? (
+                <ConfirmationCard
+                  title={advisor ? 'Switch advisors?' : 'Hire this advisor?'}
+                  body={`${row.name}. ${rate}. Estimated fee: ${money(annualFee)} this year.`}
+                  confirmLabel={advisor ? 'Switch advisor' : 'Hire advisor'}
+                  onConfirm={() => {
+                    hireAdvisorWith(row.id);
+                    setSwitching(undefined);
+                    setAsked(undefined);
+                    setFiring(false);
+                  }}
+                  onCancel={() => setSwitching(undefined)}
+                />
+              ) : null}
+            </Fragment>
+          );
+        })}
+      </Card>
+    </>
+  );
+
   if (!advisor) {
     return (
       <ScrollView contentContainerStyle={styles.content}>
         {goalSection}
-        <SectionHeading>Who you could talk to</SectionHeading>
-        <Card>
-          {ADVISORS.map((row, index) => {
-            const takes = willTakeYou(row, held);
-            return (
-              <Fragment key={row.id}>
-                {index > 0 ? <RowDivider /> : null}
-                <ListRow
-                  icon="advisor"
-                  title={row.name}
-                  subtitle={row.blurb}
-                  meta={
-                    takes
-                      ? row.feeBasis === 0
-                        ? 'No fee'
-                        : `${row.feeBasis / 100}% of what you hold, every year`
-                      : `Wants ${money(row.minimumPortfolio)} invested. You have ${money(held)}`
-                  }
-                  affordance={takes ? 'action' : 'none'}
-                  disabled={!takes}
-                  onPress={takes ? () => hireAdvisorWith(row.id) : undefined}
-                  wrap
-                />
-              </Fragment>
-            );
-          })}
-        </Card>
-
+        {tiers}
         {/*
           THE PITCH INCLUDES THE MEASUREMENT, and the measurement is not
           flattering. Every figure here came out of this build's own
@@ -149,7 +192,7 @@ export function AdvisorScreen() {
           <View style={styles.panel}>
             <Text style={styles.panelBody}>
               They can help you spread risk and keep money for bills and a planned purchase. Company
-              picks are forecasts: they can be wrong. Advice costs money when you hire the paid
+              picks are forecasts: they can be wrong. Advice costs money when you hire a paid
               advisor.
             </Text>
             <Text style={styles.panelFoot}>
@@ -164,6 +207,23 @@ export function AdvisorScreen() {
   const recommendations = adviceFor(state);
   const fee = feeThisYear(state);
   const record = howTheyHaveDone(state.prices, advisor.id);
+
+  const term = query.trim().toLowerCase();
+  const listed = INSTRUMENTS.filter((item) => priceOf(state.prices, item.id) > 0);
+  const matches = term
+    ? listed
+        .filter((item) =>
+          `${item.name} ${item.ticker} ${KIND_LABELS[item.kind]} ${item.kind}`
+            .toLowerCase()
+            .includes(term),
+        )
+        .sort(
+          (a, b) =>
+            Number(b.ticker.toLowerCase() === term) - Number(a.ticker.toLowerCase() === term),
+        )
+    : listed.filter((item) => state.portfolio.some((holding) => holding.instrumentId === item.id));
+  const chosen = asked ? findInstrument(asked) : undefined;
+  const answer = chosen ? askAdvisorAbout(state, chosen.id) : undefined;
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -209,6 +269,60 @@ export function AdvisorScreen() {
         ) : null}
       </Card>
 
+      <SectionHeading>Ask about an investment</SectionHeading>
+      <Card>
+        <View style={styles.panel}>
+          <Text style={styles.panelBody}>
+            Ask whether to buy, hold, trim or sell. Asking never places a trade.
+          </Text>
+          <TextInput
+            accessibilityLabel="Find an investment"
+            placeholder="Search name, ticker or type"
+            value={query}
+            onChangeText={(text) => {
+              setQuery(text);
+              setAsked(undefined);
+            }}
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={styles.search}
+          />
+          {term && matches.length === 0 ? (
+            <Text style={styles.panelBody}>No investments match that search.</Text>
+          ) : null}
+          {matches.length > 12 ? (
+            <Text style={styles.panelFoot}>
+              Showing 12 results. Enter a name or ticker to narrow the list.
+            </Text>
+          ) : null}
+        </View>
+        {matches.slice(0, 12).map((item) => (
+          <Fragment key={item.id}>
+            <RowDivider inset={false} />
+            <ListRow
+              icon="invest"
+              title={item.name}
+              subtitle={`${item.ticker} · ${KIND_LABELS[item.kind]}`}
+              affordance="action"
+              onPress={() => setAsked(item.id)}
+              accent={chosen?.id === item.id}
+              wrap
+            />
+            {chosen?.id === item.id && answer ? (
+              <View style={styles.panel} accessibilityLiveRegion="polite">
+                <Text style={styles.strong}>
+                  {VERB_LABELS[answer.verb]} · {item.name}
+                </Text>
+                <Text style={styles.panelBody}>{answer.text}</Text>
+                {answer.forecast ? (
+                  <Text style={styles.panelFoot}>This is a forecast, and it can be wrong.</Text>
+                ) : null}
+              </View>
+            ) : null}
+          </Fragment>
+        ))}
+      </Card>
+
       <SectionHeading note={`${recommendations.length} this year`}>What they say</SectionHeading>
       {recommendations.length === 0 ? (
         <EmptyState
@@ -230,6 +344,7 @@ export function AdvisorScreen() {
         </Card>
       )}
 
+      {tiers}
       <SectionHeading>If you have had enough</SectionHeading>
       <Card>
         {firing ? (
@@ -298,14 +413,14 @@ function Advice({
       <Text style={styles.adviceText}>{rec.text}</Text>
       {preview ? <Text style={styles.panelFoot}>If you act: {preview}</Text> : null}
 
-      {onAct && rec.amount !== undefined && rec.amount > 0 ? (
+      {onAct && preview && rec.amount !== undefined && rec.amount > 0 ? (
         <ActionButton
           label={`${VERB_LABELS[rec.verb]} ${money(rec.amount)}`}
           variant="secondary"
           onPress={onAct}
           style={styles.adviceButton}
         />
-      ) : onAct ? (
+      ) : onAct && preview ? (
         <ActionButton
           label={`${VERB_LABELS[rec.verb]} it`}
           variant="secondary"
@@ -368,6 +483,20 @@ const styles = StyleSheet.create({
   },
   adviceButton: { marginTop: spacing.md, alignSelf: 'flex-start', paddingHorizontal: spacing.xl },
 
+  search: {
+    color: colors.ink,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    borderRadius: radii.sm,
+    minHeight: 44,
+  },
+  tierDetail: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    color: colors.inkMuted,
+    fontSize: typography.sizes.caption,
+  },
   panel: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md, gap: spacing.sm },
   panelBody: {
     fontFamily: typography.family,

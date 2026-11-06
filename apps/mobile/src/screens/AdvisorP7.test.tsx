@@ -6,7 +6,8 @@ import { createNewGame, type GameState, advisorCashFor } from '@yearafter/simula
 import { post } from '@yearafter/finance';
 import { GameProvider, useGame } from '../stores/gameStore';
 import { AdvisorScreen } from './AdvisorScreen';
-import { buttonLabelled, textsOf, hosts } from '../test/harness';
+import { INSTRUMENTS } from '@yearafter/content';
+import { buttonLabelled, textsOf, hosts, rowTitled } from '../test/harness';
 let rendered: ReactTestRenderer | undefined;
 let game: ReturnType<typeof useGame> | undefined;
 const id = asSaveId('p7-ui');
@@ -80,5 +81,20 @@ describe('P7 goal screen and real store', () => {
     expect(textsOf(r).join(' ')).not.toContain('If you act:');
     expect(advisorCashFor(game!.state!).spare).toBe(0);
     expect(game!.state!.portfolio).toEqual([]);
+  });
+  it('answers a bond question without making a trade and compares three fee tiers', async () => {
+    const { r } = await mount('adv.independent');
+    const bond = INSTRUMENTS.find((row) => row.kind === 'bond')!;
+    await act(() => hosts(r, 'TextInput')[1]!.props.onChangeText(bond.ticker));
+    await act(() => rowTitled(r, bond.name).props.onPress());
+    expect(textsOf(r).join(' ')).toContain('coupon');
+    expect(game!.state!.portfolio).toEqual([]);
+    expect(rowTitled(r, 'A private wealth manager').props.meta).toContain('0.4%');
+    expect(rowTitled(r, 'A private wealth manager').props.disabled).toBe(true);
+    expect(rowTitled(r, 'A planner at your bank').props.meta).toContain('No fee');
+    await act(() => rowTitled(r, 'A planner at your bank').props.onPress());
+    expect(game!.state!.advisorId).toBe('adv.independent');
+    await act(() => buttonLabelled(r, 'Switch advisor').props.onPress());
+    expect(game!.state!.advisorId).toBe('adv.branch');
   });
 });

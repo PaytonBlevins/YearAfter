@@ -26,6 +26,7 @@ import {
 import { cents } from '@yearafter/core';
 import {
   advisorFee,
+  instrumentAdviceFor,
   gapToTrend,
   howTheyHaveDone,
   recommendationsFor,
@@ -381,5 +382,68 @@ describe('the catalog behind it', () => {
     for (const [reason, count] of counts) {
       expect(count, reason).toBeGreaterThanOrEqual(6);
     }
+  });
+});
+
+describe('questions about one instrument and tier tradeoffs', () => {
+  const pro = ADVISORS.find((advisor) => advisor.id === 'adv.private')!;
+  const stock = INSTRUMENTS.find((row) => row.kind === 'stock')!;
+  const bond = INSTRUMENTS.find((row) => row.kind === 'bond')!;
+  const coin = INSTRUMENTS.find((row) => row.kind === 'crypto')!;
+  const base = {
+    prices: openingPrices(),
+    portfolio: [],
+    cash: 100_000,
+    year: 2040,
+    advisorId: PAID.id,
+  };
+
+  it('uses different evidence for a stock, a bond and a speculative coin', () => {
+    const price = stock.priceCents;
+    const prices = {
+      ...base.prices,
+      history: { ...base.prices.history, [stock.id]: [price, price, Math.round(price * 0.7)] },
+    };
+    expect(instrumentAdviceFor({ ...base, prices }, stock.id)).toMatchObject({
+      verb: 'buy',
+      forecast: true,
+    });
+    expect(instrumentAdviceFor({ ...base, prices, advisorId: FREE.id }, stock.id)).toMatchObject({
+      verb: 'hold',
+      forecast: false,
+    });
+    expect(instrumentAdviceFor({ ...base, prices, remainingBuyBudget: 0 }, stock.id)?.verb).toBe(
+      'hold',
+    );
+    expect(instrumentAdviceFor(base, bond.id)).toMatchObject({ verb: 'buy', forecast: false });
+    expect(instrumentAdviceFor(base, coin.id)?.verb).toBe('hold');
+    expect(instrumentAdviceFor(base, 'missing')).toBeUndefined();
+  });
+
+  it('can trim a concentrated holding or sell a small speculative position to replenish the reserve', () => {
+    const portfolio = [holdingOf(coin.id, 0.01, 100)];
+    expect(instrumentAdviceFor({ ...base, portfolio }, coin.id)?.verb).toBe('reduce');
+    expect(instrumentAdviceFor({ ...base, cash: 0, portfolio }, coin.id)?.verb).toBe('sell');
+  });
+
+  it('compares fees and replayed buy calls across the same histories', () => {
+    const totals = (id: string) => {
+      let calls = 0;
+      let right = 0;
+      for (let seed = 1; seed <= 40; seed++) {
+        const record = howTheyHaveDone(bookAfter(12, seed * 101), id);
+        calls += record.calls;
+        right += record.right;
+      }
+      return { calls, right };
+    };
+    const independent = totals(PAID.id);
+    const privateTier = totals(pro.id);
+    expect(advisorFee(pro, 250_000)).toBe(1000);
+    expect(advisorFee(PAID, 250_000)).toBe(500);
+    expect(privateTier.calls).toBeGreaterThan(independent.calls);
+    expect(privateTier.right).toBeGreaterThan(0);
+    expect(privateTier.right).toBeLessThan(privateTier.calls);
+    console.info('Advisor replay across 40 histories:', { independent, privateTier });
   });
 });

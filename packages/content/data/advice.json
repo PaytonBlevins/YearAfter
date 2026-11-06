@@ -311,14 +311,28 @@
       "sharpness": 0.22,
       "concentratedAt": 0.38,
       "speculativeAt": 0.22
-    }
-  ],
-  "notYetBuilt": [
+    },
     {
       "id": "adv.private",
-      "label": "A private wealth manager",
-      "needs": "private deals worth their fee",
-      "arrives": "v0.06"
+      "name": "A private wealth manager",
+      "blurb": "Flags concentration sooner and reviews more of your portfolio.",
+      "feeBasis": 40,
+      "flatFee": 0,
+      "minimumPortfolio": 250000,
+      "reasons": [
+        "concentrated",
+        "noFloor",
+        "idleCash",
+        "belowTrend",
+        "aboveTrend",
+        "strongEarner",
+        "steady"
+      ],
+      "picks": 4,
+      "sharpness": 0.16,
+      "concentratedAt": 0.28,
+      "speculativeAt": 0.12
     }
-  ]
+  ],
+  "notYetBuilt": []
 }
