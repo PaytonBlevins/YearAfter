@@ -6,8 +6,6 @@
  * says net worth does not need to follow the player everywhere, and putting it
  * in the header would make wealth the game's headline number.
  *
- * The portrait is a monogram tile for now. Character art is a v0.20 identity
- * task; a placeholder photo would be worse than an honest initial.
  */
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -15,7 +13,9 @@ import type { Character } from '@yearafter/character';
 import { formatMoney } from '@yearafter/core';
 import type { EducationState } from '@yearafter/education';
 import { occupationFor } from '@yearafter/simulation';
-import { colors, layout, radii, spacing, typography } from '../theme/theme';
+import { colors, layout, spacing, typography } from '../theme/theme';
+import Svg, { Path } from 'react-native-svg';
+import { Portrait } from '../theme/illustrations';
 import { Glyph } from '../theme/icons';
 
 export interface CharacterHeaderProps {
@@ -34,7 +34,6 @@ export function CharacterHeader({
   year,
   onPressDebug,
 }: CharacterHeaderProps) {
-  const initials = `${character.firstName.charAt(0)}${character.lastName.charAt(0)}`;
   // Derived, not read from `character.occupation`: a stored label is only
   // rewritten on Advance, so a resumed or migrated save showed one thing here
   // and something else on the Career screen for the same child.
@@ -50,9 +49,23 @@ export function CharacterHeader({
 
   return (
     <View style={styles.header}>
-      <View style={styles.portrait}>
-        <Text style={styles.portraitText}>{initials}</Text>
+      <View
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={StyleSheet.absoluteFill}
+      >
+        <Svg width="100%" height="100%" viewBox="0 0 400 72" preserveAspectRatio="xMidYMid slice">
+          {Array.from({ length: 36 }, (_, index) => {
+            const x = (index % 12) * 36 + (index >= 12 && index < 24 ? 18 : 0);
+            const y = Math.floor(index / 12) * 25 + 10;
+            return (
+              <Path key={index} d={`M${x} ${y - 3}l2 3-2 3-2-3z`} fill={colors.identityPattern} />
+            );
+          })}
+        </Svg>
       </View>
+      <Portrait identity={character.id} size={46} />
 
       <View style={styles.identity}>
         <Text numberOfLines={1} style={styles.name}>
@@ -64,8 +77,10 @@ export function CharacterHeader({
       </View>
 
       <View style={styles.money}>
-        <Text style={styles.balance}>{formatMoney(character.cash)}</Text>
-        <Text style={styles.year}>{year}</Text>
+        <Text numberOfLines={1} style={[styles.balance, character.cash < 0 && styles.overdrawn]}>
+          {formatMoney(character.cash)}
+        </Text>
+        <Text style={styles.year}>Cash · {year}</Text>
       </View>
 
       {onPressDebug ? (
@@ -85,34 +100,20 @@ export function CharacterHeader({
 
 const styles = StyleSheet.create({
   header: {
-    height: layout.headerHeight,
+    minHeight: layout.headerHeight,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-    backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.identity,
     borderBottomWidth: layout.hairlineWidth,
     borderBottomColor: colors.hairline,
-  },
-  portrait: {
-    width: 38,
-    height: 38,
-    borderRadius: radii.sm,
-    backgroundColor: colors.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  portraitText: {
-    fontFamily: typography.family,
-    fontSize: typography.sizes.label,
-    fontWeight: typography.weights.bold,
-    color: colors.accent,
-    letterSpacing: 0.4,
   },
   identity: { flex: 1, marginLeft: spacing.md, justifyContent: 'center' },
   name: {
     fontFamily: typography.family,
     fontSize: typography.sizes.heading,
-    fontWeight: typography.weights.semibold,
+    fontWeight: typography.weights.bold,
     color: colors.ink,
   },
   status: {
@@ -121,14 +122,15 @@ const styles = StyleSheet.create({
     color: colors.inkMuted,
     marginTop: 1,
   },
-  money: { alignItems: 'flex-end', marginLeft: spacing.sm },
+  money: { alignItems: 'flex-end', marginLeft: spacing.sm, maxWidth: '45%' },
   balance: {
     fontFamily: typography.family,
     fontSize: typography.sizes.heading,
-    fontWeight: typography.weights.semibold,
-    color: colors.ink,
+    fontWeight: typography.weights.bold,
+    color: colors.positive,
     fontVariant: ['tabular-nums'],
   },
+  overdrawn: { color: colors.negative },
   year: {
     fontFamily: typography.family,
     fontSize: typography.sizes.caption,

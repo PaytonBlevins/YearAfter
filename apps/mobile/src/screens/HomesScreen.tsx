@@ -176,6 +176,7 @@ export function HomesScreen() {
         <Fragment key={listing.id}>
           {index > 0 ? <RowDivider /> : null}
           <ListRow
+            icon="home"
             title={listing.name}
             subtitle={`${listing.units > 1 ? `${listing.units} units` : rooms(listing.beds, listing.baths)} · ${age(listing.age)} · ${
               HOME_CONDITION_LABELS[listing.condition]

@@ -306,6 +306,7 @@ export function BusinessesScreen() {
                 <Fragment key={type.id}>
                   {index > 0 ? <RowDivider /> : null}
                   <ListRow
+                    icon="business"
                     title={type.name}
                     subtitle={type.sector}
                     value={money(cost)}
@@ -353,6 +354,7 @@ export function BusinessesScreen() {
                 <Fragment key={listing.id}>
                   {index > 0 ? <RowDivider /> : null}
                   <ListRow
+                    icon="business"
                     title={listing.name}
                     subtitle={`${type.name} · ${listing.years} years${listing.locations > 1 ? ` · ${listing.locations} locations` : ''} · ${reputationWord(listing.reputation)}`}
                     value={money(listing.ask)}

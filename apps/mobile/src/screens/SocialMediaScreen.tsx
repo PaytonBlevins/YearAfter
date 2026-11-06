@@ -95,6 +95,7 @@ export function SocialMediaScreen() {
               <View key={channel.id}>
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
+                  icon="social"
                   title={channel.name}
                   subtitle={`${platform?.name ?? 'Channel'} · ${audienceLine(channel)} · Open to post`}
                   meta={channel.group ? `In ${channel.group.name}` : place}

@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
-import { colors, spacing, typography } from '../theme/theme';
+import { colors, radii, spacing, typography } from '../theme/theme';
 
 export function ScreenTabs({
   tabs,
@@ -26,7 +26,7 @@ export function ScreenTabs({
           onPress={() => onSelect(id)}
           style={[styles.tab, selected === id && styles.selected]}
         >
-          <Text style={styles.label}>{label}</Text>
+          <Text style={[styles.label, selected === id && styles.selectedLabel]}>{label}</Text>
         </Pressable>
       ))}
     </ScrollView>
@@ -35,7 +35,18 @@ export function ScreenTabs({
 
 const styles = StyleSheet.create({
   tabs: { gap: spacing.sm, paddingBottom: spacing.md },
-  tab: { padding: spacing.sm, borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  selected: { borderBottomColor: colors.ink },
-  label: { color: colors.ink, fontSize: typography.sizes.caption },
+  tab: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.md,
+    backgroundColor: colors.chromeSoft,
+  },
+  selected: { backgroundColor: colors.chrome },
+  selectedLabel: { color: colors.onAccent },
+  label: {
+    color: colors.ink,
+    fontSize: typography.sizes.label,
+    fontWeight: typography.weights.bold,
+  },
 });

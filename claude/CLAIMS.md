@@ -106,3 +106,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | November playtest — business control and valuation | Codex / Agent B (`feat/november-business-control`) | — | Claimed on the November fame-offer follow-up. |
 
 | November playtest — live auction counterbids | Codex / Agent B (`feat/november-live-auctions`) | — | Claimed on November business controls. |
+
+| November playtest — illustrated mobile interface | Codex / Agent B (feat/november-visual-refresh) | — | Claimed on live auction counterbids. |

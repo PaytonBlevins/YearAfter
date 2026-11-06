@@ -425,7 +425,7 @@ function WhatYouCanDo() {
     rows.push(
       <ListRow
         key="colleagues"
-        icon="social"
+        icon="friends"
         title="People at work"
         subtitle={
           colleagues.length === 0
@@ -461,7 +461,7 @@ function WhatYouCanDo() {
     rows.push(
       <ListRow
         key="clubs"
-        icon="social"
+        icon="trophy"
         title="Clubs & Teams"
         subtitle={
           joined.length === 0

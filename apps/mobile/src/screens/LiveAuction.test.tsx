@@ -1,4 +1,5 @@
 import { expect, it, vi } from 'vitest';
+import { Modal } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { asSaveId, dollars } from '@yearafter/core';
 import { post } from '@yearafter/finance';
@@ -46,6 +47,10 @@ it('shows a live counter, resumes after loading, and passes without moving money
   await mount();
   try {
     await act(() => rowTitled(rendered, lot.name).props.onPress());
+    expect(rendered.root.findAllByType(Modal)).toHaveLength(1);
+    await act(() => rendered.root.findByType(Modal).props.onRequestClose());
+    expect(rendered.root.findAllByType(Modal)).toHaveLength(0);
+    await act(() => rowTitled(rendered, lot.name).props.onPress());
     await act(() => rowTitled(rendered, 'Use cash').props.onPress());
     const submit = rendered.root
       .findAllByType(ActionButton)
@@ -69,6 +74,11 @@ it('shows a live counter, resumes after loading, and passes without moving money
 
     await act(() => rendered.unmount());
     await mount();
+    expect(textsOf(rendered).join(' ')).toContain('Another bidder offered');
+    const dialog = rendered.root.findByType(Modal);
+    await act(() => dialog.props.onRequestClose());
+    expect(rendered.root.findAllByType(Modal)).toHaveLength(0);
+    await act(() => rowTitled(rendered, lot.name).props.onPress());
     expect(textsOf(rendered).join(' ')).toContain('Another bidder offered');
     const pass = rendered.root
       .findAllByType(ActionButton)

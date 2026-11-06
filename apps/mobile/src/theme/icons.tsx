@@ -58,7 +58,16 @@ export type IconName =
   | 'lawsuit'
   | 'estate'
   | 'school'
-  | 'debug';
+  | 'debug'
+  | 'auction'
+  | 'music'
+  | 'trophy'
+  | 'card'
+  | 'film'
+  | 'camera'
+  | 'parcel'
+  | 'art'
+  | 'watch';
 
 type Drawing = (props: { strokeWidth: number; color: string }) => React.JSX.Element;
 
@@ -73,6 +82,50 @@ type Drawing = (props: { strokeWidth: number; color: string }) => React.JSX.Elem
  * a second, competing way to express the same action.
  */
 const DRAWINGS: Record<IconName, Drawing> = {
+  auction: ({ strokeWidth }) => (
+    <Path
+      d="M5 5l3-3 6 6-3 3zM8 8l-3 3 3 3 3-3m2-2 7 7-2 2-7-7M3 21h12m-11 0v-3h10v3"
+      strokeWidth={strokeWidth}
+    />
+  ),
+  music: ({ strokeWidth }) => (
+    <Path
+      d="M9 17V6l11-3v11M9 9l11-3M9 17c0 2-2 3-4 3s-3-1-2-3c1-2 4-2 6-2m11-1c0 2-2 3-4 3s-3-1-2-3c1-2 4-2 6-2"
+      strokeWidth={strokeWidth}
+    />
+  ),
+  trophy: ({ strokeWidth }) => (
+    <Path
+      d="M7 3h10v6a5 5 0 0 1-10 0zM7 5H3v2a4 4 0 0 0 4 4m10-6h4v2a4 4 0 0 1-4 4m-5 3v5m-4 2h8"
+      strokeWidth={strokeWidth}
+    />
+  ),
+  card: ({ strokeWidth }) => <Path d="M3 6h18v12H3zM3 10h18m-15 5h4" strokeWidth={strokeWidth} />,
+  film: ({ strokeWidth }) => (
+    <Path
+      d="M3 9h18v12H3zM3 9 2 5l17-3 1 4-17 3m4-5 3 3m3-4 3 3m-5 7 4 2-4 2z"
+      strokeWidth={strokeWidth}
+    />
+  ),
+  camera: ({ strokeWidth }) => (
+    <Path
+      d="M3 7h5l2-3h4l2 3h5v13H3zM15.5 13a3.5 3.5 0 1 1-7 0 3.5 3.5 0 1 1 7 0z"
+      strokeWidth={strokeWidth}
+    />
+  ),
+  art: ({ strokeWidth }) => (
+    <Path d="M3 4h18v16H3zM4 17l5-6 4 4 3-3 4 5m-4-9h.1" strokeWidth={strokeWidth} />
+  ),
+  watch: ({ strokeWidth }) => (
+    <Path
+      d="M9 6l1-4h4l1 4m-6 12 1 4h4l1-4m3-6a6 6 0 1 1-12 0 6 6 0 0 1 12 0zm-6-3v3l2 1m4-1h2"
+      strokeWidth={strokeWidth}
+    />
+  ),
+  parcel: ({ strokeWidth }) => (
+    <Path d="M3 7l9-4 9 4v11l-9 4-9-4zM3 7l9 4 9-4m-9 4v11M7 5l9 4v4" strokeWidth={strokeWidth} />
+  ),
+
   // Career — a case. Squared, horizontal, unlike anything else in the bar.
   career: ({ strokeWidth }) => (
     <>

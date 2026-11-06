@@ -147,6 +147,14 @@ const ROUTES = {
   modeling: { screen: 'modeling', title: 'Modeling' },
 } as const;
 
+const CAREER_STAMPS = {
+  sports: 'trophy',
+  studies: 'school',
+  acting: 'film',
+  music: 'music',
+  modeling: 'camera',
+} as const;
+
 export function EntertainmentScreen() {
   const { state } = useGame();
   if (!state) return null;
@@ -167,6 +175,7 @@ export function SpecialCareersContent() {
         {hubRows(state).map((row, index) => (
           <Divided key={row.id} first={index === 0}>
             <ListRow
+              icon={CAREER_STAMPS[row.id]}
               title={row.title}
               subtitle={row.closed ?? row.subtitle}
               {...(row.value === undefined || row.closed ? {} : { value: row.value })}
