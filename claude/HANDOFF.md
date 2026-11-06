@@ -501,3 +501,11 @@ each doc change, mirror it there. `claude/build-status.md` exists only in the
 Project. Payton confirmed that the other notes referenced but absent from this
 checkout also live there; they are not lost. Repository reconciliation does
 not imply that their Project copies have been read or mirrored.
+
+## 6 November playtest follow-up
+
+The first usability fixes are on `feat/november-playtest`, based on
+`integrate/sports-on-main` (the branch with the player's special careers).
+Card payoff, property tabs, tenant/illness notices, business reports, Career's
+Special careers tab and post reception are built. See `playtest-november.md`
+for the full playtest list, evidence and unresolved balance work.

@@ -2120,3 +2120,11 @@ wording and unrelated work wait.
   cited French study is not a universal US benchmark. The brief's undefined
   0.3–0.4 requires an explicit approved game metric; disclose both raw and log
   rather than silently claiming the easier statistic as success.
+
+### November playtest follow-up
+
+First usability batch on `feat/november-playtest`, based on
+`integrate/sports-on-main`: tap-to-pay cards, individual property tabs,
+tenant and illness notices, annual business reports, Special careers under
+Career, and post reception labels. Balance and live-auction/advisor work
+remain open. Reproduction details and all 15 notes: `playtest-november.md`.

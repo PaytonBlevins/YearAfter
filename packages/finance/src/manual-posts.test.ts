@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PLATFORMS, postFormatsFor } from '@yearafter/content';
 import { dollars } from '@yearafter/core';
 import { channelYear, fameTarget, newChannel, POSTS_PER_YEAR, type Channel } from './creators';
-import { publishPost, publishingCount } from './manual-posts';
+import { publishPost, publishPostWithReception, publishingCount } from './manual-posts';
 const make = (platformId = 'photo'): Channel => ({
   ...newChannel({
     seed: 'manual',
@@ -20,6 +20,26 @@ const make = (platformId = 'photo'): Channel => ({
 const publish = (channel = make(), kind = 'photo', year = 2040, seed = 'manual') =>
   publishPost({ channel, kind, year, seed, quality: 1 });
 describe('manual publishing', () => {
+  it('distinguishes all four receptions without changing the settled post', () => {
+    const seen = new Set();
+    for (let i = 0; i < 500; i++) {
+      const input = {
+        channel: make('shortform'),
+        kind: postFormatsFor('shortform')[0]!.id,
+        year: 2040,
+        seed: `reception-${i}`,
+        quality: 1,
+      };
+      const result = publishPostWithReception(input);
+      if (!result.ok) throw Error(result.error.kind);
+      seen.add(result.value.reception);
+      const delta = result.value.channel.audience - input.channel.audience;
+      expect(result.value.channel.publishing?.gained).toBe(delta);
+      if (result.value.reception === 'poor') expect(delta).toBeLessThan(0);
+      else expect(delta).toBeGreaterThan(0);
+    }
+    expect(seen).toEqual(new Set(['poor', 'good', 'great', 'viral']));
+  });
   it('has all requested real platforms and free accounts', () => {
     expect(PLATFORMS.map((p) => p.name)).toEqual([
       'YouTube',

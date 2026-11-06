@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { GameState } from '@yearafter/simulation';
 import { useGame } from '../stores/gameStore';
+import { annualNoticeGroups, noticeGroupsBody } from './annualNoticeGroups';
 import { recapOf } from '../screens/entertainmentView';
 import { graduationOutcome } from './GraduationNotice';
 import { OutcomeCard, type Outcome } from './OutcomeCard';
@@ -15,15 +16,20 @@ import { OutcomeCard, type Outcome } from './OutcomeCard';
  * waits behind a pending question, an answer, a breakdown and a graduation.
  */
 export function recapOutcome(before: GameState, after: GameState): Outcome | undefined {
-  const groups = recapOf(before, after);
+  const updates = annualNoticeGroups(before, after);
+  const groups = [
+    ...updates,
+    ...recapOf(before, after).map((group) => ({ ...group, lines: [...group.lines] })),
+  ];
   if (groups.length === 0) return undefined;
   return {
-    title: groups.length === 1 ? groups[0]!.field : 'The year in your work',
-    body: groups
-      .map((group) =>
-        groups.length === 1 ? group.lines.join(' ') : `${group.field}: ${group.lines.join(' ')}`,
-      )
-      .join('\n\n'),
+    title:
+      groups.length === 1
+        ? groups[0]!.field
+        : updates.length
+          ? 'Yearly updates'
+          : 'The year in your work',
+    body: noticeGroupsBody(groups, groups.length > 1),
     tone: 'neutral',
   };
 }

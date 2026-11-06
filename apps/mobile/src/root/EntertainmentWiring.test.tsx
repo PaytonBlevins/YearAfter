@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { useGame } from '../stores/gameStore';
 import { useNavigation } from '../navigation/navigation';
-import { ActivitiesScreen, MindBodyScreen } from '../screens/shells';
+import { ActivitiesScreen, CareerScreen, MindBodyScreen } from '../screens/shells';
 import { ADULT } from '../test/entertainmentFixtures';
 import { rowTitled, show } from '../test/harness';
 
@@ -31,27 +31,31 @@ async function open(element: React.ReactElement) {
 }
 
 describe('the doors', () => {
-  it('Activities opens Sports and Entertainment', async () => {
-    const r = await open(<ActivitiesScreen />);
-    const row = rowTitled(r, 'Sports and Entertainment');
-    expect(row.props.disabled).toBeFalsy();
-    await act(() => row.props.onPress());
-    expect(push).toHaveBeenCalledWith({
-      screen: 'entertainment',
-      title: 'Sports and Entertainment',
-    });
+  it('opens special careers from Career and removes the hub from Activities', async () => {
+    const activities = await open(<ActivitiesScreen />);
+    expect(() => rowTitled(activities, 'Sports and Entertainment')).toThrow();
+    await act(() => activities.unmount());
+
+    const career = await open(<CareerScreen />);
+    const tab = career.root.findAll(
+      (node) => node.props.accessibilityLabel === 'Special careers',
+    )[0]!;
+    await act(() => tab.props.onPress());
+    for (const [title, route] of [
+      ['Music', 'music'],
+      ['Acting', 'acting'],
+    ] as const) {
+      await act(() => rowTitled(career, title).props.onPress());
+      expect(push).toHaveBeenCalledWith(expect.objectContaining({ screen: route }));
+    }
   });
 
-  it.each([
-    ['Martial Arts', 'studies'],
-    ['Instruments', 'music'],
-    ['Acting Lessons', 'acting'],
-  ])('Mind & Body opens %s at the %s screen', async (title, screen) => {
+  it('keeps the martial arts training shortcut in Mind & Body', async () => {
     const r = await open(<MindBodyScreen />);
-    const row = rowTitled(r, title);
-    expect(row.props.disabled).toBeFalsy();
-    await act(() => row.props.onPress());
-    expect(push).toHaveBeenCalledWith(expect.objectContaining({ screen }));
+    expect(() => rowTitled(r, 'Instruments')).toThrow();
+    expect(() => rowTitled(r, 'Acting Lessons')).toThrow();
+    await act(() => rowTitled(r, 'Martial Arts').props.onPress());
+    expect(push).toHaveBeenCalledWith(expect.objectContaining({ screen: 'studies' }));
   });
 });
 

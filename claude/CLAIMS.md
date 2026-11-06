@@ -96,3 +96,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | 0801 The sports engine, with basketball (v0.08) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Shipped 6 Oct (engine only; screens are 0809). Took save v52 (built as v44; renumbered when it joined Agent B's v51 chain).** |
 
 | v51 | Codex / Agent B | last of B's chain (P16). v52–v58 are Agent A's 0801, 0803, 0804, 0805, 0806, 0807 and 0808, renumbered on integration (0802 and 0809 have no bump). The next free save version is v59. |
+
+| November playtest — card payments, property tabs, special careers and yearly notices | Codex / Agent B (`feat/november-playtest`) | — | Claimed 6 Nov from `integrate/sports-on-main`; remaining economy and progression changes tracked separately. |
