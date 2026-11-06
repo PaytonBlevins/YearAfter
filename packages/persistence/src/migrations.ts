@@ -26,7 +26,7 @@ import {
   yearsOutside,
   type Ledger,
 } from '@yearafter/finance';
-import { CHARGED_FROM_AGE } from '@yearafter/simulation';
+import { CHARGED_FROM_AGE, savedAuctionBiddingOk } from '@yearafter/simulation';
 import { findInstrument } from '@yearafter/finance';
 import { CURRENT_SAVE_VERSION, type CurrentSaveGame } from './save-schema';
 import { legacyPartnerCareer } from '@yearafter/careers';
@@ -1966,6 +1966,7 @@ export function validateCurrentSave(
           racingTeamOk(business),
       )),
     require('businessRescue', candidate['businessRescue'], businessRescueOk(candidate)),
+    require('auctions', candidate['auctions'], savedAuctionBiddingOk(candidate['auctions'])),
     // Ticket 0605. And for the private deals.
     require('deals', candidate['deals'], Array.isArray(candidate['deals'])),
     // Ticket 0701. And for the channels, and a number for fame.

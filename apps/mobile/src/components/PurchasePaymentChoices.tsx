@@ -31,7 +31,7 @@ export function PurchasePaymentChoices({
   readonly total: Money;
   readonly cash: Money;
   readonly cards: readonly HeldCard[];
-  readonly mode?: 'purchase' | 'bid';
+  readonly mode?: 'purchase' | 'bid' | 'live-bid';
   readonly onPay: (payment: PurchasePayment) => void;
 }) {
   const [selected, setSelected] = useState<PurchasePayment>();
@@ -55,7 +55,13 @@ export function PurchasePaymentChoices({
       <SectionHeading>{`Pay for ${purchaseName}`}</SectionHeading>
       <Card>
         <ListRow
-          title={mode === 'bid' ? 'Maximum payment if you win' : 'Purchase total'}
+          title={
+            mode === 'bid'
+              ? 'Maximum payment if you win'
+              : mode === 'live-bid'
+                ? 'Total if you win'
+                : 'Purchase total'
+          }
           value={money(total)}
           affordance="none"
         />
@@ -119,11 +125,13 @@ export function PurchasePaymentChoices({
       ) : null}
       <Text style={styles.note}>
         Choose one way to pay the full amount. A card uses its available credit, not just its limit.
-        Choosing a method doesn't buy anything; the payment button confirms your choice.
+        {mode === 'live-bid'
+          ? ' You are only charged if your bid wins.'
+          : " Choosing a method doesn't buy anything; the payment button confirms your choice."}
       </Text>
       {selected && method ? (
         <ActionButton
-          label={`${mode === 'bid' ? 'Bid up to' : 'Pay'} ${money(total)} with ${method}`}
+          label={`${mode === 'bid' ? 'Bid up to' : mode === 'live-bid' ? 'Confirm bid at' : 'Pay'} ${money(total)} with ${method}`}
           disabled={!canPay}
           onPress={() => {
             if (canPay) onPay({ ...selected, expectedTotal: total });
