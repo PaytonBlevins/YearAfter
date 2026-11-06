@@ -142,11 +142,17 @@ describe('live auctions', () => {
     if (!result.ok) throw Error(result.error);
     const before = currentLots(result.value, 'auction.hartwell');
     expect(before.length).toBeGreaterThan(0);
+    const lowerMeans = {
+      ...result.value,
+      finance: createNewGame({ seed: 'without-windfall' }).finance,
+      player: { ...result.value.player, cash: dollars(0) },
+    };
+    expect(currentLots(lowerMeans, 'auction.hartwell')).toEqual(before);
     expect(
       currentLots(
-        { ...result.value, player: { ...result.value.player, cash: dollars(0) } },
+        { ...lowerMeans, auctions: { ...result.value.auctions!, ceilings: {} } },
         'auction.hartwell',
       ),
-    ).toEqual(before);
+    ).not.toEqual(before);
   });
 });
