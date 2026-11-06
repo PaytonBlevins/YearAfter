@@ -612,15 +612,35 @@ export function assetValueFor(
   return Math.round(first + more);
 }
 
-/** What the business is worth without its cash, whole dollars: years of profit, or its fittings if that is more. */
+/** Broker inputs in whole dollars; cash and business debt are separate from the operation. */
+export function businessValuationOf(business: OwnedBusiness, type: BusinessType, year: number) {
+  const history = business.profits.slice(-3).filter(Number.isFinite);
+  const mature = history.length === 3;
+  const average = history.length ? history.reduce((sum, p) => sum + p, 0) / history.length : 0;
+  const earnings = mature ? (history[0]! + 2 * history[1]! + 3 * history[2]!) / 6 : average;
+  const first = history[0] ?? 0;
+  const latest = history.at(-1) ?? 0;
+  const durable =
+    mature &&
+    history.every((profit) => profit > 0) &&
+    latest >= Math.max(first, history[1] ?? first);
+  const position = durable ? (Math.max(0, business.reputation - 50) / 50) * 0.2 : 0;
+  const growth = durable ? Math.min(0.2, ((latest - first) / first) * 0.2) : 0;
+  const multiple =
+    type.valueMultiple * (0.85 + 0.3 * (business.reputation / 100)) * (1 + position + growth);
+  const earningValue = Math.round(Math.max(0, earnings) * multiple);
+  const fittings = assetValueFor(type, business.openedYear, year, business.branches);
+  return {
+    earnings: Math.round(earnings),
+    earningValue,
+    fittings,
+    worth: Math.max(fittings, earningValue),
+  };
+}
+
+/** What the business is worth without its cash, in whole dollars. */
 export function goingConcernFor(business: OwnedBusiness, type: BusinessType, year: number): number {
-  const history = business.profits.filter((profit) => Number.isFinite(profit));
-  const average = history.length > 0 ? history.reduce((sum, p) => sum + p, 0) / history.length : 0;
-  const multiple = type.valueMultiple * (0.85 + 0.3 * (business.reputation / 100));
-  const earning = Math.max(0, average) * multiple;
-  return Math.round(
-    Math.max(assetValueFor(type, business.openedYear, year, business.branches), earning),
-  );
+  return businessValuationOf(business, type, year).worth;
 }
 
 /** What it is worth to its owner: the business, and the money in the till. */

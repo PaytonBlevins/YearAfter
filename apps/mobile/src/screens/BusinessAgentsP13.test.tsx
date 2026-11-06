@@ -154,3 +154,26 @@ describe('P13 owned screen through actual store, commands and autosave', () => {
     expect(game?.state?.businesses[0]?.agentLevel).toBe('high');
   });
 });
+
+describe('business planning on the owned screen', () => {
+  it('updates the estimate through a real price action, while reading options does not book money', async () => {
+    const { state } = await mount('biz.cafe');
+    const before = rowTitled(renderer(), 'Typical operating profit').props.value;
+    expect(rowTitled(renderer(), 'One price step lower').props.subtitle).toContain(
+      'estimated profit',
+    );
+    expect(game?.state?.finance).toEqual(state.finance);
+    const price = renderer()
+      .root.findAllByType(Pressable)
+      .find((node) => node.props.accessibilityLabel === 'Price at 100 percent');
+    expect(price).toBeDefined();
+    await act(async () => {
+      price!.props.onPress();
+    });
+    expect(rowTitled(renderer(), 'Typical operating profit').props.value).not.toBe(before);
+    expect(game?.state?.finance).toEqual(state.finance);
+    await act(() => rowTitled(renderer(), 'Request a valuation').props.onPress());
+    expect(textsOf(renderer()).join(' ')).toContain('before business cash or debt');
+    expect(rowTitled(renderer(), 'Operating value').props.value).toMatch(/\$/);
+  });
+});
