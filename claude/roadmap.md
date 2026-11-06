@@ -2128,3 +2128,7 @@ First usability batch on `feat/november-playtest`, based on
 tenant and illness notices, annual business reports, Special careers under
 Career, and post reception labels. Balance and live-auction/advisor work
 remain open. Reproduction details and all 15 notes: `playtest-november.md`.
+
+November fame/music follow-up: see `playtest-november-fame-music.md` for
+the combined gauge, established-catalogue growth, nominations, music
+collaboration and fame-assisted posting. Fixed-score offer design remains open.

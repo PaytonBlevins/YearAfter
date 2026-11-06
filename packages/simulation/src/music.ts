@@ -120,6 +120,8 @@ import {
   MANAGER_GROWTH,
   answerCollab,
   collabOffersFor,
+  collabGain,
+  reachShare,
   post,
   type Channel,
   type CollabOffer,
@@ -681,6 +683,17 @@ export function musicChannel(music: MusicState): Channel {
   };
 }
 
+/** A song circulates beyond a single feed; repeat partners still reach fewer new people. */
+export function musicCollabGain(own: number, partner: number, repeats: number): number {
+  return Math.max(
+    0,
+    Math.min(
+      LISTENER_CAP - own,
+      Math.round(collabGain(own, partner, repeats) / Math.sqrt(reachShare(own))),
+    ),
+  );
+}
+
 /** Chances to put out something with somebody this year. Derived: nothing but the answers is saved. */
 export function musicCollabOffers(state: GameState): readonly CollabOffer[] {
   if (state.player.age < MUSIC_RELEASE_MIN_AGE || totalReleased(state.music) === 0) return [];
@@ -688,6 +701,7 @@ export function musicCollabOffers(state: GameState): readonly CollabOffer[] {
     seed: state.rng.getSeed(),
     year: state.world.year,
     channel: musicChannel(state.music),
+    gainFor: musicCollabGain,
     friends: friendsOf(state),
     agent: state.representation === 'agent',
   });
@@ -770,7 +784,7 @@ export interface MusicYearOutput {
   readonly costs: number;
   /** What a manager or an agent took, whole dollars. For the line, not the ledger. */
   readonly repKept: number;
-  /** The fame music holds the character at. The caller takes the higher of this and the others. */
+  /** Current recognition earned in music. */
   readonly fame: number;
   readonly mood: number;
   /** Lessons for the year, and what they were for. */
@@ -778,6 +792,7 @@ export interface MusicYearOutput {
   readonly feeSource: string;
   /** Listeners gained through releases and the road, for the creator channel that shares the name. */
   readonly fans: number;
+  readonly awardEligible?: boolean;
 }
 
 /** A year with no music in it at all. */
@@ -794,6 +809,7 @@ export function emptyMusicYear(music: MusicState): MusicYearOutput {
     fees: 0,
     feeSource: capitalise(MUSIC_LESSONS_SOURCE),
     fans: 0,
+    awardEligible: false,
   };
 }
 
@@ -869,7 +885,19 @@ export function runMusicYear(input: MusicYearInput): MusicYearOutput {
   const manager = before.representation === 'manager';
   const agent = before.representation === 'agent';
   const boost = manager ? MANAGER_GROWTH : 1;
-  const ceiling = audienceCeiling(craft + reach.polish, musicLuck(seed, gen), reach.discover);
+  const organicCeiling = audienceCeiling(
+    craft + reach.polish,
+    musicLuck(seed, gen),
+    reach.discover,
+  );
+  // An established catalogue already has distribution. It should not have to win
+  // the same career-luck draw again to sustain an audience it actually built.
+  const national = MUSIC_TIER_ROWS.national.listeners;
+  const catalogueReach =
+    music0.peak >= national && music0.catalogue >= CATALOGUE_FULL
+      ? Math.min(MUSIC_TIER_ROWS.headliner.listeners, Math.max(0, (craft - 55) / 30) * national * 3)
+      : 0;
+  const ceiling = Math.max(organicCeiling, catalogueReach);
 
   /* ---- the records ----------------------------------------------------- */
   // Big releases first; each year has so many weeks. A label's own come first and are not the artist's to refuse.
@@ -1071,11 +1099,9 @@ export function runMusicYear(input: MusicYearInput): MusicYearOutput {
   const tier1 = tierFor(listeners1);
   let awards = music.awards;
   const top = made.length > 0 ? made.reduce((a, b) => (b.quality > a.quality ? b : a)) : undefined;
-  if (
-    top !== undefined &&
-    top.quality >= MUSIC_AWARD_LINE &&
-    musUnit(seed, gen, 'award', year) < MUSIC_TIER_ROWS[tier1].awardChance
-  ) {
+  const awardEligible =
+    top !== undefined && top.quality >= MUSIC_AWARD_LINE && MUSIC_TIER_ROWS[tier1].awardChance > 0;
+  if (awardEligible && musUnit(seed, gen, 'award', year) < MUSIC_TIER_ROWS[tier1].awardChance) {
     awards += 1;
     reputation = Math.min(100, reputation + MUSIC_AWARD_REPUTATION);
     mood += MUSIC_AWARD_MOOD;
@@ -1183,6 +1209,7 @@ export function runMusicYear(input: MusicYearInput): MusicYearOutput {
     fees,
     feeSource: capitalise(MUSIC_LESSONS_SOURCE),
     fans: fansTotal,
+    awardEligible,
   };
 }
 

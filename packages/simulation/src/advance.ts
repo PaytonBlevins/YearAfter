@@ -1,3 +1,4 @@
+import { combinedFame } from './fame-sources';
 /**
  * Ticket 0105 — Advance.
  *
@@ -70,6 +71,7 @@ import {
   drawFrom,
   drawableOn,
   findProduct,
+  fameTarget,
   portfolioWorth,
   reconcile,
   reconcileByYear,
@@ -113,7 +115,14 @@ import { runCelebrityYear } from './celebrity';
 import { awardsInputOf, runAwardsYear } from './awards';
 import { foundOut } from './auctions';
 import { residenceOf } from './rentals';
-import { INSTRUMENTS, SECTORS, costIndexOf, findActivity, findSport } from '@yearafter/content';
+import {
+  MODEL_CHANNEL_CATEGORIES,
+  INSTRUMENTS,
+  SECTORS,
+  costIndexOf,
+  findActivity,
+  findSport,
+} from '@yearafter/content';
 import { nameContext, uniqueFirstName } from './social-generator';
 import { RngDomains } from './rng/rng';
 
@@ -1605,14 +1614,24 @@ export function advanceYear(state: GameState): AdvanceResult {
       withMusicAudience(creatorsYear.channels, musicYear.fans),
       modelYear.fans,
     ),
-    // Ticket 0801. Being a pro holds fame up while it lasts; afterwards it fades as any fame does.
-    fame: Math.max(
+    // Use the creator phase's pre-crossover audience, and don't count channels
+    // fed by the same active career as a separate kind of recognition.
+    fame: combinedFame(
       creatorsYear.fame,
+      sportsYear.fame || actingYear.fame || musicYear.fame || modelYear.fame
+        ? fameTarget(
+            creatorsYear.channels.filter(
+              (channel) =>
+                !(musicYear.fame && channel.categoryId === 'music') &&
+                !(modelYear.fame && MODEL_CHANNEL_CATEGORIES.includes(channel.categoryId)),
+            ),
+          )
+        : 0,
       sportsYear.fame,
+      awardsYear.fame,
       actingYear.fame,
       musicYear.fame,
       modelYear.fame,
-      awardsYear.fame,
     ),
     sports: sportsYear.sports,
     acting: actingYear.acting,

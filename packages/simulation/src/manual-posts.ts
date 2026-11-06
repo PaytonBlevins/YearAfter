@@ -24,6 +24,7 @@ export function postToChannel(
     seed: state.rng.getSeed(),
     kind,
     quality: qualityOf(state.player.stats, state.player.talents, channel.categoryId),
+    fame: state.fame,
     boost: growthBoost(state.representation) * groupBoost(channel),
   });
   if (!result.ok) return result;
