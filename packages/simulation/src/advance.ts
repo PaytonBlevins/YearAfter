@@ -65,6 +65,7 @@ import {
 } from './modeling';
 import { runSportsYear, sportsOccupation, withSportsOffer } from './sports';
 import { branchShortOf, militaryOccupation, runMilitaryYear, withMilitaryOffer } from './military';
+import { runVeteransYear } from './military-veterans';
 import { postTitle } from './sports-post';
 import { withLifeOffer } from './life-offer';
 import { runEvents } from './phases/events';
@@ -706,6 +707,34 @@ export function advanceYear(state: GameState): AdvanceResult {
     });
   }
 
+  /*
+    Ticket 0904 — what a veteran is paid, and what a year at college uses of the GI Bill.
+
+    Retired pay is `assetIncome` like any pension, and untaxed here for the reason the civilian one is. The housing
+    allowance is a `gift`: it is paid to somebody enrolled, it is not earnings, and it is not taxed. Both are rules,
+    not draws.
+  */
+  const veterans = runVeteransYear({
+    military: militaryYear.military,
+    age: nextAge,
+    atCollege: state.education.stage === 'college' || state.education.stage === 'vocational',
+    ...(schooled.collegeEnding !== undefined ? { ending: schooled.collegeEnding } : {}),
+  });
+  if (veterans.retiredPay > 0) {
+    retirementRows.push({
+      category: 'assetIncome' as const,
+      amount: dollars(veterans.retiredPay),
+      source: 'Military retired pay',
+    });
+  }
+  if (veterans.housing > 0) {
+    retirementRows.push({
+      category: 'gift' as const,
+      amount: dollars(veterans.housing),
+      source: 'GI Bill housing allowance',
+    });
+  }
+
   // P15: calculate the existing payout before living; rows still post once below.
   const living = runLiving({
     household: state.household,
@@ -748,7 +777,9 @@ export function advanceYear(state: GameState): AdvanceResult {
       (modelYear.pay - modelTax) +
       (militaryYear.pay - militaryTax) +
       drawn.pension +
-      drawn.state,
+      drawn.state +
+      veterans.retiredPay +
+      veterans.housing,
     wealth: Math.floor(Number(state.player.cash) / 100) + drawn.drawn,
     retired: state.retirement.retiredAtAge !== undefined,
     personalDebt:
@@ -948,6 +979,8 @@ export function advanceYear(state: GameState): AdvanceResult {
   write(sportsYear.lines, (index) => `t:${nextYear}:sports:${index}`);
   // Ticket 0901. A year in uniform.
   write(militaryYear.lines, (index) => `t:${nextYear}:military:${index}`);
+  // Ticket 0904. Retired pay beginning, the GI Bill beginning and running out.
+  write(veterans.lines, (index) => `t:${nextYear}:veteran:${index}`);
   // Acting for a living ends the day job, as playing for a living does (0803, 0804).
   const actingLeftJob =
     employment.employment.job !== undefined &&
@@ -1713,7 +1746,7 @@ export function advanceYear(state: GameState): AdvanceResult {
     acting: actingYear.acting,
     music: musicYear.music,
     modeling: modelYear.modeling,
-    military: militaryYear.military,
+    military: veterans.military,
     // Ticket 0504. The same short year puts a financed car behind.
     vehicles: markVehiclesMissed(
       vehiclesYear.vehicles,

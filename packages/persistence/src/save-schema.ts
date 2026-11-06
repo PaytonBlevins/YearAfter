@@ -58,8 +58,8 @@ import type { SaveId } from '@yearafter/core';
 /** P7: explicit purchase savings goal; old lives migrate with no goal. */
 /** P10: optional paid aftermarket watch work; legacy values stay unchanged. */
 /** P11: optional once-paid preventive car service, expires after the next advance. */
-/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain; 0901 (the service) took v59, and 0902 (branches, specialties and officers) took v60, and 0903 (deployments) took v61. */
-export const CURRENT_SAVE_VERSION = 61;
+/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain; 0901 (the service) took v59, and 0902 (branches, specialties and officers) took v60, and 0903 (deployments) took v61, and 0904 (discharge, benefits and veterans) took v62. */
+export const CURRENT_SAVE_VERSION = 62;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -237,7 +237,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 61;
+  readonly version: 62;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;

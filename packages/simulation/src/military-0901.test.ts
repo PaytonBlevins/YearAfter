@@ -962,13 +962,14 @@ describe('the end of a term', () => {
     expect(out.military.offer).toEqual(withOffer.military.offer);
   });
 
-  it('does not keep somebody whose work has sat below the middle: they are not asked, and go honorably', () => {
+  it('does not keep somebody whose work has sat below the middle: they are not asked, and go honorably if the service thinks well of them (0904: a poor reputation makes it a general discharge)', () => {
     const out = yearOf(
       serving(base, {
         grade: 4,
         years: 3,
         termEnds: 4,
         performance: RETAIN_PERFORMANCE_FLOOR - 15,
+        reputation: 80,
       }),
       25,
       2033,

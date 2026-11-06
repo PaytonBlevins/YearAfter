@@ -629,17 +629,17 @@ built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sport
 > General crime, Crime talent integration, independent dealer progression,
 > organized crime, courts/prison/parole/escape minigame.
 
-**29 October 2026: Military measured and a breakdown approved (0901–0906); 0901, 0902 and 0903 are built.** Payton chose Military as the
+**29 October 2026: Military measured and a breakdown approved (0901–0906); 0901, 0902, 0903 and 0904 are built.** Payton chose Military as the
 first part of v0.09. Intelligence is the military-intelligence door in 0905; Politics and Crime get their own
 measurement and breakdown when Military is done. See `claude/v009-military-measurement.md` and
-`claude/0901-the-service-engine.md`, `claude/0902-branches-specialties-and-officers.md` and `claude/0903-deployments.md`.
+`claude/0901-the-service-engine.md`, `claude/0902-branches-specialties-and-officers.md` and `claude/0903-deployments.md` and `claude/0904-discharge-benefits-and-veterans.md`.
 
 | Ticket                                            | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **0901 The service engine, with the Army**        | **DONE (engine).** Enlist at 17–35 by a recruiter's offer or an application (no draft); a year of basic training (12.6% do not finish); nine enlisted grades on the real 2026 pay table, promoted by time and a yearly performance read from Discipline, Smarts and Health (never Charisma), with the Work Harder button feeding it; a four-year term and the choice to stay or leave, and retirement at twenty years; housing provided for a single person. Every draw is a hash, so a life with no recruiter replays exactly as before. **Save v59** (Agent B: v60+). No screens (0906). `claude/0901-the-service-engine.md`                                                                                                                                                                                                                                                                                                                                                                                          |
 | **0902 Other branches, specialties and officers** | **DONE (engine).** Army, Navy, Marine Corps, Air Force and Coast Guard on the 0901 engine, each with its own titles, training words, age and aptitude at the door, and five specialties (25 in all), the player choosing both branch and job in steps at the recruiter's table; officers O-1 to O-6 on the real 2026 DFAS table by a degree and a commission or by a board picking an enlisted member, with a training year that can send an enlisted member back to the ranks, promotion on commissioned years, and up-or-out at O-3; retirement is a choice from twenty years and a hard stop at 65; one life at a time (finding 164 closed). **Save v60** (Agent B: v61+). No screens (0906). `claude/0902-branches-specialties-and-officers.md`                                                                                                                                                                                                                                                                     |
 | **0903 Deployments**                              | **DONE (engine, no minigame).** Orders at a steady tempo by branch and job (Army 20% a year, Coast Guard 5%) that cost something to refuse (reputation, performance, a year with no promotion, not asked to stay); a year away with hostile fire pay ($225 a month, real) and a combat zone tax exclusion; one to three incidents a deployment, each a decision answered with how it came out (clean, close, mistake, disaster) so a minigame can sit on top; **harm only follows failure** (a mistake may hurt, a disaster always does and may kill, a clean or close incident never does); a real wound may leave a lasting condition, combat stress is a condition, and decorations are earned and kept. **A gate (`deploymentsOpen`) is off in every life, so nothing deploys until a minigame turns it on.** Death in service, a member who cannot retire or apply for a commission while away, and the ledger now names the branch. **Save v61** (Agent B: v62+). No screens (0906). `claude/0903-deployments.md` |
-| **0904 Discharge, benefits and veterans**         | Not started. Every way out, the Blended Retirement System, the TSP, the GI Bill, veteran preference.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **0904 Discharge, benefits and veterans**         | **DONE (engine).** A discharge for every way a career ends: honorable, general (a poor reputation, or a refused term), medical (a board for a serious injury from service; a retirement at twenty years), dishonorable (a court-martial of the undisciplined and poorly thought of) and the entry-level one; a **pension at twenty years** on the real Blended Retirement System formula (2% a year of the last three years' pay, 40% at twenty), paid for life; the **GI Bill** (real tiers by time served, 36 months of nine-month years, the real 2026–27 tuition cap and housing rate) paying tuition and a housing allowance through a first degree or a trade; and **veterans' preference** (+0.15 on public and safety jobs) for an honorable, general or medical discharge. The service reputation turned out to range only 47–55, so the dials sit at 50 and 52 (finding 196). **Save v62** (Agent B: v63+). No screens (0906). `claude/0904-discharge-benefits-and-veterans.md` |
 | **0905 Military intelligence and the agencies**   | Not started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | **0906 Military screens**                         | Not started. Last, as for sports.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
@@ -651,13 +651,13 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 
 **162. A dropout cannot enlist.** The standard asks for a high-school credential and the game has no GED.
 
-**163. First terms end in three ways here, not the real mix:** washing out (12.6%), not being asked to stay (4.8%) or choosing to leave. The real first-term attrition (35.8%) needs discharges, injuries and deployments (0903, 0904).
+**163. First terms end in three ways here, not the real mix:** washing out (12.6%), not being asked to stay (4.8%) or choosing to leave. The real first-term attrition (35.8%) needs discharges, injuries and deployments (0903, 0904). _0904 added the discharges; the mix is still not the real one._
 
 **164. A serving member can still be raised an acting, music or modeling offer.** _Closed in 0902: a guard takes those offers out of a serving life's year._
 
-**165. Events gated on "has a job" read a service member as unemployed.** Left for 0904.
+**165. Events gated on "has a job" read a service member as unemployed.** _Not closed in 0904 (206)._
 
-**166. A 20-year retiree is paid no pension, TSP or GI Bill.** That is 0904.
+**166. A 20-year retiree is paid no pension, TSP or GI Bill.** _Closed in 0904 for the pension and the GI Bill; the thrift savings plan was not chosen._
 
 **167. Performance is never shown;** only the reputation word is.
 
@@ -683,7 +683,7 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 
 **177. The board is generous to persistent applicants.** 83% of degree-holders who apply every year are commissioned.
 
-**178. `danger` and `skill` are labelled and unread** until 0903 and 0904. _`danger` is read in 0903._
+**178. `danger` and `skill` are labelled and unread** until 0903 and 0904. _`danger` is read in 0903; `skill` is still unread after 0904._
 
 **179. 0902 took save v60.** Agent B's saves are v61 and onward.
 
@@ -697,7 +697,7 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 
 **183. The four incident buttons are generic scaffolding** to be replaced, not shipped.
 
-**184. Refusing orders is a game option; in the real services it is a crime.** The cost is a judgement; discharge types are 0904.
+**184. Refusing orders is a game option; in the real services it is a crime.** The cost is a judgement. _0904: a refused term ends in a general discharge._
 
 **185. The combat zone exclusion applies to every deployment, rear included,** and the officer cap (E-9 at 26 years) stands in for the Sergeant Major of the Army's rate.
 
@@ -705,13 +705,13 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 
 **187. No strain on a partner or children** (not chosen); the world carries on while a member is away.
 
-**188. A seriously wounded member keeps serving.** No medical discharge until 0904.
+**188. A seriously wounded member keeps serving.** _Closed in 0904: a medical board (but see 198)._
 
 **189. One condition stands for all combat stress,** and the health stat is held to its ceiling at once.
 
 **190. The honors on a death are judgements** (a posthumous Bronze Star 25%, the Medal of Honor 2%).
 
-**191. Decorations and past deployments are kept and not shown or used** (0906, 0904).
+**191. Decorations and past deployments are kept and not shown or used** (0906). _0904 did not use them either._
 
 **192. Fixed: every branch's pay and tax were posted as "Army pay"** in 0901 and 0902. The ledger names the branch.
 
@@ -720,6 +720,32 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 **194. `AWARD_CHANCE` was taken by acting;** this ticket's is `DECORATION_CHANCE`.
 
 **195. 0903 took save v61.** Agent B's saves are v62 and onward.
+
+### 0904 findings (196–207)
+
+**196. The discharge dials are judgements, set from a measurement.** No source for the shares was found. The service reputation ended between 47 and 55 in every life measured, so the first dials (general under 40) were never reached and were moved to 50 (term, passed over) and 52 (not asked to stay); a court-martial needs discipline under 35 and a reputation under 50, at 5% a year; a medical board is 40% a year for a serious injury from service.
+
+**197. The service reputation has a narrow range (47–55).** A wider one is a 0901 change.
+
+**198. A medical discharge cannot happen in play yet,** because the injuries come only from a deployment and nothing opens the gate (182).
+
+**199. A court-martial is a draw and a label:** no trial, sentence, prison or record. One dishonorable discharge stands for every bad one.
+
+**200. No other-than-honorable or bad-conduct discharge, and no appeal or upgrade** (Payton's "fewer").
+
+**201. The pension is the Blended Retirement System's formula only.** No thrift savings plan, continuation pay or disability pay; untaxed; not raised for inflation. A medical retirement under twenty years pays none.
+
+**202. The GI Bill is tuition and housing only,** for a first degree or a trade. The allowance ($21,564 a year at 100%) is paid whatever the rent, so a veteran at college is better off than a working civilian.
+
+**203. Veterans' preference is a flat +0.15 on the public and safety tracks.** The real thing is points on a federal application.
+
+**204. 0901's not-retained discharge changed** from always honorable to general below a reputation of 52. One 0901 test was updated.
+
+**205. No effect on the world's view of a veteran** beyond the hiring odds.
+
+**206. Finding 165 is still open** (events gated on "has a job" read a serving member as unemployed).
+
+**207. 0904 took save v62.** Agent B's saves are v63 and onward.
 
 ## v0.10 World Integration
 
@@ -1756,8 +1782,8 @@ Agent A's next ticket.
     other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting and 0806 Music and 0807 Modeling and 0808 Racing team and the world shipped as engines; 0809 Entertainment and Sports screens
     shipped the screens for all of them. v0.08 is complete. Next is chosen by Payton.)_
 
-13. **0901 → 0906 (v0.09 Military).** _(0901 The service engine, with the Army, 0902 Other branches, specialties and officers and 0903 Deployments shipped as engines.
-    0904–0906 are approved and not started. Politics and Crime are not in this list; they get their own measurement.
+13. **0901 → 0906 (v0.09 Military).** _(0901 The service engine, with the Army, 0902 Other branches, specialties and officers, 0903 Deployments and 0904 Discharge, benefits and veterans shipped as engines.
+    0905–0906 are approved and not started. Politics and Crime are not in this list; they get their own measurement.
     Next is chosen by Payton.)_
 
 ## Playtest P1 — business rescue choices (7 October 2026)

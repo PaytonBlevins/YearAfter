@@ -1282,6 +1282,13 @@ const migrations: Readonly<Record<number, Migration>> = {
    * nothing moves but the version. No RNG, no clock.
    */
   60: (save) => ({ ...save, version: 61 }),
+  /**
+   * v61 -> v62: Ticket 0904 — discharge, benefits and veterans. A past service gains three endings and three characters
+   * of discharge, and the military state gains the months of GI Bill used. Every v61 row is a pair the new rules also
+   * allow (a washed-out recruit's entry-level, every other ending honorable), and the new field is optional and absent
+   * until a veteran enrolls, so nothing moves but the version. No RNG, no clock.
+   */
+  61: (save) => ({ ...save, version: 62 }),
 };
 
 /**
@@ -1685,7 +1692,32 @@ const SERVICE_ENDINGS_OK: readonly string[] = [
   'term',
   'retired',
   'killed',
+  'medical',
+  'misconduct',
 ];
+/** Ticket 0904. The discharges, and which endings can carry each: the pairs the engine writes and no others. */
+const DISCHARGES_OK: readonly string[] = [
+  'honorable',
+  'general',
+  'medical',
+  'dishonorable',
+  'entry-level',
+];
+const dischargeFits = (how: string, discharge: string): boolean => {
+  switch (how) {
+    case 'washed-out':
+      return discharge === 'entry-level';
+    case 'medical':
+      return discharge === 'medical';
+    case 'misconduct':
+      return discharge === 'dishonorable';
+    case 'retired':
+    case 'killed':
+      return discharge === 'honorable';
+    default:
+      return discharge === 'honorable' || discharge === 'general';
+  }
+};
 const DEPLOY_TIERS_OK: readonly string[] = ['rear', 'forward', 'front'];
 const DEPLOY_OUTCOMES_OK: readonly string[] = ['clean', 'close', 'mistake', 'disaster'];
 const SERVICE_TRACKS_OK: readonly string[] = ['enlisted', 'officer'];
@@ -1712,6 +1744,9 @@ function militaryOk(value: unknown): boolean {
   ) {
     return false;
   }
+  // Ticket 0904. Months of the GI Bill used: a whole number, never more than the thirty-six it gives.
+  const giUsed = military['giBillMonthsUsed'];
+  if (giUsed !== undefined && !(whole(giUsed) && (giUsed as number) <= 36)) return false;
   // Ticket 0903. Deployments: a flag, one in progress, the ones that are over, and what they earned.
   if (
     military['deploymentsOpen'] !== undefined &&
@@ -1786,7 +1821,9 @@ function militaryOk(value: unknown): boolean {
       !level(r['reputation']) ||
       typeof r['how'] !== 'string' ||
       !SERVICE_ENDINGS_OK.includes(r['how']) ||
-      (r['discharge'] !== 'honorable' && r['discharge'] !== 'entry-level')
+      typeof r['discharge'] !== 'string' ||
+      !DISCHARGES_OK.includes(r['discharge']) ||
+      !dischargeFits(r['how'], r['discharge'])
     ) {
       return false;
     }

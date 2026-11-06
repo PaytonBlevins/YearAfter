@@ -3703,3 +3703,26 @@ test that no 0903 test or sabotage run could see (it plays 150 lives and takes m
 reachable only through something that is off in play, exempt it by its origin in the played-life test, say why, and prove
 its reach where the gate is open. And run the whole package's suite before calling a ticket tested, not only the files
 the ticket wrote.
+
+### 13.220 A rule that reads a stat is measured against that stat's real range before its line is drawn
+
+0904's first dials sent a term-ender to a general discharge under a service reputation of 40, and a court-martial to a
+member under 40 as well, on the guess that the median reputation sat in the sixties. Two hundred simulated careers ended
+with every reputation between 49 and 55: a reputation starts at 55 and follows a performance that aims at 46, so nothing
+reaches 40, and the three new discharges could not happen in any life. The tests passed (they set the reputation by hand).
+Before a threshold on a stat is fixed, read the distribution the engine really produces (quantiles, not the mean) and put the
+line inside it; and say in the doc what the range is, because the next rule that reads it will want to know.
+
+### 13.221 A test helper that resets a life must reset every field the new rule reads
+
+0904's `eligible()` helper (taken from 0903) cleared the credentials and conditions of an adult and left the education
+stage as the adult's own, which was a student at college. A veteran in a test about a life with no college was paid a
+housing allowance, and the failure looked like an engine bug. When a ticket adds a rule that reads a new field (here the
+education stage), check each shared helper sets it, or write the helper's version for this ticket.
+
+### 13.222 A sabotage survivor is a missing test or a dead line: find out which before writing anything
+
+Of fifteen survivors in 0904, six were equivalent (the guard changes no outcome), eight were gaps and one was an argument
+(`refused` passed to a function whose only callers could never make it matter). Writing a test for the last would have pinned
+nothing. For each survivor, say whether any input can tell the mutant from the original; if not, delete the line (dead) or
+list it as equivalent; if so, write that input.

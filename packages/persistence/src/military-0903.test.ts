@@ -85,9 +85,9 @@ const withMilitary = (military: unknown, version?: number) => {
 };
 
 describe('deployments in a v61 save', () => {
-  it('is at version 61', () => {
-    expect(CURRENT_SAVE_VERSION).toBe(61);
-    expect(base().version).toBe(61);
+  it('is at version 61 or later', () => {
+    expect(CURRENT_SAVE_VERSION).toBeGreaterThanOrEqual(61);
+    expect(base().version).toBe(CURRENT_SAVE_VERSION);
   });
 
   it('keeps a deployment in progress, the ones that are over, the decorations and the gate, exactly', () => {

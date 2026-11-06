@@ -18,12 +18,15 @@ import {
   MAJORS,
   isInSchool,
   runSchoolYear,
+  tuitionFor,
   statusLabel,
+  type CollegeEnding,
   type EducationState,
 } from '@yearafter/education';
 import type { NewLifeRecord, TimelineKind } from '@yearafter/character';
 import type { NewTransaction } from '@yearafter/finance';
 import type { GameState } from '../game-state';
+import { giTuitionAid } from '../military-veterans';
 import { RngDomains } from '../rng/rng';
 
 export interface EducationPhaseOutput {
@@ -37,6 +40,8 @@ export interface EducationPhaseOutput {
   readonly records: readonly NewLifeRecord[];
   /** Ticket 0301. What this phase moved, for `advanceYear` to post. */
   readonly transactions: readonly NewTransaction[];
+  /** Ticket 0904. How a degree year ended, if it ended one. Read for the GI Bill's months. */
+  readonly collegeEnding?: CollegeEnding;
   /** P6: derived income for tax/living integration; never saved. */
   readonly shiftGross: number;
   readonly freelanceGross: number;
@@ -137,7 +142,10 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     collegeSupport:
       state.education.stage === 'postgrad'
         ? 0
-        : (state.parenting.collegeSupport ?? 0) + sportsAid(state),
+        : (state.parenting.collegeSupport ?? 0) +
+          sportsAid(state) +
+          // Ticket 0904. The GI Bill's tuition, for a first degree or a trade (never graduate school).
+          giTuitionAid(state.military, tuitionFor(state.education)),
   });
 
   /*
@@ -188,6 +196,7 @@ export function runEducation(state: GameState, age: number): EducationPhaseOutpu
     capacity: result.capacity,
     lines: result.lines.map((line) => ({ kind: line.kind as TimelineKind, text: line.text })),
     transactions,
+    ...(result.collegeEnding !== undefined ? { collegeEnding: result.collegeEnding } : {}),
     shiftGross: result.earned
       .filter((row) => row.kind === 'partTime')
       .reduce((n, row) => n + row.dollars, 0),

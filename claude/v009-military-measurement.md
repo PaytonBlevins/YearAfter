@@ -1,6 +1,6 @@
 # v0.09 Military — measurement and proposed tickets
 
-**Status: 0901, 0902 and 0903 are built; 0904–0906 are approved and not started.** Payton chose Military as the first part
+**Status: 0901, 0902, 0903 and 0904 are built; 0905–0906 are approved and not started.** Payton chose Military as the first part
 of v0.09, stacked on `integrate/sports-on-main`, and approved the breakdown below with these changes: no Space Force (Army,
 Navy, Marine Corps, Air Force and Coast Guard, four or five specialties each), enlistment from 17 to 35 by offer or
 application with no draft, rare death and real injuries (in 0903), a four-year term then a choice, promotion by time and a
@@ -150,3 +150,21 @@ the ones it added (`0903-deployments.md`):
   (officers capped at the top enlisted rate).
 - The first-term attrition anchor (35.8% did not finish) still needs discharges, injuries and deployments to be whole:
   0904 adds the discharges.
+
+## Update after 0904
+
+0904 built discharges, retired pay, the GI Bill and veterans' preference as an engine (`0904-discharge-benefits-and-veterans.md`).
+Against the figures above:
+
+- **Retirement:** the Blended Retirement System pays 2% of the average of the highest 36 months of basic pay for each year, so
+  40% at twenty years. At twenty years an E-7 is paid $29,761 a year, an E-9 $37,706 and an O-5 $56,737; at thirty years an E-9
+  is paid $66,729. No thrift savings plan or continuation pay (Payton's call).
+- **GI Bill** (Post-9/11, 2026–27): tuition up to $30,908 a year, a national average housing allowance of $2,396 a month,
+  thirty-six months, a share of 50% to 100% by time served (100% from 36 months; a medical discharge pays 100%).
+- **Veterans' preference:** honorable or general discharge, 24 months of service unless a disability ended it; here a flat
+  +0.15 on public and safety jobs.
+- **Discharges** (394 typical careers): 83.5% honorable, 2.5% general, 0% dishonorable, 14.0% entry-level; in a weaker
+  group of 355, 63.7%, 16.9%, 0.6% and 18.9%. The real shares were not found. The service reputation here ranges only 47–55,
+  so the general and dishonorable lines sit at 50 and 52.
+- The first-term attrition anchor (35.8% did not finish) is still not matched: this build has washing out, not being asked to
+  stay and choosing to leave, and a medical board that no life reaches until a minigame opens deployments.

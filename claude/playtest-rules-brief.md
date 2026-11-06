@@ -46,6 +46,11 @@ nothing for a life that is not serving.
 **v62**. Do not take v44–v61. If you already have, tell Payton before pushing and renumber. 0903 changes the tax on military
 pay in `advance.ts` and nothing for a life that is not serving.
 
+**Update, November: Agent A's 0904 (discharge, benefits and veterans) took save v62.** The current save is v62 and the next
+free version is **v63**. Do not take v44–v62. If you already have, tell Payton before pushing and renumber. 0904 adds a
+retired-pay row and a GI Bill housing row in `advance.ts`, the GI Bill's tuition in a year's college support, and a veteran
+bonus in the hiring odds, and changes nothing for a life that has not served.
+
 ## Read these first, in this order
 
 1. `specs/AI_CODING_INSTRUCTIONS.md`, `specs/ARCHITECTURE.md` (binding)

@@ -51,6 +51,7 @@ const majorOpens = (state: GameState): readonly string[] => {
 import type { GameState } from './game-state';
 import { RngDomains, stableUnit } from './rng/rng';
 import { servicePushesLeft, workHarderInService } from './military-work';
+import { veteranPreference } from './military-veterans';
 
 export type WorkError = CannotApply | 'no-such-job' | 'no-job';
 
@@ -221,6 +222,8 @@ export function chanceOf(state: GameState, job: Job): number {
         opens: majorOpens(state),
         licenses: state.education.credentials?.licenses ?? [],
         experience: experienceOf(state.employment, state.player.age),
+        // Ticket 0904. Veterans' preference, for the tracks that give it.
+        ...(veteranPreference(state) ? { veteran: true } : {}),
       },
       state.employment.standing,
       reachedBy(state.employment),

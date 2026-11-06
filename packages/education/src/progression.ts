@@ -40,7 +40,7 @@ import {
   type EducationState,
 } from './school';
 import { gigLine, gigPay } from './gigs';
-import { runCollegeYear } from './college-year';
+import { runCollegeYear, type CollegeEnding } from './college-year';
 
 /**
  * Weekly hours a degree takes against the hidden capacity model.
@@ -154,6 +154,11 @@ export interface SchoolYearResult {
    * college is helping with nothing.
    */
   readonly tuition?: number;
+  /**
+   * Ticket 0904. How a degree year ended, when it ended one. Only a year at college has one. The GI Bill reads it so a
+   * year the character left for want of money doesn't count as a year attended.
+   */
+  readonly collegeEnding?: CollegeEnding;
   /** Feed lines, in order. Milestones first, then consequences. */
   readonly lines: readonly { readonly kind: 'milestone' | 'passive'; readonly text: string }[];
 }
@@ -322,6 +327,7 @@ function schoolYear(
           ? [{ dollars: college.tuition, source: 'a year of tuition', payer: 'self' as const }]
           : [],
       tuition: college.tuition,
+      ...(college.ending !== undefined ? { collegeEnding: college.ending } : {}),
       lines: [...college.lines, ...work.lines.map((text) => ({ kind: 'passive' as const, text }))],
     };
   }

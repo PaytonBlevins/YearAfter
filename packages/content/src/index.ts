@@ -196,3 +196,4 @@ export * from './military-branches';
 export * from './military-deployments';
 export * from './military-officers';
 export * from './military-pay';
+export * from './military-veterans';

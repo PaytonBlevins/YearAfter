@@ -82,11 +82,23 @@ export interface PastService {
    * How it ended. `washed-out` is a recruit who did not finish basic training; `not-retained` is a term the service
    * did not ask them to extend; `passed-over` is an officer the promotion boards stopped choosing; `term` is a person
    * who chose to leave before twenty years; `retired` is somebody with twenty years or more who stopped (by choice, or
-   * at 65); `killed` is a member who died in service (0903).
+   * at 65); `killed` is a member who died in service (0903); `medical` is a member a medical board sent home and
+   * `misconduct` one who was court-martialed (0904).
    */
-  readonly how: 'washed-out' | 'not-retained' | 'passed-over' | 'term' | 'retired' | 'killed';
-  /** `entry-level` is the discharge of somebody who did not finish training; the rest are honorable until 0904. */
-  readonly discharge: 'honorable' | 'entry-level';
+  readonly how:
+    | 'washed-out'
+    | 'not-retained'
+    | 'passed-over'
+    | 'term'
+    | 'retired'
+    | 'killed'
+    | 'medical'
+    | 'misconduct';
+  /**
+   * The character of the discharge (0904). `entry-level` is the discharge of somebody who did not finish training.
+   * Mirrors `Discharge` in content, restated so this file has no imports.
+   */
+  readonly discharge: 'honorable' | 'general' | 'medical' | 'dishonorable' | 'entry-level';
 }
 
 /** Which step of a recruiter's offer is being asked. Branch first, then (for a graduate) the ladder, then the job. */
@@ -189,6 +201,8 @@ export interface MilitaryState {
   readonly deployments?: readonly PastDeployment[];
   /** Decorations earned, oldest first, kept for life. */
   readonly decorations?: readonly Decoration[];
+  /** Months of the GI Bill already used, whole (0904). A year at college uses nine. */
+  readonly giBillMonthsUsed?: number;
 }
 
 export const EMPTY_MILITARY: MilitaryState = { past: [] };

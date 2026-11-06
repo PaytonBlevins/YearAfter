@@ -33,6 +33,16 @@ import {
 } from '@yearafter/character';
 import { performanceYear, standingYear } from '@yearafter/careers';
 import {
+  GENERAL_DISCHARGE_NOTES,
+  MEDICAL_BOARD_CHANCE,
+  MEDICAL_BOARD_LINES,
+  MISCONDUCT_CHANCE,
+  MISCONDUCT_DISCIPLINE_BELOW,
+  MISCONDUCT_LINES,
+  MISCONDUCT_REPUTATION_BELOW,
+  dischargeOf,
+} from '@yearafter/content';
+import {
   AGE_RETIRE_LINES,
   BASIC_LINES,
   BRANCH_PROMPTS,
@@ -114,6 +124,7 @@ import {
   runDeploymentYear,
   withMissionDecision,
 } from './military-deployments';
+import { holdsServiceInjury } from './military-veterans';
 import { isModelingFullTime } from './modeling';
 import { isMusicFullTime } from './music';
 import { isFullTime as isSportsFullTime } from './sports-individual';
@@ -597,12 +608,18 @@ function endService(
   age: number,
 ): MilitaryOfferOutcome {
   const career = state.military.service!;
-  const past = pastOf(career, how, 'honorable', {
-    age,
-    years: career.years,
-    grade: career.grade,
-    reputation: career.reputation,
-  });
+  const past = pastOf(
+    career,
+    how,
+    // A retirement and a term somebody chose to end carry no refusal, so no `refused` here.
+    dischargeOf({ how, reputation: career.reputation }),
+    {
+      age,
+      years: career.years,
+      grade: career.grade,
+      reputation: career.reputation,
+    },
+  );
   const entry = entryFor(state, line, 'milestone', tag);
   const { service: _s, offer: _o, ...rest } = state.military;
   return {
@@ -1139,6 +1156,11 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
     moodNow: number,
   ): MilitaryYearOutput => {
     lines.push({ kind: 'milestone', text: line });
+    // Ticket 0904. The character of the discharge follows from how it ended and what the service thought of them.
+    const discharge = dischargeOf({ how, reputation, refused: career.refusedTerm === true });
+    if (discharge === 'general') {
+      lines.push({ kind: 'passive', text: pick(GENERAL_DISCHARGE_NOTES, `${age}:general`) });
+    }
     records.push({ category: 'military', label });
     // Ticket 0903. Orders accepted and not yet served are gone with the career.
     const { service: _s, offer: _o, deployment: _d, ...rest } = military;
@@ -1147,7 +1169,7 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
         ...rest,
         past: [
           ...military.past,
-          pastOf(career, how, 'honorable', {
+          pastOf(career, how, discharge, {
             age,
             years: nextYears,
             grade,
@@ -1167,6 +1189,37 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
   const retiredLine = (key: string, pool: readonly string[] = RETIRE_LINES): string =>
     fill(pick(pool, `${age}:${key}`), branch, { title, years: nextYears });
   const retiredLabel = `Retired from ${branchNameOf(branch)} — ${title}`;
+
+  /* ---- Ticket 0904: a medical board, or a court-martial, for somebody at home ------------------------- */
+  if (!training && military.deployment === undefined) {
+    if (
+      holdsServiceInjury(before.health.conditions) &&
+      serviceUnit(seed, gen, 'medical', age) < MEDICAL_BOARD_CHANCE
+    ) {
+      // With twenty years in, a medical board sends a member home on a retirement.
+      if (nextYears >= RETIRE_ELIGIBLE_YEARS) {
+        return leave('retired', retiredLine('retire'), retiredLabel, mood);
+      }
+      return leave(
+        'medical',
+        fill(pick(MEDICAL_BOARD_LINES, `${age}:medical`), branch, { title }),
+        `Medically discharged from ${branchNameOf(branch)} — ${title}`,
+        mood - 4,
+      );
+    }
+    if (
+      stats.discipline < MISCONDUCT_DISCIPLINE_BELOW &&
+      reputation < MISCONDUCT_REPUTATION_BELOW &&
+      serviceUnit(seed, gen, 'misconduct', age) < MISCONDUCT_CHANCE
+    ) {
+      return leave(
+        'misconduct',
+        fill(pick(MISCONDUCT_LINES, `${age}:misconduct`), branch, { title }),
+        `Dishonorably discharged from ${branchNameOf(branch)} — ${title}`,
+        mood - 8,
+      );
+    }
+  }
 
   /* ---- an officer the boards stopped choosing ----------------------------- */
   if (officer && !training && grade === 3 && commissioned >= O3_PASS_OVER_YEARS) {
