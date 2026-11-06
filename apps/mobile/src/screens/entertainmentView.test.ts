@@ -553,7 +553,11 @@ describe('music', () => {
         subtitle: `You play ${MUSIC_TIER_ROWS.club.venue}`,
       },
       { title: 'Listeners', value: '4,000', subtitle: 'A month' },
-      { title: 'Reputation', value: 'Established' },
+      {
+        title: 'Reputation',
+        value: 'Established',
+        subtitle: 'Industry standing, separate from your audience',
+      },
       { title: 'Tours', value: '2' },
     ]);
   });

@@ -19,6 +19,7 @@ interface PublishInput {
   readonly kind: string;
   readonly quality: number;
   readonly boost?: number;
+  readonly fame?: number;
 }
 
 /** Reception is transient: the save still holds only the actual audience change. */
@@ -48,6 +49,9 @@ export function publishPostWithReception(
   if (viral && platform.viral) {
     gained += Math.round(Math.max(channel.audience, POST_DISCOVERY_BASE) * platform.viral.surge);
   }
+  // Familiar names are easier to discover, but can still have a poor post.
+  if (gained > 0)
+    gained = Math.round(gained * (1 + Math.max(0, Math.min(100, input.fame ?? 0)) / 100));
   const audience = Math.max(0, Math.min(platform.ceiling, channel.audience + gained));
   return ok({
     reception: failed ? 'poor' : viral ? 'viral' : reach >= 0.75 ? 'great' : 'good',

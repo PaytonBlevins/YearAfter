@@ -40,6 +40,23 @@ describe('manual publishing', () => {
     }
     expect(seen).toEqual(new Set(['poor', 'good', 'great', 'viral']));
   });
+
+  it('lets existing fame help successful discovery without preventing poor reception', () => {
+    const outcomes = new Set();
+    for (let n = 0; n < 80; n++) {
+      const input = { channel: make(), kind: 'photo', year: 2040, seed: `known-${n}`, quality: 1 };
+      const unknown = publishPostWithReception(input);
+      const known = publishPostWithReception({ ...input, fame: 60 });
+      if (!unknown.ok || !known.ok) throw Error('Post refused');
+      expect(known.value.reception).toBe(unknown.value.reception);
+      outcomes.add(known.value.reception);
+      if (known.value.reception === 'poor')
+        expect(known.value.channel.audience).toBe(unknown.value.channel.audience);
+      else expect(known.value.channel.audience).toBeGreaterThan(unknown.value.channel.audience);
+    }
+    expect(outcomes.has('poor')).toBe(true);
+    expect(outcomes.has('good')).toBe(true);
+  });
   it('has all requested real platforms and free accounts', () => {
     expect(PLATFORMS.map((p) => p.name)).toEqual([
       'YouTube',
