@@ -207,17 +207,16 @@ describe('one channel', () => {
     expect(rowTitled(r, 'Earned so far').props.value).toBe('$0');
   });
 
-  it('marks the current effort and changes it to the one pressed', async () => {
+  it('shows the yearly posting count without asking for an effort setting', async () => {
     const r = await on(<ChannelScreen />, one(), {
       screen: 'channel',
       title: 'x',
       channelId: 'ch:one',
     });
-    expect(rowTitled(r, 'Regular').props.value).toBe('Now');
-    expect(rowTitled(r, 'Regular').props.onPress).toBeUndefined();
-    expect(rowTitled(r, 'Light').props.value).toBeUndefined();
-    await act(() => rowTitled(r, 'Heavy').props.onPress());
-    expect(creating).toHaveBeenCalledWith({ type: 'effort', channelId: 'ch:one', effort: 'heavy' });
+    expect(rowTitled(r, 'Post').props.subtitle).toContain('0 of 12 posts this year');
+    expect(rowsOf(r).some((row) => ['Light', 'Regular', 'Heavy'].includes(row.props.title))).toBe(
+      false,
+    );
   });
 
   it('has a price only on a newsletter', async () => {

@@ -81,7 +81,7 @@ import {
   goingConcernFor,
   handsOn,
   listingFor,
-  locationAttention,
+  operatingCoverage,
   locationsOf,
   luckFrom,
   supplierModifiers,
@@ -1609,7 +1609,7 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
             business.staff,
             result,
             growth,
-            hands * locationAttention(locations),
+            operatingCoverage(business.staff, type.staff, locations, hands),
             locations,
           )
         : business.staff;

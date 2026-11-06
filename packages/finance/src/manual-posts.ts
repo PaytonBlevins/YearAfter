@@ -1,6 +1,12 @@
 import { err, mixedUnit, ok, type Result } from '@yearafter/core';
 import { findPlatform, postFormatsFor } from '@yearafter/content';
-import { GROWTH_RATE, POSTS_PER_YEAR, targetAudience, type Channel } from './creators';
+import {
+  GROWTH_RATE,
+  POSTS_PER_YEAR,
+  manualChannel,
+  targetAudience,
+  type Channel,
+} from './creators';
 
 /** Modest discovery even before an audience forms; other gains derive from the existing curve. */
 export const POST_DISCOVERY_BASE = 40;
@@ -33,7 +39,12 @@ export function publishPostWithReception(
   const count = publishingCount(channel, input.year);
   if (count >= POSTS_PER_YEAR) return err({ kind: 'postingLimit' });
   const key = `${input.seed}:manual-post:${channel.id}:${input.year}:${count}`;
-  const target = targetAudience(channel, input.quality, input.year + 1, input.boost ?? 1);
+  const target = targetAudience(
+    manualChannel(channel),
+    input.quality,
+    input.year + 1,
+    input.boost ?? 1,
+  );
   const discovery = Math.max(
     POST_DISCOVERY_BASE,
     (Math.max(0, target - channel.audience) * GROWTH_RATE) / POSTS_PER_YEAR,

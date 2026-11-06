@@ -20,7 +20,7 @@ import { businessAgentEffects, businessPrice, type BusinessAgentLevel } from './
  *               × how the place landed with its neighbourhood (drawn once)
  *               × how this year went (drawn each year)
  *               × the price, to the power of minus how touchy customers are
- *   capacity  = what a worker serves × (staff + the owner's hands)
+ *   capacity  = what a worker serves × (staff + operating coverage)
  *   sold      = whichever is less
  *
  * Revenue is what it sold at the price it asked. The goods cost what they cost
@@ -351,6 +351,21 @@ export function handsOn(businessesOwned: number, holdsJob: boolean): number {
   return split * (holdsJob ? JOB_ATTENTION : 1);
 }
 
+/**
+ * A team at its normal headcount can cover routine operations while the owner
+ * is elsewhere. At lower staffing the owner can still fill part of that gap.
+ * This is capacity, not extra payroll or a substitute for minimum headcount.
+ */
+export function operatingCoverage(
+  staff: number,
+  typicalStaff: number,
+  locations: number,
+  ownerHands: number,
+): number {
+  const staffedShare = staff / Math.max(1, typicalStaff * locations);
+  return Math.max(ownerHands * locationAttention(locations), Math.min(1, staffedShare));
+}
+
 /* -------------------------------------------------------------------------- */
 /* The year                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -475,7 +490,8 @@ export function businessYear(
     // higher price is the same offer.
     (price / quality) ** -type.elasticity;
 
-  const workers = business.staff + hands;
+  const workers =
+    business.staff + operatingCoverage(business.staff, type.staff, locations, input.hands);
   const open = business.staff >= type.staffMin * locations;
   const capacity =
     perWorkerOf(type) * workers * (type.headroom ?? 1) * (open ? 1 : MINIMUM_STAFF_CAPACITY);

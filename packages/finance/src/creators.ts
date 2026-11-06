@@ -514,6 +514,10 @@ export function noteFor(
   return undefined;
 }
 
+/** Live play uses actual posts; legacy effort remains readable in existing saves. */
+export const manualChannel = (channel: Channel): Channel =>
+  channel.effort === 'regular' ? channel : { ...channel, effort: 'regular' };
+
 /** Advance a channel one year. `quality` is `creatorQuality` for the maker this year. */
 export function channelYear(input: {
   readonly channel: Channel;
@@ -530,16 +534,17 @@ export function channelYear(input: {
   if (platform === undefined || category === undefined) {
     return { channel, income: cents(0), cost: cents(0), notes: [] };
   }
-  const target = targetAudience(channel, input.quality, input.year, input.boost ?? 1);
+  const operating = input.manual ? manualChannel(channel) : channel;
+  const target = targetAudience(operating, input.quality, input.year, input.boost ?? 1);
   const posted = channel.publishing?.year === input.year - 1 ? channel.publishing.count : 0;
   // P3: posting less slows new spread, but must not preserve an old viral spike.
   const spreadShare = target < channel.audience ? 1 : Math.min(1, posted / POSTS_PER_YEAR);
   const drifted = input.manual
     ? posted > 0
       ? channel.audience +
-        Math.round((nextAudience(channel, target) - channel.audience) * spreadShare)
+        Math.round((nextAudience(operating, target) - channel.audience) * spreadShare)
       : Math.round(channel.audience * (1 - platform.churn))
-    : nextAudience(channel, target);
+    : nextAudience(operating, target);
   // Explicit publications already roll for a breakout with the life seed; do not roll twice.
   const gained = input.manual ? 0 : viralGain(channel, input.quality, input.year, drifted);
   const audience = drifted + gained;
@@ -553,11 +558,11 @@ export function channelYear(input: {
       ? !paysFrom(platform, average)
         ? 0
         : memberIncome(((channel.paid ?? 0) + paid) / 2, tier)
-      : channelIncome(platform, category, average, channel.effort, tier);
+      : channelIncome(platform, category, average, operating.effort, tier);
   const income =
     Math.round(worked * (input.manual ? Math.min(1, posted / POSTS_PER_YEAR) : 1)) * 100 +
     Number(channel.owed ?? 0);
-  const cost = upkeepOf(platform, channel.effort);
+  const cost = upkeepOf(platform, operating.effort);
   const moved: Channel = { ...channel, audience };
   const rank = chartRank(moved);
   // Off the chart this year, the old best stands: `rest` below carries it.

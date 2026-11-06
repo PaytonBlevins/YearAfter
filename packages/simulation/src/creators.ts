@@ -21,7 +21,9 @@ import {
   answerSponsor,
   chartRank,
   channelYear,
-  creatorHours,
+  EFFORT_HOURS,
+  POSTS_PER_YEAR,
+  publishingCount,
   creatorQuality,
   sponsorOffersFor,
   trendsFor,
@@ -214,14 +216,13 @@ export function closeChannel(
   });
 }
 
-/** The hours a week the character's channels ask of them: a manager gives a third of it back. */
+/** Actual posts set the workload. A dormant account asks nothing of the week. */
 export const creatorWeek = (state: GameState): number =>
-  creatorHours(
-    state.channels.filter(
-      (channel) => channel.publishing?.year === state.world.year && channel.publishing.count > 0,
-    ),
-    hoursFactor(state.representation),
-  );
+  state.channels.reduce(
+    (sum, channel) =>
+      sum + (EFFORT_HOURS.regular * publishingCount(channel, state.world.year)) / POSTS_PER_YEAR,
+    0,
+  ) * hoursFactor(state.representation);
 
 /** What a year of channels did: the channels after it, fame, the money, and the words. */
 export interface CreatorsYear {

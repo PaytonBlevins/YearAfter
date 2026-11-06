@@ -174,3 +174,32 @@ describe('manual publishing', () => {
     expect(fameTarget([{ ...make(), audience }])).toBe(expected);
   });
 });
+
+it('uses identical reach, drift and earnings for identical posts from old light and heavy saves', () => {
+  const base = { ...make('video'), audience: 50000, peak: 50000 };
+  const result = (effort: Channel['effort']) => {
+    const post = publishPostWithReception({
+      channel: { ...base, effort },
+      kind: postFormatsFor('video')[0]!.id,
+      quality: 1,
+      year: 2040,
+      seed: 'effort-neutral',
+    });
+    if (!post.ok) throw Error(post.error.kind);
+    const settled = channelYear({
+      channel: post.value.channel,
+      quality: 1,
+      year: 2041,
+      manual: true,
+    });
+    return {
+      gained: post.value.channel.publishing?.gained,
+      audience: settled.channel.audience,
+      income: settled.income,
+      cost: settled.cost,
+    };
+  };
+  expect(result('light')).toEqual(result('heavy'));
+  expect(result('light').income).toBeGreaterThan(0);
+  expect(result('light').cost).toBe(0);
+});
