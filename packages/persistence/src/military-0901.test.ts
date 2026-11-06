@@ -1,5 +1,5 @@
 /**
- * Ticket 0901 — the save. `military` is always present from v59: a career in progress (optional), the ones that
+ * Ticket 0901 — the save (as 0902 reshaped it, v60). `military` is always present from v59: a career in progress (optional), the ones that
  * ended, and a question. An older save gets an empty one and nothing else changes; a save that carries a service keeps
  * it exactly; a service that could not have been written by the engine is refused, not repaired.
  */
@@ -15,6 +15,9 @@ const SERVICE = {
   branch: 'army',
   stage: 'serving',
   enlistedAge: 19,
+  track: 'enlisted',
+  specialty: 'army.infantry',
+  commissionedAt: 0,
   grade: 5,
   years: 7,
   termEnds: 8,
@@ -32,6 +35,8 @@ const PAST = {
   enlistedAge: 18,
   endedAge: 22,
   years: 4,
+  track: 'enlisted',
+  specialty: 'army.infantry',
   finalGrade: 4,
   reputation: 51,
   how: 'term',
@@ -87,7 +92,14 @@ describe('the service in a save', () => {
   });
 
   it('keeps a recruiter’s offer, and nothing but the past after a career has ended', () => {
-    const offer = { kind: 'enlist', branch: 'army', age: 20, eventId: 'military.offer' } as const;
+    const offer = {
+      kind: 'enlist',
+      age: 20,
+      eventId: 'military.offer',
+      step: 'branch',
+      options: ['army', 'navy'],
+      intro: true,
+    } as const;
     expect(migrateSave(withMilitary({ past: [], offer })).ok).toBe(true);
     expect(
       migrateSave(
@@ -151,7 +163,7 @@ describe('the service in a save', () => {
       { past: 'none' },
       { past: [], turnedDownAge: -1 },
       { past: [], appliedAge: 1.5 },
-      { past: [{ ...PAST, branch: 'navy' }] },
+      { past: [{ ...PAST, branch: 'space-force' }] },
       { past: [{ ...PAST, how: 'quit' }] },
       { past: [{ ...PAST, discharge: 'dishonorable' }] },
       { past: [{ ...PAST, finalGrade: 0 }] },
@@ -159,7 +171,7 @@ describe('the service in a save', () => {
       { past: [{ ...PAST, years: -1 }] },
       { past: [{ ...PAST, endedAge: 'late' }] },
       { past: [{ ...PAST, reputation: 101 }] },
-      { past: [], service: { ...SERVICE, branch: 'navy' } },
+      { past: [], service: { ...SERVICE, branch: 'space-force' } },
       { past: [], service: { ...SERVICE, stage: 'deployed' } },
       { past: [], service: { ...SERVICE, grade: 0 } },
       { past: [], service: { ...SERVICE, grade: 10 } },
@@ -179,10 +191,19 @@ describe('the service in a save', () => {
       { past: [], offer: { ...REENLIST, kind: 'draft' } },
       { past: [], offer: { ...REENLIST, grade: 12 } },
       { past: [], offer: { ...REENLIST, years: -1 } },
-      { past: [], offer: { ...REENLIST, branch: 'navy' } },
+      { past: [], offer: { ...REENLIST, branch: 'space-force' } },
       { past: [], offer: { ...REENLIST, age: 'old' } },
       { past: [], offer: { ...REENLIST, eventId: 7 } },
-      { past: [], offer: { kind: 'enlist', branch: 'army', age: -1, eventId: 'military.offer' } },
+      {
+        past: [],
+        offer: {
+          kind: 'enlist',
+          age: -1,
+          eventId: 'military.offer',
+          step: 'branch',
+          options: ['army'],
+        },
+      },
       { past: [], offer: 'sign here' },
     ];
     for (const row of bad) {

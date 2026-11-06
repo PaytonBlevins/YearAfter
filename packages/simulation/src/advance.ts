@@ -41,6 +41,12 @@ import { occupationFor, runEducation } from './phases/education';
 import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
 import { withAnyOffer } from './offers';
+import {
+  withoutActingOffers,
+  withoutModelingOffers,
+  withoutMusicOffer,
+  withoutSportsOffer,
+} from './military-guard';
 import { withCollegeOffer } from './college-offer';
 import { actingOccupation, isActingFullTime, runActingYear, withActingOffer } from './acting';
 import {
@@ -285,48 +291,59 @@ export function advanceYear(state: GameState): AdvanceResult {
     being played out). Its pay and its tax are settled below, with the creator
     income, because both are earnings the household lives on.
   */
-  const sportsYear = runSportsYear({
+  /*
+    Ticket 0902 — a service life holds the whole year. Somebody in uniform is raised no contract, part, record deal or
+    modeling job (0901 only stopped civilian job offers, and found these four still came). A life that never serves
+    takes none of this, so it replays exactly as before.
+  */
+  const serviceHoldsTheYear = state.military.service !== undefined;
+
+  const rawSportsYear = runSportsYear({
     before: state,
     education: education.education,
     age: nextAge,
     year: nextYear,
     standard: state.household.standard,
   });
+  const sportsYear = withoutSportsOffer(rawSportsYear, serviceHoldsTheYear);
 
   /*
     Ticket 0805 — an acting life. The parts that were booked last year are shot, judged and paid now, a
     year's offers are raised for the one to come, and the lessons are billed. Taxed and posted below with
     the playing pay, because both are earnings the household lives on.
   */
-  const actingYear = runActingYear({
+  const rawActingYear = runActingYear({
     before: state,
     education: education.education,
     age: nextAge,
     year: nextYear,
     standard: state.household.standard,
   });
+  const actingYear = withoutActingOffers(rawActingYear, serviceHoldsTheYear);
 
   /*
     Ticket 0806 — a musician. The year's plan is run: records made, a tour gone on, listeners counted, streams, a
     label and the road paid. Taxed and posted below with the other earnings.
   */
-  const musicYear = runMusicYear({
+  const rawMusicYear = runMusicYear({
     before: state,
     education: education.education,
     age: nextAge,
     year: nextYear,
     standard: state.household.standard,
   });
+  const musicYear = withoutMusicOffer(rawMusicYear, serviceHoldsTheYear);
 
   /*
     Ticket 0807 — a model. The jobs booked last year are shot, judged and paid now, the brand deals agreed are paid,
     and a year's offers are raised for the one to come. Taxed and posted below with the other earnings.
   */
-  const modelYear = runModelingYear({
+  const rawModelYear = runModelingYear({
     before: state,
     age: nextAge,
     year: nextYear,
   });
+  const modelYear = withoutModelingOffers(rawModelYear, serviceHoldsTheYear);
 
   /*
     Ticket 0808 — the awards across fields. It reads what the acting, music, modeling and sports years just did

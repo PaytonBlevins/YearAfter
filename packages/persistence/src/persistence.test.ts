@@ -3027,8 +3027,8 @@ describe('Ticket 0406 — a question survives being saved', () => {
     }
   });
 
-  it('is at version 59 (0901)', () => {
-    expect(CURRENT_SAVE_VERSION).toBe(59);
+  it('is at version 60 (0902)', () => {
+    expect(CURRENT_SAVE_VERSION).toBe(60);
   });
 
   it('keeps a commercial lease: the trade, the term and the rent it was signed at', () => {

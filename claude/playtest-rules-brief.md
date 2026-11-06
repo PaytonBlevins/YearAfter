@@ -37,6 +37,11 @@ rebase often.
 version is **v60**. Do not take v44–v59. If you already have, tell Payton before pushing and renumber. 0901 touches the
 living phase (a `housingProvided` input that changes nothing for a life that is not serving) and `workHarder`.
 
+**Update, November: Agent A's 0902 (branches, specialties and officers) took save v60.** The current save is v60 and the
+next free version is **v61**. Do not take v44–v60. If you already have, tell Payton before pushing and renumber. 0902 adds
+a guard in `advance.ts` that takes acting, music, modeling and sports offers out of a serving life's year, and changes
+nothing for a life that is not serving.
+
 ## Read these first, in this order
 
 1. `specs/AI_CODING_INSTRUCTIONS.md`, `specs/ARCHITECTURE.md` (binding)

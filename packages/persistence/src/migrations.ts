@@ -1232,6 +1232,51 @@ const migrations: Readonly<Record<number, Migration>> = {
         : { past: [] },
     version: 59,
   }),
+  /**
+   * v59 -> v60: Ticket 0902 — branches, specialties and officers. 0901 had only the enlisted Army, so a career gets the
+   * enlisted ladder, a commission that never began (0 years) and the Army's open specialty; a past service gets the
+   * ladder and the specialty too; a recruiter's offer becomes the branch question with the Army its only option, and a
+   * term's question keeps its fields. Nothing else moves. No RNG, no clock.
+   */
+  59: (save) => {
+    const military = save['military'];
+    if (typeof military !== 'object' || military === null) return { ...save, version: 60 };
+    const m = military as Record<string, unknown>;
+    const past = Array.isArray(m['past'])
+      ? m['past'].map((row) =>
+          typeof row === 'object' && row !== null
+            ? { track: 'enlisted', specialty: 'army.infantry', ...(row as Record<string, unknown>) }
+            : row,
+        )
+      : m['past'];
+    const service =
+      typeof m['service'] === 'object' && m['service'] !== null
+        ? {
+            track: 'enlisted',
+            specialty: 'army.infantry',
+            commissionedAt: 0,
+            ...(m['service'] as Record<string, unknown>),
+          }
+        : m['service'];
+    let offer = m['offer'];
+    if (typeof offer === 'object' && offer !== null) {
+      const o = offer as Record<string, unknown>;
+      if (o['kind'] === 'enlist') {
+        const { branch: _army, ...rest } = o;
+        offer = { ...rest, step: 'branch', options: ['army'], intro: true };
+      }
+    }
+    return {
+      ...save,
+      military: {
+        ...m,
+        past,
+        ...(service !== undefined ? { service } : {}),
+        ...(offer !== undefined ? { offer } : {}),
+      },
+      version: 60,
+    };
+  },
 };
 
 /**
@@ -1621,10 +1666,24 @@ function jobOk(value: unknown, offered: boolean): boolean {
   );
 }
 
-const SERVICE_BRANCHES_OK: readonly string[] = ['army'];
-const SERVICE_ENDINGS_OK: readonly string[] = ['washed-out', 'not-retained', 'term', 'retired'];
+const SERVICE_BRANCHES_OK: readonly string[] = [
+  'army',
+  'navy',
+  'marine-corps',
+  'air-force',
+  'coast-guard',
+];
+const SERVICE_ENDINGS_OK: readonly string[] = [
+  'washed-out',
+  'not-retained',
+  'passed-over',
+  'term',
+  'retired',
+];
+const SERVICE_TRACKS_OK: readonly string[] = ['enlisted', 'officer'];
+const ENLIST_STEPS_OK: readonly string[] = ['branch', 'track', 'specialty'];
 
-/** Ticket 0901. A service life: a career in progress (optional), the ones that ended, and a question. */
+/** Ticket 0901 and 0902. A service life: a career in progress (optional), the ones that ended, and a question. */
 function militaryOk(value: unknown): boolean {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const military = value as Record<string, unknown>;
@@ -1633,8 +1692,16 @@ function militaryOk(value: unknown): boolean {
   const level = (n: unknown): boolean => typeof n === 'number' && n >= 0 && n <= 100;
   const branchOk = (n: unknown): boolean =>
     typeof n === 'string' && SERVICE_BRANCHES_OK.includes(n);
-  const gradeOk = (n: unknown): boolean => whole(n) && (n as number) >= 1 && (n as number) <= 9;
-  if (!optionalWhole(military['turnedDownAge']) || !optionalWhole(military['appliedAge'])) {
+  const trackOk = (n: unknown): boolean => typeof n === 'string' && SERVICE_TRACKS_OK.includes(n);
+  const gradeOk = (n: unknown, track: unknown): boolean =>
+    whole(n) && (n as number) >= 1 && (n as number) <= (track === 'officer' ? 6 : 9);
+  const specialtyOk = (n: unknown, branch: unknown): boolean =>
+    typeof n === 'string' && typeof branch === 'string' && n.startsWith(`${branch}.`);
+  if (
+    !optionalWhole(military['turnedDownAge']) ||
+    !optionalWhole(military['appliedAge']) ||
+    !optionalWhole(military['commissionAppliedAge'])
+  ) {
     return false;
   }
   const past = military['past'];
@@ -1644,10 +1711,12 @@ function militaryOk(value: unknown): boolean {
     const r = row as Record<string, unknown>;
     if (
       !branchOk(r['branch']) ||
+      !trackOk(r['track']) ||
+      !specialtyOk(r['specialty'], r['branch']) ||
       !whole(r['enlistedAge']) ||
       !whole(r['endedAge']) ||
       !whole(r['years']) ||
-      !gradeOk(r['finalGrade']) ||
+      !gradeOk(r['finalGrade'], r['track']) ||
       !level(r['reputation']) ||
       typeof r['how'] !== 'string' ||
       !SERVICE_ENDINGS_OK.includes(r['how']) ||
@@ -1662,9 +1731,12 @@ function militaryOk(value: unknown): boolean {
     const c = service as Record<string, unknown>;
     if (
       !branchOk(c['branch']) ||
+      !trackOk(c['track']) ||
+      !specialtyOk(c['specialty'], c['branch']) ||
       (c['stage'] !== 'training' && c['stage'] !== 'serving') ||
       !whole(c['enlistedAge']) ||
-      !gradeOk(c['grade']) ||
+      !gradeOk(c['grade'], c['track']) ||
+      !whole(c['commissionedAt']) ||
       !whole(c['years']) ||
       !whole(c['termEnds']) ||
       !level(c['performance']) ||
@@ -1677,16 +1749,40 @@ function militaryOk(value: unknown): boolean {
     ) {
       return false;
     }
+    const prior = c['prior'];
+    if (prior !== undefined) {
+      if (typeof prior !== 'object' || prior === null) return false;
+      const p = prior as Record<string, unknown>;
+      if (!gradeOk(p['grade'], 'enlisted') || !whole(p['termEnds'])) return false;
+    }
   }
   const offer = military['offer'];
   if (offer !== undefined) {
     if (typeof offer !== 'object' || offer === null) return false;
     const o = offer as Record<string, unknown>;
-    if (!branchOk(o['branch']) || !whole(o['age']) || typeof o['eventId'] !== 'string')
-      return false;
+    if (!whole(o['age']) || typeof o['eventId'] !== 'string') return false;
     if (o['kind'] === 'reenlist') {
-      if (!gradeOk(o['grade']) || !whole(o['years'])) return false;
-    } else if (o['kind'] !== 'enlist') {
+      if (
+        !branchOk(o['branch']) ||
+        (o['track'] !== undefined && !trackOk(o['track'])) ||
+        !gradeOk(o['grade'], o['track']) ||
+        !whole(o['years'])
+      ) {
+        return false;
+      }
+    } else if (o['kind'] === 'enlist') {
+      if (
+        typeof o['step'] !== 'string' ||
+        !ENLIST_STEPS_OK.includes(o['step']) ||
+        !Array.isArray(o['options']) ||
+        !(o['options'] as unknown[]).every((id) => typeof id === 'string') ||
+        (o['branch'] !== undefined && !branchOk(o['branch'])) ||
+        (o['track'] !== undefined && !trackOk(o['track'])) ||
+        (o['intro'] !== undefined && typeof o['intro'] !== 'boolean')
+      ) {
+        return false;
+      }
+    } else {
       return false;
     }
   }

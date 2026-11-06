@@ -10,21 +10,38 @@
  */
 
 /** Mirrors `ServiceBranchId` in content, restated so this file has no imports. */
-export type ServiceBranch = 'army';
+export type ServiceBranch = 'army' | 'navy' | 'marine-corps' | 'air-force' | 'coast-guard';
+
+/** Which ladder the grade is on: E-1 to E-9, or O-1 to O-6. Mirrors `ServiceTrack` in content. */
+export type ServiceTrack = 'enlisted' | 'officer';
 
 /**
- * Where the career is. `training` is the first year: basic training, and then the first posting. A recruit who does not
- * finish never becomes `serving`.
+ * Where the career is. `training` is the first year: basic training (or officer training, for an officer), and then the
+ * first posting. A recruit who does not finish never becomes `serving`.
  */
 export type ServiceStage = 'training' | 'serving';
 
 export interface ServiceCareer {
   readonly branch: ServiceBranch;
   readonly stage: ServiceStage;
-  /** The age they enlisted at. */
+  /** The age they enlisted (or, for a direct commission, were commissioned) at. */
   readonly enlistedAge: number;
-  /** Enlisted grade, 1 to 9 (E-1 to E-9). */
+  /** Which ladder `grade` is on. */
+  readonly track: ServiceTrack;
+  /** The specialty, a content id (`army.infantry`). Chosen at the door. */
+  readonly specialty: string;
+  /** Grade on the ladder: 1 to 9 (E-1 to E-9) enlisted, 1 to 6 (O-1 to O-6) officer. */
   readonly grade: number;
+  /**
+   * The years of service already done when the commission began: 0 for a direct commission, more for an enlisted
+   * member the board picked. Officer promotion counts from here; pay counts all of `years`.
+   */
+  readonly commissionedAt: number;
+  /**
+   * An enlisted member's grade and term as they were when a board picked them for officer training, kept while the
+   * training year runs so that somebody who doesn't finish goes back to exactly that.
+   */
+  readonly prior?: { readonly grade: number; readonly termEnds: number };
   /** Whole years of service completed. */
   readonly years: number;
   /** The years of service at which the current term ends: 4, then 8, and so on. */
@@ -50,30 +67,45 @@ export interface PastService {
   readonly enlistedAge: number;
   readonly endedAge: number;
   readonly years: number;
+  readonly track: ServiceTrack;
+  readonly specialty: string;
   readonly finalGrade: number;
   readonly reputation: number;
   /**
    * How it ended. `washed-out` is a recruit who did not finish basic training; `not-retained` is a term the service
-   * did not ask them to extend; `term` is a person who chose to leave; `retired` is twenty years.
+   * did not ask them to extend; `passed-over` is an officer the promotion boards stopped choosing; `term` is a person
+   * who chose to leave before twenty years; `retired` is somebody with twenty years or more who stopped (by choice, or
+   * at 65).
    */
-  readonly how: 'washed-out' | 'not-retained' | 'term' | 'retired';
+  readonly how: 'washed-out' | 'not-retained' | 'passed-over' | 'term' | 'retired';
   /** `entry-level` is the discharge of somebody who did not finish training; the rest are honorable until 0904. */
   readonly discharge: 'honorable' | 'entry-level';
 }
 
+/** Which step of a recruiter's offer is being asked. Branch first, then (for a graduate) the ladder, then the job. */
+export type EnlistStep = 'branch' | 'track' | 'specialty';
+
 /** A question the service is asking. Frozen when it was raised (the 0402 lesson). */
 export type MilitaryOffer =
   | {
-      /** A recruiter's offer. */
+      /** A recruiter's offer, asked in steps, each answer narrowing the next question. */
       readonly kind: 'enlist';
-      readonly branch: ServiceBranch;
       readonly age: number;
       readonly eventId: string;
+      readonly step: EnlistStep;
+      /** What the current question can be answered with: branch ids, track ids or specialty ids. Frozen when asked. */
+      readonly options: readonly string[];
+      /** What has been chosen so far. */
+      readonly branch?: ServiceBranch;
+      readonly track?: ServiceTrack;
+      /** True for the first question of an offer, which opens with the recruiter's own words. */
+      readonly intro?: boolean;
     }
   | {
       /** The end of a term. */
       readonly kind: 'reenlist';
       readonly branch: ServiceBranch;
+      readonly track?: ServiceTrack;
       readonly grade: number;
       readonly years: number;
       readonly age: number;
@@ -88,6 +120,8 @@ export interface MilitaryState {
   readonly turnedDownAge?: number;
   /** The age of the last application to enlist. One a year. */
   readonly appliedAge?: number;
+  /** The age of the last application for a commission, by a serving enlisted member. One a year. */
+  readonly commissionAppliedAge?: number;
 }
 
 export const EMPTY_MILITARY: MilitaryState = { past: [] };

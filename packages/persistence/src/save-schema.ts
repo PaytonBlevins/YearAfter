@@ -58,8 +58,8 @@ import type { SaveId } from '@yearafter/core';
 /** P7: explicit purchase savings goal; old lives migrate with no goal. */
 /** P10: optional paid aftermarket watch work; legacy values stay unchanged. */
 /** P11: optional once-paid preventive car service, expires after the next advance. */
-/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain; 0901 (the service) took v59. */
-export const CURRENT_SAVE_VERSION = 59;
+/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain; 0901 (the service) took v59, and 0902 (branches, specialties and officers) took v60. */
+export const CURRENT_SAVE_VERSION = 60;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -102,6 +102,12 @@ export type { WorldState };
  * team, so the migration has nothing to write; the version is bumped so a build that cannot read a team refuses the
  * save rather than dropping it. (The racing driver career and the awards layer keep nothing of their own: a driver's
  * career is a sports career, and the awards are derived.)
+ *
+ * v60 reshaped the service (Ticket 0902): every career and past service now carries its ladder (`enlisted` or `officer`) and
+ * its specialty, a career carries the years served when a commission began, and a recruiter's offer is asked in steps
+ * (a branch, a ladder, a job) with the options frozen on it. The migration gives a v59 career the enlisted ladder and the
+ * Army's open specialty (the only branch and job 0901 had), and turns a v59 offer into the branch question with the Army
+ * its only option.
  *
  * v59 added the service (Ticket 0901): `military` — a career in progress (a branch, a grade, years served, the term, a
  * performance the service never shows as a number, a reputation of its own), the careers that ended and how, and a
@@ -231,7 +237,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 59;
+  readonly version: 60;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;

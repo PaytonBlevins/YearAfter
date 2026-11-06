@@ -1,10 +1,10 @@
 /**
  * Ticket 0901 — the service.
  *
- * Enlisted service in the Army: nine grades on the real 2026 basic pay table, a four-year term, a
+ * Enlisted service: nine grades on the real 2026 basic pay table (`military-pay.ts`), a four-year term, a
  * year of basic training that some do not finish, a yearly performance read, and promotion by time
- * in service and that read. Later tickets add the other branches and officers (0902), deployments
- * (0903) and every way out with what it leaves behind (0904).
+ * in service and that read. 0902 added the other branches (`military-branches.ts`) and officers
+ * (`military-officers.ts`); deployments (0903) and every way out with what it leaves behind (0904) come later.
  *
  * Anchors that are real: the 2026 enlisted basic pay table (a 3.8% raise from 1 January 2026; read
  * from two third-party copies of the DFAS chart that agree to the cent bar two cells, and not yet
@@ -13,49 +13,36 @@
  * attrition of about 36% in the one cohort study found (GAO, FY1993), 13.6% of it inside six months.
  * Everything else is a game table: the time to each grade, the chance of a rise, the offer rates,
  * the standards and the training pass rate are judgements, and the ticket doc names the dials. Measured with
- * the table as it stands (4,000 recruits of middling fitness): 12.6% do not finish basic training; of those who retire at
- * twenty years, about 3% are E-5, 25% E-6, 50% E-7, 20% E-8 and 2% E-9.
+ * the table as it stands (0901, 4,000 recruits of middling fitness who re-enlist to twenty years): 12.6% do not finish
+ * basic training; of those who retire at twenty years, about 3% are E-5, 25% E-6, 50% E-7, 20% E-8 and 2% E-9. Since
+ * 0902 retirement is a choice from twenty years and a hard stop at 65, so that mix is the one for somebody who leaves
+ * at the first term end after twenty; somebody who stays to 65 reaches E-9 far more often (about 40% in 0902's run).
  *
  * Everything here is data or a pure function of it; `simulation/military.ts` decides who is offered
  * what. American spelling, spoken-style contractions.
  */
 
-/** The branches built so far. 0902 adds the others. */
-export const SERVICE_BRANCH_IDS = ['army'] as const;
-export type ServiceBranchId = (typeof SERVICE_BRANCH_IDS)[number];
-
-export interface ServiceBranchRow {
-  readonly id: ServiceBranchId;
-  /** "the Army", as it reads after "joined". */
-  readonly name: string;
-  /** "Army", as it reads in a header or a ledger line. */
-  readonly short: string;
-  /** "soldier". */
-  readonly member: string;
-  /** Made-up posts, for the lines. Every one is fictional. */
-  readonly posts: readonly string[];
-}
-
-export const SERVICE_BRANCHES: readonly ServiceBranchRow[] = [
-  {
-    id: 'army',
-    name: 'the Army',
-    short: 'Army',
-    member: 'soldier',
-    posts: ['Fort Harlan', 'Fort Carrow', 'Fort Medley', 'Fort Ostrander', 'Camp Verrill'],
-  },
-];
-
-export const findServiceBranch = (id: string): ServiceBranchRow | undefined =>
-  SERVICE_BRANCHES.find((row) => row.id === id);
+import { findServiceBranch } from './military-branches';
 
 /* -------------------------------------------------------------------------- */
 /* Who can join                                                                */
 /* -------------------------------------------------------------------------- */
 
-/** The youngest and the oldest an enlistment is taken (the Army's own limits, 17 and 35). */
+/** The youngest and the oldest an enlistment is taken (17 and 35, Payton's call; a branch's own limit can be lower). */
 export const ENLIST_MIN_AGE = 17;
 export const ENLIST_MAX_AGE = 35;
+
+/** The oldest a branch takes an enlistment: its own limit, held to the game's ceiling of 35. */
+export const enlistAgeLimit = (branch: string): number =>
+  Math.min(ENLIST_MAX_AGE, findServiceBranch(branch)?.maxEnlistAge ?? ENLIST_MAX_AGE);
+
+/** The oldest a branch commissions an officer. */
+export const commissionAgeLimit = (branch: string): number =>
+  Math.min(ENLIST_MAX_AGE, findServiceBranch(branch)?.maxCommissionAge ?? ENLIST_MAX_AGE);
+
+/** The least Smarts a branch takes. */
+export const smartsFloorOf = (branch: string): number =>
+  findServiceBranch(branch)?.smartsFloor ?? ENLIST_SMARTS_FLOOR;
 
 /**
  * The standards. A character needs a diploma, to be well enough, and to have the aptitude. Health 50 turns away about
@@ -68,8 +55,15 @@ export const ENLIST_SMARTS_FLOOR = 30;
 /** A term is four years, and a re-enlistment is for four more. */
 export const TERM_YEARS = 4;
 
-/** Twenty years in, a career ends in retirement and there is no question to answer. */
-export const RETIRE_AT_YEARS = 20;
+/**
+ * Twenty years of service is when retirement is open: from then on a member may retire whenever they choose, and the
+ * question at the end of every term says so. Nothing forces it before age 65 (Payton's call in 0902; 0901 retired
+ * everyone at twenty years, which left no officer able to reach colonel).
+ */
+export const RETIRE_ELIGIBLE_YEARS = 20;
+
+/** The age everyone is sent home at, a hard stop. */
+export const MANDATORY_RETIRE_AGE = 65;
 
 /**
  * A recruiter's offer, a year, to somebody who meets the standards and is not at college, a trade school or a
@@ -128,10 +122,18 @@ export const findGrade = (grade: number): GradeRow =>
  * a fifth of it) and never certain.
  */
 export function riseChance(toGrade: number, performance: number): number {
-  const row = findGrade(toGrade);
-  if (row.rise >= 1) return 1;
+  return scaledRise(findGrade(toGrade).rise, performance);
+}
+
+/**
+ * A grade's yearly chance of a rise scaled by how the year was performed (a 60 is the table's own number, 100 is 1.8
+ * times it, 20 is a fifth of it), never certain; a chance that is already certain stays certain. Shared by the officer
+ * ladder.
+ */
+export function scaledRise(rise: number, performance: number): number {
+  if (rise >= 1) return 1;
   const scale = Math.max(0.2, Math.min(1.8, 1 + (performance - 60) / 40));
-  return Math.min(0.95, row.rise * scale);
+  return Math.min(0.95, rise * scale);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -184,91 +186,6 @@ export function serviceReputationWord(reputation: number): string {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Pay                                                                         */
-/* -------------------------------------------------------------------------- */
-
-/** The years-of-service steps of the DFAS table. A step applies from that many completed years. */
-export const PAY_STEPS: readonly number[] = [0, 2, 3, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26];
-
-/** `null` is a cell the table does not have (nobody is that grade that early); the first real value stands in. */
-const PAY_TABLE_2026: Readonly<Record<number, readonly (number | null)[]>> = {
-  1: Array.from({ length: 15 }, () => 2407.2),
-  2: Array.from({ length: 15 }, () => 2697.9),
-  3: [2836.8, 3015, 3198, 3198, 3198, 3198, 3198, 3198, 3198, 3198, 3198, 3198, 3198, 3198, 3198],
-  4: [
-    3142.2, 3303, 3482.4, 3658.5, 3815.4, 3815.4, 3815.4, 3815.4, 3815.4, 3815.4, 3815.4, 3815.4,
-    3815.4, 3815.4, 3815.4,
-  ],
-  5: [
-    3342.9, 3598.2, 3775.8, 3946.8, 4110, 4299.9, 4395.3, 4421.7, 4421.7, 4421.7, 4421.7, 4421.7,
-    4421.7, 4421.7, 4421.7,
-  ],
-  6: [
-    3401.1, 3743.1, 3908.1, 4068.9, 4235.7, 4612.8, 4759.5, 5043.3, 5130.3, 5193.6, 5267.7, 5267.7,
-    5267.7, 5267.7, 5267.7,
-  ],
-  7: [
-    3932.1, 4291.5, 4456.2, 4673.1, 4843.8, 5135.7, 5300.4, 5591.7, 5835, 6000.9, 6177.3, 6245.7,
-    6475.2, 6598.2, 7067.4,
-  ],
-  8: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    5656.5,
-    5907,
-    6061.8,
-    6247.2,
-    6448.2,
-    6811.2,
-    6995.4,
-    7308.3,
-    7481.7,
-    7908.9,
-  ],
-  9: [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    6910.2,
-    7066.5,
-    7263.6,
-    7496.1,
-    7730.7,
-    8105.1,
-    8423.1,
-    8756.7,
-    9267.9,
-  ],
-};
-
-/** The monthly basic pay table is for 2026. Pay in the game is not adjusted for later years (the economy is constant-dollar). */
-export const PAY_TABLE_YEAR = 2026;
-
-/** Monthly basic pay for a grade at a number of completed years of service, whole cents. */
-export function monthlyBasePay(grade: number, years: number): number {
-  const row = PAY_TABLE_2026[findGrade(grade).grade]!;
-  let step = 0;
-  PAY_STEPS.forEach((from, index) => {
-    if (years >= from) step = index;
-  });
-  // The top two grades have no cell before their first listed step: they are paid that first one.
-  return (row[step] ?? row.find((value) => value !== null)) as number;
-}
-
-/** A year of basic pay, whole dollars. Housing and food are provided, so there is no allowance on top. */
-export const annualBasePay = (grade: number, years: number): number =>
-  Math.round(monthlyBasePay(grade, years) * 12);
-
-/** The basic-training year of somebody who does not finish: about half a year of E-1 pay. */
-export const washOutPay = (): number => Math.round(monthlyBasePay(1, 0) * 6);
-
-/* -------------------------------------------------------------------------- */
 /* Words                                                                       */
 /* -------------------------------------------------------------------------- */
 
@@ -279,21 +196,21 @@ export const ENLIST_PROMPTS: readonly string[] = [
 ];
 
 export const BASIC_LINES: readonly string[] = [
-  "Basic training was ten weeks of being told you were wrong, and by the end you weren't as wrong.",
-  'You finished basic and walked out knowing where everything was and why.',
-  'Basic was the hardest thing you had done. You were handed a rifle and a bunk and told to earn the rest.',
+  "%Training% was %weeks% weeks of being told you were wrong, and by the end you weren't as wrong.",
+  'You finished %training% and walked out knowing where everything was and why.',
+  '%Training% was the hardest thing you had done. You were handed a bunk and a uniform and told to earn the rest.',
 ];
 
 export const YEAR_LINES: readonly string[] = [
   'A steady year at the post. Early mornings, long days, and nobody asked how you felt about it.',
   'Another year in uniform. The work was the work and the days went by.',
   'A quiet year in the unit. You knew your job and your sergeant knew you knew it.',
-  'You spent the year on the range, in the motor pool and at the formation. It added up.',
+  'You spent the year at drill, on the range and at the formation. It added up.',
 ];
 
 export const WASH_OUT_LINES: readonly string[] = [
-  "You didn't make it through basic training. They sent you home with a form and a handshake.",
-  "Basic ended for you in the third week. It wasn't what they needed, and it wasn't what you needed.",
+  "You didn't make it through %training%. They sent you home with a form and a handshake.",
+  "%Training% ended for you in the third week. It wasn't what they needed, and it wasn't what you needed.",
 ];
 
 export const RISE_LINES: readonly string[] = [
@@ -303,21 +220,27 @@ export const RISE_LINES: readonly string[] = [
 ];
 
 export const NOT_RETAINED_LINES: readonly string[] = [
-  "Your term ended, and the Army didn't ask you to stay. You left as a %title%.",
+  "Your term ended, and %branch% didn't ask you to stay. You left as a %title%.",
   'You reached the end of your term and nobody offered a new one. You left as a %title%.',
 ];
 
 export const LEAVE_LINES: readonly string[] = [
-  'You left the Army as a %title%, with an honorable discharge and a duffel bag.',
+  'You left %branch% as a %title%, with an honorable discharge and a duffel bag.',
   "Your term was up and you didn't sign again. You walked out of the gate as a %title%.",
 ];
 
 export const RETIRE_LINES: readonly string[] = [
-  'Twenty years. You retired from the Army as a %title%.',
-  'You hung up the uniform after twenty years, a %title%.',
+  'You retired from %branch% as a %title% after %years% years.',
+  'You hung up the uniform after %years% years, a %title%.',
 ];
 
 export const REENLIST_PROMPTS: readonly string[] = [
-  'Your term is up. The Army wants you to stay four more years. What do you want to do?',
+  'Your term is up. %Branch% wants you to stay four more years. What do you want to do?',
   'You are at the end of your term, and your first sergeant has the papers ready.',
+];
+
+/** The same question, put to somebody with twenty years in: retiring is open. */
+export const RETIRE_PROMPTS: readonly string[] = [
+  'Your term is up, and you have your twenty years. You can retire now, or stay four more.',
+  'You are past twenty years, and the papers for either road are on the desk: retire, or sign on again.',
 ];

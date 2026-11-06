@@ -19,7 +19,7 @@ import {
   PAY_STEPS,
   PAY_TABLE_YEAR,
   RETAIN_PERFORMANCE_FLOOR,
-  RETIRE_AT_YEARS,
+  RETIRE_ELIGIBLE_YEARS,
   SERVICE_BRANCHES,
   TERM_YEARS,
   TOP_GRADE,
@@ -48,7 +48,6 @@ import { isPostFullTime } from './sports-post';
 import { decide } from './decide';
 import { hasSystemicOffer, type GameState } from './game-state';
 import {
-  MILITARY_ENLIST,
   MILITARY_LEAVE,
   MILITARY_OFFER_EVENT_ID,
   MILITARY_REENLIST,
@@ -72,6 +71,20 @@ import { createNewGame } from './new-game';
 import { withAnyOffer } from './offers';
 import { ordinaryChoice } from './ordinary-answers';
 import { runLiving } from './phases/living';
+
+/** Accepting an offer that is on its last question (the job): the infantry is the Army's open one. */
+const MILITARY_ENLIST = 'army.infantry';
+
+/** A recruiter's offer on its last question, for the Army and the enlisted ladder. */
+const ARMY_OFFER = {
+  kind: 'enlist',
+  age: 22,
+  eventId: MILITARY_OFFER_EVENT_ID,
+  step: 'specialty',
+  branch: 'army',
+  track: 'enlisted',
+  options: ['army.infantry', 'army.medic'],
+} as const;
 
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                     */
@@ -153,6 +166,9 @@ const serviceRow = (patch: Partial<ServiceCareer> = {}): ServiceCareer => ({
   branch: 'army',
   stage: 'serving',
   enlistedAge: 19,
+  track: 'enlisted',
+  specialty: 'army.infantry',
+  commissionedAt: 0,
   grade: 4,
   years: 3,
   termEnds: 4,
@@ -211,7 +227,7 @@ describe('the real figures', () => {
     }
   });
 
-  it('has nine enlisted grades with the Army titles, in order, and one branch built', () => {
+  it('has nine enlisted grades with the Army titles, in order, and five branches built', () => {
     expect(ENLISTED_GRADES).toHaveLength(9);
     expect(TOP_GRADE).toBe(9);
     expect(findGrade(1).title).toBe('Private');
@@ -220,7 +236,13 @@ describe('the real figures', () => {
     expect(findGrade(9).title).toBe('Sergeant Major');
     expect(findGrade(0).grade).toBe(1);
     expect(findGrade(99).grade).toBe(9);
-    expect(SERVICE_BRANCHES.map((row) => row.id)).toEqual(['army']);
+    expect(SERVICE_BRANCHES.map((row) => row.id)).toEqual([
+      'army',
+      'navy',
+      'marine-corps',
+      'air-force',
+      'coast-guard',
+    ]);
   });
 
   it('keeps the time for each grade rising, and every rise a chance', () => {
@@ -235,8 +257,8 @@ describe('the real figures', () => {
 
   it('is a four-year term and a twenty-year career', () => {
     expect(TERM_YEARS).toBe(4);
-    expect(RETIRE_AT_YEARS).toBe(20);
-    expect(RETIRE_AT_YEARS % TERM_YEARS).toBe(0);
+    expect(RETIRE_ELIGIBLE_YEARS).toBe(20);
+    expect(RETIRE_ELIGIBLE_YEARS % TERM_YEARS).toBe(0);
   });
 
   it('takes enlistments from 17 to 35', () => {
@@ -418,7 +440,7 @@ describe('applying at the recruiting office', () => {
       ...base,
       military: {
         past: [],
-        offer: { kind: 'enlist', branch: 'army', age: 24, eventId: MILITARY_OFFER_EVENT_ID },
+        offer: { ...ARMY_OFFER, age: 24 },
       },
     });
     expect(asked.ok).toBe(false);
@@ -484,9 +506,11 @@ describe("the recruiter's offer", () => {
     }
     expect(found?.offer).toEqual({
       kind: 'enlist',
-      branch: 'army',
       age: 22,
       eventId: MILITARY_OFFER_EVENT_ID,
+      intro: true,
+      step: 'branch',
+      options: ['army', 'navy', 'marine-corps', 'air-force', 'coast-guard'],
     });
   });
 
@@ -525,7 +549,7 @@ describe("the recruiter's offer", () => {
       ...base,
       military: {
         past: [],
-        offer: { kind: 'enlist', branch: 'army', age: 21, eventId: MILITARY_OFFER_EVENT_ID },
+        offer: { ...ARMY_OFFER, age: 21 },
       },
     } as unknown as GameState;
     const out = yearOf(asked, 22, 2031);
@@ -533,15 +557,14 @@ describe("the recruiter's offer", () => {
   });
 
   it('becomes a question with the two choices, and a pending decision once', () => {
-    const offer = {
-      kind: 'enlist',
-      branch: 'army',
-      age: 22,
-      eventId: MILITARY_OFFER_EVENT_ID,
-    } as const;
+    const offer = { ...ARMY_OFFER, age: 22 } as const;
     const decision = militaryOfferDecision(offer, 2031);
     expect(isMilitaryOfferDecision(decision.eventId)).toBe(true);
-    expect(decision.choices.map((row) => row.id)).toEqual([MILITARY_ENLIST, MILITARY_DECLINE]);
+    expect(decision.choices.map((row) => row.id)).toEqual([
+      'army.infantry',
+      'army.medic',
+      MILITARY_DECLINE,
+    ]);
     expect(decision.prompt.length).toBeGreaterThan(10);
     const asked = withMilitaryOffer({ ...base, military: { past: [], offer } }, true);
     expect(asked.pending.filter((row) => row.eventId === MILITARY_OFFER_EVENT_ID)).toHaveLength(1);
@@ -550,12 +573,7 @@ describe("the recruiter's offer", () => {
   });
 
   it('is not raised to the dead, and nothing is raised without an offer', () => {
-    const offer = {
-      kind: 'enlist',
-      branch: 'army',
-      age: 22,
-      eventId: MILITARY_OFFER_EVENT_ID,
-    } as const;
+    const offer = { ...ARMY_OFFER, age: 22 } as const;
     expect(
       withMilitaryOffer({ ...base, military: { past: [], offer } }, false).pending,
     ).toHaveLength(0);
@@ -563,21 +581,13 @@ describe("the recruiter's offer", () => {
   });
 
   it('shuts the other doors while it stands', () => {
-    const offer = {
-      kind: 'enlist',
-      branch: 'army',
-      age: 22,
-      eventId: MILITARY_OFFER_EVENT_ID,
-    } as const;
+    const offer = { ...ARMY_OFFER, age: 22 } as const;
     expect(hasSystemicOffer(base)).toBe(false);
     expect(hasSystemicOffer({ ...base, military: { past: [], offer } })).toBe(true);
   });
 
   it('asks the ordinary-life harness to decline it', () => {
-    const decision = militaryOfferDecision(
-      { kind: 'enlist', branch: 'army', age: 22, eventId: MILITARY_OFFER_EVENT_ID },
-      2031,
-    );
+    const decision = militaryOfferDecision({ ...ARMY_OFFER, age: 22 }, 2031);
     expect(ordinaryChoice(decision)?.id).toBe(MILITARY_DECLINE);
   });
 });
@@ -588,12 +598,7 @@ describe("the recruiter's offer", () => {
 
 describe('answering the service', () => {
   const base = eligible(adult('MIL-ANSWER', 26));
-  const enlistOffer = {
-    kind: 'enlist',
-    branch: 'army',
-    age: 22,
-    eventId: MILITARY_OFFER_EVENT_ID,
-  } as const;
+  const enlistOffer = { ...ARMY_OFFER, age: 22 } as const;
   const asked = (state: GameState, offer: MilitaryState['offer']): GameState =>
     withMilitaryOffer({ ...state, military: { ...state.military, offer } }, true);
 
@@ -974,9 +979,9 @@ describe('the end of a term', () => {
     expect(out.military.offer).toBeUndefined();
   });
 
-  it('retires at twenty years with the grade it reached, and asks nothing', () => {
+  it('retires somebody the service would not keep once twenty years are in, with the grade reached', () => {
     const out = yearOf(
-      serving(base, { grade: 7, years: 19, termEnds: 20, performance: 70 }),
+      serving(base, { grade: 7, years: 19, termEnds: 20, performance: 30 }),
       40,
       2050,
     );
@@ -994,7 +999,7 @@ describe('the end of a term', () => {
 
   it('still pays the last year in full when it ends the career', () => {
     const out = yearOf(
-      serving(base, { grade: 7, years: 19, termEnds: 20, performance: 70 }),
+      serving(base, { grade: 7, years: 19, termEnds: 20, performance: 30 }),
       40,
       2050,
     );
@@ -1663,7 +1668,7 @@ describe('edges of a year', () => {
 
   it('retires with a lift of mood, 2', () => {
     const out = yearOf(
-      serving(base, { grade: 7, years: 19, termEnds: 20, performance: 70 }),
+      serving(base, { grade: 7, years: 19, termEnds: 20, performance: 30 }),
       40,
       2050,
     );
@@ -1744,12 +1749,7 @@ describe('answers leave every other question alone', () => {
     choices: [{ id: 'skip', label: 'Skip' }],
     names: {},
   };
-  const enlist = {
-    kind: 'enlist',
-    branch: 'army',
-    age: 26,
-    eventId: MILITARY_OFFER_EVENT_ID,
-  } as const;
+  const enlist = { ...ARMY_OFFER, age: 26 } as const;
   const reenlist = {
     kind: 'reenlist',
     branch: 'army',

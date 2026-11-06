@@ -192,3 +192,6 @@ export * from './modeling';
 export * from './racing';
 export * from './awards';
 export * from './military';
+export * from './military-branches';
+export * from './military-officers';
+export * from './military-pay';

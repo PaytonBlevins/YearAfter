@@ -59,6 +59,7 @@ export * from './music-state';
 export * from './music';
 export * from './military-state';
 export * from './military';
+export * from './military-guard';
 export * from './military-work';
 export * from './modeling-state';
 export * from './modeling';

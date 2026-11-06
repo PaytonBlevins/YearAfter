@@ -3619,3 +3619,36 @@ Three workers on the same files each rewrote the line under test while the other
 result was a mix of two mutants and the restore step from one worker overwrote the other's change. Parallelism needs a
 copy of the tree per worker, or none. A worker also restores its file on any exit, including a signal, and the file is
 checked against the original before the next run starts.
+
+### 13.208 A fixture that removes a thing removes every place it can live
+
+The "no degree" fixture set the bachelor's year to `undefined` and left a postgraduate year in the credentials the played
+life had, so the character still held a degree, the officer bar never fired and three tests failed in a way that looked
+like a bug in the bar. A fixture for "does not hold X" clears every field X can be read from, and one test asserts the
+fixture is what it says (`holdsDegree(base)` is false) before the tests that depend on it.
+
+### 13.209 Two paths that compute one number need a test that compares them
+
+A screen helper (`yearPayOf`) and the year it describes (`runMilitaryYear`) each worked out an enlisted member's pay
+in officer training, and they disagreed: the helper said the officer rate and the year paid the rank they came from. The
+test that found it was written to pin the helper's own cases and happened to include the trainee. When a number is
+computed twice, once to show and once to pay, one test sets up the odd case and asserts both give the same figure.
+
+### 13.210 A measurement's seeds must include the life, not only the loop count
+
+The first measurement seeded every career with the age and the loop index, so 120 lives shared 15 seeds and a hash draw
+that depends only on the seed came out the same for all of them: a 0.3% officer wash-out on one policy and 15% on the other
+from the same engine. A measurement with a figure that jumps between two runs of the same rule is reading a handful of
+draws, not a rate. Put the life's index in the seed, and check that the figure holds when the seed prefix changes.
+
+### 13.211 A yearly chance with no ceiling on years makes everyone arrive, so measure the patient policy too
+
+A grade with a 28% yearly chance from year sixteen looked right at twenty years (70% of captains reached it) and meant
+every officer who stayed to 65 got there. Measure a career that never ends as well as the one that ends at twenty, and
+name the gap when a rule the real services have (a high-year-of-tenure limit) is not built.
+
+### 13.212 A fake random source breaks the first code that reads a stream
+
+A test that overrode only `getSeed` on a state was enough for hash draws and failed with "stream is not a function"
+the moment a whole year ran. Integration tests build a real generator for each seed, and a test that runs the same life
+twice builds two, so both runs start from the same stream.

@@ -1,6 +1,6 @@
 # 0901 — The service engine, with the Army
 
-**Status: DONE (engine).** No screens: they are 0906's. **Save change: v58 → v59.** Agent B's saves must start at
+**Status: DONE (engine); two rules here were changed by 0902 (see the last section).** No screens: they are 0906's. **Save change: v58 → v59.** Agent B's saves must start at
 **v60** (`CLAIMS.md`). First ticket of v0.09 (Military, Intelligence, Politics, Crime); this one is Military, stacked on
 `integrate/sports-on-main`. The measurement and breakdown that led here are `v009-military-measurement.md`.
 
@@ -200,3 +200,13 @@ overwrites it), and `washOutPay` with years 1 (E-1 pay is flat). None can change
 Payton may want to move: the share who serve (161), the dropout bar (162), the promotion table, which is mine (160), and
 what a retiree receives, which is 0904 (166). Next is 0902 (the other branches, specialties and officers); it is not
 started. Device checks do not apply: there are no screens.
+
+## Changed by 0902
+
+0902 (`0902-branches-specialties-and-officers.md`) builds on this engine and changes three things written above.
+**Twenty years is no longer a forced retirement:** from twenty years a member may retire whenever they choose, the
+question at the end of every term becomes Retire or Stay, and the only hard stop is age 65. **Army only is no longer
+true:** all five branches run on this engine, and the recruiter's offer is a three-step question (a branch, then a
+ladder for somebody with a degree, then a job) instead of a yes or a no. **The enlisted pay table is shown beside the
+real officer table**, which was read from DFAS itself. The promotion table, the basic-training rate and the standards
+above are unchanged, and a life that never meets a recruiter still replays exactly.

@@ -1,6 +1,6 @@
 # v0.09 Military — measurement and proposed tickets
 
-**Status (29 October 2026): 0901 is built; 0902–0906 are approved and not started.** Payton chose Military as the first part
+**Status: 0901 and 0902 are built; 0903–0906 are approved and not started.** Payton chose Military as the first part
 of v0.09, stacked on `integrate/sports-on-main`, and approved the breakdown below with these changes: no Space Force (Army,
 Navy, Marine Corps, Air Force and Coast Guard, four or five specialties each), enlistment from 17 to 35 by offer or
 application with no draft, rare death and real injuries (in 0903), a four-year term then a choice, promotion by time and a
@@ -115,3 +115,21 @@ Agent B would need telling).
 Own state like sports (not a catalog job), enlist from 17 to 35 by recruiter offer or application, no draft, one pay table for all
 branches, deployment hazards as named judgements and not sourced, no minigames, no new talent (Discipline, Smarts, Health and
 Charisma carry the odds), and the same "odds are Payton's" approach as 0801 once he gives them.
+
+## Update after 0902
+
+0902 built the five branches, 25 specialties and the officer road. What its measurement found, against the figures
+above (120 lives, 780 Army careers a row; the other branches share the engine):
+
+- **Officers, DoD's DOPMA guidance** (70–90% to O-4 at 9–11 years, 60–80% of those to O-5 at 15–17, 40–60% of those to O-6
+  at 21–23): of direct officers who finish training, 70% reach O-4, 70% of those reach O-5 by twenty years, and 39% of
+  the O-5s reach O-6 by 65. 29% are passed over at O-3.
+- **Wash-out of officer training:** 4% of direct candidates (about 8% at a middling fit, lower for the well prepared); no
+  modern figure exists.
+- **Enlisted:** 90.6% retire and 9.4% wash out of basic. A member who retires at twenty reached E-7 69% of the time and E-9
+  2.3%; one who stays to 65 reached E-9 40% of the time, because there is no high-year-of-tenure rule.
+- **From the ranks:** a degree-holder applying every year is commissioned 83% of the time (a 30% board at a performance
+  of 60).
+
+The **retirement figures at the top of this note** are unchanged for a member who retires at twenty. Since 0902,
+retirement is a choice from twenty years and a hard stop at 65 (Payton's call). See `0902-branches-specialties-and-officers.md`.

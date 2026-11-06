@@ -32,6 +32,11 @@ adds a `military` field to the game state (a career in progress, the ones that e
 input to the living phase, and a hand-over in `workHarder`/`pushesLeft` to a service version while somebody serves.
 Details: `0901-the-service-engine.md`.
 
+**Update, November: Agent A's 0902 (branches, specialties and officers) took save v60.** **The current save is v60 and the
+next free version is v61.** Do not take v60 or lower. It grows `military` (a track, a specialty, a commissioning year, a
+rank prior to officer training and a commission-application age) and adds a guard in `advance.ts` that takes acting,
+music, modeling and sports offers out of a serving life's year. Details: `0902-branches-specialties-and-officers.md`.
+
 **7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
 one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
 inject-or-close choices and no automatic personal-bank rescue. Death winds down troubled
