@@ -254,6 +254,7 @@ export const SPECIALTY_SKILLS = [
   'logistics',
   'maritime',
   'aviation',
+  'intelligence',
 ] as const;
 export type SpecialtySkill = (typeof SPECIALTY_SKILLS)[number];
 
@@ -478,6 +479,46 @@ export const SPECIALTIES: readonly SpecialtyRow[] = [
     requires: { health: 70, discipline: 55 },
     danger: 3,
     skill: 'aviation',
+  },
+  {
+    id: 'army.intelligence',
+    branch: 'army',
+    name: 'Intelligence Analyst',
+    requires: { smarts: 60, discipline: 55 },
+    danger: 1,
+    skill: 'intelligence',
+  },
+  {
+    id: 'navy.intelligence',
+    branch: 'navy',
+    name: 'Intelligence Specialist',
+    requires: { smarts: 60, discipline: 55 },
+    danger: 1,
+    skill: 'intelligence',
+  },
+  {
+    id: 'marine-corps.intelligence',
+    branch: 'marine-corps',
+    name: 'Intelligence Specialist',
+    requires: { smarts: 60, discipline: 55 },
+    danger: 2,
+    skill: 'intelligence',
+  },
+  {
+    id: 'air-force.intelligence',
+    branch: 'air-force',
+    name: 'Intelligence Analyst',
+    requires: { smarts: 60, discipline: 55 },
+    danger: 1,
+    skill: 'intelligence',
+  },
+  {
+    id: 'coast-guard.intelligence',
+    branch: 'coast-guard',
+    name: 'Intelligence Specialist',
+    requires: { smarts: 60, discipline: 55 },
+    danger: 1,
+    skill: 'intelligence',
   },
 ];
 

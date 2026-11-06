@@ -486,13 +486,13 @@ describe('rank titles', () => {
 });
 
 describe('the specialties', () => {
-  it('are five in each branch, 25 in all, each id belonging to its branch and none repeated', () => {
-    expect(SPECIALTIES).toHaveLength(25);
+  it('are five in each branch and an intelligence one besides (0905), 30 in all, each id belonging to its branch and none repeated', () => {
+    expect(SPECIALTIES).toHaveLength(30);
     for (const id of SERVICE_BRANCH_IDS) {
-      expect(specialtiesOf(id), id).toHaveLength(5);
+      expect(specialtiesOf(id), id).toHaveLength(6);
       for (const s of specialtiesOf(id)) expect(s.id.startsWith(`${id}.`)).toBe(true);
     }
-    expect(new Set(SPECIALTIES.map((s) => s.id)).size).toBe(25);
+    expect(new Set(SPECIALTIES.map((s) => s.id)).size).toBe(30);
     expect(new Set(SPECIALTIES.map((s) => s.name)).size).toBeGreaterThan(15);
     expect(specialtiesOf('nowhere')).toEqual([]);
   });
@@ -533,6 +533,12 @@ describe('the specialties', () => {
       ['coast-guard.enforcement', 'Maritime Enforcement', 0, 0, 50, 2, 'security'],
       ['coast-guard.health', 'Health Services Technician', 50, 0, 0, 1, 'medical'],
       ['coast-guard.survival', 'Aviation Survival Technician', 0, 70, 55, 3, 'aviation'],
+      // Ticket 0905. One intelligence job in each branch, each wanting a Top Secret clearance.
+      ['army.intelligence', 'Intelligence Analyst', 60, 0, 55, 1, 'intelligence'],
+      ['navy.intelligence', 'Intelligence Specialist', 60, 0, 55, 1, 'intelligence'],
+      ['marine-corps.intelligence', 'Intelligence Specialist', 60, 0, 55, 2, 'intelligence'],
+      ['air-force.intelligence', 'Intelligence Analyst', 60, 0, 55, 1, 'intelligence'],
+      ['coast-guard.intelligence', 'Intelligence Specialist', 60, 0, 55, 1, 'intelligence'],
     ]);
     for (const s of SPECIALTIES) expect(SPECIALTY_SKILLS).toContain(s.skill);
   });
@@ -860,6 +866,7 @@ describe('the door, branch by branch', () => {
       'army.mechanic',
       'army.signal',
       'army.police',
+      'army.intelligence',
     ]);
     expect(qualifyingSpecialties(base, 'coast-guard')).toEqual(
       specialtiesOf('coast-guard').map((s) => s.id),
@@ -1124,6 +1131,7 @@ describe('the recruiter’s offer, in steps', () => {
       "Machinist's Mate",
       'Information Systems Technician',
       'Aviation Mechanic',
+      'Intelligence Specialist',
       'Not for me',
     ]);
     expect(decision.prompt).toContain('the Navy');

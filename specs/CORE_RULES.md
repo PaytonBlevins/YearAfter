@@ -3726,3 +3726,26 @@ Of fifteen survivors in 0904, six were equivalent (the guard changes no outcome)
 (`refused` passed to a function whose only callers could never make it matter). Writing a test for the last would have pinned
 nothing. For each survivor, say whether any input can tell the mutant from the original; if not, delete the line (dead) or
 list it as equivalent; if so, write that input.
+
+### 13.223 A threshold on a stat that stops changing is measured at the end of the life, not at the start
+
+0905's agents start at a performance of 50 and follow a target that settles near it, so the retention floor of 40 looked
+sensible against a typical new hire. Played for twenty years, every agent's performance sat between 42 and 54, so nobody was
+ever let go, and a promotion table that read a 60 as the table's own number put 83% of careers at GS-14 and GS-15. Both
+dials were wrong in the same direction and both passed their tests (the tests set the stat by hand). Before a rule reads a
+stat that is slowly pulled to a point, play a population to the end and read the quantiles there; then set the dial and say in
+the doc what the range was.
+
+### 13.224 A test that accepts either answer is not a test
+
+The first "busy" test for the agencies' door read `expect(['busy', undefined]).toContain(bar)`, because the fixture was a
+career the engine did not treat as full time. The sabotage run deleted the whole check and it still passed. When a fixture
+might not be the thing it says it is, assert the fixture first (the way 0901's cases check `busy(state)` is true) and then
+assert exactly one answer.
+
+### 13.225 When one comparison is hidden behind an unrelated effect, hold the rest of the life still
+
+Two lives that differ by a promotion's mood also differ by every random event the year draws, and the happiness of the
+promoted one came out lower than the other's. Testing "the mood is added" through two different lives cannot work. Wrap the
+one function (`vi.spyOn` on the module, calling through and adding a number) so both runs are the same life, and compare
+those. The same applies to a ledger reconciliation and any comparison that reads a whole year.

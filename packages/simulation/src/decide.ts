@@ -32,6 +32,7 @@ import { answerRenovationOffer, isRenovationOfferDecision } from './renovations'
 import { answerBusinessRescue, BUSINESS_RESCUE_EVENT_ID } from './business-rescue';
 import { answerActingOffer, isActingOfferDecision } from './acting';
 import { answerMilitaryOffer, isMilitaryOfferDecision } from './military';
+import { answerIntelMission, isIntelMissionDecision } from './intel';
 import { answerMission, isMilitaryMissionDecision } from './military-deployments';
 import { answerModelingOffer, isModelingOfferDecision } from './modeling';
 import { answerMusicOffer, isMusicOfferDecision } from './music';
@@ -195,6 +196,15 @@ export function decide(
   // Ticket 0903. The thirteenth: an incident of a deployment, answered with how it came out.
   if (isMilitaryMissionDecision(eventId)) {
     const answered = answerMission(state, choiceId);
+    if (!answered.ok) {
+      return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
+    }
+    return ok({ state: answered.value.state, entry: answered.value.entry });
+  }
+
+  // Ticket 0905. The fourteenth: a mission of an intelligence life, answered with how it came out.
+  if (isIntelMissionDecision(eventId)) {
+    const answered = answerIntelMission(state, choiceId);
     if (!answered.ok) {
       return err(answered.error === 'no-such-choice' ? 'no-such-choice' : 'unresolvable');
     }

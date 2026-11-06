@@ -168,3 +168,21 @@ Against the figures above:
   so the general and dishonorable lines sit at 50 and 52.
 - The first-term attrition anchor (35.8% did not finish) is still not matched: this build has washing out, not being asked to
   stay and choosing to leave, and a medical board that no life reaches until a minigame opens deployments.
+
+## Update after 0905
+
+0905 built the clearance, military-intelligence specialties, the FBI and the CIA, and missions as an engine
+(`0905-military-intelligence-and-the-agencies.md`). Against the figures above:
+
+- **Clearances:** investigations took **243 days for Top Secret and 197 for Secret** (fiscal 2026, second quarter); a
+  Confidential is the Secret investigation; a clearance can be reinstated within **24 months** of the job that needed it. A
+  typical life here is granted Top Secret 87.6% of the time, a weak one 82.3%; the denial rates are the game's.
+- **The FBI:** special agents are 23 to 36 at appointment (a bachelor's degree, two years of professional experience), 19 weeks
+  at Quantico, 25% availability pay on top of the General Schedule, compulsory retirement at 57. The CIA wants a bachelor's
+  degree and enters near GS-9.
+- **Pay:** the 2026 General Schedule for Washington, step 1: GS-9 $70,623, GS-12 $102,415, GS-13 $121,785, GS-15 $169,279, base
+  pay capped at $197,200. A typical FBI agent here is paid about $190,000 ten years in; a CIA officer about $148,000.
+- **Retirement:** 1.7% of the average of the last three years' pay for each of the first twenty years and 1% for each after,
+  from fifty with twenty years in.
+- **Careers** (600 each): about 5 to 12% wash out of the academy, about 0 to 5% are let go, and the rest reach the end of the
+  career, mostly at GS-13 with a few at GS-15. An agent's performance after years ranges only 42–54 (finding 209).

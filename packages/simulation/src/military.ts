@@ -40,6 +40,9 @@ import {
   MISCONDUCT_DISCIPLINE_BELOW,
   MISCONDUCT_LINES,
   MISCONDUCT_REPUTATION_BELOW,
+  NOT_CLEARED_LINES,
+  RECLASSIFIED_LINES,
+  clearanceForSkill,
   dischargeOf,
 } from '@yearafter/content';
 import {
@@ -108,6 +111,7 @@ import type { PendingDecision } from '@yearafter/events';
 import { isActingFullTime } from './acting';
 import { resign } from './careers';
 import { hasSystemicOffer, type GameState } from './game-state';
+import { clearanceMeets, investigate, type Investigation } from './intel-clearance';
 import type {
   MilitaryOffer,
   MilitaryState,
@@ -267,7 +271,7 @@ export const ENLIST_ERROR_LABELS: Readonly<Record<EnlistError, string>> = {
 };
 
 /** Whether another full-time career holds the character's year. */
-const holdsAnotherCareer = (state: GameState): boolean =>
+export const holdsAnotherCareer = (state: GameState): boolean =>
   isSportsFullTime(state.sports.career) ||
   isPostFullTime(state.sports.post) ||
   isActingFullTime(state.acting) ||
@@ -275,7 +279,7 @@ const holdsAnotherCareer = (state: GameState): boolean =>
   isModelingFullTime(state.modeling);
 
 /** Whether another field has a question standing: a contract, a part, a record deal, a job. */
-const otherFieldAsking = (state: GameState): boolean =>
+export const otherFieldAsking = (state: GameState): boolean =>
   state.sports.offer !== undefined ||
   state.acting.offers.length > 0 ||
   state.music.offer !== undefined ||
@@ -920,6 +924,8 @@ export interface MilitaryYearOutput {
   readonly statDeltas: Partial<Record<VisibleStatKey, number>>;
   /** True when this year took somebody out of uniform. */
   readonly left: boolean;
+  /** Ticket 0905. The investigation a recruit's training year ended in, if the specialty wanted a clearance. */
+  readonly investigation?: Investigation;
 }
 
 const NONE_YEAR: Omit<MilitaryYearOutput, 'military'> = {
@@ -995,6 +1001,10 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
       : annualBasePay(career.grade, years, track);
   const titleOf = (grade: number, onTrack: ServiceTrack = track): string =>
     rankTitle(branch, onTrack, grade);
+  // Ticket 0905. The investigation a clearance-wanting specialty runs at the end of the training year, and the
+  // specialty somebody is left with if the clearance is refused.
+  let investigation: Investigation | undefined;
+  let specialty = career.specialty;
 
   /* ---- the first year: basic training, or officer training --------------- */
   if (training) {
@@ -1074,6 +1084,37 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
       statDeltas.discipline = 2;
       statDeltas.health = 2;
     }
+    /* ---- Ticket 0905: the investigation the specialty needs ---- */
+    const skill = (findSpecialty(career.specialty) ?? openSpecialtyOf(branch)).skill;
+    const needed = clearanceForSkill(skill);
+    if (needed !== undefined && !clearanceMeets(before.intel, age, needed)) {
+      investigation = investigate({
+        seed,
+        generation: gen,
+        age,
+        level: needed,
+        discipline: stats.discipline,
+        military,
+        intel: before.intel,
+        key: `training:${career.specialty}`,
+      });
+      lines.push({ kind: 'milestone', text: investigation.line });
+      if (!investigation.granted) {
+        if (skill === 'intelligence') {
+          const open = openSpecialtyOf(branch);
+          specialty = open.id;
+          lines.push({
+            kind: 'milestone',
+            text: fill(pick(RECLASSIFIED_LINES, `${age}:reclass`), branch).replaceAll(
+              '%job%',
+              open.name,
+            ),
+          });
+        } else {
+          lines.push({ kind: 'passive', text: pick(NOT_CLEARED_LINES, `${age}:notcleared`) });
+        }
+      }
+    }
   } else if (years < TERM_YEARS) {
     // A first term still builds discipline, a little.
     statDeltas.discipline = 1;
@@ -1141,6 +1182,7 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
   const { prior: _prior, ...careerBase } = career;
   const next: ServiceCareer = {
     ...careerBase,
+    specialty,
     stage: 'serving',
     grade,
     years: nextYears,
@@ -1291,6 +1333,7 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
     mood,
     statDeltas,
     left: false,
+    ...(investigation ? { investigation } : {}),
   };
 }
 

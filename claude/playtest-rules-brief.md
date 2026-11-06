@@ -51,6 +51,11 @@ free version is **v63**. Do not take v44–v62. If you already have, tell Payton
 retired-pay row and a GI Bill housing row in `advance.ts`, the GI Bill's tuition in a year's college support, and a veteran
 bonus in the hiring odds, and changes nothing for a life that has not served.
 
+**Update, November: Agent A's 0905 (military intelligence and the agencies) took save v63.** The current save is v63 and the next
+free version is **v64**. Do not take v44–v63. If you already have, tell Payton before pushing and renumber. 0905 adds an intelligence
+year in `advance.ts` (agency pay, retired federal pay, both in the household's income), an investigation at the end of a recruit's
+training year, and changes nothing for a life with no clearance, no agency and no service in an intelligence job.
+
 ## Read these first, in this order
 
 1. `specs/AI_CODING_INSTRUCTIONS.md`, `specs/ARCHITECTURE.md` (binding)

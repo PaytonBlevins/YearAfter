@@ -48,6 +48,7 @@ import type {
   ActingState,
   MusicState,
   ModelingState,
+  IntelState,
   MilitaryState,
   RngSnapshot,
   WorldState,
@@ -58,8 +59,8 @@ import type { SaveId } from '@yearafter/core';
 /** P7: explicit purchase savings goal; old lives migrate with no goal. */
 /** P10: optional paid aftermarket watch work; legacy values stay unchanged. */
 /** P11: optional once-paid preventive car service, expires after the next advance. */
-/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain; 0901 (the service) took v59, and 0902 (branches, specialties and officers) took v60, and 0903 (deployments) took v61, and 0904 (discharge, benefits and veterans) took v62. */
-export const CURRENT_SAVE_VERSION = 62;
+/** 0801–0808 (sports, acting, music, modeling, racing) took v52–v58 after Agent B's P1–P16 chain; 0901 (the service) took v59, and 0902 (branches, specialties and officers) took v60, and 0903 (deployments) took v61, and 0904 (discharge, benefits and veterans) took v62, and 0905 (military intelligence and the agencies) took v63. */
+export const CURRENT_SAVE_VERSION = 63;
 
 export interface SaveSettings {
   /** Reduced animation and shorter transitions. */
@@ -108,6 +109,10 @@ export type { WorldState };
  * (a branch, a ladder, a job) with the options frozen on it. The migration gives a v59 career the enlisted ladder and the
  * Army's open specialty (the only branch and job 0901 had), and turns a v59 offer into the branch question with the Army
  * its only option.
+ *
+ * v63 added intelligence (Ticket 0905): `intel` — a clearance (its level and when it was granted, and since when it has been idle),
+ * an agency career in progress, the ones that ended and how, and a mission waiting. Always present, so the migration gives
+ * every older save an empty one: nobody before it held a clearance or worked for an agency.
  *
  * v59 added the service (Ticket 0901): `military` — a career in progress (a branch, a grade, years served, the term, a
  * performance the service never shows as a number, a reputation of its own), the careers that ended and how, and a
@@ -237,7 +242,7 @@ export type { WorldState };
  * Older saves migrate forward; see migrations.ts.
  */
 export interface SaveGameV18 {
-  readonly version: 62;
+  readonly version: 63;
   readonly id: SaveId;
   /** Master RNG seed plus live domain-stream states. */
   readonly rng: RngSnapshot;
@@ -363,6 +368,8 @@ export interface SaveGameV18 {
   readonly modeling: ModelingState;
   /** Ticket 0901. A service life: a career, the ones that ended, and a question. Always present from v59. */
   readonly military: MilitaryState;
+  /** Ticket 0905. A clearance, an agency career, the ones that ended, and a mission. Always present from v63. */
+  readonly intel: IntelState;
   /*
     Ticket 0212 adds no top-level field. `player.records` is finally populated
     and children carry a `life`, but both were already part of `Character` and

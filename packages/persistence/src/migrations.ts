@@ -1289,6 +1289,17 @@ const migrations: Readonly<Record<number, Migration>> = {
    * until a veteran enrolls, so nothing moves but the version. No RNG, no clock.
    */
   61: (save) => ({ ...save, version: 62 }),
+  /**
+   * v62 -> v63: Ticket 0905 — military intelligence and the agencies. Nobody before it held a clearance or worked for an
+   * agency, so every older save gets an empty intelligence state: no clearance, no career, nothing in the past. What a
+   * v62 save already carries is kept. No RNG, no clock.
+   */
+  62: (save) => ({
+    ...save,
+    intel:
+      typeof save['intel'] === 'object' && save['intel'] !== null ? save['intel'] : { past: [] },
+    version: 63,
+  }),
 };
 
 /**
@@ -1904,6 +1915,128 @@ function militaryOk(value: unknown): boolean {
   return true;
 }
 
+const CLEARANCES_OK: readonly string[] = ['confidential', 'secret', 'top-secret'];
+const AGENCIES_OK: readonly string[] = ['fbi', 'cia'];
+const MISSION_SOURCES_OK: readonly string[] = ['military', 'fbi', 'cia'];
+const AGENCY_ENDINGS_OK: readonly string[] = [
+  'washed-out',
+  'let-go',
+  'clearance-lost',
+  'resigned',
+  'retired',
+  'killed',
+];
+
+/** Ticket 0905. A clearance, an agency career, the ones that ended, and a mission waiting. */
+function intelOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const intel = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  const level = (n: unknown): boolean => typeof n === 'number' && n >= 0 && n <= 100;
+  const agencyOk = (n: unknown): boolean => typeof n === 'string' && AGENCIES_OK.includes(n);
+  const gradeOk = (n: unknown): boolean => whole(n) && (n as number) >= 9 && (n as number) <= 15;
+  if (
+    !optionalWhole(intel['revokedAge']) ||
+    !optionalWhole(intel['deniedAge']) ||
+    !optionalWhole(intel['appliedAge'])
+  ) {
+    return false;
+  }
+  if (intel['missionsOpen'] !== undefined && typeof intel['missionsOpen'] !== 'boolean') {
+    return false;
+  }
+  const clearance = intel['clearance'];
+  if (clearance !== undefined) {
+    if (typeof clearance !== 'object' || clearance === null) return false;
+    const c = clearance as Record<string, unknown>;
+    if (
+      typeof c['level'] !== 'string' ||
+      !CLEARANCES_OK.includes(c['level']) ||
+      !whole(c['grantedAge']) ||
+      !optionalWhole(c['idleSince'])
+    ) {
+      return false;
+    }
+  }
+  const career = intel['career'];
+  if (career !== undefined) {
+    if (typeof career !== 'object' || career === null) return false;
+    const c = career as Record<string, unknown>;
+    if (
+      !agencyOk(c['agency']) ||
+      (c['stage'] !== 'training' && c['stage'] !== 'serving') ||
+      !whole(c['enteredAge']) ||
+      !gradeOk(c['grade']) ||
+      !whole(c['gradeYears']) ||
+      !whole(c['years']) ||
+      !level(c['performance']) ||
+      !level(c['reputation']) ||
+      (c['effort'] !== 'normal' && c['effort'] !== 'hard') ||
+      !optionalWhole(c['pushedAtAge']) ||
+      !optionalWhole(c['pushedThisYear']) ||
+      !whole(c['lastPay']) ||
+      typeof c['post'] !== 'string' ||
+      (c['door'] !== 'service' && c['door'] !== 'degree') ||
+      !whole(c['poorYears']) ||
+      !Array.isArray(c['highPay']) ||
+      (c['highPay'] as unknown[]).length > 3 ||
+      !(c['highPay'] as unknown[]).every((n) => whole(n))
+    ) {
+      return false;
+    }
+  }
+  const past = intel['past'];
+  if (!Array.isArray(past)) return false;
+  for (const row of past) {
+    if (typeof row !== 'object' || row === null) return false;
+    const r = row as Record<string, unknown>;
+    if (
+      !agencyOk(r['agency']) ||
+      !whole(r['enteredAge']) ||
+      !whole(r['endedAge']) ||
+      !whole(r['years']) ||
+      !gradeOk(r['finalGrade']) ||
+      !level(r['reputation']) ||
+      typeof r['how'] !== 'string' ||
+      !AGENCY_ENDINGS_OK.includes(r['how']) ||
+      !whole(r['pension'])
+    ) {
+      return false;
+    }
+  }
+  const mission = intel['mission'];
+  if (mission !== undefined) {
+    if (typeof mission !== 'object' || mission === null) return false;
+    const m = mission as Record<string, unknown>;
+    if (
+      typeof m['source'] !== 'string' ||
+      !MISSION_SOURCES_OK.includes(m['source']) ||
+      !whole(m['age'])
+    ) {
+      return false;
+    }
+  }
+  const missions = intel['missions'];
+  if (missions !== undefined) {
+    if (!Array.isArray(missions)) return false;
+    for (const row of missions) {
+      if (typeof row !== 'object' || row === null) return false;
+      const r = row as Record<string, unknown>;
+      if (
+        !whole(r['age']) ||
+        typeof r['source'] !== 'string' ||
+        !MISSION_SOURCES_OK.includes(r['source']) ||
+        typeof r['outcome'] !== 'string' ||
+        !DEPLOY_OUTCOMES_OK.includes(r['outcome'])
+      ) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function modelingOk(value: unknown): boolean {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const modeling = value as Record<string, unknown>;
@@ -2278,6 +2411,8 @@ export function validateCurrentSave(
     require('modeling', candidate['modeling'], modelingOk(candidate['modeling'])),
     // Ticket 0901. Always present from v59: a career in progress, the ones that ended, and a question.
     require('military', candidate['military'], militaryOk(candidate['military'])),
+    // Ticket 0905. Always present from v63: a clearance, an agency career, the ones that ended, and a mission.
+    require('intel', candidate['intel'], intelOk(candidate['intel'])),
     // Ticket 0704. Optional, but if it is there it has to be one of the two.
     require('representation', candidate['representation'], candidate['representation'] ===
       undefined ||

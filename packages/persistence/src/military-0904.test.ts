@@ -38,8 +38,8 @@ const withMilitary = (military: unknown, version?: number) => {
 
 describe('discharges and the GI Bill in a v62 save', () => {
   it('is at version 62', () => {
-    expect(CURRENT_SAVE_VERSION).toBe(62);
-    expect(base().version).toBe(62);
+    expect(CURRENT_SAVE_VERSION).toBeGreaterThanOrEqual(62);
+    expect(base().version).toBeGreaterThanOrEqual(62);
   });
 
   it('keeps every ending with the discharges that go with it, exactly', () => {

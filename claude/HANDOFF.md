@@ -49,6 +49,13 @@ GI Bill used), adds a retired-pay row and a GI Bill housing row to `advance.ts` 
 Bill's tuition to a year's college support (`college.ts`, `phases/education.ts`), and adds `Applicant.veteran` to the hiring
 odds (`careers/src/employment.ts`). A life that never serves replays exactly. Details: `0904-discharge-benefits-and-veterans.md`.
 
+**Update, November: Agent A's 0905 (military intelligence and the agencies) took save v63.** **The current save is v63 and the next free version is
+v64.** Do not take v63 or lower. It adds an `intel` field to the game state (a clearance, an agency career, the careers that ended, a
+mission waiting and the missions done, and a gate that no code sets), an `intel` year in `advance.ts` (agency pay and its tax, retired
+federal pay, the household's income, mood, occupation, the held year), an investigation at the end of a recruit's training year in
+`military.ts`, a hand-over in `workHarder`/`pushesLeft`, and an intelligence specialty in every branch. A life that never meets any of it
+replays exactly. There is no minigame, so no mission is raised in play. Details: `0905-military-intelligence-and-the-agencies.md`.
+
 **7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
 one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
 inject-or-close choices and no automatic personal-bank rescue. Death winds down troubled

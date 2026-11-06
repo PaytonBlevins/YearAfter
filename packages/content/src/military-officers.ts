@@ -186,4 +186,9 @@ export const SKILL_LINES: Readonly<Record<SpecialtySkill, readonly string[]>> = 
     'You spent the year around aircraft, and learned what it takes to keep them in the air.',
     'Another year of preflights, repairs and watching things you worked on take off.',
   ],
+  intelligence: [
+    'A year in the intelligence section, reading what other people wrote and deciding what mattered.',
+    "You spent the year with imagery, intercepts and reports, and learned to tell what's known from what's guessed.",
+    "Another year in the section. Most of what you did, you can't describe.",
+  ],
 };
