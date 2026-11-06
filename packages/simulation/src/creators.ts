@@ -13,7 +13,7 @@ import {
   SPONSOR_KIND,
   creatorLine,
   findCreatorCategory,
-  findFameWork,
+  fameWorkLabel,
   findPlatform,
 } from '@yearafter/content';
 import { dollars, err, ok, stablePick, type Result } from '@yearafter/core';
@@ -377,7 +377,7 @@ export function runCreatorsYear(input: {
     transactions.push({
       category: 'creator',
       amount: dollars(job.pay),
-      source: `${findFameWork(job.id)?.label ?? 'Appearance'}: ${job.outlet}`,
+      source: `${fameWorkLabel(job.id, job.outlet) ?? 'Appearance'}: ${job.outlet}`,
     });
   }
   const managerKept = managerShare(input.representation, gross);

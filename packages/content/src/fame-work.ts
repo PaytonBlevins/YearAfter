@@ -155,3 +155,52 @@ export const FAME_WORK: readonly FameWorkDef[] = [
 
 const BY_ID = new Map(FAME_WORK.map((work) => [work.id, work]));
 export const findFameWork = (id: string): FameWorkDef | undefined => BY_ID.get(id as FameWorkId);
+
+/** A larger commission replaces the starter offer in the same annual work slot. */
+export const NATIONAL_FAME_WORK = 30;
+
+export const NATIONAL_CAMPAIGNS = {
+  photoshoot: {
+    label: 'National photo campaign',
+    minimum: 4_500,
+    premiumShare: 0.5,
+    maximumPremium: 12_000,
+    outlets: [
+      'the Alder House national lookbook',
+      'Meridian Style’s cover campaign',
+      'the North Coast travel campaign',
+      'Vela & Ash’s national catalogue',
+      'Cedar Run’s seasonal campaign',
+    ],
+    offer:
+      '{outlet} wants you for a national photo campaign. The fee covers the shoot and use of your photos. It pays {pay}.',
+    line: 'You shot {outlet}. The campaign paid {pay}, including the use of your photos.',
+  },
+  commercial: {
+    label: 'National brand commercial',
+    minimum: 9_000,
+    premiumShare: 0.35,
+    maximumPremium: 20_000,
+    outlets: [
+      'Fairhaven Coffee’s national campaign',
+      'Summit Mobile’s national campaign',
+      'Harbor Market’s national campaign',
+      'Willow Bank’s national campaign',
+      'Fieldstone Motors’ national campaign',
+    ],
+    offer:
+      '{outlet} wants you in a national commercial. The fee covers filming and running the ad. It pays {pay}.',
+    line: 'You filmed a commercial for {outlet}. The campaign paid {pay}, including the use of the ad.',
+  },
+} as const;
+
+export function nationalCampaignFor(id: string) {
+  return id === 'photoshoot' || id === 'commercial' ? NATIONAL_CAMPAIGNS[id] : undefined;
+}
+
+/** Accepted work keeps the label of the outlet that actually booked it, even if fame changes. */
+export function fameWorkLabel(id: string, outlet: string): string | undefined {
+  const campaign = nationalCampaignFor(id);
+  if (campaign?.outlets.some((name) => name === outlet)) return campaign.label;
+  return findFameWork(id)?.label;
+}

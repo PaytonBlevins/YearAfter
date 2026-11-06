@@ -2132,3 +2132,8 @@ remain open. Reproduction details and all 15 notes: `playtest-november.md`.
 November fame/music follow-up: see `playtest-november-fame-music.md` for
 the combined gauge, established-catalogue growth, nominations, music
 collaboration and fame-assisted posting. Fixed-score offer design remains open.
+
+November fixed-score fame offers: national photo and commercial campaigns
+now replace starter bookings at 30 fame in the same slots, with $4,500 and
+$9,000 floors. See `playtest-november-fame-offers.md`. Business control and
+valuations, live auctions, multiple ventures, and advisor work remain open.
