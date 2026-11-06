@@ -47,13 +47,15 @@ describe('the recap, made from the real year', () => {
     expect(outcome.body).toContain('Put out a single');
   });
 
-  it('is a racing team’s own season when that is all that happened', () => {
+  it('includes the racing season and its business report', () => {
     const rich = withBookedCash(ADULT, 5_000_000);
     const opened = openBusiness(rich, 'biz.racing');
     if (!opened.ok) throw new Error('no team');
     const turned = advanceYear(opened.value.state).state;
     const outcome = recapOutcome(opened.value.state, turned)!;
-    expect(outcome.title).toBe('Your racing team');
+    expect(outcome.title).toBe('Yearly updates');
+    expect(outcome.body).toContain('Annual business report');
+    expect(outcome.body).toContain('revenue');
     expect(outcome.body).toMatch(/finished \d+(st|nd|rd|th) of \d+ in the Coastline Club Racing/);
   });
 

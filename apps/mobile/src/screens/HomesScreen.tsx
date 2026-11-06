@@ -21,6 +21,7 @@
 
 import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
 import { dollars } from '@yearafter/core';
+import { ScreenTabs } from '../components/ScreenTabs';
 
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
@@ -56,6 +57,7 @@ export function HomesScreen() {
   const { state, buyAHome, sellAHome } = useGame();
   const { push } = useNavigation();
   const [open, setOpen] = useState<string | undefined>(undefined);
+  const [propertyId, setPropertyId] = useState<string>();
   const [selling, setSelling] = useState<string | undefined>(undefined);
   if (!state) return null;
 
@@ -73,13 +75,14 @@ export function HomesScreen() {
   const home = residenceOf(state.homes);
   const others = otherPropertyOf(state.homes);
 
-  const ownedRows = (owned: OwnedHome, index: number) => {
+  const properties = home ? [home, ...others] : others;
+  const selected = properties.find((property) => property.id === (propertyId ?? properties[0]?.id));
+  const ownedRows = (owned: OwnedHome) => {
     const kind = findHomeKind(owned.kindId);
     const owed = Number(owned.mortgage?.balance ?? 0) / 100;
     const mortgage = mortgageLineOf(owned);
     return (
       <Fragment key={owned.id}>
-        {index > 0 ? <RowDivider /> : null}
         <ListRow
           icon="home"
           title={`${kind?.name ?? 'Home'} in ${owned.regionName}`}
@@ -253,41 +256,51 @@ export function HomesScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      {home ? (
-        <>
-          <SectionHeading>Your home</SectionHeading>
-          <Card>{ownedRows(home, 0)}</Card>
-        </>
+      {properties.length > 0 ? (
+        <ScreenTabs
+          selected={selected?.id ?? 'listings'}
+          onSelect={(id) => {
+            setPropertyId(id);
+            setSelling(undefined);
+            setOpen(undefined);
+          }}
+          tabs={[
+            { id: 'listings', label: 'Listings' },
+            ...properties.map((property, index) => ({
+              id: property.id,
+              label:
+                property.id === home?.id
+                  ? 'Your home'
+                  : `${index + 1}. ${findHomeKind(property.kindId)?.name ?? 'Property'}`,
+            })),
+          ]}
+        />
       ) : null}
-
-      {others.length > 0 ? (
-        <>
-          <SectionHeading>
-            {others.length === 1 ? 'Your property' : 'Your properties'}
-          </SectionHeading>
-          <Card>{others.map((owned, index) => ownedRows(owned, index))}</Card>
-        </>
-      ) : null}
-
-      <SectionHeading note={listings[0]?.regionName}>For sale this year</SectionHeading>
-      {listings.length === 0 ? (
-        <EmptyState title="Nothing listed" body="Nothing is for sale near you this year." />
+      {selected ? (
+        <Card>{ownedRows(selected)}</Card>
       ) : (
-        <Card>{listingRows(listings)}</Card>
-      )}
+        <>
+          <SectionHeading note={listings[0]?.regionName}>For sale this year</SectionHeading>
+          {listings.length === 0 ? (
+            <EmptyState title="Nothing listed" body="Nothing is for sale near you this year." />
+          ) : (
+            <Card>{listingRows(listings)}</Card>
+          )}
 
-      {/*
+          {/*
         Ticket 0503. Only when there is something to show: behind the same
         hidden gate as the homes, a character who could never afford a duplex
         never sees an empty heading telling them so.
       */}
-      {rentals.length > 0 ? (
-        <>
-          <SectionHeading>Rental property for sale</SectionHeading>
-          <Card>{listingRows(rentals)}</Card>
+          {rentals.length > 0 ? (
+            <>
+              <SectionHeading>Rental property for sale</SectionHeading>
+              <Card>{listingRows(rentals)}</Card>
+            </>
+          ) : null}
+          <Text style={styles.note}>New listings every year.</Text>
         </>
-      ) : null}
-      <Text style={styles.note}>New listings every year.</Text>
+      )}
     </ScrollView>
   );
 }

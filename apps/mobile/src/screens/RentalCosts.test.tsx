@@ -54,10 +54,10 @@ const occupied = (over: Partial<OwnedHome> = {}) =>
   });
 const money = (n: number) =>
   `${n < 0 ? '−' : ''}$${Math.abs(Math.round(n)).toLocaleString('en-US')}`;
-async function screen(property: OwnedHome, homes = false) {
+async function screen(property: OwnedHome, homes = false, others: OwnedHome[] = []) {
   const state = createNewGame({ seed: 'rental-costs' });
   vi.mocked(useGame, { partial: true }).mockReturnValue({
-    state: { ...state, player: { ...state.player, age: 25 }, homes: [property] },
+    state: { ...state, player: { ...state.player, age: 25 }, homes: [property, ...others] },
     letting,
   });
   vi.mocked(useNavigation, { partial: true }).mockReturnValue({
@@ -175,5 +175,19 @@ describe('A7 — visible rental costs', () => {
   it('labels the owned-property rent summary as gross', async () => {
     await screen(occupied(), true);
     expect(text()).toContain('gross a month');
+  });
+  it('keeps property details and sale actions on the selected property tab', async () => {
+    await screen(occupied(), true, [occupied({ id: 'second', regionName: 'Texas' })]);
+    expect(text()).toContain('in Ohio');
+    expect(text()).not.toContain('in Texas');
+    const tabs = rendered!.root.findAll(
+      (node) => node.props.accessibilityRole === 'tab' && typeof node.type === 'string',
+    );
+    await act(() => tabs[2]!.props.onPress());
+    expect(text()).toContain('in Texas');
+    expect(text()).not.toContain('in Ohio');
+    expect(
+      rendered!.root.findAllByType(ListRow).filter((row) => row.props.title === 'Sell'),
+    ).toHaveLength(1);
   });
 });

@@ -149,10 +149,20 @@ const ROUTES = {
 
 export function EntertainmentScreen() {
   const { state } = useGame();
-  const { push } = useNavigation();
   if (!state) return null;
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      <SpecialCareersContent />
+    </ScrollView>
+  );
+}
+
+export function SpecialCareersContent() {
+  const { state } = useGame();
+  const { push } = useNavigation();
+  if (!state) return null;
+  return (
+    <>
       <Card>
         {hubRows(state).map((row, index) => (
           <Divided key={row.id} first={index === 0}>
@@ -171,7 +181,7 @@ export function EntertainmentScreen() {
         A scholarship, a contract, a part, a record deal or a job turns up as a question when the
         year turns. What you do in between is here.
       </Text>
-    </ScrollView>
+    </>
   );
 }
 
