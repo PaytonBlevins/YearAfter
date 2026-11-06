@@ -102,3 +102,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | November playtest — fame and music | Codex / Agent B (`feat/november-fame-music`) | — | Claimed after Payton asked to start the follow-up; based on November usability fixes. |
 
 | November playtest — fame offer quality and pay | Codex / Agent B (`feat/november-fame-offers`) | — | Claimed on the fame/music follow-up for the fixed-score fame offer pass. |
+
+| November playtest — business control and valuation | Codex / Agent B (`feat/november-business-control`) | — | Claimed on the November fame-offer follow-up. |

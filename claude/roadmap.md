@@ -2137,3 +2137,8 @@ November fixed-score fame offers: national photo and commercial campaigns
 now replace starter bookings at 30 fame in the same slots, with $4,500 and
 $9,000 floors. See `playtest-november-fame-offers.md`. Business control and
 valuations, live auctions, multiple ventures, and advisor work remain open.
+
+November business controls: the owned dashboard now previews operating
+profit and compares price, staffing and supplier changes. Broker values
+weight recent earnings and distinguish durable growth from a downturn.
+See `playtest-november-business-control.md` for model inputs and calibration.

@@ -41,6 +41,7 @@ import {
   SUPPLIER_SEARCHES,
   BUSINESS_LOAN_REFUSALS,
   businessesValue,
+  businessValuationOf,
   eventLineFor,
   findBusinessEvent,
   reportedProfitOf,
@@ -53,6 +54,11 @@ import {
   DEMAND_LABELS,
   appraise,
   appraiseListing,
+  acceptSupplier,
+  businessForecast,
+  hireStaff,
+  letStaffGo,
+  nudgePrice,
   businessMarket,
   businessesForSale,
   expansionOffers,
@@ -679,6 +685,22 @@ export function BusinessScreen() {
   const hands = handsFor(state);
   const appraisal = panel === 'valuation' ? appraise(state, business.id) : undefined;
   const offer = panel === 'sell' ? offerFor(state, business.id) : undefined;
+  const forecast = businessForecast(state, business);
+  const valuation = businessValuationOf(business, type, state.world.year);
+  const preview = (
+    change: { readonly ok: false } | { readonly ok: true; readonly value: typeof state },
+  ) => {
+    if (!change.ok || !forecast) return undefined;
+    const changed = change.value.businesses.find((row) => row.id === business.id);
+    const next = changed && businessForecast(change.value, changed);
+    if (!next) return undefined;
+    const delta = next.typical.profit - forecast.typical.profit;
+    return `${money(next.typical.profit)} estimated profit · ${delta === 0 ? 'no change' : `${money(Math.abs(delta))} ${delta > 0 ? 'more' : 'less'}`}`;
+  };
+  const cheaper =
+    business.price > PRICE_MIN ? preview(nudgePrice(state, business.id, -1)) : undefined;
+  const dearer =
+    business.price < PRICE_MAX ? preview(nudgePrice(state, business.id, 1)) : undefined;
 
   return (
     <ScrollView
@@ -730,6 +752,52 @@ export function BusinessScreen() {
           </>
         )}
       </Card>
+
+      {forecast ? (
+        <>
+          <SectionHeading>Plan next year</SectionHeading>
+          <Card>
+            <ListRow
+              title="Typical operating profit"
+              value={money(forecast.typical.profit)}
+              subtitle={`${money(forecast.typical.revenue)} sales · ${money(forecast.typical.costs)} costs`}
+              affordance="none"
+              wrap
+            />
+            <RowDivider />
+            <ListRow
+              title="Profit with slower or busier trade"
+              value={
+                forecast.low === forecast.high
+                  ? money(forecast.low)
+                  : `${money(forecast.low)} to ${money(forecast.high)}`
+              }
+              subtitle={
+                forecast.low === forecast.high
+                  ? 'The estimate is the same in both scenarios'
+                  : undefined
+              }
+              affordance="none"
+              wrap
+            />
+            <RowDivider />
+            <ListRow
+              title="Capacity in a typical year"
+              subtitle={
+                forecast.typical.turnedAway > 0
+                  ? `About ${Math.round(forecast.typical.turnedAway * 100)}% of demand goes unserved`
+                  : `About ${Math.round(forecast.typical.idle * 100)}% of capacity goes unused`
+              }
+              affordance="none"
+              wrap
+            />
+          </Card>
+          <Text style={styles.note}>
+            Estimates use your current settings and economy. They exclude one-off events, loan
+            payments and taxes.
+          </Text>
+        </>
+      ) : null}
 
       <BusinessWarning
         business={business}
@@ -810,6 +878,27 @@ export function BusinessScreen() {
                   onPick={(price) => tuneBusiness(business.id, { kind: 'price', price })}
                 />
               </Card>
+              {cheaper || dearer ? (
+                <Card>
+                  {cheaper ? (
+                    <ListRow
+                      title="One price step lower"
+                      subtitle={cheaper}
+                      affordance="none"
+                      wrap
+                    />
+                  ) : null}
+                  {cheaper && dearer ? <RowDivider /> : null}
+                  {dearer ? (
+                    <ListRow
+                      title="One price step higher"
+                      subtitle={dearer}
+                      affordance="none"
+                      wrap
+                    />
+                  ) : null}
+                </Card>
+              ) : null}
             </>
           ) : (
             <Text style={styles.note}>
@@ -892,7 +981,10 @@ export function BusinessScreen() {
                     />
                     <ListRow
                       title="Accept this supplier"
-                      subtitle="Keep these quoted terms until you choose another supplier. Goods are paid for as the business sells them."
+                      subtitle={
+                        preview(acceptSupplier(state, business.id, pitch.id)) ??
+                        'Keep these quoted terms until you choose another supplier. Goods are paid for as the business sells them.'
+                      }
                       affordance="action"
                       onPress={() => acceptBusinessSupplier(business.id, pitch.id)}
                       wrap
@@ -959,7 +1051,11 @@ export function BusinessScreen() {
           <Card>
             <ListRow
               title="Hire someone"
-              subtitle={view.canHire ? undefined : "You've reached this location's staff limit"}
+              subtitle={
+                view.canHire
+                  ? preview(hireStaff(state, business.id))
+                  : "You've reached this location's staff limit"
+              }
               affordance="action"
               disabled={!view.canHire}
               onPress={view.canHire ? () => tuneBusiness(business.id, { kind: 'hire' }) : undefined}
@@ -970,7 +1066,7 @@ export function BusinessScreen() {
               title="Let someone go"
               subtitle={
                 view.canLetGo
-                  ? undefined
+                  ? preview(letStaffGo(state, business.id))
                   : "You're already at the minimum staff this business needs"
               }
               affordance="action"
@@ -1108,7 +1204,13 @@ export function BusinessScreen() {
 
       <SectionHeading>Worth</SectionHeading>
       <Card>
-        <ListRow title="Worth to you" value={money(view.worth)} affordance="none" compact />
+        <ListRow
+          title="Worth to you"
+          value={money(view.worth)}
+          subtitle="Includes business cash, before debt"
+          affordance="none"
+          compact
+        />
         <ListRow
           title="Invested"
           subtitle="What has gone in, counting a business you were left at what it was worth then"
@@ -1124,9 +1226,29 @@ export function BusinessScreen() {
           compact
         />
         {appraisal ? (
-          <Text style={styles.blurb}>
-            A broker puts it between {money(appraisal.low)} and {money(appraisal.high)}.
-          </Text>
+          <>
+            <Text style={styles.blurb}>
+              A broker puts it between {money(appraisal.low)} and {money(appraisal.high)}, before
+              business cash or debt.
+            </Text>
+            <ListRow
+              title="Operating value"
+              value={money(valuation.worth)}
+              subtitle={
+                valuation.earningValue >= valuation.fittings
+                  ? 'Based on recent profit and the strength of the business'
+                  : 'Based on what the equipment and fittings are worth'
+              }
+              affordance="none"
+              wrap
+            />
+            <ListRow
+              title="Business cash, separate"
+              value={money(dollarsOf(business.cash))}
+              affordance="none"
+              compact
+            />
+          </>
         ) : null}
         <RowDivider />
         <ListRow

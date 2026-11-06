@@ -215,23 +215,23 @@ describe('0603 — what is for sale', () => {
 
   it('is bought with cash at its asking price, as a transfer, and is no longer for sale', () => {
     const listing = businessesForSale(RICH)[0]!;
-    expect(listing.ask).toBe(135_852);
+    expect(listing.ask).toBe(134_852);
     const before = cashOf(RICH);
     const result = buyBusiness(RICH, listing.id);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     const next = result.value.state;
-    expect(cashOf(next)).toBe(before - 135_852);
+    expect(cashOf(next)).toBe(before - 134_852);
     expect(next.player.cash).toBe(next.finance.balance);
     expect(next.businesses).toHaveLength(1);
     const owned = next.businesses[0]!;
     expect(owned.id).toBe(listing.id);
-    expect(Number(owned.invested)).toBe(13_585_200);
+    expect(Number(owned.invested)).toBe(13_485_200);
     expect(owned.reputation).toBe(listing.business.reputation - 4);
     expect(owned.openedYear).toBe(2030 - listing.years);
     expect(next.loans).toHaveLength(0);
     expect(businessesForSale(next).map((row) => row.id)).not.toContain(listing.id);
-    expect(result.value.entry.text).toMatch(/Bought .* for \$135,852\./);
+    expect(result.value.entry.text).toMatch(/Bought .* for \$134,852\./);
     expect(
       next.finance.transactions.some(
         (row) => row.category === 'property' && row.source === `Bought ${listing.name}`,
@@ -259,33 +259,33 @@ describe('0603 — borrowing for it', () => {
   const listing = businessesForSale(FIXED)[0]!;
 
   it('puts the loan straight into the purchase: the money is booked as borrowed and spent, and never sits in cash', () => {
-    expect(listing.ask).toBe(141_564);
+    expect(listing.ask).toBe(140_064);
     const offered = purchaseOffers(FIXED, listing.id)[0]!;
     expect(offered.product.id).toBe('loan.smallbiz');
-    // 80% of $141,564, to the hundred below.
-    expect(offered.decision.offered).toBe(113_200);
-    const result = buyBusiness(FIXED, listing.id, { productId: 'loan.smallbiz', amount: 113_200 });
+    // 80% of $140,064, to the hundred below.
+    expect(offered.decision.offered).toBe(112_000);
+    const result = buyBusiness(FIXED, listing.id, { productId: 'loan.smallbiz', amount: 112_000 });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     const next = result.value.state;
-    // $141,564 less the $113,200 borrowed is $28,364 out of a $60,000 balance.
-    expect(cashOf(next)).toBe(31_636);
+    // $140,064 less the $112,000 borrowed is $28,064 out of a $60,000 balance.
+    expect(cashOf(next)).toBe(31_936);
     expect(next.loans).toHaveLength(1);
     expect(next.loans[0]!.businessId).toBe(listing.id);
     expect(next.loans[0]!.productId).toBe('loan.smallbiz');
-    expect(Number(next.loans[0]!.balance)).toBe(11_320_000);
+    expect(Number(next.loans[0]!.balance)).toBe(11_200_000);
     expect(next.loans[0]!.termLeft).toBe(10);
     const rows = next.finance.transactions.filter((row) => row.year === 2030);
     const borrowed = rows.find(
       (row) => row.category === 'debt' && /Small Business Loan — to buy/.test(row.source),
     );
-    expect(Number(borrowed?.amount)).toBe(11_320_000);
+    expect(Number(borrowed?.amount)).toBe(11_200_000);
     const paid = rows.find((row) => row.source === `Bought ${listing.name}`);
-    expect(Number(paid?.amount)).toBe(-14_156_400);
-    expect(result.value.entry.text).toMatch(/\$113,200 of it borrowed/);
+    expect(Number(paid?.amount)).toBe(-14_006_400);
+    expect(result.value.entry.text).toMatch(/\$112,000 of it borrowed/);
     expect(viewOf(next, next.businesses[0]!)!.loan).toMatchObject({
       name: 'Small Business Loan',
-      owed: 113_200,
+      owed: 112_000,
       termLeft: 10,
     });
   });
@@ -297,7 +297,7 @@ describe('0603 — borrowing for it', () => {
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(Number(result.value.state.loans[0]!.balance)).toBe(11_320_000);
+    expect(Number(result.value.state.loans[0]!.balance)).toBe(11_200_000);
   });
 
   it('refuses a loan nobody offers, and leaves everything exactly where it was', () => {
@@ -322,7 +322,7 @@ describe('0603 — borrowing for it', () => {
   });
 
   it('does not count against the owner as a borrower, as a mortgage does not', () => {
-    const bought = buyBusiness(FIXED, listing.id, { productId: 'loan.smallbiz', amount: 113_200 });
+    const bought = buyBusiness(FIXED, listing.id, { productId: 'loan.smallbiz', amount: 112_000 });
     if (!bought.ok) throw new Error('could not buy');
     const withLoan = bought.value.state;
     const without = { ...withLoan, loans: [] };
