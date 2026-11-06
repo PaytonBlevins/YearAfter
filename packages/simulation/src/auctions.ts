@@ -8,9 +8,8 @@
  * 1478: soft gates, well below billionaire). The rules are
  * `@yearafter/finance`'s `auctions.ts`; this is the sale itself.
  *
- * A SALE IS DERIVED, NOT STORED. Attending is the only thing written: the
- * diary counts visits (so the yearly limit holds) and remembers which lots
- * were bid on (so a lot cannot be bid on twice). The lots of a visit come from
+ * A sale is derived from its visit and a saved catalog reach. The diary
+ * counts visits, saves open counterbid rounds and remembers closed lots. The lots of a visit come from
  * the seed, the year, the venue and the visit number, the same way homes, cars
  * and shop counters do (CORE_RULES 13.19). So does what everybody else would
  * have bid: the room's top bid is drawn from a key, not a stream, so looking
@@ -303,12 +302,18 @@ function unitLot(state: GameState, venue: AuctionVenue, key: string, id: string)
   };
 }
 
+const saleCeiling = (state: GameState) =>
+  Math.max(10_000, Math.floor(shoppingMeansOf(state) * AUCTION_REACH));
+
 /** The lots of one visit to a venue. Same answer every time it is asked. */
 export function lotsFor(state: GameState, venueId: string, visit: number): readonly Lot[] {
   const venue = findAuctionVenue(venueId);
   if (!venue || visit < 1) return [];
   const credibility = credibilityOf(venue, state.world.year);
-  const ceiling = Math.max(10_000, shoppingMeansOf(state) * AUCTION_REACH);
+  const ceiling =
+    visit === visitsUsed(state, venueId)
+      ? (diaryOf(state).ceilings?.[venueId] ?? saleCeiling(state))
+      : saleCeiling(state);
   const lots: Lot[] = [];
   for (let slot = 0; slot < venue.lots; slot += 1) {
     const key = `${state.world.year}:${venue.id}:${visit}:${slot}`;
@@ -336,12 +341,13 @@ export const hasBidOn = (state: GameState, lotId: string): boolean =>
 /* Going, and bidding                                                          */
 /* -------------------------------------------------------------------------- */
 
-export type AttendError = 'no-such-venue' | 'not-open' | 'no-visits-left';
+export type AttendError = 'no-such-venue' | 'not-open' | 'no-visits-left' | 'bid-open';
 
 export const ATTEND_ERROR_LABELS: Readonly<Record<AttendError, string>> = {
   'no-such-venue': "There's no sale there.",
   'not-open': "You aren't on their list.",
   'no-visits-left': "That's all their sales for this year.",
+  'bid-open': 'Finish bidding or pass on the open lot before going to the next sale.',
 };
 
 /** Go to the next sale. Spec 41's limit is counted here, and only here. */
@@ -351,21 +357,26 @@ export function attendAuction(state: GameState, venueId: string): Result<GameSta
   if (!openVenues(state).some((open) => open.id === venueId)) return err('not-open');
   if (visitsLeft(state, venueId) <= 0) return err('no-visits-left');
   const diary = diaryOf(state);
+  if (Object.keys(diary.rounds ?? {}).some((id) => id.split(':')[2] === venueId))
+    return err('bid-open');
   return ok({
     ...state,
     auctions: {
       ...diary,
       visits: { ...diary.visits, [venueId]: (diary.visits[venueId] ?? 0) + 1 },
+      ceilings: { ...diary.ceilings, [venueId]: saleCeiling(state) },
     },
   });
 }
 
-export type BidError = 'no-such-lot' | 'already-bid' | 'cannot-cover' | PaymentRefusal;
+export type BidError =
+  'no-such-lot' | 'already-bid' | 'cannot-cover' | 'stale-bid' | PaymentRefusal;
 
 export const BID_ERROR_LABELS: Readonly<Record<BidError, string>> = {
   ...PAYMENT_REFUSAL_LABELS,
   'no-such-lot': "That lot isn't in this sale.",
   'already-bid': 'That one has gone.',
+  'stale-bid': 'That bid has changed. Review the current amount before bidding again.',
   'cannot-cover': "You couldn't pay that if you won it.",
 };
 
@@ -421,7 +432,7 @@ export function bidOn(
   const venue = findAuctionVenue(venueId);
   const lot = currentLots(state, venueId).find((candidate) => candidate.id === lotId);
   if (!venue || !lot) return err('no-such-lot');
-  if (hasBidOn(state, lotId)) return err('already-bid');
+  if (hasBidOn(state, lotId) || diaryOf(state).rounds?.[lotId]) return err('already-bid');
   const premium = lot.kind === 'unit' ? STORAGE_PREMIUM : BUYERS_PREMIUM;
   const ceiling = maxBidFor(lot.estimate, tier);
   const refusal = purchaseEligibility(
@@ -445,18 +456,187 @@ export function bidOn(
     });
   }
   const paid = Math.round(result.hammer * (1 + premium));
-  // The confirmed quote is the ceiling including premium; only the winning price is charged.
+  // Legacy proxy bids confirm their ceiling, but settle at the winning price.
   const actualPayment: PurchasePayment =
     payment.kind === 'card' ? { kind: 'card', productId: payment.productId } : { kind: 'cash' };
-  const paymentResult = payPurchase(
-    state.finance,
+  return settleAuctionWin(marked, venue, lot, result.hammer, paid, actualPayment);
+}
+
+export interface LiveBidQuote {
+  readonly hammer: number;
+  readonly total: number;
+  readonly counter?: number;
+  /** Stale confirmations cannot silently bid a higher amount or on a different lot. */
+  readonly token: string;
+}
+
+const MAX_LIVE_ROUND = 32;
+
+/** Legacy diaries have neither optional field. Validate the new data before replaying it. */
+export function savedAuctionBiddingOk(value: unknown): boolean {
+  const object = (raw: unknown): Record<string, unknown> | undefined =>
+    raw !== null && typeof raw === 'object' && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : undefined;
+  const diary = object(value);
+  if (!diary || (diary['ceilings'] === undefined && diary['rounds'] === undefined)) return true;
+  const visits = object(diary['visits']);
+  const bids = diary['bids'];
+  const ceilings = object(diary['ceilings']);
+  const rounds = object(diary['rounds']);
+  if (
+    !visits ||
+    !Array.isArray(bids) ||
+    !Number.isSafeInteger(diary['year']) ||
+    (diary['ceilings'] !== undefined && !ceilings) ||
+    (diary['rounds'] !== undefined && !rounds)
+  )
+    return false;
+  for (const [id, ceiling] of Object.entries(ceilings ?? {})) {
+    const venue = findAuctionVenue(id);
+    const count = visits[id];
+    if (
+      !venue ||
+      !Number.isSafeInteger(ceiling) ||
+      Number(ceiling) < 10_000 ||
+      !Number.isSafeInteger(count) ||
+      Number(count) < 1 ||
+      Number(count) > venue.visits
+    )
+      return false;
+  }
+  return Object.entries(rounds ?? {}).every(([id, round]) => {
+    const [kind, year, venueId, visit, slot, extra] = id.split(':');
+    const venue = findAuctionVenue(venueId ?? '');
+    return (
+      kind === 'lot' &&
+      year === String(diary['year']) &&
+      !!venue &&
+      !!ceilings?.[venue.id] &&
+      visit === String(visits[venue.id]) &&
+      slot !== undefined &&
+      /^\d+$/.test(slot) &&
+      Number(slot) < venue.lots &&
+      extra === undefined &&
+      !bids.includes(id) &&
+      Number.isSafeInteger(round) &&
+      Number(round) >= 1 &&
+      Number(round) <= MAX_LIVE_ROUND
+    );
+  });
+}
+
+const bidStep = (lot: Lot, round: number) =>
+  Math.max(1, Math.round(lot.estimate.low * 0.06 * 1.6 ** round));
+
+function quoteForLot(lot: Lot, round: number): LiveBidQuote {
+  let hammer = Math.max(1, Math.round(lot.estimate.low * 0.6));
+  let counter: number | undefined;
+  for (let n = 0; n < round; n++) {
+    counter = Math.min(lot.roomTop, hammer + bidStep(lot, n));
+    hammer = counter + bidStep(lot, 0);
+  }
+  const identity =
+    lot.kind === 'car' ? lot.trimId : lot.kind === 'valuable' ? lot.itemId : lot.size;
+  const total = Math.round(hammer * (1 + (lot.kind === 'unit' ? STORAGE_PREMIUM : BUYERS_PREMIUM)));
+  return {
+    hammer,
+    total,
+    ...(counter === undefined ? {} : { counter }),
+    token: `${lot.id}:${identity}:${round}:${hammer}`,
+  };
+}
+
+function liveLot(state: GameState, lotId: string): Lot | undefined {
+  if (!state.player.alive || state.player.age < AUCTIONS_FROM_AGE || hasBidOn(state, lotId))
+    return undefined;
+  return currentLots(state, lotId.split(':')[2] ?? '').find((lot) => lot.id === lotId);
+}
+
+export function liveBidQuote(state: GameState, lotId: string): LiveBidQuote | undefined {
+  const lot = liveLot(state, lotId);
+  return lot && quoteForLot(lot, diaryOf(state).rounds?.[lotId] ?? 0);
+}
+
+function liveDiary(state: GameState, lot: Lot, round?: number): AuctionDiary {
+  const diary = diaryOf(state);
+  const rounds = { ...diary.rounds };
+  if (round === undefined) delete rounds[lot.id];
+  else rounds[lot.id] = round;
+  return {
+    ...diary,
+    rounds,
+    ceilings: {
+      ...diary.ceilings,
+      [lot.venueId]: diary.ceilings?.[lot.venueId] ?? saleCeiling(state),
+    },
+    bids: round === undefined ? [...diary.bids, lot.id] : diary.bids,
+  };
+}
+
+export type LiveBidOutcome =
+  | { readonly kind: 'counter'; readonly state: GameState }
+  | { readonly kind: 'won'; readonly state: GameState; readonly text: string };
+
+export function bidLive(
+  state: GameState,
+  lotId: string,
+  token: string,
+  payment: PurchasePayment,
+): Result<LiveBidOutcome, BidError> {
+  const lot = liveLot(state, lotId);
+  if (!lot) return err(hasBidOn(state, lotId) ? 'already-bid' : 'no-such-lot');
+  const round = diaryOf(state).rounds?.[lotId] ?? 0;
+  const quote = quoteForLot(lot, round);
+  if (quote.token !== token) return err('stale-bid');
+  const refusal = purchaseEligibility(
+    state.player.cash,
     state.cards,
-    state.world.year,
-    state.player.age,
+    dollars(quote.total),
+    payment,
+  );
+  if (refusal) return err(refusal === 'payment-cash-short' ? 'cannot-cover' : refusal);
+  if (quote.hammer < lot.roomTop) {
+    if (round >= MAX_LIVE_ROUND) return err('stale-bid');
+    return ok({ kind: 'counter', state: { ...state, auctions: liveDiary(state, lot, round + 1) } });
+  }
+  const venue = findAuctionVenue(lot.venueId)!;
+  const result = settleAuctionWin(
+    { ...state, auctions: liveDiary(state, lot) },
+    venue,
+    lot,
+    quote.hammer,
+    quote.total,
+    payment,
+  );
+  return result.ok
+    ? ok({ kind: 'won', state: result.value.state, text: result.value.text })
+    : result;
+}
+
+export function passLiveBid(state: GameState, lotId: string): Result<GameState, BidError> {
+  const lot = liveLot(state, lotId);
+  if (!lot || !diaryOf(state).rounds?.[lotId]) return err('no-such-lot');
+  return ok({ ...state, auctions: liveDiary(state, lot) });
+}
+
+function settleAuctionWin(
+  marked: GameState,
+  venue: AuctionVenue,
+  lot: Lot,
+  hammer: number,
+  paid: number,
+  payment: PurchasePayment,
+): Result<BidOutcome, BidError> {
+  const paymentResult = payPurchase(
+    marked.finance,
+    marked.cards,
+    marked.world.year,
+    marked.player.age,
     dollars(paid),
     'property',
     lot.kind === 'unit' ? `A storage unit at ${venue.name}` : `Won ${lot.name} at ${venue.name}`,
-    actualPayment,
+    payment,
   );
   if (!paymentResult.ok) return err(paymentResult.error);
   const charged: GameState = {
@@ -467,8 +647,8 @@ export function bidOn(
   };
   return ok(
     lot.kind === 'unit'
-      ? wonUnit(charged, lot, result.hammer, paid, payment)
-      : wonLot(charged, venue, lot, result.hammer, paid, payment),
+      ? wonUnit(charged, lot, hammer, paid, payment)
+      : wonLot(charged, venue, lot, hammer, paid, payment),
   );
 }
 

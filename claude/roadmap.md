@@ -2142,3 +2142,7 @@ November business controls: the owned dashboard now previews operating
 profit and compares price, staffing and supplier changes. Broker values
 weight recent earnings and distinguish durable growth from a downturn.
 See `playtest-november-business-control.md` for model inputs and calibration.
+
+November live auctions: available lots now support an opening bid, visible
+rival counters, and an exact raise or pass. Open bids resume after reload;
+payment only occurs on a win. See `playtest-november-live-auctions.md`.

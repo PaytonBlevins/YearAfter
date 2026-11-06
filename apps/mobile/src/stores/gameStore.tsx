@@ -73,7 +73,8 @@ import {
   BUY_VALUABLE_ERROR_LABELS,
   iceValuable,
   attendAuction,
-  bidOn,
+  bidLive,
+  passLiveBid,
   ATTEND_ERROR_LABELS,
   BID_ERROR_LABELS,
   BUY_VEHICLE_ERROR_LABELS,
@@ -124,7 +125,7 @@ import {
   type Financing,
 } from '@yearafter/simulation';
 import { type LifestyleTier, EXPAND_REFUSAL_LABELS, OPEN_REFUSAL_LABELS } from '@yearafter/finance';
-import type { BidTier, Payroll, BusinessAgentLevel } from '@yearafter/finance';
+import type { Payroll, BusinessAgentLevel } from '@yearafter/finance';
 import type { PendingDecision } from '@yearafter/events';
 
 import type { TimelineEntry } from '@yearafter/character';
@@ -269,7 +270,8 @@ interface GameContextValue {
   readonly sellAValuable: (pieceId: string) => void;
   /** Ticket 0507. Go to an auction's next sale, and bid on a lot at it. */
   readonly attendAnAuction: (venueId: string) => void;
-  readonly bidAtAuction: (lotId: string, tier: BidTier, payment?: PurchasePayment) => void;
+  readonly bidAtAuction: (lotId: string, token: string, payment: PurchasePayment) => void;
+  readonly passAtAuction: (lotId: string) => void;
   readonly payLoanOff: (productId: string, amount: number, businessId?: string) => void;
   /** Ticket 0308. */
   readonly buyInvestment: (productId: string, amount: number, payment?: PurchasePayment) => void;
@@ -1248,21 +1250,35 @@ export function GameProvider({ repository, children }: GameProviderProps) {
   );
 
   const bidAtAuction = useCallback(
-    (lotId: string, tier: BidTier, payment?: PurchasePayment) => {
+    (lotId: string, token: string, payment: PurchasePayment) => {
       setState((current) => {
         if (!current) return current;
-        const result = bidOn(current, lotId, tier, payment);
+        const result = bidLive(current, lotId, token, payment);
         if (!result.ok) {
           setOutcome({ title: 'Not now', body: BID_ERROR_LABELS[result.error], tone: 'bad' });
           return current;
         }
-        setOutcome({
-          title: result.value.won ? 'Sold — to you' : 'Outbid',
-          body: result.value.text,
-          tone: result.value.won ? 'good' : 'neutral',
-        });
+        if (result.value.kind === 'won') {
+          setOutcome({ title: 'Sold — to you', body: result.value.text, tone: 'good' });
+        }
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
+      });
+    },
+    [persist, saveId, settings],
+  );
+
+  const passAtAuction = useCallback(
+    (lotId: string) => {
+      setState((current) => {
+        if (!current) return current;
+        const result = passLiveBid(current, lotId);
+        if (!result.ok) {
+          setOutcome({ title: 'Not now', body: BID_ERROR_LABELS[result.error], tone: 'bad' });
+          return current;
+        }
+        if (saveId) persist(result.value, saveId, settings);
+        return result.value;
       });
     },
     [persist, saveId, settings],
@@ -1886,6 +1902,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       sellAValuable,
       attendAnAuction,
       bidAtAuction,
+      passAtAuction,
       payLoanOff: payLoanWith,
       buyInvestment: buyInvestmentWith,
       sellInvestment: sellInvestmentWith,
@@ -1972,6 +1989,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       sellAValuable,
       attendAnAuction,
       bidAtAuction,
+      passAtAuction,
       buyInvestmentWith,
       sellInvestmentWith,
       hireAdvisorWith,
