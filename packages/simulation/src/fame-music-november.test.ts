@@ -6,8 +6,9 @@ import { createNewGame } from './new-game';
 import { musicCollabGain, runMusicYear } from './music';
 import { awardsInputOf, runAwardsYear } from './awards';
 import { advanceYear } from './advance';
+import type { GameState } from './game-state';
 
-function artist(seed: string, active = true) {
+function artist(seed: string, active = true): GameState {
   const s = createNewGame({ seed });
   return {
     ...s,
