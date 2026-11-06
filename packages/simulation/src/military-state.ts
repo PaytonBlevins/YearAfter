@@ -59,6 +59,13 @@ export interface ServiceCareer {
   readonly lastPay: number;
   /** The post they are at, a made-up name, for the lines. */
   readonly post: string;
+  /**
+   * Set when somebody refuses orders (0903): the age at which no promotion can come. The year after the refusal is
+   * the one meant, so it holds the age that year reaches.
+   */
+  readonly noRiseAtAge?: number;
+  /** True once orders were refused this term. A member who refused is not asked to stay when the term ends. */
+  readonly refusedTerm?: boolean;
 }
 
 /** What is kept of a service once it is over. 0904 grows `discharge` and what follows a discharge. */
@@ -75,9 +82,9 @@ export interface PastService {
    * How it ended. `washed-out` is a recruit who did not finish basic training; `not-retained` is a term the service
    * did not ask them to extend; `passed-over` is an officer the promotion boards stopped choosing; `term` is a person
    * who chose to leave before twenty years; `retired` is somebody with twenty years or more who stopped (by choice, or
-   * at 65).
+   * at 65); `killed` is a member who died in service (0903).
    */
-  readonly how: 'washed-out' | 'not-retained' | 'passed-over' | 'term' | 'retired';
+  readonly how: 'washed-out' | 'not-retained' | 'passed-over' | 'term' | 'retired' | 'killed';
   /** `entry-level` is the discharge of somebody who did not finish training; the rest are honorable until 0904. */
   readonly discharge: 'honorable' | 'entry-level';
 }
@@ -110,7 +117,56 @@ export type MilitaryOffer =
       readonly years: number;
       readonly age: number;
       readonly eventId: string;
+    }
+  | {
+      /** Orders for a deployment (0903): go, or refuse and pay for it. Frozen when raised. */
+      readonly kind: 'orders';
+      readonly age: number;
+      readonly eventId: string;
+      readonly theater: string;
+      readonly months: number;
+      readonly tier: DeploymentTier;
+      readonly incidents: number;
     };
+
+/** How a deployment's incidents came out. Mirrors `IncidentOutcome` in content. */
+export type DeploymentOutcome = 'clean' | 'close' | 'mistake' | 'disaster';
+
+/** How close a place is to the fighting. Mirrors `DeployTier` in content. */
+export type DeploymentTier = 'rear' | 'forward' | 'front';
+
+/**
+ * A deployment in progress (0903). `ordered` is orders accepted, the year not yet run; `active` is the year away, with
+ * `results` holding what the incidents played so far have come out as. It ends when every incident has a result.
+ */
+export interface Deployment {
+  readonly status: 'ordered' | 'active';
+  readonly theater: string;
+  readonly months: number;
+  readonly tier: DeploymentTier;
+  readonly incidents: number;
+  readonly results: readonly DeploymentOutcome[];
+  readonly orderedAge: number;
+  /** True once an incident has hurt the member. */
+  readonly wounded?: boolean;
+}
+
+/** What is kept of a deployment once it is over. */
+export interface PastDeployment {
+  readonly age: number;
+  readonly theater: string;
+  readonly months: number;
+  readonly tier: DeploymentTier;
+  /** The worst an incident came out as. */
+  readonly worst: DeploymentOutcome;
+  readonly wounded: boolean;
+}
+
+/** A decoration, by its content id, and the age it was awarded at. */
+export interface Decoration {
+  readonly id: string;
+  readonly age: number;
+}
 
 export interface MilitaryState {
   readonly service?: ServiceCareer;
@@ -122,6 +178,17 @@ export interface MilitaryState {
   readonly appliedAge?: number;
   /** The age of the last application for a commission, by a serving enlisted member. One a year. */
   readonly commissionAppliedAge?: number;
+  /**
+   * True once the game can play a deployment's incidents (0903). Orders are never raised until it is: a deployment waits
+   * for a result from the minigame, and nothing stands in for it. Whatever builds the minigame turns this on.
+   */
+  readonly deploymentsOpen?: boolean;
+  /** The deployment in progress. */
+  readonly deployment?: Deployment;
+  /** Deployments that are over, oldest first. */
+  readonly deployments?: readonly PastDeployment[];
+  /** Decorations earned, oldest first, kept for life. */
+  readonly decorations?: readonly Decoration[];
 }
 
 export const EMPTY_MILITARY: MilitaryState = { past: [] };

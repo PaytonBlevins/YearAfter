@@ -64,7 +64,7 @@ import {
   withModelingOffer,
 } from './modeling';
 import { runSportsYear, sportsOccupation, withSportsOffer } from './sports';
-import { militaryOccupation, runMilitaryYear, withMilitaryOffer } from './military';
+import { branchShortOf, militaryOccupation, runMilitaryYear, withMilitaryOffer } from './military';
 import { postTitle } from './sports-post';
 import { withLifeOffer } from './life-offer';
 import { runEvents } from './phases/events';
@@ -445,6 +445,10 @@ export function advanceYear(state: GameState): AdvanceResult {
         })()
       : rawMilitaryYear;
   const serving = state.military.service !== undefined;
+  // Ticket 0903. The ledger names the branch the pay came from (0901 and 0902 had every branch as "Army pay").
+  const militaryBranchName = state.military.service
+    ? branchShortOf(state.military.service.branch)
+    : 'Army';
 
   /*
     Ticket 0411 — what the year's work did to them.
@@ -604,7 +608,8 @@ export function advanceYear(state: GameState): AdvanceResult {
       actingYear.pay +
       musicYear.pay +
       modelYear.pay,
-    militaryYear.pay,
+    // Ticket 0903. A deployed year's combat zone pay is not taxed.
+    militaryYear.pay - militaryYear.taxFreePay,
   );
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
   const dealsYear = runDealsYear({
@@ -619,7 +624,7 @@ export function advanceYear(state: GameState): AdvanceResult {
       actingYear.pay +
       musicYear.pay +
       modelYear.pay +
-      militaryYear.pay,
+      (militaryYear.pay - militaryYear.taxFreePay),
   });
   const businessNet = businessesYear.drawn - businessTax;
 
@@ -1175,7 +1180,7 @@ export function advanceYear(state: GameState): AdvanceResult {
           {
             category: 'salary' as const,
             amount: dollars(militaryYear.pay),
-            source: 'Army pay',
+            source: `${militaryBranchName} pay`,
           },
         ]
       : []),
@@ -1184,7 +1189,7 @@ export function advanceYear(state: GameState): AdvanceResult {
           {
             category: 'tax' as const,
             amount: dollars(-militaryTax),
-            source: 'Tax on Army pay',
+            source: `Tax on ${militaryBranchName} pay`,
           },
         ]
       : []),

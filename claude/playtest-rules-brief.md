@@ -42,6 +42,10 @@ next free version is **v61**. Do not take v44–v60. If you already have, tell P
 a guard in `advance.ts` that takes acting, music, modeling and sports offers out of a serving life's year, and changes
 nothing for a life that is not serving.
 
+**Update, November: Agent A's 0903 (deployments) took save v61.** The current save is v61 and the next free version is
+**v62**. Do not take v44–v61. If you already have, tell Payton before pushing and renumber. 0903 changes the tax on military
+pay in `advance.ts` and nothing for a life that is not serving.
+
 ## Read these first, in this order
 
 1. `specs/AI_CODING_INSTRUCTIONS.md`, `specs/ARCHITECTURE.md` (binding)

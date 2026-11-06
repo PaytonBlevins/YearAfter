@@ -58,6 +58,7 @@ export * from './acting';
 export * from './music-state';
 export * from './music';
 export * from './military-state';
+export * from './military-deployments';
 export * from './military';
 export * from './military-guard';
 export * from './military-work';

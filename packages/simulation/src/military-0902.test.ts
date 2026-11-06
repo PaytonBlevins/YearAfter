@@ -1963,6 +1963,7 @@ describe('applying for a commission from the ranks', () => {
       unfit: "The physical turned you away. You're not well enough for this yet.",
       'already-applied': "You've already put in a package this year.",
       'offer-pending': 'There is a question waiting for you already.',
+      deployed: "You're deployed. A board will wait.",
     });
   });
 

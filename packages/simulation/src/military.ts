@@ -106,6 +106,14 @@ import type {
   ServiceCareer,
   ServiceTrack,
 } from './military-state';
+import {
+  ORDERS_CHOICES,
+  answerOrders,
+  ordersOfferFor,
+  ordersPrompt,
+  runDeploymentYear,
+  withMissionDecision,
+} from './military-deployments';
 import { isModelingFullTime } from './modeling';
 import { isMusicFullTime } from './music';
 import { isFullTime as isSportsFullTime } from './sports-individual';
@@ -172,6 +180,9 @@ export function militaryOccupation(military: MilitaryState): string | undefined 
 
 /** How a life reads the branch: "the Army". */
 export const branchNameOf = (branch: ServiceBranch): string => branchRow(branch).name;
+
+/** The branch's short name, for a ledger row: "Army", "Marine Corps". */
+export const branchShortOf = (branch: ServiceBranch): string => branchRow(branch).short;
 
 /** The name of the specialty, or the branch's open one's if the id is unknown. */
 export const specialtyNameOf = (career: ServiceCareer): string =>
@@ -501,6 +512,7 @@ function planEnlist(
 }
 
 function offerPrompt(offer: MilitaryOffer): string {
+  if (offer.kind === 'orders') return ordersPrompt(offer);
   if (offer.kind === 'enlist') {
     const key = `${offer.age}:${offer.step}`;
     const intro = offer.intro ? `${pick(ENLIST_PROMPTS, `${offer.age}`)} ` : '';
@@ -515,6 +527,7 @@ function offerPrompt(offer: MilitaryOffer): string {
 }
 
 function offerChoices(offer: MilitaryOffer): PendingDecision['choices'] {
+  if (offer.kind === 'orders') return ORDERS_CHOICES;
   if (offer.kind === 'enlist') {
     const no = { id: MILITARY_DECLINE, label: 'Not for me' };
     if (offer.step === 'branch') {
@@ -556,7 +569,9 @@ export function militaryOfferDecision(offer: MilitaryOffer, year: number): Pendi
  */
 export function withMilitaryOffer(state: GameState, alive: boolean): GameState {
   const offer = state.military.offer;
-  if (!alive || !offer) return state;
+  // Ticket 0903. An incident of a deployment under way is a question too, raised the same way.
+  if (!offer) return withMissionDecision(state, alive);
+  if (!alive) return state;
   if (state.pending.some((row) => row.eventId === MILITARY_OFFER_EVENT_ID)) return state;
   return { ...state, pending: [...state.pending, militaryOfferDecision(offer, state.world.year)] };
 }
@@ -610,7 +625,7 @@ function endService(
   };
 }
 
-export type ServiceRetireError = 'not-serving' | 'too-soon';
+export type ServiceRetireError = 'not-serving' | 'too-soon' | 'deployed';
 
 /**
  * Retire, by choice. Open from twenty years of service, and not during training. A retirement ends the service and starts
@@ -621,6 +636,7 @@ export function retireFromService(
 ): Result<MilitaryOfferOutcome, ServiceRetireError> {
   const career = state.military.service;
   if (!career) return err('not-serving');
+  if (state.military.deployment !== undefined) return err('deployed');
   if (career.stage === 'training' || career.years < RETIRE_ELIGIBLE_YEARS) return err('too-soon');
   const title = rankTitleOf(career);
   return ok(
@@ -645,6 +661,11 @@ export function answerMilitaryOffer(
   const offer = state.military.offer;
   if (!offer) return err('no-offer');
   if (!offerChoices(offer).some((choice) => choice.id === choiceId)) return err('no-such-choice');
+
+  if (offer.kind === 'orders') {
+    const answered = answerOrders(state, choiceId);
+    return answered.ok ? ok(answered.value) : err('no-such-choice');
+  }
 
   if (offer.kind === 'enlist') {
     if (choiceId === MILITARY_DECLINE) {
@@ -761,7 +782,8 @@ export type CommissionError =
   | 'too-old'
   | 'unfit'
   | 'already-applied'
-  | 'offer-pending';
+  | 'offer-pending'
+  | 'deployed';
 
 export const COMMISSION_ERROR_LABELS: Readonly<Record<CommissionError, string>> = {
   'not-serving': "You're not in uniform.",
@@ -773,6 +795,7 @@ export const COMMISSION_ERROR_LABELS: Readonly<Record<CommissionError, string>> 
   unfit: "The physical turned you away. You're not well enough for this yet.",
   'already-applied': "You've already put in a package this year.",
   'offer-pending': 'There is a question waiting for you already.',
+  deployed: "You're deployed. A board will wait.",
 };
 
 export interface CommissionOutcome {
@@ -792,6 +815,7 @@ export function applyForCommission(state: GameState): Result<CommissionOutcome, 
   if (!career) return err('not-serving');
   if (career.track === 'officer') return err('already-an-officer');
   if (career.stage === 'training') return err('in-training');
+  if (state.military.deployment !== undefined) return err('deployed');
   if (state.military.commissionAppliedAge === state.player.age) return err('already-applied');
   if (state.military.offer || otherFieldAsking(state)) return err('offer-pending');
   if (career.years < COMMISSION_BOARD_MIN_YEARS) return err('too-soon');
@@ -872,6 +896,8 @@ export interface MilitaryYearOutput {
   readonly records: readonly NewLifeRecord[];
   /** Gross basic pay for the year, whole dollars. The caller taxes and posts it. */
   readonly pay: number;
+  /** The part of `pay` the combat zone exclusion keeps from tax (0903): zero unless the year was a deployment. */
+  readonly taxFreePay: number;
   /** What a stat gets from the year, in `nudgeStats` terms. */
   readonly mood: number;
   readonly statDeltas: Partial<Record<VisibleStatKey, number>>;
@@ -883,6 +909,7 @@ const NONE_YEAR: Omit<MilitaryYearOutput, 'military'> = {
   lines: [],
   records: [],
   pay: 0,
+  taxFreePay: 0,
   mood: 0,
   statDeltas: {},
   left: false,
@@ -981,6 +1008,7 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
         lines,
         records,
         pay,
+        taxFreePay: 0,
         mood: -3,
         statDeltas: {},
         left: false,
@@ -1011,6 +1039,7 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
         lines,
         records,
         pay,
+        taxFreePay: 0,
         mood: -6,
         statDeltas: {},
         left: true,
@@ -1051,6 +1080,8 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
     // A recruit who finishes basic is at the third enlisted grade by the end of the first year; a candidate who
     // finishes officer training is a second lieutenant, or an ensign.
     grade = officer ? 1 : Math.max(grade, 3);
+  } else if (career.noRiseAtAge === age) {
+    // Ticket 0903. Refused orders last year: no promotion this one.
   } else if (!officer && grade < TOP_GRADE) {
     const next = grade + 1;
     const row = ENLISTED_GRADES[next - 1]!;
@@ -1109,7 +1140,8 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
   ): MilitaryYearOutput => {
     lines.push({ kind: 'milestone', text: line });
     records.push({ category: 'military', label });
-    const { service: _s, offer: _o, ...rest } = military;
+    // Ticket 0903. Orders accepted and not yet served are gone with the career.
+    const { service: _s, offer: _o, deployment: _d, ...rest } = military;
     return {
       military: {
         ...rest,
@@ -1126,6 +1158,7 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
       lines,
       records,
       pay,
+      taxFreePay: 0,
       mood: moodNow,
       statDeltas,
       left: true,
@@ -1154,8 +1187,10 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
   }
 
   /* ---- the end of a term ---------------------------------------------------- */
-  if (nextYears >= career.termEnds && military.offer === undefined) {
-    if (performance < RETAIN_PERFORMANCE_FLOOR) {
+  const ordered = military.deployment?.status === 'ordered' ? military.deployment : undefined;
+  // Ticket 0903. A member away is not asked about the next term: the question waits for the year they are home.
+  if (nextYears >= career.termEnds && military.offer === undefined && ordered === undefined) {
+    if (performance < RETAIN_PERFORMANCE_FLOOR || career.refusedTerm === true) {
       // Not asked to stay. With twenty years in, that is a retirement.
       if (nextYears >= RETIRE_ELIGIBLE_YEARS) {
         return leave('retired', retiredLine('retire'), retiredLabel, mood + 2);
@@ -1181,11 +1216,25 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
     };
   }
 
+  /* ---- Ticket 0903: orders accepted are served this year; orders for next year are raised now ------------ */
+  let taxFreePay = 0;
+  if (ordered) {
+    const away = runDeploymentYear(career, ordered, age);
+    pay += away.extraPay;
+    taxFreePay = away.taxFreePay;
+    lines.push({ kind: 'milestone', text: away.line });
+    military = { ...military, deployment: away.deployment };
+  } else if (military.offer === undefined && military.deployment === undefined && !training) {
+    const orders = ordersOfferFor(before, next, age);
+    if (orders) military = { ...military, offer: orders };
+  }
+
   return {
     military: { ...military, service: next },
     lines,
     records,
     pay,
+    taxFreePay,
     mood,
     statDeltas,
     left: false,

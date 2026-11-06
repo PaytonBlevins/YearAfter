@@ -525,7 +525,9 @@ export const hasSystemicOffer = (state: GameState): boolean =>
   // Ticket 0807. A job somebody wants the model for.
   state.modeling.offers.length > 0 ||
   // Ticket 0901. A recruiter's offer, or the end of a term.
-  state.military.offer !== undefined;
+  state.military.offer !== undefined ||
+  // Ticket 0903. An incident of a deployment under way.
+  state.military.deployment?.status === 'active';
 
 export const createWorldState = (year: number, generation = 1): WorldState => ({
   year,

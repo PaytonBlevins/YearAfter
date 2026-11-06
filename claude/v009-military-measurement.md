@@ -1,6 +1,6 @@
 # v0.09 Military — measurement and proposed tickets
 
-**Status: 0901 and 0902 are built; 0903–0906 are approved and not started.** Payton chose Military as the first part
+**Status: 0901, 0902 and 0903 are built; 0904–0906 are approved and not started.** Payton chose Military as the first part
 of v0.09, stacked on `integrate/sports-on-main`, and approved the breakdown below with these changes: no Space Force (Army,
 Navy, Marine Corps, Air Force and Coast Guard, four or five specialties each), enlistment from 17 to 35 by offer or
 application with no draft, rare death and real injuries (in 0903), a four-year term then a choice, promotion by time and a
@@ -133,3 +133,20 @@ above (120 lives, 780 Army careers a row; the other branches share the engine):
 
 The **retirement figures at the top of this note** are unchanged for a member who retires at twenty. Since 0902,
 retirement is a choice from twenty years and a hard stop at 65 (Payton's call). See `0902-branches-specialties-and-officers.md`.
+
+## Update after 0903
+
+0903 built deployments as an engine with no minigame (the gate is off in every life). Against the figures above, with
+the ones it added (`0903-deployments.md`):
+
+- **Casualties** (NDU Press, "Annex A", as of June 2015): 52,340 wounded in action and 6,836 dead in Iraq and Afghanistan
+  from 2001 to 2014, over about 5.4 million deployments (a widely cited figure; not re-fetched): about 1.0% wounded and
+  0.13% killed per deployment. A reference player here (88% clean, 9% close, 2.5% a mistake, 0.5% a disaster) is wounded in
+  2.07% of deployments and killed in 0.22%, about twice and 1.7 times the real rates. Payton asked for higher than real,
+  with harm only after a failure.
+- **Tempo:** an Army member deploys at least once in a four-year term 57% of the time, and one who deploys in eight years
+  deploys 1.9 times on average (RAND's "about two"); the Air Force 32% and 1.35, the Coast Guard 18% and 1.2.
+- **Pay:** hostile fire pay $225 a month at the forward and front tiers; base pay for the months away is kept from tax
+  (officers capped at the top enlisted rate).
+- The first-term attrition anchor (35.8% did not finish) still needs discharges, injuries and deployments to be whole:
+  0904 adds the discharges.

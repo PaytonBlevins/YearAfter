@@ -382,7 +382,11 @@ describe('a life ends', () => {
     for (const life of LIFETIMES) {
       for (const id of life.everHeld) seen.add(id);
     }
-    const missing = CONDITIONS.filter((condition) => !seen.has(condition.id)).map((c) => c.id);
+    // Ticket 0903. A service condition comes from a deployment, and nothing in play starts one yet (the gate is off), so
+    // the played lives cannot reach them; `military-0903.test.ts` reaches every one through an open deployment.
+    const missing = CONDITIONS.filter(
+      (condition) => condition.from !== 'service' && !seen.has(condition.id),
+    ).map((c) => c.id);
     expect(missing, `never reached in ${LIVES} lives`).toEqual([]);
   });
 

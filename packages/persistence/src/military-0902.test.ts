@@ -67,8 +67,8 @@ const withMilitary = (military: unknown, version?: number) => {
 };
 
 describe('the service in a v60 save', () => {
-  it('is at version 60', () => {
-    expect(CURRENT_SAVE_VERSION).toBe(60);
+  it('is at version 60 or later', () => {
+    expect(CURRENT_SAVE_VERSION).toBeGreaterThanOrEqual(60);
   });
 
   it('keeps an officer, an officer candidate who came from the ranks, a passed-over past and every kind of question, exactly', () => {

@@ -54,7 +54,7 @@ export interface ConditionKind {
   readonly treatable: number;
   /** Chance it clears on its own in a year, treated or not. */
   readonly resolves: number;
-  readonly from: 'illness' | 'injury';
+  readonly from: 'illness' | 'injury' | 'service';
 }
 
 /**
@@ -189,6 +189,66 @@ export const CONDITIONS: readonly ConditionKind[] = [
     treatable: 0.14,
     resolves: 0.03,
     from: 'illness',
+  },
+  {
+    id: 'cond.shrapnel',
+    label: 'Shrapnel that never came out',
+    severity: 'minor',
+    ceiling: 80,
+    hazard: 1.0,
+    treatable: 0.2,
+    resolves: 0.04,
+    from: 'service',
+  },
+  {
+    id: 'cond.blast',
+    label: 'A blast injury',
+    severity: 'serious',
+    ceiling: 62,
+    hazard: 1.2,
+    treatable: 0.15,
+    resolves: 0.02,
+    from: 'service',
+  },
+  {
+    id: 'cond.limb',
+    label: 'A lost limb',
+    severity: 'serious',
+    ceiling: 64,
+    hazard: 1.1,
+    treatable: 0,
+    resolves: 0,
+    from: 'service',
+  },
+  {
+    id: 'cond.brain',
+    label: 'A brain injury',
+    severity: 'serious',
+    ceiling: 56,
+    hazard: 1.35,
+    treatable: 0.1,
+    resolves: 0.02,
+    from: 'service',
+  },
+  {
+    id: 'cond.burns',
+    label: 'Burns',
+    severity: 'serious',
+    ceiling: 66,
+    hazard: 1.15,
+    treatable: 0.12,
+    resolves: 0.03,
+    from: 'service',
+  },
+  {
+    id: 'cond.trauma',
+    label: 'Post-traumatic stress',
+    severity: 'serious',
+    ceiling: 68,
+    hazard: 1.1,
+    treatable: 0.35,
+    resolves: 0.06,
+    from: 'service',
   },
 ];
 

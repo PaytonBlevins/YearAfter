@@ -79,6 +79,7 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | 0901 The service engine, with the Army (v0.09) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Built 29 Oct (engine only; screens are 0906). Took save v59, stacked on `integrate/sports-on-main`. Touches `phases/living.ts` (a `housingProvided` input), `careers.ts` (Work Harder hands over to the service), `advance.ts`, `game-state.ts`, `offers.ts`, `decide.ts`, `ordinary-answers.ts`, migrations, `TICKET`. Agent B: start at v60 (0902 then took v60: start at v61).** |
 | 0902 The other branches, specialties and officers (v0.09) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Built (engine only; screens are 0906). Took save v60, stacked on 0901. Touches `advance.ts` (a one-life-at-a-time guard), `military*.ts`, migrations, `TICKET`. Agent B: start at v61.** |
+| 0903 Deployments (v0.09) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Built (engine only, no minigame; screens are 0906). Took save v61, stacked on 0902. Touches `advance.ts` (the tax on pay minus the combat zone exclusion; the ledger names the branch), `decide.ts`, `game-state.ts`, `military*.ts`, `health/src/conditions.ts` (six `service` conditions), migrations, `TICKET`. Agent B: start at v62.** |
 
 | 0809 Entertainment and Sports screens (v0.08) | Claude (Agent A): screens, store wiring, tests, docs | — | **Built 11 Oct (mobile only). No save change of its own. After integration with Agent B's chain the save is v58 (see 0801–0808). Touches `apps/mobile` (new `EntertainmentScreens`, `entertainmentView`, `entertainmentActions`, `YearRecapNotice`; edits to `gameStore.tsx`, `BusinessesScreen.tsx`, `shells.tsx`, `navigation.tsx`, `Shell.tsx`) and adds three exports to `packages/simulation/src/index.ts`. Integrated with Agent B's P1–P16 on `integrate/sports-on-main`.** |
 
@@ -100,4 +101,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | v51 | Codex / Agent B | last of B's chain (P16). v52–v58 are Agent A's 0801, 0803, 0804, 0805, 0806, 0807 and 0808, renumbered on integration (0802 and 0809 have no bump). |
 | v59 | Claude (Agent A) | 0901 the service engine (`military`). |
-| v60 | Claude (Agent A) | 0902 branches, specialties and officers (`military` grows a track, a specialty and a commissioning year). The next free save version is **v61**. |
+| v60 | Claude (Agent A) | 0902 branches, specialties and officers (`military` grows a track, a specialty and a commissioning year). The next free save version is **v62** (0903 took v61). |
+| v61 | Claude (Agent A) | 0903 deployments (`military` grows a gate, orders, a deployment in progress, past deployments and decorations). The next free save version is **v62**. |

@@ -1277,6 +1277,11 @@ const migrations: Readonly<Record<number, Migration>> = {
       version: 60,
     };
   },
+  /**
+   * v60 -> v61: Ticket 0903 — deployments. Every new field is optional and absent on a life that has not deployed, so
+   * nothing moves but the version. No RNG, no clock.
+   */
+  60: (save) => ({ ...save, version: 61 }),
 };
 
 /**
@@ -1679,7 +1684,10 @@ const SERVICE_ENDINGS_OK: readonly string[] = [
   'passed-over',
   'term',
   'retired',
+  'killed',
 ];
+const DEPLOY_TIERS_OK: readonly string[] = ['rear', 'forward', 'front'];
+const DEPLOY_OUTCOMES_OK: readonly string[] = ['clean', 'close', 'mistake', 'disaster'];
 const SERVICE_TRACKS_OK: readonly string[] = ['enlisted', 'officer'];
 const ENLIST_STEPS_OK: readonly string[] = ['branch', 'track', 'specialty'];
 
@@ -1703,6 +1711,64 @@ function militaryOk(value: unknown): boolean {
     !optionalWhole(military['commissionAppliedAge'])
   ) {
     return false;
+  }
+  // Ticket 0903. Deployments: a flag, one in progress, the ones that are over, and what they earned.
+  if (
+    military['deploymentsOpen'] !== undefined &&
+    typeof military['deploymentsOpen'] !== 'boolean'
+  ) {
+    return false;
+  }
+  const tierOk = (n: unknown): boolean => typeof n === 'string' && DEPLOY_TIERS_OK.includes(n);
+  const outcomeOk = (n: unknown): boolean =>
+    typeof n === 'string' && DEPLOY_OUTCOMES_OK.includes(n);
+  const deployment = military['deployment'];
+  if (deployment !== undefined) {
+    if (typeof deployment !== 'object' || deployment === null) return false;
+    const d = deployment as Record<string, unknown>;
+    if (
+      (d['status'] !== 'ordered' && d['status'] !== 'active') ||
+      typeof d['theater'] !== 'string' ||
+      !whole(d['months']) ||
+      (d['months'] as number) < 1 ||
+      !tierOk(d['tier']) ||
+      !whole(d['incidents']) ||
+      (d['incidents'] as number) < 1 ||
+      !Array.isArray(d['results']) ||
+      !(d['results'] as unknown[]).every(outcomeOk) ||
+      (d['results'] as unknown[]).length > (d['incidents'] as number) ||
+      !whole(d['orderedAge']) ||
+      (d['wounded'] !== undefined && typeof d['wounded'] !== 'boolean')
+    ) {
+      return false;
+    }
+  }
+  const deployments = military['deployments'];
+  if (deployments !== undefined) {
+    if (!Array.isArray(deployments)) return false;
+    for (const row of deployments) {
+      if (typeof row !== 'object' || row === null) return false;
+      const r = row as Record<string, unknown>;
+      if (
+        !whole(r['age']) ||
+        typeof r['theater'] !== 'string' ||
+        !whole(r['months']) ||
+        !tierOk(r['tier']) ||
+        !outcomeOk(r['worst']) ||
+        typeof r['wounded'] !== 'boolean'
+      ) {
+        return false;
+      }
+    }
+  }
+  const decorations = military['decorations'];
+  if (decorations !== undefined) {
+    if (!Array.isArray(decorations)) return false;
+    for (const row of decorations) {
+      if (typeof row !== 'object' || row === null) return false;
+      const r = row as Record<string, unknown>;
+      if (typeof r['id'] !== 'string' || !whole(r['age'])) return false;
+    }
   }
   const past = military['past'];
   if (!Array.isArray(past)) return false;
@@ -1744,6 +1810,8 @@ function militaryOk(value: unknown): boolean {
       (c['effort'] !== 'normal' && c['effort'] !== 'hard') ||
       !optionalWhole(c['pushedAtAge']) ||
       !optionalWhole(c['pushedThisYear']) ||
+      !optionalWhole(c['noRiseAtAge']) ||
+      (c['refusedTerm'] !== undefined && typeof c['refusedTerm'] !== 'boolean') ||
       !whole(c['lastPay']) ||
       typeof c['post'] !== 'string'
     ) {
@@ -1779,6 +1847,16 @@ function militaryOk(value: unknown): boolean {
         (o['branch'] !== undefined && !branchOk(o['branch'])) ||
         (o['track'] !== undefined && !trackOk(o['track'])) ||
         (o['intro'] !== undefined && typeof o['intro'] !== 'boolean')
+      ) {
+        return false;
+      }
+    } else if (o['kind'] === 'orders') {
+      if (
+        typeof o['theater'] !== 'string' ||
+        !whole(o['months']) ||
+        !tierOk(o['tier']) ||
+        !whole(o['incidents']) ||
+        (o['incidents'] as number) < 1
       ) {
         return false;
       }

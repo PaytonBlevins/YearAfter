@@ -3652,3 +3652,54 @@ name the gap when a rule the real services have (a high-year-of-tenure limit) is
 A test that overrode only `getSeed` on a state was enough for hash draws and failed with "stream is not a function"
 the moment a whole year ran. Integration tests build a real generator for each seed, and a test that runs the same life
 twice builds two, so both runs start from the same stream.
+
+### 13.213 A comparison of two runs of one state needs a fresh generator for each
+
+A test that ran the same life with the gate closed and again with it open handed both runs the one `Rng` the state
+carried, so the second run started where the first had stopped and the two lives differed in cash and in every draw that
+used the stream. The test was checking that nothing but the flag changed, and it failed for a reason that had nothing to
+do with the flag. Build a new generator from the seed for each run (`fresh(state)`) when the point is that two runs agree.
+
+### 13.214 A tier boundary written as a sum of decimals is not the number you wrote
+
+`0.3 + 0.55` is `0.8500000000000001`, so a draw of exactly `0.85` fell in the middle tier of a table whose rows were
+`[0.3, 0.55, 0.15]`, and a test of the edge expected the last. A boundary test uses a value clear of the edge (0.9, 0.29,
+0.3 for a cut at 0.3 that is a literal in the table) and does not assert the point where two decimals meet. The table's
+own cut is not wrong for a hash draw, which is never exactly there.
+
+### 13.215 Adding a condition and holding the stat to its ceiling are one step
+
+The first version of a deployment's lasting trauma added the condition and left the health stat where it was, so a member
+held "post-traumatic stress" (a ceiling of 68) at health 80 until the next year's health phase clamped it. A wound already
+did both. A test that read the stat straight after the answer found it. Whatever adds a condition clamps the stat to
+`ceilingWith(conditions)` in the same step, and one test reads the stat after, not at the year's end.
+
+### 13.216 A name exported from a package barrel must be searched for in the barrel first
+
+`AWARD_CHANCE` was already exported by acting's table, and `export *` from two files with one name is a type error that
+names neither file as the cause. The deployment table's version is `DECORATION_CHANCE`. Before a new exported constant
+takes a generic name (`CHANCE`, `LINES`, `AWARD_…`), search the package's `index.ts` exports for it, or name it for its
+own domain.
+
+### 13.217 A year can raise other questions beside the one a test is about
+
+Every deployment test that ran a year and then asserted `pending` was exactly the service's question failed in the
+same way: the ordinary life had also raised a friend asking for a loan, and the year would not advance until that was
+answered. A test of one system's question filters the pending list to that system's event ids (`militaryQuestions`) and
+settles the others the way an ordinary life would (`settle`), then goes on.
+
+### 13.218 When two checks guard one case, test the case only one of them covers
+
+Removing the `stage !== 'serving'` check on orders changed nothing the tests could see, because the training year has
+zero years served and a second check (`years < DEPLOY_MIN_YEARS`) turned it away anyway. An enlisted member in officer
+training has years behind them and is still in training, and the first check is the only thing that stops orders for
+them. A test for each guard needs a fixture that passes the others (training, with five years).
+
+### 13.219 A "every one can be reached" test counts the ones behind a gate that is shut
+
+The health catalog's reachability test plays whole lives and asks that every condition turn up in one. Six new service
+conditions can only come from a deployment, and no life deploys while the gate is off, so the full verify failed on the
+test that no 0903 test or sabotage run could see (it plays 150 lives and takes minutes). When a new catalog entry is
+reachable only through something that is off in play, exempt it by its origin in the played-life test, say why, and prove
+its reach where the gate is open. And run the whole package's suite before calling a ticket tested, not only the files
+the ticket wrote.
