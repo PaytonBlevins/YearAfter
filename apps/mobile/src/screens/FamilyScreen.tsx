@@ -215,7 +215,7 @@ function MemberRow({
 
   return (
     <ListRow
-      icon={member.role === 'sibling' ? 'friends' : 'family'}
+      portrait={member.id}
       title={`${member.firstName} ${member.lastName}`}
       subtitle={member.alive ? `${role} · ${age}` : `${role} · died`}
       affordance={onPress && member.alive ? 'navigate' : 'none'}

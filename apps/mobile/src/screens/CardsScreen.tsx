@@ -76,7 +76,7 @@ export function CardsScreen() {
                 <Fragment key={card.productId}>
                   {index > 0 ? <RowDivider /> : null}
                   <ListRow
-                    icon="money"
+                    icon="card"
                     title={product.name}
                     /*
                       Spec 28's fields, in the order a person asks about them:
@@ -143,6 +143,7 @@ export function CardsScreen() {
           <Fragment key={product.id}>
             {index > 0 ? <RowDivider /> : null}
             <ListRow
+              icon="card"
               title={product.name}
               /*
                 The blurb when they can have it, the reason when they cannot.

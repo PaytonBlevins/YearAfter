@@ -26,6 +26,7 @@
  */
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Illustration } from '../theme/illustrations';
 import { colors, radii, spacing, typography } from '../theme/theme';
 
 /**
@@ -88,6 +89,7 @@ export function OutcomeCard({ outcome, onDismiss }: OutcomeCardProps) {
         accessibilityViewIsModal
         accessibilityLabel={`${outcome.title}. ${outcome.body}`}
       >
+        <Illustration name="news" />
         <Text style={[styles.title, { color: accent }]}>{outcome.title}</Text>
         <ScrollView style={styles.message}>
           <Text style={styles.body}>{outcome.body}</Text>

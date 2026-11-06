@@ -23,6 +23,7 @@
 
 import { Fragment } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Illustration } from '../theme/illustrations';
 import { colors, radii, spacing, typography } from '../theme/theme';
 
 export interface DetailLine {
@@ -61,7 +62,10 @@ export function DetailCard({ detail, onDismiss }: DetailCardProps) {
 
       <View style={styles.card} accessibilityViewIsModal accessibilityLabel={detail.title}>
         <View style={styles.head}>
-          <Text style={styles.title}>{detail.title}</Text>
+          <View style={styles.headLead}>
+            <Illustration name="news" size={30} />
+            <Text style={styles.title}>{detail.title}</Text>
+          </View>
           {detail.note ? <Text style={styles.note}>{detail.note}</Text> : null}
         </View>
 
@@ -138,6 +142,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingBottom: spacing.md,
   },
+  headLead: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   title: {
     flexShrink: 1,
     fontFamily: typography.family,
