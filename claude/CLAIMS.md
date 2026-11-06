@@ -110,3 +110,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | November playtest — illustrated mobile interface | Codex / Agent B (feat/november-visual-refresh) | — | Claimed on live auction counterbids. |
 
 | November playtest — businesses and social account portfolios | Codex / Agent B (feat/november-venture-portfolios) | — | Claimed after visual refresh; notes 13–14. |
+
+| November playtest — advisor tiers, investment questions and spending | Codex / Agent B (feat/november-advisor-upgrade) | — | Claimed after venture portfolios; note 15. |

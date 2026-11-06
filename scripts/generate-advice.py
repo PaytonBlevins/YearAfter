@@ -239,44 +239,32 @@ ADVISORS = [
         "concentratedAt": 0.38,
         "speculativeAt": 0.22,
     },
-]
-
-# THE PRIVATE WEALTH MANAGER IS NOT HERE, AND THAT IS A MEASUREMENT, NOT AN
-# OVERSIGHT.
-#
-# It was built, priced at 40 basis points, and cut. Across 500 forty-year lives
-# it returned 1.23x a stock-picking player against 1.31x for the FREE planner —
-# strictly worse, at a fee. Every attempt to give it a mechanism failed against
-# the market this build actually has:
-#
-#   Spotting an opportunity sooner did nothing. Moving its threshold from 0.18
-#   to 0.38 changed the forty-year outcome by zero, because the best
-#   opportunity in a year is either glaring or absent and no bar in between
-#   discriminates.
-#
-#   Making more calls made it worse, because the extra calls are the weaker
-#   ones and each is another single name where a fund would do.
-#
-#   Holding a tighter leash moved the floor from 1.40x to 1.42x. Real, and not
-#   worth double the fee.
-#
-# The honest reading is that this market contains ONE edge and the free advisor
-# already captures it. A third tier whose only genuine difference is a larger
-# fee is a worse deal in a nicer suit, and shipping it would be the "system
-# nobody should ever use" mirror of CORE_RULES 13.7.
-#
-# What a wealth manager would actually have to sell is ACCESS — spec 1860's
-# "private investment opportunities scale with wealth and may be illiquid or
-# fail" — and that arrives with v0.06. It comes back then, with something to
-# offer.
-NOT_YET_BUILT = [
+    # The November playtest requested three tiers. Private management sells
+    # a stricter risk review, not special access or a better return.
     {
         "id": "adv.private",
-        "label": "A private wealth manager",
-        "needs": "private deals worth their fee",
-        "arrives": "v0.06",
+        "name": "A private wealth manager",
+        "blurb": "Flags concentration sooner and reviews more of your portfolio.",
+        "feeBasis": 40,
+        "flatFee": 0,
+        "minimumPortfolio": 250_000,
+        "reasons": [
+            "concentrated",
+            "noFloor",
+            "idleCash",
+            "belowTrend",
+            "aboveTrend",
+            "strongEarner",
+            "steady",
+        ],
+        "picks": 4,
+        "sharpness": 0.16,
+        "concentratedAt": 0.28,
+        "speculativeAt": 0.12,
     },
 ]
+
+NOT_YET_BUILT = []
 
 REASONS = ["belowTrend", "strongEarner", "aboveTrend", "concentrated", "noFloor", "idleCash", "steady"]
 
@@ -352,8 +340,12 @@ def check() -> None:
     fees = [a["feeBasis"] for a in ADVISORS]
     if fees != sorted(fees):
         problems.append("advisors are not ordered cheapest first")
-    if len({len(a["reasons"]) for a in ADVISORS}) != len(ADVISORS):
-        problems.append("two advisors see exactly the same number of things; the tier is a label")
+    profiles = {
+        (tuple(sorted(a["reasons"])), a["concentratedAt"], a["speculativeAt"])
+        for a in ADVISORS
+    }
+    if len(profiles) != len(ADVISORS):
+        problems.append("two advisors have identical reason and risk profiles; the tier is a label")
     if len(ADVISORS) < 2:
         problems.append("a ladder needs at least two rungs")
 
