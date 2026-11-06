@@ -100,3 +100,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | November playtest — card payments, property tabs, special careers and yearly notices | Codex / Agent B (`feat/november-playtest`) | — | Claimed 6 Nov from `integrate/sports-on-main`; remaining economy and progression changes tracked separately. |
 
 | November playtest — fame and music | Codex / Agent B (`feat/november-fame-music`) | — | Claimed after Payton asked to start the follow-up; based on November usability fixes. |
+
+| November playtest — fame offer quality and pay | Codex / Agent B (`feat/november-fame-offers`) | — | Claimed on the fame/music follow-up for the fixed-score fame offer pass. |

@@ -7,7 +7,7 @@
  */
 
 import { ScrollView, StyleSheet, Text } from 'react-native';
-import { findFameWork } from '@yearafter/content';
+import { fameWorkLabel } from '@yearafter/content';
 import { WORK_FROM_AGE, connectionMenu, connectionRows, fameOffers } from '@yearafter/simulation';
 import { Card, EmptyState, ListRow, SectionHeading } from '../components';
 import { FameBar } from '../components/FameBar';
@@ -79,7 +79,7 @@ export function FameScreen() {
             {doneNow.map((row, index) => (
               <Divided key={row.id} first={index === 0}>
                 <ListRow
-                  title={findFameWork(row.id)?.label ?? 'Work'}
+                  title={fameWorkLabel(row.id, row.outlet) ?? 'Work'}
                   subtitle={row.outlet}
                   value={money(row.pay)}
                   affordance="none"

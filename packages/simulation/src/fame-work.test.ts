@@ -171,6 +171,49 @@ describe('who is offered what', () => {
     void kid;
   });
 
+  it('replaces starter briefs at fixed fame, with national pay and no extra annual slot', () => {
+    const pair = [
+      ['photoshoot', 'Photoshoot', 'National photo campaign', 1510, 4500],
+      ['commercial', 'Commercial', 'National brand commercial', 3010, 9000],
+    ] as const;
+    for (const [id, oldLabel, label, oldAt30, minimum] of pair) {
+      const starter = offering(known(29), id);
+      const at30 = { ...starter, fame: 30 };
+      const old = fameOffers(starter).find((item) => item.def.id === id)!;
+      const upgrade = fameOffers(at30).filter((item) => item.def.id === id);
+      expect(old.def.label).toBe(oldLabel);
+      expect(workPay(findFameWork(id)!, 30)).toBe(oldAt30);
+      expect(upgrade).toHaveLength(1);
+      expect(upgrade[0]?.def.label).toBe(label);
+      expect(upgrade[0]?.pay).toBe(minimum);
+      expect(upgrade[0]?.outlet).not.toBe(old.outlet);
+      expect(upgrade[0]?.text).toContain('fee covers');
+      const yes = doFameWork(at30, id);
+      if (!yes.ok) throw Error(yes.error.kind);
+      expect(yes.value.celebrities.work.done[0]?.pay).toBe(minimum);
+      expect(doFameWork({ ...yes.value, fame: 29 }, id).ok).toBe(false);
+    }
+  });
+
+  it('caps the added campaign premium at high fame and never replaces an accepted starter job', () => {
+    for (const [id, cap] of [
+      ['photoshoot', 12000],
+      ['commercial', 20000],
+    ] as const) {
+      const knownStar = offering(known(100), id);
+      const campaign = fameOffers(knownStar).find((offer) => offer.def.id === id)!;
+      expect(campaign.pay - workPay(findFameWork(id)!, 100)).toBe(cap);
+
+      const starter = offering(known(29), id);
+      const oldPay = fameOffers(starter).find((offer) => offer.def.id === id)!.pay;
+      const accepted = doFameWork(starter, id);
+      if (!accepted.ok) throw Error(accepted.error.kind);
+      const famous = { ...accepted.value, fame: 50 };
+      expect(fameOffers(famous).some((offer) => offer.def.id === id)).toBe(false);
+      expect(workToSettle(famous)[0]?.pay).toBe(oldPay);
+    }
+  });
+
   it('is the same year every time and a different one for an heir', () => {
     const state = atGeneration(known(50), 4);
     expect(fameOffers(state)).toEqual(fameOffers(state));
@@ -241,11 +284,11 @@ describe('saying yes', () => {
     const after = result.value;
     expect(after.celebrities.work).toEqual({
       year: state.world.year,
-      done: [{ id: 'commercial', outlet: offer.outlet, pay: 95320, fame: 1, mood: 0 }],
+      done: [{ id: 'commercial', outlet: offer.outlet, pay: 115320, fame: 1, mood: 0 }],
     });
     const line = after.player.timeline.at(-1)!;
     expect(line.text).toContain(offer.outlet);
-    expect(line.text).toContain('$95,320');
+    expect(line.text).toContain('$115,320');
     expect(after.player.timeline.length).toBe(state.player.timeline.length + 1);
     expect(after.finance.balance).toBe(state.finance.balance);
     expect(after.finance.transactions).toEqual(state.finance.transactions);
@@ -444,16 +487,19 @@ describe('settling with the year', () => {
       atGeneration({ ...state, celebrities: EMPTY_CELEBRITIES }, state.world.generation),
     ).state;
     const withWork = advanceYear(yes.value).state;
-    const rows = withWork.finance.transactions.filter((t) => t.source.startsWith('Commercial: '));
+    const rows = withWork.finance.transactions.filter((t) =>
+      t.source.startsWith('National brand commercial: '),
+    );
     expect(rows.length).toBe(1);
-    expect(Number(rows[0]!.amount)).toBe(9_532_000);
+    expect(Number(rows[0]!.amount)).toBe(11_532_000);
     expect(withWork.finance.transactions.some((t) => t.source.startsWith('Tax on creator'))).toBe(
       true,
     );
     // The year after, nothing of it is paid again.
     const next = advanceYear(answerEverything(withWork)).state;
     expect(
-      next.finance.transactions.filter((t) => t.source.startsWith('Commercial: ')).length,
+      next.finance.transactions.filter((t) => t.source.startsWith('National brand commercial: '))
+        .length,
     ).toBe(1);
     expect(workToSettle(withWork)).toEqual([]);
     void without;

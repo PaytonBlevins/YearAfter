@@ -17,7 +17,14 @@
  * Nothing here draws from the shared random stream.
  */
 
-import { findFameWork, FAME_WORK, findPlatform, type FameWorkDef } from '@yearafter/content';
+import {
+  findFameWork,
+  FAME_WORK,
+  NATIONAL_FAME_WORK,
+  nationalCampaignFor,
+  findPlatform,
+  type FameWorkDef,
+} from '@yearafter/content';
 import { err, mixedUnit, ok, stablePick, type Result } from '@yearafter/core';
 import { appendToTimeline } from '@yearafter/character';
 import type { Channel } from '@yearafter/finance';
@@ -45,6 +52,25 @@ export const workChance = (fame: number, fromFame: number): number =>
 export const workPay = (def: FameWorkDef, fame: number): number =>
   Math.max(def.floor, Math.round((def.times * postRate(fame)) / 10) * 10);
 
+/** Replace starter creative with the national brief while keeping its slot and settlement id. */
+function commissionFor(def: FameWorkDef, fame: number): FameWorkDef {
+  const campaign = fame >= NATIONAL_FAME_WORK ? nationalCampaignFor(def.id) : undefined;
+  if (!campaign) return def;
+  const base = workPay(def, fame);
+  const premium = Math.min(
+    campaign.maximumPremium,
+    Math.round((base * campaign.premiumShare) / 10) * 10,
+  );
+  return {
+    ...def,
+    label: campaign.label,
+    floor: Math.max(campaign.minimum, base + premium),
+    outlets: campaign.outlets,
+    offers: [campaign.offer],
+    lines: [campaign.line],
+  };
+}
+
 export interface FameOffer {
   readonly def: FameWorkDef;
   readonly outlet: string;
@@ -63,7 +89,8 @@ export function fameOffers(state: GameState): readonly FameOffer[] {
   const done = state.celebrities.work.year === year ? state.celebrities.work.done : [];
   const seed = state.rng.getSeed();
   const offers: FameOffer[] = [];
-  for (const def of FAME_WORK) {
+  for (const slot of FAME_WORK) {
+    const def = commissionFor(slot, state.fame);
     if (state.fame < def.fromFame || done.some((entry) => entry.id === def.id)) continue;
     const key = `${seed}:${state.world.generation}:${year}:fame-work:${def.id}`;
     if (mixedUnit(`${key}:happens`) >= workChance(state.fame, def.fromFame)) continue;
