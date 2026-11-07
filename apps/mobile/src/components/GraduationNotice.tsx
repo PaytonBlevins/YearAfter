@@ -61,6 +61,7 @@ export function graduationOutcome(before: GameState, after: GameState): Outcome 
     title: school ? 'You graduated' : 'Program completed',
     body: `${qualification} ${opens} ${loan}`,
     tone: 'good',
+    art: 'graduation',
   };
 }
 

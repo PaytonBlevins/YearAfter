@@ -38,6 +38,7 @@ export function recapOutcome(before: GameState, after: GameState): Outcome | und
           : 'The year in your work',
     body: noticeGroupsBody(groups, groups.length > 1),
     tone: 'neutral',
+    ...(groups.some((group) => group.field === 'Awards') ? { art: 'awards' as const } : {}),
   };
 }
 

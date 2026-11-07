@@ -26,6 +26,7 @@
  */
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { MilestoneArt } from '../theme/sceneArt';
 import { Illustration } from '../theme/illustrations';
 import { colors, radii, spacing, typography } from '../theme/theme';
 
@@ -50,6 +51,7 @@ export interface Outcome {
   /** One or two sentences saying what actually happened. */
   readonly body: string;
   readonly tone: OutcomeTone;
+  readonly art?: 'graduation' | 'awards';
   /** Optional bar, for an outcome that moved something the player can see. */
   readonly meter?: OutcomeMeter;
   /** Optional right-hand figure — money, most often. */
@@ -89,7 +91,7 @@ export function OutcomeCard({ outcome, onDismiss }: OutcomeCardProps) {
         accessibilityViewIsModal
         accessibilityLabel={`${outcome.title}. ${outcome.body}`}
       >
-        <Illustration name="news" />
+        {outcome.art ? <MilestoneArt kind={outcome.art} /> : <Illustration name="news" />}
         <Text style={[styles.title, { color: accent }]}>{outcome.title}</Text>
         <ScrollView style={styles.message}>
           <Text style={styles.body}>{outcome.body}</Text>

@@ -28,7 +28,7 @@ import {
 import { useNavigation } from '../navigation/navigation';
 import { ActionButton, Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
-import { Illustration } from '../theme/illustrations';
+import { LotArt } from '../theme/sceneArt';
 import { colors, radii, shadows, spacing, typography } from '../theme/theme';
 
 const money = (amount: number): string => `$${Math.round(amount).toLocaleString('en-US')}`;
@@ -139,7 +139,7 @@ export function AuctionScreen() {
               </View>
               <ScrollView style={styles.dialogScroll} contentContainerStyle={styles.dialogContent}>
                 <View style={styles.lotHero}>
-                  <Illustration name={lotIcon(selected)} size={86} />
+                  <LotArt lot={selected} />
                   <Text style={styles.venue}>{venue.name}</Text>
                   <Text accessibilityRole="header" style={styles.lotName}>
                     {selected.name}
