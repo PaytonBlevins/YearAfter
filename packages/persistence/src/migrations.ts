@@ -1220,6 +1220,86 @@ const migrations: Readonly<Record<number, Migration>> = {
    * clock.
    */
   57: (save) => ({ ...save, version: 58 }),
+  /**
+   * v58 -> v59: Ticket 0901 — the service engine. Nobody before it could serve, so every older save gets an empty
+   * service: no career, nothing in the past, no question. What a v58 save already carries is kept. No RNG, no clock.
+   */
+  58: (save) => ({
+    ...save,
+    military:
+      typeof save['military'] === 'object' && save['military'] !== null
+        ? save['military']
+        : { past: [] },
+    version: 59,
+  }),
+  /**
+   * v59 -> v60: Ticket 0902 — branches, specialties and officers. 0901 had only the enlisted Army, so a career gets the
+   * enlisted ladder, a commission that never began (0 years) and the Army's open specialty; a past service gets the
+   * ladder and the specialty too; a recruiter's offer becomes the branch question with the Army its only option, and a
+   * term's question keeps its fields. Nothing else moves. No RNG, no clock.
+   */
+  59: (save) => {
+    const military = save['military'];
+    if (typeof military !== 'object' || military === null) return { ...save, version: 60 };
+    const m = military as Record<string, unknown>;
+    const past = Array.isArray(m['past'])
+      ? m['past'].map((row) =>
+          typeof row === 'object' && row !== null
+            ? { track: 'enlisted', specialty: 'army.infantry', ...(row as Record<string, unknown>) }
+            : row,
+        )
+      : m['past'];
+    const service =
+      typeof m['service'] === 'object' && m['service'] !== null
+        ? {
+            track: 'enlisted',
+            specialty: 'army.infantry',
+            commissionedAt: 0,
+            ...(m['service'] as Record<string, unknown>),
+          }
+        : m['service'];
+    let offer = m['offer'];
+    if (typeof offer === 'object' && offer !== null) {
+      const o = offer as Record<string, unknown>;
+      if (o['kind'] === 'enlist') {
+        const { branch: _army, ...rest } = o;
+        offer = { ...rest, step: 'branch', options: ['army'], intro: true };
+      }
+    }
+    return {
+      ...save,
+      military: {
+        ...m,
+        past,
+        ...(service !== undefined ? { service } : {}),
+        ...(offer !== undefined ? { offer } : {}),
+      },
+      version: 60,
+    };
+  },
+  /**
+   * v60 -> v61: Ticket 0903 — deployments. Every new field is optional and absent on a life that has not deployed, so
+   * nothing moves but the version. No RNG, no clock.
+   */
+  60: (save) => ({ ...save, version: 61 }),
+  /**
+   * v61 -> v62: Ticket 0904 — discharge, benefits and veterans. A past service gains three endings and three characters
+   * of discharge, and the military state gains the months of GI Bill used. Every v61 row is a pair the new rules also
+   * allow (a washed-out recruit's entry-level, every other ending honorable), and the new field is optional and absent
+   * until a veteran enrolls, so nothing moves but the version. No RNG, no clock.
+   */
+  61: (save) => ({ ...save, version: 62 }),
+  /**
+   * v62 -> v63: Ticket 0905 — military intelligence and the agencies. Nobody before it held a clearance or worked for an
+   * agency, so every older save gets an empty intelligence state: no clearance, no career, nothing in the past. What a
+   * v62 save already carries is kept. No RNG, no clock.
+   */
+  62: (save) => ({
+    ...save,
+    intel:
+      typeof save['intel'] === 'object' && save['intel'] !== null ? save['intel'] : { past: [] },
+    version: 63,
+  }),
 };
 
 /**
@@ -1609,6 +1689,354 @@ function jobOk(value: unknown, offered: boolean): boolean {
   );
 }
 
+const SERVICE_BRANCHES_OK: readonly string[] = [
+  'army',
+  'navy',
+  'marine-corps',
+  'air-force',
+  'coast-guard',
+];
+const SERVICE_ENDINGS_OK: readonly string[] = [
+  'washed-out',
+  'not-retained',
+  'passed-over',
+  'term',
+  'retired',
+  'killed',
+  'medical',
+  'misconduct',
+];
+/** Ticket 0904. The discharges, and which endings can carry each: the pairs the engine writes and no others. */
+const DISCHARGES_OK: readonly string[] = [
+  'honorable',
+  'general',
+  'medical',
+  'dishonorable',
+  'entry-level',
+];
+const dischargeFits = (how: string, discharge: string): boolean => {
+  switch (how) {
+    case 'washed-out':
+      return discharge === 'entry-level';
+    case 'medical':
+      return discharge === 'medical';
+    case 'misconduct':
+      return discharge === 'dishonorable';
+    case 'retired':
+    case 'killed':
+      return discharge === 'honorable';
+    default:
+      return discharge === 'honorable' || discharge === 'general';
+  }
+};
+const DEPLOY_TIERS_OK: readonly string[] = ['rear', 'forward', 'front'];
+const DEPLOY_OUTCOMES_OK: readonly string[] = ['clean', 'close', 'mistake', 'disaster'];
+const SERVICE_TRACKS_OK: readonly string[] = ['enlisted', 'officer'];
+const ENLIST_STEPS_OK: readonly string[] = ['branch', 'track', 'specialty'];
+
+/** Ticket 0901 and 0902. A service life: a career in progress (optional), the ones that ended, and a question. */
+function militaryOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const military = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  const level = (n: unknown): boolean => typeof n === 'number' && n >= 0 && n <= 100;
+  const branchOk = (n: unknown): boolean =>
+    typeof n === 'string' && SERVICE_BRANCHES_OK.includes(n);
+  const trackOk = (n: unknown): boolean => typeof n === 'string' && SERVICE_TRACKS_OK.includes(n);
+  const gradeOk = (n: unknown, track: unknown): boolean =>
+    whole(n) && (n as number) >= 1 && (n as number) <= (track === 'officer' ? 6 : 9);
+  const specialtyOk = (n: unknown, branch: unknown): boolean =>
+    typeof n === 'string' && typeof branch === 'string' && n.startsWith(`${branch}.`);
+  if (
+    !optionalWhole(military['turnedDownAge']) ||
+    !optionalWhole(military['appliedAge']) ||
+    !optionalWhole(military['commissionAppliedAge'])
+  ) {
+    return false;
+  }
+  // Ticket 0904. Months of the GI Bill used: a whole number, never more than the thirty-six it gives.
+  const giUsed = military['giBillMonthsUsed'];
+  if (giUsed !== undefined && !(whole(giUsed) && (giUsed as number) <= 36)) return false;
+  // Ticket 0903. Deployments: a flag, one in progress, the ones that are over, and what they earned.
+  if (
+    military['deploymentsOpen'] !== undefined &&
+    typeof military['deploymentsOpen'] !== 'boolean'
+  ) {
+    return false;
+  }
+  const tierOk = (n: unknown): boolean => typeof n === 'string' && DEPLOY_TIERS_OK.includes(n);
+  const outcomeOk = (n: unknown): boolean =>
+    typeof n === 'string' && DEPLOY_OUTCOMES_OK.includes(n);
+  const deployment = military['deployment'];
+  if (deployment !== undefined) {
+    if (typeof deployment !== 'object' || deployment === null) return false;
+    const d = deployment as Record<string, unknown>;
+    if (
+      (d['status'] !== 'ordered' && d['status'] !== 'active') ||
+      typeof d['theater'] !== 'string' ||
+      !whole(d['months']) ||
+      (d['months'] as number) < 1 ||
+      !tierOk(d['tier']) ||
+      !whole(d['incidents']) ||
+      (d['incidents'] as number) < 1 ||
+      !Array.isArray(d['results']) ||
+      !(d['results'] as unknown[]).every(outcomeOk) ||
+      (d['results'] as unknown[]).length > (d['incidents'] as number) ||
+      !whole(d['orderedAge']) ||
+      (d['wounded'] !== undefined && typeof d['wounded'] !== 'boolean')
+    ) {
+      return false;
+    }
+  }
+  const deployments = military['deployments'];
+  if (deployments !== undefined) {
+    if (!Array.isArray(deployments)) return false;
+    for (const row of deployments) {
+      if (typeof row !== 'object' || row === null) return false;
+      const r = row as Record<string, unknown>;
+      if (
+        !whole(r['age']) ||
+        typeof r['theater'] !== 'string' ||
+        !whole(r['months']) ||
+        !tierOk(r['tier']) ||
+        !outcomeOk(r['worst']) ||
+        typeof r['wounded'] !== 'boolean'
+      ) {
+        return false;
+      }
+    }
+  }
+  const decorations = military['decorations'];
+  if (decorations !== undefined) {
+    if (!Array.isArray(decorations)) return false;
+    for (const row of decorations) {
+      if (typeof row !== 'object' || row === null) return false;
+      const r = row as Record<string, unknown>;
+      if (typeof r['id'] !== 'string' || !whole(r['age'])) return false;
+    }
+  }
+  const past = military['past'];
+  if (!Array.isArray(past)) return false;
+  for (const row of past) {
+    if (typeof row !== 'object' || row === null) return false;
+    const r = row as Record<string, unknown>;
+    if (
+      !branchOk(r['branch']) ||
+      !trackOk(r['track']) ||
+      !specialtyOk(r['specialty'], r['branch']) ||
+      !whole(r['enlistedAge']) ||
+      !whole(r['endedAge']) ||
+      !whole(r['years']) ||
+      !gradeOk(r['finalGrade'], r['track']) ||
+      !level(r['reputation']) ||
+      typeof r['how'] !== 'string' ||
+      !SERVICE_ENDINGS_OK.includes(r['how']) ||
+      typeof r['discharge'] !== 'string' ||
+      !DISCHARGES_OK.includes(r['discharge']) ||
+      !dischargeFits(r['how'], r['discharge'])
+    ) {
+      return false;
+    }
+  }
+  const service = military['service'];
+  if (service !== undefined) {
+    if (typeof service !== 'object' || service === null) return false;
+    const c = service as Record<string, unknown>;
+    if (
+      !branchOk(c['branch']) ||
+      !trackOk(c['track']) ||
+      !specialtyOk(c['specialty'], c['branch']) ||
+      (c['stage'] !== 'training' && c['stage'] !== 'serving') ||
+      !whole(c['enlistedAge']) ||
+      !gradeOk(c['grade'], c['track']) ||
+      !whole(c['commissionedAt']) ||
+      !whole(c['years']) ||
+      !whole(c['termEnds']) ||
+      !level(c['performance']) ||
+      !level(c['reputation']) ||
+      (c['effort'] !== 'normal' && c['effort'] !== 'hard') ||
+      !optionalWhole(c['pushedAtAge']) ||
+      !optionalWhole(c['pushedThisYear']) ||
+      !optionalWhole(c['noRiseAtAge']) ||
+      (c['refusedTerm'] !== undefined && typeof c['refusedTerm'] !== 'boolean') ||
+      !whole(c['lastPay']) ||
+      typeof c['post'] !== 'string'
+    ) {
+      return false;
+    }
+    const prior = c['prior'];
+    if (prior !== undefined) {
+      if (typeof prior !== 'object' || prior === null) return false;
+      const p = prior as Record<string, unknown>;
+      if (!gradeOk(p['grade'], 'enlisted') || !whole(p['termEnds'])) return false;
+    }
+  }
+  const offer = military['offer'];
+  if (offer !== undefined) {
+    if (typeof offer !== 'object' || offer === null) return false;
+    const o = offer as Record<string, unknown>;
+    if (!whole(o['age']) || typeof o['eventId'] !== 'string') return false;
+    if (o['kind'] === 'reenlist') {
+      if (
+        !branchOk(o['branch']) ||
+        (o['track'] !== undefined && !trackOk(o['track'])) ||
+        !gradeOk(o['grade'], o['track']) ||
+        !whole(o['years'])
+      ) {
+        return false;
+      }
+    } else if (o['kind'] === 'enlist') {
+      if (
+        typeof o['step'] !== 'string' ||
+        !ENLIST_STEPS_OK.includes(o['step']) ||
+        !Array.isArray(o['options']) ||
+        !(o['options'] as unknown[]).every((id) => typeof id === 'string') ||
+        (o['branch'] !== undefined && !branchOk(o['branch'])) ||
+        (o['track'] !== undefined && !trackOk(o['track'])) ||
+        (o['intro'] !== undefined && typeof o['intro'] !== 'boolean')
+      ) {
+        return false;
+      }
+    } else if (o['kind'] === 'orders') {
+      if (
+        typeof o['theater'] !== 'string' ||
+        !whole(o['months']) ||
+        !tierOk(o['tier']) ||
+        !whole(o['incidents']) ||
+        (o['incidents'] as number) < 1
+      ) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+const CLEARANCES_OK: readonly string[] = ['confidential', 'secret', 'top-secret'];
+const AGENCIES_OK: readonly string[] = ['fbi', 'cia'];
+const MISSION_SOURCES_OK: readonly string[] = ['military', 'fbi', 'cia'];
+const AGENCY_ENDINGS_OK: readonly string[] = [
+  'washed-out',
+  'let-go',
+  'clearance-lost',
+  'resigned',
+  'retired',
+  'killed',
+];
+
+/** Ticket 0905. A clearance, an agency career, the ones that ended, and a mission waiting. */
+function intelOk(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const intel = value as Record<string, unknown>;
+  const whole = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
+  const optionalWhole = (n: unknown): boolean => n === undefined || whole(n);
+  const level = (n: unknown): boolean => typeof n === 'number' && n >= 0 && n <= 100;
+  const agencyOk = (n: unknown): boolean => typeof n === 'string' && AGENCIES_OK.includes(n);
+  const gradeOk = (n: unknown): boolean => whole(n) && (n as number) >= 9 && (n as number) <= 15;
+  if (
+    !optionalWhole(intel['revokedAge']) ||
+    !optionalWhole(intel['deniedAge']) ||
+    !optionalWhole(intel['appliedAge'])
+  ) {
+    return false;
+  }
+  if (intel['missionsOpen'] !== undefined && typeof intel['missionsOpen'] !== 'boolean') {
+    return false;
+  }
+  const clearance = intel['clearance'];
+  if (clearance !== undefined) {
+    if (typeof clearance !== 'object' || clearance === null) return false;
+    const c = clearance as Record<string, unknown>;
+    if (
+      typeof c['level'] !== 'string' ||
+      !CLEARANCES_OK.includes(c['level']) ||
+      !whole(c['grantedAge']) ||
+      !optionalWhole(c['idleSince'])
+    ) {
+      return false;
+    }
+  }
+  const career = intel['career'];
+  if (career !== undefined) {
+    if (typeof career !== 'object' || career === null) return false;
+    const c = career as Record<string, unknown>;
+    if (
+      !agencyOk(c['agency']) ||
+      (c['stage'] !== 'training' && c['stage'] !== 'serving') ||
+      !whole(c['enteredAge']) ||
+      !gradeOk(c['grade']) ||
+      !whole(c['gradeYears']) ||
+      !whole(c['years']) ||
+      !level(c['performance']) ||
+      !level(c['reputation']) ||
+      (c['effort'] !== 'normal' && c['effort'] !== 'hard') ||
+      !optionalWhole(c['pushedAtAge']) ||
+      !optionalWhole(c['pushedThisYear']) ||
+      !whole(c['lastPay']) ||
+      typeof c['post'] !== 'string' ||
+      (c['door'] !== 'service' && c['door'] !== 'degree') ||
+      !whole(c['poorYears']) ||
+      !Array.isArray(c['highPay']) ||
+      (c['highPay'] as unknown[]).length > 3 ||
+      !(c['highPay'] as unknown[]).every((n) => whole(n))
+    ) {
+      return false;
+    }
+  }
+  const past = intel['past'];
+  if (!Array.isArray(past)) return false;
+  for (const row of past) {
+    if (typeof row !== 'object' || row === null) return false;
+    const r = row as Record<string, unknown>;
+    if (
+      !agencyOk(r['agency']) ||
+      !whole(r['enteredAge']) ||
+      !whole(r['endedAge']) ||
+      !whole(r['years']) ||
+      !gradeOk(r['finalGrade']) ||
+      !level(r['reputation']) ||
+      typeof r['how'] !== 'string' ||
+      !AGENCY_ENDINGS_OK.includes(r['how']) ||
+      !whole(r['pension'])
+    ) {
+      return false;
+    }
+  }
+  const mission = intel['mission'];
+  if (mission !== undefined) {
+    if (typeof mission !== 'object' || mission === null) return false;
+    const m = mission as Record<string, unknown>;
+    if (
+      typeof m['source'] !== 'string' ||
+      !MISSION_SOURCES_OK.includes(m['source']) ||
+      !whole(m['age'])
+    ) {
+      return false;
+    }
+  }
+  const missions = intel['missions'];
+  if (missions !== undefined) {
+    if (!Array.isArray(missions)) return false;
+    for (const row of missions) {
+      if (typeof row !== 'object' || row === null) return false;
+      const r = row as Record<string, unknown>;
+      if (
+        !whole(r['age']) ||
+        typeof r['source'] !== 'string' ||
+        !MISSION_SOURCES_OK.includes(r['source']) ||
+        typeof r['outcome'] !== 'string' ||
+        !DEPLOY_OUTCOMES_OK.includes(r['outcome'])
+      ) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function modelingOk(value: unknown): boolean {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const modeling = value as Record<string, unknown>;
@@ -1982,6 +2410,10 @@ export function validateCurrentSave(
     require('music', candidate['music'], musicOk(candidate['music'])),
     // Ticket 0807. Always present from v49: a rung, credits, a following, and the jobs on the table and booked.
     require('modeling', candidate['modeling'], modelingOk(candidate['modeling'])),
+    // Ticket 0901. Always present from v59: a career in progress, the ones that ended, and a question.
+    require('military', candidate['military'], militaryOk(candidate['military'])),
+    // Ticket 0905. Always present from v63: a clearance, an agency career, the ones that ended, and a mission.
+    require('intel', candidate['intel'], intelOk(candidate['intel'])),
     // Ticket 0704. Optional, but if it is there it has to be one of the two.
     require('representation', candidate['representation'], candidate['representation'] ===
       undefined ||

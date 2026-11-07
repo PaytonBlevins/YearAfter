@@ -29,6 +29,7 @@ import {
 } from '@yearafter/education';
 import { err, ok, type Result } from '@yearafter/core';
 import type { GameState } from './game-state';
+import { giTuitionAid } from './military-veterans';
 import { RngDomains, stableUnit } from './rng/rng';
 
 export type CollegeError =
@@ -153,7 +154,9 @@ export const collegeSupportOf = (state: GameState, program?: Major): number => {
   if (state.education.stage === 'postgrad') return 0;
   // Ticket 0801. A sports scholarship is aid too, and it is read here so the affordability gate sees it.
   const aid = state.sports.career?.stage === 'college' ? (state.sports.career.aid ?? 0) : 0;
-  return (state.parenting.collegeSupport ?? 0) + aid;
+  // Ticket 0904. The GI Bill pays tuition for a first degree or a trade, up to a yearly cap, for the share earned.
+  const gi = giTuitionAid(state.military, program?.tuition ?? tuitionDue(state));
+  return (state.parenting.collegeSupport ?? 0) + aid + gi;
 };
 
 /**

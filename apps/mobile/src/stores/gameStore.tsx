@@ -138,6 +138,7 @@ import {
   type CreatorAction,
 } from './fameActions';
 import { applyEntertainment, type EntertainmentAction } from './entertainmentActions';
+import { applyMilitary, type MilitaryAction } from './militaryActions';
 import type { Detail } from '../components/DetailCard';
 import type { Outcome } from '../components/OutcomeCard';
 import type { Result } from '@yearafter/core';
@@ -319,6 +320,8 @@ interface GameContextValue {
   readonly meetThem: (actionId: string) => void;
   /** Ticket 0809. Everything a player does in sports, studies, acting, music, modeling and racing. */
   readonly entertain: (action: EntertainmentAction) => void;
+  /** Ticket 0906. Enlist, apply for a commission, retire, put the work in, apply to an agency, leave one. */
+  readonly serve: (action: MilitaryAction) => void;
   readonly startNewLife: (seed?: string) => Promise<void>;
   /**
    * Ticket 0212. Carry on as one of your children.
@@ -1724,6 +1727,10 @@ export function GameProvider({ repository, children }: GameProviderProps) {
     (action: EntertainmentAction) => commit((current) => applyEntertainment(current, action)),
     [commit],
   );
+  const serve = useCallback(
+    (action: MilitaryAction) => commit((current) => applyMilitary(current, action)),
+    [commit],
+  );
 
   const interactWith = useCallback(
     (personId: string, interactionId: string) => {
@@ -1932,6 +1939,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       connectWith,
       meetThem,
       entertain,
+      serve,
       startNewLife,
       continueAs,
       updateSettings,
@@ -2019,6 +2027,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
       connectWith,
       meetThem,
       entertain,
+      serve,
       startNewLife,
       continueAs,
       updateSettings,

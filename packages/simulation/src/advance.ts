@@ -42,6 +42,12 @@ import { occupationFor, runEducation } from './phases/education';
 import { findJob } from '@yearafter/careers';
 import { runEmployment } from './phases/employment';
 import { withAnyOffer } from './offers';
+import {
+  withoutActingOffers,
+  withoutModelingOffers,
+  withoutMusicOffer,
+  withoutSportsOffer,
+} from './military-guard';
 import { withCollegeOffer } from './college-offer';
 import { actingOccupation, isActingFullTime, runActingYear, withActingOffer } from './acting';
 import {
@@ -59,6 +65,15 @@ import {
   withModelingOffer,
 } from './modeling';
 import { runSportsYear, sportsOccupation, withSportsOffer } from './sports';
+import {
+  branchShortOf,
+  militaryOccupation,
+  rankTitleOf,
+  runMilitaryYear,
+  withMilitaryOffer,
+} from './military';
+import { runVeteransYear } from './military-veterans';
+import { agencyOccupation, runIntelYear, withIntelMission } from './intel';
 import { postTitle } from './sports-post';
 import { withLifeOffer } from './life-offer';
 import { runEvents } from './phases/events';
@@ -119,6 +134,8 @@ import {
   MODEL_CHANNEL_CATEGORIES,
   INSTRUMENTS,
   SECTORS,
+  agencyRow,
+  agencyTitle,
   costIndexOf,
   findActivity,
   findSport,
@@ -293,48 +310,61 @@ export function advanceYear(state: GameState): AdvanceResult {
     being played out). Its pay and its tax are settled below, with the creator
     income, because both are earnings the household lives on.
   */
-  const sportsYear = runSportsYear({
+  /*
+    Ticket 0902 — a service life holds the whole year. Somebody in uniform is raised no contract, part, record deal or
+    modeling job (0901 only stopped civilian job offers, and found these four still came). A life that never serves
+    takes none of this, so it replays exactly as before.
+  */
+  // Ticket 0905. An agency career holds the whole year as a service life does.
+  const serviceHoldsTheYear =
+    state.military.service !== undefined || state.intel.career !== undefined;
+
+  const rawSportsYear = runSportsYear({
     before: state,
     education: education.education,
     age: nextAge,
     year: nextYear,
     standard: state.household.standard,
   });
+  const sportsYear = withoutSportsOffer(rawSportsYear, serviceHoldsTheYear);
 
   /*
     Ticket 0805 — an acting life. The parts that were booked last year are shot, judged and paid now, a
     year's offers are raised for the one to come, and the lessons are billed. Taxed and posted below with
     the playing pay, because both are earnings the household lives on.
   */
-  const actingYear = runActingYear({
+  const rawActingYear = runActingYear({
     before: state,
     education: education.education,
     age: nextAge,
     year: nextYear,
     standard: state.household.standard,
   });
+  const actingYear = withoutActingOffers(rawActingYear, serviceHoldsTheYear);
 
   /*
     Ticket 0806 — a musician. The year's plan is run: records made, a tour gone on, listeners counted, streams, a
     label and the road paid. Taxed and posted below with the other earnings.
   */
-  const musicYear = runMusicYear({
+  const rawMusicYear = runMusicYear({
     before: state,
     education: education.education,
     age: nextAge,
     year: nextYear,
     standard: state.household.standard,
   });
+  const musicYear = withoutMusicOffer(rawMusicYear, serviceHoldsTheYear);
 
   /*
     Ticket 0807 — a model. The jobs booked last year are shot, judged and paid now, the brand deals agreed are paid,
     and a year's offers are raised for the one to come. Taxed and posted below with the other earnings.
   */
-  const modelYear = runModelingYear({
+  const rawModelYear = runModelingYear({
     before: state,
     age: nextAge,
     year: nextYear,
   });
+  const modelYear = withoutModelingOffers(rawModelYear, serviceHoldsTheYear);
 
   /*
     Ticket 0808 — the awards across fields. It reads what the acting, music, modeling and sports years just did
@@ -411,6 +441,52 @@ export function advanceYear(state: GameState): AdvanceResult {
   });
 
   /*
+    Ticket 0901 — a service life. Basic pay for the year, the year's promotion and the question at the end of a term.
+    Taxed and posted below with the other earnings. A recruiter's offer is dropped when another field has already
+    raised a question this year: one a year (spec 1233).
+  */
+  const rawMilitaryYear = runMilitaryYear({
+    before: state,
+    education: education.education,
+    age: nextAge,
+    year: nextYear,
+  });
+  const otherOfferRaised =
+    sportsYear.sports.offer !== undefined ||
+    actingYear.acting.offers.length > 0 ||
+    musicYear.music.offer !== undefined ||
+    modelYear.modeling.offers.length > 0;
+  const militaryYear =
+    rawMilitaryYear.military.offer?.kind === 'enlist' &&
+    state.military.offer === undefined &&
+    otherOfferRaised
+      ? (() => {
+          const { offer: _dropped, ...rest } = rawMilitaryYear.military;
+          return { ...rawMilitaryYear, military: rest };
+        })()
+      : rawMilitaryYear;
+  const serving = state.military.service !== undefined;
+  /*
+    Ticket 0905. The clearance a training year ended in, an agency career's year, retired federal pay and a mission the
+    year raised. Run after the service's year, which it reads.
+  */
+  const intelYear = runIntelYear({
+    before: state,
+    military: militaryYear.military,
+    education: education.education,
+    age: nextAge,
+    year: nextYear,
+    ...(militaryYear.investigation ? { investigation: militaryYear.investigation } : {}),
+  });
+  const inAgency = state.intel.career !== undefined;
+  // Ticket 0903. The ledger names the branch the pay came from (0901 and 0902 had every branch as "Army pay").
+  const militaryBranchName = state.military.service
+    ? branchShortOf(state.military.service.branch)
+    : 'Army';
+  // Ticket 0905. The ledger names the agency a year's pay came from, whichever career ended this year.
+  const intelSource = state.intel.career ? agencyRow(state.intel.career.agency).short : 'Agency';
+
+  /*
     Ticket 0411 — what the year's work did to them.
 
     Applied HERE rather than inside the phase, because a phase reports and
@@ -421,7 +497,11 @@ export function advanceYear(state: GameState): AdvanceResult {
   */
   const worked: Character = {
     ...education.player,
-    stats: nudgeStats(education.player.stats, employment.statDeltas),
+    // Ticket 0901. Somebody in uniform has no idle years: the service's own year is what moves them.
+    stats: nudgeStats(
+      education.player.stats,
+      serving ? militaryYear.statDeltas : inAgency ? intelYear.statDeltas : employment.statDeltas,
+    ),
   };
 
   /*
@@ -555,6 +635,30 @@ export function advanceYear(state: GameState): AdvanceResult {
       musicYear.pay,
     modelYear.pay,
   );
+  // Ticket 0901. Basic pay is pay: taxed on top of the rest.
+  const militaryTax = businessTaxOn(
+    earnedIncome +
+      businessesYear.drawn +
+      creatorsYear.net +
+      sportsYear.pay +
+      actingYear.pay +
+      musicYear.pay +
+      modelYear.pay,
+    // Ticket 0903. A deployed year's combat zone pay is not taxed.
+    militaryYear.pay - militaryYear.taxFreePay,
+  );
+  // Ticket 0905. An agency's pay is pay: taxed on top of the rest.
+  const intelTax = businessTaxOn(
+    earnedIncome +
+      businessesYear.drawn +
+      creatorsYear.net +
+      sportsYear.pay +
+      actingYear.pay +
+      musicYear.pay +
+      modelYear.pay +
+      (militaryYear.pay - militaryTax),
+    intelYear.pay,
+  );
   // Ticket 0605. Interest, settlements and write-offs of private deals; the tax on what they earned.
   const dealsYear = runDealsYear({
     deals: state.deals,
@@ -567,7 +671,9 @@ export function advanceYear(state: GameState): AdvanceResult {
       sportsYear.pay +
       actingYear.pay +
       musicYear.pay +
-      modelYear.pay,
+      modelYear.pay +
+      (militaryYear.pay - militaryYear.taxFreePay) +
+      (intelYear.pay - intelTax),
   });
   const businessNet = businessesYear.drawn - businessTax;
 
@@ -649,6 +755,60 @@ export function advanceYear(state: GameState): AdvanceResult {
     });
   }
 
+  /*
+    Ticket 0904 — what a veteran is paid, and what a year at college uses of the GI Bill.
+
+    Retired pay is `assetIncome` like any pension, and untaxed here for the reason the civilian one is. The housing
+    allowance is a `gift`: it is paid to somebody enrolled, it is not earnings, and it is not taxed. Both are rules,
+    not draws.
+  */
+  const veterans = runVeteransYear({
+    military: militaryYear.military,
+    age: nextAge,
+    atCollege: state.education.stage === 'college' || state.education.stage === 'vocational',
+    ...(schooled.collegeEnding !== undefined ? { ending: schooled.collegeEnding } : {}),
+  });
+  if (veterans.retiredPay > 0) {
+    retirementRows.push({
+      category: 'assetIncome' as const,
+      amount: dollars(veterans.retiredPay),
+      source: 'Military retired pay',
+    });
+  }
+  // Ticket 0905. Retired pay from an agency, a pension like any other here.
+  if (intelYear.pension > 0) {
+    retirementRows.push({
+      category: 'assetIncome' as const,
+      amount: dollars(intelYear.pension),
+      source: 'Federal retired pay',
+    });
+  }
+  if (veterans.housing > 0) {
+    retirementRows.push({
+      category: 'gift' as const,
+      amount: dollars(veterans.housing),
+      source: 'GI Bill housing allowance',
+    });
+  }
+
+  /*
+    Ticket 0906 (finding 216). Somebody in uniform or in an agency has no civilian job, so the living
+    phase had no title to write the year's money line with and wrote "no work all year" over a year
+    that paid. Their rank or title is the job's here, and the year's gross pay is what it earned. A
+    life with neither is untouched: this is undefined and nothing is added.
+  */
+  const publicWork = state.military.service
+    ? rankTitleOf(state.military.service)
+    : state.intel.career
+      ? agencyTitle(state.intel.career.agency, state.intel.career.grade)
+      : undefined;
+  const publicEarned = militaryYear.pay + intelYear.pay;
+  const publicTitle =
+    currentJobTitle({ ...state, employment: employment.employment }) === undefined &&
+    publicEarned > 0
+      ? publicWork
+      : undefined;
+  const publicPay = publicTitle === undefined ? 0 : publicEarned;
   // P15: calculate the existing payout before living; rows still post once below.
   const living = runLiving({
     household: state.household,
@@ -689,8 +849,13 @@ export function advanceYear(state: GameState): AdvanceResult {
       (actingYear.pay - actingTax) +
       (musicYear.pay - musicTax) +
       (modelYear.pay - modelTax) +
+      (militaryYear.pay - militaryTax) +
+      (intelYear.pay - intelTax) +
+      intelYear.pension +
       drawn.pension +
-      drawn.state,
+      drawn.state +
+      veterans.retiredPay +
+      veterans.housing,
     wealth: Math.floor(Number(state.player.cash) / 100) + drawn.drawn,
     retired: state.retirement.retiredAtAge !== undefined,
     personalDebt:
@@ -706,10 +871,14 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0308b. What they hold in the market — see `portfolio` on the
     // input. Being illiquid is not the same as being destitute.
     portfolio: Math.floor(Number(portfolioWorth(state.prices, state.portfolio)) / 100),
-    earned: earnedIncome,
+    // Ticket 0906 (finding 216). A year in uniform or an agency earns, and with no civilian job the
+    // living phase wrote "no work all year, nothing came in". It now reads the pay as a job's.
+    earned: earnedIncome + publicPay,
     ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
       ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }
-      : {}),
+      : publicTitle !== undefined
+        ? { jobTitle: publicTitle }
+        : {}),
     toldToLeave: family.toldToLeave,
     hasLivingParent: livingParents(family.family).length > 0,
     // Ticket 0501. Somebody who owns a home lives in it; no one asks which.
@@ -722,6 +891,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     // living bill stops paying for getting about (a bounded dollar allowance).
     vehicleCost: vehiclesYear.cost,
     ownsVehicle: state.vehicles.length > 0,
+    // Ticket 0901. The roof and the meals are the service's while they serve.
+    housingProvided: serving,
   });
 
   const events = runEvents(
@@ -886,6 +1057,12 @@ export function advanceYear(state: GameState): AdvanceResult {
   write(events.lines, () => undefined);
   write(celebritiesYear.lines, (index) => `t:${nextYear}:celeb:${index}`);
   write(sportsYear.lines, (index) => `t:${nextYear}:sports:${index}`);
+  // Ticket 0901. A year in uniform.
+  write(militaryYear.lines, (index) => `t:${nextYear}:military:${index}`);
+  // Ticket 0905. A clearance, an agency year, a federal pension.
+  write(intelYear.lines, (index) => `t:${nextYear}:intel:${index}`);
+  // Ticket 0904. Retired pay beginning, the GI Bill beginning and running out.
+  write(veterans.lines, (index) => `t:${nextYear}:veteran:${index}`);
   // Acting for a living ends the day job, as playing for a living does (0803, 0804).
   const actingLeftJob =
     employment.employment.job !== undefined &&
@@ -1109,6 +1286,44 @@ export function advanceYear(state: GameState): AdvanceResult {
             category: 'tax' as const,
             amount: dollars(-modelTax),
             source: 'Tax on modeling pay',
+          },
+        ]
+      : []),
+    // Ticket 0901. Basic pay, and the tax on it. Housing and food are not a row: they are the lower living cost.
+    ...(militaryYear.pay > 0
+      ? [
+          {
+            category: 'salary' as const,
+            amount: dollars(militaryYear.pay),
+            source: `${militaryBranchName} pay`,
+          },
+        ]
+      : []),
+    ...(militaryTax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-militaryTax),
+            source: `Tax on ${militaryBranchName} pay`,
+          },
+        ]
+      : []),
+    // Ticket 0905. An agency's pay, and the tax on it.
+    ...(intelYear.pay > 0
+      ? [
+          {
+            category: 'salary' as const,
+            amount: dollars(intelYear.pay),
+            source: `${intelSource} pay`,
+          },
+        ]
+      : []),
+    ...(intelTax > 0
+      ? [
+          {
+            category: 'tax' as const,
+            amount: dollars(-intelTax),
+            source: `Tax on ${intelSource} pay`,
           },
         ]
       : []),
@@ -1483,6 +1698,8 @@ export function advanceYear(state: GameState): AdvanceResult {
         happiness:
           (fieldMood === 0 ? (shaped.happiness ?? 0) : fieldMood) +
           (living.mood > 0 && money.short < 0 ? 0 : living.mood) +
+          militaryYear.mood +
+          intelYear.mood +
           renovationComfortFor(homesYear.homes, living.hardship, money.short),
       }),
       health: clampStat(health.health + sportsYear.health),
@@ -1496,6 +1713,10 @@ export function advanceYear(state: GameState): AdvanceResult {
       actingOccupation(actingYear.acting) ??
       musicOccupation(musicYear.music) ??
       modelingOccupation(modelYear.modeling) ??
+      // Ticket 0901. A rank is the occupation while somebody serves.
+      militaryOccupation(militaryYear.military) ??
+      // Ticket 0905. An agency's title is the occupation while the career lasts.
+      agencyOccupation(intelYear.intel) ??
       occupationFor(
         education.education,
         nextAge,
@@ -1549,6 +1770,9 @@ export function advanceYear(state: GameState): AdvanceResult {
       ...musicYear.records,
       // Ticket 0807. A first job, a rise, an award.
       ...modelYear.records,
+      // Ticket 0901. A rank, a term ended, an enlistment that did not take.
+      ...militaryYear.records,
+      ...intelYear.records,
       // Ticket 0808. The ceremonies, the sweeps and the charts, last, so no earlier record's ordinal moves.
       ...awardsYear.records,
     ].reduce<readonly LifeRecord[]>(
@@ -1637,6 +1861,8 @@ export function advanceYear(state: GameState): AdvanceResult {
     acting: actingYear.acting,
     music: musicYear.music,
     modeling: modelYear.modeling,
+    military: veterans.military,
+    intel: intelYear.intel,
     // Ticket 0504. The same short year puts a financed car behind.
     vehicles: markVehiclesMissed(
       vehiclesYear.vehicles,
@@ -1754,7 +1980,13 @@ export function advanceYear(state: GameState): AdvanceResult {
                   withModelingOffer(
                     withMusicOffer(
                       withActingOffer(
-                        withSportsOffer(repossess(foreclose(reviewed)), health.alive),
+                        withSportsOffer(
+                          withIntelMission(
+                            withMilitaryOffer(repossess(foreclose(reviewed)), health.alive),
+                            health.alive,
+                          ),
+                          health.alive,
+                        ),
                         health.alive,
                       ),
                       health.alive,

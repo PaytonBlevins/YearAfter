@@ -3591,7 +3591,191 @@ call it from the helper every test already opens the screen through, and let it 
 had before the ticket. Doing so found two real bugs the first time it ran over all states: the hire-a-driver list and an
 opened martial art's skill bars had no hairlines between their rows.
 
-### 13.204 Occupancy is not tenant continuity, and card payoff is exact
+### 13.204 To test a hashed draw, compute the hash first and run the year only for the seeds that fire
+
+A recruiter's offer is a hash of the seed, the generation, the age and a name. The first test ran a full year on every
+seed in a loop and counted the offers, which is slow and, at 1% a year, mostly runs years where nothing is being tested.
+Compute the same key in the test, keep the seeds whose draw falls under the chance, and run the real year only on those.
+Every trial then counts, the loop can stop at the third case, and the test says how many cases it saw.
+
+### 13.205 A guard that only matters when two things collide needs a test that builds the collision
+
+"One question a year" lets a recruiter's offer give way to a modeling job raised the same year. Thirty-one hand-written
+mutants killed the guard's neighbours and one survived: replacing the guard's condition with `false`. No ordinary life
+raises both in a year, so no ordinary test could tell. The test that kills it makes a life that is certain to raise one
+(a model who has been seen), finds seeds where the other also fires by the same hash, and asserts that only one question
+stands. A guard with no collision test is a line that has never run.
+
+### 13.206 A fixture taken from a played life inherits what the life did, so a test about a gate states the gate's inputs
+
+An "adult at twenty-two" had gone to a trade school in one seed and dropped out in another, so the enlistment tests
+found no one eligible and the offer never fired, which looked like a bug in the offer. A diploma, being out of school and
+a fit body are the gate's inputs; a test about the gate sets them, and a test about the bar sets one of them wrong on
+purpose. Memoising the played life is fine; relying on what it happened to do is not.
+
+### 13.207 Run one mutation worker per source tree
+
+Three workers on the same files each rewrote the line under test while the others ran their tests against it, so every
+result was a mix of two mutants and the restore step from one worker overwrote the other's change. Parallelism needs a
+copy of the tree per worker, or none. A worker also restores its file on any exit, including a signal, and the file is
+checked against the original before the next run starts.
+
+### 13.208 A fixture that removes a thing removes every place it can live
+
+The "no degree" fixture set the bachelor's year to `undefined` and left a postgraduate year in the credentials the played
+life had, so the character still held a degree, the officer bar never fired and three tests failed in a way that looked
+like a bug in the bar. A fixture for "does not hold X" clears every field X can be read from, and one test asserts the
+fixture is what it says (`holdsDegree(base)` is false) before the tests that depend on it.
+
+### 13.209 Two paths that compute one number need a test that compares them
+
+A screen helper (`yearPayOf`) and the year it describes (`runMilitaryYear`) each worked out an enlisted member's pay
+in officer training, and they disagreed: the helper said the officer rate and the year paid the rank they came from. The
+test that found it was written to pin the helper's own cases and happened to include the trainee. When a number is
+computed twice, once to show and once to pay, one test sets up the odd case and asserts both give the same figure.
+
+### 13.210 A measurement's seeds must include the life, not only the loop count
+
+The first measurement seeded every career with the age and the loop index, so 120 lives shared 15 seeds and a hash draw
+that depends only on the seed came out the same for all of them: a 0.3% officer wash-out on one policy and 15% on the other
+from the same engine. A measurement with a figure that jumps between two runs of the same rule is reading a handful of
+draws, not a rate. Put the life's index in the seed, and check that the figure holds when the seed prefix changes.
+
+### 13.211 A yearly chance with no ceiling on years makes everyone arrive, so measure the patient policy too
+
+A grade with a 28% yearly chance from year sixteen looked right at twenty years (70% of captains reached it) and meant
+every officer who stayed to 65 got there. Measure a career that never ends as well as the one that ends at twenty, and
+name the gap when a rule the real services have (a high-year-of-tenure limit) is not built.
+
+### 13.212 A fake random source breaks the first code that reads a stream
+
+A test that overrode only `getSeed` on a state was enough for hash draws and failed with "stream is not a function"
+the moment a whole year ran. Integration tests build a real generator for each seed, and a test that runs the same life
+twice builds two, so both runs start from the same stream.
+
+### 13.213 A comparison of two runs of one state needs a fresh generator for each
+
+A test that ran the same life with the gate closed and again with it open handed both runs the one `Rng` the state
+carried, so the second run started where the first had stopped and the two lives differed in cash and in every draw that
+used the stream. The test was checking that nothing but the flag changed, and it failed for a reason that had nothing to
+do with the flag. Build a new generator from the seed for each run (`fresh(state)`) when the point is that two runs agree.
+
+### 13.214 A tier boundary written as a sum of decimals is not the number you wrote
+
+`0.3 + 0.55` is `0.8500000000000001`, so a draw of exactly `0.85` fell in the middle tier of a table whose rows were
+`[0.3, 0.55, 0.15]`, and a test of the edge expected the last. A boundary test uses a value clear of the edge (0.9, 0.29,
+0.3 for a cut at 0.3 that is a literal in the table) and does not assert the point where two decimals meet. The table's
+own cut is not wrong for a hash draw, which is never exactly there.
+
+### 13.215 Adding a condition and holding the stat to its ceiling are one step
+
+The first version of a deployment's lasting trauma added the condition and left the health stat where it was, so a member
+held "post-traumatic stress" (a ceiling of 68) at health 80 until the next year's health phase clamped it. A wound already
+did both. A test that read the stat straight after the answer found it. Whatever adds a condition clamps the stat to
+`ceilingWith(conditions)` in the same step, and one test reads the stat after, not at the year's end.
+
+### 13.216 A name exported from a package barrel must be searched for in the barrel first
+
+`AWARD_CHANCE` was already exported by acting's table, and `export *` from two files with one name is a type error that
+names neither file as the cause. The deployment table's version is `DECORATION_CHANCE`. Before a new exported constant
+takes a generic name (`CHANCE`, `LINES`, `AWARD_…`), search the package's `index.ts` exports for it, or name it for its
+own domain.
+
+### 13.217 A year can raise other questions beside the one a test is about
+
+Every deployment test that ran a year and then asserted `pending` was exactly the service's question failed in the
+same way: the ordinary life had also raised a friend asking for a loan, and the year would not advance until that was
+answered. A test of one system's question filters the pending list to that system's event ids (`militaryQuestions`) and
+settles the others the way an ordinary life would (`settle`), then goes on.
+
+### 13.218 When two checks guard one case, test the case only one of them covers
+
+Removing the `stage !== 'serving'` check on orders changed nothing the tests could see, because the training year has
+zero years served and a second check (`years < DEPLOY_MIN_YEARS`) turned it away anyway. An enlisted member in officer
+training has years behind them and is still in training, and the first check is the only thing that stops orders for
+them. A test for each guard needs a fixture that passes the others (training, with five years).
+
+### 13.219 A "every one can be reached" test counts the ones behind a gate that is shut
+
+The health catalog's reachability test plays whole lives and asks that every condition turn up in one. Six new service
+conditions can only come from a deployment, and no life deploys while the gate is off, so the full verify failed on the
+test that no 0903 test or sabotage run could see (it plays 150 lives and takes minutes). When a new catalog entry is
+reachable only through something that is off in play, exempt it by its origin in the played-life test, say why, and prove
+its reach where the gate is open. And run the whole package's suite before calling a ticket tested, not only the files
+the ticket wrote.
+
+### 13.220 A rule that reads a stat is measured against that stat's real range before its line is drawn
+
+0904's first dials sent a term-ender to a general discharge under a service reputation of 40, and a court-martial to a
+member under 40 as well, on the guess that the median reputation sat in the sixties. Two hundred simulated careers ended
+with every reputation between 49 and 55: a reputation starts at 55 and follows a performance that aims at 46, so nothing
+reaches 40, and the three new discharges could not happen in any life. The tests passed (they set the reputation by hand).
+Before a threshold on a stat is fixed, read the distribution the engine really produces (quantiles, not the mean) and put the
+line inside it; and say in the doc what the range is, because the next rule that reads it will want to know.
+
+### 13.221 A test helper that resets a life must reset every field the new rule reads
+
+0904's `eligible()` helper (taken from 0903) cleared the credentials and conditions of an adult and left the education
+stage as the adult's own, which was a student at college. A veteran in a test about a life with no college was paid a
+housing allowance, and the failure looked like an engine bug. When a ticket adds a rule that reads a new field (here the
+education stage), check each shared helper sets it, or write the helper's version for this ticket.
+
+### 13.222 A sabotage survivor is a missing test or a dead line: find out which before writing anything
+
+Of fifteen survivors in 0904, six were equivalent (the guard changes no outcome), eight were gaps and one was an argument
+(`refused` passed to a function whose only callers could never make it matter). Writing a test for the last would have pinned
+nothing. For each survivor, say whether any input can tell the mutant from the original; if not, delete the line (dead) or
+list it as equivalent; if so, write that input.
+
+### 13.223 A threshold on a stat that stops changing is measured at the end of the life, not at the start
+
+0905's agents start at a performance of 50 and follow a target that settles near it, so the retention floor of 40 looked
+sensible against a typical new hire. Played for twenty years, every agent's performance sat between 42 and 54, so nobody was
+ever let go, and a promotion table that read a 60 as the table's own number put 83% of careers at GS-14 and GS-15. Both
+dials were wrong in the same direction and both passed their tests (the tests set the stat by hand). Before a rule reads a
+stat that is slowly pulled to a point, play a population to the end and read the quantiles there; then set the dial and say in
+the doc what the range was.
+
+### 13.224 A test that accepts either answer is not a test
+
+The first "busy" test for the agencies' door read `expect(['busy', undefined]).toContain(bar)`, because the fixture was a
+career the engine did not treat as full time. The sabotage run deleted the whole check and it still passed. When a fixture
+might not be the thing it says it is, assert the fixture first (the way 0901's cases check `busy(state)` is true) and then
+assert exactly one answer.
+
+### 13.225 When one comparison is hidden behind an unrelated effect, hold the rest of the life still
+
+Two lives that differ by a promotion's mood also differ by every random event the year draws, and the happiness of the
+promoted one came out lower than the other's. Testing "the mood is added" through two different lives cannot work. Wrap the
+one function (`vi.spyOn` on the module, calling through and adding a number) so both runs are the same life, and compare
+those. The same applies to a ledger reconciliation and any comparison that reads a whole year.
+
+### 13.226 A screen asks the engine whether it would refuse a verb, by running it and throwing the result away
+
+0906's Military screens grey out Retire, Apply for a commission and Apply to an agency, and say why. The first idea was to copy
+the engine's conditions into the view (twenty years, a degree, an age window). Every copy would drift the day an engine
+changed, and the screen would offer a button that then answers "not now". Instead the view runs `retireFromService`,
+`applyForCommission` or `applyToAgency` on the state, reads the error and discards the new state, and writes the error in
+words. The words are the screen's; the rule is the engine's. A test per refusal says the engine's error and the screen's
+sentence together.
+
+### 13.227 A test that asserts on something the code cannot change passes for the wrong reason: probe the data before writing the comment
+
+The 0906 test "stays open when only some branches turn the person away" said smarts 35 was "under the Army's smarts floor
+and over the Coast Guard's". It was the other way round (35 clears the Army's floor and not the Coast Guard's), and the
+assertion `toEqual({})` also treats `{ closed: undefined }` as equal to `{}`, so sabotaging the check from "every branch" to
+"some branch" still passed. Two defences: print the bars for every branch before writing a sentence about them (one probe
+test, thrown away), and when the point is that a key is absent, assert `'closed' in value` is false.
+
+### 13.228 A card for something that ended is read from the change itself, not from the button that caused it
+
+A service can end three ways in 0906: the Retire button, an answer to "stay or leave" at the end of a term, and a year
+turning (a wash-out, a retirement at 65). Giving each path its own card would have meant three cards that can disagree.
+`dischargeOutcome(before, after)` reads the states on either side of any change (a service existed, now it does not, a new
+row in the past, the player alive) and the recap notice shows it first and removes the year's service lines it already
+says. The same pattern as 0809's recap, taken one step further, and the reason the Retire verb writes no card of its own.
+
+### 13.229 Occupancy is not tenant continuity, and card payoff is exact
 
 A letting agent can replace a tenant in the same annual settlement. Vacancy and
 unit counts alone cannot tell whether anyone left. Compare tenant identities on

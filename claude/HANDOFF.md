@@ -26,6 +26,43 @@ the next free version is **v59**. Your migrations 43–50 and the P16 migration 
 (v44–v50 with sports) cannot be opened as the same version on the integrated build; they were development saves only. Agent A's CORE_RULES lessons
 were renumbered 13.164–13.203 after yours (13.134–13.163).
 
+**29 October: Agent A's v0.09 Military has started.** 0901 (the service engine, with the Army) took save **v59**, stacked
+on `integrate/sports-on-main`. **The current save is v59 and the next free version is v60.** Do not take v59 or lower. It
+adds a `military` field to the game state (a career in progress, the ones that ended, and a question), a `housingProvided`
+input to the living phase, and a hand-over in `workHarder`/`pushesLeft` to a service version while somebody serves.
+Details: `0901-the-service-engine.md`.
+
+**Update, November: Agent A's 0902 (branches, specialties and officers) took save v60.** **The current save is v60 and the
+next free version is v61.** Do not take v60 or lower. It grows `military` (a track, a specialty, a commissioning year, a
+rank prior to officer training and a commission-application age) and adds a guard in `advance.ts` that takes acting,
+music, modeling and sports offers out of a serving life's year. Details: `0902-branches-specialties-and-officers.md`.
+
+**Update, November: Agent A's 0903 (deployments) took save v61.** **The current save is v61 and the next free version is
+v62.** Do not take v61 or lower. It grows `military` (a gate that no code sets, orders, a deployment in progress, past
+deployments and decorations), adds six `service` conditions to the health catalog, and changes the tax on military pay and
+the ledger's names for it in `advance.ts`. A life that never deploys replays exactly. There is no minigame, so nothing deploys
+in play. Details: `0903-deployments.md`.
+
+**Update, November: Agent A's 0904 (discharge, benefits and veterans) took save v62.** **The current save is v62 and the
+next free version is v63.** Do not take v62 or lower. It grows `military` (two new endings, five discharges and the months of
+GI Bill used), adds a retired-pay row and a GI Bill housing row to `advance.ts` (both in the household's income), adds the GI
+Bill's tuition to a year's college support (`college.ts`, `phases/education.ts`), and adds `Applicant.veteran` to the hiring
+odds (`careers/src/employment.ts`). A life that never serves replays exactly. Details: `0904-discharge-benefits-and-veterans.md`.
+
+**Update, November: Agent A's 0905 (military intelligence and the agencies) took save v63.** **The current save is v63 and the next free version is
+v64.** Do not take v63 or lower. It adds an `intel` field to the game state (a clearance, an agency career, the careers that ended, a
+mission waiting and the missions done, and a gate that no code sets), an `intel` year in `advance.ts` (agency pay and its tax, retired
+federal pay, the household's income, mood, occupation, the held year), an investigation at the end of a recruit's training year in
+`military.ts`, a hand-over in `workHarder`/`pushesLeft`, and an intelligence specialty in every branch. A life that never meets any of it
+replays exactly. There is no minigame, so no mission is raised in play. Details: `0905-military-intelligence-and-the-agencies.md`.
+
+**Update, November: Agent A's 0906 (military screens) took no save version.** **The current save is still v63 and the next free version is
+v64.** It is mobile screens for 0901–0905 (a Public service card on the Career page, the Military hub, the recruiter, Veteran, the FBI and the
+CIA, a discharge card, a longer year recap). The one engine change is in `advance.ts`: when there is no civilian job and the year paid, the
+living phase is handed the rank (or the agent's title) and the gross pay, so the feed no longer says "no work all year" over a year in
+uniform (finding 216). It touches `gameStore.tsx` (one `serve` action), `navigation.tsx`, `Shell.tsx` and `shells.tsx`; rebase with care.
+Details: `0906-military-screens.md`.
+
 **7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
 one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
 inject-or-close choices and no automatic personal-bank rescue. Death winds down troubled

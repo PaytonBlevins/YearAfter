@@ -130,6 +130,14 @@ export type ScreenKey =
   | 'acting'
   | 'music'
   | 'modeling'
+  /** Ticket 0906. The service: a hub, the service itself, the recruiter, and what a veteran has. */
+  | 'military'
+  | 'service'
+  | 'recruiter'
+  | 'veteran'
+  /** Ticket 0906. The two agencies, each its own screen and neither part of the service. */
+  | 'fbi'
+  | 'cia'
   | 'debug';
 
 export interface Route {

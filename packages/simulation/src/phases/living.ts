@@ -113,6 +113,12 @@ export interface LivingPhaseInput {
    */
   readonly vehicleCost?: number;
   readonly ownsVehicle?: boolean;
+  /**
+   * Ticket 0901. The service provides a roof and meals. For somebody single with no children at home the year is
+   * charged at the at-home share, and the address the household remembers does not move (a soldier in barracks has not
+   * "moved out"). A partner or a child at home pays the whole household's.
+   */
+  readonly housingProvided?: boolean;
 }
 
 export interface LivingPhaseOutput {
@@ -308,6 +314,11 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
   });
 
   const wasAtHome = input.household.housing === 'withFamily';
+  const provided =
+    (input.housingProvided ?? false) &&
+    !input.ownsHome &&
+    !input.partnered &&
+    input.childAges.length === 0;
   /*
     Ticket 0501. OWNING DECIDES IT, before anything else does. A character who
     owns a home lives in it — there is no primary-residence mechanic (spec
@@ -319,7 +330,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     ? 'owned'
     : input.household.housing === 'owned'
       ? 'ownPlace'
-      : wasAtHome && movesOut(input, asIfAlone.total)
+      : wasAtHome && !provided && movesOut(input, asIfAlone.total)
         ? 'ownPlace'
         : input.household.housing;
   const moved = wasAtHome && housing === 'ownPlace';
@@ -330,7 +341,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     locationIndex: input.locationIndex,
     partnered: input.partnered,
     childAges: input.childAges,
-    housing,
+    housing: provided ? 'withFamily' : housing,
     housingCost: input.housingCost ?? 0,
     vehicleCost: input.vehicleCost ?? 0,
     ownsVehicle: input.ownsVehicle ?? false,
@@ -402,7 +413,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
       locationIndex: input.locationIndex,
       partnered: input.partnered,
       childAges: input.childAges,
-      housing,
+      housing: provided ? 'withFamily' : housing,
       housingCost: input.housingCost ?? 0,
       vehicleCost: input.vehicleCost ?? 0,
       ownsVehicle: input.ownsVehicle ?? false,
@@ -458,7 +469,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     transactions.push({
       category: 'living',
       amount: dollars(-cost.total),
-      source: sourceFor(input, housing),
+      source: provided ? 'Living costs, housing provided' : sourceFor(input, housing),
     });
   }
 
@@ -467,7 +478,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
     locationIndex: input.locationIndex,
     partnered: input.partnered,
     childAges: input.childAges,
-    housing,
+    housing: provided ? 'withFamily' : housing,
     housingCost: input.housingCost ?? 0,
     vehicleCost: input.vehicleCost ?? 0,
     ownsVehicle: input.ownsVehicle ?? false,
@@ -518,7 +529,7 @@ export function runLiving(input: LivingPhaseInput): LivingPhaseOutput {
           locationIndex: input.locationIndex,
           partnered: input.partnered,
           childAges: input.childAges,
-          housing,
+          housing: provided ? 'withFamily' : housing,
           housingCost: input.housingCost ?? 0,
         }).total,
     hardship: inHardship,

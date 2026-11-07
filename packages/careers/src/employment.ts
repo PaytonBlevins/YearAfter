@@ -13,6 +13,7 @@
  * information", not a management screen.
  */
 
+import { PREFERENCE_BONUS, PREFERENCE_TRACKS } from '@yearafter/content';
 import { clampStat, type StatValue } from '@yearafter/core';
 import { licenseReach, meetsLevel, type EducationLevel } from '@yearafter/education';
 import type { CareerTrack, Job } from './jobs';
@@ -119,6 +120,11 @@ export interface Applicant {
   readonly standing: number;
   /** The highest rung they have ever held on this track. */
   readonly reached: number;
+  /**
+   * Ticket 0904. Entitled to veterans' preference: a discharge under honorable conditions after enough service. It
+   * counts on the public and safety tracks and nowhere else. Absent for everybody who never served.
+   */
+  readonly veteran?: boolean;
 }
 
 export type CannotApply =
@@ -230,8 +236,12 @@ export function hireChance(job: Job, applicant: Applicant): number {
   // what it hands back as well as what it lets through.
   if (job.license !== undefined && !applicant.licenses.includes(job.license)) return 0;
 
+  // Ticket 0904. Veterans' preference: a bonus on the tracks that give it, and nothing anywhere else.
+  const preferred =
+    applicant.veteran === true && PREFERENCE_TRACKS.includes(job.track) ? PREFERENCE_BONUS : 0;
+
   const chance =
-    base + climb + charm + smarts + steady + known + seen + paper + relevant + licensed;
+    base + climb + charm + smarts + steady + known + seen + paper + relevant + licensed + preferred;
 
   // Never certain in either direction, for the reason `willThey` gives: an
   // employer who always says yes is a vending machine, and one who never does is

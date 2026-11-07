@@ -50,6 +50,9 @@ const majorOpens = (state: GameState): readonly string[] => {
 };
 import type { GameState } from './game-state';
 import { RngDomains, stableUnit } from './rng/rng';
+import { agencyPushesLeft, workHarderInAgency } from './intel-work';
+import { servicePushesLeft, workHarderInService } from './military-work';
+import { veteranPreference } from './military-veterans';
 
 export type WorkError = CannotApply | 'no-such-job' | 'no-job';
 
@@ -220,6 +223,8 @@ export function chanceOf(state: GameState, job: Job): number {
         opens: majorOpens(state),
         licenses: state.education.credentials?.licenses ?? [],
         experience: experienceOf(state.employment, state.player.age),
+        // Ticket 0904. Veterans' preference, for the tracks that give it.
+        ...(veteranPreference(state) ? { veteran: true } : {}),
       },
       state.employment.standing,
       reachedBy(state.employment),
@@ -334,6 +339,10 @@ export function applyFor(state: GameState, jobId: string): Result<ApplyOutcome, 
  * every year compounds.
  */
 export function workHarder(state: GameState): Result<PushOutcome, WorkError> {
+  // Ticket 0901. Somebody in uniform has no job held; the same button feeds the service's read of them.
+  if (state.military.service) return workHarderInService(state);
+  // Ticket 0905. The same button, for an agent.
+  if (state.intel.career) return workHarderInAgency(state);
   const held = state.employment.job;
   if (!held) return err('no-job');
 
@@ -389,6 +398,8 @@ export function workHarder(state: GameState): Result<PushOutcome, WorkError> {
  * is who is allowed to read it: the simulation, not the button.
  */
 export const pushesLeft = (state: GameState): number => {
+  if (state.military.service) return servicePushesLeft(state);
+  if (state.intel.career) return agencyPushesLeft(state);
   const held = state.employment.job;
   if (!held) return 0;
   const pushed = held.pushedAtAge === state.player.age ? held.pushedThisYear : 0;

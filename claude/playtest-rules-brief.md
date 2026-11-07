@@ -33,6 +33,29 @@ take v44–v58. If you already have, tell Payton before pushing and renumber. Ag
 `CORE_RULES.md`, `packages/*/src/index.ts`, `gameStore.tsx`, migrations, `TICKET`) only in small separate commits;
 rebase often.
 
+**Update, 29 October: Agent A's 0901 (the service engine) took save v59.** The current save is v59 and the next free
+version is **v60**. Do not take v44–v59. If you already have, tell Payton before pushing and renumber. 0901 touches the
+living phase (a `housingProvided` input that changes nothing for a life that is not serving) and `workHarder`.
+
+**Update, November: Agent A's 0902 (branches, specialties and officers) took save v60.** The current save is v60 and the
+next free version is **v61**. Do not take v44–v60. If you already have, tell Payton before pushing and renumber. 0902 adds
+a guard in `advance.ts` that takes acting, music, modeling and sports offers out of a serving life's year, and changes
+nothing for a life that is not serving.
+
+**Update, November: Agent A's 0903 (deployments) took save v61.** The current save is v61 and the next free version is
+**v62**. Do not take v44–v61. If you already have, tell Payton before pushing and renumber. 0903 changes the tax on military
+pay in `advance.ts` and nothing for a life that is not serving.
+
+**Update, November: Agent A's 0904 (discharge, benefits and veterans) took save v62.** The current save is v62 and the next
+free version is **v63**. Do not take v44–v62. If you already have, tell Payton before pushing and renumber. 0904 adds a
+retired-pay row and a GI Bill housing row in `advance.ts`, the GI Bill's tuition in a year's college support, and a veteran
+bonus in the hiring odds, and changes nothing for a life that has not served.
+
+**Update, November: Agent A's 0905 (military intelligence and the agencies) took save v63.** The current save is v63 and the next
+free version is **v64**. Do not take v44–v63. If you already have, tell Payton before pushing and renumber. 0905 adds an intelligence
+year in `advance.ts` (agency pay, retired federal pay, both in the household's income), an investigation at the end of a recruit's
+training year, and changes nothing for a life with no clearance, no agency and no service in an intelligence job.
+
 ## Read these first, in this order
 
 1. `specs/AI_CODING_INSTRUCTIONS.md`, `specs/ARCHITECTURE.md` (binding)

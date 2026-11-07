@@ -281,7 +281,11 @@ export function withAnyOffer(state: GameState, alive: boolean): GameState {
     isPostFullTime(state.sports.post) ||
     isActingFullTime(state.acting) ||
     isMusicFullTime(state.music) ||
-    isModelingFullTime(state.modeling)
+    isModelingFullTime(state.modeling) ||
+    // Ticket 0901. Somebody in uniform is not between jobs either.
+    state.military.service !== undefined ||
+    // Ticket 0905. Nor is somebody in an agency.
+    state.intel.career !== undefined
   ) {
     return state;
   }
