@@ -64,7 +64,13 @@ import {
   withModelingOffer,
 } from './modeling';
 import { runSportsYear, sportsOccupation, withSportsOffer } from './sports';
-import { branchShortOf, militaryOccupation, runMilitaryYear, withMilitaryOffer } from './military';
+import {
+  branchShortOf,
+  militaryOccupation,
+  rankTitleOf,
+  runMilitaryYear,
+  withMilitaryOffer,
+} from './military';
 import { runVeteransYear } from './military-veterans';
 import { agencyOccupation, runIntelYear, withIntelMission } from './intel';
 import { postTitle } from './sports-post';
@@ -129,6 +135,7 @@ import {
   costIndexOf,
   findActivity,
   findSport,
+  agencyTitle,
 } from '@yearafter/content';
 import { nameContext, uniqueFirstName } from './social-generator';
 import { RngDomains } from './rng/rng';
@@ -781,6 +788,24 @@ export function advanceYear(state: GameState): AdvanceResult {
     });
   }
 
+  /*
+    Ticket 0906 (finding 216). Somebody in uniform or in an agency has no civilian job, so the living
+    phase had no title to write the year's money line with and wrote "no work all year" over a year
+    that paid. Their rank or title is the job's here, and the year's gross pay is what it earned. A
+    life with neither is untouched: this is undefined and nothing is added.
+  */
+  const publicWork = state.military.service
+    ? rankTitleOf(state.military.service)
+    : state.intel.career
+      ? agencyTitle(state.intel.career.agency, state.intel.career.grade)
+      : undefined;
+  const publicEarned = militaryYear.pay + intelYear.pay;
+  const publicTitle =
+    currentJobTitle({ ...state, employment: employment.employment }) === undefined &&
+    publicEarned > 0
+      ? publicWork
+      : undefined;
+  const publicPay = publicTitle === undefined ? 0 : publicEarned;
   // P15: calculate the existing payout before living; rows still post once below.
   const living = runLiving({
     household: state.household,
@@ -843,10 +868,14 @@ export function advanceYear(state: GameState): AdvanceResult {
     // Ticket 0308b. What they hold in the market — see `portfolio` on the
     // input. Being illiquid is not the same as being destitute.
     portfolio: Math.floor(Number(portfolioWorth(state.prices, state.portfolio)) / 100),
-    earned: earnedIncome,
+    // Ticket 0906 (finding 216). A year in uniform or an agency earns, and with no civilian job the
+    // living phase wrote "no work all year, nothing came in". It now reads the pay as a job's.
+    earned: earnedIncome + publicPay,
     ...(currentJobTitle({ ...state, employment: employment.employment }) !== undefined
       ? { jobTitle: currentJobTitle({ ...state, employment: employment.employment })! }
-      : {}),
+      : publicTitle !== undefined
+        ? { jobTitle: publicTitle }
+        : {}),
     toldToLeave: family.toldToLeave,
     hasLivingParent: livingParents(family.family).length > 0,
     // Ticket 0501. Somebody who owns a home lives in it; no one asks which.

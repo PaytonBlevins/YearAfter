@@ -62,6 +62,7 @@ export * from './military-deployments';
 export * from './military';
 export * from './military-guard';
 export * from './military-work';
+export * from './military-veterans';
 export * from './intel-state';
 export * from './intel-clearance';
 export * from './intel-work';

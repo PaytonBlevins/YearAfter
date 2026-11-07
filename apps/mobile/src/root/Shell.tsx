@@ -60,6 +60,14 @@ import {
   SportsScreen,
   StudiesScreen,
 } from '../screens/EntertainmentScreens';
+import {
+  CiaScreen,
+  FbiScreen,
+  MilitaryScreen,
+  RecruiterScreen,
+  ServiceScreen,
+  VeteranScreen,
+} from '../screens/MilitaryScreens';
 import { SocialMediaScreen } from '../screens/SocialMediaScreen';
 import { FamilyScreen } from '../screens/FamilyScreen';
 import { SchoolActivitiesScreen } from '../screens/SchoolActivitiesScreen';
@@ -150,6 +158,12 @@ const LEAF_SCREENS: Partial<Record<ScreenKey, () => React.JSX.Element | null>> =
   acting: ActingScreen,
   music: MusicScreen,
   modeling: ModelingScreen,
+  military: MilitaryScreen,
+  service: ServiceScreen,
+  recruiter: RecruiterScreen,
+  veteran: VeteranScreen,
+  fbi: FbiScreen,
+  cia: CiaScreen,
   debug: DebugScreen,
 };
 

@@ -750,6 +750,10 @@ const FIELD_LINES: readonly (readonly [RegExp, string])[] = [
   [/^t:\d+:modeling:\d+$/, 'Modeling'],
   [/^t:\d+:awards:\d+$/, 'Awards'],
   [/^t:\d+:biz:\d+$/, 'Your racing team'],
+  // Ticket 0906. A year in uniform, a year in an agency, and what a veteran is paid or can use.
+  [/^t:\d+:military:\d+$/, 'Your service'],
+  [/^t:\d+:intel:\d+$/, 'Your agency'],
+  [/^t:\d+:veteran:\d+$/, 'Your benefits'],
 ];
 
 /**

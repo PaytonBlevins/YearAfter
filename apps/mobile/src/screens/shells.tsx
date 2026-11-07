@@ -70,6 +70,7 @@ import {
 } from '../components';
 import { EnrolledProgramRow } from './ProgramScreen';
 import { StudentDebtRow } from './StudentDebtRow';
+import { publicServiceRows } from './militaryView';
 import { useGame } from '../stores/gameStore';
 import { useNavigation, type Route } from '../navigation/navigation';
 import { colors, spacing, typography } from '../theme/theme';
@@ -218,6 +219,7 @@ export function CareerScreen() {
       ) : null}
       <WhatYouCanDo />
       <Elsewhere />
+      <PublicService />
     </Screen>
   );
 }
@@ -583,6 +585,52 @@ function Elsewhere() {
           },
         ]}
       />
+    </>
+  );
+}
+
+/**
+ * Ticket 0906 — the service, the FBI and the CIA, from the Career page.
+ *
+ * Three doors and nothing else: the service has its own hub, and each agency its own screen. They are
+ * separate because an agency takes a degree as readily as a clearance, so nobody has to have served
+ * to reach one. Nothing shows for a child; an agency a grown person is too young for is greyed with the
+ * age that opens it.
+ */
+const PUBLIC_ROUTES = {
+  military: { screen: 'military', title: 'Military' },
+  fbi: { screen: 'fbi', title: 'FBI' },
+  cia: { screen: 'cia', title: 'CIA' },
+} as const;
+
+function PublicService() {
+  const { state } = useGame();
+  const { push } = useNavigation();
+  if (!state) return null;
+  const rows = publicServiceRows(state);
+  if (rows.length === 0) return null;
+  return (
+    <>
+      <SectionHeading>Public service</SectionHeading>
+      <Card>
+        {rows.map((row, index) => (
+          <Fragment key={row.id}>
+            {index > 0 ? <RowDivider /> : null}
+            <ListRow
+              icon="career"
+              title={row.title}
+              subtitle={row.closed ?? row.subtitle}
+              affordance="navigate"
+              disabled={row.closed !== undefined}
+              onPress={
+                row.closed
+                  ? undefined
+                  : () => push(PUBLIC_ROUTES[row.id as keyof typeof PUBLIC_ROUTES])
+              }
+            />
+          </Fragment>
+        ))}
+      </Card>
     </>
   );
 }

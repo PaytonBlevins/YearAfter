@@ -1,6 +1,6 @@
 # v0.09 Military — measurement and proposed tickets
 
-**Status: 0901, 0902, 0903 and 0904 are built; 0905–0906 are approved and not started.** Payton chose Military as the first part
+**Status: 0901–0906 are all built** (0901–0905 as engines, 0906 as their screens). Payton chose Military as the first part
 of v0.09, stacked on `integrate/sports-on-main`, and approved the breakdown below with these changes: no Space Force (Army,
 Navy, Marine Corps, Air Force and Coast Guard, four or five specialties each), enlistment from 17 to 35 by offer or
 application with no draft, rare death and real injuries (in 0903), a four-year term then a choice, promotion by time and a
@@ -186,3 +186,11 @@ Against the figures above:
   from fifty with twenty years in.
 - **Careers** (600 each): about 5 to 12% wash out of the academy, about 0 to 5% are let go, and the rest reach the end of the
   career, mostly at GS-13 with a few at GS-15. An agent's performance after years ranges only 42–54 (finding 209).
+
+## Update after 0906
+
+0906 built the screens for 0901–0905 (`0906-military-screens.md`). No new real figure was needed; every number the screens show
+is the engines' own (the pay readers, the GI Bill tiers and cap, the pension, the General Schedule), and the screens show
+words and bars for everything else. Payton's decisions: the hub on the Career page; the FBI and the CIA as screens of their own,
+not part of a military career; a discharge card and a recap card; decorations by name only. Finding 216 (a year with no civilian
+job written as "no work all year") was fixed for service members and agents; the other lives it affects are finding 222.

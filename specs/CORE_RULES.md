@@ -3749,3 +3749,28 @@ Two lives that differ by a promotion's mood also differ by every random event th
 promoted one came out lower than the other's. Testing "the mood is added" through two different lives cannot work. Wrap the
 one function (`vi.spyOn` on the module, calling through and adding a number) so both runs are the same life, and compare
 those. The same applies to a ledger reconciliation and any comparison that reads a whole year.
+
+### 13.226 A screen asks the engine whether it would refuse a verb, by running it and throwing the result away
+
+0906's Military screens grey out Retire, Apply for a commission and Apply to an agency, and say why. The first idea was to copy
+the engine's conditions into the view (twenty years, a degree, an age window). Every copy would drift the day an engine
+changed, and the screen would offer a button that then answers "not now". Instead the view runs `retireFromService`,
+`applyForCommission` or `applyToAgency` on the state, reads the error and discards the new state, and writes the error in
+words. The words are the screen's; the rule is the engine's. A test per refusal says the engine's error and the screen's
+sentence together.
+
+### 13.227 A test that asserts on something the code cannot change passes for the wrong reason: probe the data before writing the comment
+
+The 0906 test "stays open when only some branches turn the person away" said smarts 35 was "under the Army's smarts floor
+and over the Coast Guard's". It was the other way round (35 clears the Army's floor and not the Coast Guard's), and the
+assertion `toEqual({})` also treats `{ closed: undefined }` as equal to `{}`, so sabotaging the check from "every branch" to
+"some branch" still passed. Two defences: print the bars for every branch before writing a sentence about them (one probe
+test, thrown away), and when the point is that a key is absent, assert `'closed' in value` is false.
+
+### 13.228 A card for something that ended is read from the change itself, not from the button that caused it
+
+A service can end three ways in 0906: the Retire button, an answer to "stay or leave" at the end of a term, and a year
+turning (a wash-out, a retirement at 65). Giving each path its own card would have meant three cards that can disagree.
+`dischargeOutcome(before, after)` reads the states on either side of any change (a service existed, now it does not, a new
+row in the past, the player alive) and the recap notice shows it first and removes the year's service lines it already
+says. The same pattern as 0809's recap, taken one step further, and the reason the Retire verb writes no card of its own.

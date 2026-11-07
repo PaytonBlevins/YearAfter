@@ -33,7 +33,7 @@ import {
 /* Small pieces every screen shares                                             */
 /* -------------------------------------------------------------------------- */
 
-function FactRows({ facts }: { readonly facts: readonly Fact[] }) {
+export function FactRows({ facts }: { readonly facts: readonly Fact[] }) {
   return (
     <>
       {facts.map((fact, index) => (

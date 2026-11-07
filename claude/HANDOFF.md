@@ -56,6 +56,13 @@ federal pay, the household's income, mood, occupation, the held year), an invest
 `military.ts`, a hand-over in `workHarder`/`pushesLeft`, and an intelligence specialty in every branch. A life that never meets any of it
 replays exactly. There is no minigame, so no mission is raised in play. Details: `0905-military-intelligence-and-the-agencies.md`.
 
+**Update, November: Agent A's 0906 (military screens) took no save version.** **The current save is still v63 and the next free version is
+v64.** It is mobile screens for 0901–0905 (a Public service card on the Career page, the Military hub, the recruiter, Veteran, the FBI and the
+CIA, a discharge card, a longer year recap). The one engine change is in `advance.ts`: when there is no civilian job and the year paid, the
+living phase is handed the rank (or the agent's title) and the gross pay, so the feed no longer says "no work all year" over a year in
+uniform (finding 216). It touches `gameStore.tsx` (one `serve` action), `navigation.tsx`, `Shell.tsx` and `shells.tsx`; rebase with care.
+Details: `0906-military-screens.md`.
+
 **7 October P1 update:** Payton authorized P1 after PR #10's rebase report. Agent B built
 one yearly business rescue review on `feat/playtest-p1-business-rescue`, with separate
 inject-or-close choices and no automatic personal-bank rescue. Death winds down troubled

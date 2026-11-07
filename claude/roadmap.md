@@ -629,7 +629,7 @@ built. See `claude/v008-entertainment-measurement.md` and `claude/0801-the-sport
 > General crime, Crime talent integration, independent dealer progression,
 > organized crime, courts/prison/parole/escape minigame.
 
-**29 October 2026: Military measured and a breakdown approved (0901–0906); 0901, 0902, 0903, 0904 and 0905 are built.** Payton chose Military as the
+**29 October 2026: Military measured and a breakdown approved (0901–0906); all six are built (0901–0905 as engines, 0906 as their screens).** Payton chose Military as the
 first part of v0.09. Intelligence is the military-intelligence door in 0905; Politics and Crime get their own
 measurement and breakdown when Military is done. See `claude/v009-military-measurement.md` and
 `claude/0901-the-service-engine.md`, `claude/0902-branches-specialties-and-officers.md` and `claude/0903-deployments.md`, `claude/0904-discharge-benefits-and-veterans.md` and `claude/0905-military-intelligence-and-the-agencies.md`.
@@ -641,7 +641,7 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 | **0903 Deployments**                              | **DONE (engine, no minigame).** Orders at a steady tempo by branch and job (Army 20% a year, Coast Guard 5%) that cost something to refuse (reputation, performance, a year with no promotion, not asked to stay); a year away with hostile fire pay ($225 a month, real) and a combat zone tax exclusion; one to three incidents a deployment, each a decision answered with how it came out (clean, close, mistake, disaster) so a minigame can sit on top; **harm only follows failure** (a mistake may hurt, a disaster always does and may kill, a clean or close incident never does); a real wound may leave a lasting condition, combat stress is a condition, and decorations are earned and kept. **A gate (`deploymentsOpen`) is off in every life, so nothing deploys until a minigame turns it on.** Death in service, a member who cannot retire or apply for a commission while away, and the ledger now names the branch. **Save v61** (Agent B: v62+). No screens (0906). `claude/0903-deployments.md`                                                                                                                                                                                                                                                                                                                                                              |
 | **0904 Discharge, benefits and veterans**         | **DONE (engine).** A discharge for every way a career ends: honorable, general (a poor reputation, or a refused term), medical (a board for a serious injury from service; a retirement at twenty years), dishonorable (a court-martial of the undisciplined and poorly thought of) and the entry-level one; a **pension at twenty years** on the real Blended Retirement System formula (2% a year of the last three years' pay, 40% at twenty), paid for life; the **GI Bill** (real tiers by time served, 36 months of nine-month years, the real 2026–27 tuition cap and housing rate) paying tuition and a housing allowance through a first degree or a trade; and **veterans' preference** (+0.15 on public and safety jobs) for an honorable, general or medical discharge. The service reputation turned out to range only 47–55, so the dials sit at 50 and 52 (finding 196). **Save v62** (Agent B: v63+). No screens (0906). `claude/0904-discharge-benefits-and-veterans.md`                                                                                                                                                                                                                                                                                                                                                                                            |
 | **0905 Military intelligence and the agencies**   | **DONE (engine, no minigame).** A clearance in three levels, no compartments (Confidential, Secret, Top Secret), granted by an investigation (real times: 243 days for Top Secret, 197 for Secret), denied by a draw that reads Discipline, a general or dishonorable discharge and a past revocation, held while the work lasts and two years after; a military-intelligence specialty in every branch (30 in all), with the investigation at the end of the training year; and **the FBI and the CIA**, entered from the service with a clearance or by a degree and an application (FBI 23–36, two years of experience, 19 weeks at Quantico, 25% availability pay, retire at 57, all real), a training year that can wash out, GS-9 to GS-15 on the real 2026 General Schedule, let go after two poor years, and a federal pension (1.7% a year for twenty, 1% after, from fifty). **Missions** are quiet yearly decisions answered with how they came out (clean, close, mistake, disaster) behind a gate that nothing opens yet; **harm only follows a mistake or a disaster** (the clearance, then the job; a death only after a disaster, 3% military, 5% FBI, 8% CIA). The agent's performance ranges only 42–54, so the retention floor sits at 45 (finding 209). **Save v63** (Agent B: v64+). No screens (0906). `claude/0905-military-intelligence-and-the-agencies.md` |
-| **0906 Military screens**                         | Not started. Last, as for sports.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **0906 Military screens**                         | **DONE.** The mobile screens for 0901–0905. A **Public service** card on the Career page holds Military, the FBI and the CIA, each its own screen (a degree opens an agency without a day in uniform; Payton's call). The Military hub has **Service** (rank, job, posting, term, pay, a phrase and a bar for how it is going; **Put the work in**, **Apply for a commission**, **Retire from service**, each greyed with the reason when the engine would refuse it), **the recruiter's table** (branch, then enlisted or officer, then job) and **Veteran** (retired pay, the GI Bill, the hiring preference, past services). A **discharge card** is read from the change whenever a service ends, however it ends, and the year recap card carries a year in uniform, an agency and a veteran's benefits. Words and bars, no numbers (pay, years and months are real figures). Decorations are names only, past deployments are not shown. **Finding 216 fixed** for service members and agents. **No save change (still v63).** `claude/0906-military-screens.md`                                                                                                                                                                                                                                                                                                               |
 
 ### 0901 findings (160–168)
 
@@ -677,7 +677,7 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 
 **174. No high-year-of-tenure limit.** With a hard stop at 65, a patient officer reaches O-5 and four in ten enlisted members who stay to 65 reach E-9. Payton's 65 rule; dials were tuned for careers that end at twenty years.
 
-**175. The retire question comes only at term ends;** `retireFromService` is open any time after twenty years and wants a button (0906).
+**175. The retire question comes only at term ends;** `retireFromService` is open any time after twenty years and wants a button (0906). _Closed in 0906: Service has Retire from service._
 
 **176. All officers share the enlisted specialty list.**
 
@@ -711,7 +711,7 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 
 **190. The honors on a death are judgements** (a posthumous Bronze Star 25%, the Medal of Honor 2%).
 
-**191. Decorations and past deployments are kept and not shown or used** (0906). _0904 did not use them either._
+**191. Decorations and past deployments are kept and not shown or used** (0906). _0904 did not use them either. 0906 shows decoration names under Honours and nothing of deployments (finding 223)._
 
 **192. Fixed: every branch's pay and tax were posted as "Army pay"** in 0901 and 0902. The ledger names the branch.
 
@@ -765,7 +765,7 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 
 **215. The Career screen can still hire a civilian job for somebody in an agency or in uniform** (the same gap as 87).
 
-**216. The living phase tells the wrong story about a year with no civilian job but another income.** It writes "No work all year. $10,280 went out and nothing came in" (or a sibling line) for a service member and an agent, next to the real pay. Pre-existing since 0901; not changed (it touches the feed of every non-job income) and wants a decision.
+**216. The living phase tells the wrong story about a year with no civilian job but another income.** It writes "No work all year. $10,280 went out and nothing came in" (or a sibling line) for a service member and an agent, next to the real pay. Pre-existing since 0901. _Fixed in 0906 for service members and agents; still written for other lives with income and no job (finding 222)._
 
 **217. No minigame exists and nothing sets the missions' gate** (`intel.missionsOpen`). The four buttons are scaffolding (as 183).
 
@@ -774,6 +774,43 @@ measurement and breakdown when Military is done. See `claude/v009-military-measu
 **219. Finding 165 is still open** and now covers agents.
 
 **220. 0905 took save v63.** Agent B's saves are v64 and onward.
+
+### 0906 findings (221–229)
+
+**221. The FBI and the CIA are their own screens, as Payton chose.** They do not live under Military. The Career page's
+"Public service" card holds Military, FBI and CIA side by side; an agency's screen has its own Apply, Put the work in and
+Leave. A degree opens an agency without a day in uniform, and the screen says what counts for you (years in intelligence,
+a clearance).
+
+**222. Finding 216 is fixed for service members and agents only.** The same "No work all year… nothing came in" line is
+still written for any other life with an income and no civilian job: a pro athlete, an actor, a musician, a model, and a
+retired veteran or agent drawing a pension. Reproduced with a pro basketball life and a retired veteran. The fix for them is
+the same shape (a title and a gross figure for every non-job income) and wants a decision, because it touches the feed of
+every such life.
+
+**223. Decorations are shown by name only, and past deployments not at all.** Payton did not choose either. The Service
+screen lists names under "Honours" when any exist; this is the one place the original "awards" wording was leaned on. Dates,
+the deployment history and what each decoration was for are kept in the save and unseen (finding 191, partly).
+
+**224. Finding 175 is closed.** `retireFromService` has a button; it is open any time after twenty years and not in training
+or while deployed. Its refusal words (`RETIRE_ERROR_LABELS`) live in mobile because the engine returns codes, as with 152.
+
+**225. Findings 165 and 215 are still open.** Events gated on "has a job" still read a serving member or an agent as
+unemployed (165), and the Career screen's Apply is still not blocked for somebody in uniform or an agency (215). Neither is a
+screen problem.
+
+**226. The recruiter's table is a local flow.** Leaving it half-way forgets the branch. The engine's own stepped offer (the
+recruiter's call) is unaffected and is still the generic decision card.
+
+**227. The Career card is hidden under 17.** A child sees nothing; at 17 the service is open and each agency is shut with its
+age.
+
+**228. A mission, a deployment and the gate still do nothing.** `deploymentsOpen` and `intel.missionsOpen` are off in every
+life (182, 217), so no screen shows a deployment in progress or a mission waiting; the incident and mission cards are the
+generic scaffolding of 183 and 217.
+
+**229. Device checks are open and a save is still v63.** Nothing here has been looked at on a phone; the Service and
+Recruiter screens are the long ones, and the discharge card is long. Agent B's chain is on v64 or later.
 
 ## v0.10 World Integration
 
@@ -1810,8 +1847,8 @@ Agent A's next ticket.
     other team sports and 0803 Individual sports and combat and 0804 Olympics, coaching and commentary and 0805 Acting and 0806 Music and 0807 Modeling and 0808 Racing team and the world shipped as engines; 0809 Entertainment and Sports screens
     shipped the screens for all of them. v0.08 is complete. Next is chosen by Payton.)_
 
-13. **0901 → 0906 (v0.09 Military).** _(0901 The service engine, with the Army, 0902 Other branches, specialties and officers, 0903 Deployments, 0904 Discharge, benefits and veterans and 0905 Military intelligence and the agencies shipped as engines.
-    0906 is approved and not started. Politics and Crime are not in this list; they get their own measurement.
+13. **0901 → 0906 (v0.09 Military).** _(0901 The service engine, with the Army, 0902 Other branches, specialties and officers, 0903 Deployments, 0904 Discharge, benefits and veterans and 0905 Military intelligence and the agencies shipped as engines; 0906 Military screens shipped the screens for all of them. Military is complete.
+    Politics and Crime are not in this list; they get their own measurement.
     Next is chosen by Payton.)_
 
 ## Playtest P1 — business rescue choices (7 October 2026)
