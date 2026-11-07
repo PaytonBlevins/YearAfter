@@ -22,3 +22,9 @@ The follow-up adds separate scenes for births and adoptions in the Life feed,
 home purchase confirmations, military discharge, and the end-of-life summary.
 Family scenes use the child's saved arrival age and route. This adds at most one
 scene per age and does not add a popup or rewrite the timeline.
+
+The next batch covers wedding, successful hire, and retirement confirmations.
+Career recaps also get illustrations for music, acting, and modeling when
+one of those fields has its own card. A recorded championship gets a medal
+scene; awards still take priority when both appear in the same recap. Mixed
+recaps without a featured milestone keep the neutral illustration.

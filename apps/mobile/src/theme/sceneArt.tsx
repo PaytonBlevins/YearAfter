@@ -343,7 +343,20 @@ export function LotArt({ lot }: { lot: Lot }) {
 }
 
 export type MilestoneKind =
-  'graduation' | 'awards' | 'newborn' | 'adoption' | 'home' | 'service' | 'remembrance';
+  | 'graduation'
+  | 'awards'
+  | 'newborn'
+  | 'adoption'
+  | 'home'
+  | 'service'
+  | 'remembrance'
+  | 'wedding'
+  | 'new-job'
+  | 'retirement'
+  | 'championship'
+  | 'music'
+  | 'acting'
+  | 'modeling';
 
 const milestoneBackdrop: Record<MilestoneKind, string> = {
   graduation: '#EEE4FA',
@@ -353,6 +366,13 @@ const milestoneBackdrop: Record<MilestoneKind, string> = {
   home: '#E2EDF8',
   service: '#E7EBF3',
   remembrance: '#F1E8DE',
+  wedding: '#F6E5EF',
+  'new-job': '#E3EDF8',
+  retirement: '#F7EAD5',
+  championship: '#E3EFE8',
+  music: '#EDE5F7',
+  acting: '#E5EAF7',
+  modeling: '#F6E7ED',
 };
 
 const milestoneScenes: Record<MilestoneKind, ReactNode> = {
@@ -437,6 +457,102 @@ const milestoneScenes: Record<MilestoneKind, ReactNode> = {
       <Rect x={113} y={67} width={34} height={39} rx={6} fill="#866C81" />
       <Path d="M130 65c-16-4-10-19 3-34-2 10 11 24-3 34z" fill="#BC824A" />
       <Path d="M109 104q-23-3-29-16 19-1 29 16m42 0q23-3 29-16-19-1-29 16" fill="#6D8373" />
+    </>
+  ),
+  wedding: (
+    <>
+      <Circle cx={110} cy={79} r={23} fill="none" stroke="#B88C4B" strokeWidth={7} />
+      <Circle cx={148} cy={77} r={24} fill="none" stroke="#8F5273" strokeWidth={7} />
+      <Path d="M136 50l5-9h15l5 9-12 13z" fill="#C2E0E9" stroke="#744861" strokeWidth={2} />
+      <Path
+        d="M87 103q-12-5-19-20m105 19q12-5 20-20"
+        fill="none"
+        stroke="#5E8D79"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  'new-job': (
+    <>
+      <Path d="M112 53V42q18-13 36 0v11" fill="none" stroke="#374F74" strokeWidth={6} />
+      <Rect x={77} y={51} width={106} height={58} rx={9} fill="#416685" />
+      <Path d="M77 73q53 17 106 0" fill="none" stroke="#B1CCD9" strokeWidth={3} />
+      <Rect x={122} y={75} width={16} height={13} rx={3} fill="#E6BD74" />
+      <Path
+        d="M184 37h12m-6-6v12M60 96h10m-5-5v10"
+        stroke="#6F8EA8"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  retirement: (
+    <>
+      <Circle cx={157} cy={55} r={22} fill="#E6B974" />
+      <Path
+        d="M67 108h127M75 89q55-20 110 0"
+        fill="none"
+        stroke="#8FA595"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M91 57l21 35h45m-45 0-9 18m46-18 10 18"
+        fill="none"
+        stroke="#76565F"
+        strokeWidth={6}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M90 61l17 24q19-8 41 1"
+        fill="none"
+        stroke="#AB6875"
+        strokeWidth={8}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  championship: (
+    <>
+      <Path d="M111 30l19 39-17 9-23-48zm37 0-18 39 17 9 23-48z" fill="#416C67" />
+      <Circle cx={130} cy={88} r={29} fill="#AE7845" />
+      <Circle cx={130} cy={88} r={24} fill="#E5B96C" />
+      <Path d="M130 72l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z" fill="#FFF1C4" />
+    </>
+  ),
+  music: (
+    <>
+      <Circle cx={124} cy={73} r={44} fill="#403354" />
+      <Circle cx={124} cy={73} r={34} fill="none" stroke="#77628E" strokeWidth={2} />
+      <Circle cx={124} cy={73} r={23} fill="none" stroke="#77628E" strokeWidth={2} />
+      <Circle cx={124} cy={73} r={15} fill="#DA9B91" />
+      <Circle cx={124} cy={73} r={3} fill="#FFF2D1" />
+      <Path
+        d="M157 100l30-57h14l-13 11"
+        fill="none"
+        stroke="#A26D55"
+        strokeWidth={5}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  acting: (
+    <>
+      <Rect x={83} y={62} width={96} height={49} rx={5} fill="#3D4B66" />
+      <Path d="M81 58l-5-16 92-22 5 16z" fill="#566787" />
+      <Path d="M92 39l13 13m12-19 13 13m12-19 13 13m-62 29h75" stroke="#E9E5D8" strokeWidth={4} />
+      <Path d="M125 77l19 9-19 10z" fill="#E5B96C" />
+    </>
+  ),
+  modeling: (
+    <>
+      <Path d="M97 50l8-13h49l8 13" fill="#815674" />
+      <Rect x={74} y={49} width={112} height={62} rx={11} fill="#815674" />
+      <Circle cx={131} cy={80} r={23} fill="#4C405B" stroke="#E6B8B5" strokeWidth={4} />
+      <Circle cx={131} cy={80} r={11} fill="#89AEBB" />
+      <Circle cx={136} cy={75} r={4} fill="#FDF1E7" />
+      <Rect x={160} y={59} width={15} height={8} rx={2} fill="#F9DCB3" />
     </>
   ),
 };
