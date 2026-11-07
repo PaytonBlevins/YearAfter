@@ -28,3 +28,11 @@ Career recaps also get illustrations for music, acting, and modeling when
 one of those fields has its own card. A recorded championship gets a medal
 scene; awards still take priority when both appear in the same recap. Mixed
 recaps without a featured milestone keep the neutral illustration.
+
+The watch and jewelry pass assigns an art profile to all 55 watch catalog
+models. Case shape, metal, dial, bracelet and visible face treatment vary
+by model. The Jakob Timeless Treasure has a gold gem-set bracelet treatment.
+The 42 rings, necklaces, chains, bracelets and earrings draw from separate
+silhouettes and details such as stone sizes, bands, links, pearls and clasps.
+The art is a stylized catalog depiction and does not add watch specifications
+or change what an auction reveals.

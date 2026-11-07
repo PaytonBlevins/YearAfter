@@ -1,8 +1,9 @@
+import { watchProfiles } from './watchArtProfiles';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { findValuable, findVehicleTrim, type Valuable, type VehicleBody } from '@yearafter/content';
 import type { Lot } from '@yearafter/simulation';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { radii, spacing } from './theme';
 
 function artSeed(id: string): number {
@@ -16,7 +17,6 @@ function artSeed(id: string): number {
 
 const paints = ['#407E83', '#8F4862', '#475D91', '#9C6940', '#5C5676', '#367083'];
 const metals = ['#A3B1BC', '#DDBF78', '#DAAB9D', '#818896'];
-const dials = ['#1C3743', '#403052', '#1C5045', '#653344', '#304A73', '#4E403B'];
 
 function Frame({ children, compact }: { children: ReactNode; compact?: boolean }) {
   return (
@@ -47,77 +47,129 @@ function Backdrop({ color = '#F0E8F8' }: { color?: string }) {
   );
 }
 
+const watchMetal = {
+  steel: '#B5C1CA',
+  gold: '#D3AB57',
+  rose: '#D5A097',
+  black: '#51515D',
+  titanium: '#949DAB',
+};
+const watchCases = {
+  square: 'M101 42q0-8 8-8h42q8 0 8 8v62q0 8-8 8h-42q-8 0-8-8z',
+  tank: 'M105 32h50v82h-50z',
+  octagon: 'M111 34h38l19 19v40l-19 19h-38L92 93V53z',
+  triangle: 'M103 36l65 37-65 37-13-37z',
+  barrel: 'M101 34q29-9 58 0 14 39 0 78-29 9-58 0-14-39 0-78z',
+};
+
 function Watch({ item, iced }: { item: Valuable; iced: boolean }) {
-  const seed = artSeed(item.id);
-  const dial = dials[seed % dials.length];
-  const metal = metals[(seed >>> 7) % metals.length];
-  const model = item.id.toLowerCase();
-  const digital = /casiot|apple-ish/.test(model);
-  const rectangular = digital || /tanque|reverso|santo|monako/.test(model);
-  const angular = /ventura|millon|royal-ash|nautilos|timeless/.test(model);
-  const diver = /subaquatic|seamarine|diver|black-cove|fifty|pelagos|superocean|yacht-voyager/.test(
-    model,
-  );
-  const complications = /daytonna|speedmeister|chrono|carrara|monako|navigator|grand-comp/.test(
-    model,
-  );
-  const dateWindow = /datesure|day-date|gmt|pointer-date/.test(model);
-  const bracelet =
-    diver ||
-    /datesure|day-date|perpetual|royal-ash|prx|gold/.test(model) ||
-    (!digital && !rectangular && (seed & 2) === 0);
-  const strap = bracelet ? metal : '#463241';
+  const model = item.id.slice('val.watch.'.length);
+  const [shape, metalName, dial, band, face] =
+    watchProfiles[model] ?? (['round', 'steel', '#263C51', 'leather', 'plain'] as const);
+  const metal = watchMetal[metalName];
+  const brightDial = parseInt(dial.slice(1, 3), 16) > 150;
+  const marks = brightDial ? '#3A3340' : '#FFF2D8';
+  const links = band === 'links' || band === 'fine-links' || band === 'gems';
+  const glitz = iced || item.icing?.kind === 'factory';
+  const bandColor = links
+    ? metal
+    : band === 'rubber'
+      ? '#30333F'
+      : band === 'fabric'
+        ? '#626C53'
+        : '#5A3A3D';
+  const radius = shape === 'triangle' || shape === 'tank' ? 17 : 22;
   return (
     <>
-      <Backdrop color="#F5EBD7" />
-      <Rect x={109} y={5} width={42} height={136} rx={11} fill={strap} />
-      <Path d="M120 9v128m20-128v128" stroke="#FFFFFF" opacity={0.28} />
-      {bracelet
-        ? [16, 26, 36, 110, 120, 130].map((y) => (
-            <Path key={y} d={`M110 ${y}h40`} stroke="#4F4650" opacity={0.45} />
+      <Backdrop color={band === 'gems' ? '#F6E3AE' : '#F5EBD7'} />
+      <Rect x={109} y={5} width={42} height={136} rx={8} fill={bandColor} />
+      <Path d="M116 9v128m28-128v128" stroke="#FFFFFF" opacity={0.42} />
+      {links ? (
+        Array.from({ length: band === 'fine-links' ? 22 : 15 }, (_, i) => (
+          <Path
+            key={i}
+            d={`M110 ${10 + i * (band === 'fine-links' ? 6 : 9)}h40`}
+            stroke="#4F4650"
+            opacity={0.46}
+          />
+        ))
+      ) : (
+        <Path
+          d={
+            band === 'fabric'
+              ? 'M121 10v125m5-125v125m8-125v125m5-125v125'
+              : 'M127 16h6m-6 8h6m-6 8h6m-6 82h6m-6 8h6m-6 8h6'
+          }
+          stroke="#FFFFFF"
+          opacity={0.25}
+          strokeWidth={2}
+        />
+      )}
+      {band === 'gems'
+        ? [11, 21, 121, 131].map((y) => (
+            <Path
+              key={y}
+              d={`M112 ${y}h36v7h-36zm12 0v7m12-7v7`}
+              fill="#F9DE86"
+              stroke="#9D793A"
+              strokeWidth={1.5}
+            />
           ))
         : null}
-      <Rect x={163} y={67} width={8} height={12} rx={3} fill={metal} />
-      {rectangular ? (
+      <Rect
+        x={shape === 'tank' || shape === 'square' ? 153 : 163}
+        y={67}
+        width={8}
+        height={12}
+        rx={3}
+        fill={metal}
+      />
+      {shape === 'round' ? (
         <>
-          <Rect x={99} y={35} width={62} height={76} rx={10} fill={metal} />
-          <Rect x={105} y={41} width={50} height={64} rx={6} fill={dial} />
-        </>
-      ) : angular ? (
-        <>
-          <Path
-            d={
-              /ventura/.test(model)
-                ? 'M100 32l70 40-70 42-12-42z'
-                : 'M110 34h40l19 18v42l-19 18h-40L91 94V52z'
-            }
-            fill={metal}
+          <Circle cx={130} cy={73} r={39} fill={metal} stroke="#473B49" strokeWidth={1.3} />
+          <Circle
+            cx={130}
+            cy={73}
+            r={34}
+            fill={face === 'dive' || face === 'gmt' ? '#263547' : metal}
           />
-          <Path
-            d={
-              /ventura/.test(model)
-                ? 'M104 43l53 29-53 31-10-31z'
-                : 'M113 40h34l16 15v36l-16 15h-34L97 91V55z'
-            }
-            fill={dial}
-          />
+          {face === 'gmt' ? <Path d="M96 73a34 34 0 0 0 68 0z" fill="#AD4B59" /> : null}
+          <Circle cx={130} cy={73} r={face === 'dive' || face === 'gmt' ? 27 : 31} fill={dial} />
         </>
       ) : (
         <>
-          <Circle cx={130} cy={73} r={39} fill={metal} />
-          <Circle cx={130} cy={73} r={diver ? 35 : 31} fill={diver ? '#283044' : '#E6DCE8'} />
-          <Circle cx={130} cy={73} r={diver ? 28 : 30} fill={dial} />
+          <Path d={watchCases[shape]} fill={metal} stroke="#473B49" strokeWidth={1.3} />
+          <Path
+            d={watchCases[shape]}
+            transform="translate(130 73) scale(.79) translate(-130 -73)"
+            fill={dial}
+          />
         </>
       )}
-      {digital ? (
+      {face === 'digital' || face === 'smart' ? (
         <>
-          <Rect x={110} y={58} width={40} height={30} rx={4} fill="#C6DBCD" />
-          <Path
-            d="M116 64h7v17m-7-8h7m5-9h6v17h-6zm11 0h7v9h-7v8h7"
-            fill="none"
-            stroke="#263F3D"
-            strokeWidth={2}
+          <Rect
+            x={110}
+            y={56}
+            width={40}
+            height={32}
+            rx={4}
+            fill={face === 'smart' ? '#202A3D' : '#BCD2B6'}
           />
+          {face === 'smart' ? (
+            <>
+              <Circle cx={130} cy={72} r={11} fill="none" stroke="#F38480" strokeWidth={2} />
+              <Circle cx={130} cy={72} r={7} fill="none" stroke="#7DCCA3" strokeWidth={2} />
+              <Circle cx={130} cy={72} r={3} fill="#81C3E1" />
+            </>
+          ) : (
+            <Path
+              d="M116 64h7v17m-7-8h7m5-9h6v17h-6zm11 0h7v9h-7v8h7"
+              fill="none"
+              stroke="#263F3D"
+              strokeWidth={2}
+            />
+          )}
         </>
       ) : (
         <>
@@ -126,41 +178,67 @@ function Watch({ item, iced }: { item: Valuable; iced: boolean }) {
             return (
               <Circle
                 key={i}
-                cx={130 + Math.sin(a) * 23}
-                cy={73 - Math.cos(a) * 23}
-                r={i % 3 === 0 ? 2 : 1.1}
-                fill="#FFF2D8"
+                cx={130 + Math.sin(a) * radius}
+                cy={73 - Math.cos(a) * radius}
+                r={i % 3 === 0 ? 2 : 1}
+                fill={marks}
               />
             );
           })}
-          {complications
-            ? [116, 144].map((x) => (
-                <Circle key={x} cx={x} cy={76} r={6} fill={metal} opacity={0.75} />
+          {face === 'chrono' || face === 'open'
+            ? [
+                [119, 71],
+                [141, 71],
+                [130, 84],
+              ].map(([x, y]) => (
+                <Circle
+                  key={x}
+                  cx={x}
+                  cy={y}
+                  r={5.5}
+                  fill={face === 'open' ? '#D7B56F' : metal}
+                  stroke={marks}
+                  strokeWidth={0.6}
+                />
               ))
             : null}
+          {face === 'date' || face === 'day-date' ? (
+            <Rect
+              x={143}
+              y={70}
+              width={8}
+              height={6}
+              rx={1}
+              fill="#FAEBD4"
+              stroke="#86725B"
+              strokeWidth={0.6}
+            />
+          ) : null}
+          {face === 'day-date' ? (
+            <Rect x={123} y={56} width={14} height={4} rx={1} fill="#FAEBD4" />
+          ) : null}
+          {face === 'dive' ? <Path d="M130 40l-3 6h6z" fill="#FFF2D8" /> : null}
           <Path
-            d="M114 62l16 11 17-10m-17 10 4 15"
-            stroke="#FFF2D8"
-            strokeWidth={2}
-            strokeLinecap="round"
+            d="M116 63l14 10 14-10"
+            stroke={marks}
+            strokeWidth={2.5}
             fill="none"
+            strokeLinecap="round"
           />
-          <Circle cx={130} cy={73} r={3} fill={metal} />
-          {dateWindow ? <Rect x={145} y={71} width={8} height={6} rx={1} fill="#F5EDD8" /> : null}
-          {diver ? <Path d="M130 40l-3 6h6z" fill="#FFF2D8" /> : null}
+          <Circle cx={130} cy={73} r={2.5} fill={marks} />
         </>
       )}
-      {iced || item.icing?.kind === 'factory'
+      {glitz
         ? Array.from({ length: 16 }, (_, i) => {
-            const a = (i * Math.PI) / 8;
-            const x = 130 + Math.sin(a) * (rectangular ? 29 : 35);
-            const y = 73 - Math.cos(a) * 35;
+            const angle = (i * Math.PI) / 8;
+            const x = 130 + Math.sin(angle) * (shape === 'tank' ? 23 : 34);
+            const y = 73 - Math.cos(angle) * 34;
             return (
               <Path
                 key={i}
                 d={`M${x} ${y - 3}l3 3-3 3-3-3z`}
-                fill="#F8FEFF"
-                stroke="#8DB7C7"
+                fill={band === 'gems' ? '#FFEA9E' : '#F8FEFF'}
+                stroke={band === 'gems' ? '#AB843F' : '#8DB7C7'}
                 strokeWidth={0.6}
               />
             );
@@ -234,6 +312,124 @@ export function VehicleArt({ trimId, compact }: { trimId: string; compact?: bool
   );
 }
 
+function Jewelry({ item }: { item: Valuable }) {
+  const id = item.id;
+  const metal = /silver|platinum/.test(id) ? '#A8B8CA' : '#D4AA63';
+  const gemstone = /emerald/.test(id) ? '#438C75' : /sapphire/.test(id) ? '#496BB1' : '#D9F0F6';
+  const stone = /solitaire-5|tennis-10/.test(id)
+    ? 16
+    : /solitaire-3|solitaire-2|studs-2/.test(id)
+      ? 13
+      : /-05/.test(id)
+        ? 7
+        : 10;
+  const gem = (x: number, y: number, size = stone, color = gemstone) => (
+    <Path
+      key={`${x}:${y}`}
+      d={`M${x} ${y - size}l${size} ${size * 0.85} -${size} ${size * 1.15} -${size} -${size * 1.15}z`}
+      fill={color}
+      stroke="#637789"
+      strokeWidth={1.2}
+    />
+  );
+  if (item.kind === 'ring')
+    return (
+      <>
+        <Circle cx={130} cy={81} r={26} stroke={metal} strokeWidth={10} fill="none" />
+        <Path d="M110 92q18 21 37 2" stroke="#FFF5D7" strokeWidth={2} fill="none" opacity={0.7} />
+        {/signet/.test(id) ? (
+          <Rect
+            x={113}
+            y={48}
+            width={34}
+            height={20}
+            rx={5}
+            fill="#A97944"
+            stroke={metal}
+            strokeWidth={3}
+          />
+        ) : /solitaire|sapphire|emerald|setting/.test(id) ? (
+          gem(130, 54)
+        ) : /juste/.test(id) ? (
+          <Path
+            d="M117 53h24l8 7"
+            stroke="#94683E"
+            strokeWidth={5}
+            fill="none"
+            strokeLinecap="round"
+          />
+        ) : null}
+      </>
+    );
+  if (item.kind === 'earrings')
+    return (
+      <>
+        {[105, 155].map((x) =>
+          /hoops/.test(id) ? (
+            <Circle key={x} cx={x} cy={74} r={17} fill="none" stroke={metal} strokeWidth={6} />
+          ) : /pearl/.test(id) ? (
+            <Fragment key={x}>
+              <Path
+                d={`M${x - 6} 51q6-9 12 0l-6 17v13`}
+                fill="none"
+                stroke={metal}
+                strokeWidth={3}
+              />
+              <Circle cx={x} cy={87} r={9} fill="#FAEAD9" stroke="#BC9B86" />
+            </Fragment>
+          ) : (
+            gem(x, 72)
+          ),
+        )}
+      </>
+    );
+  const bracelet = item.kind === 'bracelet';
+  const span = bracelet ? 43 : 54;
+  const depth = bracelet ? 36 : 52;
+  const top = bracelet ? 51 : 36;
+  const linked = item.kind === 'chain' || /gold-link/.test(id);
+  const beads = /pearl|beaded|tennis|alhambra/.test(id);
+  const count = linked ? 18 : beads ? 15 : 0;
+  const point = (f: number) => ({
+    x: 130 + f * span,
+    y: top + (1 - f * f) * depth,
+  });
+  const first = point(-1);
+  return (
+    <>
+      <Path
+        d={`M${first.x} ${first.y}q${span} ${depth * 2} ${span * 2} 0`}
+        fill="none"
+        stroke={metal}
+        strokeWidth={/cuff/.test(id) ? 10 : linked ? 5 : 3}
+        strokeLinecap="round"
+      />
+      {Array.from({ length: count }, (_, i) => {
+        const { x, y } = point((i / (count - 1)) * 2 - 1);
+        if (/tennis|diamond-cuban/.test(id)) return gem(x, y, /tennis-10/.test(id) ? 4.5 : 3);
+        return (
+          <Circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={/cuban|beaded|pearl/.test(id) ? 4 : 3}
+            fill={linked ? 'none' : /pearl/.test(id) ? '#FFF0DF' : '#709B90'}
+            stroke={metal}
+            strokeWidth={linked ? 2.4 : 1.1}
+          />
+        );
+      })}
+      {/cross|gold-pendant/.test(id) ? (
+        <Path d="M130 86v24m-8-16h16" stroke={metal} strokeWidth={5} strokeLinecap="round" />
+      ) : /pendant/.test(id) ? (
+        gem(130, top + depth + 8)
+      ) : /charm/.test(id) ? (
+        [112, 130, 148].map((x) => gem(x, 96, 4, '#E8C196'))
+      ) : null}
+    </>
+  );
+}
+
 export function ValuableArt({
   item,
   iced = false,
@@ -255,33 +451,7 @@ export function ValuableArt({
         <>
           <Backdrop color={jewelry ? '#F5E4EE' : '#E8EDF8'} />
           {jewelry ? (
-            <>
-              <Path
-                d={
-                  item.kind === 'ring'
-                    ? 'M108 81a22 22 0 1 0 44 0 22 22 0 1 0-44 0z'
-                    : item.kind === 'earrings'
-                      ? 'M96 45q-12 0-12 13v20m80-33q12 0 12 13v20'
-                      : 'M82 48q48 101 96 0'
-                }
-                stroke={metal}
-                strokeWidth={7}
-                fill="none"
-                strokeLinecap="round"
-              />
-              {(item.kind === 'earrings' ? [84, 176] : [130]).map((x) => {
-                const y = item.kind === 'ring' ? 54 : item.kind === 'earrings' ? 87 : 96;
-                return (
-                  <Path
-                    key={x}
-                    d={`M${x} ${y - 12}l13 11-13 16-13-16z`}
-                    fill={tone}
-                    stroke={metal}
-                    strokeWidth={2}
-                  />
-                );
-              })}
-            </>
+            <Jewelry item={item} />
           ) : item.kind === 'art' ? (
             <>
               <Rect x={78} y={21} width={104} height={104} rx={3} fill={metal} />
