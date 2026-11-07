@@ -8,6 +8,7 @@
  * name already says both.
  */
 
+import { ValuableArt } from '../theme/sceneArt';
 import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { dollars } from '@yearafter/core';
@@ -138,6 +139,7 @@ export function StoreScreen() {
                   const quote = valuablePurchaseQuote(piece, finish);
                   return (
                     <>
+                      <ValuableArt item={piece.item} iced={iced} />
                       {piece.item.icing?.kind === 'aftermarket' ? (
                         <>
                           <ListRow
@@ -248,6 +250,10 @@ export function CollectionsScreen() {
                 ) : null}
                 {selling === owned.id ? (
                   <>
+                    <ValuableArt
+                      item={item}
+                      iced={Boolean(owned.icing) || customizing === owned.id}
+                    />
                     <ActionButton
                       label={`Sell it — ${money(Number(owned.value) / 100)}`}
                       variant="secondary"

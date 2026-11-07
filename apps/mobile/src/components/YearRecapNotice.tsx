@@ -5,7 +5,14 @@ import { annualNoticeGroups, noticeGroupsBody } from './annualNoticeGroups';
 import { recapOf } from '../screens/entertainmentView';
 import { dischargeOutcome } from '../screens/militaryView';
 import { graduationOutcome } from './GraduationNotice';
+import type { MilestoneKind } from '../theme/sceneArt';
 import { OutcomeCard, type Outcome } from './OutcomeCard';
+
+const recapArt: Readonly<Record<string, MilestoneKind>> = {
+  Music: 'music',
+  Acting: 'acting',
+  Modeling: 'modeling',
+};
 
 /**
  * Ticket 0809 — what the year did in sports, acting, music, modeling, awards and a racing team.
@@ -29,6 +36,16 @@ export function recapOutcome(before: GameState, after: GameState): Outcome | und
       .map((group) => ({ ...group, lines: [...group.lines] })),
   ];
   if (groups.length === 0) return undefined;
+  const championship = after.player.records.some(
+    (record) => record.year === after.world.year && record.category === 'championship',
+  );
+  const art = groups.some((group) => group.field === 'Awards')
+    ? 'awards'
+    : championship
+      ? 'championship'
+      : groups.length === 1
+        ? recapArt[groups[0]!.field]
+        : undefined;
   return {
     title:
       groups.length === 1
@@ -38,6 +55,7 @@ export function recapOutcome(before: GameState, after: GameState): Outcome | und
           : 'The year in your work',
     body: noticeGroupsBody(groups, groups.length > 1),
     tone: 'neutral',
+    ...(art ? { art } : {}),
   };
 }
 

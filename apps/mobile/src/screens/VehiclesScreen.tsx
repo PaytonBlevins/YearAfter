@@ -20,6 +20,7 @@
  * the deposit and the rate are the lender's answer, shown before the press.
  */
 
+import { VehicleArt } from '../theme/sceneArt';
 import { dollars } from '@yearafter/core';
 import { PurchasePaymentChoices } from '../components/PurchasePaymentChoices';
 import { Fragment, useState } from 'react';
@@ -235,6 +236,7 @@ export function CarListingScreen() {
       <SectionHeading note={listing.lotName}>
         {listing.isNew ? 'New' : String(listing.modelYear)}
       </SectionHeading>
+      <VehicleArt trimId={listing.trimId} />
       <Card>
         <ListRow
           icon="vehicle"
@@ -365,6 +367,7 @@ export function VehicleScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      <VehicleArt trimId={vehicle.trimId} />
       <Card>
         <ListRow
           icon="vehicle"

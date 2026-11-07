@@ -613,6 +613,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           title: result.value.hired ? 'You got it' : 'They went elsewhere',
           body: result.value.entry.text,
           tone: result.value.hired ? 'good' : 'bad',
+          ...(result.value.hired ? { art: 'new-job' as const } : {}),
         });
         setLastEntries((entries) => [...entries, result.value.entry]);
         if (saveId) persist(result.value.state, saveId, settings);
@@ -826,7 +827,12 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           });
           return current;
         }
-        setOutcome({ title: 'It is yours', body: result.value.entry.text, tone: 'good' });
+        setOutcome({
+          title: 'It is yours',
+          body: result.value.entry.text,
+          tone: 'good',
+          art: 'home',
+        });
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
       });
@@ -1482,6 +1488,7 @@ export function GameProvider({ repository, children }: GameProviderProps) {
         title: result.value.title,
         body: result.value.body,
         tone: result.value.good ? 'good' : 'neutral',
+        art: 'retirement',
       });
       if (saveId) persist(result.value.state, saveId, settings);
       return result.value.state;
@@ -1763,10 +1770,17 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           setSaveError(`Cannot do that right now (${result.error}).`);
           return current;
         }
+        const wasMarried = current.circle.people.some(
+          (person) => person.id === personId && person.romance?.stage === 'married',
+        );
+        const isMarried = result.value.state.circle.people.some(
+          (person) => person.id === personId && person.romance?.stage === 'married',
+        );
         setOutcome({
           title: result.value.worked ? 'It went well' : 'It did not land',
           body: result.value.entry.text,
           tone: result.value.worked ? 'good' : 'bad',
+          ...(!wasMarried && isMarried ? { art: 'wedding' as const } : {}),
         });
         setLastEntries((entries) => [...entries, result.value.entry]);
         if (saveId) persist(result.value.state, saveId, settings);

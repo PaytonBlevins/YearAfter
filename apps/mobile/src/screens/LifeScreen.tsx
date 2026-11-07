@@ -20,6 +20,7 @@ import { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { groupByAge, type TimelineEntry } from '@yearafter/character';
 import { describeCity } from '@yearafter/content';
+import { MilestoneArt, type MilestoneKind } from '../theme/sceneArt';
 import { FameBar } from '../components/FameBar';
 import { useNavigation } from '../navigation/navigation';
 import { useGame } from '../stores/gameStore';
@@ -44,6 +45,15 @@ export function LifeScreen() {
   // groupByAge is newest-first; the feed reads oldest-first.
   const sections = groupByAge(timeline).reverse();
   const birthYear = state.player.birthYear;
+  // Family arrivals carry their own age and route, so old saves can show art
+  // without guessing from the wording of a timeline entry.
+  const familyScenes = new Map<number, MilestoneKind>();
+  for (const member of state.family.members) {
+    if (member.role !== 'child' || member.arrivedWhenPlayerWas === undefined) continue;
+    const age = member.arrivedWhenPlayerWas;
+    if (member.arrivedBy === 'adoption') familyScenes.set(age, 'adoption');
+    if (member.arrivedBy === 'birth' && !familyScenes.has(age)) familyScenes.set(age, 'newborn');
+  }
 
   return (
     <View style={styles.page}>
@@ -63,19 +73,23 @@ export function LifeScreen() {
           </Text>
         </View>
 
-        {sections.map((section) => (
-          <View key={section.age} style={styles.section}>
-            <View style={styles.ageHeader}>
-              <Text style={styles.ageLabel}>Age {section.age}</Text>
-              <View style={styles.ageRule} />
-              <Text style={styles.ageYear}>{birthYear + section.age}</Text>
-            </View>
+        {sections.map((section) => {
+          const scene = familyScenes.get(section.age);
+          return (
+            <View key={section.age} style={styles.section}>
+              <View style={styles.ageHeader}>
+                <Text style={styles.ageLabel}>Age {section.age}</Text>
+                <View style={styles.ageRule} />
+                <Text style={styles.ageYear}>{birthYear + section.age}</Text>
+              </View>
 
-            {section.entries.map((entry) => (
-              <FeedRow key={entry.id} entry={entry} isNew={newestIds.has(entry.id)} />
-            ))}
-          </View>
-        ))}
+              {scene ? <MilestoneArt kind={scene} /> : null}
+              {section.entries.map((entry) => (
+                <FeedRow key={entry.id} entry={entry} isNew={newestIds.has(entry.id)} />
+              ))}
+            </View>
+          );
+        })}
 
         {timeline.length === 0 ? (
           <View style={styles.empty}>
