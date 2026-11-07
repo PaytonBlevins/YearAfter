@@ -25,7 +25,8 @@
  * two halves of one conversation: a question in a card, an answer in a card.
  */
 
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Illustration } from '../theme/illustrations';
 import { colors, radii, spacing, typography } from '../theme/theme';
 
 /**
@@ -88,8 +89,11 @@ export function OutcomeCard({ outcome, onDismiss }: OutcomeCardProps) {
         accessibilityViewIsModal
         accessibilityLabel={`${outcome.title}. ${outcome.body}`}
       >
+        <Illustration name="news" />
         <Text style={[styles.title, { color: accent }]}>{outcome.title}</Text>
-        <Text style={styles.body}>{outcome.body}</Text>
+        <ScrollView style={styles.message}>
+          <Text style={styles.body}>{outcome.body}</Text>
+        </ScrollView>
 
         {outcome.value ? (
           <Text style={[styles.value, { color: accent }]}>{outcome.value}</Text>
@@ -161,6 +165,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
+  message: { maxHeight: 300, flexGrow: 0 },
   body: {
     fontFamily: typography.family,
     fontSize: typography.sizes.body,

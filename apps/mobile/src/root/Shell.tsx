@@ -91,12 +91,7 @@ import {
   RelationshipsScreen,
   RelocateScreen,
 } from '../screens/shells';
-import {
-  useNavigation,
-  WORLD_LABELS,
-  WORLD_TITLES,
-  type ScreenKey,
-} from '../navigation/navigation';
+import { useNavigation, WORLD_TITLES, type ScreenKey } from '../navigation/navigation';
 import { WorldBar } from '../navigation/WorldBar';
 import { useGame } from '../stores/gameStore';
 import { colors, layout, spacing, typography } from '../theme/theme';
@@ -243,10 +238,7 @@ export function Shell() {
               hitSlop={12}
               style={styles.headerSlot}
             >
-              <Glyph name="back" size={22} color={colors.accent} />
-              <Text numberOfLines={1} style={styles.headerSlotLabel}>
-                {WORLD_LABELS[world]}
-              </Text>
+              <Glyph name="back" size={22} color={colors.onAccent} />
             </Pressable>
           ) : (
             <Pressable
@@ -256,7 +248,7 @@ export function Shell() {
               hitSlop={12}
               style={styles.headerSlot}
             >
-              <Glyph name="close" size={20} color={colors.accent} />
+              <Glyph name="close" size={20} color={colors.onAccent} />
             </Pressable>
           )}
 
@@ -270,9 +262,9 @@ export function Shell() {
               accessibilityLabel="Close, back to Life"
               onPress={closeToLife}
               hitSlop={12}
-              style={[styles.headerSlot, styles.headerSlotEnd]}
+              style={styles.headerSlot}
             >
-              <Glyph name="close" size={20} color={colors.inkFaint} />
+              <Glyph name="close" size={20} color={colors.onAccent} />
             </Pressable>
           ) : (
             <View style={styles.headerSlot} />
@@ -379,28 +371,21 @@ const styles = StyleSheet.create({
   subHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 44,
+    minHeight: 52,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.chrome,
     borderBottomWidth: layout.hairlineWidth,
     borderBottomColor: colors.hairline,
   },
-  // Fixed-width slots on both sides keep the title optically centred whether
-  // the leading control is a close cross or a back arrow with a word beside it.
-  headerSlot: { flexDirection: 'row', alignItems: 'center', width: 104, gap: 2 },
-  headerSlotEnd: { justifyContent: 'flex-end' },
-  headerSlotLabel: {
-    fontFamily: typography.family,
-    fontSize: typography.sizes.body,
-    color: colors.accent,
-  },
+  headerSlot: { alignItems: 'center', justifyContent: 'center', width: 44, minHeight: 44 },
   subHeaderTitle: {
     flex: 1,
     textAlign: 'center',
     fontFamily: typography.family,
-    fontSize: typography.sizes.body,
-    fontWeight: typography.weights.semibold,
-    color: colors.ink,
+    fontSize: typography.sizes.heading,
+    fontWeight: typography.weights.bold,
+    color: colors.onAccent,
+    letterSpacing: 0.4,
   },
 });
 

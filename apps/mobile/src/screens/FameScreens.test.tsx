@@ -70,7 +70,7 @@ describe('the Fame screen', () => {
       expect(row.props.subtitle).toBe(offer.text);
       expect(row.props.value).toBe(`$${offer.pay.toLocaleString('en-US')}`);
     }
-    const commercial = rowTitled(r, 'Commercial');
+    const commercial = rowTitled(r, 'National brand commercial');
     await act(() => commercial.props.onPress());
     expect(doFameWork).toHaveBeenCalledTimes(1);
     expect(doFameWork).toHaveBeenCalledWith('commercial');

@@ -83,7 +83,7 @@ export function PersonScreen() {
       <SectionHeading>{person.kind === 'teacher' ? 'Teacher' : 'Classmate'}</SectionHeading>
       <Card>
         <ListRow
-          icon={person.kind === 'teacher' ? 'school' : 'friends'}
+          portrait={person.id}
           title={fullName(person)}
           subtitle={describe(person, state.player.age)}
           affordance="none"

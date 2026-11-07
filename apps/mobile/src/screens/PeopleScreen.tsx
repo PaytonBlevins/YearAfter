@@ -148,6 +148,7 @@ export function PeopleScreen() {
               <Fragment key={person.id}>
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
+                  portrait={person.id}
                   title={displayName(person)}
                   subtitle={endedLabel(person)}
                   affordance="none"
@@ -224,7 +225,7 @@ function PersonRow({
 
   return (
     <ListRow
-      icon={person.kind === 'teacher' ? 'school' : 'friends'}
+      portrait={person.id}
       title={displayName(person)}
       subtitle={subtitle}
       affordance="navigate"

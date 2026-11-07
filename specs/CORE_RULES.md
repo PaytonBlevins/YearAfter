@@ -3774,3 +3774,12 @@ turning (a wash-out, a retirement at 65). Giving each path its own card would ha
 `dischargeOutcome(before, after)` reads the states on either side of any change (a service existed, now it does not, a new
 row in the past, the player alive) and the recap notice shows it first and removes the year's service lines it already
 says. The same pattern as 0809's recap, taken one step further, and the reason the Retire verb writes no card of its own.
+
+### 13.229 Occupancy is not tenant continuity, and card payoff is exact
+
+A letting agent can replace a tenant in the same annual settlement. Vacancy and
+unit counts alone cannot tell whether anyone left. Compare tenant identities on
+the same held property across the completed turn, and test both a retained lease
+and an occupied unit with a replacement. For money, a card balance from an
+explicit purchase can contain cents. Quote the exact amount and cap the cash
+debit and debt reduction at the same exact amount, including on a partial payoff.

@@ -81,7 +81,7 @@ import {
   goingConcernFor,
   handsOn,
   listingFor,
-  locationAttention,
+  operatingCoverage,
   locationsOf,
   luckFrom,
   supplierModifiers,
@@ -308,6 +308,25 @@ export function viewOf(state: GameState, business: OwnedBusiness): BusinessView 
     expansionBase: expansionRefusal(business, type, state.world.year, Number.POSITIVE_INFINITY),
     loan: loanViewOf(state, business),
   };
+}
+
+/**
+ * Planning scenarios, not this year's hidden rolls. Compare choices in the same
+ * market with the same business engine that settles them.
+ */
+export function businessForecast(state: GameState, business: OwnedBusiness) {
+  const type = findBusinessType(business.typeId);
+  if (!type || type.id === RACING_TEAM_TYPE_ID) return undefined;
+  const typicalInput = {
+    year: state.world.year + 1,
+    market: state.market,
+    stat: statFor(state, type),
+    hands: handsFor(state),
+  };
+  const scenario = (shock: number) => businessYear(business, type, { ...typicalInput, shock });
+  const typical = scenario(0);
+  const profits = [scenario(-1).profit, typical.profit, scenario(1).profit];
+  return { typical, low: Math.min(...profits), high: Math.max(...profits) };
 }
 
 function loanViewOf(state: GameState, business: OwnedBusiness): BusinessLoanView | undefined {
@@ -1590,7 +1609,7 @@ export function runBusinessesYear(input: BusinessesYearInput): BusinessesYear {
             business.staff,
             result,
             growth,
-            hands * locationAttention(locations),
+            operatingCoverage(business.staff, type.staff, locations, hands),
             locations,
           )
         : business.staff;

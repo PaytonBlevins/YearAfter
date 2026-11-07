@@ -643,11 +643,11 @@ describe('the year, in the game (0704)', () => {
     expect(creatorHours(four().channels, 0.7)).toBeCloseTo(25.2, 10);
   });
 
-  it('a manager gives back 30% of the week: 36 hours is 25.2 with one, and an agent changes nothing', () => {
+  it('a manager gives back 30% of the week: 20 hours is 14 with one, and an agent changes nothing', () => {
     const base = four();
-    expect(creatorWeek(base)).toBe(36);
-    expect(creatorWeek({ ...base, representation: 'manager' })).toBeCloseTo(25.2, 10);
-    expect(creatorWeek({ ...base, representation: 'agent' })).toBe(36);
+    expect(creatorWeek(base)).toBe(20);
+    expect(creatorWeek({ ...base, representation: 'manager' })).toBeCloseTo(14, 10);
+    expect(creatorWeek({ ...base, representation: 'agent' })).toBe(20);
     expect(creatorWeek({ ...base, channels: [] })).toBe(0);
   });
 

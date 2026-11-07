@@ -22,20 +22,27 @@ import { Platform } from 'react-native';
  * harsh on OLED phones.
  */
 const palette = {
-  paper: '#FBFAF7',
+  paper: '#F7F5FB',
   surface: '#FFFFFF',
-  surfaceSunken: '#F2F0EA',
-  ink: '#1A1815',
-  inkMuted: '#6B6558',
-  inkFaint: '#9C9587',
-  hairline: '#E5E1D8',
+  surfaceSunken: '#EEEAF5',
+  ink: '#24223C',
+  inkMuted: '#575368',
+  inkFaint: '#6C657C',
+  hairline: '#DDD6EB',
 
   // One saturated accent carries the Advance control and active navigation.
-  accent: '#1B6E4F',
-  accentPressed: '#14563E',
-  accentSoft: '#E4F0EA',
+  accent: '#51408C',
+  accentPressed: '#3D2D73',
+  accentSoft: '#EAE3F8',
 
-  positive: '#1B6E4F',
+  chrome: '#352761',
+  chromeSoft: '#F0E9FC',
+  identity: '#F9ECD1',
+  identityPattern: '#E6C77D',
+  auction: '#733557',
+  auctionSoft: '#F9EAF2',
+
+  positive: '#14674C',
   caution: '#B4741C',
   negative: '#A8362C',
 
@@ -64,7 +71,7 @@ export const colors = {
    * Dim behind a decision card (Ticket 0203). Deliberately light: the year that
    * raised the question stays readable behind it.
    */
-  scrim: 'rgba(26, 24, 21, 0.32)',
+  scrim: 'rgba(28, 21, 48, 0.62)',
 } as const;
 
 /**
@@ -128,28 +135,28 @@ export const radii = {
  * Spec 879–943 targets roughly 6–9 rows per phone screen.
  */
 export const layout = {
-  rowHeight: 60,
+  rowHeight: 62,
   rowHeightCompact: 48,
-  headerHeight: 60,
+  headerHeight: 72,
   tabBarHeight: 64,
   /** The central Advance control overlaps the tab bar and is deliberately large. */
   advanceButtonSize: 62,
   advanceButtonLift: 18,
-  statBarHeight: 6,
+  statBarHeight: 8,
   screenPadding: spacing.lg,
   hairlineWidth: 1,
 } as const;
 
 export const shadows = {
   raised: {
-    shadowColor: '#1A1815',
+    shadowColor: '#24223C',
     shadowOpacity: 0.1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
     elevation: 4,
   },
   card: {
-    shadowColor: '#1A1815',
+    shadowColor: '#24223C',
     shadowOpacity: 0.05,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 1 },

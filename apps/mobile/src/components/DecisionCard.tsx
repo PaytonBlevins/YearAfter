@@ -17,6 +17,7 @@
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { PendingDecision } from '@yearafter/events';
+import { Illustration } from '../theme/illustrations';
 import { colors, layout, radii, shadows, spacing, typography } from '../theme/theme';
 
 export interface DecisionCardProps {
@@ -38,7 +39,10 @@ export function DecisionCard({ decision, remaining, onChoose }: DecisionCardProp
         accessibilityLabel={`A decision at age ${decision.age}`}
       >
         <View style={styles.meta}>
-          <Text style={styles.metaAge}>Age {decision.age}</Text>
+          <View style={styles.metaLead}>
+            <Illustration name="activities" size={30} />
+            <Text style={styles.metaAge}>Age {decision.age}</Text>
+          </View>
           {remaining > 1 ? <Text style={styles.metaCount}>1 of {remaining}</Text> : null}
         </View>
 
@@ -96,12 +100,15 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     borderWidth: layout.hairlineWidth,
     borderColor: colors.hairline,
+    borderTopWidth: spacing.xs,
+    borderTopColor: colors.accent,
     padding: spacing.lg,
     gap: spacing.md,
     ...shadows.raised,
   },
 
   meta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  metaLead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   metaAge: {
     fontFamily: typography.family,
     fontSize: typography.sizes.caption,

@@ -1,3 +1,4 @@
+import { annualNoticeGroups, noticeGroupsBody } from './annualNoticeGroups';
 import { useEffect, useRef, useState } from 'react';
 import { findMajor, findLicense, isAtCollege } from '@yearafter/education';
 import { TRACK_LABELS } from '@yearafter/careers';
@@ -76,7 +77,19 @@ export function GraduationNotice() {
       return;
     }
     const earned = graduationOutcome(before, state);
-    if (earned) setNotice(earned);
+    if (earned) {
+      const updates = noticeGroupsBody(annualNoticeGroups(before, state), true);
+      setNotice(
+        updates
+          ? {
+              ...earned,
+              body: `${earned.body}
+
+${updates}`,
+            }
+          : earned,
+      );
+    }
   }, [state]);
   if (!state || !state.player.alive || decision || outcome || detail || !notice) return null;
   return <OutcomeCard outcome={notice} onDismiss={() => setNotice(undefined)} />;

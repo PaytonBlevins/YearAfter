@@ -479,6 +479,10 @@ export interface AuctionDiary {
   readonly year: number;
   readonly visits: Readonly<Record<string, number>>;
   readonly bids: readonly string[];
+  /** Frozen catalog reach for each current sale, so spending can't swap the lot. */
+  readonly ceilings?: Readonly<Record<string, number>>;
+  /** Number of rival replies shown for each still-open lot. */
+  readonly rounds?: Readonly<Record<string, number>>;
 }
 
 export interface VehicleOffer {

@@ -561,9 +561,8 @@ export function payTowards(
   card: HeldCard,
   amount: number,
 ): { readonly card: HeldCard; readonly paid: number } {
-  const owed = Number(card.balance) / 100;
-  const paid = Math.max(0, Math.min(owed, Math.round(amount)));
-  return { card: { ...card, balance: dollars(Math.round(owed - paid)) }, paid };
+  const paid = Math.min(Number(card.balance), dollars(Math.max(0, amount)));
+  return { card: { ...card, balance: cents(card.balance - paid) }, paid: paid / 100 };
 }
 
 export const EMPTY_CARDS: readonly HeldCard[] = [];

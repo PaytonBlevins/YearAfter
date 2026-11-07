@@ -20,7 +20,7 @@ import { businessAgentEffects, businessPrice, type BusinessAgentLevel } from './
  *               × how the place landed with its neighbourhood (drawn once)
  *               × how this year went (drawn each year)
  *               × the price, to the power of minus how touchy customers are
- *   capacity  = what a worker serves × (staff + the owner's hands)
+ *   capacity  = what a worker serves × (staff + operating coverage)
  *   sold      = whichever is less
  *
  * Revenue is what it sold at the price it asked. The goods cost what they cost
@@ -351,6 +351,21 @@ export function handsOn(businessesOwned: number, holdsJob: boolean): number {
   return split * (holdsJob ? JOB_ATTENTION : 1);
 }
 
+/**
+ * A team at its normal headcount can cover routine operations while the owner
+ * is elsewhere. At lower staffing the owner can still fill part of that gap.
+ * This is capacity, not extra payroll or a substitute for minimum headcount.
+ */
+export function operatingCoverage(
+  staff: number,
+  typicalStaff: number,
+  locations: number,
+  ownerHands: number,
+): number {
+  const staffedShare = staff / Math.max(1, typicalStaff * locations);
+  return Math.max(ownerHands * locationAttention(locations), Math.min(1, staffedShare));
+}
+
 /* -------------------------------------------------------------------------- */
 /* The year                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -475,7 +490,8 @@ export function businessYear(
     // higher price is the same offer.
     (price / quality) ** -type.elasticity;
 
-  const workers = business.staff + hands;
+  const workers =
+    business.staff + operatingCoverage(business.staff, type.staff, locations, input.hands);
   const open = business.staff >= type.staffMin * locations;
   const capacity =
     perWorkerOf(type) * workers * (type.headroom ?? 1) * (open ? 1 : MINIMUM_STAFF_CAPACITY);
@@ -612,15 +628,35 @@ export function assetValueFor(
   return Math.round(first + more);
 }
 
-/** What the business is worth without its cash, whole dollars: years of profit, or its fittings if that is more. */
+/** Broker inputs in whole dollars; cash and business debt are separate from the operation. */
+export function businessValuationOf(business: OwnedBusiness, type: BusinessType, year: number) {
+  const history = business.profits.slice(-3).filter(Number.isFinite);
+  const mature = history.length === 3;
+  const average = history.length ? history.reduce((sum, p) => sum + p, 0) / history.length : 0;
+  const earnings = mature ? (history[0]! + 2 * history[1]! + 3 * history[2]!) / 6 : average;
+  const first = history[0] ?? 0;
+  const latest = history.at(-1) ?? 0;
+  const durable =
+    mature &&
+    history.every((profit) => profit > 0) &&
+    latest >= Math.max(first, history[1] ?? first);
+  const position = durable ? (Math.max(0, business.reputation - 50) / 50) * 0.2 : 0;
+  const growth = durable ? Math.min(0.2, ((latest - first) / first) * 0.2) : 0;
+  const multiple =
+    type.valueMultiple * (0.85 + 0.3 * (business.reputation / 100)) * (1 + position + growth);
+  const earningValue = Math.round(Math.max(0, earnings) * multiple);
+  const fittings = assetValueFor(type, business.openedYear, year, business.branches);
+  return {
+    earnings: Math.round(earnings),
+    earningValue,
+    fittings,
+    worth: Math.max(fittings, earningValue),
+  };
+}
+
+/** What the business is worth without its cash, in whole dollars. */
 export function goingConcernFor(business: OwnedBusiness, type: BusinessType, year: number): number {
-  const history = business.profits.filter((profit) => Number.isFinite(profit));
-  const average = history.length > 0 ? history.reduce((sum, p) => sum + p, 0) / history.length : 0;
-  const multiple = type.valueMultiple * (0.85 + 0.3 * (business.reputation / 100));
-  const earning = Math.max(0, average) * multiple;
-  return Math.round(
-    Math.max(assetValueFor(type, business.openedYear, year, business.branches), earning),
-  );
+  return businessValuationOf(business, type, year).worth;
 }
 
 /** What it is worth to its owner: the business, and the money in the till. */

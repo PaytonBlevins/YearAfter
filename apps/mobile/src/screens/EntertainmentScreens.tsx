@@ -147,16 +147,35 @@ const ROUTES = {
   modeling: { screen: 'modeling', title: 'Modeling' },
 } as const;
 
+const CAREER_STAMPS = {
+  sports: 'trophy',
+  studies: 'school',
+  acting: 'film',
+  music: 'music',
+  modeling: 'camera',
+} as const;
+
 export function EntertainmentScreen() {
+  const { state } = useGame();
+  if (!state) return null;
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <SpecialCareersContent />
+    </ScrollView>
+  );
+}
+
+export function SpecialCareersContent() {
   const { state } = useGame();
   const { push } = useNavigation();
   if (!state) return null;
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <>
       <Card>
         {hubRows(state).map((row, index) => (
           <Divided key={row.id} first={index === 0}>
             <ListRow
+              icon={CAREER_STAMPS[row.id]}
               title={row.title}
               subtitle={row.closed ?? row.subtitle}
               {...(row.value === undefined || row.closed ? {} : { value: row.value })}
@@ -171,7 +190,7 @@ export function EntertainmentScreen() {
         A scholarship, a contract, a part, a record deal or a job turns up as a question when the
         year turns. What you do in between is here.
       </Text>
-    </ScrollView>
+    </>
   );
 }
 

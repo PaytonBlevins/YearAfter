@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PLATFORMS, postFormatsFor } from '@yearafter/content';
 import { dollars } from '@yearafter/core';
 import { channelYear, fameTarget, newChannel, POSTS_PER_YEAR, type Channel } from './creators';
-import { publishPost, publishingCount } from './manual-posts';
+import { publishPost, publishPostWithReception, publishingCount } from './manual-posts';
 const make = (platformId = 'photo'): Channel => ({
   ...newChannel({
     seed: 'manual',
@@ -20,6 +20,43 @@ const make = (platformId = 'photo'): Channel => ({
 const publish = (channel = make(), kind = 'photo', year = 2040, seed = 'manual') =>
   publishPost({ channel, kind, year, seed, quality: 1 });
 describe('manual publishing', () => {
+  it('distinguishes all four receptions without changing the settled post', () => {
+    const seen = new Set();
+    for (let i = 0; i < 500; i++) {
+      const input = {
+        channel: make('shortform'),
+        kind: postFormatsFor('shortform')[0]!.id,
+        year: 2040,
+        seed: `reception-${i}`,
+        quality: 1,
+      };
+      const result = publishPostWithReception(input);
+      if (!result.ok) throw Error(result.error.kind);
+      seen.add(result.value.reception);
+      const delta = result.value.channel.audience - input.channel.audience;
+      expect(result.value.channel.publishing?.gained).toBe(delta);
+      if (result.value.reception === 'poor') expect(delta).toBeLessThan(0);
+      else expect(delta).toBeGreaterThan(0);
+    }
+    expect(seen).toEqual(new Set(['poor', 'good', 'great', 'viral']));
+  });
+
+  it('lets existing fame help successful discovery without preventing poor reception', () => {
+    const outcomes = new Set();
+    for (let n = 0; n < 80; n++) {
+      const input = { channel: make(), kind: 'photo', year: 2040, seed: `known-${n}`, quality: 1 };
+      const unknown = publishPostWithReception(input);
+      const known = publishPostWithReception({ ...input, fame: 60 });
+      if (!unknown.ok || !known.ok) throw Error('Post refused');
+      expect(known.value.reception).toBe(unknown.value.reception);
+      outcomes.add(known.value.reception);
+      if (known.value.reception === 'poor')
+        expect(known.value.channel.audience).toBe(unknown.value.channel.audience);
+      else expect(known.value.channel.audience).toBeGreaterThan(unknown.value.channel.audience);
+    }
+    expect(outcomes.has('poor')).toBe(true);
+    expect(outcomes.has('good')).toBe(true);
+  });
   it('has all requested real platforms and free accounts', () => {
     expect(PLATFORMS.map((p) => p.name)).toEqual([
       'YouTube',
@@ -136,4 +173,33 @@ describe('manual publishing', () => {
   ])('anchors fame for %s followers at %s', (audience, expected) => {
     expect(fameTarget([{ ...make(), audience }])).toBe(expected);
   });
+});
+
+it('uses identical reach, drift and earnings for identical posts from old light and heavy saves', () => {
+  const base = { ...make('video'), audience: 50000, peak: 50000 };
+  const result = (effort: Channel['effort']) => {
+    const post = publishPostWithReception({
+      channel: { ...base, effort },
+      kind: postFormatsFor('video')[0]!.id,
+      quality: 1,
+      year: 2040,
+      seed: 'effort-neutral',
+    });
+    if (!post.ok) throw Error(post.error.kind);
+    const settled = channelYear({
+      channel: post.value.channel,
+      quality: 1,
+      year: 2041,
+      manual: true,
+    });
+    return {
+      gained: post.value.channel.publishing?.gained,
+      audience: settled.channel.audience,
+      income: settled.income,
+      cost: settled.cost,
+    };
+  };
+  expect(result('light')).toEqual(result('heavy'));
+  expect(result('light').income).toBeGreaterThan(0);
+  expect(result('light').cost).toBe(0);
 });

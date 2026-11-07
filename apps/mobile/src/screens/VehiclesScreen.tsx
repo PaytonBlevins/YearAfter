@@ -190,6 +190,7 @@ export function CarMarketScreen() {
               <Fragment key={listing.id}>
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
+                  icon="vehicle"
                   title={listing.name}
                   subtitle={listingLine(listing)}
                   value={money(inspectionOf(state, listing).price)}

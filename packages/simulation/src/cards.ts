@@ -224,10 +224,10 @@ export function payCard(
   if (!held) return err('noSuchCard');
   if (Number(held.balance) <= 0) return err('nothingOwed');
 
-  const cash = Math.round(Number(state.player.cash) / 100);
-  if (cash <= 0) return err('noCash');
+  const cash = Number(state.player.cash) / 100;
+  if (cash <= 0 || !Number.isFinite(amount)) return err('noCash');
 
-  const wanted = Math.max(0, Math.min(Math.round(amount), cash));
+  const wanted = Math.max(0, Math.min(amount, cash));
   const { card, paid } = payTowards(held, wanted);
   if (paid <= 0) return err('noCash');
 
@@ -310,4 +310,8 @@ export const limitIfApproved = (state: GameState, productId: string): number => 
 };
 
 const money = (amountInCents: number): string =>
-  `$${Math.round(amountInCents / 100).toLocaleString('en-US')}`;
+  (amountInCents / 100).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: amountInCents % 100 === 0 ? 0 : 2,
+  });

@@ -263,7 +263,7 @@ export interface AwardsYearInput {
   /** The year that has just come in. */
   readonly year: number;
   readonly acting: AwardsFieldInput;
-  readonly music: AwardsFieldInput;
+  readonly music: AwardsFieldInput & { readonly eligibleWork?: boolean };
   readonly modeling: AwardsFieldInput;
   readonly sports: AwardsSportsInput;
   /** The player's records BEFORE this year's. */
@@ -273,7 +273,11 @@ export interface AwardsYearInput {
 /** What the four fields' own years just did, as the awards layer reads it. */
 export interface AwardsPieces {
   readonly acting: { readonly acting: { readonly awards: number }; readonly fame: number };
-  readonly music: { readonly music: { readonly awards: number }; readonly fame: number };
+  readonly music: {
+    readonly music: { readonly awards: number };
+    readonly fame: number;
+    readonly awardEligible?: boolean;
+  };
   readonly modeling: { readonly modeling: { readonly awards: number }; readonly fame: number };
   readonly sports: {
     readonly sports: { readonly career?: SportCareer | undefined };
@@ -299,7 +303,13 @@ export function awardsInputOf(
     generation: state.world.generation,
     year,
     acting: { won: pieces.acting.acting.awards - state.acting.awards, fame: pieces.acting.fame },
-    music: { won: pieces.music.music.awards - state.music.awards, fame: pieces.music.fame },
+    music: {
+      won: pieces.music.music.awards - state.music.awards,
+      fame: pieces.music.fame,
+      ...(pieces.music.awardEligible === undefined
+        ? {}
+        : { eligibleWork: pieces.music.awardEligible }),
+    },
     modeling: {
       won: pieces.modeling.modeling.awards - state.modeling.awards,
       fame: pieces.modeling.fame,
@@ -431,7 +441,11 @@ export function runAwardsYear(input: AwardsYearInput): AwardsYearOutput {
     ['sports', input.sports.fame, laurel],
   ];
   for (const [ceremony, fame, won] of contending) {
-    if (won || fame < NOMINEE_FAME) continue;
+    const eligible =
+      ceremony === 'music' && input.music.eligibleWork !== undefined
+        ? input.music.eligibleWork
+        : fame >= NOMINEE_FAME;
+    if (won || !eligible) continue;
     if (ceremony === 'sports' && tier === undefined) continue;
     if (awardUnit(seed, generation, 'nominee', ceremony, year) >= NOMINEE_CHANCE) continue;
     const winner = rosterWinner(seed, year, ceremony, ceremony === 'sports' && racing);

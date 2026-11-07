@@ -8,7 +8,7 @@
  */
 
 import type { TimelineEntry } from '@yearafter/character';
-import { findFameWork, type RepresentationKind } from '@yearafter/content';
+import { fameWorkLabel, type RepresentationKind } from '@yearafter/content';
 import {
   PAYMENT_REFUSAL_LABELS,
   type Effort,
@@ -318,14 +318,13 @@ export function applyFameWork(state: GameState, workId: string): Attempt {
   const result = doFameWork(state, workId);
   if (!result.ok) return failed(result.error);
   const entries = newEntries(state, result.value);
-  const def = findFameWork(workId);
   const done = result.value.celebrities.work.done.find((row) => row.id === workId);
   return {
     ok: true,
     state: result.value,
     entries,
     outcome: {
-      title: `${def?.label ?? 'Work'} done`,
+      title: `${fameWorkLabel(workId, done?.outlet ?? '') ?? 'Work'} done`,
       body: wrote(entries, 'Done.'),
       tone: 'good',
       ...(done === undefined ? {} : { value: dollarsText(done.pay) }),

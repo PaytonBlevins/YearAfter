@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { formatMoney, type Money } from '@yearafter/core';
 import { colors, layout, radii, spacing, typography } from '../theme/theme';
+import { Illustration, Portrait } from '../theme/illustrations';
 import { Glyph, type IconName } from '../theme/icons';
 
 /* -------------------------------------------------------------------------- */
@@ -40,6 +41,7 @@ export type RowAffordance = 'navigate' | 'action' | 'none';
 
 export interface ListRowProps {
   readonly icon?: IconName;
+  readonly portrait?: string;
   readonly title: string;
   readonly subtitle?: string;
   /** Right-aligned value, e.g. a salary or a count. */
@@ -76,6 +78,7 @@ export interface ListRowProps {
 
 export function ListRow({
   icon,
+  portrait,
   title,
   subtitle,
   value,
@@ -110,9 +113,13 @@ export function ListRow({
         disabled ? styles.rowDisabled : null,
       ]}
     >
-      {icon ? (
+      {portrait !== undefined || icon ? (
         <View style={styles.rowIcon}>
-          <Glyph name={icon} color={accent ? colors.accent : colors.inkMuted} />
+          {portrait !== undefined ? (
+            <Portrait identity={portrait} size={compact ? 30 : 38} />
+          ) : icon ? (
+            <Illustration name={icon} size={compact ? 28 : 36} />
+          ) : null}
         </View>
       ) : null}
 
@@ -353,13 +360,13 @@ const styles = StyleSheet.create({
   },
   rowPressed: { backgroundColor: colors.surfaceSunken },
   rowDisabled: { opacity: 0.42 },
-  rowIcon: { width: 30, alignItems: 'flex-start' },
+  rowIcon: { width: 48, alignItems: 'flex-start' },
   rowBody: { flex: 1, justifyContent: 'center' },
   rowTitle: {
     fontFamily: typography.family,
     fontSize: typography.sizes.body,
     lineHeight: typography.lineHeights.body,
-    fontWeight: typography.weights.medium,
+    fontWeight: typography.weights.bold,
     color: colors.ink,
   },
   rowTitleAccent: { color: colors.accent },
@@ -388,29 +395,33 @@ const styles = StyleSheet.create({
   },
   rowMarker: { marginLeft: spacing.xs },
   rowMeterTrack: {
-    height: 4,
-    borderRadius: 2,
+    height: layout.statBarHeight,
+    borderRadius: radii.pill,
     backgroundColor: colors.surfaceSunken,
     overflow: 'hidden',
     marginTop: 5,
     marginRight: spacing.lg,
   },
-  rowMeterFill: { height: '100%', borderRadius: 2 },
+  rowMeterFill: { height: '100%', borderRadius: radii.pill },
 
   sectionHeading: {
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.sm,
+    paddingVertical: spacing.sm,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.lg,
+    marginBottom: spacing.xs,
+    borderRadius: radii.sm,
+    backgroundColor: colors.chromeSoft,
   },
   sectionHeadingText: {
     fontFamily: typography.family,
     fontSize: typography.sizes.caption,
     fontWeight: typography.weights.semibold,
     letterSpacing: 0.9,
-    color: colors.inkFaint,
+    color: colors.chrome,
   },
   sectionHeadingNote: {
     fontFamily: typography.family,
@@ -427,7 +438,7 @@ const styles = StyleSheet.create({
     borderColor: colors.hairline,
   },
   divider: { height: layout.hairlineWidth, backgroundColor: colors.hairline },
-  dividerInset: { marginLeft: spacing.lg + 30 },
+  dividerInset: { marginLeft: spacing.lg + 48 },
 
   money: {
     fontFamily: typography.family,
@@ -470,6 +481,8 @@ const styles = StyleSheet.create({
     margin: spacing.md,
     borderWidth: layout.hairlineWidth,
     borderColor: colors.hairline,
+    borderTopWidth: spacing.xs,
+    borderTopColor: colors.accent,
   },
   confirmationTitle: {
     fontFamily: typography.family,

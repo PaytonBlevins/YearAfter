@@ -106,6 +106,7 @@ export function InvestmentsScreen() {
           <SectionHeading>Where it stands</SectionHeading>
           <Card>
             <ListRow
+              icon="invest"
               title="Portfolio"
               subtitle={
                 gain === 0
@@ -127,6 +128,7 @@ export function InvestmentsScreen() {
               <Fragment key={row.holding.instrumentId}>
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
+                  icon="invest"
                   title={row.instrument.name}
                   /*
                     The GAP, never the value — the value is already the number on

@@ -86,7 +86,7 @@ export function LoveScreen() {
       <Card>
         {partner ? (
           <ListRow
-            icon="love"
+            portrait={partner.id}
             title={displayName(partner)}
             subtitle={stageLine(partner, age)}
             meter={partner.relationship}
@@ -146,6 +146,7 @@ export function LoveScreen() {
               <Fragment key={person.id}>
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
+                  portrait={person.id}
                   title={displayName(person)}
                   subtitle="You haven't said anything. Yet."
                   meter={person.relationship}
@@ -170,6 +171,7 @@ export function LoveScreen() {
               <Fragment key={person.id}>
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
+                  portrait={person.id}
                   title={displayName(person)}
                   subtitle={whereFrom(person)}
                   meter={person.relationship}
@@ -190,6 +192,7 @@ export function LoveScreen() {
               <Fragment key={person.id}>
                 {index > 0 ? <RowDivider /> : null}
                 <ListRow
+                  portrait={person.id}
                   title={displayName(person)}
                   subtitle={endLine(person)}
                   affordance="none"

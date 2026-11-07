@@ -199,9 +199,10 @@ export function RentalScreen() {
 
       <Text style={styles.note}>
         Rent is what tenants pay, before your mortgage, property tax, upkeep and any agent fee.
-        Costs are for the whole property, not each unit. Signed commercial rents stay fixed until
-        renewal. This assumes a full year at current occupancy, not rent already collected. Empty
-        units and missed payments can change the result.
+        Tenants can renew automatically and stay for several years. Costs are for the whole
+        property, not each unit. Signed commercial rents stay fixed until renewal. This assumes a
+        full year at current occupancy, not rent already collected. Empty units and missed payments
+        can change the result.
       </Text>
       {numbers.profitYear < 0 ? (
         <Text style={styles.note}>

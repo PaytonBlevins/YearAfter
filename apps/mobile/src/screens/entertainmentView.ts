@@ -538,7 +538,11 @@ export function musicView(state: GameState): MusicView {
     facts: [
       { title: 'Where you are', value: tier.name, subtitle: `You play ${tier.venue}` },
       { title: 'Listeners', value: music.listeners.toLocaleString('en-US'), subtitle: 'A month' },
-      { title: 'Reputation', value: upper(musicReputationWord(music.reputation)) },
+      {
+        title: 'Reputation',
+        value: upper(musicReputationWord(music.reputation)),
+        subtitle: 'Industry standing, separate from your audience',
+      },
       ...(music.tours > 0 ? [{ title: 'Tours', value: `${music.tours}` }] : []),
     ],
     plan: RELEASE_KINDS.map((kind) => ({

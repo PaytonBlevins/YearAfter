@@ -14,7 +14,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, layout, radii, shadows, spacing, typography } from '../theme/theme';
-import { Glyph, type IconName } from '../theme/icons';
+import { Illustration } from '../theme/illustrations';
+import { type IconName } from '../theme/icons';
 import { StatBars } from '../components/StatBars';
 import type { VisibleStats } from '@yearafter/character';
 import { WORLDS, WORLD_LABELS, type World } from './navigation';
@@ -101,12 +102,9 @@ function WorldTab({
       onPress={onPress}
       style={styles.tab}
     >
-      <Glyph
-        name={WORLD_ICONS[world]}
-        size={21}
-        active={active}
-        color={active ? colors.accent : colors.inkMuted}
-      />
+      <View style={[styles.tabStamp, active && styles.tabStampActive]}>
+        <Illustration name={WORLD_ICONS[world]} size={26} />
+      </View>
       <Text numberOfLines={1} style={[styles.tabLabel, active && styles.tabLabelActive]}>
         {WORLD_LABELS[world]}
       </Text>
@@ -162,6 +160,8 @@ const styles = StyleSheet.create({
     minHeight: layout.tabBarHeight,
   },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'flex-start', gap: 3, paddingTop: 4 },
+  tabStamp: { borderRadius: radii.md, paddingHorizontal: spacing.sm },
+  tabStampActive: { backgroundColor: colors.chromeSoft },
   tabLabel: {
     fontFamily: typography.family,
     fontSize: typography.sizes.caption,

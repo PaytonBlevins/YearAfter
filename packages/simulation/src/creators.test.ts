@@ -11,7 +11,6 @@ import {
   totalFor,
   channelIncome,
   channelYear,
-  creatorHours,
   sponsorOffersFor,
   creep,
   householdScale,
@@ -28,6 +27,7 @@ import {
   answerSponsorOffer,
   chartStandings,
   closeChannel,
+  creatorWeek,
   openChannel,
   placeOf,
   sponsorOffers,
@@ -839,7 +839,7 @@ describe('charts and trends, in the game', () => {
 });
 
 describe('what channels ask of a life', () => {
-  it('piles stress on a life with four heavy channels compared with four light ones', () => {
+  it('more posts raise workload and stress without reading old effort settings', () => {
     let state = ADULT;
     for (const [platform, category] of [
       ['video', 'gaming'],
@@ -849,94 +849,20 @@ describe('what channels ask of a life', () => {
     ] as const) {
       state = withPublishedChannel(state, platform, category);
     }
-    const with_ = (effort: 'light' | 'heavy'): GameState => ({
-      ...state,
-      channels: state.channels.map((c) => ({ ...c, effort })),
-    });
-    let heavier = 0;
-    for (const years of [1, 2, 3]) {
-      let light = with_('light');
-      let heavy = with_('heavy');
-      for (let i = 0; i < years; i += 1) {
-        light = answerEverything(
-          advanceYear({
-            ...light,
-            channels: light.channels.map((channel) => ({
-              ...channel,
-              publishing: { year: light.world.year, count: 12, kind: 'gameplay', gained: 0 },
-            })),
-          }).state,
-        );
-        heavy = answerEverything(
-          advanceYear({
-            ...heavy,
-            channels: heavy.channels.map((channel) => ({
-              ...channel,
-              publishing: { year: heavy.world.year, count: 12, kind: 'gameplay', gained: 0 },
-            })),
-          }).state,
-        );
-      }
-      if (heavy.player.stress.level > light.player.stress.level) heavier += 1;
-    }
-    expect(heavier).toBe(3);
-  });
-});
-
-describe('what channels ask of a life', () => {
-  const stressAfter = (state: GameState): number => advanceYear(state).state.player.stress.level;
-  const withEffort = (state: GameState, effort: 'light' | 'regular' | 'heavy'): GameState => ({
-    ...state,
-    channels: state.channels.map((c) => ({ ...c, effort })),
-  });
-  const many = (count: number, base: GameState = ADULT): GameState => {
-    let state = base;
-    const picks: [string, string][] = [
-      ['video', 'gaming'],
-      ['stream', 'gaming'],
-      ['podcast', 'comedy'],
-      ['photo', 'lifestyle'],
-    ];
-    for (const [platform, category] of picks.slice(0, count))
-      state = withPublishedChannel(state, platform, category);
-    return {
+    const withPosts = (count: number, effort: 'heavy' | 'light'): GameState => ({
       ...state,
       channels: state.channels.map((channel) => ({
         ...channel,
-        publishing: { year: state.world.year, count: 12, kind: 'gameplay', gained: 0 },
+        effort,
+        publishing: { year: state.world.year, count, kind: 'gameplay', gained: 0 },
       })),
-    };
-  };
-
-  it('counts every channel’s hours, and the hours are what reach the stress model', () => {
-    expect(creatorHours(withEffort(many(4), 'heavy').channels)).toBe(36);
-    /*
-      One year of one life is one draw of everything else a year holds, so a single life can put a light
-      channel below no channel by chance (it did, once the catalog changed which life ADULT is). The claim
-      is about the hours, so it is made over six lives and their totals.
-    */
-    const lives = [
-      ADULT,
-      ...Array.from({ length: 5 }, (_, index) => liveTo(`creators-adult-${index}`, 25)),
-    ];
-    let none = 0;
-    let light = 0;
-    let heavy = 0;
-    for (const life of lives) {
-      none += stressAfter(life);
-      light += stressAfter(withEffort(many(1, life), 'light'));
-      heavy += stressAfter(withEffort(many(4, life), 'heavy'));
-    }
-    // Heavy channels cost more than light ones, and more than none. A light one is not asserted against none:
-    // over six lives it came out five points below, which is a year's noise and not a claim anyone made.
-    expect(heavy).toBeGreaterThan(light);
-    expect(heavy).toBeGreaterThan(none);
-  });
-
-  it('is nothing to a life with no channels, and more with each hour', () => {
-    const one = stressAfter(withEffort(many(1), 'heavy'));
-    const four = stressAfter(withEffort(many(4), 'heavy'));
-    expect(four).toBeGreaterThan(one);
+    });
+    const quiet = withPosts(1, 'heavy');
+    const active = withPosts(12, 'light');
+    expect(advanceYear(active).state.player.stress.level).toBeGreaterThan(
+      advanceYear(quiet).state.player.stress.level,
+    );
+    expect(creatorWeek(withPosts(12, 'heavy'))).toBe(creatorWeek(active));
   });
 });
 

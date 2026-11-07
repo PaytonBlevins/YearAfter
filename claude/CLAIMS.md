@@ -101,7 +101,24 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 
 | 0801 The sports engine, with basketball (v0.08) | Claude (Agent A): engine, save, calibration, tests, docs | — | **Shipped 6 Oct (engine only; screens are 0809). Took save v52 (built as v44; renumbered when it joined Agent B's v51 chain).** |
 
-| v51 | Codex / Agent B | last of B's chain (P16). v52–v58 are Agent A's 0801, 0803, 0804, 0805, 0806, 0807 and 0808, renumbered on integration (0802 and 0809 have no bump). |
+| v51 | Codex / Agent B | last of B's chain (P16). v52–v58 are Agent A's 0801, 0803, 0804, 0805, 0806, 0807 and 0808, renumbered on integration (0802 and 0809 have no bump). The next free save version is v59. |
+
+| November playtest — card payments, property tabs, special careers and yearly notices | Codex / Agent B (`feat/november-playtest`) | — | Claimed 6 Nov from `integrate/sports-on-main`; remaining economy and progression changes tracked separately. |
+
+| November playtest — fame and music | Codex / Agent B (`feat/november-fame-music`) | — | Claimed after Payton asked to start the follow-up; based on November usability fixes. |
+
+| November playtest — fame offer quality and pay | Codex / Agent B (`feat/november-fame-offers`) | — | Claimed on the fame/music follow-up for the fixed-score fame offer pass. |
+
+| November playtest — business control and valuation | Codex / Agent B (`feat/november-business-control`) | — | Claimed on the November fame-offer follow-up. |
+
+| November playtest — live auction counterbids | Codex / Agent B (`feat/november-live-auctions`) | — | Claimed on November business controls. |
+
+| November playtest — illustrated mobile interface | Codex / Agent B (feat/november-visual-refresh) | — | Claimed on live auction counterbids. |
+
+| November playtest — businesses and social account portfolios | Codex / Agent B (feat/november-venture-portfolios) | — | Claimed after visual refresh; notes 13–14. |
+
+| November playtest — advisor tiers, investment questions and spending | Codex / Agent B (feat/november-advisor-upgrade) | — | Claimed after venture portfolios; note 15. |
+
 | v59 | Claude (Agent A) | 0901 the service engine (`military`). |
 | v60 | Claude (Agent A) | 0902 branches, specialties and officers (`military` grows a track, a specialty and a commissioning year). The next free save version is **v63** (0903 took v61 and 0904 took v62). |
 | v61 | Claude (Agent A) | 0903 deployments (`military` grows a gate, orders, a deployment in progress, past deployments and decorations). The next free save version is **v63** (0904 took v62). |

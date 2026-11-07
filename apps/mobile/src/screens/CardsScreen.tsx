@@ -14,7 +14,7 @@
  * wants to see what they are not yet good enough for).
  */
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import {
   CREDIT_FROM_AGE,
@@ -24,15 +24,20 @@ import {
   minimumOn,
 } from '@yearafter/finance';
 import { cardOffers } from '@yearafter/simulation';
-import { Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
+import { ActionButton, Card, EmptyState, ListRow, RowDivider, SectionHeading } from '../components';
 import { useGame } from '../stores/gameStore';
 import { colors, spacing, typography } from '../theme/theme';
 
 const money = (amountInCents: number): string =>
-  `$${Math.round(amountInCents / 100).toLocaleString('en-US')}`;
+  (amountInCents / 100).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: amountInCents % 100 === 0 ? 0 : 2,
+  });
 
 export function CardsScreen() {
-  const { state, applyForCard: apply } = useGame();
+  const { state, applyForCard: apply, payCardOff } = useGame();
+  const [open, setOpen] = useState<string>();
   if (!state) return null;
 
   const offers = cardOffers(state);
@@ -65,11 +70,13 @@ export function CardsScreen() {
               const product = findProduct(card.productId);
               if (!product) return null;
               const owed = Number(card.balance);
+              const cash = Number(state.player.cash);
+              const payment = Math.min(owed, cash);
               return (
                 <Fragment key={card.productId}>
                   {index > 0 ? <RowDivider /> : null}
                   <ListRow
-                    icon="money"
+                    icon="card"
                     title={product.name}
                     /*
                       Spec 28's fields, in the order a person asks about them:
@@ -83,7 +90,12 @@ export function CardsScreen() {
                     }
                     value={owed > 0 ? money(owed) : 'Clear'}
                     meta={`${Math.round(product.apr * 100)}% · ${REWARD_LABELS[product.rewards]}`}
-                    affordance="none"
+                    affordance={owed > 0 ? 'action' : 'none'}
+                    onPress={
+                      owed > 0
+                        ? () => setOpen(open === card.productId ? undefined : card.productId)
+                        : undefined
+                    }
                     wrap
                   />
                   {owed > 0 ? (
@@ -93,6 +105,30 @@ export function CardsScreen() {
                       affordance="none"
                       compact
                     />
+                  ) : null}
+                  {open === card.productId && owed > 0 ? (
+                    <>
+                      <ListRow
+                        title="Cash available"
+                        value={money(cash)}
+                        affordance="none"
+                        compact
+                      />
+                      <ActionButton
+                        label={
+                          payment === owed
+                            ? `Pay off — ${money(payment)}`
+                            : payment > 0
+                              ? `Pay what you can — ${money(payment)}`
+                              : 'No cash available to pay'
+                        }
+                        disabled={payment <= 0}
+                        onPress={() => {
+                          payCardOff(card.productId, payment / 100);
+                          setOpen(undefined);
+                        }}
+                      />
+                    </>
                   ) : null}
                 </Fragment>
               );
@@ -107,6 +143,7 @@ export function CardsScreen() {
           <Fragment key={product.id}>
             {index > 0 ? <RowDivider /> : null}
             <ListRow
+              icon="card"
               title={product.name}
               /*
                 The blurb when they can have it, the reason when they cannot.
@@ -134,9 +171,7 @@ export function CardsScreen() {
         ))}
       </Card>
 
-      <Text style={styles.note}>
-        A card covers what your money doesn’t, on its own. Paying it down is the part you choose.
-      </Text>
+      <Text style={styles.note}>Tap a card with a balance to make a payment from your cash.</Text>
     </ScrollView>
   );
 }

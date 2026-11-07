@@ -59,7 +59,7 @@ import {
   type Sector,
 } from '@yearafter/content';
 import { priceLine, priceOf, yearChange, type PriceBook } from './market';
-import { holdingWorth, type Holding } from './portfolio';
+import { canBuy, holdingWorth, type Holding } from './portfolio';
 
 export {
   ADVISORS,
@@ -159,6 +159,7 @@ export interface AdviceInput {
   readonly advisorId: string;
   readonly annualBills?: number;
   readonly cashGoal?: number;
+  readonly remainingBuyBudget?: number;
 }
 
 /**
@@ -197,7 +198,8 @@ export function recommendationsFor(input: AdviceInput): readonly Recommendation[
 
   const { prices, portfolio, cash, year } = input;
   const reserve = advisorReserve(input.annualBills ?? 24_000, input.cashGoal ?? 0);
-  const buyAmount = advisorBuyAmount(cash - reserve);
+  const buyLimit = input.remainingBuyBudget ?? advisorBuyAmount(cash - reserve);
+  const buyAmount = buyLimit >= SLICE_FLOOR ? buyLimit : 0;
   const can = (reason: AdviceReason): boolean => advisor.reasons.includes(reason);
 
   const worth = portfolio.reduce((sum, holding) => sum + holdingWorth(prices, holding) / 100, 0);
@@ -348,6 +350,107 @@ export function recommendationsFor(input: AdviceInput): readonly Recommendation[
   }
 
   return out.slice(0, advisor.picks);
+}
+
+export interface InstrumentAdvice {
+  readonly verb: Exclude<AdviceVerb, 'rebalance'>;
+  readonly text: string;
+  readonly forecast: boolean;
+}
+
+/** An answer about one named instrument, never an order. */
+export function instrumentAdviceFor(
+  input: AdviceInput,
+  instrumentId: string,
+): InstrumentAdvice | undefined {
+  const advisor = findAdvisor(input.advisorId);
+  const instrument = findInstrument(instrumentId);
+  if (!advisor || !instrument || priceOf(input.prices, instrumentId) <= 0) return undefined;
+  const { prices, portfolio, cash } = input;
+  const name = instrument.name;
+  const reserve = advisorReserve(input.annualBills ?? 24000, input.cashGoal ?? 0);
+  const budget = input.remainingBuyBudget ?? advisorBuyAmount(cash - reserve);
+  const canAdd =
+    budget >= SLICE_FLOOR && !canBuy(prices, portfolio, instrument, budget, cash - reserve);
+  const paid = advisor.reasons.includes('belowTrend');
+  const total = portfolio.reduce((sum, row) => sum + holdingWorth(prices, row) / 100, 0);
+  const held = portfolio.find((row) => row.instrumentId === instrumentId);
+  const value = held ? holdingWorth(prices, held) / 100 : 0;
+  const speculative = (kind: Instrument['kind']) => kind === 'crypto' || kind === 'penny';
+  const risky = speculative(instrument.kind);
+  const related = portfolio.reduce((sum, row) => {
+    const other = findInstrument(row.instrumentId);
+    if (!other) return sum;
+    const sameRisk = risky && speculative(other.kind);
+    const sameSector = instrument.sector !== undefined && other.sector === instrument.sector;
+    return (
+      sum +
+      (sameRisk || sameSector || other.id === instrumentId ? holdingWorth(prices, row) / 100 : 0)
+    );
+  }, 0);
+  const limit = risky ? advisor.speculativeAt : advisor.concentratedAt;
+  const hold = (text: string): InstrumentAdvice => ({ verb: 'hold', text, forecast: false });
+
+  if (held && risky && cash < reserve && value > 0 && value <= reserve - cash) {
+    return {
+      verb: 'sell',
+      text: `I'd sell ${name} and keep the proceeds in cash. You're short of the money you set aside, and this is a speculative holding.`,
+      forecast: false,
+    };
+  }
+  if (total > 0 && related / total >= limit) {
+    const reason = risky ? 'speculative holdings' : instrument.sector ? 'this sector' : name;
+    if (held)
+      return {
+        verb: 'reduce',
+        text: `I'd trim ${name}. About ${pct(related / total)} of what you hold is already in ${reason}.`,
+        forecast: false,
+      };
+    return hold(`I'd pass on ${name} for now. You already have a lot riding on ${reason}.`);
+  }
+  if (risky) {
+    return hold(
+      held
+        ? `I wouldn't add to ${name}. It's speculative, and its price history doesn't tell me where it goes next.`
+        : `I'd pass on ${name}. It's speculative, and a price swing by itself isn't a reason to buy.`,
+    );
+  }
+  if (paid && REVERTS(instrument)) {
+    const gap = gapToTrend(prices, instrument);
+    if (held && -gap >= Math.max(DEAR_ENOUGH, advisor.sharpness)) {
+      return {
+        verb: 'reduce',
+        text: `I'd trim ${name}. It's about ${pct(-gap)} above its own trend, though it could stay there.`,
+        forecast: true,
+      };
+    }
+    if (canAdd && gap >= Math.max(CHEAP_ENOUGH, advisor.sharpness)) {
+      return {
+        verb: 'buy',
+        text: `I'd consider buying ${name}. It's about ${pct(gap)} below its own trend. It may not recover.`,
+        forecast: true,
+      };
+    }
+  }
+  if (instrument.kind === 'bond') {
+    const terms = `It pays a ${Number((instrument.payout * 100).toFixed(2))}% coupon and has a ${instrument.termYears}-year term.`;
+    if (paid && !held && canAdd)
+      return {
+        verb: 'buy',
+        text: `I'd consider ${name} if you want scheduled income. ${terms} You may get a different price if you sell early.`,
+        forecast: false,
+      };
+    return hold(`${terms} ${held ? "I'd keep what you have." : "I'd leave it alone for now."}`);
+  }
+  if (!canAdd && budget < SLICE_FLOOR)
+    return hold(
+      `I'd leave ${name} alone for now. Keep cash for bills and your goal, and stay within this year's advice budget.`,
+    );
+  return hold(
+    paid
+      ? `I don't see a strong reason to trade ${name} at this price.`
+      : `I don't see a problem with your exposure to ${name}. I can talk about risk, but I don't make price forecasts.`,
+  );
 }
 
 /* -------------------------------------------------------------------------- */

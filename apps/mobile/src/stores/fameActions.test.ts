@@ -387,7 +387,7 @@ describe('what a name gets you offered', () => {
     const state = offeringWork(withFame(RICH, 30), 'photoshoot');
     const offer = fameOffers(state).find((o) => o.def.id === 'photoshoot')!;
     const result = done(applyFameWork(state, 'photoshoot'));
-    expect(result.outcome).toMatchObject({ title: 'Photoshoot done', tone: 'good' });
+    expect(result.outcome).toMatchObject({ title: 'National photo campaign done', tone: 'good' });
     expect(result.outcome!.value).toBe(`$${offer.pay.toLocaleString('en-US')}`);
     expect(result.outcome!.body).toContain(offer.outlet);
     expect(result.state.celebrities.work.done.map((row) => row.id)).toEqual(['photoshoot']);
@@ -412,8 +412,9 @@ describe('what a name gets you offered', () => {
         withFame({ ...RICH, channels: [channelOf('ch:w', 100_000)] }, 70),
         def.id,
       );
+      const offer = fameOffers(state).find((item) => item.def.id === def.id)!;
       const result = done(applyFameWork(state, def.id));
-      expect(result.outcome!.title).toBe(`${def.label} done`);
+      expect(result.outcome!.title).toBe(`${offer.def.label} done`);
       reached += 1;
     }
     expect(reached).toBe(4);

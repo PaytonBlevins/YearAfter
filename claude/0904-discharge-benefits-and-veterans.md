@@ -25,15 +25,15 @@ and field is absent for a life with no service (a test compares one field for fi
 A career that ends is a past service with a `how` and now a `discharge` that follows from it
 (`dischargeOf` in `content/src/military-veterans.ts`, used by `military.ts` where a career ends):
 
-| Ending                                   | Discharge                                                                              |
-| ---------------------------------------- | -------------------------------------------------------------------------------------- |
-| washed out of basic or officer training  | entry-level (as before)                                                                |
-| retired (twenty years or more, or at 65) | honorable, always                                                                      |
-| killed in service                        | honorable, always                                                                      |
-| a medical board sent them home           | **medical**                                                                            |
-| a court-martial                          | **dishonorable**                                                                       |
-| a term ended by choice, or an officer passed over | honorable, or **general** with a service reputation under **50**               |
-| not asked to stay                        | **general** with a reputation under **52**, or if they refused the orders that term; else honorable |
+| Ending                                            | Discharge                                                                                           |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| washed out of basic or officer training           | entry-level (as before)                                                                             |
+| retired (twenty years or more, or at 65)          | honorable, always                                                                                   |
+| killed in service                                 | honorable, always                                                                                   |
+| a medical board sent them home                    | **medical**                                                                                         |
+| a court-martial                                   | **dishonorable**                                                                                    |
+| a term ended by choice, or an officer passed over | honorable, or **general** with a service reputation under **50**                                    |
+| not asked to stay                                 | **general** with a reputation under **52**, or if they refused the orders that term; else honorable |
 
 A general discharge adds a line to the feed saying so.
 
@@ -85,10 +85,10 @@ education or license for (the hard gates still return zero first).
 **Discharges** (simulated careers on the branch's own first specialty, 80 starts a branch, a seed each, a 70% chance of
 staying at each term's end; the rest taken from the hash):
 
-| Population                                                   | Lives | Honorable | General | Dishonorable | Entry-level |
-| ------------------------------------------------------------ | ----- | --------- | ------- | ------------ | ----------- |
-| Typical (discipline 40–85, smarts 30–80, health 55–90)       | 394   | 83.5%     | 2.5%    | 0%           | 14.0%       |
-| Weak as well (discipline 15–85, smarts 15–85)                | 355   | 63.7%     | 16.9%   | 0.6%         | 18.9%       |
+| Population                                             | Lives | Honorable | General | Dishonorable | Entry-level |
+| ------------------------------------------------------ | ----- | --------- | ------- | ------------ | ----------- |
+| Typical (discipline 40–85, smarts 30–80, health 55–90) | 394   | 83.5%     | 2.5%    | 0%           | 14.0%       |
+| Weak as well (discipline 15–85, smarts 15–85)          | 355   | 63.7%     | 16.9%   | 0.6%         | 18.9%       |
 
 The service reputation these lives ended with (not counting wash-outs) ran from **47 to 55**, the median **51** and a tenth
 under 50. That is why the dials are where they are (finding 196). Of the typical lives 17% retired at twenty years or more,
@@ -96,9 +96,9 @@ the policy's doing and not a finding.
 
 **Retired pay at twenty years** (basic pay at the 2026 table, final grade held for the last three years):
 
-| Grade   | E-5     | E-6     | E-7     | E-8     | E-9     | O-3     | O-4     | O-5     | O-6     |
-| ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- |
-| A year  | $21,224 | $25,285 | $29,761 | $32,988 | $37,706 | $43,220 | $50,448 | $56,737 | $63,971 |
+| Grade  | E-5     | E-6     | E-7     | E-8     | E-9     | O-3     | O-4     | O-5     | O-6     |
+| ------ | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- |
+| A year | $21,224 | $25,285 | $29,761 | $32,988 | $37,706 | $43,220 | $50,448 | $56,737 | $63,971 |
 
 At thirty years: an E-9 $66,729 (60%), an O-6 $109,358.
 

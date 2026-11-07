@@ -103,6 +103,7 @@ export function collabOffersFor(input: {
   /** People the character counts as friends, who can guest for free. */
   readonly friends: readonly { readonly id: string; readonly name: string }[];
   readonly agent?: boolean;
+  readonly gainFor?: typeof collabGain;
 }): readonly CollabOffer[] {
   const { channel } = input;
   if (channel.audience < MIN_COLLAB_AUDIENCE) return [];
@@ -152,7 +153,7 @@ export function collabOffersFor(input: {
       };
     }
     const repeats = channel.collabs?.[partner.id] ?? 0;
-    const gain = collabGain(channel.audience, partner.audience, repeats);
+    const gain = (input.gainFor ?? collabGain)(channel.audience, partner.audience, repeats);
     if (!worthCollab(gain)) continue;
     // Friends and a group's own people appear for nothing; a bigger stranger charges.
     const fee =

@@ -33,10 +33,14 @@ afterEach(async () => {
   vi.clearAllMocks();
 });
 
-async function open(state: GameState) {
+async function open(state: GameState, tab: 'Special careers' | 'Work & study' = 'Special careers') {
   vi.mocked(useGame, { partial: true }).mockReturnValue({ state });
   vi.mocked(useNavigation, { partial: true }).mockReturnValue({ push });
   rendered = await show(<CareerScreen />);
+  if (tab === 'Special careers') {
+    const button = rendered.root.findAll((node) => node.props.accessibilityLabel === tab)[0]!;
+    await act(() => button.props.onPress());
+  }
   return rendered;
 }
 const headings = (r: ReactTestRenderer) =>
@@ -44,13 +48,18 @@ const headings = (r: ReactTestRenderer) =>
 const person = eligible(ADULT);
 
 describe('the Career page', () => {
-  it('has a Public service card after Elsewhere, with the military, the FBI and the CIA', async () => {
+  it('has a Public service card in the Special careers tab, below the sports and entertainment rows, with the military, the FBI and the CIA', async () => {
     const r = await open(agencyReady());
-    const all = headings(r);
-    expect(all).toContain('Public service');
-    expect(all.indexOf('Public service')).toBeGreaterThan(all.indexOf('Elsewhere'));
+    expect(headings(r)).toContain('Public service');
     const rows = rowsOf(r).map((row) => row.props.title as string);
     expect(rows.slice(-3)).toEqual(['Military', 'FBI', 'CIA']);
+    expect(rows.indexOf('Military')).toBeGreaterThan(rows.indexOf('Acting'));
+  });
+
+  it('keeps it off the Work & study tab', async () => {
+    const r = await open(agencyReady(), 'Work & study');
+    expect(headings(r)).not.toContain('Public service');
+    expect(() => rowTitled(r, 'Military')).toThrow();
   });
 
   it.each([

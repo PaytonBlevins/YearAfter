@@ -284,6 +284,22 @@ describe('worth, sale and wind-down', () => {
     expect(known).toBeGreaterThan(rich);
   });
 
+  it('values growing earnings above the same profits in reverse order, with a separate premium for a durable name', () => {
+    const { business, type } = mature('biz.accounting');
+    const worth = (profits: number[], reputation: number) =>
+      goingConcernFor({ ...business, profits, reputation }, type, 2012);
+    const rising = [50000, 80000, 110000];
+    const falling = [...rising].reverse();
+    expect(worth(rising, 85)).toBeGreaterThan(worth([80000, 80000, 80000], 85));
+    expect(worth([80000, 80000, 80000], 85)).toBeGreaterThan(worth(falling, 85));
+    expect(worth(rising, 85)).toBeGreaterThan(worth(rising, 50));
+    const base = (profit: number, rep: number) =>
+      Math.round(profit * type.valueMultiple * (0.85 + (0.3 * rep) / 100));
+    expect(worth([110000], 85)).toBe(base(110000, 85));
+    expect(worth([110000, 80000, 50000], 85)).toBe(base(70000, 85));
+    expect(worth([110000, 110000, -50000], 85)).toBe(base(30000, 85));
+  });
+
   it('adds the till to what the owner values it at', () => {
     const { business, type } = mature('biz.salon');
     const empty = { ...business, cash: dollars(0) };

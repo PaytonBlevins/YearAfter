@@ -5,7 +5,7 @@ import {
   fameTarget,
   groupBoost,
   growthBoost,
-  publishPost,
+  publishPostWithReception,
   type PostRefusal,
 } from '@yearafter/finance';
 import { entryFor, qualityOf } from './creators';
@@ -18,20 +18,27 @@ export function postToChannel(
 ): Result<GameState, PostRefusal> {
   const channel = state.channels.find((row) => row.id === channelId);
   if (!channel) return err({ kind: 'noSuchChannel' });
-  const result = publishPost({
+  const result = publishPostWithReception({
     channel,
     year: state.world.year,
     seed: state.rng.getSeed(),
     kind,
     quality: qualityOf(state.player.stats, state.player.talents, channel.categoryId),
+    fame: state.fame,
     boost: growthBoost(state.representation) * groupBoost(channel),
   });
   if (!result.ok) return result;
-  const updated = result.value;
+  const { channel: updated, reception } = result.value;
+  const reaction = {
+    poor: 'It got a poor reception.',
+    good: 'It was well received.',
+    great: 'It got a great reception.',
+    viral: 'It went viral.',
+  }[reception];
   const gained = updated.publishing?.gained ?? 0;
   const platform = findPlatform(channel.platformId);
   const option = postFormatsFor(channel.platformId).find((row) => row.id === kind);
-  const text = `You published ${option?.name.toLowerCase() ?? 'a post'} on ${platform?.name ?? 'your channel'}. ${gained > 0 ? `${gained.toLocaleString('en-US')} new ${platform?.audienceWord ?? 'followers'} found you.` : gained < 0 ? `${Math.abs(gained).toLocaleString('en-US')} ${platform?.audienceWord ?? 'followers'} left after it.` : "It didn't change your audience."}`;
+  const text = `You published ${option?.name.toLowerCase() ?? 'a post'} on ${platform?.name ?? 'your channel'}. ${reaction} ${gained > 0 ? `${gained.toLocaleString('en-US')} new ${platform?.audienceWord ?? 'followers'} found you.` : gained < 0 ? `${Math.abs(gained).toLocaleString('en-US')} ${platform?.audienceWord ?? 'followers'} left after it.` : "It didn't change your audience."}`;
   const channels = state.channels.map((row) => (row.id === channelId ? updated : row));
   const entry = entryFor(
     state,

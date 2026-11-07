@@ -43,8 +43,9 @@ import {
   MOST_OF_PAY,
   UNLOCKS_AT,
   advisorFee,
+  ADVISOR_INVEST_SHARE,
+  instrumentAdviceFor,
   advisorReserve,
-  advisorBuyAmount,
   annualExpenseOf,
   vehicleLoanPayments,
   runCardYear,
@@ -155,12 +156,24 @@ export interface InvestOutcome {
   readonly good: boolean;
 }
 
+const ADVISOR_BUY_PREFIX = 'Advisor purchase: ';
+
 /** Buy into an instrument with a sum of money. */
 export function invest(
   state: GameState,
   instrumentId: string,
   amount: number,
   payment: PurchasePayment = { kind: 'cash' },
+): Result<InvestOutcome, InvestError> {
+  return buyInvestment(state, instrumentId, amount, payment);
+}
+
+function buyInvestment(
+  state: GameState,
+  instrumentId: string,
+  amount: number,
+  payment: PurchasePayment,
+  advised = false,
 ): Result<InvestOutcome, InvestError> {
   const instrument = findInstrument(instrumentId);
   if (!instrument) return err('noSuchInstrument');
@@ -201,7 +214,7 @@ export function invest(
     state.player.age,
     dollars(bought.spent),
     'investment',
-    `${instrument.name} — bought`,
+    advised ? `${ADVISOR_BUY_PREFIX}${instrument.name}` : `${instrument.name} — bought`,
     payment,
   );
   if (!paid.ok) return err(paid.error);
@@ -531,6 +544,24 @@ export function advisorCashFor(state: GameState) {
   };
 }
 
+/** One shared envelope per year, reconstructed from settled purchases in the ledger. */
+export function advisorBudgetFor(state: GameState) {
+  const spent = state.finance.transactions.reduce(
+    (sum, row) =>
+      row.year === state.world.year &&
+      row.category === 'investment' &&
+      row.source.startsWith(ADVISOR_BUY_PREFIX) &&
+      row.amount < 0
+        ? sum - Number(row.amount) / 100
+        : sum,
+    0,
+  );
+  const { reserve, spare } = advisorCashFor(state);
+  const cashBeforeAdvice = Number(state.player.cash) / 100 + spent;
+  const limit = Math.floor(Math.max(0, cashBeforeAdvice - reserve) * ADVISOR_INVEST_SHARE);
+  return { spent, limit, remaining: Math.floor(Math.max(0, Math.min(spare, limit - spent))) };
+}
+
 export type CashGoalError = 'not-alive' | 'too-young' | 'pending-choice' | 'invalid-amount';
 export const CASH_GOAL_ERROR_LABELS: Record<CashGoalError, string> = {
   'not-alive': 'This life has ended.',
@@ -547,18 +578,28 @@ export function setCashGoal(state: GameState, amount: number): Result<GameState,
   return ok(amount === 0 ? rest : { ...state, cashGoal: amount });
 }
 
-/** This year's advice, or nothing when nobody is hired. */
-export function adviceFor(state: GameState): readonly Recommendation[] {
-  if (!state.advisorId) return [];
-  return recommendationsFor({
+function adviceInput(state: GameState, advisorId: string) {
+  return {
     prices: state.prices,
     portfolio: state.portfolio,
-    cash: Math.round(Number(state.player.cash) / 100),
+    cash: Number(state.player.cash) / 100,
     year: state.world.year,
-    advisorId: state.advisorId,
+    advisorId,
     annualBills: advisorCashFor(state).annualBills,
     cashGoal: state.cashGoal,
-  });
+    remainingBuyBudget: advisorBudgetFor(state).remaining,
+  };
+}
+
+/** This year's advice, or nothing when nobody is hired. */
+export function adviceFor(state: GameState): readonly Recommendation[] {
+  return state.advisorId ? recommendationsFor(adviceInput(state, state.advisorId)) : [];
+}
+
+export function askAdvisorAbout(state: GameState, instrumentId: string) {
+  return state.advisorId
+    ? instrumentAdviceFor(adviceInput(state, state.advisorId), instrumentId)
+    : undefined;
 }
 
 /** What this year's fee will be, for the screen to say before it is charged. */
@@ -593,9 +634,9 @@ export function actOnAdvice(
   if (!state.player.alive || state.pending.length > 0) return err('noCash');
   if (rec.verb === 'buy') {
     const target = rec.instrumentId ?? 'fd.broadindex';
-    const amount = Math.min(rec.amount ?? 0, advisorBuyAmount(advisorCashFor(state).spare));
+    const amount = Math.min(rec.amount ?? 0, advisorBudgetFor(state).remaining);
     if (amount <= 0) return err('noCash');
-    return invest(state, target, amount);
+    return buyInvestment(state, target, amount, { kind: 'cash' }, true);
   }
   if (rec.verb === 'reduce' || rec.verb === 'sell' || rec.verb === 'rebalance') {
     let targets = state.portfolio.filter(
@@ -642,10 +683,16 @@ export function actOnAdvice(
     }
     if (raised <= 0) return err('nothingHeld');
     // The approved 15% limit also applies to advisor reinvestment of sale proceeds.
-    const transfer = Math.min(raised, advisorBuyAmount(advisorCashFor(next).spare));
+    const transfer = Math.min(raised, advisorBudgetFor(next).remaining);
     let invested = 0;
-    if (transfer > 0) {
-      const buy = invest(next, 'fd.broadindex', transfer);
+    if (transfer >= 1) {
+      const buy = buyInvestment(
+        next,
+        'fd.broadindex',
+        Math.floor(transfer),
+        { kind: 'cash' },
+        true,
+      );
       if (buy.ok) {
         invested = (Number(next.player.cash) - Number(buy.value.state.player.cash)) / 100;
         next = buy.value.state;

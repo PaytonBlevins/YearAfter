@@ -7,6 +7,9 @@ import {
   actOnAdvice,
   adviceFor,
   advisorCashFor,
+  advisorBudgetFor,
+  invest,
+  dismissAdvisor,
   advicePreviewFor,
   setCashGoal,
 } from './investments';
@@ -157,6 +160,44 @@ describe('P7 actual advisor actions', () => {
     }
     expect(reconcile(s.finance).ok).toBe(true);
   });
+  it('shares one yearly buy budget across recommendations, advisor changes, and ledger reloads', () => {
+    const start = fixture();
+    const budget = advisorBudgetFor(start);
+    const first = adviceFor(start).find((r) => r.verb === 'buy')!;
+    const bought = actOnAdvice(start, first.id);
+    if (!bought.ok) throw Error(bought.error);
+    const settled = bought.value.state;
+    expect(advisorBudgetFor(settled).spent).toBe(budget.limit);
+    expect(advisorBudgetFor(settled).remaining).toBe(0);
+    expect(actOnAdvice(settled, first.id).ok).toBe(false);
+
+    const switched = {
+      ...dismissAdvisor(settled),
+      advisorId: 'adv.branch',
+      finance: JSON.parse(JSON.stringify(settled.finance)) as GameState['finance'],
+    };
+    expect(adviceFor(switched).filter((r) => r.verb === 'buy')).toEqual([]);
+    const manual = invest(switched, 'fd.broadindex', 2000);
+    if (!manual.ok) throw Error(manual.error);
+    expect(advisorBudgetFor(manual.value.state).spent).toBe(budget.limit);
+    const nextYear = { ...settled, world: { ...settled.world, year: settled.world.year + 1 } };
+    expect(advisorBudgetFor(nextYear).spent).toBe(0);
+    expect(advisorBudgetFor(nextYear).remaining).toBeGreaterThan(0);
+  });
+
+  it('counts reinvestment and direct recommendations against the same budget', () => {
+    const coin = INSTRUMENTS.find((item) => item.kind === 'crypto')!;
+    const start = withHoldings(fixture(200_000), [coin.id], [60_000]);
+    const rebalance = adviceFor(start).find((row) => row.reason === 'noFloor')!;
+    const first = actOnAdvice(start, rebalance.id);
+    if (!first.ok) throw Error(first.error);
+    const after = first.value.state;
+    expect(advisorBudgetFor(after).spent).toBeGreaterThan(0);
+    expect(adviceFor(after).filter((row) => row.verb === 'buy')).toEqual([]);
+    expect(advisorBudgetFor(after).remaining).toBeLessThan(1000);
+    expect(reconcile(after.finance).ok).toBe(true);
+  });
+
   it('uses current lifestyle costs and no purchase or operating-account balance', () => {
     const s = {
       ...fixture(),

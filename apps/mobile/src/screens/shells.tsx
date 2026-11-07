@@ -15,7 +15,9 @@
  *  - roughly 6–9 rows visible per phone screen.
  */
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
+import { ScreenTabs } from '../components/ScreenTabs';
+import { SpecialCareersContent } from './EntertainmentScreens';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { formatMoney } from '@yearafter/core';
 import {
@@ -205,21 +207,38 @@ function Screen({ children }: { children: React.ReactNode }) {
  */
 export function CareerScreen() {
   const { state } = useGame();
+  const [tab, setTab] = useState('work');
   if (!state) return null;
 
   return (
     <Screen>
-      <WhereYouAre />
-      {isAtCollege(state.education) && state.employment.job ? (
-        <Card>
-          <EnrolledProgramRow />
-          <RowDivider />
-          <StudentDebtRow />
-        </Card>
-      ) : null}
-      <WhatYouCanDo />
-      <Elsewhere />
-      <PublicService />
+      <ScreenTabs
+        selected={tab}
+        onSelect={setTab}
+        tabs={[
+          { id: 'work', label: 'Work & study' },
+          { id: 'special', label: 'Special careers' },
+        ]}
+      />
+      {tab === 'special' ? (
+        <>
+          <SpecialCareersContent />
+          <PublicService />
+        </>
+      ) : (
+        <>
+          <WhereYouAre />
+          {isAtCollege(state.education) && state.employment.job ? (
+            <Card>
+              <EnrolledProgramRow />
+              <RowDivider />
+              <StudentDebtRow />
+            </Card>
+          ) : null}
+          <WhatYouCanDo />
+          <Elsewhere />
+        </>
+      )}
     </Screen>
   );
 }
@@ -410,7 +429,7 @@ function WhatYouCanDo() {
     rows.push(
       <ListRow
         key="colleagues"
-        icon="social"
+        icon="friends"
         title="People at work"
         subtitle={
           colleagues.length === 0
@@ -446,7 +465,7 @@ function WhatYouCanDo() {
     rows.push(
       <ListRow
         key="clubs"
-        icon="social"
+        icon="trophy"
         title="Clubs & Teams"
         subtitle={
           joined.length === 0
@@ -592,7 +611,7 @@ function Elsewhere() {
 /**
  * Ticket 0906 — the service, the FBI and the CIA, from the Career page.
  *
- * Three doors and nothing else: the service has its own hub, and each agency its own screen. They are
+ * Three doors (in the Special careers tab, beside sports and entertainment) and nothing else: the service has its own hub, and each agency its own screen. They are
  * separate because an agency takes a degree as readily as a clearance, so nobody has to have served
  * to reach one. Nothing shows for a child; an agency a grown person is too young for is greyed with the
  * age that opens it.
@@ -1023,16 +1042,8 @@ export function ActivitiesScreen() {
           {
             icon: 'mind',
             title: 'Mind & Body',
-            subtitle: 'Gym, meditation, martial arts, instruments',
+            subtitle: 'Gym, meditation, martial arts',
             route: { screen: 'mindBody', title: 'Mind & Body' },
-          },
-          // Ticket 0809. The careers 0801–0808 built, from one place: sports, martial arts and
-          // karting, acting, music and modeling.
-          {
-            icon: 'activities' as const,
-            title: 'Sports and Entertainment',
-            subtitle: 'Sports, martial arts, acting, music, modeling',
-            route: { screen: 'entertainment' as const, title: 'Sports and Entertainment' },
           },
           {
             icon: 'doctor',
@@ -1133,17 +1144,6 @@ export function MindBodyScreen() {
             title: 'Martial Arts',
             subtitle: 'Boxing, Muay Thai, jiu-jitsu, wrestling, karate, taekwondo, karting',
             route: { screen: 'studies' as const, title: 'Martial Arts and Karting' },
-          },
-          {
-            title: 'Instruments',
-            subtitle: 'Lessons, releases and tours',
-            route: { screen: 'music' as const, title: 'Music' },
-          },
-          {
-            title: 'Acting Lessons',
-            affordance: 'action',
-            subtitle: 'Lessons and character work',
-            route: { screen: 'acting' as const, title: 'Acting' },
           },
           { title: 'Books / Library', affordance: 'action', ticket: 'v0.10' },
           { title: 'Diet', affordance: 'action', ticket: 'v0.10' },

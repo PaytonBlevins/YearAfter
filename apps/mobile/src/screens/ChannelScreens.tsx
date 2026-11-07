@@ -9,13 +9,7 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { findCreatorCategory, findPlatform, PLATFORMS, postFormatsFor } from '@yearafter/content';
-import {
-  EFFORTS,
-  PAID_TIERS,
-  chartRank,
-  POSTS_PER_YEAR,
-  publishingCount,
-} from '@yearafter/finance';
+import { PAID_TIERS, chartRank, POSTS_PER_YEAR, publishingCount } from '@yearafter/finance';
 import { whyNotChannel } from '@yearafter/simulation';
 import {
   ActionButton,
@@ -31,16 +25,7 @@ import { useNavigation } from '../navigation/navigation';
 import { useGame } from '../stores/gameStore';
 import { refusalText } from '../stores/fameActions';
 import { colors, spacing, typography } from '../theme/theme';
-import {
-  EFFORT_BLURBS,
-  EFFORT_LABELS,
-  audienceLine,
-  money,
-  rankLine,
-  tierLine,
-  topLine,
-  trendLine,
-} from './fameView';
+import { audienceLine, money, rankLine, tierLine, topLine, trendLine } from './fameView';
 
 export function ChannelScreen() {
   const { state, creating } = useGame();
@@ -84,7 +69,7 @@ export function ChannelScreen() {
         <RowDivider />
         <ListRow
           title="Earned so far"
-          subtitle="Before what it costs to keep going"
+          subtitle="Before any representation or group share"
           value={money(Number(channel.earned) / 100)}
           affordance="none"
           wrap
@@ -139,7 +124,7 @@ export function ChannelScreen() {
           ))}
           <Text style={styles.note}>
             Choose a format, then publish it. Posts can bring people in, fall flat or lose
-            followers. Advancing the year doesn't post for you.
+            followers. Posting is free. Advancing the year doesn't post for you.
           </Text>
           <ActionButton
             label="Publish post"
@@ -170,27 +155,6 @@ export function ChannelScreen() {
         Sponsorships, collaborations and representation are on Social Media. Each account's posts
         are your choice.
       </Text>
-      <SectionHeading note="For your next post">How hard you work at it</SectionHeading>
-      <Card>
-        {EFFORTS.map((effort, index) => (
-          <Divided key={effort} first={index === 0}>
-            <ListRow
-              title={EFFORT_LABELS[effort]}
-              subtitle={EFFORT_BLURBS[effort]}
-              value={channel.effort === effort ? 'Now' : undefined}
-              accent={channel.effort === effort}
-              affordance="action"
-              onPress={
-                channel.effort === effort
-                  ? undefined
-                  : () => creating({ type: 'effort', channelId: channel.id, effort })
-              }
-              wrap
-            />
-          </Divided>
-        ))}
-      </Card>
-
       {members ? (
         <>
           <SectionHeading note="From next year">What a reader pays</SectionHeading>
