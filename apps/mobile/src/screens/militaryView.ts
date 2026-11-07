@@ -528,6 +528,7 @@ export function dischargeOutcome(before: GameState, after: GameState): Outcome |
   }
   return {
     title: DISCHARGE_TITLES[row.how],
+    art: 'service',
     body: lines.join(' '),
     tone:
       row.discharge === 'honorable' || row.discharge === 'medical'

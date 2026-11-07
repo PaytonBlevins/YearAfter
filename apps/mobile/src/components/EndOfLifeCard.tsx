@@ -33,6 +33,7 @@
  * to sit with it.
  */
 
+import { MilestoneArt } from '../theme/sceneArt';
 import { Fragment, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { RITES, type Eulogy } from '@yearafter/simulation';
@@ -95,6 +96,7 @@ export function EndOfLifeCard({
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
         >
+          <MilestoneArt kind="remembrance" />
           <Text style={styles.name}>{eulogy.name}</Text>
           <Text style={styles.dates}>{`${eulogy.bornYear} – ${eulogy.diedYear}`}</Text>
           <Text style={styles.identity}>{eulogy.identity}</Text>

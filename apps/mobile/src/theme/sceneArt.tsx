@@ -342,29 +342,110 @@ export function LotArt({ lot }: { lot: Lot }) {
   );
 }
 
-export function MilestoneArt({ kind }: { kind: 'graduation' | 'awards' }) {
+export type MilestoneKind =
+  'graduation' | 'awards' | 'newborn' | 'adoption' | 'home' | 'service' | 'remembrance';
+
+const milestoneBackdrop: Record<MilestoneKind, string> = {
+  graduation: '#EEE4FA',
+  awards: '#FAEBCD',
+  newborn: '#F7E5ED',
+  adoption: '#E4F1EA',
+  home: '#E2EDF8',
+  service: '#E7EBF3',
+  remembrance: '#F1E8DE',
+};
+
+const milestoneScenes: Record<MilestoneKind, ReactNode> = {
+  graduation: (
+    <>
+      <Path d="M92 65v25q38 24 76 0V65" fill="#6B508B" />
+      <Path d="M75 59l55-24 55 24-55 24z" fill="#3C2A60" />
+      <Path d="M130 59l47 5v28" stroke="#B66F36" strokeWidth={3} fill="none" />
+      <Circle cx={177} cy={96} r={5} fill="#B66F36" />
+    </>
+  ),
+  awards: (
+    <>
+      <Path
+        d="M105 43H89q-1 31 29 33m37-33h16q1 31-29 33"
+        fill="none"
+        stroke="#B87938"
+        strokeWidth={6}
+      />
+      <Path d="M102 36h56q0 36-23 44v20h18v10h-46v-10h18V80q-23-8-23-44z" fill="#D4A653" />
+      <Path d="M130 45l3 8 9 1-7 6 2 8-7-4-7 4 2-8-7-6 9-1z" fill="#FFF4D3" />
+    </>
+  ),
+  newborn: (
+    <>
+      <Path d="M77 94h106v7q-53 32-106 0z" fill="#774561" />
+      <Path d="M85 92q12-40 47-40 30 0 44 40z" fill="#B76689" />
+      <Circle cx={125} cy={57} r={15} fill="#F2CB9B" />
+      <Path
+        d="M115 57q3 4 6 0m8 0q3 4 6 0m-15 7q5 3 10 0M113 75l29 18m9-19-21 20"
+        fill="none"
+        stroke="#663D54"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <Path d="M169 29l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z" fill="#DBA953" />
+    </>
+  ),
+  adoption: (
+    <>
+      <Path d="M71 74l36-30 37 30h-11v34H83V74z" fill="#4A7F72" />
+      <Path d="M103 108V83h15v25" fill="#ECDEAD" />
+      <Rect x={151} y={74} width={37} height={34} rx={6} fill="#AD7158" />
+      <Path d="M161 74v-6q9-9 18 0v6" fill="none" stroke="#785045" strokeWidth={4} />
+      <Path d="M165 38c-8-11-21 2 0 15 21-13 8-26 0-15z" fill="#AB5377" />
+    </>
+  ),
+  home: (
+    <>
+      <Rect x={83} y={65} width={92} height={47} rx={4} fill="#5982A5" />
+      <Path d="M71 68l59-41 59 41z" fill="#394E74" />
+      <Rect x={119} y={80} width={23} height={32} rx={3} fill="#EED9A0" />
+      <Rect x={92} y={78} width={17} height={17} rx={2} fill="#D6F1EB" />
+      <Path d="M154 82h12m-6-6v12" stroke="#D6F1EB" strokeWidth={3} />
+      <Circle cx={194} cy={93} r={10} fill="none" stroke="#AF7D41" strokeWidth={5} />
+      <Path d="M194 103v22h-9m9-8h-5" fill="none" stroke="#AF7D41" strokeWidth={5} />
+    </>
+  ),
+  service: (
+    <>
+      <Rect x={87} y={43} width={88} height={63} rx={6} fill="#34465F" />
+      <Rect x={94} y={50} width={74} height={49} rx={3} fill="#F9E9C6" />
+      <Path
+        d="M106 63h50m-45 10h40m-33 10h24"
+        stroke="#827154"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <Path d="M146 98l-1 24 10-6 10 6-1-24" fill="#805669" />
+      <Circle cx={155} cy={96} r={11} fill="#B78E55" />
+    </>
+  ),
+  remembrance: (
+    <>
+      <Path
+        d="M82 112q48-11 96 0"
+        fill="none"
+        stroke="#B19884"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+      <Rect x={113} y={67} width={34} height={39} rx={6} fill="#866C81" />
+      <Path d="M130 65c-16-4-10-19 3-34-2 10 11 24-3 34z" fill="#BC824A" />
+      <Path d="M109 104q-23-3-29-16 19-1 29 16m42 0q23-3 29-16-19-1-29 16" fill="#6D8373" />
+    </>
+  ),
+};
+
+export function MilestoneArt({ kind }: { kind: MilestoneKind }) {
   return (
     <Frame compact>
-      <Backdrop color={kind === 'awards' ? '#FAEBCD' : '#EEE4FA'} />
-      {kind === 'graduation' ? (
-        <>
-          <Path d="M92 65v25q38 24 76 0V65" fill="#6B508B" />
-          <Path d="M75 59l55-24 55 24-55 24z" fill="#3C2A60" />
-          <Path d="M130 59l47 5v28" stroke="#B66F36" strokeWidth={3} fill="none" />
-          <Circle cx={177} cy={96} r={5} fill="#B66F36" />
-        </>
-      ) : (
-        <>
-          <Path
-            d="M105 43H89q-1 31 29 33m37-33h16q1 31-29 33"
-            fill="none"
-            stroke="#B87938"
-            strokeWidth={6}
-          />
-          <Path d="M102 36h56q0 36-23 44v20h18v10h-46v-10h18V80q-23-8-23-44z" fill="#D4A653" />
-          <Path d="M130 45l3 8 9 1-7 6 2 8-7-4-7 4 2-8-7-6 9-1z" fill="#FFF4D3" />
-        </>
-      )}
+      <Backdrop color={milestoneBackdrop[kind]} />
+      {milestoneScenes[kind]}
     </Frame>
   );
 }

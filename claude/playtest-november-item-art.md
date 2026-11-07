@@ -17,3 +17,8 @@ auction quote, condition, or milestone text.
 These are stylized vector illustrations composed from a common set of parts.
 They are not faithful product drawings or individual paintings for every
 catalog item. No save change.
+
+The follow-up adds separate scenes for births and adoptions in the Life feed,
+home purchase confirmations, military discharge, and the end-of-life summary.
+Family scenes use the child's saved arrival age and route. This adds at most one
+scene per age and does not add a popup or rewrite the timeline.

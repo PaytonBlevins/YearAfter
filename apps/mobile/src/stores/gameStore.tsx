@@ -826,7 +826,12 @@ export function GameProvider({ repository, children }: GameProviderProps) {
           });
           return current;
         }
-        setOutcome({ title: 'It is yours', body: result.value.entry.text, tone: 'good' });
+        setOutcome({
+          title: 'It is yours',
+          body: result.value.entry.text,
+          tone: 'good',
+          art: 'home',
+        });
         if (saveId) persist(result.value.state, saveId, settings);
         return result.value.state;
       });
