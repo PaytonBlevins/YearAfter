@@ -23,6 +23,13 @@ vi.mock('react-native-svg', () => ({
   Rect: 'Rect',
   Line: 'Line',
   Polyline: 'Polyline',
+  Ellipse: 'Ellipse',
+  G: 'G',
+  Text: 'SvgText',
+  Defs: 'Defs',
+  LinearGradient: 'LinearGradient',
+  RadialGradient: 'RadialGradient',
+  Stop: 'Stop',
 }));
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });

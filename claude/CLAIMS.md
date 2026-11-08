@@ -127,3 +127,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | 0906 Military screens (v0.09) | Claude (Agent A): screens, store wiring, tests, docs | — | **Built (mobile; one engine fix for finding 216 in `advance.ts`). No save change: still v63, stacked on 0905. Touches `apps/mobile` (new `militaryView`, `MilitaryScreens`, `militaryActions`; edits to `YearRecapNotice.tsx`, `entertainmentView.ts`, `EntertainmentScreens.tsx`, `shells.tsx`, `gameStore.tsx`, `navigation.tsx`, `Shell.tsx`), `packages/simulation/src/advance.ts` (the living phase is handed a rank or title and the gross pay when there is no civilian job) and one export in `index.ts`. Agent B: the next free save version is still v64.** |
 
 | November — individual item and milestone art | Codex / Agent B (feat/november-item-art) | — | Claimed on the merged playtest build. |
+
+| November — artwork realism | Codex / Agent B (`feat/november-art-realism`) | — | Built on merged PR #37; mobile artwork and verification complete. Native device visual check remains open. See `playtest-november-art-realism.md`. |
