@@ -18,6 +18,8 @@
  */
 
 import {
+  FAME_BOOKING_CAP,
+  FAME_RECEPTION,
   findFameWork,
   FAME_WORK,
   NATIONAL_FAME_WORK,
@@ -50,7 +52,10 @@ export const workChance = (fame: number, fromFame: number): number =>
 
 /** Dollars, to the nearest ten, and never under what the thing pays at the very least. */
 export const workPay = (def: FameWorkDef, fame: number): number =>
-  Math.max(def.floor, Math.round((def.times * postRate(fame)) / 10) * 10);
+  Math.min(
+    FAME_BOOKING_CAP[def.id],
+    Math.max(def.floor, Math.round((def.times * postRate(fame)) / 10) * 10),
+  );
 
 /** Replace starter creative with the national brief while keeping its slot and settlement id. */
 function commissionFor(def: FameWorkDef, fame: number): FameWorkDef {
@@ -119,36 +124,63 @@ export function biggestChannel(channels: readonly Channel[]): Channel | undefine
 
 export type FameWorkRefusal = { readonly kind: 'notOffered' };
 
-/** Say yes. The audience comes now; the pay, the fame and the mood come when the year is settled. */
+/** Reception and audience resolve now; booked pay and mood settle with the year. */
 export function doFameWork(state: GameState, id: string): Result<GameState, FameWorkRefusal> {
   const offer = fameOffers(state).find((row) => row.def.id === id);
   if (offer === undefined) return err({ kind: 'notOffered' });
   const { def } = offer;
   const year = state.world.year;
   const key = `${state.rng.getSeed()}:${state.world.generation}:${year}:fame-work:${def.id}`;
+  const craft =
+    def.id === 'photoshoot'
+      ? (state.player.stats.looks + (state.modeling.craft ?? state.player.stats.looks)) / 2
+      : (state.player.stats.charisma + (state.acting.craft ?? state.player.stats.charisma)) / 2;
+  const reception =
+    mixedUnit(`${key}:reception`) * 100 + (craft - 50) * FAME_RECEPTION.attributeWeight;
+  const fameChange =
+    reception < FAME_RECEPTION.poorBelow
+      ? FAME_RECEPTION.poorChange
+      : reception < FAME_RECEPTION.weakBelow
+        ? FAME_RECEPTION.weakChange
+        : reception < FAME_RECEPTION.greatFrom
+          ? def.fame
+          : def.fame + FAME_RECEPTION.greatBonus;
+  const review =
+    fameChange < 0
+      ? 'The reception was poor.'
+      : reception >= FAME_RECEPTION.greatFrom
+        ? 'The audience loved it.'
+        : 'The reception was positive.';
   const target = def.audience === undefined ? undefined : biggestChannel(state.channels);
   let gain = 0;
   if (target !== undefined && def.audience !== undefined && target.audience > 0) {
     const share = def.audience[0] + (def.audience[1] - def.audience[0]) * mixedUnit(`${key}:size`);
-    gain = Math.max(1, Math.round(share * target.audience));
+    gain =
+      fameChange > 0
+        ? Math.max(1, Math.round(share * target.audience))
+        : -Math.round(share * target.audience * FAME_RECEPTION.lostAudienceShare);
   }
   const platform = target === undefined ? undefined : findPlatform(target.platformId);
   const line = stablePick(def.lines, `${key}:line`) ?? def.lines[0] ?? '';
   const text =
     fill(line, offer.outlet, offer.pay) +
+    ` ${review} Fame ${fameChange > 0 ? '+' : ''}${fameChange}.` +
     (gain > 0
       ? ` About ${gain.toLocaleString('en-US')} new ${platform?.audienceWord ?? 'followers'} came over to ${target!.name}.`
-      : '');
+      : gain < 0
+        ? ` About ${Math.abs(gain).toLocaleString('en-US')} followers left ${target?.name ?? 'your channel'}.`
+        : '');
   const entry: FameWorkDone = {
     id: def.id,
     outlet: offer.outlet,
     pay: offer.pay,
-    fame: def.fame,
+    fame: 0, // Reception is applied immediately; annual settlement pays the fee only.
     mood: def.mood,
   };
   const before = state.celebrities.work.year === year ? state.celebrities.work.done : [];
   return ok({
     ...state,
+    fame: Math.max(0, Math.min(100, state.fame + fameChange)),
     channels:
       target === undefined || gain === 0
         ? state.channels

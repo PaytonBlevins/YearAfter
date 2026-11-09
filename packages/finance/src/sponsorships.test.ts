@@ -54,7 +54,7 @@ describe('what a deal pays', () => {
   it('pins each platform at a known audience (gaming pays 0.8)', () => {
     expect(sponsorPay(make({ audience: 100_000 }), 1)).toBe(2_400);
     expect(sponsorPay(make({ audience: 1_000_000 }), 1)).toBe(24_000);
-    expect(sponsorPay(make({ platformId: 'stream', audience: 100_000 }), 1)).toBe(21_600);
+    expect(sponsorPay(make({ platformId: 'stream', audience: 100_000 }), 1)).toBe(2_880);
     expect(
       sponsorPay(make({ platformId: 'podcast', categoryId: 'comedy', audience: 5_000 }), 1),
     ).toBe(900);
@@ -334,22 +334,22 @@ describe('deals on the other three platforms (0703)', () => {
   const on = (platformId: string, categoryId: string, audience: number) =>
     make({ platformId, categoryId, audience });
 
-  it('pays a photo channel for four posts at one and a half times the going rate', () => {
+  it('pays a photo channel for four posts at 1.4 times the going rate', () => {
     expect(BRAND_CAMPAIGN_POSTS).toBe(4);
-    expect(BRAND_CAMPAIGN_PREMIUM).toBe(1.5);
-    // 100,000 followers: $1,300 a post at the going rate, times six.
-    expect(sponsorPay(on('photo', 'lifestyle', 100_000), 1)).toBe(7_800);
-    expect(sponsorPay(on('photo', 'lifestyle', 1_000_000), 1)).toBe(96_000);
-    expect(sponsorPay(on('photo', 'lifestyle', 100_000), 1.4)).toBe(10_920);
+    expect(BRAND_CAMPAIGN_PREMIUM).toBe(1.4);
+    // 100,000 followers: $1,300 a post at the going rate, times 5.6.
+    expect(sponsorPay(on('photo', 'lifestyle', 100_000), 1)).toBe(7_280);
+    expect(sponsorPay(on('photo', 'lifestyle', 1_000_000), 1)).toBe(89_600);
+    expect(sponsorPay(on('photo', 'lifestyle', 100_000), 1.4)).toBe(10_192);
     expect(sponsorPay(on('photo', 'fitness', 100_000), 1)).toBe(
-      Math.round(7_800 * findCreatorCategory('fitness')!.pays),
+      Math.round(7_280 * findCreatorCategory('fitness')!.pays),
     );
   });
 
   it('does not mark a small photo channel’s posts down below the going rate', () => {
     // 5,000 followers: $50 a post at the going rate, six of them. The going rate only rises with size.
-    expect(sponsorPay(on('photo', 'lifestyle', 5_000), 1)).toBe(300);
-    expect(sponsorPay(on('photo', 'lifestyle', 10_000), 1)).toBe(600);
+    expect(sponsorPay(on('photo', 'lifestyle', 5_000), 1)).toBe(280);
+    expect(sponsorPay(on('photo', 'lifestyle', 10_000), 1)).toBe(560);
   });
 
   it('pays a short-form channel for five clips seen by a third of its followers', () => {
@@ -442,4 +442,16 @@ describe('asking for more is a fair gamble', () => {
     expect(MORE_RAISE).toBe(0.6);
     expect(MORE_CHANCE * (1 + MORE_RAISE)).toBeCloseTo(1.04, 12);
   });
+});
+
+it('prices large campaigns with diminishing reach and a bounded initial quote', () => {
+  const million = sponsorPay(make({ audience: 1_000_000 }), 1);
+  const tenMillion = sponsorPay(make({ audience: 10_000_000 }), 1);
+  expect(tenMillion).toBeGreaterThan(million);
+  expect(tenMillion).toBeLessThan(million * 10);
+  for (const platformId of ['video', 'stream', 'photo', 'shortform', 'podcast', 'subscription']) {
+    expect(sponsorPay(make({ platformId, audience: 1_000_000_000 }), 1.4)).toBeLessThanOrEqual(
+      5_000_000,
+    );
+  }
 });

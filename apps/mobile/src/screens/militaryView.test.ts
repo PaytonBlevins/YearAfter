@@ -225,7 +225,7 @@ describe('Service, in uniform', () => {
     expect(by('This term')).toEqual({
       title: 'This term',
       value: '1 year',
-      subtitle: 'Left before you decide again',
+      subtitle: 'Until End term is available',
     });
     expect(by('In uniform').value).toBe('3 years');
     expect(by('Pay').value).toMatch(/^\$[\d,]+ a year$/);
@@ -249,8 +249,8 @@ describe('Service, in uniform', () => {
     const ending = serviceView(serving(person, { years: 4, termEnds: 4 }));
     expect(ending.facts.find((fact) => fact.title === 'This term')).toEqual({
       title: 'This term',
-      value: 'Up this year',
-      subtitle: 'Stay or leave, when the year turns',
+      value: 'First term completed',
+      subtitle: 'You can choose to leave from this screen',
     });
     const more = serviceView(serving(person, { years: 2, termEnds: 4 }));
     expect(more.facts.find((fact) => fact.title === 'This term')!.value).toBe('2 years');
@@ -258,7 +258,9 @@ describe('Service, in uniform', () => {
 
   it('never shows a negative number of years left', () => {
     const past = serviceView(serving(person, { years: 6, termEnds: 4 }));
-    expect(past.facts.find((fact) => fact.title === 'This term')!.value).toBe('Up this year');
+    expect(past.facts.find((fact) => fact.title === 'This term')!.value).toBe(
+      'First term completed',
+    );
   });
 
   it('marks the bar low just under the floor the service lets people go below', () => {
@@ -386,7 +388,8 @@ describe('Service, the verbs the engine would refuse', () => {
 
   it('shuts Retire before twenty years, and during training, with the same words', () => {
     const words = 'Retiring opens at twenty years of service, and not during training.';
-    expect(serviceView(serving(person, { years: 19 })).retire).toEqual({ closed: words });
+    expect(serviceView(serving(person, { years: 19 })).retire).toBeUndefined();
+    expect(serviceView(serving(person, { years: 19 })).endTerm).toEqual({});
     expect(serviceView(serving(person, { years: 25, stage: 'training' })).retire).toEqual({
       closed: words,
     });

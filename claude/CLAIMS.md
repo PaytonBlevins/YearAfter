@@ -129,3 +129,5 @@ before starting work. A = every ticket end to end (engine, save, calibration, te
 | November — individual item and milestone art | Codex / Agent B (feat/november-item-art) | — | Claimed on the merged playtest build. |
 
 | November — artwork realism | Codex / Agent B (`feat/november-art-realism`) | — | Built on merged PR #37; mobile artwork and verification complete. Native device visual check remains open. See `playtest-november-art-realism.md`. |
+
+| November — career control and aptitude | Codex (`feat/november-career-control`) | — | Built and verified: sports, military, classes, fame and sponsor changes. No new save fields. See `playtest-november-career-control.md`. |

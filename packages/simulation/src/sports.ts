@@ -92,7 +92,6 @@ import {
   trainingCeiling,
   tourCardOffer,
   turnProOffer,
-  withoutBase,
 } from './sports-individual';
 import {
   COLLEGE_SERIOUS_LINES,
@@ -103,6 +102,7 @@ import {
   injuryOf,
   money,
   nextForm,
+  trainingEfficiency,
   pick,
   positionIn,
   sportUnit,
@@ -154,7 +154,10 @@ export function skillsOf(
   return sport.skills.map((skill) => ({
     id: skill.id,
     name: skill.name,
-    value: skillValue(career.form, sportUnit(seed, state.world.generation, 'skill', skill.id)),
+    value: Math.min(
+      Math.max(career.form, trainingCeiling(state, career.sportId)),
+      skillValue(career.form, sportUnit(seed, state.world.generation, 'skill', skill.id)),
+    ),
   }));
 }
 
@@ -226,10 +229,13 @@ export function trainSport(
   const age = state.player.age;
   const done = career.trainedAtAge === age ? career.trainedCount : 0;
   if (done >= PRACTICE_SESSIONS) return err('no-sessions-left');
-  const gain = practiceGain(state.player.stats, career.form, done);
+  const gain = Math.max(
+    1,
+    Math.round(practiceGain(state.player.stats, career.form, done) * trainingEfficiency(state)),
+  );
   const sport = findSport(career.sportId);
-  // Work lifts an individual player only so far (ticket 0803); a team player's practice is as it was.
-  const ceiling = sport && sport.format !== 'team' ? trainingCeiling(state) : 100;
+  // Potential is activity-specific; older above-cap skill is allowed to decline gradually.
+  const ceiling = trainingCeiling(state, career.sportId);
   const next: SportCareer = {
     ...career,
     form: Math.min(Math.max(career.form, ceiling), career.form + gain),
@@ -505,7 +511,10 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
     if (injury === 'serious' && sportUnit(seed, gen, 'tierloss', year) < SERIOUS_TIER_LOSS_CHANCE) {
       peak = stepTier(peak, -1);
     }
-    const tier = tierAt(peak, career.breakout ?? 1, proSeasons, career.endAge ?? 99, age);
+    const endAge = sport
+      ? between(sportUnit(seed, gen, 'retire', sport.id), sport.economy.retireAge.star)
+      : (career.endAge ?? 99);
+    const tier = tierAt(peak, career.breakout ?? 1, proSeasons, endAge, age);
     const missed = injury === 'serious' || injury === 'ending';
     const title =
       !missed && sportUnit(seed, gen, 'title', year) < BASE_TITLE_CHANCE + TIER_TITLE_BONUS[tier];
@@ -569,7 +578,7 @@ export function runSportsYear(input: SportsYearInput): SportsYearOutput {
         text: `An injury ended your ${sport?.noun ?? 'playing'} career at ${age}.`,
       });
       finish('injury', career);
-    } else if (age >= (career.endAge ?? 99)) {
+    } else if (age >= endAge) {
       lines.push({
         kind: 'milestone',
         text: `Retired from ${sport?.noun ?? 'the game'} at ${age}, after ${proSeasons} ${proSeasons === 1 ? 'season' : 'seasons'}${career.titles > 0 ? ` and ${career.titles} ${career.titles === 1 ? 'title' : 'titles'}` : ''}.`,
@@ -729,7 +738,7 @@ function draftOffer(
     stablePick(sport.proTeams, `sports:pro:${seed}:${gen}:${pick}`) ?? sport.proTeams[0]!;
   const breakout = between(sportUnit(seed, gen, 'breakout', sport.id), BREAKOUT_YEARS[peak]);
   // Drawn from the age they are drafted at, which is when the career starts: a late bloomer is a late retirement too.
-  const endAge = between(sportUnit(seed, gen, 'retire', sport.id), economy.retireAge[peak]);
+  const endAge = between(sportUnit(seed, gen, 'retire', sport.id), economy.retireAge.star);
   const deal = rookieDeal(sport, pick);
   return {
     career: { ...career, peak, breakout, endAge, pick, tier: stepTier(peak, -1) },
@@ -1180,7 +1189,7 @@ export function answerSportsOffer(
           },
         }
       : state;
-    const arts = sport ? withoutBase(sportsRest.arts ?? [], sport) : (sportsRest.arts ?? []);
+    const arts = sportsRest.arts ?? [];
     const { arts: _used, ...restNoArts } = sportsRest;
     const text = proTour
       ? `Took the ${sport?.leagueShort ?? 'tour'} card.${left?.ok ? ' That was the end of the day job.' : ''}`
@@ -1383,3 +1392,41 @@ const RISE_LINES: readonly string[] = [
   'Something clicked this season.',
   'You stopped being the young one on the bench.',
 ];
+
+/** Voluntary exit keeps independent classes and records the career immediately. */
+export function leaveSport(
+  state: GameState,
+): Result<{ readonly state: GameState; readonly entry: TimelineEntry }, TrainError> {
+  const career = state.sports.career;
+  if (!career || career.stage === 'school') return err('not-playing');
+  const { career: _career, offer: _offer, ...rest } = state.sports;
+  const past: PastCareer = {
+    sportId: career.sportId,
+    startedAge: career.startedAge,
+    endedAge: state.player.age,
+    seasons: career.seasons,
+    titles: career.titles,
+    reputation: career.reputation,
+    reached: career.stage,
+    how: career.stage === 'pro' ? 'retired' : 'left-college',
+    ...(career.tier ? { bestTier: career.best ?? bestTierOf(career) } : {}),
+    ...(career.wins !== undefined ? { wins: career.wins, losses: career.losses ?? 0 } : {}),
+  };
+  const entry = createTimelineEntry({
+    age: state.player.age,
+    year: state.world.year,
+    kind: 'milestone',
+    text: `${career.stage === 'pro' ? 'Retired from' : 'Left'} ${findSport(career.sportId)?.name ?? career.sportId}.`,
+    id: `t:${state.world.year}:sports:leave`,
+    sequence: state.player.timeline.filter((row) => row.age === state.player.age).length,
+  });
+  return ok({
+    entry,
+    state: {
+      ...state,
+      sports: { ...rest, past: [...rest.past, past] },
+      pending: state.pending.filter((row) => row.eventId !== SPORTS_OFFER_EVENT_ID),
+      player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
+    },
+  });
+}

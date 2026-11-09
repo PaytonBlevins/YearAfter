@@ -557,7 +557,7 @@ function offerChoices(offer: MilitaryOffer): PendingDecision['choices'] {
     return [...offer.options.map((id) => ({ id, label: findSpecialty(id)?.name ?? id })), no];
   }
   return [
-    { id: MILITARY_REENLIST, label: `Stay ${TERM_YEARS} more years` },
+    { id: MILITARY_REENLIST, label: 'Continue service' },
     {
       id: MILITARY_LEAVE,
       label:
@@ -652,6 +652,24 @@ export type ServiceRetireError = 'not-serving' | 'too-soon' | 'deployed';
  * Retire, by choice. Open from twenty years of service, and not during training. A retirement ends the service and starts
  * nothing: pay and benefits for a retiree are 0904.
  */
+export function endServiceTerm(state: GameState): Result<MilitaryOfferOutcome, ServiceRetireError> {
+  const career = state.military.service;
+  if (!career) return err('not-serving');
+  if (state.military.deployment) return err('deployed');
+  if (career.stage === 'training' || career.years < TERM_YEARS) return err('too-soon');
+  if (career.years >= RETIRE_ELIGIBLE_YEARS) return retireFromService(state);
+  return ok(
+    endService(
+      state,
+      'term',
+      'You chose to end your service after completing your first term.',
+      `Left ${branchNameOf(career.branch)} — ${rankTitleOf(career)}`,
+      'leave',
+      state.player.age,
+    ),
+  );
+}
+
 export function retireFromService(
   state: GameState,
 ): Result<MilitaryOfferOutcome, ServiceRetireError> {
@@ -775,7 +793,7 @@ export function answerMilitaryOffer(
   const { offer: _spent, ...rest } = state.military;
   const entry = entryFor(
     state,
-    `You signed up for ${TERM_YEARS} more years as a ${title.toLowerCase()}.`,
+    `You chose to continue serving as a ${title.toLowerCase()}. You can leave from the service screen.`,
     'milestone',
     'reenlist',
   );
@@ -783,7 +801,16 @@ export function answerMilitaryOffer(
     entry,
     state: {
       ...state,
-      military: { ...rest, service: { ...career, termEnds: career.termEnds + TERM_YEARS } },
+      military: {
+        ...rest,
+        service: {
+          ...career,
+          termEnds:
+            career.years >= RETIRE_ELIGIBLE_YEARS
+              ? 100
+              : Math.min(RETIRE_ELIGIBLE_YEARS, career.termEnds + TERM_YEARS),
+        },
+      },
       pending: dropQuestion(state),
       player: { ...state.player, timeline: appendToTimeline(state.player.timeline, entry) },
     },
@@ -1180,12 +1207,15 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
   }
 
   const { prior: _prior, ...careerBase } = career;
-  const next: ServiceCareer = {
+  let next: ServiceCareer = {
     ...careerBase,
     specialty,
     stage: 'serving',
     grade,
     years: nextYears,
+    ...(career.years < RETIRE_ELIGIBLE_YEARS && nextYears >= RETIRE_ELIGIBLE_YEARS
+      ? { termEnds: RETIRE_ELIGIBLE_YEARS }
+      : {}),
     performance,
     reputation,
     lastPay: pay,
@@ -1284,7 +1314,12 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
   /* ---- the end of a term ---------------------------------------------------- */
   const ordered = military.deployment?.status === 'ordered' ? military.deployment : undefined;
   // Ticket 0903. A member away is not asked about the next term: the question waits for the year they are home.
-  if (nextYears >= career.termEnds && military.offer === undefined && ordered === undefined) {
+  if (
+    nextYears >= next.termEnds &&
+    next.termEnds <= RETIRE_ELIGIBLE_YEARS &&
+    military.offer === undefined &&
+    ordered === undefined
+  ) {
     if (performance < RETAIN_PERFORMANCE_FLOOR || career.refusedTerm === true) {
       // Not asked to stay. With twenty years in, that is a retirement.
       if (nextYears >= RETIRE_ELIGIBLE_YEARS) {
@@ -1297,18 +1332,21 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
         mood,
       );
     }
-    military = {
-      ...military,
-      offer: {
-        kind: 'reenlist',
-        branch,
-        track,
-        grade,
-        years: nextYears,
-        age,
-        eventId: MILITARY_OFFER_EVENT_ID,
-      },
-    };
+    if (nextYears < RETIRE_ELIGIBLE_YEARS) {
+      next = { ...next, termEnds: Math.min(RETIRE_ELIGIBLE_YEARS, nextYears + TERM_YEARS) };
+    } else if (next.termEnds <= RETIRE_ELIGIBLE_YEARS)
+      military = {
+        ...military,
+        offer: {
+          kind: 'reenlist',
+          branch,
+          track,
+          grade,
+          years: nextYears,
+          age,
+          eventId: MILITARY_OFFER_EVENT_ID,
+        },
+      };
   }
 
   /* ---- Ticket 0903: orders accepted are served this year; orders for next year are raised now ------------ */
@@ -1340,3 +1378,36 @@ export function runMilitaryYear(input: MilitaryYearInput): MilitaryYearOutput {
 /** A line saying what the pay is, for a screen. */
 export const payWords = (career: ServiceCareer): string =>
   `${dollarsWords(yearPayOf(career))} a year`;
+
+/** Clear obsolete routine term decisions when an old save is restored. */
+export function normalizeServiceDecision(state: GameState): GameState {
+  const offer = state.military.offer;
+  if (
+    offer?.kind === 'reenlist' &&
+    (offer.years < RETIRE_ELIGIBLE_YEARS ||
+      (offer.years > RETIRE_ELIGIBLE_YEARS &&
+        (state.military.service?.termEnds ?? 0) > RETIRE_ELIGIBLE_YEARS))
+  ) {
+    const { offer: _old, ...rest } = state.military;
+    const career = rest.service;
+    return {
+      ...state,
+      military: {
+        ...rest,
+        ...(career
+          ? {
+              service: {
+                ...career,
+                termEnds:
+                  career.years >= RETIRE_ELIGIBLE_YEARS
+                    ? 100
+                    : Math.min(RETIRE_ELIGIBLE_YEARS, career.years + TERM_YEARS),
+              },
+            }
+          : {}),
+      },
+      pending: dropQuestion(state),
+    };
+  }
+  return state;
+}

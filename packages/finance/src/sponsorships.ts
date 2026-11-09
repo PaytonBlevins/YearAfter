@@ -32,7 +32,7 @@ export const VIEWS_PER_AUDIENCE = 0.4;
 /** What a thousand views are worth to a brand, whole dollars, before the category. $10–50 is the range. */
 export const SPONSOR_VIDEO_CPM = 25;
 /** What a sponsored stream pays per average viewer, whole dollars, before the category. */
-export const SPONSOR_PER_VIEWER = 15;
+export const SPONSOR_PER_VIEWER = 2;
 /** A video or stream deal is a short campaign: this many videos or streams. */
 export const DEAL_VIDEOS = 3;
 export const DEAL_STREAMS = 3;
@@ -43,7 +43,7 @@ export const FLIGHT_EPISODES = 8;
 export const SPONSOR_FLIGHT_CPM = 25;
 /** Ticket 0703. A brand campaign on a photo channel: this many posts, at this multiple of the going rate for a post. */
 export const BRAND_CAMPAIGN_POSTS = 4;
-export const BRAND_CAMPAIGN_PREMIUM = 1.5;
+export const BRAND_CAMPAIGN_PREMIUM = 1.4;
 /** A short-form campaign: this many clips, each seen by this share of the followers, at this rate per thousand views (influencer CPMs run $5–25). */
 export const CAMPAIGN_CLIPS = 5;
 export const CLIP_VIEWS_PER_FOLLOWER = 0.3;
@@ -78,6 +78,16 @@ export function brandInterest(audience: number, paysAt: number): number {
 
 /** What a deal pays, whole dollars, given how much of the rate the brand offered (0.6–1.4). */
 export function sponsorPay(channel: Channel, rate: number): number {
+  // Marketplace packages and celebrity contracts are different markets. Reach has diminishing
+  // returns at scale; a follower is not a guaranteed impression. See the November balance notes.
+  const audience =
+    channel.audience <= 1_000_000
+      ? channel.audience
+      : 1_000_000 * (channel.audience / 1_000_000) ** 0.85;
+  return Math.min(5_000_000, campaignPay({ ...channel, audience }, rate));
+}
+
+function campaignPay(channel: Channel, rate: number): number {
   const platform = findPlatform(channel.platformId);
   const category = findCreatorCategory(channel.categoryId);
   if (platform === undefined || category === undefined) return 0;

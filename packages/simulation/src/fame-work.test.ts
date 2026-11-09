@@ -96,9 +96,9 @@ describe('the numbers (13.120: written out, not read back from the constants)', 
       800, 950, 2390, 9530, 95320, 953190,
     ]);
     expect([20, 28, 40, 60, 80].map((f) => pay('talkShow', f))).toEqual([
-      500, 500, 790, 7940, 79430,
+      500, 500, 790, 7940, 25000,
     ]);
-    expect([28, 40, 60, 80].map((f) => pay('guestStar', f))).toEqual([1283, 3180, 31770, 317730]);
+    expect([28, 40, 60, 80].map((f) => pay('guestStar', f))).toEqual([1283, 3180, 31770, 150000]);
   });
 
   it('rises from the level and stops at the cap', () => {
@@ -197,7 +197,7 @@ describe('who is offered what', () => {
 
   it('caps the added campaign premium at high fame and never replaces an accepted starter job', () => {
     for (const [id, cap] of [
-      ['photoshoot', 12000],
+      ['photoshoot', 0],
       ['commercial', 20000],
     ] as const) {
       const knownStar = offering(known(100), id);
@@ -284,7 +284,7 @@ describe('saying yes', () => {
     const after = result.value;
     expect(after.celebrities.work).toEqual({
       year: state.world.year,
-      done: [{ id: 'commercial', outlet: offer.outlet, pay: 115320, fame: 1, mood: 0 }],
+      done: [{ id: 'commercial', outlet: offer.outlet, pay: 115320, fame: 0, mood: 0 }],
     });
     const line = after.player.timeline.at(-1)!;
     expect(line.text).toContain(offer.outlet);
@@ -292,7 +292,7 @@ describe('saying yes', () => {
     expect(after.player.timeline.length).toBe(state.player.timeline.length + 1);
     expect(after.finance.balance).toBe(state.finance.balance);
     expect(after.finance.transactions).toEqual(state.finance.transactions);
-    expect(after.fame).toBe(state.fame);
+    expect(after.fame).not.toBe(state.fame);
     expect(workToSettle(after)).toEqual(after.celebrities.work.done);
   });
 
@@ -327,11 +327,18 @@ describe('saying yes', () => {
       if (!r.ok) continue;
       const now = r.value.channels.find((c) => c.id === big.id)!;
       const gain = now.audience - big.audience;
-      expect(gain / big.audience).toBeGreaterThanOrEqual(0.03 - 1e-4);
-      expect(gain / big.audience).toBeLessThanOrEqual(0.08 + 1e-4);
-      expect(now.peak).toBe(now.audience);
+      if (r.value.fame > trial.fame) {
+        expect(gain / big.audience).toBeGreaterThanOrEqual(0.03 - 1e-4);
+        expect(gain / big.audience).toBeLessThanOrEqual(0.08 + 1e-4);
+      } else {
+        expect(gain / big.audience).toBeGreaterThanOrEqual(-0.02 - 1e-4);
+        expect(gain / big.audience).toBeLessThanOrEqual(-0.0075 + 1e-4);
+      }
+      expect(now.peak).toBe(Math.max(big.peak, now.audience));
       expect(r.value.channels.find((c) => c.id === small.id)).toEqual(small);
-      expect(r.value.player.timeline.at(-1)!.text).toContain(gain.toLocaleString('en-US'));
+      expect(r.value.player.timeline.at(-1)!.text).toContain(
+        Math.abs(gain).toLocaleString('en-US'),
+      );
       expect(r.value.player.timeline.at(-1)!.text).toContain(big.name);
       counted += 1;
     }
@@ -344,8 +351,9 @@ describe('saying yes', () => {
     expect(guest.ok).toBe(true);
     if (guest.ok) {
       const share = (guest.value.channels[0]!.audience - 50_000) / 50_000;
-      expect(share).toBeGreaterThanOrEqual(0.02 - 1e-4);
-      expect(share).toBeLessThanOrEqual(0.06 + 1e-4);
+      expect(guest.value.fame).toBeLessThan(60);
+      expect(share).toBeGreaterThanOrEqual(-0.015 - 1e-4);
+      expect(share).toBeLessThanOrEqual(-0.005 + 1e-4);
     }
     for (const id of ['photoshoot', 'commercial']) {
       const r = doFameWork(offering(known(60, [big]), id), id);
@@ -374,7 +382,7 @@ describe('saying yes', () => {
       if (!fameOffers(trial).some((o) => o.def.id === 'talkShow')) continue;
       const r = doFameWork(trial, 'talkShow');
       expect(r.ok).toBe(true);
-      if (!r.ok) continue;
+      if (!r.ok || r.value.fame <= trial.fame) continue;
       expect(r.value.channels[0]!.audience).toBeGreaterThanOrEqual(11);
       expect(r.value.player.timeline.at(-1)!.text).toContain('came over');
       seen += 1;
@@ -402,7 +410,7 @@ describe('saying yes', () => {
   });
 
   it('records every thing’s fame and mood as the catalog sets them', () => {
-    const want = { photoshoot: [1, 1], commercial: [1, 0], talkShow: [2, 1], guestStar: [3, 2] };
+    const want = { photoshoot: [0, 1], commercial: [0, 0], talkShow: [0, 1], guestStar: [0, 2] };
     for (const [id, [fame, mood]] of Object.entries(want)) {
       const r = doFameWork(offering(known(80), id), id);
       expect(r.ok, id).toBe(true);

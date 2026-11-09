@@ -917,16 +917,15 @@ describe('a year of service', () => {
 describe('the end of a term', () => {
   const base = eligible(adult('MIL-TERM', 24));
 
-  it('asks the question when a term ends, freezing the grade and years it ended at', () => {
+  it('continues a completed first term without a popup', () => {
     const out = yearOf(
       serving(base, { grade: 5, years: 3, termEnds: 4, performance: 70 }),
       25,
       2033,
     );
-    expect(out.military.offer?.kind).toBe('reenlist');
-    if (out.military.offer?.kind !== 'reenlist') return;
-    expect(out.military.offer.years).toBe(4);
-    expect(out.military.offer.grade).toBe(out.military.service!.grade);
+    expect(out.military.offer?.kind).not.toBe('reenlist');
+    expect(out.military.service?.years).toBe(4);
+    expect(out.military.service?.termEnds).toBe(8);
     expect(out.military.service).toBeDefined();
     expect(out.left).toBe(false);
   });
@@ -1683,7 +1682,8 @@ describe('edges of a year', () => {
       28,
       2041,
     );
-    expect(at.military.offer?.kind).toBe('reenlist');
+    expect(at.military.offer?.kind).not.toBe('reenlist');
+    expect(at.military.service?.years).toBe(4);
     const under = yearOf(
       serving(middling, {
         grade: 4,

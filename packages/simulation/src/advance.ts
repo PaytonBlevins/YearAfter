@@ -600,6 +600,10 @@ export function advanceYear(state: GameState): AdvanceResult {
   */
   const creatorsYear = runCreatorsYear({
     channels: state.channels,
+    excludedFameCategories: [
+      ...(musicYear.fame ? ['music'] : []),
+      ...(modelYear.fame ? MODEL_CHANNEL_CATEGORIES : []),
+    ],
     fame: state.fame,
     year: nextYear,
     stats: worked.stats as unknown as Record<string, number>,

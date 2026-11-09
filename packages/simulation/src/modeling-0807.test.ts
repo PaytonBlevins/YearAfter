@@ -3618,12 +3618,15 @@ describe('what a model’s year does to the rest of the life', () => {
     ).toBe(true);
     expect(next.fame).toBeGreaterThan(0);
     expect(next.fame).toBe(
-      modelFameOf({
-        tier: next.modeling.best ?? next.modeling.tier,
-        reputation: next.modeling.reputation,
-        awards: next.modeling.awards,
-        idle: next.modeling.idle,
-      }),
+      Math.round(
+        0.15 *
+          modelFameOf({
+            tier: next.modeling.best ?? next.modeling.tier,
+            reputation: next.modeling.reputation,
+            awards: next.modeling.awards,
+            idle: next.modeling.idle,
+          }),
+      ),
     );
   });
 

@@ -31,6 +31,7 @@ import {
   leaveAgency,
   leaveAgent,
   leavePost,
+  leaveSport,
   moveUpSeries,
   planReleases,
   planTour,
@@ -58,6 +59,7 @@ import { newEntries, refusalText, type Attempt, type Refused } from './fameActio
 /** Everything a player can do in these fields, as one value so the store has one action for them. */
 export type EntertainmentAction =
   | { readonly type: 'train' }
+  | { readonly type: 'leaveSport' }
   | { readonly type: 'art'; readonly artId: string; readonly do: 'start' | 'stop' | 'train' }
   | { readonly type: 'leavePost' }
   | { readonly type: 'apply'; readonly field: 'acting' | 'modeling'; readonly callId: string }
@@ -143,6 +145,11 @@ function collabRefusal(error: { readonly kind: string; readonly needed?: number 
 
 export function applyEntertainment(state: GameState, action: EntertainmentAction): Attempt {
   switch (action.type) {
+    case 'leaveSport': {
+      const result = leaveSport(state);
+      if (!result.ok) return refuse(TRAIN_ERROR_LABELS[result.error], 'Not now');
+      return done(state, result.value, 'You left the sport', 'neutral');
+    }
     case 'train': {
       const result = trainSport(state);
       if (!result.ok) return refuse(TRAIN_ERROR_LABELS[result.error], 'Not now');

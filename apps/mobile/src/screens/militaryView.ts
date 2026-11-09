@@ -59,6 +59,7 @@ import {
   pushesLeft,
   rankTitleOf,
   retireFromService,
+  endServiceTerm,
   retiredPayOf,
   retiredPayStartAge,
   specialtyNameOf,
@@ -209,6 +210,7 @@ export interface ServiceView {
   /** Only an enlisted member has a commission to apply for. */
   readonly commission?: { readonly closed?: string };
   readonly retire?: { readonly closed?: string };
+  readonly endTerm?: { readonly closed?: string };
   /** For somebody out of uniform: why the recruiter's door is shut, if it is. */
   readonly enlist?: { readonly closed?: string };
 }
@@ -239,7 +241,7 @@ export function serviceView(state: GameState): ServiceView {
     };
   }
 
-  const left = Math.max(0, career.termEnds - career.years);
+  const left = Math.max(0, 4 - career.years);
   const training = career.stage === 'training';
   const row = SERVICE_BRANCHES.find((branch) => branch.id === career.branch);
   const facts: Fact[] = [
@@ -260,8 +262,9 @@ export function serviceView(state: GameState): ServiceView {
       : { title: 'Posting', value: career.post },
     {
       title: 'This term',
-      value: left === 0 ? 'Up this year' : plural(left, 'year'),
-      subtitle: left === 0 ? 'Stay or leave, when the year turns' : 'Left before you decide again',
+      value: left === 0 ? 'First term completed' : plural(left, 'year'),
+      subtitle:
+        left === 0 ? 'You can choose to leave from this screen' : 'Until End term is available',
     },
     { title: 'In uniform', value: plural(career.years, 'year') },
     { title: 'Pay', value: `${money(yearPayOf(career))} a year` },
@@ -289,7 +292,16 @@ export function serviceView(state: GameState): ServiceView {
             : { closed: COMMISSION_ERROR_LABELS[commissionTrial.error] },
         }
       : {}),
-    retire: retireTrial.ok ? {} : { closed: RETIRE_ERROR_LABELS[retireTrial.error] },
+    ...(career.years >= RETIRE_ELIGIBLE_YEARS
+      ? { retire: retireTrial.ok ? {} : { closed: RETIRE_ERROR_LABELS[retireTrial.error] } }
+      : {}),
+    ...(career.years >= 4 && career.years < RETIRE_ELIGIBLE_YEARS
+      ? {
+          endTerm: endServiceTerm(state).ok
+            ? {}
+            : { closed: 'You must return from deployment first.' },
+        }
+      : {}),
   };
 }
 

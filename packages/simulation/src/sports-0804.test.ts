@@ -594,7 +594,7 @@ describe('boxing and wrestling reach the Games after the gym’s question', () =
     ).toBe(true);
   });
 
-  it('removes the art that was the base once the program is joined, and leaves the others alone', () => {
+  it('preserves every class when the national program is joined', () => {
     const state = firstSeed('base-gone', (seed) => {
       const base = withArts(life(seed), [study('wrestling', 8), study('swimming', 5)]);
       const found = nationalTeamOffer(base, 19, artsOf(base));
@@ -609,7 +609,7 @@ describe('boxing and wrestling reach the Games after the gym’s question', () =
     if (!result.ok) return;
     expect(result.value.state.sports.career?.stage).toBe('pro');
     expect(result.value.state.sports.career?.tier).toBe('fringe');
-    expect(artsOf(result.value.state).map((row) => row.artId)).toEqual(['swimming']);
+    expect(artsOf(result.value.state).map((row) => row.artId)).toEqual(['wrestling', 'swimming']);
   });
 });
 
@@ -646,7 +646,7 @@ describe('the national-team question', () => {
     expect(isFullTime(career)).toBe(false);
     expect(result.value.state.player.records.some((row) => /program/.test(row.label))).toBe(true);
     expect(result.value.state.sports.offer).toBeUndefined();
-    expect(artsOf(result.value.state)).toEqual([]);
+    expect(artsOf(result.value.state)).toEqual(artsOf(state));
     expect(careerLabel(career)).toBe('National Aquatics Federation');
   });
 
@@ -974,14 +974,14 @@ describe('an Olympic life, through the game', () => {
   it('studies are readable only while studied: stopping one drops it, and a joined program has none of its base', () => {
     const state = swimmer('oly-reading', 18);
     if (state.sports.career?.stage === 'pro')
-      expect(artsOf(state).some((row) => row.artId === 'swimming')).toBe(false);
+      expect(artsOf(state).some((row) => row.artId === 'swimming')).toBe(true);
   });
 
-  it('cannot study the boxing that is already the Olympic career', () => {
+  it('can continue boxing classes during an Olympic career', () => {
     const state = proState(OLY_BOXING, { tier: 'role' }, 'is-oly-boxing');
     const refused = startArt({ ...state, player: { ...state.player, age: 22 } }, 'boxing');
-    expect(refused.ok).toBe(false);
-    if (!refused.ok) expect(refused.error).toBe('is-your-career');
+    expect(refused.ok).toBe(true);
+    if (refused.ok) expect(refused.value.state.sports.arts).toHaveLength(1);
   });
 });
 

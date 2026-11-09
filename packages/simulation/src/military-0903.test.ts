@@ -821,7 +821,7 @@ describe('answering the orders', () => {
       year: ending.world.year + 1,
     });
     expect(out.left).toBe(false);
-    expect(out.military.offer?.kind).toBe('reenlist');
+    expect(out.military.offer?.kind).not.toBe('reenlist');
   });
 
   it('turns down a choice it does not offer, and an answer with no orders to answer', () => {
@@ -971,7 +971,8 @@ describe('the year away', () => {
       age: awayLife.player.age + 1,
       year: awayLife.world.year + 1,
     });
-    expect(home.military.offer?.kind === 'reenlist' || home.left).toBe(true);
+    expect(home.military.offer?.kind).not.toBe('reenlist');
+    expect(home.military.service?.years).toBe(5);
   });
 
   it('puts the branch on the ledger: a Navy member’s pay is Navy pay', () => {

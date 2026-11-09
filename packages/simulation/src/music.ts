@@ -130,7 +130,7 @@ import type { GameState } from './game-state';
 import type { LabelDeal, LabelOffer, MusicPlan, MusicState } from './music-state';
 import { EMPTY_PLAN } from './music-state';
 import { friendsOf } from './network';
-import { affordsFee } from './pursuits';
+import { canContinueClass } from './class-budget';
 import { money } from './sports-core';
 
 export const MUSIC_OFFER_EVENT_ID = 'music.offer';
@@ -862,10 +862,10 @@ export function runMusicYear(input: MusicYearInput): MusicYearOutput {
   if (music.lessons) {
     // As the arts are billed: an adult living on their own pays, and the first thing to go in a tight year is the class.
     const pays = age >= 18 && before.household.housing !== 'withFamily';
-    if (pays && !affordsFee(input.standard ?? 0, MUSIC_LESSONS_COST)) {
+    if (pays && !canContinueClass(before, 'music-lessons', input.standard ?? 0)) {
       lines.push({
         kind: 'passive',
-        text: 'Let the music lessons go. The fees were the first thing to cut.',
+        text: "Let the music lessons go. There wasn't enough money for the fees.",
       });
       const { lessons: _dropped, ...without } = music;
       music = without as MusicState;

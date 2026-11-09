@@ -17,6 +17,7 @@ import {
   applyToEnlist,
   leaveIntelCareer,
   retireFromService,
+  endServiceTerm,
   workHarder,
   type GameState,
   type ServiceBranch,
@@ -35,6 +36,7 @@ export type MilitaryAction =
     }
   | { readonly type: 'commission' }
   | { readonly type: 'retire' }
+  | { readonly type: 'endTerm' }
   | { readonly type: 'work' }
   | { readonly type: 'applyAgency'; readonly agency: AgencyId }
   | { readonly type: 'leaveAgency' };
@@ -83,8 +85,9 @@ export function applyMilitary(state: GameState, action: MilitaryAction): Attempt
         tone: result.value.picked ? 'good' : 'neutral',
       });
     }
+    case 'endTerm':
     case 'retire': {
-      const result = retireFromService(state);
+      const result = action.type === 'endTerm' ? endServiceTerm(state) : retireFromService(state);
       if (!result.ok) return refuse(RETIRE_ERROR_LABELS[result.error]);
       // No card here: the discharge card is read from the change itself, by `YearRecapNotice`, so it
       // is the same card whether the service ended by this button or by an answer at the end of a term.

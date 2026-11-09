@@ -919,3 +919,24 @@ describe('found by the sabotage pass, second round', () => {
     expectWellFormed(r);
   });
 });
+
+describe('November career control', () => {
+  it('puts acting and music class enrollment in Activity classes', async () => {
+    const r = await open(<StudiesScreen />, ADULT);
+    await act(() => rowTitled(r, 'Take acting classes').props.onPress());
+    await act(() => rowTitled(r, 'Take music classes').props.onPress());
+    expect(entertain).toHaveBeenCalledWith({ type: 'lessons', field: 'acting', on: true });
+    expect(entertain).toHaveBeenCalledWith({ type: 'lessons', field: 'music', on: true });
+  });
+  it('lets an enrolled student quit from Activity classes', async () => {
+    const state = { ...ADULT, acting: { ...ADULT.acting, lessons: { since: 20, seasons: 5 } } };
+    const r = await open(<StudiesScreen />, state);
+    await act(() => rowTitled(r, 'Quit acting classes').props.onPress());
+    expect(entertain).toHaveBeenCalledWith({ type: 'lessons', field: 'acting', on: false });
+  });
+  it('lets a player leave the league from the Sports screen', async () => {
+    const r = await open(<SportsScreen />, withCareer(ADULT));
+    await act(() => buttonLabelled(r, 'Retire / Leave league').props.onPress());
+    expect(entertain).toHaveBeenCalledWith({ type: 'leaveSport' });
+  });
+});

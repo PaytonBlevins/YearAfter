@@ -97,7 +97,7 @@ import type { EducationState } from '@yearafter/education';
 import type { PendingDecision } from '@yearafter/events';
 import type { ActingState, BookedRole, Role } from './acting-state';
 import type { GameState } from './game-state';
-import { affordsFee } from './pursuits';
+import { canContinueClass } from './class-budget';
 import { money } from './sports-core';
 
 export const ACTING_OFFER_EVENT_ID = 'acting.offer';
@@ -827,10 +827,10 @@ export function runActingYear(input: ActingYearInput): ActingYearOutput {
   if (acting.lessons) {
     // As the arts are billed: an adult living on their own pays, and the first thing to go in a tight year is the class.
     const pays = age >= 18 && before.household.housing !== 'withFamily';
-    if (pays && !affordsFee(input.standard ?? 0, LESSONS_COST)) {
+    if (pays && !canContinueClass(before, 'acting-lessons', input.standard ?? 0)) {
       lines.push({
         kind: 'passive',
-        text: 'Let the acting lessons go. The fees were the first thing to cut.',
+        text: "Let the acting lessons go. There wasn't enough money for the fees.",
       });
       const { lessons: _dropped, ...without } = acting;
       acting = without as ActingState;

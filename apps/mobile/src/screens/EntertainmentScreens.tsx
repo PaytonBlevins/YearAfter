@@ -279,6 +279,15 @@ export function SportsScreen() {
         </>
       ) : null}
 
+      {state.sports.career && state.sports.career.stage !== 'school' ? (
+        <ActionButton
+          label={
+            state.sports.career.stage === 'pro' ? 'Retire / Leave league' : 'Leave college sport'
+          }
+          variant="quiet"
+          onPress={() => entertain({ type: 'leaveSport' })}
+        />
+      ) : null}
       <AwardsCard view={view.awards} />
 
       {view.past.length > 0 ? (
@@ -305,6 +314,20 @@ export function StudiesScreen() {
   const age = state.player.age;
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      <Card>
+        <ListRow
+          title={state.acting.lessons ? 'Quit acting classes' : 'Take acting classes'}
+          subtitle="Paid annually; continue until you choose to quit or cannot afford the fees"
+          onPress={() => entertain({ type: 'lessons', field: 'acting', on: !state.acting.lessons })}
+          wrap
+        />
+        <RowDivider />
+        <ListRow
+          title={state.music.lessons ? 'Quit music classes' : 'Take music classes'}
+          onPress={() => entertain({ type: 'lessons', field: 'music', on: !state.music.lessons })}
+          wrap
+        />
+      </Card>
       {view.road ? <Text style={styles.note}>{view.road}.</Text> : null}
       <Card>
         {view.rows.map((row, index) => (
@@ -446,6 +469,15 @@ export function ActingScreen() {
         />
       </Card>
 
+      {state.sports.career && state.sports.career.stage !== 'school' ? (
+        <ActionButton
+          label={
+            state.sports.career.stage === 'pro' ? 'Retire / Leave league' : 'Leave college sport'
+          }
+          variant="quiet"
+          onPress={() => entertain({ type: 'leaveSport' })}
+        />
+      ) : null}
       <AwardsCard view={view.awards} />
     </ScrollView>
   );
@@ -587,6 +619,15 @@ export function MusicScreen() {
         />
       </Card>
 
+      {state.sports.career && state.sports.career.stage !== 'school' ? (
+        <ActionButton
+          label={
+            state.sports.career.stage === 'pro' ? 'Retire / Leave league' : 'Leave college sport'
+          }
+          variant="quiet"
+          onPress={() => entertain({ type: 'leaveSport' })}
+        />
+      ) : null}
       <AwardsCard view={view.awards} />
     </ScrollView>
   );
@@ -701,6 +742,15 @@ export function ModelingScreen() {
         />
       </Card>
 
+      {state.sports.career && state.sports.career.stage !== 'school' ? (
+        <ActionButton
+          label={
+            state.sports.career.stage === 'pro' ? 'Retire / Leave league' : 'Leave college sport'
+          }
+          variant="quiet"
+          onPress={() => entertain({ type: 'leaveSport' })}
+        />
+      ) : null}
       <AwardsCard view={view.awards} />
     </ScrollView>
   );

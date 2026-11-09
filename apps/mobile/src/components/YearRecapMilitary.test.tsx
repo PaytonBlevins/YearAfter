@@ -7,7 +7,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, type ReactTestRenderer } from 'react-test-renderer';
-import { advanceYear, decide, type GameState } from '@yearafter/simulation';
+import { advanceYear, endServiceTerm, type GameState } from '@yearafter/simulation';
 import { useGame } from '../stores/gameStore';
 import { ADULT, withMusic } from '../test/entertainmentFixtures';
 import {
@@ -54,9 +54,8 @@ const linesOf = (state: GameState, kind: 'military' | 'intel' | 'veteran'): stri
 function leaving(): { before: GameState; asked: GameState; after: GameState } {
   const before = serving(person, { years: 3, termEnds: 4 });
   const asked = advanceYear(before).state;
-  const question = asked.pending.find((row) => row.eventId === 'military.offer');
-  if (!question) throw new Error('no end-of-term question was raised');
-  const result = decide(asked, question.eventId, 'leave');
+  expect(asked.military.offer?.kind).not.toBe('reenlist');
+  const result = endServiceTerm(asked);
   if (!result.ok) throw new Error(`could not leave: ${String(result.error)}`);
   return { before, asked, after: result.value.state };
 }
@@ -132,7 +131,7 @@ describe('the recap carries a year in uniform, an agency and a veteran’s benef
 });
 
 describe('the discharge card', () => {
-  it('is read from an answer at the end of a term, which is not a year turn', () => {
+  it('is read from the End term button, which is not a year turn', () => {
     const { asked, after } = leaving();
     expect(after.world.year).toBe(asked.world.year);
     const cardsMade = noticesOf(asked, after);
@@ -142,7 +141,7 @@ describe('the discharge card', () => {
     expect(cardsMade[0]!.body).toContain('Your discharge: Honorable.');
   });
 
-  it('is nothing at the question itself, while the member is still in uniform', () => {
+  it('is nothing before pressing the button, while the member is still in uniform', () => {
     const { before, asked } = leaving();
     expect(noticesOf(before, asked).every((card) => card.title !== 'You left the service')).toBe(
       true,
