@@ -176,6 +176,16 @@ export function ServiceScreen() {
             />
           </>
         ) : null}
+        {view.endTerm ? (
+          <>
+            <RowDivider />
+            <VerbRow
+              title="End term"
+              closed={view.endTerm.closed}
+              onPress={() => serve({ type: 'endTerm' })}
+            />
+          </>
+        ) : null}
         {view.retire ? (
           <>
             <RowDivider />

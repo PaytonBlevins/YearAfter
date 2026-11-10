@@ -1356,7 +1356,7 @@ describe('a term’s question', () => {
   it('asks somebody under twenty years to stay or leave, in the branch’s own words', () => {
     const decision = militaryOfferDecision(reenlist(), 2031);
     expect(decision.choices).toEqual([
-      { id: MILITARY_REENLIST, label: 'Stay 4 more years' },
+      { id: MILITARY_REENLIST, label: 'Continue service' },
       { id: MILITARY_LEAVE, label: 'Leave the Navy' },
     ]);
     expect(decision.prompt).toContain('You are a petty officer second class with 8 years in.');
@@ -1369,7 +1369,7 @@ describe('a term’s question', () => {
   it('asks somebody with twenty years in to stay or retire', () => {
     const decision = militaryOfferDecision(reenlist({ years: 20, grade: 7 }), 2031);
     expect(decision.choices).toEqual([
-      { id: MILITARY_REENLIST, label: 'Stay 4 more years' },
+      { id: MILITARY_REENLIST, label: 'Continue service' },
       { id: MILITARY_LEAVE, label: 'Retire' },
     ]);
     expect(decision.prompt).toMatch(/twenty years/i);
@@ -1464,7 +1464,9 @@ describe('a term’s question', () => {
     if (!out.ok) throw new Error('should answer');
     expect(out.value.state.military.service?.termEnds).toBe(16);
     expect(out.value.state.military.service?.track).toBe('officer');
-    expect(out.value.entry.text).toBe('You signed up for 4 more years as a major.');
+    expect(out.value.entry.text).toBe(
+      'You chose to continue serving as a major. You can leave from the service screen.',
+    );
   });
 
   it('adds the four years to where the term ended, not to the day the question was answered', () => {
@@ -1770,7 +1772,7 @@ describe('the end of a career', () => {
     });
     // Still a service member while the question stands.
     expect(at(19).military.service?.years).toBe(20);
-    expect(at(18).military.offer).toMatchObject({ years: 19 });
+    expect(at(18).military.offer?.kind).not.toBe('reenlist');
     expect(at(10, { termEnds: 12 }).military.offer).toBeUndefined();
     const officer = yearOf(
       officering(base, { grade: 4, years: 19, termEnds: 20, performance: 80, commissionedAt: 5 }),

@@ -10,9 +10,11 @@
  */
 
 import {
+  SPORT_DEVELOPMENT,
   CAREER_ENDING_SHARE,
   SERIOUS_SHARE,
   naturalForm,
+  findSport,
   type Sport,
   type SportTier,
 } from '@yearafter/content';
@@ -94,16 +96,31 @@ export function nextForm(
   age: number,
   declineFrom: number = DEFAULT_DECLINE_FROM,
 ): number {
-  const natural = naturalForm(
-    before.player.stats.health,
-    before.player.stats.discipline,
-    before.player.talents.athletics,
+  const cap = aptitudeCeiling(before, career.sportId);
+  const worked = career.trainedAtAge === before.player.age && career.trainedCount > 0;
+  const natural = Math.min(
+    cap,
+    naturalForm(
+      before.player.stats.health,
+      before.player.stats.discipline,
+      before.player.talents.athletics,
+    ),
   );
-  const pull = natural > career.form ? 0.3 : 0.1;
-  const ageing = career.stage === 'pro' ? Math.max(0, age - declineFrom) * 1.2 : 0;
+  const growth =
+    Math.max(0, natural - career.form) *
+    SPORT_DEVELOPMENT.annualGrowth *
+    trainingEfficiency(before);
+  const ageing =
+    career.stage === 'pro'
+      ? Math.min(
+          SPORT_DEVELOPMENT.maximumAgeLoss,
+          Math.max(0, age - declineFrom) * SPORT_DEVELOPMENT.ageLossPerYear,
+        )
+      : 0;
+  const neglect = worked ? 0 : SPORT_DEVELOPMENT.neglectLoss;
   return Math.max(
     0,
-    Math.min(100, Math.round(career.form + (natural - career.form) * pull - ageing)),
+    Math.min(Math.max(cap, career.form), Math.round(career.form + growth - ageing - neglect)),
   );
 }
 
@@ -177,3 +194,30 @@ export const RACING_SERIOUS_LINES: readonly string[] = [
   'Back surgery in the autumn, and the season was gone.',
   'A broken collarbone, then a long winter of rehab.',
 ];
+
+/** Stable, separate from Boolean talents, and specific to this life's activity. */
+export function sportAptitude(state: GameState, activity: string): number {
+  const key = findSport(activity)?.format === 'racing' ? 'karting' : activity;
+  return Math.floor(sportUnit(state.rng.getSeed(), state.world.generation, 'aptitude', key) * 101);
+}
+
+/** Piecewise potential: 40 → 50, 60 → 65, 80 → 95. Talent retains full potential. */
+export function ceilingForAptitude(aptitude: number): number {
+  const a = Math.max(0, Math.min(100, aptitude));
+  const anchors = SPORT_DEVELOPMENT.potentialAnchors;
+  for (let i = 1; i < anchors.length; i++) {
+    const low = anchors[i - 1];
+    const high = anchors[i];
+    if (low && high && a <= high[0])
+      return low[1] + ((a - low[0]) / (high[0] - low[0])) * (high[1] - low[1]);
+  }
+  return 100;
+}
+export function aptitudeCeiling(state: GameState, activity: string): number {
+  return state.player.talents.athletics
+    ? 100
+    : Math.round(ceilingForAptitude(sportAptitude(state, activity)));
+}
+export function trainingEfficiency(state: GameState): number {
+  return state.player.talents.athletics ? 1 : SPORT_DEVELOPMENT.untalentedEfficiency;
+}

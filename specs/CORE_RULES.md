@@ -3783,3 +3783,16 @@ the same held property across the completed turn, and test both a retained lease
 and an occupied unit with a replacement. For money, a card balance from an
 explicit purchase can contain cents. Quote the exact amount and cap the cash
 debit and debt reduction at the same exact amount, including on a partial payoff.
+
+### 13.230 Player-controlled classes and career exits (November owner revision)
+
+Classes persist until the player quits or cannot fund their fees; becoming a professional never
+silently removes a class. Activity classes must be reachable directly from Activities. Sporting
+retirement uses the sport's normal age band for every rank, with a manual exit; injury and competitive
+release are distinct outcomes. Aptitude is deterministic per life/activity and distinct from Boolean
+talent. Training respects that potential and existing skill declines gradually rather than resetting.
+Military service has an End term action from four years, one retire/continue question at twenty,
+an ongoing retirement action thereafter, and mandatory retirement at65. Old routine term popups
+must not return when a save loads. Fame-work reception changes fame immediately in either direction;
+settlement must not apply that same change again, and career recognition must not instantly erase it.
+See `claude/playtest-november-career-control.md` for the approved scope and tunable implementation.

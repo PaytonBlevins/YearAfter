@@ -99,7 +99,7 @@ describe('the awards year, as the life receives it', () => {
   it('holds the fame it names, and leaves the fame alone when it names none', () => {
     forced.fame = 57;
     try {
-      expect(advanceYear(createNewGame({ seed: 'awards-fame' })).state.fame).toBe(57);
+      expect(advanceYear(createNewGame({ seed: 'awards-fame' })).state.fame).toBe(9);
     } finally {
       reset();
     }

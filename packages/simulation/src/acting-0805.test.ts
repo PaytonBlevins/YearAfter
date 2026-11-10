@@ -838,7 +838,10 @@ describe('lessons', () => {
 
   it('count a season each year, and bill an adult on their own', () => {
     const state = withActing(adult('lessons-bill'), { lessons: { since: 20, seasons: 0 } });
-    const own = { ...state, household: { ...state.household, housing: 'ownPlace' as const } };
+    const own = {
+      ...state,
+      household: { ...state.household, housing: 'ownPlace' as const },
+    };
     const out = runActingYear({
       before: own,
       education: own.education,
@@ -875,9 +878,14 @@ describe('lessons', () => {
     ).toBe(0);
   });
 
-  it('are the first thing to go in a tight year, with a line', () => {
+  it('stop only when neither cash nor the yearly budget covers the fee', () => {
     const state = withActing(adult('lessons-tight'), { lessons: { since: 20, seasons: 2 } });
-    const own = { ...state, household: { ...state.household, housing: 'ownPlace' as const } };
+    const emptyFinance = { ...state.finance, balance: 0 as typeof state.finance.balance };
+    const own = {
+      ...state,
+      finance: emptyFinance,
+      household: { ...state.household, housing: 'ownPlace' as const },
+    };
     const out = runActingYear({
       before: own,
       education: own.education,

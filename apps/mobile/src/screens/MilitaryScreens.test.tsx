@@ -119,7 +119,6 @@ describe('Service, in uniform', () => {
       'How it is going',
       'Put the work in',
       'Apply for a commission',
-      'Retire from service',
     ]);
     expect(headings(r)).toEqual(['What you can do']);
     expect(rowTitled(r, 'Rank').props.value).toBe('Specialist');
@@ -178,17 +177,16 @@ describe('Service, in uniform', () => {
   it('has no commission row for an officer', async () => {
     const r = await open(<ServiceScreen />, serving(withDegree(person), { track: 'officer' }));
     expect(titles(r)).not.toContain('Apply for a commission');
-    expect(titles(r)).toContain('Retire from service');
+    expect(titles(r)).not.toContain('Retire from service');
   });
 
-  it('greys Retire before twenty years, and sends it at twenty', async () => {
+  it('offers End term before twenty years, and Retire at twenty', async () => {
     const early = await open(<ServiceScreen />, serving(person, { years: 19 }));
-    const shut = rowTitled(early, 'Retire from service');
-    expect(shut.props.disabled).toBe(true);
-    expect(shut.props.subtitle).toBe(
-      'Retiring opens at twenty years of service, and not during training.',
-    );
-    expect(shut.props.onPress).toBeUndefined();
+    expect(titles(early)).not.toContain('Retire from service');
+    const exit = rowTitled(early, 'End term');
+    expect(exit.props.disabled).toBe(false);
+    await act(() => exit.props.onPress());
+    expect(serve).toHaveBeenCalledWith({ type: 'endTerm' });
     await act(() => early.unmount());
     rendered = undefined;
 

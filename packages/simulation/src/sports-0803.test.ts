@@ -10,7 +10,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   COMBAT_SPORTS,
-  naturalForm,
   FIELD_STRENGTH,
   FIGHTS_PER_YEAR,
   MARTIAL_ARTS,
@@ -630,7 +629,7 @@ describe('turning pro as a fighter', () => {
     expect(stuck.state).toBe(state);
   });
 
-  it('puts a boxer on a card in the gym that wants them, with a 0–0 record and the arts they came from gone', () => {
+  it('puts a boxer on a card in the gym that wants them, with a 0–0 record and their classes retained', () => {
     const state = firstWith(
       'road-boxer-accept',
       ['boxing'],
@@ -649,7 +648,7 @@ describe('turning pro as a fighter', () => {
     expect(career.contract).toBeUndefined();
     expect(career.peak).toBeUndefined();
     expect(career.endAge).toBeUndefined();
-    expect(artsOf(state).some((row) => row.artId === 'boxing')).toBe(false);
+    expect(artsOf(state).some((row) => row.artId === 'boxing')).toBe(true);
     expect(
       state.player.records.some((row) => /Turned pro as a boxing fighter/.test(row.label)),
     ).toBe(true);
@@ -683,7 +682,7 @@ describe('turning pro as a fighter', () => {
       losses: 0,
       tier: 'fringe',
     });
-    expect(artsOf(taken)).toEqual([]);
+    expect(artsOf(taken)).toEqual(artsOf(state));
   });
 
   it('never offers a card on a single striking or grappling art alone', () => {
@@ -859,14 +858,14 @@ describe('a fighter’s year', () => {
     expect(recordOf({ ...row.career, wins: undefined })).toBeUndefined();
   });
 
-  it('retires at an age that depends on the best tier reached, and a rise extends it', () => {
+  it('uses the same normal retirement band at every tier', () => {
     const lows = new Set<number>();
     for (let index = 0; index < 60; index += 1) {
       const low = retirementAge(BOXING, 'fringe', `life-${index}`, 0);
       const high = retirementAge(BOXING, 'superstar', `life-${index}`, 0);
-      expect(low).toBeGreaterThanOrEqual(BOXING.economy.retireAge.fringe[0]);
-      expect(low).toBeLessThanOrEqual(BOXING.economy.retireAge.fringe[1]);
-      expect(high).toBeGreaterThanOrEqual(BOXING.economy.retireAge.superstar[0]);
+      expect(low).toBeGreaterThanOrEqual(BOXING.economy.retireAge.star[0]);
+      expect(low).toBeLessThanOrEqual(BOXING.economy.retireAge.star[1]);
+      expect(high).toBe(low);
       expect(high).toBeGreaterThanOrEqual(low);
       lows.add(low);
     }
@@ -896,9 +895,9 @@ describe('a fighter’s year', () => {
       expect(line.text).toMatch(
         /^Retired from boxing at \d+, after \d+ seasons? and a record of \d+–\d+/,
       );
-    // And somebody who has risen retires later than the same life would have as a fringe fighter.
+    // A rise in rank no longer changes the normal retirement age.
     const best = retirementAge(BOXING, 'superstar', state.rng.getSeed(), state.world.generation);
-    expect(best).toBeGreaterThan(due);
+    expect(best).toBe(due);
   });
 
   it('is hurt as a fighter is, in a fighter’s words, and a serious injury cancels the year’s fights and most of its purse', () => {
@@ -1184,11 +1183,11 @@ describe('boxing and MMA, through the game', () => {
     expect(isFullTime(college.sports.career)).toBe(false);
   });
 
-  it('only a boxer or MMA fighter can not study the art that is already their job', () => {
+  it('lets a professional keep studying their own sport', () => {
     const state = proState(BOXING, { tier: 'role' }, 'is-job');
     const refused = startArt({ ...state, player: { ...state.player, age: 25 } }, 'boxing');
-    expect(refused.ok).toBe(false);
-    if (!refused.ok) expect(refused.error).toBe('is-your-career');
+    expect(refused.ok).toBe(true);
+    if (refused.ok) expect(refused.value.state.sports.arts).toHaveLength(1);
     // Another art is allowed: a boxer who wants to learn to wrestle.
     expect(startArt({ ...state, player: { ...state.player, age: 25 } }, 'wrestling').ok).toBe(true);
   });
@@ -1286,7 +1285,7 @@ describe('the years of an art', () => {
     const base = withArts(life('art-ageing'), [study('boxing', 12, 60)]);
     const at40 = runArtsYear(base, 40, 2030, 5_000_000, false).arts[0]!.level;
     const at60 = runArtsYear(base, 60, 2030, 5_000_000, false).arts[0]!.level;
-    expect(at40 - at60).toBeGreaterThanOrEqual(20);
+    expect(at40 - at60).toBe(3);
   });
 
   it('are posted to the ledger as spending, for an adult paying their own way', () => {
@@ -1309,15 +1308,10 @@ describe('the years of an art', () => {
 });
 
 describe('the ceiling of what work alone can do', () => {
-  it('is what the character is plus seven, and no more', () => {
+  it('allows full talented potential and preserves earned skill when joining a tour', () => {
     const state = life('ceiling');
-    const natural = naturalForm(
-      state.player.stats.health,
-      state.player.stats.discipline,
-      state.player.talents.athletics,
-    );
-    expect(trainingCeiling(state)).toBe(Math.min(100, natural + 7));
-    // A level that is already above it falls back when a card is earned.
+    expect(trainingCeiling(state, 'boxing')).toBe(100);
+    // Accepting a card must not abruptly remove previously earned skill.
     const college: SportCareer = {
       sportId: 'golf',
       stage: 'college',
@@ -1335,8 +1329,7 @@ describe('the ceiling of what work alone can do', () => {
       const candidate = life(`ceiling-card-${index}`);
       found = tourCardOffer(candidate, college, GOLF, 22);
       if (found) {
-        expect(found.career.form).toBe(trainingCeiling(candidate));
-        expect(found.career.form).toBeLessThan(100);
+        expect(found.career.form).toBe(college.form);
       }
     }
     expect(found).toBeDefined();

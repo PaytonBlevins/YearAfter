@@ -351,11 +351,11 @@ describe('karting', () => {
     expect(startArt(at(MARTIAL_ART_MIN_AGE), 'boxing').ok).toBe(true);
   });
 
-  it('is refused to a driver who is racing for a living: it is the career', () => {
+  it('lets a professional driver keep taking karting classes', () => {
     const state = driverState();
     const refused = startArt({ ...state, player: { ...state.player, age: 25 } }, 'karting');
-    expect(refused.ok).toBe(false);
-    if (!refused.ok) expect(refused.error).toBe('is-your-career');
+    expect(refused.ok).toBe(true);
+    if (refused.ok) expect(refused.value.state.sports.arts).toHaveLength(1);
   });
 
   it('counts as a study (two at once, at most) like any other', () => {

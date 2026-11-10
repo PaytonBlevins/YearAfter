@@ -326,7 +326,7 @@ export function applyFameWork(state: GameState, workId: string): Attempt {
     outcome: {
       title: `${fameWorkLabel(workId, done?.outlet ?? '') ?? 'Work'} done`,
       body: wrote(entries, 'Done.'),
-      tone: 'good',
+      tone: result.value.fame < state.fame ? 'bad' : 'good',
       ...(done === undefined ? {} : { value: dollarsText(done.pay) }),
     },
   };

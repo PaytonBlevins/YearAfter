@@ -33,6 +33,7 @@ import {
   type TimelineEntry,
 } from '@yearafter/character';
 import {
+  SPORT_DEVELOPMENT,
   ART_START_LEVEL,
   FINAL_LINE,
   FIGHT_LUCK,
@@ -61,7 +62,6 @@ import {
   TITLE_PURSE_SHARE,
   TOUR_NOISE,
   TOUR_TITLE_CHANCE,
-  TRAINING_CAP,
   TURN_PRO_MAX_AGE,
   TURN_PRO_MIN_AGE,
   between,
@@ -89,7 +89,7 @@ import {
 import { err, ok, stablePick, type Result } from '@yearafter/core';
 import { PRACTICE_SESSIONS, practiceGain } from '@yearafter/education';
 import type { GameState } from './game-state';
-import { affordsFee } from './pursuits';
+import { canContinueClass } from './class-budget';
 import {
   COMBAT_MINOR_LINES,
   COMBAT_SERIOUS_LINES,
@@ -99,6 +99,8 @@ import {
   RACING_SERIOUS_LINES,
   TOUR_MINOR_LINES,
   TOUR_SERIOUS_LINES,
+  aptitudeCeiling,
+  trainingEfficiency,
   healthAdjusted,
   injuryOf,
   money,
@@ -156,7 +158,10 @@ export function readArts(state: GameState): readonly ArtReading[] {
         skills: art.skills.map((skill) => ({
           id: skill.id,
           name: skill.name,
-          value: skillValue(study.level, sportUnit(seed, gen, 'art-skill', art.id, skill.id)),
+          value: Math.min(
+            Math.max(study.level, trainingCeiling(state, art.id)),
+            skillValue(study.level, sportUnit(seed, gen, 'art-skill', art.id, skill.id)),
+          ),
         })),
       },
     ];
@@ -258,7 +263,7 @@ function outcomeOf(
   };
 }
 
-/** Begin studying an art. From ten, two at a time, and not the one that is already your career. */
+/** Begin studying an art. From ten, two at a time; a professional may keep learning. */
 export function startArt(state: GameState, artId: string): Result<ArtOutcome, ArtError> {
   const art = findMartialArt(artId);
   if (!art) return err('no-such-art');
@@ -266,10 +271,6 @@ export function startArt(state: GameState, artId: string): Result<ArtOutcome, Ar
   const arts = artsOf(state);
   if (arts.some((row) => row.artId === artId)) return err('already-studying');
   if (arts.length >= MAX_ARTS_AT_ONCE) return err('too-many');
-  const career = state.sports.career;
-  if (career?.stage === 'pro' && art.feeds.includes(career.sportId as never)) {
-    return err('is-your-career');
-  }
   const study: ArtStudy = {
     artId,
     startedAge: state.player.age,
@@ -298,16 +299,9 @@ export function stopArt(state: GameState, artId: string): Result<ArtOutcome, Art
   );
 }
 
-/** The highest level work alone can reach for this character: what they are like, and `TRAINING_CAP` more. */
-export function trainingCeiling(state: GameState): number {
-  return Math.min(
-    100,
-    naturalForm(
-      state.player.stats.health,
-      state.player.stats.discipline,
-      state.player.talents.athletics,
-    ) + TRAINING_CAP,
-  );
+/** The highest level training can reach in this activity, from stable hidden potential. */
+export function trainingCeiling(state: GameState, activity = 'general'): number {
+  return aptitudeCeiling(state, activity);
 }
 
 /** A session: three a year per art, each worth a little less than the last. */
@@ -320,10 +314,13 @@ export function trainArt(state: GameState, artId: string): Result<ArtOutcome, Ar
   const age = state.player.age;
   const done = study.trainedAtAge === age ? study.trainedCount : 0;
   if (done >= PRACTICE_SESSIONS) return err('no-sessions-left');
-  const gain = practiceGain(state.player.stats, study.level, done);
+  const gain = Math.max(
+    1,
+    Math.round(practiceGain(state.player.stats, study.level, done) * trainingEfficiency(state)),
+  );
   const next: ArtStudy = {
     ...study,
-    level: Math.min(trainingCeiling(state), study.level + gain),
+    level: Math.min(Math.max(study.level, trainingCeiling(state, artId)), study.level + gain),
     trainedAtAge: age,
     trainedCount: done + 1,
   };
@@ -369,8 +366,8 @@ export function runArtsYear(
     // An adult living on their own pays their own way, and the first thing to go in a tight year is
     // the gym. A child, or an adult still at home, is the household's to pay and is not billed.
     const pays = age >= 18 && !withFamily;
-    if (pays && !affordsFee(standard, art.annualCost)) {
-      lines.push(`Let ${art.name} go. The dues were the first thing to cut.`);
+    if (pays && !canContinueClass(before, study.artId, standard)) {
+      lines.push(`Let ${art.name} go. There wasn't enough money for the dues.`);
       continue;
     }
     if (pays) {
@@ -379,11 +376,22 @@ export function runArtsYear(
     }
     const hard =
       study.trainedAtAge === before.player.age && study.trainedCount >= HARD_WORK_SESSIONS;
-    const pull = natural > study.level ? 0.3 : 0.1;
-    const ageing = Math.max(0, age - 40) * 1.2;
+    const cap = trainingCeiling(before, study.artId);
+    const target = Math.min(cap, natural);
+    const growth =
+      Math.max(0, target - study.level) *
+      SPORT_DEVELOPMENT.annualGrowth *
+      trainingEfficiency(before);
+    const ageing = Math.min(
+      SPORT_DEVELOPMENT.maximumAgeLoss,
+      Math.max(0, age - SPORT_DEVELOPMENT.classDeclineFrom) * SPORT_DEVELOPMENT.ageLossPerYear,
+    );
     const level = Math.max(
       0,
-      Math.min(100, Math.round(study.level + (natural - study.level) * pull - ageing)),
+      Math.min(
+        Math.max(cap, study.level),
+        Math.round(study.level + growth - ageing - (hard ? 0 : SPORT_DEVELOPMENT.neglectLoss)),
+      ),
     );
     const seasons = study.seasons + 1;
     if (seasons === MIN_ART_SEASONS) {
@@ -599,8 +607,8 @@ export function tourCardOffer(
   );
   if (sportUnit(seed, gen, 'draft', sport.id) >= draftChance(category)) return undefined;
   return {
-    // The school and college game lets practice carry anybody towards 100; a tour does not (TRAINING_CAP).
-    career: { ...career, tier: 'fringe', form: Math.min(career.form, trainingCeiling(before)) },
+    // Keep the skill already earned; accepting a card is not a skill reset.
+    career: { ...career, tier: 'fringe', form: career.form },
     offer: { kind: 'tour-card', sportId: sport.id, age, eventId: OFFER_EVENT_ID },
     line: `Earned a ${sport.leagueShort} card. The ${sport.league} is open to you.`,
   };
@@ -628,8 +636,8 @@ export interface IndividualSeasonOutput {
  * life. Computed each season and not saved, so a player who rises extends their own career, and a
  * fringe player's is short.
  */
-export function retirementAge(sport: Sport, best: SportTier, seed: string, gen: number): number {
-  return between(sportUnit(seed, gen, 'retire', sport.id), sport.economy.retireAge[best]);
+export function retirementAge(sport: Sport, _best: SportTier, seed: string, gen: number): number {
+  return between(sportUnit(seed, gen, 'retire', sport.id), sport.economy.retireAge.star);
 }
 
 const ordinal = (n: number): string => {

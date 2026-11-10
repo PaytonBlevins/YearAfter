@@ -1041,6 +1041,12 @@ export function ActivitiesScreen() {
             : []),
           {
             icon: 'mind',
+            title: 'Activity classes',
+            subtitle: 'Boxing, swimming, karting, acting, music',
+            route: { screen: 'studies', title: 'Activity classes' },
+          },
+          {
+            icon: 'mind',
             title: 'Mind & Body',
             subtitle: 'Gym, meditation, martial arts',
             route: { screen: 'mindBody', title: 'Mind & Body' },

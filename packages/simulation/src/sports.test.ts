@@ -1,3 +1,5 @@
+import { retirementAge } from './sports-individual';
+import { nextForm } from './sports-core';
 /**
  * Ticket 0801 acceptance tests — the sports engine, with basketball.
  *
@@ -588,7 +590,8 @@ describe('the pros', () => {
   it('makes a pro known, and a rookie less known than a star', () => {
     const state = pro();
     const career = careerOf(state)!;
-    expect(state.fame).toBeGreaterThanOrEqual(sportsFameOf(career));
+    expect(state.fame).toBeGreaterThan(0);
+    expect(state.fame).toBeLessThanOrEqual(sportsFameOf(career));
     expect(sportsFameOf({ ...career, tier: 'fringe', titles: 0 })).toBeLessThan(
       sportsFameOf({ ...career, tier: 'star', titles: 0 }),
     );
@@ -928,7 +931,12 @@ describe('the shape of a career', () => {
       const year = runSportsYear({
         before,
         education: before.education,
-        age: before.player.age + 1,
+        age: retirementAge(
+          findSport(career.sportId)!,
+          career.tier ?? 'fringe',
+          before.rng.getSeed(),
+          before.world.generation,
+        ),
         year: 7001 + attempt,
       });
       const hurtForGood = year.lines.some((line) => /ended your \w+ career/.test(line.text));
@@ -948,8 +956,7 @@ describe('the shape of a career', () => {
       world: { ...base.world, year: 8000 },
       sports: { ...base.sports, career: { ...career, endAge: 99 } },
     };
-    const at = (age: number): number =>
-      runSportsYear({ before, education: before.education, age, year: 8001 }).sports.career!.form;
+    const at = (age: number): number => nextForm(before, career, age);
     expect(at(37)).toBeLessThan(at(26));
   });
 

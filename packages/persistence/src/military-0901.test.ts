@@ -87,8 +87,10 @@ describe('the service in a save', () => {
     if (!result.ok) return;
     expect(result.value.military).toEqual(military);
     const state = fromSave(result.value);
-    expect(state.military).toEqual(military);
-    expect(toSave(state, { id: asSaveId('save-MIL-SAVE') }).military).toEqual(military);
+    const { offer: _obsolete, ...rest } = military;
+    const normalized = { ...rest, service: { ...SERVICE, termEnds: 11 } };
+    expect(state.military).toEqual(normalized);
+    expect(toSave(state, { id: asSaveId('save-MIL-SAVE') }).military).toEqual(normalized);
   });
 
   it('keeps a recruiter’s offer, and nothing but the past after a career has ended', () => {

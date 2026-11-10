@@ -227,6 +227,7 @@ export const creatorWeek = (state: GameState): number =>
 /** What a year of channels did: the channels after it, fame, the money, and the words. */
 export interface CreatorsYear {
   readonly channels: readonly Channel[];
+  readonly excludedFameCategories?: readonly string[];
   readonly fame: number;
   readonly transactions: readonly NewTransaction[];
   readonly lines: readonly string[];
@@ -243,6 +244,7 @@ export interface CreatorsYear {
 /** A year of every channel held. `year` is the year that is beginning. */
 export function runCreatorsYear(input: {
   readonly channels: readonly Channel[];
+  readonly excludedFameCategories?: readonly string[];
   readonly fame: number;
   readonly year: number;
   readonly stats: Readonly<Record<string, number>>;
@@ -329,7 +331,12 @@ export function runCreatorsYear(input: {
       key: `${input.seed}:${input.generation ?? 0}:${input.year}:creator-event`,
       seed: input.seed,
       year: input.year,
-      fame: nextFame(input.fame, fameTarget(channels)),
+      fame: nextFame(
+        input.fame,
+        fameTarget(
+          channels.filter((channel) => !input.excludedFameCategories?.includes(channel.categoryId)),
+        ),
+      ),
       channels: channels.map((channel, index) => ({ channel, gross: grossOf[index] ?? 0 })),
     };
     const plan = drawCreatorEvent(eventInput);
@@ -393,7 +400,20 @@ export function runCreatorsYear(input: {
   const net = Math.max(0, gross - upkeep - shares);
   return {
     channels: channelsNow,
-    fame: Math.min(100, Math.max(0, nextFame(input.fame, fameTarget(channelsNow)) + fameShift)),
+    fame: Math.min(
+      100,
+      Math.max(
+        0,
+        nextFame(
+          input.fame,
+          fameTarget(
+            channelsNow.filter(
+              (channel) => !input.excludedFameCategories?.includes(channel.categoryId),
+            ),
+          ),
+        ) + fameShift,
+      ),
+    ),
     transactions,
     lines,
     gross,

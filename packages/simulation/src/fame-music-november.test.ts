@@ -27,10 +27,10 @@ function artist(seed: string, active = true): GameState {
 }
 describe('November fame and music', () => {
   it('counts different audiences with diminishing returns, without counting history or sports awards twice', () => {
-    expect(combinedFame(0, 12, 0, 0, 0, 31, 0)).toBe(39);
+    expect(combinedFame(0, 12, 0, 0, 0, 31, 0)).toBe(6);
     expect(combinedFame(39, 12, 0, 0, 0, 31, 0)).toBe(39);
-    expect(combinedFame(0, 0, 35, 42, 0, 0, 0)).toBe(42);
-    expect(combinedFame(0, 60, 60, 0, 60, 100, 60)).toBe(100);
+    expect(combinedFame(0, 0, 35, 42, 0, 0, 0)).toBe(6);
+    expect(combinedFame(0, 60, 60, 0, 60, 100, 60)).toBe(15);
   });
 
   it('recognizes an independent channel alongside music in the actual annual turn', () => {

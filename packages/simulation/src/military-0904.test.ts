@@ -879,7 +879,8 @@ describe('how an ordinary career ends', () => {
     const calm = seedWhere(base, 'medical', AGE, () => true);
     const good = runYear(serving(calm, { years: 3, termEnds: 4, reputation: 80, performance: 80 }));
     expect(good.left).toBe(false);
-    expect(good.military.offer?.kind).toBe('reenlist');
+    expect(good.military.offer?.kind).not.toBe('reenlist');
+    expect(good.military.service?.years).toBe(4);
   });
 
   it('gives a member not asked to stay a general discharge when the reputation is low, honorable when it is high', () => {

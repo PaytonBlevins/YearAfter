@@ -900,7 +900,7 @@ describe('lessons', () => {
         .fees,
     ).toBe(0);
     const tight = runMusicYear({
-      before: own,
+      before: { ...own, finance: { ...own.finance, balance: 0 as typeof own.finance.balance } },
       education: own.education,
       age: 27,
       year: own.world.year + 1,
