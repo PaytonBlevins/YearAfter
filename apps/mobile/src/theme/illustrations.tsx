@@ -1,7 +1,8 @@
-import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { View } from 'react-native';
+import Svg, { Circle, Path, Rect, Ellipse, G } from 'react-native-svg';
 import { Glyph, type IconName } from './icons';
-import { radii } from './theme';
+import { Materials, paint, useArtId } from './artMaterials';
+import { MenuObject } from './menuArt';
 
 const inks = {
   violet: ['#EAE2FA', '#523A89'],
@@ -43,21 +44,23 @@ const tones: Partial<Record<IconName, keyof typeof inks>> = {
   watch: 'aqua',
 };
 
-/** A decorative two-tone stamp. The row supplies its accessible label. */
+/** Decorative object art. Row text remains the accessible name. */
 export function Illustration({ name, size = 36 }: { name: IconName; size?: number }) {
-  const [backgroundColor, ink] = inks[tones[name] ?? 'violet'];
+  const id = useArtId();
+  const [, ink] = inks[tones[name] ?? 'violet'];
+  if (['chevron', 'back', 'ellipsis', 'close'].includes(name))
+    return <Glyph name={name} size={size} color={ink} />;
   return (
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={[styles.stamp, { width: size, height: size, backgroundColor }]}
+      style={{ width: size, height: size }}
     >
-      <Svg width={size} height={size} viewBox="0 0 40 40" style={styles.art}>
-        <Circle cx={17} cy={15} r={11} fill="#FFFFFF" opacity={0.58} />
-        <Path d="M30 6v6m-3-3h6M8 29v4m-2-2h4" stroke={ink} opacity={0.42} strokeLinecap="round" />
-        <Circle cx={31} cy={30} r={2} fill={ink} opacity={0.24} />
+      <Svg width={size} height={size} viewBox="0 0 48 48">
+        <Materials id={id} color={ink} />
+        <Ellipse cx={24} cy={44} rx={17} ry={2} fill="#26333F" opacity={0.1} />
+        <MenuObject name={name} id={id} />
       </Svg>
-      <Glyph name={name} size={Math.round(size * 0.6)} color={ink} active />
     </View>
   );
 }
@@ -74,11 +77,14 @@ const haircuts = [
 
 /** Stable illustrated identity, derived from the existing ID and never saved separately. */
 export function Portrait({ identity, size = 40 }: { identity: string; size?: number }) {
+  const id = useArtId();
   let seed = 2166136261;
   for (let index = 0; index < identity.length; index += 1) {
     seed = Math.imul(seed ^ identity.charCodeAt(index), 16777619);
   }
-  const variant = seed >>> 0;
+  // Mix high bits too: consecutive IDs should not all choose the same haircut.
+  seed = Math.imul(seed ^ (seed >>> 16), 0x85ebca6b);
+  const variant = (seed ^ (seed >>> 13)) >>> 0;
   const skin = complexions[variant % complexions.length];
   const hair = hairColors[(variant >>> 6) % hairColors.length];
   const outfit = outfits[(variant >>> 14) % outfits.length];
@@ -86,23 +92,53 @@ export function Portrait({ identity, size = 40 }: { identity: string; size?: num
   return (
     <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Svg width={size} height={size} viewBox="0 0 48 48">
-        <Rect width={48} height={48} rx={12} fill="#F3DDB1" />
-        <Circle cx={33} cy={16} r={11} fill="#FFF4D9" />
-        <Path d="M6 48c1-10 8-14 18-14s17 4 18 14z" fill={outfit} />
-        <Path d="M20 32h8v7q-4 5-8 0z" fill={skin} />
-        <Circle cx={13} cy={25} r={3} fill={skin} />
-        <Circle cx={35} cy={25} r={3} fill={skin} />
-        <Path d="M14 19c0-12 20-12 20 0v8c0 6-5 10-10 10s-10-4-10-10z" fill={skin} />
-        <Path d={haircut} fill={hair} />
-        <Circle cx={19} cy={25} r={1.2} fill="#2C2430" />
-        <Circle cx={29} cy={25} r={1.2} fill="#2C2430" />
+        <Materials id={id} color={outfit} skin={skin} />
+        <Rect width={48} height={48} rx={12} fill="#EEE9E2" />
+        <Ellipse cx={24} cy={46} rx={20} ry={3} fill="#252D39" opacity={0.13} />
+        <Path d="M6 48c1-10 8-14 18-14s17 4 18 14z" fill={paint(id, 'cloth')} />
+        <Path d="M20 32h8v7q-4 5-8 0z" fill={paint(id, 'skin')} />
+        <Circle cx={13} cy={25} r={3} fill={paint(id, 'skin')} />
+        <Circle cx={35} cy={25} r={3} fill={paint(id, 'skin')} />
+        <Path d="M14 19c0-12 20-12 20 0v8c0 6-5 10-10 10s-10-4-10-10z" fill={paint(id, 'skin')} />
+        <Path d="M19 36l5 6 5-6 5 5-10 6-10-6z" fill="#E8E4D9" />
+        <Path d={haircut} fill={hair} stroke="#302A2A" strokeWidth={0.4} />
         <Path
-          d="M21 30q3 3 6 0"
-          stroke="#532C36"
-          strokeWidth={1.15}
-          strokeLinecap="round"
+          d="M16 16q7-7 15-4m-14 2q5-6 11-5"
+          stroke="#EBCFA1"
+          opacity={0.25}
           fill="none"
+          strokeWidth={0.6}
         />
+        <Path
+          d="M16.4 23q3-2 5.5-.2m4.2 0q3-1.8 5.5.2"
+          stroke={hair}
+          strokeWidth={0.9}
+          fill="none"
+          strokeLinecap="round"
+        />
+        {[19, 29].map((x) => (
+          <G key={x}>
+            <Path
+              d={`M${x - 3} 25q3-3.6 6 0-3 3.5-6 0`}
+              fill="#F4EEE5"
+              stroke="#7D5945"
+              strokeWidth={0.35}
+            />
+            <Circle cx={x} cy={25} r={1.55} fill={['#66513E', '#638181', '#6D7754'][variant % 3]} />
+            <Circle cx={x} cy={25} r={0.75} fill="#252830" />
+            <Circle cx={x - 0.35} cy={24.5} r={0.35} fill="#FFF" />
+          </G>
+        ))}
+        <Path d="M24 24l-1.5 4q1.5 1 3 0" stroke="#8F6046" strokeWidth={0.6} fill="none" />
+        <Path d="M20.5 31q3.5 1 7 0-3.5 5-7 0" fill="#8D514B" />
+        <Path d="M21.5 31.5h5" stroke="#F6E5D2" strokeWidth={0.65} />
+        <Path
+          d="M16 28q1 1 3 .6m10 0q2 .4 3-.6"
+          stroke="#C68670"
+          opacity={0.45}
+          strokeWidth={1.2}
+        />
+
         {(variant & 16) !== 0 ? (
           <Path
             d="M15.5 23h7v2.5a3.5 3.5 0 0 1-7 0zM25.5 23h7v2.5a3.5 3.5 0 0 1-7 0zM22.5 24.5h3"
@@ -115,8 +151,3 @@ export function Portrait({ identity, size = 40 }: { identity: string; size?: num
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  stamp: { borderRadius: radii.md, alignItems: 'center', justifyContent: 'center' },
-  art: { position: 'absolute', top: 0, left: 0 },
-});

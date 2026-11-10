@@ -36,3 +36,7 @@ The 42 rings, necklaces, chains, bracelets and earrings draw from separate
 silhouettes and details such as stone sizes, bands, links, pearls and clasps.
 The art is a stylized catalog depiction and does not add watch specifications
 or change what an auction reveals.
+
+The realism continuation on `feat/november-art-realism` upgrades the shared
+renderers across these categories. Current changes, validation and visual
+limitations are in `playtest-november-art-realism.md`.
